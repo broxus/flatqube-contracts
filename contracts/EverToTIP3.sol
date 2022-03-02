@@ -5,14 +5,15 @@ pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
 import "./libraries/DexGas.sol";
+import "./libraries/SwapEverErrors.sol";
 import "./libraries/DexOperationTypes.sol";
 import "./libraries/EverToTip3OperationStatus.sol";
 
-import "./abstract/DexContractBase.sol";
-import "./interfaces/IDexRoot.sol";
-import "./interfaces/IEverValt.sol";
+import "./interfaces/IEverVault.sol";
+import "./interfaces/IEverTIP3SwapEvents.sol";
 import "./interfaces/IEverTIP3SwapCallbacks.sol";
 
+import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensMintCallback.sol";
@@ -20,170 +21,186 @@ import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransfe
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensBurnCallback.sol";
 
 
-abstract contract EvereToTip3 is DexContractBase, IDexRoot, IEverValt, IAcceptTokensMintCallback, IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTIP3SwapCallbacks {
+contract EvereToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTIP3SwapEvents {
 
     uint32 static _nonce;
 
-    address owner_;
-    address pendingOwner;
-
-    address weverRoot_;
-    address weverAddress_;
-    address weverVault_;
+    address wEverRoot_;
+    address wEverWallet_;
+    address wEverVault_;
     address dexVault_;
 
-    constructor(address _owner, address _weverRoot, address _weverVault, address _dexVault) public {
+    constructor(address _wEverRoot, address _wEverVault, address _dexVault) public {
         tvm.accept();
-        owner_ = _owner;
-        weverRoot_ = _weverRoot;
-        weverVault_ = _weverVault;
+        wEverRoot_ = _wEverRoot;
+        wEverVault_ = _wEverVault;
         dexVault_ = _dexVault;
 
-       ITokenRoot(weverRoot_)
-       .deployWallet{
+        tvm.rawReserve(1 ton, 0);
+       ITokenRoot(wEverRoot_).deployWallet {
            value : DexGas.DEPLOY_EMPTY_WALLET_VALUE,
            flag: MsgFlag.SENDER_PAYS_FEES,
-           callback: EvereToTip3.onTokenWallet
+           callback: EvereToTip3.onWEverWallet
        }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
     }
 
-    modifier onlyOwner() {
-        require(msg.sender.value != 0 && msg.sender == owner_, DexErrors.NOT_MY_OWNER);
-        _;
+    // Payload constructor swap Ever -> TIP-3
+    function buildSwapEversPayload(
+        uint64 id, 
+        uint128 amount, 
+        address recipient,
+        uint128 expectedAmount,
+        uint128 deployWalletValue) external pure returns (TvmCell) {
+        TvmBuilder builderPayload;
+        builderPayload.store(id);
+        builderPayload.store(amount);
+        builderPayload.store(recipient);
+        builderPayload.store(expectedAmount);
+        builderPayload.store(deployWalletValue);
+        return builderPayload.toCell();
     }
 
-    // callback deploy wever for contract
-    function onTokenWallet (address _weverAddress) external {
-        require(msg.sender.value != 0 && msg.sender == weverRoot_, DexErrors.NOT_ROOT);
-        weverAddress_ = _weverAddress;
+    // callback deploy WEVER wallet for contract
+    function onWEverWallet(address _wEverWallet) external {
+        require(msg.sender.value != 0 && msg.sender == wEverRoot_, SwapEverErrors.NOT_ROOT_WEVER);
+        wEverWallet_ = _wEverWallet;
     }
 
-    function getOwner() external view responsible returns (address) {
-        return {value: 0, flag: MsgFlag.REMAINING_GAS, bounce: false} owner_;
-    }
-    
-    function getPendingOwner() external view responsible returns (address) {
-        return {value: 0, flag: MsgFlag.REMAINING_GAS, bounce: false} pendingOwner;
-    }
-
-    function transferOwner(address newOwner) external onlyOwner {
-         emit RequestedOwnerTransfer(owner_, newOwner);
-         pendingOwner = newOwner;
-    }
-
-    function acceptOwner() external {
-        require(msg.sender.value != 0 && msg.sender == pendingOwner, DexErrors.NOT_PENDING_OWNER);
-        emit OwnerTransferAccepted(owner_, pendingOwner);
-        owner_ = pendingOwner;
-        pendingOwner = address.makeAddrStd(0, 0);
-    }
-
-    function swapEvers(TvmCell payload, address remainingGas) external {
+    // swapEvers - wrap EVER to WEVER.
+   function swapEvers(address user, TvmCell payload) external {
         TvmSlice payloadSlice = payload.toSlice();
-        if (payloadSlice.bits() == 715) {
-            (uint64 id, uint128 amount, address pairAddress, uint128 expectedAmount, uint128 deployWalletGas) =
-            payloadSlice.decode(uint64, uint128, address, uint128, uint128);
+        
+        require(payloadSlice.bits() == 715, SwapEverErrors.INVALID_CALLBACK);
+        
+        (uint64 id, uint128 amount, address recipient, uint128 expectedAmount, uint128 deployWalletValue) =
+        payloadSlice.decode(uint64, uint128, address, uint128, uint128);
 
-            require(msg.value >= (amount+DexGas.VAULT_TRANSFER_BASE_VALUE_V2));
+        require(msg.value >= (amount+DexGas.VAULT_TRANSFER_BASE_VALUE_V2), SwapEverErrors.VALUE_TOO_LOW); 
 
-            IEverValt(weverVault_).wrap(amount, address(this), remainingGas, payload);
-        } else {
-            msg.sender.transfer({value: 0, flag: MsgFlag.REMAINING_GAS, bounce: false});
-        }
+        emit WrapEverToWEver(user, id);
+
+        IEverVault(wEverVault_).wrap(amount, address(this), user, payload); 
     }
 
+    // Callback Mint token to wEwerWallet contract
     function onAcceptTokensMint(
         address tokenRoot,
         uint128 amount,
-        address remainingGasTo,
+        address user,
         TvmCell payload
     ) override external {
-        require(msg.sender.value != 0 && msg.sender == weverAddress_, DexErrors.WRONG_RECIPIENT);
+        require(msg.sender.value != 0 && msg.sender == wEverWallet_, SwapEverErrors.NOT_WALLET_WEVER);
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
+       
         TvmSlice  payloadSlice = payload.toSlice();
-        (uint64 id, uint128 amount_, address pairAddress, uint128 expectedAmount, uint128 deployWalletGas) =
+        (uint64 id, uint128 amount_, address recipient, uint128 expectedAmount, uint128 deployWalletValue) =
             payloadSlice.decode(uint64, uint128, address, uint128, uint128);
+        
+        emit WEverTokenMint(user, id);
 
         TvmBuilder successPayload;
         successPayload.store(EverToTip3OperationStatus.SUCCESS);
-        //successPayload.store(id);
-        successPayload.store(remainingGasTo);
-        successPayload.store(deployWalletGas);
+        successPayload.store(id);
+        successPayload.store(user);
+        successPayload.store(deployWalletValue);
 
         TvmBuilder cancelPayload;
         cancelPayload.store(EverToTip3OperationStatus.CANCEL);
-        //cancelPayload.store(id);
-        cancelPayload.store(remainingGasTo);
+        cancelPayload.store(id);
+        cancelPayload.store(user);
 
-        TvmBuilder payload2;
+        TvmBuilder resultPayload;
 
-        payload2.store(DexOperationTypes.EXCHANGE);
-        payload2.store(uint128(0));
-        payload2.store(DexGas.DEPLOY_EMPTY_WALLET_VALUE);
-        payload2.store(payload);
-        payload2.store(id);
-        payload2.storeRef(successPayload);
-        payload2.storeRef(cancelPayload);
+        resultPayload.store(DexOperationTypes.EXCHANGE);
+        resultPayload.store(id);
+        resultPayload.store(DexGas.DEPLOY_EMPTY_WALLET_VALUE);
+        resultPayload.store(uint128(0));
 
-        ITokenWallet(weverAddress_).transfer{value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false}(
+        resultPayload.storeRef(successPayload);
+        resultPayload.storeRef(cancelPayload);
+
+        ITokenWallet(wEverWallet_).transfer{value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false}(
             amount_,
-            pairAddress,
-            deployWalletGas,
-            remainingGasTo,
+            recipient,
+            deployWalletValue,
+            user,
             true,
-            payload2.toCell()
+            resultPayload.toCell()
         );
     }
 
+    // Callback result swap
     function onAcceptTokensTransfer(
         address tokenRoot,
         uint128 amount,
         address sender,
         address senderWallet,
-        address remainingGasTo,
+        address user,
         TvmCell payload
     ) override external {
+        tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
         TvmSlice payloadSlice = payload.toSlice();
-       (uint8 dexOperationType_, uint128 deployWalletGas_, uint8 deployEmptyValue_, TvmCell payload_, uint64 id_) = payloadSlice.decode(uint8, uint128, uint8, TvmCell, uint64);
-        if (msg.sender.value != 0 && msg.sender == weverAddress_) {    
-            TvmBuilder payloadID;
-            payloadID.store(id_);
-            TvmCell payloadID_ = payloadID.toCell();
+        
+        if (payloadSlice.bits() == 339) {
+            if (msg.sender.value != 0 && msg.sender == wEverWallet_) {
+                (uint8 dexOperationType_, uint64 id_) = payloadSlice.decode(uint8, uint64);
+                
+                emit WEverTIP3Cancel(user, id_);
 
-            if (payloadSlice.bits() == 339) { //cancel
-                ITokenWallet(weverAddress_).transfer{value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false}(
+                TvmBuilder payloadID;
+                payloadID.store(id_);
+                TvmCell payloadID_ = payloadID.toCell();
+
+                // Burn WEVER
+                ITokenWallet(msg.sender).transfer{value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false}(
                     amount,
-                    weverVault_,
+                    wEverVault_,
                     0,
-                    remainingGasTo,
+                    user,
                     false,
                     payloadID_
                 );
-            } else if (payloadSlice.bits() == 476) { //success
-                IEverTIP3SwapCallbacks(remainingGasTo).onSuccess{value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false}(id_, amount);
-                ITokenWallet(weverAddress_).transfer{value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false}(
+            }
+        } else if (payloadSlice.bits() == 476) {
+            (uint8 dexOperationType_, uint64 id_) = payloadSlice.decode(uint8, uint64);
+            TvmBuilder payloadID;
+            payloadID.store(id_);
+            TvmCell payloadID_ = payloadID.toCell();
+            
+            IEverTIP3SwapCallbacks(user).onSuccess{value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false}(id_, amount);
+            
+            TvmCell successPayload = payloadSlice.loadRef();
+            TvmSlice successPayloadSlice = successPayload.toSlice();
+            (uint8 operationStatus_, uint64 _id,  address user_, uint128 deployWalletValue) = successPayloadSlice.decode(uint8, uint64, address, uint128);
+            
+            emit WEverTIP3Success(user, _id);
+
+            // Send TIP-3 token user
+            ITokenWallet(msg.sender).transfer{value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false}(
                     amount,
-                    remainingGasTo,
-                    deployEmptyValue_,
-                    remainingGasTo,
+                    user,
+                    deployWalletValue,
+                    user,
                     true,
                     payloadID_
                 );
-
-            }
-       }
+        }
     }
 
+    // Callback Burn token if result swap cancel
     function onAcceptTokensBurn(
         uint128 amount,
         address walletOwner,
         address wallet,
-        address remainingGasTo,
+        address user,
         TvmCell payload
     ) override external {
-        require(msg.sender.value != 0 && msg.sender == weverRoot_, DexErrors.NOT_ROOT);
+       require(msg.sender.value != 0 && msg.sender == wEverRoot_, SwapEverErrors.NOT_ROOT_WEVER); 
        TvmSlice payloadSlice =  payload.toSlice();
        (uint64 id_) = payloadSlice.decode(uint64);
-        IEverTIP3SwapCallbacks(remainingGasTo).onCancel{value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false}(id_);
+
+       emit WEverTokenCancelBurn(user, id_);
+
+       IEverTIP3SwapCallbacks(user).onCancel{value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false}(id_);
     }
 }
