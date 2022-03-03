@@ -143,7 +143,7 @@ contract EvereToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback
         
         if (payloadSlice.bits() == 339) {
             if (msg.sender.value != 0 && msg.sender == wEverWallet_) {
-                (uint8 dexOperationType_, uint64 id_) = payloadSlice.decode(uint8, uint64);
+                (uint8 dexOperationType_, uint64 id_, uint128 deployWalletValue_, uint128 amount_) = payloadSlice.decode(uint8, uint64, uint128, uint128);
                 
                 emit WEverTIP3Cancel(user, id_);
 
@@ -162,7 +162,7 @@ contract EvereToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback
                 );
             }
         } else if (payloadSlice.bits() == 476) {
-            (uint8 dexOperationType_, uint64 id_) = payloadSlice.decode(uint8, uint64);
+            (uint8 dexOperationType_, uint64 id_, uint128 deployWalletValue_, uint128 amount_) = payloadSlice.decode(uint8, uint64);
             TvmBuilder payloadID;
             payloadID.store(id_);
             TvmCell payloadID_ = payloadID.toCell();
@@ -201,6 +201,6 @@ contract EvereToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback
 
        emit WEverTokenCancelBurn(user, id_);
 
-       IEverTIP3SwapCallbacks(user).onCancel{value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false}(id_);
+       IEverTIP3SwapCallbacks(user).onCancel{value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false}(id_);
     }
 }
