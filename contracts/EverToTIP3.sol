@@ -28,7 +28,7 @@ contract EvereToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback
     address wEverWallet_;
     address wEverVault_;
 
-    constructor(address _wEverRoot, address _wEverVault, address _dexVault) public {
+    constructor(address _wEverRoot, address _wEverVault) public {
         tvm.accept();
         wEverRoot_ = _wEverRoot;
         wEverVault_ = _wEverVault;
