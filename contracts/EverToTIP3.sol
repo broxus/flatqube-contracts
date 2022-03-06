@@ -160,7 +160,7 @@ contract EvereToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback
                 if (msg.sender.value != 0 && msg.sender == wEverWallet_) {
                         emit WEverTIP3Cancel(user, id_);
                         // Burn WEVER
-                        ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: true }(
+                        ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
                             amount,
                             wEverVault_,
                             0,
@@ -191,7 +191,7 @@ contract EvereToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback
             }  
         } else {
             TvmCell emptyPayload;
-            ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: true }(
+            ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
                 amount,
                 user,
                 0,
@@ -217,6 +217,6 @@ contract EvereToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback
         (uint64 id_) = payloadSlice.decode(uint64);
 
         emit WEverTokenCancelBurn(user, id_);
-        IEverTIP3SwapCallbacks(user).onCancel{ value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: true }(id_);
+        IEverTIP3SwapCallbacks(user).onCancel{ value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false }(id_);
     }
 }
