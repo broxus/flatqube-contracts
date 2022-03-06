@@ -217,6 +217,6 @@ contract EvereToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback
         (uint64 id_) = payloadSlice.decode(uint64);
 
         emit WEverTokenCancelBurn(user, id_);
-        IEverTIP3SwapCallbacks(user).onCancel{ value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false }(id_);
+        IEverTIP3SwapCallbacks(user).onCancel{ value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: true }(id_);
     }
 }
