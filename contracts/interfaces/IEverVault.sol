@@ -7,5 +7,4 @@ interface IEverVault {
         address gas_back_address,
         TvmCell payload
     ) external;
-    
 }
