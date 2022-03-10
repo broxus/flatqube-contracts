@@ -1,14 +1,14 @@
 const { Command } = require('commander');
-const { Migration } = require('./utils');
 
 const logger = require('mocha-logger');
 const program = new Command();
-const prompts = require('promepts');
+const prompts = require('prompts');
 
-const migration = new Migration();
+const fs = require('fs');
+const isValidTonAddress = (address) => /^(?:-1|0):[0-9a-fA-F]{64}$/.test(address);
 
 async function main() {
-    const keyPairs = await locklift.keys.getKeyPairs();
+    const [keyPair] = await locklift.keys.getKeyPairs();
     const promptsData = [];
 
     program
@@ -39,23 +39,24 @@ async function main() {
     }
 
     const response = await prompts(promptsData);
-    const weverRoot = options.weverroot || options.weverRoot;
-    const weverVault = options.wevervault || options.weverVault;
+    const weverRoot = options.weverroot || response.weverRoot;
+    const weverVault = options.wevervault || response.weverVault;
 
-    const EverTIP3 = await locklift.factory.GetContract('EvereToTip3');
+    const EverToTip3 = await locklift.factory.getContract('EverToTip3');
 
-    let everTIP3 = await locklift.giver.deployContracts({
-        contract: EverTIP3,
-        constructorParams: {},
+    let everTIP3 = await locklift.giver.deployContract({
+        contract: EverToTip3,
+        constructorParams: {
+            _wEverRoot: weverRoot,
+            _wEverVault: weverVault,
+        },
         initParams: {
             randomNonce_: Math.random() * 6400 | 0,
-            wEverRoot: weverRoot,
-            wEverVault_: weverVault,
+            wEverWallet_: locklift.utils.zeroAddress,
         },
-        keyPair: keyPairs[0],
+        keyPair,
     }, locklift.utils.convertCrystal('3', 'nano'));
 
-    migration.store(everTIP3, 'Ever to TIP3');
     logger.log(`'Ever to TIP3': ${everTIP3.address}`);
 }
 

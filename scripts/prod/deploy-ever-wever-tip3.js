@@ -1,14 +1,14 @@
 const { Command } = require('commander');
-const { Migration } = require('./utils');
 
 const logger = require('mocha-logger');
 const program = new Command();
-const prompts = require('promepts');
+const prompts = require('prompts');
 
-const migration = new Migration();
+const fs = require('fs');
+const isValidTonAddress = (address) => /^(?:-1|0):[0-9a-fA-F]{64}$/.test(address);
 
 async function main() {
-    const keyPairs = await locklift.keys.getKeyPairs();
+    const [keyPair] = await locklift.keys.getKeyPairs();
     const promptsData = [];
 
     program
@@ -43,31 +43,33 @@ async function main() {
         promptsData.push({
             type: 'text',
             name: 'swapEver',
-            message: 'WEVER Vault',
+            message: 'Swap Ever contract',
             validate: value => isValidTonAddress(value) ? true : 'Invalid TON address'
         })
     }
 
     const response = await prompts(promptsData);
-    const weverRoot = options.weverroot || options.weverRoot;
-    const weverVault = options.wevervault || options.weverVault;
-    const swapEver = options.swapever || options.swapEver;
+    const weverRoot = options.weverroot || response.weverRoot;
+    const weverVault = options.wevervault || response.weverVault;
+    const swapEver = options.swapever || response.swapEver;
 
-    const EverTIP3 = await locklift.factory.GetContract('EverWEverToTIP3');
+    const EverWEverToTIP3 = await locklift.factory.getContract('EverWEverToTIP3');
 
-    let everTIP3 = await locklift.giver.deployContracts({
-        contract: EverTIP3,
-        constructorParams: {},
+    let everWEverToTIP3 = await locklift.giver.deployContract({
+        contract: EverWEverToTIP3,
+        constructorParams: {
+            _wEverRoot: weverRoot,
+            _wEverVault: weverVault,
+            _swapEver: swapEver,
+        },
         initParams: {
             randomNonce_: Math.random() * 6400 | 0,
-            wEverRoot: weverRoot,
-            wEverVault_: weverVault,
+            wEverWallet: locklift.utils.zeroAddress,
         },
-        keyPair: keyPairs[0],
+        keyPair,
     }, locklift.utils.convertCrystal('3', 'nano'));
 
-    migration.store(everTIP3, 'Ever and WEVER to TIP3');
-    logger.log(`'Ever and WEVER to TIP3': ${everTIP3.address}`);
+    logger.log(`'Ever and WEVER to TIP3': ${everWEverToTIP3.address}`);
 }
 
 main()
