@@ -87,16 +87,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
             TvmBuilder payloadID_;
             payloadID_.store(id);
             
-            IEverTIP3SwapCallbacks(user).onSwapEverToTip3Cancel{ value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false }(id);
-
-            ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
-                amount,
-                user,
-                uint128(0),
-                user,
-                true,
-                payloadID_.toCell()
-            );    
+            IEverTIP3SwapCallbacks(user).onSwapEverToTip3Cancel{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(id);            
         }
     }
 
@@ -111,7 +102,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         tvm.rawReserve(EverToTip3Gas.ACCOUNT_INITIAL_BALANCE, 0);
        
         TvmSlice payloadSlice = payload.toSlice();
-        if (payloadSlice.bits() == 715) {
+        if (payloadSlice.bits() == 715 && msg.value >= (amount + EverToTip3Gas.GAS_SWAP)) {
             (uint64 id, uint128 amount_, address pair, uint128 expectedAmount, uint128 deployWalletValue) =
             payloadSlice.decode(uint64, uint128, address, uint128, uint128);
             
