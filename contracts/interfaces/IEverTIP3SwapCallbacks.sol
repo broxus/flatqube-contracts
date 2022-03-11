@@ -15,6 +15,7 @@ interface IEverTIP3SwapCallbacks {
      ) external;
 
      function onSwapTIP3ToEverSuccess(
-         uint64 id
+         uint64 id,
+         uint128 amount
      ) external;
 }

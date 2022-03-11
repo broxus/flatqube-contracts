@@ -136,6 +136,7 @@ contract TIP3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
 
                     TvmBuilder payloadID;
                     payloadID.store(id);
+                    payloadID.store(amount);
                     TvmCell payloadID_ = payloadID.toCell();
 
                     ITokenWallet(wEverWallet_).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
@@ -181,7 +182,7 @@ contract TIP3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         tvm.rawReserve(EverToTip3Gas.ACCOUNT_INITIAL_BALANCE, 0);
        
         TvmSlice payloadSlice =  payload.toSlice();
-        (uint64 id) = payloadSlice.decode(uint64);
+        (uint64 id, uint128 amount) = payloadSlice.decode(uint64, uint128);
 
         emit SwapTIP3EverSuccessTransfer(user, id);
         IEverTIP3SwapCallbacks(user).onSwapTIP3ToEverSuccess{ value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false }(id);
