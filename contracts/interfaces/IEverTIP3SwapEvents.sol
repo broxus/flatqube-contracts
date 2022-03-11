@@ -1,13 +1,22 @@
 pragma ton-solidity >= 0.57.0;
 
 interface IEverTIP3SwapEvents {
-    event WrapEverToWEver(address user, uint64 id);
-    event UnwrapWEverToEver(address user, uint64 id);
-    event WEverTokenMint(address user, uint64 id);
-    event WEverTIP3Cancel(address user, uint64 id);
-    event TIP3WEverCancel(address user, uint64 id);
-    event TIP3WEverSuccess(address user, uint64 id);
-    event TIP3TokenSuccessBurn(address user, uint64 id);
-    event WEverTokenCancelBurn(address user, uint64 id);
-    event WEverTIP3Success(address user, uint64 id);
+
+    // EverToTIP3 contract events
+    event SwapEverToTIP3WEVERMint(
+        uint64 id, 
+        uint128 amount,
+        address pair, 
+        uint128 expectedAmount,
+         uint128 deployWalletValue
+    );
+    event SwapEverToTIP3SuccessTransfer(address user, uint64 id);
+    event SwapEverToTIP3CancelTransfer(address user, uint64 id);
+
+    // TIP3ToEvent contract events
+    event SwapTIP3EverSuccessTransfer(address user, uint64 id);
+    event SwapTIP3EverCancelTransfer(address user, uint64 id);
+
+    // EverWEverToTIP3 contract events
+    event SwapEverWEverToTIP3Unwrap(address user, uint64 id);
 }
