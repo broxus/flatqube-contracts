@@ -1,6 +1,7 @@
 const fs = require('fs');
 
 const TOKEN_CONTRACTS_PATH = 'node_modules/ton-eth-bridge-token-contracts/build'
+const WEVER_CONTRACTS_PATH = 'node_modules/ton-wton/everscale/build'
 const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
@@ -56,6 +57,12 @@ const Constants = {
       symbol: 'Qwe',
       decimals: 6,
       upgradeable: false
+    },
+    wever: {
+      name: 'Wrapped EVER',
+      symbol: 'WEVER',
+      decimals: 9,
+      upgradeable: true
     }
   },
   LP_DECIMALS: 9,
