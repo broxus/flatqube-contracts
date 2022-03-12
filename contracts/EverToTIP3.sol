@@ -10,8 +10,8 @@ import "./libraries/DexOperationTypes.sol";
 import "./libraries/EverToTip3OperationStatus.sol";
 
 import "./interfaces/IEverVault.sol";
-import "./interfaces/IEverTIP3SwapEvents.sol";
-import "./interfaces/IEverTIP3SwapCallbacks.sol";
+import "./interfaces/IEverTip3SwapEvents.sol";
+import "./interfaces/IEverTip3SwapCallbacks.sol";
 
  import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
  import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
@@ -20,7 +20,7 @@ import "./interfaces/IEverTIP3SwapCallbacks.sol";
  import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
  import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensBurnCallback.sol";
 
-contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTIP3SwapEvents {
+contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTip3SwapEvents {
 
     uint32 static randomNonce_;
 
@@ -33,7 +33,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         wEverRoot_ = _wEverRoot;
         wEverVault_ = _wEverVault;
     
-        tvm.rawReserve(EverToTip3Gas.DEPLOY_EMPTY_WALLET_VALUE, 0);
+        tvm.rawReserve(EverToTip3Gas.ACCOUNT_INITIAL_BALANCE, 0);
         ITokenRoot(wEverRoot_).deployWallet {
             value: EverToTip3Gas.DEPLOY_EMPTY_WALLET_VALUE,
             flag: MsgFlag.SENDER_PAYS_FEES,
@@ -42,15 +42,18 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
             address(this), 
             EverToTip3Gas.DEPLOY_EMPTY_WALLET_GRAMS
         );
+
+        msg.sender.transfer(0, false, MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS);
     }
 
     // Callback deploy WEVER wallet for contract
     function onWEverWallet(address _wEverWallet) external {
         require(msg.sender.value != 0 && msg.sender == wEverRoot_, SwapEverErrors.NOT_ROOT_WEVER);
         wEverWallet_ = _wEverWallet;
+        wEverWallet_.transfer(0, false, MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS);
     }
 
-    // Payload constructor swap Ever -> TIP-3
+    // Payload constructor swap Ever -> Tip-3
     function buildSwapEversPayload(
         uint64 id, 
         uint128 amount, 
@@ -76,7 +79,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
 
         (uint64 id, uint128 amount) = payloadSlice.decode(uint64, uint128);
 
-        if (msg.value >= (amount + EverToTip3Gas.GAS_SWAP)) {
+        if (msg.value >= (amount + EverToTip3Gas.SWAP_EVER_TO_TIP3_MIN_VALUE)) {
             IEverVault(wEverVault_).wrap{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
                 amount,
                 address(this), 
@@ -87,7 +90,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
             TvmBuilder payloadID_;
             payloadID_.store(id);
             
-            IEverTIP3SwapCallbacks(user).onSwapEverToTip3Cancel{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(id);            
+            IEverTip3SwapCallbacks(user).onSwapEverToTip3Cancel{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(id);            
         }
     }
 
@@ -102,23 +105,21 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         tvm.rawReserve(EverToTip3Gas.ACCOUNT_INITIAL_BALANCE, 0);
        
         TvmSlice payloadSlice = payload.toSlice();
-        if (payloadSlice.bits() == 715 && msg.value >= (amount + EverToTip3Gas.GAS_SWAP)) {
+        if (payloadSlice.bits() == 715 && msg.value >= (EverToTip3Gas.SWAP_EVER_TO_TIP3_MIN_VALUE)) {
             (uint64 id, uint128 amount_, address pair, uint128 expectedAmount, uint128 deployWalletValue) =
             payloadSlice.decode(uint64, uint128, address, uint128, uint128);
             
-            emit SwapEverToTIP3WEVERMint(id, amount_, pair, expectedAmount, deployWalletValue);
+            emit SwapEverToTip3WEverMint(id, amount_, pair, expectedAmount, deployWalletValue);
 
             TvmBuilder successPayload;
             successPayload.store(EverToTip3OperationStatus.SUCCESS);
             successPayload.store(id);
-            successPayload.store(user);
             successPayload.store(deployWalletValue);
 
             TvmBuilder cancelPayload;
             cancelPayload.store(EverToTip3OperationStatus.CANCEL);
             cancelPayload.store(id);
-            cancelPayload.store(user);
-
+            
             TvmBuilder resultPayload;
 
             resultPayload.store(DexOperationTypes.EXCHANGE);
@@ -138,19 +139,23 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
                 resultPayload.toCell()
             );
         } else {
-            TvmCell emptyPayload;
-            // TvmBuilder payloadID_;
-            // payloadID_.store(id);
-            
-            IEverTIP3SwapCallbacks(user).onSwapEverToTip3Cancel{ value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false }(uint64(0));
-            ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
-                amount,
-                user,
-                uint128(0),
-                user,
-                true,
-                emptyPayload
-            );      
+                uint64 id = 0;
+                if (payloadSlice.bits() >= 64) {
+                    id = payloadSlice.decode(uint64);
+                }
+
+                TvmBuilder payloadID_;
+                payloadID_.store(id);
+
+                // Burn WEVER
+                ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
+                    amount,
+                    wEverVault_,
+                    uint128(0),
+                    user,
+                    true,
+                    payloadID_.toCell()
+                );
         }
     }
 
@@ -169,7 +174,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
 
         if (payloadSlice.bits() >= 8) {
             uint8 operationStatus = payloadSlice.decode(uint8);
-            if (payloadSlice.bits() == 331 && operationStatus == EverToTip3OperationStatus.CANCEL && 
+            if (payloadSlice.bits() == 64 && operationStatus == EverToTip3OperationStatus.CANCEL && 
                 msg.sender.value != 0 && msg.sender == wEverWallet_)
             {
                 (uint64 id) = payloadSlice.decode(uint64);
@@ -186,12 +191,12 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
                     true,
                     payloadID_.toCell()
                 );
-            } else if (payloadSlice.bits() == 468 && operationStatus == EverToTip3OperationStatus.SUCCESS) {
-                (uint64 id,, uint128 deployWalletValue_) = payloadSlice.decode(uint64, address,uint128);
+            } else if (payloadSlice.bits() == 192 && operationStatus == EverToTip3OperationStatus.SUCCESS) {
+                (uint64 id, uint128 deployWalletValue_) = payloadSlice.decode(uint64, uint128);
 
-                IEverTIP3SwapCallbacks(user).onSwapEverToTip3Success{ value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false }(id, amount);
+                IEverTip3SwapCallbacks(user).onSwapEverToTip3Success{ value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false }(id, amount);
                 
-                emit SwapEverToTIP3SuccessTransfer(user, id);
+                emit SwapEverToTip3SuccessTransfer(user, id);
 
                 TvmBuilder payloadID_;
                 payloadID_.store(id);
@@ -239,7 +244,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         TvmSlice payloadSlice =  payload.toSlice();
         (uint64 id) = payloadSlice.decode(uint64);
 
-        emit SwapEverToTIP3CancelTransfer(user, id);
-        IEverTIP3SwapCallbacks(user).onSwapEverToTip3Cancel{ value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false }(id);
+        emit SwapEverToTip3CancelTransfer(user, id);
+        IEverTip3SwapCallbacks(user).onSwapEverToTip3Cancel{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(id);
     }
 }

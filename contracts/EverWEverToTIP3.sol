@@ -8,7 +8,7 @@ import "./libraries/EverToTip3Gas.sol";
 import "./libraries/SwapEverErrors.sol";
 
 import "./interfaces/IEverVault.sol";
-import "./interfaces/IEverTIP3SwapEvents.sol";
+import "./interfaces/IEverTip3SwapEvents.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
@@ -16,7 +16,7 @@ import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensBurnCallback.sol";
 
-contract EverWEverToTIP3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTIP3SwapEvents {
+contract EverWEverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTip3SwapEvents {
 
     uint32 static randomNonce_;
 
@@ -35,7 +35,7 @@ contract EverWEverToTIP3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         ITokenRoot(wEverRoot_).deployWallet{
             value: EverToTip3Gas.DEPLOY_EMPTY_WALLET_VALUE,
             flag: MsgFlag.SENDER_PAYS_FEES,
-            callback: EverWEverToTIP3.onWEverWallet
+            callback: EverWEverToTip3.onWEverWallet
         }(
             address(this),
             EverToTip3Gas.DEPLOY_EMPTY_WALLET_GRAMS
@@ -78,7 +78,7 @@ contract EverWEverToTIP3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         
         if (payloadSlice.bits() == 715 && 
             msg.sender.value != 0 && msg.sender == wEverWallet_ && 
-            msg.value >= (amount + EverToTip3Gas.GAS_SWAP)) 
+            msg.value >= (amount + EverToTip3Gas.SWAP_EVER_TO_TIP3_MIN_VALUE)) 
         {
                 ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
                     amount,
@@ -115,7 +115,7 @@ contract EverWEverToTIP3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         TvmSlice payloadSlice =  payload.toSlice();
         (uint64 id) = payloadSlice.decode(uint64);
 
-        emit SwapEverWEverToTIP3Unwrap(user, id);
+        emit SwapEverWEverToTip3Unwrap(user, id);
         IEverVault(wEverVault_).wrap{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
                 amount,
                 swapEver_, 
