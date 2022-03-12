@@ -4,7 +4,6 @@ const logger = require('mocha-logger');
 const program = new Command();
 const prompts = require('prompts');
 
-const fs = require('fs');
 const isValidTonAddress = (address) => /^(?:-1|0):[0-9a-fA-F]{64}$/.test(address);
 
 async function main() {
@@ -13,8 +12,8 @@ async function main() {
 
     program
         .allowUnknownOption()
-        .option('-evroot', '--weverroot <wEverRoot>', 'WEVER Root')
-        .option('-ewvault', '--wevervault <wEverVault>', 'WEVER Vault');
+        .option('-evroot', '--weverroot <wEverRoot>', 'WEver Root')
+        .option('-ewvault', '--wevervault <wEverVault>', 'WEver Vault');
 
     program.parse(process.argv);  
     
@@ -23,32 +22,32 @@ async function main() {
     if (!isValidTonAddress(options.weverroot)) {
         promptsData.push({
             type: 'text',
-            name: 'weverRoot',
-            message: 'WEVER Root',
-            validate: value => isValidTonAddress(value) ? true : 'Invalid TON address'
+            name: 'wEverRoot',
+            message: 'WEver Root',
+            validate: value => isValidTonAddress(value) ? true : 'Invalid Ever address'
         })
     }
 
     if (!isValidTonAddress(options.wevervault)) {
         promptsData.push({
             type: 'text',
-            name: 'weverVault',
-            message: 'WEVER Vault',
-            validate: value => isValidTonAddress(value) ? true : 'Invalid TON address'
+            name: 'wEverVault',
+            message: 'WEver Vault',
+            validate: value => isValidTonAddress(value) ? true : 'Invalid Ever address'
         })
     }
 
     const response = await prompts(promptsData);
-    const weverRoot = options.weverroot || response.weverRoot;
-    const weverVault = options.wevervault || response.weverVault;
+    const wEverRoot_ = options.weverroot || response.wEverRoot;
+    const wEverVault_ = options.wevervault || response.wEverRoot;
 
     const EverToTip3 = await locklift.factory.getContract('EverToTip3');
 
-    let everTIP3 = await locklift.giver.deployContract({
+    let everTip3 = await locklift.giver.deployContract({
         contract: EverToTip3,
         constructorParams: {
-            _wEverRoot: weverRoot,
-            _wEverVault: weverVault,
+            _wEverRoot: wEverRoot_,
+            _wEverVault: wEverVault_,
         },
         initParams: {
             randomNonce_: Math.random() * 6400 | 0,
@@ -57,7 +56,7 @@ async function main() {
         keyPair,
     }, locklift.utils.convertCrystal('3', 'nano'));
 
-    logger.log(`'Ever to TIP3': ${everTIP3.address}`);
+    logger.log(`'Ever to Tip3': ${everTip3.address}`);
 }
 
 main()

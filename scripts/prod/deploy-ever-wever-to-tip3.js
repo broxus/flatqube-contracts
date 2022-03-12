@@ -4,7 +4,6 @@ const logger = require('mocha-logger');
 const program = new Command();
 const prompts = require('prompts');
 
-const fs = require('fs');
 const isValidTonAddress = (address) => /^(?:-1|0):[0-9a-fA-F]{64}$/.test(address);
 
 async function main() {
@@ -13,9 +12,9 @@ async function main() {
 
     program
         .allowUnknownOption()
-        .option('-evroot', '--weverroot <wEverRoot>', 'WEVER Root')
-        .option('-ewvault', '--wevervault <wEverVault>', 'WEVER Vault')
-        .option('-swapever', '--swapever <swapEver>', 'Swap Ever to TIP-3 address');
+        .option('-evroot', '--weverroot <wEverRoot>', 'WEver Root')
+        .option('-ewvault', '--wevervault <wEverVault>', 'WEver Vault')
+        .option('-swapever', '--swapever <swapEver>', 'Swap Ever to Tip3 contract');
 
     program.parse(process.argv);  
     
@@ -24,18 +23,18 @@ async function main() {
     if (!isValidTonAddress(options.weverroot)) {
         promptsData.push({
             type: 'text',
-            name: 'weverRoot',
-            message: 'WEVER Root',
-            validate: value => isValidTonAddress(value) ? true : 'Invalid TON address'
+            name: 'wEverRoot',
+            message: 'WEver Root',
+            validate: value => isValidTonAddress(value) ? true : 'Invalid Ever address'
         })
     }
 
     if (!isValidTonAddress(options.wevervault)) {
         promptsData.push({
             type: 'text',
-            name: 'weverVault',
-            message: 'WEVER Vault',
-            validate: value => isValidTonAddress(value) ? true : 'Invalid TON address'
+            name: 'wEverVault',
+            message: 'WEver Vault',
+            validate: value => isValidTonAddress(value) ? true : 'Invalid Ever address'
         })
     }
 
@@ -44,23 +43,23 @@ async function main() {
             type: 'text',
             name: 'swapEver',
             message: 'Swap Ever contract',
-            validate: value => isValidTonAddress(value) ? true : 'Invalid TON address'
+            validate: value => isValidTonAddress(value) ? true : 'Invalid Ever address'
         })
     }
 
     const response = await prompts(promptsData);
-    const weverRoot = options.weverroot || response.weverRoot;
-    const weverVault = options.wevervault || response.weverVault;
-    const swapEver = options.swapever || response.swapEver;
+    const wEverRoot_ = options.weverroot || response.wEverRoot;
+    const wEverVault_ = options.wevervault || response.wEverVault;
+    const swapEver_ = options.swapever || response.swapEver;
 
-    const EverWEverToTIP3 = await locklift.factory.getContract('EverWEverToTIP3');
+    const EverWEverToTIP3 = await locklift.factory.getContract('EverWEverToTip3');
 
-    let everWEverToTIP3 = await locklift.giver.deployContract({
+    let everWEverToTip3 = await locklift.giver.deployContract({
         contract: EverWEverToTIP3,
         constructorParams: {
-            _wEverRoot: weverRoot,
-            _wEverVault: weverVault,
-            _swapEver: swapEver,
+            _wEverRoot: wEverRoot_,
+            _wEverVault: wEverVault_,
+            _swapEver: swapEver_,
         },
         initParams: {
             randomNonce_: Math.random() * 6400 | 0,
@@ -69,7 +68,7 @@ async function main() {
         keyPair,
     }, locklift.utils.convertCrystal('3', 'nano'));
 
-    logger.log(`'Ever and WEVER to TIP3': ${everWEverToTIP3.address}`);
+    logger.log(`'Ever and WEver to Tip3': ${everWEverToTip3.address}`);
 }
 
 main()
