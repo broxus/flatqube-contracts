@@ -185,7 +185,7 @@ contract TIP3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         (uint64 id, uint128 amount) = payloadSlice.decode(uint64, uint128);
 
         emit SwapTIP3EverSuccessTransfer(user, id);
-        IEverTIP3SwapCallbacks(user).onSwapTIP3ToEverSuccess{ value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false }(id);
+        IEverTIP3SwapCallbacks(user).onSwapTIP3ToEverSuccess{ value: 0, flag: MsgFlag.SENDER_PAYS_FEES, bounce: false }(id, amount);
     }
 
 }
