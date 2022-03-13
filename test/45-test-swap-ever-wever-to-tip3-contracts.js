@@ -68,7 +68,7 @@ describe('Tests Swap Evers', async function () {
             await migration.balancesCheckpoint();
             logger.log(`#############################`);
             logger.log(``);
-            
+
             const EVERS_TO_EXCHANGE = 20;
             const expected = await dexPair.call({
                 method: 'expectedExchange', params: {
@@ -265,6 +265,73 @@ describe('Tests Swap Evers', async function () {
     });
 
     describe('Swap Tip3 to Ever', async function () {
+        it(`Swap Tip3 to Ever - Cancel`, async function () {
+            await migration.balancesCheckpoint();
+            logger.log(`#############################`);
+            logger.log(``);
+
+            const dexStart = await dexBalances();
+            const accountStart = await account3balances();
+            const pairStart = await dexPairInfo();
+            logBalances('start', dexStart, accountStart, pairStart);
+            const TOKENS_TO_EXCHANGE = accountStart.tst;
+            const expected = await dexPair.call({
+                method: 'expectedExchange', params: {
+                    amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                    spent_token_root: tstRoot.address
+                }
+            });
+
+            logger.log(`Spent amount: ${TOKENS_TO_EXCHANGE} TST`);
+            logger.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
+            logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-9).toString()} EVER`);
+
+            const params = {
+                id: 66,
+                pair: dexPair.address,
+                expectedAmount: new BigNumber(expected.expected_amount).times(2).toString(),
+            }
+
+            logger.log(`Tip3ToEver.buildSwapEversPayload(${JSON.stringify(params)})`);
+            const payload = await tip3ToEver.call({
+                method: 'buildSwapEversPayload',
+                params: params
+            });
+            logger.log(`Result payload = ${payload}`);
+
+            logger.log(`tstWallet3(${tstWallet3.address}).transfer(
+                amount: ${new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.tst.decimals).toString()},
+                recipient: ${tip3ToEver.address},
+                deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
+                remainingGasTo: ${account3.address},
+                notify: ${true},
+                payload: {${JSON.stringify(params)}}
+            )`);
+            const tx = await account3.runTarget({
+                contract: tstWallet3,
+                method: 'transfer',
+                params: {
+                    amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                    recipient: tip3ToEver.address,
+                    deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
+                    remainingGasTo: account3.address,
+                    notify: true,
+                    payload: payload
+                },
+                value: locklift.utils.convertCrystal(3.6, 'nano'),
+                keyPair: keyPairs[2]
+            });
+            logger.log(`txId: ${tx.transaction.id}`);
+
+            const dexEnd = await dexBalances();
+            const accountEnd = await account3balances();
+            const pairEnd = await dexPairInfo();
+            logBalances('end', dexEnd, accountEnd, pairEnd);
+            await logGas();
+
+            expect(accountStart.tst.toString()).to.equal(accountEnd.tst.toString(), 'Wrong Account#3 TST balance');
+        });
+
         it(`Swap Tip3 to Ever - Success`, async function () {
             await migration.balancesCheckpoint();
             logger.log(`#############################`);
@@ -333,73 +400,6 @@ describe('Tests Swap Evers', async function () {
             expect(expectedAccountTst).to.equal(accountEnd.tst.toString(), 'Wrong Account#3 TST balance');
             const expectedAccountEverMin = new BigNumber(accountStart.ever).plus(new BigNumber(expected.expected_amount).shiftedBy(-9)).minus(3.6).toNumber();
             expect(expectedAccountEverMin).to.lt(new BigNumber(accountEnd.ever).toNumber(), 'Wrong Account#3 EVER balance');
-        });
-
-        it(`Swap Tip3 to Ever - Cancel`, async function () {
-            await migration.balancesCheckpoint();
-            logger.log(`#############################`);
-            logger.log(``);
-
-            const dexStart = await dexBalances();
-            const accountStart = await account3balances();
-            const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
-            const TOKENS_TO_EXCHANGE = accountStart.tst;
-            const expected = await dexPair.call({
-                method: 'expectedExchange', params: {
-                    amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    spent_token_root: tstRoot.address
-                }
-            });
-
-            logger.log(`Spent amount: ${TOKENS_TO_EXCHANGE} TST`);
-            logger.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
-            logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-9).toString()} EVER`);
-
-            const params = {
-                id: 66,
-                pair: dexPair.address,
-                expectedAmount: new BigNumber(expected.expected_amount).times(2).toString(),
-            }
-
-            logger.log(`Tip3ToEver.buildSwapEversPayload(${JSON.stringify(params)})`);
-            const payload = await tip3ToEver.call({
-                method: 'buildSwapEversPayload',
-                params: params
-            });
-            logger.log(`Result payload = ${payload}`);
-
-            logger.log(`tstWallet3(${tstWallet3.address}).transfer(
-                amount: ${new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.tst.decimals).toString()},
-                recipient: ${tip3ToEver.address},
-                deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
-                remainingGasTo: ${account3.address},
-                notify: ${true},
-                payload: {${JSON.stringify(params)}}
-            )`);
-            const tx = await account3.runTarget({
-                contract: tstWallet3,
-                method: 'transfer',
-                params: {
-                    amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    recipient: tip3ToEver.address,
-                    deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
-                    remainingGasTo: account3.address,
-                    notify: true,
-                    payload: payload
-                },
-                value: locklift.utils.convertCrystal(3.6, 'nano'),
-                keyPair: keyPairs[2]
-            });
-            logger.log(`txId: ${tx.transaction.id}`);
-
-            const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
-            const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
-            await logGas();
-
-            expect(accountStart.tst.toString()).to.equal(accountEnd.tst.toString(), 'Wrong Account#3 TST balance');
         });
     });
 });
