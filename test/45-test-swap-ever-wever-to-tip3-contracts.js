@@ -89,9 +89,9 @@ describe('Tests Swap Evers', async function () {
                 deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano')
             }
 
-            logger.log(`EverToTip3.buildSwapEversPayload(${JSON.stringify(params)})`);
+            logger.log(`EverToTip3.buildExchangePayload(${JSON.stringify(params)})`);
             const payload = await everToTip3.call({
-                method: 'buildSwapEversPayload',
+                method: 'buildExchangePayload',
                 params: params
             });
             logger.log(`Result payload = ${payload}`);
@@ -156,9 +156,9 @@ describe('Tests Swap Evers', async function () {
                 deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano')
             }
 
-            logger.log(`EverToTip3.buildSwapEversPayload(${JSON.stringify(params)})`);
+            logger.log(`EverToTip3.buildExchangePayload(${JSON.stringify(params)})`);
             const payload = await everToTip3.call({
-                method: 'buildSwapEversPayload',
+                method: 'buildExchangePayload',
                 params: params
             });
             logger.log(`Result payload = ${payload}`);
@@ -220,9 +220,9 @@ describe('Tests Swap Evers', async function () {
                 deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano')
             }
 
-            logger.log(`EverToTip3.buildSwapEversPayload(${JSON.stringify(params)})`);
+            logger.log(`EverToTip3.buildExchangePayload(${JSON.stringify(params)})`);
             const payload = await everToTip3.call({
-                method: 'buildSwapEversPayload',
+                method: 'buildExchangePayload',
                 params: params
             });
             logger.log(`Result payload = ${payload}`);
@@ -292,9 +292,9 @@ describe('Tests Swap Evers', async function () {
                 expectedAmount: new BigNumber(expected.expected_amount).times(2).toString(),
             }
 
-            logger.log(`Tip3ToEver.buildSwapEversPayload(${JSON.stringify(params)})`);
+            logger.log(`Tip3ToEver.buildExchangePayload(${JSON.stringify(params)})`);
             const payload = await tip3ToEver.call({
-                method: 'buildSwapEversPayload',
+                method: 'buildExchangePayload',
                 params: params
             });
             logger.log(`Result payload = ${payload}`);
@@ -359,9 +359,9 @@ describe('Tests Swap Evers', async function () {
                 expectedAmount: expected.expected_amount,
             }
 
-            logger.log(`Tip3ToEver.buildSwapEversPayload(${JSON.stringify(params)})`);
+            logger.log(`Tip3ToEver.buildExchangePayload(${JSON.stringify(params)})`);
             const payload = await tip3ToEver.call({
-                method: 'buildSwapEversPayload',
+                method: 'buildExchangePayload',
                 params: params
             });
             logger.log(`Result payload = ${payload}`);

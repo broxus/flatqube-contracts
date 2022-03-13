@@ -52,7 +52,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
     }
 
     // Payload constructor swap TIP-3 -> Ever
-    function buildSwapEversPayload(
+    function buildExchangePayload(
         uint64 id, 
         address pair,
         uint128 expectedAmount

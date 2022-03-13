@@ -31,7 +31,7 @@ contract EverWEverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         wEverVault_ = _wEverVault;
         swapEver_ = _swapEver;
         
-        tvm.rawReserve(EverToTip3Gas.DEPLOY_EMPTY_WALLET_VALUE, 0);
+        tvm.rawReserve(EverToTip3Gas.ACCOUNT_INITIAL_BALANCE, 0);
         ITokenRoot(wEverRoot_).deployWallet{
             value: EverToTip3Gas.DEPLOY_EMPTY_WALLET_VALUE,
             flag: MsgFlag.SENDER_PAYS_FEES,
@@ -48,7 +48,7 @@ contract EverWEverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         wEverWallet_ = _wEverWallet;
     }
 
-    function buildEverWEverPayload(
+    function buildExchangePayload(
         uint64 id, 
         uint128 amount, 
         address pair,
