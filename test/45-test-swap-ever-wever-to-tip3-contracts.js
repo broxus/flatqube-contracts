@@ -21,6 +21,7 @@ let IS_WEVER_LEFT;
 
 describe('Tests Swap Evers', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
+
     before('Load contracts', async function () {
         everToTip3 = migration.load(await locklift.factory.getContract('EverToTip3'), 'EverToTip3');
         tip3ToEver = migration.load(await locklift.factory.getContract('Tip3ToEver'), 'Tip3ToEver');
@@ -60,10 +61,10 @@ describe('Tests Swap Evers', async function () {
         logger.log(`WeverVaultWallet: ${wEverVaultWallet.address}`);
         logger.log(`Account3: ${account3.address}`);
         logger.log(`TstWallet3: ${tstWallet3.address}`);
-    })
+    });
 
     describe('Swap Ever to Tip3', async function () {
-        it(`WEverVault.wrap()`, async function () {
+        it(`Swap Ever to Tip3 via wrap() - Success`, async function () {
             await migration.balancesCheckpoint();
             logger.log(`#############################`);
             logger.log(``);
@@ -88,12 +89,11 @@ describe('Tests Swap Evers', async function () {
                 deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano')
             }
 
-            logger.log(`Call buildSwapEversPayload(${JSON.stringify(params)})`);
+            logger.log(`EverToTip3.buildSwapEversPayload(${JSON.stringify(params)})`);
             const payload = await everToTip3.call({
                 method: 'buildSwapEversPayload',
                 params: params
             });
-
             logger.log(`Result payload = ${payload}`);
 
             const dexStart = await dexBalances();
@@ -101,7 +101,12 @@ describe('Tests Swap Evers', async function () {
             const pairStart = await dexPairInfo();
             logBalances('start', dexStart, accountStart, pairStart);
 
-            logger.log(`Call method wrap contract wEverVault...`)
+            logger.log(`wEverVault(wEverVault.address).wrap(
+                tokens = ${new BigNumber(EVERS_TO_EXCHANGE).shiftedBy(9).toString()},
+                owner_address: ${everToTip3.address},
+                gas_back_address: ${account3.address},
+                payload: {${JSON.stringify(params)}}
+            )`);
             const tx = await account3.runTarget({
                 contract: wEverVault,
                 method: 'wrap',
@@ -111,7 +116,7 @@ describe('Tests Swap Evers', async function () {
                     gas_back_address: account3.address,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal(EVERS_TO_EXCHANGE + 6, 'nano'),
+                value: locklift.utils.convertCrystal((EVERS_TO_EXCHANGE) + 5, 'nano'),
                 keyPair: keyPairs[2]
             });
             logger.log(`txId: ${tx.transaction.id}`);
@@ -126,7 +131,7 @@ describe('Tests Swap Evers', async function () {
             expect(expectedAccountTst).to.equal(accountEnd.tst.toString(), 'Wrong Account#3 TST balance');
         });
 
-        it(`everToTip3.swapEvers()`, async function () {
+        it(`Swap Ever to Tip3 via swapEvers() - Success`, async function () {
             await migration.balancesCheckpoint();
             logger.log(`#############################`);
             logger.log(``);
@@ -151,7 +156,7 @@ describe('Tests Swap Evers', async function () {
                 deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano')
             }
 
-            logger.log(`Call buildSwapEversPayload(${JSON.stringify(params)})`);
+            logger.log(`EverToTip3.buildSwapEversPayload(${JSON.stringify(params)})`);
             const payload = await everToTip3.call({
                 method: 'buildSwapEversPayload',
                 params: params
@@ -163,7 +168,10 @@ describe('Tests Swap Evers', async function () {
             const pairStart = await dexPairInfo();
             logBalances('start', dexStart, accountStart, pairStart);
 
-            logger.log(`Call method swapEvers contract everToTip3...`)
+            logger.log(`EverToTip3(${everToTip3.address}).swapEvers(
+                user: ${account3.address},
+                payload: {${JSON.stringify(params)}}
+            )`);
             const tx = await account3.runTarget({
                 contract: everToTip3,
                 method: 'swapEvers',
@@ -171,7 +179,7 @@ describe('Tests Swap Evers', async function () {
                     user: account3.address,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal(EVERS_TO_EXCHANGE + 6, 'nano'),
+                value: locklift.utils.convertCrystal((EVERS_TO_EXCHANGE) + 5, 'nano'),
                 keyPair: keyPairs[2]
             });
             logger.log(`txId: ${tx.transaction.id}`);
@@ -187,7 +195,7 @@ describe('Tests Swap Evers', async function () {
             expect(expectedAccountTst).to.equal(accountEnd.tst.toString(), 'Wrong Account#3 TST balance');
         });
 
-        it(`swapCancel`, async function () {
+        it(`Swap Ever to Tip3 via wrap() - Cancel`, async function () {
             await migration.balancesCheckpoint();
             logger.log(`#############################`);
             logger.log(``);
@@ -212,7 +220,7 @@ describe('Tests Swap Evers', async function () {
                 deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano')
             }
 
-            logger.log(`Call buildSwapEversPayload(${JSON.stringify(params)})`);
+            logger.log(`EverToTip3.buildSwapEversPayload(${JSON.stringify(params)})`);
             const payload = await everToTip3.call({
                 method: 'buildSwapEversPayload',
                 params: params
@@ -224,7 +232,12 @@ describe('Tests Swap Evers', async function () {
             const pairStart = await dexPairInfo();
             logBalances('start', dexStart, accountStart, pairStart);
 
-            logger.log(`Call method wrap contract wEverVault...`)
+            logger.log(`wEverVault(${wEverVault.address}).wrap(
+                tokens = ${new BigNumber(EVERS_TO_EXCHANGE).shiftedBy(9).toString()},
+                owner_address: ${everToTip3.address},
+                gas_back_address: ${account3.address},
+                payload: {${JSON.stringify(params)}}
+            )`);
             const tx = await account3.runTarget({
                 contract: wEverVault,
                 method: 'wrap',
@@ -234,7 +247,7 @@ describe('Tests Swap Evers', async function () {
                     gas_back_address: account3.address,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal(EVERS_TO_EXCHANGE + 6, 'nano'),
+                value: locklift.utils.convertCrystal((EVERS_TO_EXCHANGE) + 5, 'nano'),
                 keyPair: keyPairs[2]
             });
             logger.log(`txId: ${tx.transaction.id}`);
@@ -247,12 +260,12 @@ describe('Tests Swap Evers', async function () {
             await logGas();
 
             expect(accountStart.tst.toString()).to.equal(accountEnd.tst.toString(), 'Wrong Account#3 TST balance');
-            expect(new BigNumber(accountStart.ever).minus(6).toNumber()).lt(new BigNumber(accountEnd.ever).toNumber(), 'Wrong Account#3 TST balance');
+            expect(new BigNumber(accountStart.ever).minus(5).toNumber()).lt(new BigNumber(accountEnd.ever).toNumber(), 'Wrong Account#3 TST balance');
         });
     });
 
-    describe('Swap TIP3 to Ever', async function () {
-        it(`Success swap`, async function () {
+    describe('Swap Tip3 to Ever', async function () {
+        it(`Swap Tip3 to Ever - Success`, async function () {
             await migration.balancesCheckpoint();
             logger.log(`#############################`);
             logger.log(``);
@@ -279,14 +292,21 @@ describe('Tests Swap Evers', async function () {
                 expectedAmount: expected.expected_amount,
             }
 
-            logger.log(`Call buildSwapEversPayload(${JSON.stringify(params)})`);
+            logger.log(`Tip3ToEver.buildSwapEversPayload(${JSON.stringify(params)})`);
             const payload = await tip3ToEver.call({
                 method: 'buildSwapEversPayload',
                 params: params
             });
             logger.log(`Result payload = ${payload}`);
 
-            logger.log(`Call method transfer contract tstWallet3...`)
+            logger.log(`tstWallet3(${tstWallet3.address}).transfer(
+                amount: ${new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.tst.decimals).toString()},
+                recipient: ${tip3ToEver.address},
+                deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
+                remainingGasTo: ${account3.address},
+                notify: ${true},
+                payload: {${JSON.stringify(params)}}
+            )`);
             const tx = await account3.runTarget({
                 contract: tstWallet3,
                 method: 'transfer',
@@ -315,7 +335,7 @@ describe('Tests Swap Evers', async function () {
             expect(expectedAccountEverMin).to.lt(new BigNumber(accountEnd.ever).toNumber(), 'Wrong Account#3 EVER balance');
         });
 
-        it(`Cancel swap`, async function () {
+        it(`Swap Tip3 to Ever - Cancel`, async function () {
             await migration.balancesCheckpoint();
             logger.log(`#############################`);
             logger.log(``);
@@ -342,14 +362,21 @@ describe('Tests Swap Evers', async function () {
                 expectedAmount: new BigNumber(expected.expected_amount).times(2).toString(),
             }
 
-            logger.log(`Call buildSwapEversPayload(${JSON.stringify(params)})`);
+            logger.log(`Tip3ToEver.buildSwapEversPayload(${JSON.stringify(params)})`);
             const payload = await tip3ToEver.call({
                 method: 'buildSwapEversPayload',
                 params: params
             });
             logger.log(`Result payload = ${payload}`);
 
-            logger.log(`Call method transfer contract tstWallet3...`)
+            logger.log(`tstWallet3(${tstWallet3.address}).transfer(
+                amount: ${new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.tst.decimals).toString()},
+                recipient: ${tip3ToEver.address},
+                deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
+                remainingGasTo: ${account3.address},
+                notify: ${true},
+                payload: {${JSON.stringify(params)}}
+            )`);
             const tx = await account3.runTarget({
                 contract: tstWallet3,
                 method: 'transfer',
