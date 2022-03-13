@@ -13,12 +13,12 @@ import "./interfaces/IEverVault.sol";
 import "./interfaces/IEverTip3SwapEvents.sol";
 import "./interfaces/IEverTip3SwapCallbacks.sol";
 
- import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
- import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
- import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
- import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensMintCallback.sol";
- import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
- import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensBurnCallback.sol";
+import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
+import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
+import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
+import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensMintCallback.sol";
+import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
+import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensBurnCallback.sol";
 
 contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTip3SwapEvents {
 
