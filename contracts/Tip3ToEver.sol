@@ -97,7 +97,6 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
                 resultPayload.store(DexOperationTypes.EXCHANGE);
                 resultPayload.store(id);
                 resultPayload.store(uint128(0));
-                resultPayload.store(uint128(0));
                 resultPayload.store(expectedAmount);
                 
                 resultPayload.storeRef(successPayload);
