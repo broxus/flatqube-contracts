@@ -25,7 +25,7 @@ describe('Tests Swap Evers', async function () {
     before('Load contracts', async function () {
         everToTip3 = migration.load(await locklift.factory.getContract('EverToTip3'), 'EverToTip3');
         tip3ToEver = migration.load(await locklift.factory.getContract('Tip3ToEver'), 'Tip3ToEver');
-        everWEverToTIP3 = migration.load(await locklift.factory.getContract('EverWEverToTip3'), 'EverWEverToTip3');
+        everWEverToTIP3 = migration.load(await locklift.factory.getContract('EverWeverToTip3'), 'EverWeverToTip3');
 
         keyPairs = await locklift.keys.getKeyPairs();
         dexPair = migration.load(await locklift.factory.getContract('DexPair'), 'DexPairTstWEVER');

@@ -9,39 +9,15 @@ IFREF {
 }
 GETGLOB 6
 THROWIF 51
-OVER
-PUSHCONT {
-	LDREF
-	ENDS
-	CTOS
-}
-IF
-LDMSGADDR
-LDREF
 ENDS
-CTOS
-LDMSGADDR
-LDREF
-ENDS
-CTOS
-LDMSGADDR
-ENDS
-.loc ../contracts/EverWEverToTip3.sol, 29
+.loc ../contracts/EverWeverToTip3.sol, 30
 ACCEPT
-.loc ../contracts/EverWEverToTip3.sol, 30
-ROT
-SETGLOB 11
-.loc ../contracts/EverWEverToTip3.sol, 31
-SWAP
-SETGLOB 13
-.loc ../contracts/EverWEverToTip3.sol, 32
-SETGLOB 14
-.loc ../contracts/EverWEverToTip3.sol, 34
-PUSHINT 500000000
+.loc ../contracts/EverWeverToTip3.sol, 32
+PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/EverWEverToTip3.sol, 35
-PUSHINT 200000000
+.loc ../contracts/EverWeverToTip3.sol, 34
+PUSHINT 100000000
 MYADDR
 GETGLOB 11
 NEWC
@@ -50,7 +26,7 @@ STSLICE
 PUSHSLICE x41dcd6500000000000000000000000000003_
 STSLICER
 ROTREV
-PUSHSLICE x31edd4c76d1fe7ee
+PUSHSLICE x31edd4c7282c61f5
 NEWC
 STSLICE
 STSLICE
@@ -59,13 +35,25 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/EverWEverToTip3.sol, 0
+.loc ../contracts/EverWeverToTip3.sol, 43
+GETGLOB 9
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHINT 128
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/EverWeverToTip3.sol, 0
 CALLREF {
 	CALL $c7_to_c4$
 }
 THROW 0
 
-.macro onWEverWallet
+.macro onWeverWallet
 DROP
 GETGLOB 6
 THROWIFNOT 76
@@ -74,7 +62,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/EverWEverToTip3.sol, 46
+.loc ../contracts/EverWeverToTip3.sol, 47
 OVER
 PUSHCONT {
 	LDREF
@@ -84,9 +72,9 @@ PUSHCONT {
 IF
 LDMSGADDR
 ENDS
-.loc ../contracts/EverWEverToTip3.sol, 0
+.loc ../contracts/EverWeverToTip3.sol, 0
 CALLREF {
-	CALL $onWEverWallet_internal_macro$
+	CALL $onWeverWallet_internal_macro$
 }
 DROP
 CALLREF {
@@ -94,8 +82,8 @@ CALLREF {
 }
 THROW 0
 
-.macro onWEverWallet_internal_macro
-.loc ../contracts/EverWEverToTip3.sol, 47
+.macro onWeverWallet_internal_macro
+.loc ../contracts/EverWeverToTip3.sol, 48
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -105,16 +93,28 @@ GETGLOB 9
 GETGLOB 11
 SDEQ
 AND
-THROWIFNOT 100
-.loc ../contracts/EverWEverToTip3.sol, 48
-SETGLOB 12
-.loc ../contracts/EverWEverToTip3.sol, 0
+THROWIFNOT 200
+.loc ../contracts/EverWeverToTip3.sol, 49
+DUP
+SETGLOB 14
+.loc ../contracts/EverWeverToTip3.sol, 50
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHINT 64
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/EverWeverToTip3.sol, 0
 
-.macro buildEverWEverPayload
+.macro buildExchangePayload
 DROP
 GETGLOB 6
 THROWIFNOT 76
-.loc ../contracts/EverWEverToTip3.sol, 51
+.loc ../contracts/EverWeverToTip3.sol, 53
 OVER
 PUSHCONT {
 	LDU 64
@@ -137,9 +137,9 @@ PUSHCONT {
 IFELSE
 LDU 128
 ENDS
-.loc ../contracts/EverWEverToTip3.sol, 0
+.loc ../contracts/EverWeverToTip3.sol, 0
 CALLREF {
-	CALL $buildEverWEverPayload_internal_macro$
+	CALL $buildExchangePayload_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -152,7 +152,7 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x0000000000000000000000003e5ca33d2_
+	PUSHSLICE x0000000000000000000000002d0381092_
 	STSLICER
 	STREF
 	ENDC
@@ -168,27 +168,27 @@ IFREF {
 }
 THROW 0
 
-.macro buildEverWEverPayload_internal_macro
-.loc ../contracts/EverWEverToTip3.sol, 59
+.macro buildExchangePayload_internal_macro
+.loc ../contracts/EverWeverToTip3.sol, 65
 ROLL 4
 NEWC
 STU 64
-.loc ../contracts/EverWEverToTip3.sol, 60
+.loc ../contracts/EverWeverToTip3.sol, 66
 ROLL 4
 SWAP
 STU 128
-.loc ../contracts/EverWEverToTip3.sol, 61
+.loc ../contracts/EverWeverToTip3.sol, 67
 ROLL 3
 SWAP
 STSLICE
-.loc ../contracts/EverWEverToTip3.sol, 62
+.loc ../contracts/EverWeverToTip3.sol, 68
 XCHG S1, S2
 STU 128
-.loc ../contracts/EverWEverToTip3.sol, 63
+.loc ../contracts/EverWeverToTip3.sol, 69
 STU 128
-.loc ../contracts/EverWEverToTip3.sol, 64
+.loc ../contracts/EverWeverToTip3.sol, 70
 ENDC
-.loc ../contracts/EverWEverToTip3.sol, 0
+.loc ../contracts/EverWeverToTip3.sol, 0
 
 .macro onAcceptTokensTransfer
 DROP
@@ -199,7 +199,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/EverWEverToTip3.sol, 68
+.loc ../contracts/EverWeverToTip3.sol, 74
 OVER
 PUSHCONT {
 	LDREF
@@ -223,7 +223,7 @@ CTOS
 LDMSGADDR
 LDREF
 ENDS
-.loc ../contracts/EverWEverToTip3.sol, 0
+.loc ../contracts/EverWeverToTip3.sol, 0
 CALLREF {
 	CALL $onAcceptTokensTransfer_internal_macro$
 }
@@ -234,14 +234,14 @@ CALLREF {
 THROW 0
 
 .macro onAcceptTokensTransfer_internal_macro
-.loc ../contracts/EverWEverToTip3.sol, 76
+.loc ../contracts/EverWeverToTip3.sol, 85
 DUP
 CTOS
-.loc ../contracts/EverWEverToTip3.sol, 77
+.loc ../contracts/EverWeverToTip3.sol, 86
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/EverWEverToTip3.sol, 79
+.loc ../contracts/EverWeverToTip3.sol, 88
 SBITS
 PUSHINT 715
 EQUAL
@@ -254,7 +254,7 @@ PUSHCONT {
 	PLDU 256
 	NEQINT 0
 	GETGLOB 9
-	GETGLOB 12
+	GETGLOB 14
 	SDEQ
 	AND
 	DUP
@@ -273,19 +273,19 @@ PUSHCONT {
 }
 IF
 PUSHCONT {
-	.loc ../contracts/EverWEverToTip3.sol, 83
+	.loc ../contracts/EverWeverToTip3.sol, 92
 	DUP
 	TRUE
 	PUSH S3
 	PUSHINT 0
-	GETGLOB 13
+	GETGLOB 12
 	PUSH S9
 }
 PUSHCONT {
-	.loc ../contracts/EverWEverToTip3.sol, 92
+	.loc ../contracts/EverWeverToTip3.sol, 101
 	PUSHREF {
 	}
-	.loc ../contracts/EverWEverToTip3.sol, 93
+	.loc ../contracts/EverWeverToTip3.sol, 102
 	TRUE
 	PUSH S3
 	PUSHINT 0
@@ -318,7 +318,7 @@ STBREFR
 ENDC
 PUSHINT 128
 SENDRAWMSG
-.loc ../contracts/EverWEverToTip3.sol, 0
+.loc ../contracts/EverWeverToTip3.sol, 0
 BLKDROP 6
 
 .macro onAcceptTokensBurn
@@ -330,7 +330,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/EverWEverToTip3.sol, 105
+.loc ../contracts/EverWeverToTip3.sol, 114
 OVER
 PUSHCONT {
 	LDREF
@@ -350,7 +350,7 @@ CTOS
 LDMSGADDR
 LDREF
 ENDS
-.loc ../contracts/EverWEverToTip3.sol, 0
+.loc ../contracts/EverWeverToTip3.sol, 0
 CALLREF {
 	CALL $onAcceptTokensBurn_internal_macro$
 }
@@ -361,7 +361,7 @@ CALLREF {
 THROW 0
 
 .macro onAcceptTokensBurn_internal_macro
-.loc ../contracts/EverWEverToTip3.sol, 112
+.loc ../contracts/EverWeverToTip3.sol, 124
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -371,20 +371,20 @@ GETGLOB 9
 GETGLOB 11
 SDEQ
 AND
-THROWIFNOT 100
-.loc ../contracts/EverWEverToTip3.sol, 113
+THROWIFNOT 200
+.loc ../contracts/EverWeverToTip3.sol, 125
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/EverWEverToTip3.sol, 115
+.loc ../contracts/EverWeverToTip3.sol, 127
 DUP
 CTOS
-.loc ../contracts/EverWEverToTip3.sol, 116
+.loc ../contracts/EverWeverToTip3.sol, 128
 LDU 64
 DROP
-.loc ../contracts/EverWEverToTip3.sol, 118
+.loc ../contracts/EverWeverToTip3.sol, 130
 PUSH S2
-PUSHSLICE xc0000000000000000000000000457549a3
+PUSHSLICE xc000000000000000000000000071c4619b
 NEWC
 STSLICE
 STSLICE
@@ -392,11 +392,11 @@ STU 64
 ENDC
 PUSHINT 0
 SENDRAWMSG
-.loc ../contracts/EverWEverToTip3.sol, 119
+.loc ../contracts/EverWeverToTip3.sol, 131
 SWAP
-GETGLOB 14
-ROLL 5
 GETGLOB 13
+ROLL 5
+GETGLOB 12
 FALSE
 NEWC
 STSLICECONST x6_
@@ -420,7 +420,7 @@ STBREFR
 ENDC
 PUSHINT 128
 SENDRAWMSG
-.loc ../contracts/EverWEverToTip3.sol, 0
+.loc ../contracts/EverWeverToTip3.sol, 0
 DROP2
 
 .macro c4_to_c7
@@ -474,10 +474,39 @@ PUSHCONT {
 		PUSHINT 0
 	}
 	IFELSE
+	PUSHINT 2
+	PUSH S2
+	PUSHINT 64
+	DICTUGET
+	PUSHCONT {
+		PUSHREFSLICE {
+			.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+		}
+	}
+	IFNOT
+	PUSHINT 3
+	PUSH S3
+	PUSHINT 64
+	DICTUGET
+	PUSHCONT {
+		PUSHREFSLICE {
+			.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+		}
+	}
+	IFNOT
+	PUSHINT 4
+	PUSH S4
+	PUSHINT 64
+	DICTUGET
+	PUSHCONT {
+		PUSHREFSLICE {
+			.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+		}
+	}
+	IFNOT
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
-	BLKPUSH 3, 0
 	SETGLOB 14
 	SETGLOB 13
 	SETGLOB 12
@@ -633,9 +662,118 @@ CALLREF {
 }
 THROW 60
 
+.macro weverRoot
+DROP
+ENDS
+CALLREF {
+	CALL $c4_to_c7$
+}
+GETGLOB 11
+OVER
+PUSHCONT {
+	PUSHSLICE xc0000000000000000000000000fe107c52
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+IF
+THROW 0
+
+.macro weverVault
+DROP
+ENDS
+CALLREF {
+	CALL $c4_to_c7$
+}
+GETGLOB 12
+OVER
+PUSHCONT {
+	PUSHSLICE xc0000000000000000000000000b75f660d
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+IF
+THROW 0
+
+.macro everToTip3
+DROP
+ENDS
+CALLREF {
+	CALL $c4_to_c7$
+}
+GETGLOB 13
+OVER
+PUSHCONT {
+	PUSHSLICE xc0000000000000000000000000f687bac2
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+IF
+THROW 0
+
+.macro weverWallet
+DROP
+ENDS
+CALLREF {
+	CALL $c4_to_c7$
+}
+GETGLOB 14
+OVER
+PUSHCONT {
+	PUSHSLICE xc00000000000000000000000009e3cdebb
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+IF
+THROW 0
+
 .macro public_function_selector
 DUP
-PUSHINT 1893244873
+PUSHINT 928998925
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 507305659
+	EQUAL
+	IFJMPREF {
+		CALL $weverWallet$
+	}
+	DUP
+	PUSHINT 673997301
+	EQUAL
+	IFJMPREF {
+		CALL $onWeverWallet$
+	}
+	DUP
+	PUSHINT 873333796
+	EQUAL
+	IFJMPREF {
+		CALL $buildExchangePayload$
+	}
+	DUP
+	PUSHINT 928998925
+	EQUAL
+	IFJMPREF {
+		CALL $weverVault$
+	}
+}
+DUP
+PUSHINT 1988606658
 LEQ
 IFJMPREF {
 	DUP
@@ -645,16 +783,10 @@ IFJMPREF {
 		CALL $onAcceptTokensBurn$
 	}
 	DUP
-	PUSHINT 1824563769
+	PUSHINT 1756716863
 	EQUAL
 	IFJMPREF {
 		CALL $constructor$
-	}
-	DUP
-	PUSHINT 1830807534
-	EQUAL
-	IFJMPREF {
-		CALL $onWEverWallet$
 	}
 	DUP
 	PUSHINT 1893244873
@@ -662,11 +794,17 @@ IFJMPREF {
 	IFJMPREF {
 		CALL $onAcceptTokensTransfer$
 	}
+	DUP
+	PUSHINT 1988606658
+	EQUAL
+	IFJMPREF {
+		CALL $everToTip3$
+	}
 }
 DUP
-PUSHINT 2037550324
+PUSHINT 2115009618
 EQUAL
 IFJMPREF {
-	CALL $buildEverWEverPayload$
+	CALL $weverRoot$
 }
 

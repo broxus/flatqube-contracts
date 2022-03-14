@@ -7,23 +7,22 @@ async function main() {
 
     const EverToTip3 = await locklift.factory.getContract('EverToTip3');
     const Tip3ToEver = await locklift.factory.getContract('Tip3ToEver');
-    const EverWEverToTip3 = await locklift.factory.getContract('EverWEverToTip3');
+    const EverWeverToTip3 = await locklift.factory.getContract('EverWeverToTip3');
 
     const [keyPair] = await locklift.keys.getKeyPairs();
 
-    const wEverRoot = migration.load(await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH), 'WEVERRoot').address;
-    const wEverVault = migration.load(await locklift.factory.getContract('TestWeverVault'), 'WEVERVault').address;
+    const weverRoot = migration.load(await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH), 'WEVERRoot').address;
+    const weverVault = migration.load(await locklift.factory.getContract('TestWeverVault'), 'WEVERVault').address;
 
     console.log(`Deploying EverToTip3 contract...`);
     const everToTip3 = await locklift.giver.deployContract({
         contract: EverToTip3,
         constructorParams: {
-            _wEverRoot: wEverRoot,
-            _wEverVault: wEverVault
         },
         initParams: {
             randomNonce_: getRandomNonce(),
-            wEverWallet_: locklift.utils.zeroAddress,
+            weverRoot: weverRoot,
+            weverVault: weverVault
         },
         keyPair,
     }, locklift.utils.convertCrystal('2', 'nano'));    
@@ -33,36 +32,34 @@ async function main() {
     const tip3ToEver = await locklift.giver.deployContract({
         contract: Tip3ToEver,
         constructorParams: {
-            _wEverRoot: wEverRoot,
-            _wEverVault: wEverVault,
         },
         initParams: {
             randomNonce_: getRandomNonce(),
-            wEverWallet_: locklift.utils.zeroAddress,
+            weverRoot: weverRoot,
+            weverVault: weverVault
         },
         keyPair,
     }, locklift.utils.convertCrystal('2', 'nano'));    
-    console.log(`Tip3ToEver deploing end. Address: ${tip3ToEver.address}`);
+    console.log(`Tip3ToEver deploying end. Address: ${tip3ToEver.address}`);
 
-    console.log(`Deploying EverWEverToTip3...`);
+    console.log(`Deploying EverWeverToTip3...`);
     const everWEverToTIP3 = await locklift.giver.deployContract({
-        contract: EverWEverToTip3,
+        contract: EverWeverToTip3,
         constructorParams: {
-            _wEverRoot: wEverRoot,
-            _wEverVault: wEverVault,
-            _swapEver: everToTip3.address,
         },
         initParams: {
             randomNonce_: getRandomNonce(),
-            wEverWallet_: locklift.utils.zeroAddress,
+            weverRoot: weverRoot,
+            weverVault: weverVault,
+            everToTip3: everToTip3.address
         },
         keyPair,
     }, locklift.utils.convertCrystal('2', 'nano'));    
-    console.log(`EverWEverToTip3 deploing end. Address: ${everWEverToTIP3.address}`);
+    console.log(`EverWeverToTip3 deploing end. Address: ${everWEverToTIP3.address}`);
 
     migration.store(everToTip3, 'EverToTip3');
     migration.store(tip3ToEver, 'Tip3ToEver');
-    migration.store(everWEverToTIP3, 'EverWEverToTip3');
+    migration.store(everWEverToTIP3, 'EverWeverToTip3');
 }
 
 main()

@@ -5,7 +5,7 @@ pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
 import "./libraries/EverToTip3Gas.sol";
-import "./libraries/SwapEverErrors.sol";
+import "./libraries/EverToTip3Errors.sol";
 import "./libraries/DexOperationTypes.sol";
 import "./libraries/EverToTip3OperationStatus.sol";
 
@@ -22,20 +22,20 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
    
     uint32 static randomNonce_;
     
-    address wEverRoot_;
-    address wEverWallet_;
-    address wEverVault_;
+    address static public weverRoot;
+    address static public weverVault;
 
-    constructor(address _wEverRoot, address _wEverVault) public {
+    address public weverWallet;
+
+    constructor() public {
         tvm.accept();
-        wEverRoot_ = _wEverRoot;
-        wEverVault_ = _wEverVault;
 
-        tvm.rawReserve(EverToTip3Gas.ACCOUNT_INITIAL_BALANCE, 0);
-        ITokenRoot(wEverRoot_).deployWallet{
+        tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
+
+        ITokenRoot(weverRoot).deployWallet{
             value: EverToTip3Gas.DEPLOY_EMPTY_WALLET_VALUE,
             flag: MsgFlag.SENDER_PAYS_FEES,
-            callback: Tip3ToEver.onWEverWallet    
+            callback: Tip3ToEver.onWeverWallet
         }(
             address(this), 
             EverToTip3Gas.DEPLOY_EMPTY_WALLET_GRAMS
@@ -45,10 +45,10 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
     }
 
     // Сallback deploy WEVER wallet for contract
-    function onWEverWallet(address _wEverWallet) external {
-        require(msg.sender.value != 0 && msg.sender == wEverRoot_, SwapEverErrors.NOT_ROOT_WEVER);
-        wEverWallet_ = _wEverWallet;
-        wEverWallet_.transfer(0, false, MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS);
+    function onWeverWallet(address _weverWallet) external {
+        require(msg.sender.value != 0 && msg.sender == weverRoot, EverToTip3Errors.NOT_WEVER_ROOT);
+        weverWallet = _weverWallet;
+        weverWallet.transfer(0, false, MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS);
     }
 
     // Payload constructor swap TIP-3 -> Ever
@@ -57,13 +57,13 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         address pair,
         uint128 expectedAmount
     ) external pure returns (TvmCell) {
-        TvmBuilder builderPayload;
-        builderPayload.store(EverToTip3OperationStatus.SWAP);
-        builderPayload.store(id);
-        builderPayload.store(pair);
-        builderPayload.store(expectedAmount);
+        TvmBuilder builder;
+        builder.store(EverToTip3OperationStatus.SWAP);
+        builder.store(id);
+        builder.store(pair);
+        builder.store(expectedAmount);
     
-        return builderPayload.toCell();
+        return builder.toCell();
     }
 
     // Callback result swap
@@ -77,7 +77,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
     ) override external {
         TvmSlice payloadSlice = payload.toSlice();
         bool needCancel;
-        tvm.rawReserve(EverToTip3Gas.ACCOUNT_INITIAL_BALANCE, 0);
+        tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
 
         if (payloadSlice.bits() >= 8) {
             (uint8 operationStatus) = payloadSlice.decode(uint8);
@@ -130,7 +130,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
                         payloadID_
                     );
                 } else if (operationStatus == EverToTip3OperationStatus.SUCCESS && 
-                          (msg.sender.value != 0 && msg.sender == wEverWallet_)) {
+                          (msg.sender.value != 0 && msg.sender == weverWallet)) {
                     (uint64 id) = payloadSlice.decode(uint64);
 
                     TvmBuilder payloadID;
@@ -138,9 +138,9 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
                     payloadID.store(amount);
                     TvmCell payloadID_ = payloadID.toCell();
 
-                    ITokenWallet(wEverWallet_).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
+                    ITokenWallet(weverWallet).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
                         amount,
-                        wEverVault_,
+                        weverVault,
                         uint128(0),
                         user,
                         true,
@@ -177,8 +177,8 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         address user,
         TvmCell payload
     ) override external {
-        require(msg.sender.value != 0 && msg.sender == wEverRoot_, SwapEverErrors.NOT_ROOT_WEVER); 
-        tvm.rawReserve(EverToTip3Gas.ACCOUNT_INITIAL_BALANCE, 0);
+        require(msg.sender.value != 0 && msg.sender == weverRoot, EverToTip3Errors.NOT_WEVER_ROOT);
+        tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
        
         TvmSlice payloadSlice =  payload.toSlice();
         (uint64 id, uint128 amount) = payloadSlice.decode(uint64, uint128);
