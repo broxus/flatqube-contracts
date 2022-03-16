@@ -8,7 +8,6 @@ import "./libraries/EverToTip3Gas.sol";
 import "./libraries/EverToTip3Errors.sol";
 
 import "./interfaces/IEverVault.sol";
-import "./interfaces/IEverTip3SwapEvents.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
@@ -16,7 +15,7 @@ import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensBurnCallback.sol";
 
-contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTip3SwapEvents {
+contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback {
 
     uint32 static randomNonce_;
 
@@ -52,14 +51,12 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
 
     function buildExchangePayload(
         uint64 id, 
-        uint128 amount, 
+        uint128 amount,
         address pair,
         uint128 expectedAmount,
         uint128 deployWalletValue
     ) 
-        external 
-        pure 
-        returns (TvmCell) 
+        external pure returns (TvmCell) 
     {
         TvmBuilder builder;
         builder.store(id);
@@ -82,22 +79,30 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         override 
         external 
     {
+        bool needCancel = false;
         TvmSlice payloadSlice = payload.toSlice();
         tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
-        
-        if (payloadSlice.bits() == 715 && 
-            msg.sender.value != 0 && msg.sender == weverWallet &&
-            msg.value >= (amount + EverToTip3Gas.SWAP_EVER_TO_TIP3_MIN_VALUE)) 
+        if (payloadSlice.bits() ==  715 && 
+            msg.sender.value != 0 && msg.sender == weverWallet) 
         {
-            ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
-                amount,
-                weverVault,
-                0,
-                user,
-                true,
-                payload
-            );
+            (, uint128 amount_) = payloadSlice.decode(uint64, uint128); 
+            if ((amount + msg.value - EverToTip3Gas.SWAP_EVER_TO_TIP3_MIN_VALUE) >= amount_) {
+                ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
+                    amount,
+                    weverVault,
+                    0,
+                    user,
+                    true,
+                    payload
+                );
+            } else {
+                needCancel = true;    
+            }
         } else {
+            needCancel = true;
+        } 
+            
+        if (needCancel) {
             TvmCell emptyPayload;
             ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
                 amount,
@@ -112,7 +117,7 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
 
     // Callback Burn token
     function onAcceptTokensBurn(
-        uint128 amount,
+        uint128 /*amount*/,
         address /*walletOwner*/,
         address /*wallet*/,
         address user,
@@ -123,16 +128,15 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
     {
         require(msg.sender.value != 0 && msg.sender == weverRoot, EverToTip3Errors.NOT_WEVER_ROOT);
         tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
-          
+        
         TvmSlice payloadSlice =  payload.toSlice();
-        (uint64 id) = payloadSlice.decode(uint64);
-
-        emit SwapEverWeverToTip3Unwrap(user, id);
+        (, uint128 amount_) = payloadSlice.decode(uint64, uint128);
+             
         IEverVault(weverVault).wrap{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
-            amount,
+            amount_,
             everToTip3, 
             user, 
             payload
-        );
+        );        
     }
 }
