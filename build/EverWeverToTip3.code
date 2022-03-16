@@ -10,13 +10,13 @@ IFREF {
 GETGLOB 6
 THROWIF 51
 ENDS
-.loc ../contracts/EverWeverToTip3.sol, 30
+.loc ../contracts/EverWeverToTip3.sol, 29
 ACCEPT
-.loc ../contracts/EverWeverToTip3.sol, 32
+.loc ../contracts/EverWeverToTip3.sol, 31
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/EverWeverToTip3.sol, 34
+.loc ../contracts/EverWeverToTip3.sol, 33
 PUSHINT 100000000
 MYADDR
 GETGLOB 11
@@ -35,7 +35,7 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/EverWeverToTip3.sol, 43
+.loc ../contracts/EverWeverToTip3.sol, 42
 GETGLOB 9
 NEWC
 STSLICECONST x42_
@@ -62,7 +62,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/EverWeverToTip3.sol, 47
+.loc ../contracts/EverWeverToTip3.sol, 46
 OVER
 PUSHCONT {
 	LDREF
@@ -83,7 +83,7 @@ CALLREF {
 THROW 0
 
 .macro onWeverWallet_internal_macro
-.loc ../contracts/EverWeverToTip3.sol, 48
+.loc ../contracts/EverWeverToTip3.sol, 47
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -94,10 +94,10 @@ GETGLOB 11
 SDEQ
 AND
 THROWIFNOT 200
-.loc ../contracts/EverWeverToTip3.sol, 49
+.loc ../contracts/EverWeverToTip3.sol, 48
 DUP
 SETGLOB 14
-.loc ../contracts/EverWeverToTip3.sol, 50
+.loc ../contracts/EverWeverToTip3.sol, 49
 NEWC
 STSLICECONST x42_
 STSLICE
@@ -114,7 +114,7 @@ SENDRAWMSG
 DROP
 GETGLOB 6
 THROWIFNOT 76
-.loc ../contracts/EverWeverToTip3.sol, 53
+.loc ../contracts/EverWeverToTip3.sol, 52
 OVER
 PUSHCONT {
 	LDU 64
@@ -169,24 +169,24 @@ IFREF {
 THROW 0
 
 .macro buildExchangePayload_internal_macro
-.loc ../contracts/EverWeverToTip3.sol, 65
+.loc ../contracts/EverWeverToTip3.sol, 62
 ROLL 4
 NEWC
 STU 64
-.loc ../contracts/EverWeverToTip3.sol, 66
+.loc ../contracts/EverWeverToTip3.sol, 63
 ROLL 4
 SWAP
 STU 128
-.loc ../contracts/EverWeverToTip3.sol, 67
+.loc ../contracts/EverWeverToTip3.sol, 64
 ROLL 3
 SWAP
 STSLICE
-.loc ../contracts/EverWeverToTip3.sol, 68
+.loc ../contracts/EverWeverToTip3.sol, 65
 XCHG S1, S2
 STU 128
-.loc ../contracts/EverWeverToTip3.sol, 69
+.loc ../contracts/EverWeverToTip3.sol, 66
 STU 128
-.loc ../contracts/EverWeverToTip3.sol, 70
+.loc ../contracts/EverWeverToTip3.sol, 67
 ENDC
 .loc ../contracts/EverWeverToTip3.sol, 0
 
@@ -199,7 +199,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/EverWeverToTip3.sol, 74
+.loc ../contracts/EverWeverToTip3.sol, 71
 OVER
 PUSHCONT {
 	LDREF
@@ -234,14 +234,17 @@ CALLREF {
 THROW 0
 
 .macro onAcceptTokensTransfer_internal_macro
-.loc ../contracts/EverWeverToTip3.sol, 85
-DUP
+.loc ../contracts/EverWeverToTip3.sol, 82
+FALSE
+.loc ../contracts/EverWeverToTip3.sol, 83
+OVER
 CTOS
-.loc ../contracts/EverWeverToTip3.sol, 86
+.loc ../contracts/EverWeverToTip3.sol, 84
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/EverWeverToTip3.sol, 88
+.loc ../contracts/EverWeverToTip3.sol, 85
+DUP
 SBITS
 PUSHINT 715
 EQUAL
@@ -257,67 +260,116 @@ PUSHCONT {
 	GETGLOB 14
 	SDEQ
 	AND
-	DUP
-	PUSHCONT {
-		DROP
-		DEPTH
-		ADDCONST -2
-		PICK
-		PUSH S5
-		PUSHINT 4000000000
-		ADD
-		UFITS 128
-		GEQ
-	}
-	IF
 }
 IF
 PUSHCONT {
-	.loc ../contracts/EverWeverToTip3.sol, 92
+	.loc ../contracts/EverWeverToTip3.sol, 88
 	DUP
-	TRUE
-	PUSH S3
-	PUSHINT 0
-	GETGLOB 12
-	PUSH S9
+	LDU 64
+	LDU 128
+	POP S3
+	NIP
+	.loc ../contracts/EverWeverToTip3.sol, 89
+	PUSH S7
+	DEPTH
+	ADDCONST -2
+	PICK
+	ADD
+	UFITS 128
+	PUSHINT 4000000000
+	SUB
+	UFITS 128
+	SWAP
+	GEQ
+	PUSHCONT {
+		.loc ../contracts/EverWeverToTip3.sol, 90
+		PUSH S2
+		TRUE
+		PUSH S5
+		PUSHINT 0
+		GETGLOB 12
+		PUSH S11
+		GETGLOB 9
+		FALSE
+		NEWC
+		STSLICECONST x6_
+		STI 1
+		PUSHINT 3
+		STZEROES
+		STSLICE
+		PUSHINT 1
+		STUR 111
+		ROLLREV 6
+		NEWC
+		STSLICECONST x73e22143
+		STU 128
+		STSLICE
+		STU 128
+		ROLLREV 3
+		NEWC
+		STSLICE
+		STI 1
+		STREF
+		STBREFR
+		STBREFR
+		ENDC
+		PUSHINT 128
+		SENDRAWMSG
+	}
+	PUSHCONT {
+		.loc ../contracts/EverWeverToTip3.sol, 99
+		TRUE
+		POP S2
+	}
+	IFELSE
+	.loc ../contracts/EverWeverToTip3.sol, 0
 }
 PUSHCONT {
-	.loc ../contracts/EverWeverToTip3.sol, 101
+	.loc ../contracts/EverWeverToTip3.sol, 102
+	TRUE
+	POP S2
+}
+IFELSE
+.loc ../contracts/EverWeverToTip3.sol, 105
+DROP
+PUSHCONT {
+	.loc ../contracts/EverWeverToTip3.sol, 106
 	PUSHREF {
 	}
-	.loc ../contracts/EverWeverToTip3.sol, 102
+	.loc ../contracts/EverWeverToTip3.sol, 107
 	TRUE
 	PUSH S3
 	PUSHINT 0
 	PUSH2 S5, S8
+	GETGLOB 9
+	FALSE
+	NEWC
+	STSLICECONST x6_
+	STI 1
+	PUSHINT 3
+	STZEROES
+	STSLICE
+	PUSHINT 1
+	STUR 111
+	ROLLREV 6
+	NEWC
+	STSLICECONST x73e22143
+	STU 128
+	STSLICE
+	STU 128
+	ROLLREV 3
+	NEWC
+	STSLICE
+	STI 1
+	STREF
+	STBREFR
+	STBREFR
+	ENDC
+	PUSHINT 128
+	SENDRAWMSG
+	.loc ../contracts/EverWeverToTip3.sol, 0
 }
-IFELSE
-GETGLOB 9
-FALSE
-NEWC
-STSLICECONST x6_
-STI 1
-PUSHINT 3
-STZEROES
-STSLICE
-PUSHINT 1
-STUR 111
-ROLLREV 6
-NEWC
-STSLICECONST x73e22143
-STU 128
-STSLICE
-STU 128
-ROLLREV 3
-NEWC
-STSLICE
-STI 1
-STREF
-STBREFR
-STBREFR
-ENDC
-PUSHINT 128
-SENDRAWMSG
+IF
 .loc ../contracts/EverWeverToTip3.sol, 0
 BLKDROP 6
 
@@ -330,7 +382,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/EverWeverToTip3.sol, 114
+.loc ../contracts/EverWeverToTip3.sol, 119
 OVER
 PUSHCONT {
 	LDREF
@@ -361,7 +413,7 @@ CALLREF {
 THROW 0
 
 .macro onAcceptTokensBurn_internal_macro
-.loc ../contracts/EverWeverToTip3.sol, 124
+.loc ../contracts/EverWeverToTip3.sol, 129
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -372,30 +424,22 @@ GETGLOB 11
 SDEQ
 AND
 THROWIFNOT 200
-.loc ../contracts/EverWeverToTip3.sol, 125
+.loc ../contracts/EverWeverToTip3.sol, 130
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/EverWeverToTip3.sol, 127
+.loc ../contracts/EverWeverToTip3.sol, 132
 DUP
 CTOS
-.loc ../contracts/EverWeverToTip3.sol, 128
+.loc ../contracts/EverWeverToTip3.sol, 133
 LDU 64
+LDU 128
 DROP
-.loc ../contracts/EverWeverToTip3.sol, 130
-PUSH S2
-PUSHSLICE xc000000000000000000000000071c4619b
-NEWC
-STSLICE
-STSLICE
-STU 64
-ENDC
-PUSHINT 0
-SENDRAWMSG
-.loc ../contracts/EverWeverToTip3.sol, 131
-SWAP
+NIP
+.loc ../contracts/EverWeverToTip3.sol, 135
+XCHG S2
 GETGLOB 13
-ROLL 5
+ROLL 3
 GETGLOB 12
 FALSE
 NEWC
@@ -421,7 +465,7 @@ ENDC
 PUSHINT 128
 SENDRAWMSG
 .loc ../contracts/EverWeverToTip3.sol, 0
-DROP2
+BLKDROP 3
 
 .macro c4_to_c7
 PUSHROOT
