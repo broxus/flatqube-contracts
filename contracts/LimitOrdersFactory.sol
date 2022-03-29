@@ -110,8 +110,8 @@ contract LimitOrdersFactory is ILimitOrderFactory {
             MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
         );
     }
-
-    function createLimitOrdersRoot(address tokenRoot) external {
+    
+    function createLimitOrdersRoot(address tokenRoot, uint256 backPubKey) external {
         require(
             msg.value >= LimitOrdersGas.DEPLOY_ORDERS_ROOT,
             LimitOrdersErrors.VALUE_TOO_LOW
@@ -125,7 +125,7 @@ contract LimitOrdersFactory is ILimitOrderFactory {
             stateInit: stateInit_,
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED
-        }(address(this), msg.sender);
+        }(address(this), msg.sender, backPubKey);
     }
 
     function expectedAddressLimitOrderRoots(address tokenRoot_)
