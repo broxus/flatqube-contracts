@@ -21,13 +21,15 @@ contract LimitOrdersRoot is IAcceptTokensTransferCallback {
     address limitOrdersFactory;
     address wallet;
     address deployer;
+    address dexRoot;
 
-    constructor(address limitOrdersFactory_, address deployer_) public {
+    constructor(address limitOrdersFactory_, address deployer_, address dexRoot_) public {
         tvm.rawReserve(LimitOrdersGas.TARGET_BALANCE, 0);
         if (msg.sender.value != 0 && msg.sender == limitOrdersFactory) {
             limitOrdersFactory = limitOrdersFactory_;
             deployer = deployer_;
-
+            dexRoot = dexRoot_;
+            
             ITokenRoot(tokenRoot_).deployWallet{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED,
@@ -118,7 +120,7 @@ contract LimitOrdersRoot is IAcceptTokensTransferCallback {
             address limitOrderAddress = new LimitOrder{
                 stateInit: stateInit_,
                 value: LimitOrdersGas.DEPLOY_ORDER_MIN_VALUE
-            }(expectedAmount, amount, backPubKey);
+            }(expectedAmount, amount, backPubKey, dexRoot);
 
             ITokenWallet(msg.sender).transfer{
                 value: 0,

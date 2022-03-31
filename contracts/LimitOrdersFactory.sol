@@ -16,6 +16,7 @@ contract LimitOrdersFactory is ILimitOrderFactory {
 
     address owner;
     address pendingOwner;
+    address dexRoot;
 
     TvmCell limitOrdersRootCode_;
     TvmCell limitOrderCode_;
@@ -125,7 +126,7 @@ contract LimitOrdersFactory is ILimitOrderFactory {
             stateInit: stateInit_,
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED
-        }(address(this), msg.sender);
+        }(address(this), msg.sender, dexRoot);
     }
 
     function expectedAddressLimitOrderRoots(address tokenRoot_)
