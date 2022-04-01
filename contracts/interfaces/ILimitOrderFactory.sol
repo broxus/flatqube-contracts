@@ -5,6 +5,7 @@ interface ILimitOrderFactory {
     event OwnerTransferAccepted(address oldOwner, address newOwner);
     event LimitOrderRootCodeUpgraded();
     event LimitOrderCodeUpgraded();
+    event LimitOrderCodeCancelUpgraded();
     event CreateLimitOrderRoot(address limitOrderRoot, address tokenRoot);
 
     function onLimitOrderRootDeployed(

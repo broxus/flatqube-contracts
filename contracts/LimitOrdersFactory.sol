@@ -20,6 +20,7 @@ contract LimitOrdersFactory is ILimitOrderFactory {
 
     TvmCell limitOrdersRootCode_;
     TvmCell limitOrderCode_;
+    TvmCell limitOrderCodeCancel_;
 
     constructor(address _owner) public {
         require(_owner.value != 0);
@@ -59,6 +60,10 @@ contract LimitOrdersFactory is ILimitOrderFactory {
         return limitOrderCode_;
     }
 
+    function limitOrderCancel() external view responsible returns (TvmCell) {
+        return limitOrderCodeCancel_;
+    }
+
     function transferOwner(address newOwner)
         external
         responsible
@@ -83,7 +88,7 @@ contract LimitOrdersFactory is ILimitOrderFactory {
         return owner;
     }
 
-    function setlimitOrdersRootCode(TvmCell _limitOrdersRootCode)
+    function setLimitOrdersRootCode(TvmCell _limitOrdersRootCode)
         public
         onlyOwner
     {
@@ -99,7 +104,7 @@ contract LimitOrdersFactory is ILimitOrderFactory {
         );
     }
 
-    function setlimitOrderCode(TvmCell _limitOrderCode) public onlyOwner {
+    function setLimitOrderCode(TvmCell _limitOrderCode) public onlyOwner {
         tvm.rawReserve(LimitOrdersGas.SET_CODE, 0);
         limitOrderCode_ = _limitOrderCode;
 
@@ -111,7 +116,20 @@ contract LimitOrdersFactory is ILimitOrderFactory {
             MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
         );
     }
-    
+
+    function setLimitOrderCodeCancel(TvmCell _limitOrderCodeCancel) public onlyOwner {
+        tvm.rawReserve(LimitOrdersGas.SET_CODE, 0);
+        limitOrderCodeCancel_ = _limitOrderCodeCancel;
+
+        emit LimitOrderCodeCancelUpgraded();
+
+        msg.sender.transfer(
+            0,
+            false,
+            MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS;
+        );
+    }
+
     function createLimitOrdersRoot(address tokenRoot) external {
         require(
             msg.value >= LimitOrdersGas.DEPLOY_ORDERS_ROOT,
@@ -126,7 +144,13 @@ contract LimitOrdersFactory is ILimitOrderFactory {
             stateInit: stateInit_,
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED
-        }(address(this), msg.sender, dexRoot);
+        }(
+            address(this), 
+            msg.sender,
+            dexRoot,
+            limitOrderCode_,
+            limitOrderCodeCancel_
+        );
     }
 
     function expectedAddressLimitOrderRoots(address tokenRoot_)
@@ -162,22 +186,25 @@ contract LimitOrdersFactory is ILimitOrderFactory {
         address _owner,
         address _tokenRoot,
         TvmCell _limitOrdersRootCode
-    ) internal pure returns (TvmCell){
+    ) internal pure returns (TvmCell) {
         TvmBuilder salt;
         salt.store(_owner, _tokenRoot);
         return tvm.setCodeSalt(_limitOrdersRootCode, salt.toCell());
     }
 
-    function buildState(
-        TvmCell code_,
-        address tokenRoot_
-    ) internal view returns (TvmCell){
-        return tvm.buildStateInit({
+    function buildState(TvmCell code_, address tokenRoot_)
+        internal
+        view
+        returns (TvmCell)
+    {
+        return
+            tvm.buildStateInit({
                 contr: LimitOrdersRoot,
                 varInit: {
                     tokenRoot_: tokenRoot_,
-                    limitOrderCode: limitOrderCode_},
+                    limitOrdersFactory: this(address),
+                },
                 code: code_
-                });
+            });
     }
 }
