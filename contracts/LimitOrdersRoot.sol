@@ -16,20 +16,23 @@ import "./interfaces/ILimitOrderFactory.sol";
 
 contract LimitOrdersRoot is IAcceptTokensTransferCallback {
     address static tokenRoot_;
-    TvmCell static limitOrderCode;
+    address static limitOrdersFactory;
+    
+    TvmCell limitOrderCode;
+    TVMCell limitOrderCodeCancel;
 
-    address limitOrdersFactory;
     address wallet;
     address deployer;
     address dexRoot;
 
-    constructor(address limitOrdersFactory_, address deployer_, address dexRoot_) public {
+    constructor(address deployer_, address dexRoot_, TvmCell limitOrderCode_, TvmCell limitOrderCodeCancel_) public {
         tvm.rawReserve(LimitOrdersGas.TARGET_BALANCE, 0);
         if (msg.sender.value != 0 && msg.sender == limitOrdersFactory) {
-            limitOrdersFactory = limitOrdersFactory_;
             deployer = deployer_;
             dexRoot = dexRoot_;
-            
+            limitOrderCode = limitOrderCode_; 
+            limitOrderCodeCancel = limitOrderCodeCancel_;
+
             ITokenRoot(tokenRoot_).deployWallet{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED,
@@ -120,7 +123,22 @@ contract LimitOrdersRoot is IAcceptTokensTransferCallback {
             address limitOrderAddress = new LimitOrder{
                 stateInit: stateInit_,
                 value: LimitOrdersGas.DEPLOY_ORDER_MIN_VALUE
-            }(expectedAmount, amount, backPubKey, dexRoot);
+            }(
+                expectedAmount,
+                amount, 
+                backPubKey, 
+                dexRoot, 
+                limitOrderCodeCancel
+            );
+
+            // Create wallet for owner token2
+            ITokenWallet(tokenRoot_).deployWallet{
+                value: LimitOrderGas.DEPLOY_EMPTY_WALLET_VALUE,
+                flag: MsgFlag.SENDER_PAYS_FEES
+            }(
+                msg.sender,
+                LimitOrderGas.DEPLOY_EMPTY_WALLET_GRAMS
+            );
 
             ITokenWallet(msg.sender).transfer{
                 value: 0,
@@ -134,6 +152,7 @@ contract LimitOrdersRoot is IAcceptTokensTransferCallback {
                 false,
                 payload
             );
+
         } else {
             TvmCell emptyPayload;
             ITokenWallet(msg.sender).transfer{
@@ -169,10 +188,12 @@ contract LimitOrdersRoot is IAcceptTokensTransferCallback {
             tvm.buildStateInit({
                 contr: LimitOrder,
                 varInit: {
-                            rootAddress: address(this),
+                            limitOrderAddress: address(this),
                             ownerAddress: msg.sender,
-                            rootToken1: tokenRoot_,
-                            rootToken2: tokenRoot2
+                            tokenRoot1: tokenRoot_,
+                            tokenRoot2: tokenRoot2,
+                            timeTx: tx.timestamp,
+                            nowTx: uint64(now)
                         },
                 code: code_
             });
