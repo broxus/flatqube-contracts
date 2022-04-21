@@ -4,40 +4,49 @@ pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
-import "./libraries/LimitOrdersGas.sol";
-import "./libraries/LimitOrdersErrors.sol";
+import "./libraries/LimitOrderGas.sol";
+import "./libraries/LimitOrderErrors.sol";
 import "./LimitOrder.sol";
+
+import "./interfaces/ILimitOrderFactory.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
-import "./interfaces/ILimitOrderFactory.sol";
 
-contract LimitOrdersRoot is IAcceptTokensTransferCallback {
-    address static tokenRoot_;
-    address static limitOrdersFactory;
+contract LimitOrderRoot is IAcceptTokensTransferCallback {
+    address static spentTokenRoot; // Убрать static после перевода на платформу
+    address static limitOrdersFactory; // Убрать static после перевода на платформу
     
+    uint32 version;
     TvmCell limitOrderCode;
-    TVMCell limitOrderCodeCancel;
+    TvmCell limitOrderCodeClosed;
 
-    address wallet;
+    address spentTokenWallet;
     address deployer;
     address dexRoot;
 
-    constructor(address deployer_, address dexRoot_, TvmCell limitOrderCode_, TvmCell limitOrderCodeCancel_) public {
-        tvm.rawReserve(LimitOrdersGas.TARGET_BALANCE, 0);
+    constructor(
+        address deployer_,
+        address dexRoot_, 
+        TvmCell limitOrderCode_, 
+        TvmCell limitOrderCodeClosed_, 
+        uint32 version_
+    ) public {
+        tvm.rawReserve(LimitOrderGas.TARGET_BALANCE, 0);
         if (msg.sender.value != 0 && msg.sender == limitOrdersFactory) {
             deployer = deployer_;
             dexRoot = dexRoot_;
             limitOrderCode = limitOrderCode_; 
-            limitOrderCodeCancel = limitOrderCodeCancel_;
+            limitOrderCodeClosed = limitOrderCodeClosed_;
+            version = version_;
 
-            ITokenRoot(tokenRoot_).deployWallet{
+            ITokenRoot(spentTokenRoot).deployWallet{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED,
-                callback: LimitOrdersRoot.onTokenWallet
-            }(address(this), LimitOrdersGas.DEPLOY_EMPTY_WALLET_GRAMS);
+                callback: LimitOrderRoot.onTokenWallet
+            }(address(this), LimitOrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
         } else {
             msg.sender.transfer(
                 0,
@@ -49,26 +58,26 @@ contract LimitOrdersRoot is IAcceptTokensTransferCallback {
 
     function onTokenWallet(address _wallet) external {
         require(
-            msg.sender.value != 0 && msg.sender == tokenRoot_,
-            LimitOrdersErrors.NOT_TOKEN1_ROOT
+            msg.sender.value != 0 && msg.sender == spentTokenRoot,
+            LimitOrderErrors.NOT_TOKEN1_ROOT
         );
-        tvm.rawReserve(LimitOrdersGas.TARGET_BALANCE, 0);
-        wallet = _wallet;
+        tvm.rawReserve(LimitOrderGas.TARGET_BALANCE, 0);
+        spentTokenWallet = _wallet;
 
-        ILimitOrderFactory(limitOrdersFactory).onLimitOrderRootDeployed{
+        ILimitOrderFactory(limitOrdersFactory).onLimitOrdersRootDeployed{
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED
-        }(address(this), tokenRoot_, deployer);
+        }(address(this), spentTokenRoot, deployer);
     }
 
-    onBounce(TvmSlice body) external {
-        tvm.rawReserve(LimitOrdersGas.TARGET_BALANCE, 0);
+    onBounce(TvmSlice body) external view {
+        tvm.rawReserve(LimitOrderGas.TARGET_BALANCE, 0);
 
         uint32 functionId = body.decode(uint32);
 
         if (
             functionId == tvm.functionId(ITokenRoot.deployWallet) &&
-            msg.sender == tokenRoot_
+            msg.sender == spentTokenRoot
         ) {
             deployer.transfer(
                 0,
@@ -97,44 +106,44 @@ contract LimitOrdersRoot is IAcceptTokensTransferCallback {
         uint128 amount,
         address sender,
         address, /*senderWallet*/
-        address original_gas_to,
+        address originalGasTo,
         TvmCell payload
     ) external override {
-        tvm.rawReserve(LimitOrdersGas.DEPLOY_ORDER_MIN_VALUE, 0);
+        tvm.rawReserve(LimitOrderGas.DEPLOY_ORDER_MIN_VALUE, 0);
 
         TvmSlice payloadSlice = payload.toSlice();
         if (payloadSlice.bits() == 779 &&
             msg.sender.value != 0 &&
-            msg.sender == wallet) 
+            msg.sender == spentTokenWallet) 
         {
             (
-                address tokenRoot2,
+                address receiveTokenRoot,
                 uint128 expectedAmount,
                 uint128 deployWalletValue,
                 uint256 backPubKey
             ) = payloadSlice.decode(address, uint128, uint128, uint256);
 
             TvmCell indexCode = buildCode(
-                tokenRoot2,
+                receiveTokenRoot,
                 limitOrderCode
             );
 
-            TvmCell stateInit_ = buildState(indexCode, tokenRoot2);
-            address limitOrderAddress = new LimitOrder{
+            TvmCell stateInit_ = buildState(indexCode, receiveTokenRoot);
+            address limitOrderAddress = new LimitOrder {
                 stateInit: stateInit_,
-                value: LimitOrdersGas.DEPLOY_ORDER_MIN_VALUE
+                value: LimitOrderGas.DEPLOY_ORDER_MIN_VALUE
             }(
                 expectedAmount,
                 amount, 
                 backPubKey, 
                 dexRoot, 
-                limitOrderCodeCancel
+                limitOrderCodeClosed
             );
 
-            // Create wallet for owner token2
-            ITokenWallet(tokenRoot_).deployWallet{
+            ITokenRoot(receiveTokenRoot).deployWallet { 
                 value: LimitOrderGas.DEPLOY_EMPTY_WALLET_VALUE,
-                flag: MsgFlag.SENDER_PAYS_FEES
+                flag: MsgFlag.SENDER_PAYS_FEES,
+                callback: LimitOrderRoot.onTokenWallet
             }(
                 msg.sender,
                 LimitOrderGas.DEPLOY_EMPTY_WALLET_GRAMS
@@ -147,8 +156,8 @@ contract LimitOrdersRoot is IAcceptTokensTransferCallback {
             }(
                 amount,
                 limitOrderAddress,
-                (deployWalletValue <= LimitOrdersGas.DEPLOY_EMPTY_WALLET_GRAMS? deployWalletValue:LimitOrdersGas.DEPLOY_EMPTY_WALLET_GRAMS),
-                original_gas_to,
+                (deployWalletValue <= LimitOrderGas.DEPLOY_EMPTY_WALLET_GRAMS? deployWalletValue:LimitOrderGas.DEPLOY_EMPTY_WALLET_GRAMS),
+                originalGasTo,
                 false,
                 payload
             );
@@ -163,7 +172,7 @@ contract LimitOrdersRoot is IAcceptTokensTransferCallback {
                 amount,
                 sender, 
                 uint128(0),
-                original_gas_to,
+                originalGasTo,
                 true,
                 emptyPayload
             );
@@ -171,27 +180,28 @@ contract LimitOrdersRoot is IAcceptTokensTransferCallback {
     }
 
     function buildCode(
-        address tokenRoot2,
+        address receiveTokenRoot,
         TvmCell limitOrderCode_
     ) internal pure returns (TvmCell){
         TvmBuilder salt;
         salt.store(address(this));
-        salt.store(tokenRoot2);
+        salt.store(receiveTokenRoot);
         return tvm.setCodeSalt(limitOrderCode_, salt.toCell());
     }
 
     function buildState(
         TvmCell code_,
-        address tokenRoot2
+        address receiveTokenRoot
     ) internal view returns (TvmCell){
         return
             tvm.buildStateInit({
                 contr: LimitOrder,
                 varInit: {
-                            limitOrderAddress: address(this),
+                            limitOrdersRoot: address(this),
+                            factoryOrderRoot: limitOrdersFactory,
                             ownerAddress: msg.sender,
-                            tokenRoot1: tokenRoot_,
-                            tokenRoot2: tokenRoot2,
+                            spentTokenRoot: spentTokenRoot,
+                            receiveTokenRoot: receiveTokenRoot,
                             timeTx: tx.timestamp,
                             nowTx: uint64(now)
                         },
