@@ -171,6 +171,26 @@ contract LimitOrder is IAcceptTokensTransferCallback, ILimitOrder {
             changeState(LimitOrderStatus.AwaitTokens);
         }
     }
+    
+    function getInitParams() override external view responsible returns(LimitOrderInitParams){
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} LimitOrderInitParams(
+            limitOrdersRoot,
+            factoryOrderRoot,
+            ownerAddress,
+            spentTokenRoot,
+            receiveTokenRoot,
+            timeTx,
+            nowTx
+        );
+    }
+
+    function buildPayload(
+        uint128 deployWalletValue
+    ) external pure returns (TvmCell) {
+        TvmBuilder builder;
+        builder.store(deployWalletValue);
+        return builder.toCell();
+    }
 
     function onAcceptTokensTransfer(
         address tokenRoot,
@@ -268,8 +288,16 @@ contract LimitOrder is IAcceptTokensTransferCallback, ILimitOrder {
                                 emptyPayload
                             );
 
-                            currentAmountReceiveToken -= amount;
                             currentAmountSpentToken -= transferAmount;
+                            currentAmountReceiveToken -= amount;
+
+                            emit LimitOrderPartExchange(
+                                spentTokenRoot,
+                                transferAmount, 
+                                receiveTokenRoot, 
+                                amount,
+                                currentAmountSpentToken,
+                                currentAmountReceiveToken);
                         }
                     } else {
                         needCancel = true;    
