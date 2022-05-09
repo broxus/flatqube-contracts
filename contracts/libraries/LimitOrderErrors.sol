@@ -12,5 +12,7 @@ library LimitOrderErrors {
     uint16 constant NOT_BACKEND_PUB_KEY                     = 308;
     uint16 constant NOT_FILLED_OR_CANCEL_STATUS_LIMIT_OEDER = 309;
     uint16 constant NOT_TOKEN1_ROOT                         = 310;
-    uint16 constant NOT_FACTORY_LIMIT_ORDERS_ROOT           = 311;
+    uint16 constant NOT_TOKEN2_ROOT                         = 311;
+    uint16 constant NOT_FACTORY_LIMIT_ORDERS_ROOT           = 312;
+    uint16 constant NOT_LIMIT_ORDER_ROOT                    = 313;
 }

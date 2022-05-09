@@ -40,6 +40,13 @@ interface ILimitOrder {
 		uint128 currentReceiveTokenAmount
 	);
 
+	function getCurrentStatus() 
+		external
+		view
+		responsible
+		returns(uint8);
+		
+	
 	function getInitParams()
 		external
 		view

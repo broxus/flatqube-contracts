@@ -72,6 +72,8 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
         }(address(this), spentTokenRoot, deployer);
     }
 
+    function onTokenWalletReceive(address _wallet) external {}
+
     onBounce(TvmSlice body) external view {
         tvm.rawReserve(LimitOrderGas.TARGET_BALANCE, 0);
 
@@ -89,6 +91,10 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
         }
     }
 
+    function getVersion() external view responsible returns (uint32) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} version;
+    }
+
     function getSpentTokenRoot() override external view responsible returns(address) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } spentTokenRoot;
     }
@@ -98,13 +104,13 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
     }
 
     function buildPayload(
-        address tokenRootRecieve,
+        address tokenRootReceive,
         uint128 expectedTokenAmount,
         uint128 deployWalletValue,
         uint256 backPubKey              
     ) external pure returns (TvmCell) {
         TvmBuilder builder;
-        builder.store(tokenRootRecieve);
+        builder.store(tokenRootReceive);
         builder.store(expectedTokenAmount);
         builder.store(deployWalletValue);
         builder.store(backPubKey);       
@@ -150,12 +156,19 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
                 limitOrderCodeClosed
             );
 
+            emit CreateLimitOrder(
+                limitOrderAddress, 
+                tokenRoot, 
+                amount, 
+                receiveTokenRoot,
+                expectedAmount);
+
             ITokenRoot(receiveTokenRoot).deployWallet { 
                 value: LimitOrderGas.DEPLOY_EMPTY_WALLET_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: LimitOrderRoot.onTokenWallet
+                callback: LimitOrderRoot.onTokenWalletReceive
             }(
-                msg.sender,
+                sender,
                 LimitOrderGas.DEPLOY_EMPTY_WALLET_GRAMS
             );
 
@@ -168,17 +181,9 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
                 limitOrderAddress,
                 (deployWalletValue <= LimitOrderGas.DEPLOY_EMPTY_WALLET_GRAMS? deployWalletValue:LimitOrderGas.DEPLOY_EMPTY_WALLET_GRAMS),
                 originalGasTo,
-                false,
+                true,
                 payload
             );
-           
-            emit CreateLimitOrder(
-                limitOrderAddress, 
-                tokenRoot, 
-                amount, 
-                receiveTokenRoot,
-                expectedAmount);
-
         } else {
             TvmCell emptyPayload;
             ITokenWallet(msg.sender).transfer{
@@ -244,14 +249,14 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
         return tvm.buildStateInit({
                 contr: LimitOrder,
                 varInit: {
-                        limitOrdersRoot: address(this),
-                        factoryOrderRoot: limitOrdersFactory,
-                        ownerAddress: msg.sender,
-                        spentTokenRoot: spentTokenRoot,
-                        receiveTokenRoot: receiveTokenRoot,
-                        timeTx: tx.timestamp,
-                        nowTx: uint64(now)
-                        },
+                    factoryOrderRoot: limitOrdersFactory,
+                    limitOrdersRoot: address(this),
+                    ownerAddress: msg.sender,
+                    spentTokenRoot: spentTokenRoot,
+                    receiveTokenRoot: receiveTokenRoot,
+                    timeTx: tx.timestamp,
+                    nowTx: uint64(now)
+                    },
                 code: code_
             });
     }

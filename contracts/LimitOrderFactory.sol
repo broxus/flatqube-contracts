@@ -206,7 +206,7 @@ contract LimitOrderFactory is ILimitOrderFactory {
 		responsible
 		returns (address)
 	{
-		return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} address(tvm.hash(buildState(buildCode(owner, tokenRoot, limitOrdersRootCode), tokenRoot)));
+		return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} expectedAddressLimitOrderRoot(tokenRoot);
 	}
 
 	function onLimitOrdersRootDeployed(
@@ -214,12 +214,21 @@ contract LimitOrderFactory is ILimitOrderFactory {
 		address tokenRoot,
 		address sendGasTo
 	) external override {
+		require(
+			msg.sender.value != 0 && msg.sender == expectedAddressLimitOrderRoot(tokenRoot), 
+			LimitOrderErrors.NOT_LIMIT_ORDER_ROOT
+		);
 		tvm.rawReserve(LimitOrderGas.TARGET_BALANCE, 0);
+		
 		emit CreateLimitOrderRoot(limitOrderRoot, tokenRoot);
 		sendGasTo.transfer({
 			value: 0,
 			flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
 		});
+	}
+
+	function expectedAddressLimitOrderRoot(address tokenRoot) internal view returns(address) {
+		return address(tvm.hash(buildState(buildCode(owner, tokenRoot, limitOrdersRootCode), tokenRoot)));
 	}
 
 	function buildCode(
