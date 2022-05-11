@@ -5,7 +5,7 @@ library LimitOrderGas {
     uint128 constant SET_CODE                       = 0.1 ton;
     uint128 constant DEPLOY_ORDERS_ROOT             = 1 ton; 
     uint128 constant DEPLOY_ORDER_MIN_VALUE         = 2 ton; 
-    uint128 constant DEPLOY_EMPTY_WALLET_VALUE      = 0.3 ton;
+    uint128 constant DEPLOY_EMPTY_WALLET_VALUE      = 0.5 ton;
     uint128 constant GET_DEX_PAIR                   = 0.1 ton;
     uint128 constant GET_BALANCE_WALLET             = 0.1 ton;
     uint128 constant TRANSFER_MIN_VALUE             = 0.2 ton;

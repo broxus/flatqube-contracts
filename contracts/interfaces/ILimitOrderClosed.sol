@@ -2,7 +2,7 @@ pragma ton-solidity >=0.57.0;
 
 interface ILimitOrderClosed {
 	struct LimitOrderClosedInitParams {
-		address limitOrdersRoot;
+		address limitOrderRoot;
 		address factoryOrderRoot;
 		address ownerAddress;
 		address spentTokenRoot;
@@ -10,7 +10,7 @@ interface ILimitOrderClosed {
 	}
 
 	struct LimitOrderClosedDetails {
-		address limitOrdersRoot;
+		address limitOrderRoot;
 		address ownerAddress;
 		uint64 swapAttempt;
 		uint8 state;
@@ -22,4 +22,10 @@ interface ILimitOrderClosed {
 		uint128 initialAmount;
 		uint128 currentAmountSpentToken;
 	}
+
+	function getCurrentStatus() external view responsible returns(uint8);
+
+	function getInitParams() external view responsible returns(LimitOrderClosedInitParams);
+
+	function getDetails() external view responsible returns(LimitOrderClosedDetails);
 }

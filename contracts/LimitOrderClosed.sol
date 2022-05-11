@@ -12,7 +12,7 @@ import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
 
 contract LimitOrderClosed is IAcceptTokensTransferCallback, ILimitOrderClosed{
 	address static factoryOrderRoot;
-	address static limitOrdersRoot;
+	address static limitOrderRoot;
 	address static ownerAddress;
 	address static spentTokenRoot;
 	address static receiveTokenRoot;
@@ -29,13 +29,13 @@ contract LimitOrderClosed is IAcceptTokensTransferCallback, ILimitOrderClosed{
 
 	uint64 swapAttempt;
 
-	function getCurrentStatus() external view responsible returns(uint8) {
+	function getCurrentStatus() override external view responsible returns(uint8) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } state;
     }
 
-    function getInitParams() external view responsible returns(LimitOrderClosedInitParams){
+    function getInitParams() override external view responsible returns(LimitOrderClosedInitParams){
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } LimitOrderClosedInitParams(
-            limitOrdersRoot,
+            limitOrderRoot,
             factoryOrderRoot,
             ownerAddress,
             spentTokenRoot,
@@ -43,14 +43,14 @@ contract LimitOrderClosed is IAcceptTokensTransferCallback, ILimitOrderClosed{
         );
     }
 
-    function getDetails() external view responsible returns(LimitOrderClosedDetails){
+    function getDetails() override external view responsible returns(LimitOrderClosedDetails){
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } builderDetails();
     }
 
 	modifier onlyLimitOrderFactory() {
 		require(
 			msg.sender.value != 0 && msg.sender == factoryOrderRoot,
-			LimitOrderErrors.NOT_FACTORY_LIMIT_ORDERS_ROOT
+			LimitOrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT
 		);
 		_;
 	}
@@ -81,7 +81,7 @@ contract LimitOrderClosed is IAcceptTokensTransferCallback, ILimitOrderClosed{
 
 	function builderDetails() private view returns(LimitOrderClosedDetails){
         return LimitOrderClosedDetails(
-            limitOrdersRoot,
+            limitOrderRoot,
             ownerAddress,
             swapAttempt,
 
@@ -108,7 +108,7 @@ contract LimitOrderClosed is IAcceptTokensTransferCallback, ILimitOrderClosed{
         builderUpg.store(state);
         builderUpg.store(ownerAddress);
         builderUpg.store(factoryOrderRoot);
-        builderUpg.store(limitOrdersRoot);
+        builderUpg.store(limitOrderRoot);
         builderUpg.store(swapAttempt);
 
         TvmBuilder builderTokens;
@@ -136,14 +136,14 @@ contract LimitOrderClosed is IAcceptTokensTransferCallback, ILimitOrderClosed{
 			uint8 state_, 
 			address ownerAddress_,
 			address factoryOrderRoot_,
-			address limitOrdersRoot_,
+			address limitOrderRoot_,
 			uint64 swapAttempt_
 		) = upg.decode(uint8, address, address, address, uint64);
 
 		state = state_;
 		ownerAddress = ownerAddress_;
 		factoryOrderRoot = factoryOrderRoot_;
-		limitOrdersRoot = limitOrdersRoot_;
+		limitOrderRoot = limitOrderRoot_;
 		swapAttempt = swapAttempt_;
 
 		TvmSlice dataTokens = upg.loadRefAsSlice();

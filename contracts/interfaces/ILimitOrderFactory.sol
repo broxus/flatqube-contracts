@@ -18,14 +18,14 @@ interface ILimitOrderFactory {
     event LimitOrderCodePlatformUpgraded();
 
     event CreateLimitOrderRoot(
-        address limitOrdersRoot,
+        address limitOrderRoot,
         address tokenRoot
     );
     
 
     event LimitOrderFactoryUpgrade();
 
-    function createLimitOrdersRoot(
+    function createLimitOrderRoot(
         address tokenRoot
     ) external view;
 
@@ -35,7 +35,7 @@ interface ILimitOrderFactory {
 		responsible
 		returns (address);
 
-    function onLimitOrdersRootDeployed(
+    function onLimitOrderRootDeployed(
         address limitOrderRoot,
         address tokenRoot,
         address sendGasTo

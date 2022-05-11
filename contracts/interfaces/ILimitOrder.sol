@@ -2,7 +2,7 @@ pragma ton-solidity >=0.57.0;
 
 interface ILimitOrder {
 	struct LimitOrderInitParams {
-		address limitOrdersRoot;
+		address limitOrderRoot;
 		address factoryOrderRoot;
 		address ownerAddress;
 		address spentTokenRoot;
@@ -12,7 +12,7 @@ interface ILimitOrder {
 	}
 
 	struct LimitOrderDetails {
-		address limitOrdersRoot;
+		address limitOrderRoot;
 		address ownerAddress;
 		uint256 backendPubKey;
 		address dexRoot;
@@ -52,4 +52,10 @@ interface ILimitOrder {
 		view
 		responsible
 		returns (LimitOrderInitParams);
+
+	function getDetails()
+		external
+		view
+		responsible
+		returns (LimitOrderDetails);	
 }

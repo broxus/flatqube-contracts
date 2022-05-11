@@ -16,12 +16,12 @@ contract LimitOrderFactory is ILimitOrderFactory {
 	address static dexRoot;
 
 	uint32 currentVersion;
-	uint32 versionLimitOrdersRoot;
+	uint32 versionLimitOrderRoot;
 
 	address owner;
 	address pendingOwner;
 	
-	TvmCell limitOrdersRootCode;
+	TvmCell limitOrderRootCode;
 	TvmCell limitOrderCode;
 	TvmCell limitOrderCodeClosed;
 	TvmCell limitOrderPlatform;
@@ -32,7 +32,7 @@ contract LimitOrderFactory is ILimitOrderFactory {
 		tvm.rawReserve(LimitOrderGas.TARGET_BALANCE, 0);
 
 		currentVersion = _version;
-		versionLimitOrdersRoot++;
+		versionLimitOrderRoot++;
 
 		owner = _owner;
 		owner.transfer({
@@ -51,59 +51,33 @@ contract LimitOrderFactory is ILimitOrderFactory {
 	}
 
 	function getOwner() external view responsible returns (address) {
-		return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} owner;
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
 	}
 
 	function getVersion() external view responsible returns (uint32) {
-		return
-			{
-				value: 0,
-				bounce: false,
-				flag: MsgFlag.REMAINING_GAS
-			} currentVersion;
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } currentVersion;
 	}
 
 	function getPendingOwner() external view responsible returns (address) {
-		return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} pendingOwner;
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pendingOwner;
 	}
 
-	function limitOrdersRoot() external view responsible returns (TvmCell) {
-		return
-			{
-				value: 0,
-				bounce: false,
-				flag: MsgFlag.REMAINING_GAS
-			} limitOrdersRootCode;
+	function limitOrderRoot() external view responsible returns (TvmCell) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } limitOrderRootCode;
 	}
 
 	function limitOrder() external view responsible returns (TvmCell) {
-		return
-			{
-				value: 0,
-				bounce: false,
-				flag: MsgFlag.REMAINING_GAS
-			} limitOrderCode;
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } limitOrderCode;
 	}
 
 	function limitOrderClosed() external view responsible returns (TvmCell) {
-		return
-			{
-				value: 0,
-				bounce: false,
-				flag: MsgFlag.REMAINING_GAS
-			} limitOrderCodeClosed;
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } limitOrderCodeClosed;
 	}
 
-	function transferOwner(address newOwner)
-		external
-		responsible
-		onlyOwner
-		returns (address)
-	{
+	function transferOwner(address newOwner) external responsible onlyOwner returns (address) {
 		pendingOwner = newOwner;
 		emit RequestedOwnerTransfer(owner, pendingOwner);
-		return
-			{value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} pendingOwner;
+		return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} pendingOwner;
 	}
 
 	function acceptOwner() external responsible returns (address) {
@@ -115,15 +89,12 @@ contract LimitOrderFactory is ILimitOrderFactory {
 		owner = pendingOwner;
 		pendingOwner = address(0);
 
-		return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} owner;
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
 	}
 
-	function setLimitOrderRootCode(TvmCell _limitOrdersRootCode)
-		public
-		onlyOwner
-	{
+	function setLimitOrderRootCode(TvmCell _limitOrderRootCode) public onlyOwner {
 		tvm.rawReserve(LimitOrderGas.SET_CODE, 0);
-		limitOrdersRootCode = _limitOrdersRootCode;
+		limitOrderRootCode = _limitOrderRootCode;
 
 		emit LimitOrderRootCodeUpgraded();
 
@@ -147,10 +118,7 @@ contract LimitOrderFactory is ILimitOrderFactory {
 		);
 	}
 
-	function setlimitOrderCodeClosed(TvmCell _limitOrderCodeClosed)
-		public
-		onlyOwner
-	{
+	function setlimitOrderCodeClosed(TvmCell _limitOrderCodeClosed) public onlyOwner {
 		tvm.rawReserve(LimitOrderGas.SET_CODE, 0);
 		limitOrderCodeClosed = _limitOrderCodeClosed;
 
@@ -176,14 +144,14 @@ contract LimitOrderFactory is ILimitOrderFactory {
 		);
 	}
 
-	function createLimitOrdersRoot(address tokenRoot) override external view {
+	function createLimitOrderRoot(address tokenRoot) override external view {
 		require(
 			msg.value >= LimitOrderGas.DEPLOY_ORDERS_ROOT,
 			LimitOrderErrors.VALUE_TOO_LOW
 		);
 		tvm.rawReserve(LimitOrderGas.DEPLOY_ORDERS_ROOT, 0);
 
-		TvmCell indexCode = buildCode(owner, tokenRoot, limitOrdersRootCode);
+		TvmCell indexCode = buildCode(owner, tokenRoot, limitOrderRootCode);
 		TvmCell stateInit_ = buildState(indexCode, tokenRoot);
 
 		new LimitOrderRoot{
@@ -195,7 +163,7 @@ contract LimitOrderFactory is ILimitOrderFactory {
 			dexRoot,
 			limitOrderCode,
 			limitOrderCodeClosed,
-			versionLimitOrdersRoot
+			versionLimitOrderRoot
 		);
 	}
 
@@ -206,11 +174,11 @@ contract LimitOrderFactory is ILimitOrderFactory {
 		responsible
 		returns (address)
 	{
-		return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} expectedAddressLimitOrderRoot(tokenRoot);
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } expectedAddressLimitOrderRoot(tokenRoot);
 	}
 
-	function onLimitOrdersRootDeployed(
-		address limitOrderRoot,
+	function onLimitOrderRootDeployed(
+		address _limitOrderRoot,
 		address tokenRoot,
 		address sendGasTo
 	) external override {
@@ -220,7 +188,8 @@ contract LimitOrderFactory is ILimitOrderFactory {
 		);
 		tvm.rawReserve(LimitOrderGas.TARGET_BALANCE, 0);
 		
-		emit CreateLimitOrderRoot(limitOrderRoot, tokenRoot);
+		emit CreateLimitOrderRoot(_limitOrderRoot, tokenRoot);
+		
 		sendGasTo.transfer({
 			value: 0,
 			flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
@@ -228,31 +197,27 @@ contract LimitOrderFactory is ILimitOrderFactory {
 	}
 
 	function expectedAddressLimitOrderRoot(address tokenRoot) internal view returns(address) {
-		return address(tvm.hash(buildState(buildCode(owner, tokenRoot, limitOrdersRootCode), tokenRoot)));
+		return address(tvm.hash(buildState(buildCode(owner, tokenRoot, limitOrderRootCode), tokenRoot)));
 	}
 
 	function buildCode(
 		address _owner,
 		address tokenRoot,
-		TvmCell _limitOrdersRootCode
+		TvmCell _limitOrderRootCode
 	) internal pure returns (TvmCell) {
 		TvmBuilder salt;
 		salt.store(_owner);
 		salt.store(tokenRoot);
-		return tvm.setCodeSalt(_limitOrdersRootCode, salt.toCell());
+		return tvm.setCodeSalt(_limitOrderRootCode, salt.toCell());
 	}
 
-	function buildState(TvmCell code_, address tokenRoot)
-		internal
-		pure
-		returns (TvmCell)
-	{
+	function buildState(TvmCell code_, address tokenRoot) internal pure returns (TvmCell) {
 		return
 			tvm.buildStateInit({
 				contr: LimitOrderRoot,
 				varInit: {
 					spentTokenRoot: tokenRoot,
-					limitOrdersFactory: address(this)
+					limitOrderFactory: address(this)
 				},
 				code: code_
 			});
@@ -276,16 +241,16 @@ contract LimitOrderFactory is ILimitOrderFactory {
 			TvmBuilder builder;
 			builder.store(currentVersion);
 			builder.store(newVersion);
-			builder.store(versionLimitOrdersRoot);
+			builder.store(versionLimitOrderRoot);
 
 			builder.store(owner);
 			builder.store(pendingOwner);
 			builder.store(dexRoot);
 
-			builder.store(limitOrdersRootCode);
+			builder.store(limitOrderRootCode);
 			builder.store(limitOrderCode);
 			builder.store(limitOrderCodeClosed);
-			//builder.store(limitOrderPlatform);
+			//builder.store(limitOrderPlatform); //!!!
 
 			// set code after complete this method
 			tvm.setcode(newCode);

@@ -8,7 +8,9 @@ interface ILimitOrderRoot {
 		address receiveTokenRoot,
 		uint128 expectedAmount
 	);
-
+	
+	function getVersion() external view responsible returns(uint32);
+	
 	function getSpentTokenRoot() external view responsible returns (address);
 
 	function getFactoryAddress() external view responsible returns (address);

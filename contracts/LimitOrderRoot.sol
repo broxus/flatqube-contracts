@@ -19,7 +19,7 @@ import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransfe
 
 contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
     address static spentTokenRoot; //!!!
-    address static limitOrdersFactory; //!!!
+    address static limitOrderFactory; //!!!
     
     uint32 version;
     TvmCell limitOrderCode;
@@ -37,7 +37,7 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
         uint32 version_
     ) public {
         tvm.rawReserve(LimitOrderGas.TARGET_BALANCE, 0);
-        if (msg.sender.value != 0 && msg.sender == limitOrdersFactory) {
+        if (msg.sender.value != 0 && msg.sender == limitOrderFactory) {
             deployer = deployer_;
             dexRoot = dexRoot_;
             limitOrderCode = limitOrderCode_; 
@@ -66,7 +66,7 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
         tvm.rawReserve(LimitOrderGas.TARGET_BALANCE, 0);
         spentTokenWallet = _wallet;
 
-        ILimitOrderFactory(limitOrdersFactory).onLimitOrdersRootDeployed{
+        ILimitOrderFactory(limitOrderFactory).onLimitOrderRootDeployed{
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED
         }(address(this), spentTokenRoot, deployer);
@@ -82,7 +82,7 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
         if (
             functionId == tvm.functionId(ITokenRoot.deployWallet) &&
             msg.sender == spentTokenRoot
-        ) {
+        ){
             deployer.transfer(
                 0,
                 false,
@@ -91,8 +91,8 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
         }
     }
 
-    function getVersion() external view responsible returns (uint32) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} version;
+    function getVersion() override external view responsible returns (uint32) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } version;
     }
 
     function getSpentTokenRoot() override external view responsible returns(address) {
@@ -100,7 +100,7 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
     }
 
     function getFactoryAddress() override external view responsible returns(address) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } limitOrdersFactory;
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } limitOrderFactory;
     }
 
     function buildPayload(
@@ -144,7 +144,7 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
                 limitOrderCode
             );
 
-            TvmCell stateInit_ = buildState(indexCode, receiveTokenRoot);
+            TvmCell stateInit_ = buildState(sender, indexCode, receiveTokenRoot);
             address limitOrderAddress = new LimitOrder{
                 stateInit: stateInit_,
                 value: LimitOrderGas.DEPLOY_ORDER_MIN_VALUE
@@ -202,8 +202,8 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
     }
 
     function expectedAddressLimitOrder(
-        address limitOrderRoot,
-        address limitOrderFactory,
+        address _limitOrderRoot,
+        address _limitOrderFactory,
         address owner,
         address spentTokenRoot_,
         address receiveTokenRoot,
@@ -212,15 +212,15 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
     ) override external view responsible returns (address) 
     {
         TvmBuilder salt;
-        salt.store(limitOrderRoot);
+        salt.store(_limitOrderRoot);
         salt.store(receiveTokenRoot);
 
        return address(tvm.hash(
            tvm.buildStateInit({
                contr: LimitOrder,
                varInit: {
-                    limitOrdersRoot: limitOrderRoot,
-                    factoryOrderRoot: limitOrderFactory,
+                    limitOrderRoot: _limitOrderRoot,
+                    factoryOrderRoot: _limitOrderFactory,
                     ownerAddress: owner,
                     spentTokenRoot: spentTokenRoot_,
                     receiveTokenRoot: receiveTokenRoot,
@@ -243,15 +243,16 @@ contract LimitOrderRoot is IAcceptTokensTransferCallback, ILimitOrderRoot  {
     }
 
     function buildState(
+        address sender,
         TvmCell code_,
         address receiveTokenRoot
     ) internal view returns (TvmCell){
         return tvm.buildStateInit({
                 contr: LimitOrder,
                 varInit: {
-                    factoryOrderRoot: limitOrdersFactory,
-                    limitOrdersRoot: address(this),
-                    ownerAddress: msg.sender,
+                    factoryOrderRoot: limitOrderFactory,
+                    limitOrderRoot: address(this),
+                    ownerAddress: sender,
                     spentTokenRoot: spentTokenRoot,
                     receiveTokenRoot: receiveTokenRoot,
                     timeTx: tx.timestamp,
