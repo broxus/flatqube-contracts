@@ -1,5 +1,9 @@
 pragma ton-solidity >=0.57.0;
 
+pragma AbiHeader time;
+pragma AbiHeader expire;
+pragma AbiHeader pubkey;
+
 import "./libraries/LimitOrderGas.sol";
 import "./libraries/LimitOrderStatus.sol";
 import "./libraries/LimitOrderErrors.sol";

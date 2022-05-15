@@ -399,8 +399,6 @@ contract LimitOrder is IAcceptTokensTransferCallback, ILimitOrder {
         changeState(LimitOrderStatus.Cancelled);
 
         tvm.accept();
-        tvm.rawReserve(address(this).balance - msg.value, 0);
-
         closeLimitOrder();
     }
 
