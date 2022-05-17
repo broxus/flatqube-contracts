@@ -31,14 +31,14 @@ async function main() {
             dexRoot: dexRoot
         },
         keyPair,
-    }, locklift.utils.convertCrystal('2', 'nano'));
+    }, locklift.utils.convertCrystal('1.5', 'nano'));
     console.log(`LimitOrderFactory deploing end. Address: ${factoryLimitOrder.address}`);
     
     console.log(`Set code LimitOrderRoot`);
     await account.runTarget({
         contract: factoryLimitOrder,
         method: 'setLimitOrderRootCode',
-        params: {_limitOrdersRootCode: RootLimitOrder.code},
+        params: {_limitOrderRootCode: RootLimitOrder.code},
         value: locklift.utils.convertCrystal('0.1', 'nano'),
         keyPair
     });
@@ -76,11 +76,11 @@ async function main() {
 
    tx = await account.runTarget ({
         contract: factoryLimitOrder,
-        method: 'createLimitOrdersRoot',
+        method: 'createLimitOrderRoot',
         params: {
             tokenRoot: rootToken.address
         },
-        value: locklift.utils.convertCrystal('3', 'nano'),
+        value: locklift.utils.convertCrystal('2.5', 'nano'),
         keyPair
     });
 }
