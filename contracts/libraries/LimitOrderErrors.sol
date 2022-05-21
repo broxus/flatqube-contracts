@@ -13,6 +13,10 @@ library LimitOrderErrors {
     uint16 constant NOT_FILLED_OR_CANCEL_STATUS_LIMIT_OEDER = 309;
     uint16 constant NOT_TOKEN1_ROOT                         = 310;
     uint16 constant NOT_TOKEN2_ROOT                         = 311;
-    uint16 constant NOT_FACTORY_LIMIT_ORDER_ROOT           = 312;
+    uint16 constant NOT_FACTORY_LIMIT_ORDER_ROOT            = 312;
     uint16 constant NOT_LIMIT_ORDER_ROOT                    = 313;
+    uint16 constant NOT_EMERGENCY_MANAGER                   = 314;
+    uint16 constant EMERGENCY_MANAGER_NOT_EMPTY              = 315;
+    uint16 constant EMERGENCY_STATUS_NOW                    = 316;
+    uint16 constant NOT_EMERGENCY_STATUS_NOW                = 317;
 }

@@ -9,12 +9,13 @@ import "./libraries/LimitOrderStatus.sol";
 import "./libraries/LimitOrderErrors.sol";
 
 import "./interfaces/ILimitOrderClosed.sol";
+import "./interfaces/IHasEmergencyMode.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
 
-contract LimitOrderClosed is IAcceptTokensTransferCallback, ILimitOrderClosed{
+contract LimitOrderClosed is IAcceptTokensTransferCallback, ILimitOrderClosed, IHasEmergencyMode {
 	address static factoryOrderRoot;
 	address static limitOrderRoot;
 	address static ownerAddress;
@@ -30,8 +31,26 @@ contract LimitOrderClosed is IAcceptTokensTransferCallback, ILimitOrderClosed{
 	address receiveWallet;
 
 	uint8 state;
-
 	uint64 swapAttempt;
+
+	uint8 prevState;
+	uint256 emergencyManager;
+
+	modifier onlyLimitOrderFactory() {	
+		require(
+			msg.sender.value != 0 && msg.sender == factoryOrderRoot,
+			LimitOrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT
+		);
+		_;
+	}
+
+	modifier onlyEmergencyManager() {
+        require(
+            emergencyManager != 0 && (msg.sender.value == emergencyManager || msg.pubkey() == emergencyManager),
+            LimitOrderErrors.NOT_EMERGENCY_MANAGER
+        );  
+        _;  
+    }
 
 	function getCurrentStatus() override external view responsible returns(uint8) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } state;
@@ -50,14 +69,6 @@ contract LimitOrderClosed is IAcceptTokensTransferCallback, ILimitOrderClosed{
     function getDetails() override external view responsible returns(LimitOrderClosedDetails){
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } builderDetails();
     }
-
-	modifier onlyLimitOrderFactory() {
-		require(
-			msg.sender.value != 0 && msg.sender == factoryOrderRoot,
-			LimitOrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT
-		);
-		_;
-	}
 
 	function onAcceptTokensTransfer(
 		address, /*tokenRoot*/
@@ -83,6 +94,60 @@ contract LimitOrderClosed is IAcceptTokensTransferCallback, ILimitOrderClosed{
 		);
 	}
 
+	function enableEmergency(uint256 _emergencyManager) override external onlyLimitOrderFactory {
+        require(state != LimitOrderStatus.Emergency, LimitOrderErrors.EMERGENCY_STATUS_NOW);
+        
+        prevState = state;
+        state = LimitOrderStatus.Emergency;
+        emergencyManager = _emergencyManager;
+		emit LimitOrderStateChanged(prevState, state, builderDetails());
+    }
+
+    function disableEmergency() override external onlyLimitOrderFactory {
+        require(state == LimitOrderStatus.Emergency, LimitOrderErrors.EMERGENCY_STATUS_NOW);
+
+        state = prevState;
+        prevState = 0;
+        emergencyManager = 0;
+		emit LimitOrderStateChanged(LimitOrderStatus.Emergency, state, builderDetails());
+    }
+
+	function proxyTokensTransfer(
+        address _tokenWallet,
+        uint128 _gasValue,
+        uint128 _amount,
+        address _recipient,
+        uint128 _deployWalletValue,
+        address _remainingGasTo,
+        bool _notify,
+        TvmCell _payload
+    ) public view onlyEmergencyManager {
+		require(state == LimitOrderStatus.Emergency, LimitOrderErrors.NOT_EMERGENCY_STATUS_NOW);
+        tvm.accept();
+
+        ITokenWallet(_tokenWallet).transfer{
+            value: _gasValue,
+            flag: MsgFlag.SENDER_PAYS_FEES
+        }(
+            _amount,
+            _recipient,
+            _deployWalletValue,
+            _remainingGasTo,
+            _notify,
+            _payload
+        );
+    }
+
+    function sendGas(
+        address to,
+        uint128 value_,
+        uint16  flag_
+    ) public view onlyEmergencyManager {
+		require(state == LimitOrderStatus.Emergency, LimitOrderErrors.NOT_EMERGENCY_STATUS_NOW);
+        tvm.accept();
+        to.transfer({value: value_, flag: flag_, bounce: false});
+    }
+
 	function builderDetails() private view returns(LimitOrderClosedDetails){
         return LimitOrderClosedDetails(
             limitOrderRoot,
@@ -104,7 +169,7 @@ contract LimitOrderClosed is IAcceptTokensTransferCallback, ILimitOrderClosed{
         );
     }
 
-	function upgrade(TvmCell newCode) internal onlyLimitOrderFactory { //?
+	function upgrade(TvmCell newCode) internal onlyLimitOrderFactory { 
 		tvm.setcode(newCode);
 		tvm.setCurrentCode(newCode);
 

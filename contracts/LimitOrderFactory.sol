@@ -7,6 +7,7 @@ pragma AbiHeader pubkey;
 import "./libraries/LimitOrderGas.sol";
 import "./libraries/LimitOrderErrors.sol";
 import "./interfaces/ILimitOrderFactory.sol";
+import "./interfaces/IHasEmergencyMode.sol";
 
 import "./LimitOrderRoot.sol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
@@ -90,6 +91,24 @@ contract LimitOrderFactory is ILimitOrderFactory {
 		pendingOwner = address(0);
 
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
+	}
+
+	function setEmergency(bool enabled, address limitOrderAddress, uint256 manager) external view onlyOwner {
+		require(msg.value >= LimitOrderGas.MANAGE_EMERGENCY_MODE_MIN_VALUE, LimitOrderErrors.VALUE_TOO_LOW);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
+		if (enabled) {
+			IHasEmergencyMode(limitOrderAddress).enableEmergency{
+				value: 0,
+				flag: MsgFlag.ALL_NOT_RESERVED,
+				bounce: false
+			}(manager);
+		} else {
+			IHasEmergencyMode(limitOrderAddress).disableEmergency{
+				value: 0,
+				flag: MsgFlag.ALL_NOT_RESERVED,
+				bounce: false
+			}();
+		}	
 	}
 
 	function setLimitOrderRootCode(TvmCell _limitOrderRootCode) public onlyOwner {
