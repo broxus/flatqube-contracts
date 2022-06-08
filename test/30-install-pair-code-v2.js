@@ -15,13 +15,20 @@ let dexRoot;
 
 program
     .allowUnknownOption()
-    .option('-cn, --contract_name <contract_name>', 'New version of contract name');
+    .option('-cn, --contract_name <contract_name>', 'New version of contract name')
+    .option('-pt, --pool_type <pool_type>', 'Pool type');
 
 program.parse(process.argv);
 
 const options = program.opts();
 
-options.contract_name = options.contract_name || 'DexPairV2';
+options.contract_name = options.contract_name || 'DexPair';
+options.pool_type = options.pool_type || 1;
+
+console.log(``);
+console.log(`##############################################################################################`);
+console.log(`30-install-pair-code-v2.js`);
+console.log(`OPTIONS: `, options);
 
 describe('Test Dex Pair contract upgrade', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
@@ -38,19 +45,22 @@ describe('Test Dex Pair contract upgrade', async function () {
     })
     describe('Install DexPair code', async function () {
         it('Check code version', async function () {
-            const startVersion = await dexRoot.call({method: 'getPairVersion', params: {}});
+            let startVersion = 0;
+            try {
+                startVersion = await dexRoot.call({method: 'getPairVersion', params: { pool_type: options.pool_type }});
+            } catch (e) {}
             logger.log(`Start DexPair code version: ${startVersion}`);
 
             logger.log(`Installing new DexPair contract in DexRoot: ${dexRoot.address}`);
             await account.runTarget({
                 contract: dexRoot,
                 method: 'installOrUpdatePairCode',
-                params: {code: NextVersionContract.code},
+                params: {code: NextVersionContract.code, pool_type: options.pool_type},
                 value: locklift.utils.convertCrystal(5, 'nano'),
                 keyPair
             });
 
-            const endVersion = await dexRoot.call({method: 'getPairVersion', params: {}});
+            const endVersion = await dexRoot.call({method: 'getPairVersion', params: { pool_type: options.pool_type }});
             logger.log(`End DexPair code version: ${endVersion}`);
 
             expect(new BigNumber(startVersion).plus(1).toString())

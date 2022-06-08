@@ -21,10 +21,10 @@ let newRootData = {};
 const loadRootData = async (root) => {
   const data = {};
   data.platform_code = await root.call({method: 'platform_code'});
-  data.account_code = await root.call({method: 'account_code'});
+  data.account_code = await root.call({method: 'getAccountCode'});
   data.account_version = (await root.call({method: 'getAccountVersion'})).toString();
-  data.pair_code = await root.call({method: 'pair_code'});
-  data.pair_version = (await root.call({method: 'getPairVersion'})).toString();
+  data.pair_code = await root.call({method: 'getPairCode', params: { pool_type: 1}});
+  data.pair_version = (await root.call({method: 'getPairVersion', params: { pool_type: 1}})).toString();
   data.active = await root.call({method: 'isActive'});
   data.owner = await root.call({method: 'getOwner'});
   data.vault = await root.call({method: 'getVault'});

@@ -1,5 +1,8 @@
 const fs = require('fs');
 
+const logger = require('mocha-logger');
+
+const N_COINS = 2;
 const TOKEN_CONTRACTS_PATH = 'node_modules/ton-eth-bridge-token-contracts/build'
 const WEVER_CONTRACTS_PATH = 'node_modules/ton-wton/everscale/build'
 const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
@@ -29,7 +32,15 @@ async function sleep(ms) {
 }
 
 const afterRun = async (tx) => {
-  await new Promise(resolve => setTimeout(resolve, 30000));
+  // await new Promise(resolve => setTimeout(resolve, 5000));
+};
+
+const displayTx = (_tx) => {
+  if(locklift.tracing) {
+    console.log(`txId: ${_tx.id}`);
+  } else {
+    console.log(`txId: ${_tx.transaction.id}`);
+  }
 };
 
 const Constants = {
@@ -37,26 +48,32 @@ const Constants = {
     foo: {
       name: 'Foo',
       symbol: 'Foo',
-      decimals: 9,
+      decimals: 6,
       upgradeable: true
     },
     bar: {
       name: 'Bar',
       symbol: 'Bar',
-      decimals: 18,
-      upgradeable: false
-    },
-    tst: {
-      name: 'Test',
-      symbol: 'Tst',
-      decimals: 3,
+      decimals: 6,
       upgradeable: true
     },
     qwe: {
-      name: 'Qwerty',
+      name: 'QWE',
       symbol: 'Qwe',
-      decimals: 6,
-      upgradeable: false
+      decimals: 8,
+      upgradeable: true
+    },
+    tst: {
+      name: 'Tst',
+      symbol: 'Tst',
+      decimals: 9,
+      upgradeable: true
+    },
+    coin: {
+      name: 'Coin',
+      symbol: 'Coin',
+      decimals: 9,
+      upgradeable: true
     },
     wever: {
       name: 'Wrapped EVER',
@@ -143,6 +160,128 @@ class Migration {
   }
 }
 
+function logExpectedDepositV2(expected, tokens) {
+  logger.log(`Deposit: `);
+  for (var i = 0; i < N_COINS; i++) {
+    if (new BigNumber(expected.amounts[i]).gt(0)) {
+      logger.log(
+        `    ` +
+        `${expected.amounts[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)} ${tokens[i].symbol}`
+      );
+    }
+  }
+  logger.log(`Expected LP reward:`);
+  logger.log(`${expected.lp_reward.shiftedBy(-Constants.LP_DECIMALS).toFixed(Constants.LP_DECIMALS)}`);
+
+  logger.log(`Fees: `);
+  for (var i = 0; i < N_COINS; i++) {
+    if (new BigNumber(expected.pool_fees[i]).gt(0)) {
+      logger.log(`     Pool fee ` +
+          `${expected.pool_fees[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)} ${tokens[i].symbol}`);
+    }
+    if (new BigNumber(expected.beneficiary_fees[i]).gt(0)) {
+    logger.log(`     DAO fee ` +
+        `${expected.beneficiary_fees[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)} ${tokens[i].symbol}`);
+    }
+  }
+  logger.log(` ---DEBUG--- `);
+  logger.log(`Invariant: ${expected.invariant}`);
+  for (var i = 0; i < N_COINS; i++) {
+    logger.log(`${tokens[i].symbol}:`);
+    logger.log(`     old_balances: ` +
+        `${expected.old_balances[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
+    logger.log(`     result_balances: ` +
+        `${expected.result_balances[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
+    logger.log(`     old_balances: ` +
+        `${expected.old_balances[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
+    logger.log(`     change: ` +
+        `${expected.result_balances[i].minus(expected.old_balances[i]).shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
+   logger.log(`     differences: ` +
+        `${expected.differences[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
+    logger.log(`     pool_fees: ` +
+        `${expected.pool_fees[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
+    logger.log(`     beneficiary_fees: ` +
+        `${expected.beneficiary_fees[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
+    logger.log(`     sell: ${expected.sell[i]}`);
+  }
+}
+
+function logExpectedDeposit(expected, tokens) {
+
+  const left_decimals = tokens[0].decimals;
+  const right_decimals = tokens[1].decimals;
+  logger.log(`Expected result: `);
+  if (expected.step_1_lp_reward.isZero()) {
+    logger.log(`    Step 1: skipped`);
+  } else {
+    logger.log(`    Step 1: `);
+    logger.log(`        Left deposit = ${expected.step_1_left_deposit.shiftedBy(-left_decimals).toFixed(left_decimals)}`);
+    logger.log(`        Right deposit = ${expected.step_1_right_deposit.shiftedBy(-right_decimals).toFixed(right_decimals)}`);
+    logger.log(`        LP reward = ${expected.step_1_lp_reward.shiftedBy(-Constants.LP_DECIMALS).toFixed(Constants.LP_DECIMALS)}`);
+  }
+  if (expected.step_2_left_to_right) {
+    logger.log(`    Step 2: `);
+    logger.log(`        Left amount for change = ${expected.step_2_spent.shiftedBy(-left_decimals).toFixed(left_decimals)}`);
+    logger.log(`        Left fee = ${expected.step_2_fee.shiftedBy(-left_decimals).toFixed(left_decimals)}`);
+    logger.log(`        Right received amount = ${expected.step_2_received.shiftedBy(-right_decimals).toFixed(right_decimals)}`);
+  } else if (expected.step_2_right_to_left) {
+    logger.log(`    Step 2: `);
+    logger.log(`        Right amount for change = ${expected.step_2_spent.shiftedBy(-right_decimals).toFixed(right_decimals)}`);
+    logger.log(`        Right fee = ${expected.step_2_fee.shiftedBy(-right_decimals).toFixed(right_decimals)}`);
+    logger.log(`        Left received amount = ${expected.step_2_received.shiftedBy(-left_decimals).toFixed(left_decimals)}`);
+  } else {
+    logger.log(`    Step 2: skipped`);
+  }
+  if (expected.step_3_lp_reward.isZero()) {
+    logger.log(`    Step 3: skipped`);
+  } else {
+    logger.log(`    Step 3: `);
+    logger.log(`        Left deposit = ${expected.step_3_left_deposit.shiftedBy(-left_decimals).toFixed(left_decimals)}`);
+    logger.log(`        Right deposit = ${expected.step_3_right_deposit.shiftedBy(-right_decimals).toFixed(right_decimals)}`);
+    logger.log(`        LP reward = ${expected.step_3_lp_reward.shiftedBy(-Constants.LP_DECIMALS).toFixed(Constants.LP_DECIMALS)}`);
+  }
+  logger.log(`    TOTAL: `);
+  logger.log(`        LP reward = ${expected.step_1_lp_reward.plus(expected.step_3_lp_reward).shiftedBy(-Constants.LP_DECIMALS).toFixed(Constants.LP_DECIMALS)}`);
+}
+
+async function expectedDepositLiquidity(pairAddress, contractName, tokens, amounts, autoChange) {
+
+  const pair = await locklift.factory.getContract(contractName);
+  pair.setAddress(pairAddress)
+
+  let LP_REWARD = "0";
+
+  if (contractName === "DexStablePair") {
+    const expected = await pair.call({
+      method: 'expectedDepositLiquidityV2',
+      params: {
+        amounts
+      }
+    });
+
+    LP_REWARD = new BigNumber(expected.lp_reward).shiftedBy(-9).toString();
+
+    logExpectedDepositV2(expected, tokens);
+  } else {
+
+    const expected = await pair.call({
+      method: 'expectedDepositLiquidity',
+      params: {
+        left_amount: amounts[0],
+        right_amount: amounts[1],
+        auto_change: autoChange
+      }
+    });
+
+    LP_REWARD = new BigNumber(expected.step_1_lp_reward)
+        .plus(expected.step_3_lp_reward).shiftedBy(-9).toString();
+
+    logExpectedDeposit(expected, tokens);
+  }
+
+  return LP_REWARD;
+}
+
 module.exports = {
   Migration,
   Constants,
@@ -151,7 +290,11 @@ module.exports = {
   sleep,
   getBalance,
   displayAccount,
+  displayTx,
   afterRun,
   TOKEN_CONTRACTS_PATH,
-  EMPTY_TVM_CELL
+  EMPTY_TVM_CELL,
+  expectedDepositLiquidity,
+  logExpectedDeposit,
+  logExpectedDepositV2
 }

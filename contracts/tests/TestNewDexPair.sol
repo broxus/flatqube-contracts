@@ -12,7 +12,7 @@ import "../interfaces/IDexPair.sol";
 import "../structures/ITokenOperationStructure.sol";
 
 // This is just for test purposes, this is not a real contract!
-contract TestNewDexPair is ITokenOperationStructure {
+contract TestNewDexPair is ITokenOperationStructure, IFeeParams {
     address root;
     address vault;
     uint32 current_version;
@@ -38,8 +38,7 @@ contract TestNewDexPair is ITokenOperationStructure {
     uint128 public left_balance;
     uint128 public right_balance;
     // Fee
-    uint16 fee_numerator;
-    uint16 fee_denominator;
+    FeeParams fee;
 
     // v2
     uint64 _nonce;
@@ -77,8 +76,8 @@ contract TestNewDexPair is ITokenOperationStructure {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (vault_left_wallet, vault_right_wallet);
     }
 
-    function getFeeParams() external view responsible returns (uint16 numerator, uint16 denominator) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee_numerator, fee_denominator);
+    function getFeeParams() external view responsible returns (FeeParams) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } fee;
     }
 
     function isActive() external view responsible returns (bool) {
@@ -111,8 +110,31 @@ contract TestNewDexPair is ITokenOperationStructure {
         (left_root, right_root, lp_root) = tokens_data_slice.decode(address, address, address);
 
         TvmSlice token_balances_data_slice = tokens_data_slice.loadRefAsSlice(); // ref 2_1
-        (lp_supply, left_balance, right_balance, fee_numerator, fee_denominator) =
-        token_balances_data_slice.decode(uint128, uint128, uint128, uint16, uint16);
+        (lp_supply, left_balance, right_balance) =
+        token_balances_data_slice.decode(uint128, uint128, uint128);
+
+        TvmSlice fee_data_slice = tokens_data_slice.loadRefAsSlice();
+        (
+            uint64 denominator,
+            uint64 pool_numerator,
+            uint64 beneficiary_numerator,
+            address beneficiary,
+            uint128 threshold_left,
+            uint128 threshold_right
+        ) = fee_data_slice.decode(uint64, uint64, uint64, address, uint128, uint128);
+
+        mapping(address => uint128) fee_threshold;
+
+        fee_threshold[left_root] = threshold_left;
+        fee_threshold[right_root] = threshold_right;
+
+        fee = FeeParams(
+            denominator,
+            pool_numerator,
+            beneficiary_numerator,
+            beneficiary,
+            fee_threshold
+        );
 
         TvmSlice pair_wallets_data_slice = s.loadRefAsSlice(); // ref 3
         (lp_wallet, left_wallet, right_wallet) = pair_wallets_data_slice.decode(address, address, address);

@@ -15,6 +15,7 @@ program.parse(process.argv);
 const options = program.opts();
 options.pair_contract_name = options.pair_contract_name || 'DexPair';
 options.account_contract_name = options.account_contract_name || 'DexAccount';
+options.root_contract_name = options.root_contract_name || 'DexRoot';
 
 let DexRoot;
 let DexVault;
@@ -56,12 +57,12 @@ describe('Check for correct deployment', async function () {
         .equal(DexPlatform.code, 'Wrong platform code in DexRoot');
     });
     it('Check Account code is installed', async function () {
-      expect(await dexRoot.call({method: 'account_code'}))
+      expect(await dexRoot.call({method: 'getAccountCode'}))
         .to
         .equal(DexAccount.code, 'Wrong Account code in DexRoot');
     });
     it('Check Pair code is installed', async function () {
-      expect(await dexRoot.call({method: 'pair_code'}))
+      expect(await dexRoot.call({ method: 'getPairCode', params: { pool_type: 1}}))
         .to
         .equal(DexPair.code, 'Wrong Pair code in DexRoot');
     });

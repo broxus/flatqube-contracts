@@ -34,4 +34,9 @@ library DexErrors {
     uint16 constant WRONG_RECIPIENT                  = 128;
     uint16 constant WRONG_PAIR_VERSION               = 129;
     uint16 constant OPERATION_ALREADY_IN_PROGRESS    = 130;
+    uint16 constant WRONG_FEE_PARAMS                 = 131;
+    uint16 constant NOT_BENEFICIARY                  = 132;
+    uint16 constant UNSUPPORTED_POOL_TYPE            = 133;
+    uint16 constant WRONG_AMOUNT                     = 134;
+    uint16 constant WRONG_TOKEN_ROOT                 = 135;
 }

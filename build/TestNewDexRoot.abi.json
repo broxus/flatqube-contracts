@@ -49,10 +49,30 @@
 		{
 			"name": "getPairVersion",
 			"inputs": [
-				{"name":"answerId","type":"uint32"}
+				{"name":"answerId","type":"uint32"},
+				{"name":"pool_type","type":"uint8"}
 			],
 			"outputs": [
 				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "getPairCode",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"pool_type","type":"uint8"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "getAccountCode",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
 			]
 		},
 		{
@@ -95,14 +115,6 @@
 			"outputs": [
 				{"name":"account_code","type":"cell"}
 			]
-		},
-		{
-			"name": "pair_code",
-			"inputs": [
-			],
-			"outputs": [
-				{"name":"pair_code","type":"cell"}
-			]
 		}
 	],
 	"data": [
@@ -118,8 +130,8 @@
 		{"name":"platform_code","type":"cell"},
 		{"name":"account_code","type":"cell"},
 		{"name":"account_version","type":"uint32"},
-		{"name":"pair_code","type":"cell"},
-		{"name":"pair_version","type":"uint32"},
+		{"name":"pair_codes","type":"map(uint8,cell)"},
+		{"name":"pair_versions","type":"map(uint8,uint32)"},
 		{"name":"active","type":"bool"},
 		{"name":"owner","type":"address"},
 		{"name":"vault","type":"address"},
