@@ -21,23 +21,26 @@
 		{
 			"name": "buildExchangePayload",
 			"inputs": [
-				{"name":"id","type":"uint64"},
-				{"name":"amount","type":"uint128"},
 				{"name":"pair","type":"address"},
-				{"name":"expectedAmount","type":"uint128"},
-				{"name":"deployWalletValue","type":"uint128"}
+				{"name":"id","type":"uint64"},
+				{"name":"deployWalletValue","type":"uint128"},
+				{"name":"expectedAmount","type":"uint128"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
 			]
 		},
 		{
-			"name": "swapEvers",
+			"name": "buildCrossPairExchangePayload",
 			"inputs": [
-				{"name":"user","type":"address"},
-				{"name":"payload","type":"cell"}
+				{"name":"pair","type":"address"},
+				{"name":"id","type":"uint64"},
+				{"name":"deployWalletValue","type":"uint128"},
+				{"name":"expectedAmount","type":"uint128"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"steps","type":"tuple[]"}
 			],
 			"outputs": [
+				{"name":"value0","type":"cell"}
 			]
 		},
 		{
@@ -54,7 +57,7 @@
 		{
 			"name": "onAcceptTokensTransfer",
 			"inputs": [
-				{"name":"value0","type":"address"},
+				{"name":"tokenRoot","type":"address"},
 				{"name":"amount","type":"uint128"},
 				{"name":"sender","type":"address"},
 				{"name":"value3","type":"address"},
@@ -67,7 +70,7 @@
 		{
 			"name": "onAcceptTokensBurn",
 			"inputs": [
-				{"name":"value0","type":"uint128"},
+				{"name":"amount","type":"uint128"},
 				{"name":"value1","type":"address"},
 				{"name":"value2","type":"address"},
 				{"name":"user","type":"address"},
@@ -108,31 +111,44 @@
 	],
 	"events": [
 		{
-			"name": "SwapEverToTip3WeverMint",
+			"name": "SwapEverToTip3Start",
 			"inputs": [
+				{"name":"pair","type":"address"},
+				{"name":"operationType","type":"uint8"},
+				{"name":"id","type":"uint64"},
+				{"name":"user","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "SwapEverToTip3Success",
+			"inputs": [
+				{"name":"user","type":"address"},
 				{"name":"id","type":"uint64"},
 				{"name":"amount","type":"uint128"},
-				{"name":"pair","type":"address"},
-				{"name":"expectedAmount","type":"uint128"},
-				{"name":"deployWalletValue","type":"uint128"}
+				{"name":"tokenRoot","type":"address"}
 			],
 			"outputs": [
 			]
 		},
 		{
-			"name": "SwapEverToTip3SuccessTransfer",
+			"name": "SwapEverToTip3Partial",
 			"inputs": [
 				{"name":"user","type":"address"},
-				{"name":"id","type":"uint64"}
+				{"name":"id","type":"uint64"},
+				{"name":"amount","type":"uint128"},
+				{"name":"tokenRoot","type":"address"}
 			],
 			"outputs": [
 			]
 		},
 		{
-			"name": "SwapEverToTip3CancelTransfer",
+			"name": "SwapEverToTip3Cancel",
 			"inputs": [
 				{"name":"user","type":"address"},
-				{"name":"id","type":"uint64"}
+				{"name":"id","type":"uint64"},
+				{"name":"amount","type":"uint128"}
 			],
 			"outputs": [
 			]
@@ -141,7 +157,8 @@
 			"name": "SwapTip3EverSuccessTransfer",
 			"inputs": [
 				{"name":"user","type":"address"},
-				{"name":"id","type":"uint64"}
+				{"name":"id","type":"uint64"},
+				{"name":"amount","type":"uint128"}
 			],
 			"outputs": [
 			]
@@ -150,7 +167,9 @@
 			"name": "SwapTip3EverCancelTransfer",
 			"inputs": [
 				{"name":"user","type":"address"},
-				{"name":"id","type":"uint64"}
+				{"name":"id","type":"uint64"},
+				{"name":"amount","type":"uint128"},
+				{"name":"tokenRoot","type":"address"}
 			],
 			"outputs": [
 			]

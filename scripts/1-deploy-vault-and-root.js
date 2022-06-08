@@ -127,14 +127,14 @@ async function main() {
       keyPair
     });
     displayTx(tx);
-    console.log(`DexRoot: installing DexPair STABLESWAP code...`);
-    tx = await account.runTarget({
-      contract: dexRoot,
-      method: 'installOrUpdatePairCode',
-      params: {code: DexStablePair.code, pool_type: 2},
-      keyPair
-    });
-    displayTx(tx);
+    // console.log(`DexRoot: installing DexPair STABLESWAP code...`);
+    // tx = await account.runTarget({
+    //   contract: dexRoot,
+    //   method: 'installOrUpdatePairCode',
+    //   params: {code: DexStablePair.code, pool_type: 2},
+    //   keyPair
+    // });
+    // displayTx(tx);
   }
 
   console.log(`DexRoot: set Dex is active...`);

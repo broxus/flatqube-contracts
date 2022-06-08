@@ -4,11 +4,9 @@ const BigNumber = require('bignumber.js');
 BigNumber.config({ EXPONENTIAL_AT: 257 });
 const {Constants, Migration, afterRun, EMPTY_TVM_CELL,
     TOKEN_CONTRACTS_PATH, WEVER_CONTRACTS_PATH,
-    stringToBytesArray, getRandomNonce} = require(process.cwd()+'/scripts/utils');
+    stringToBytesArray, getRandomNonce, displayTx} = require(process.cwd()+'/scripts/utils');
 const { Command } = require('commander');
 const program = new Command();
-
-const logTx = (tx) => logger.success(`Transaction: ${tx.transaction.id}`);
 
 let tx;
 
@@ -56,6 +54,7 @@ async function main() {
     }, locklift.utils.convertCrystal(5, 'nano'));
 
     logger.success(`Tunnel address: ${tunnel.address}`);
+    migration.store(tunnel.address, `${tokenData.symbol}Tunnel`);
 
     logger.log(`Deploying WEVER`);
 
@@ -101,6 +100,7 @@ async function main() {
     root.afterRun = afterRun;
 
     logger.success(`WEVER root: ${root.address}`);
+    migration.store(TokenRoot, `${tokenData.symbol}Root`);
 
     logger.log(`Deploying vault`);
 
@@ -123,6 +123,7 @@ async function main() {
     });
 
     logger.success(`Vault address: ${vault.address}`);
+    migration.store(vault, `${tokenData.symbol}Vault`);
 
     logger.log(`Adding tunnel (vault, root)`);
 
@@ -136,7 +137,7 @@ async function main() {
         keyPair: keyPairs[1]
     });
 
-    logTx(tx);
+    displayTx(tx);
 
     logger.log(`Draining vault`);
 
@@ -149,7 +150,7 @@ async function main() {
         keyPair: keyPairs[1]
     });
 
-    logTx(tx);
+    displayTx(tx);
 
     logger.log(`Wrap ${options.wrap_amount} EVER`);
 
@@ -165,7 +166,7 @@ async function main() {
         keyPair: keyPairs[1]
     });
 
-    logTx(tx);
+    displayTx(tx);
 
     const tokenWalletAddress = await TokenRoot.call({
         method: 'walletOf', params: {
@@ -174,14 +175,10 @@ async function main() {
     });
 
     TokenWallet.setAddress(tokenWalletAddress);
+    migration.store(TokenWallet, tokenData.symbol + 'Wallet2');
 
     const balance = new BigNumber(await TokenWallet.call({method: 'balance', params: {}})).shiftedBy(-9).toString();
     logger.log(`Account2 WEVER balance: ${balance}`);
-
-    migration.store(TokenWallet, tokenData.symbol + 'Wallet2');
-    migration.store(TokenRoot, `${tokenData.symbol}Root`);
-    migration.store(vault, `${tokenData.symbol}Vault`);
-    migration.store(tunnel.address, `${tokenData.symbol}Tunnel`);
 
     logger.log(`Giver balance: ${locklift.utils.convertCrystal(await locklift.ton.getBalance(locklift.networkConfig.giver.address), 'ton')}`);
 }

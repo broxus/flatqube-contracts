@@ -245,14 +245,19 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
 
         bool notify_success = payloadSlice.refs() >= 1;
         bool notify_cancel = payloadSlice.refs() >= 2;
+        bool hasRef3 = payloadSlice.refs() >= 3;
         TvmCell empty;
         TvmCell success_payload;
         TvmCell cancel_payload;
+        TvmCell ref3;
         if (notify_success) {
             success_payload = payloadSlice.loadRef();
         }
         if (notify_cancel) {
             cancel_payload = payloadSlice.loadRef();
+        }
+        if (hasRef3) {
+            ref3 = payloadSlice.loadRef();
         }
 
         if (!need_cancel) {
@@ -460,15 +465,16 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
 
                         address next_pair = _expectedPairAddress(right_root, next_token_root);
 
-                        IDexPair(next_pair).crossPairExchange{
+                        IDexPair(next_pair).crossPoolExchange{
                             value: 0,
                             flag: MsgFlag.ALL_NOT_RESERVED
                         }(
                             id,
 
                             current_version,
-                            left_root,
-                            right_root,
+                            DexPoolTypes.CONSTANT_PRODUCT,
+
+                            _tokenRoots(),
 
                             right_root,
                             right_amount,
@@ -478,7 +484,11 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                             original_gas_to,
                             deploy_wallet_grams,
 
-                            success_payload
+                            success_payload,    // actually it is next_payload
+                            notify_cancel,      // actually it is notify_success
+                            cancel_payload,     // actually it is success_payload
+                            hasRef3,            // actually it is notify_success
+                            ref3                // actually it is cancel_payload
                         );
                     } else {
                         need_cancel = true;
@@ -687,15 +697,16 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
 
                         address next_pair = _expectedPairAddress(left_root, next_token_root);
 
-                        IDexPair(next_pair).crossPairExchange{
+                        IDexPair(next_pair).crossPoolExchange{
                             value: 0,
                             flag: MsgFlag.ALL_NOT_RESERVED
                         }(
                             id,
 
                             current_version,
-                            left_root,
-                            right_root,
+                            DexPoolTypes.CONSTANT_PRODUCT,
+
+                            _tokenRoots(),
 
                             left_root,
                             left_amount,
@@ -705,7 +716,11 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                             original_gas_to,
                             deploy_wallet_grams,
 
-                            success_payload
+                            success_payload,    // actually it is next_payload
+                            notify_cancel,      // actually it is notify_success
+                            cancel_payload,     // actually it is success_payload
+                            hasRef3,            // actually it is notify_success
+                            ref3                // actually it is cancel_payload
                         );
                     } else {
                         need_cancel = true;
@@ -862,7 +877,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
             if (auto_change) {
                 left_balance = left_balance + left_amount;
                 right_balance = right_balance + right_amount;
-                
+
                 if (r.step_2_right_to_left) {
                     require(r.step_2_received <= left_balance + r.step_1_left_deposit, DexErrors.NOT_ENOUGH_FUNDS);
                     right_balance -= step_2_beneficiary_fee;
@@ -1406,12 +1421,13 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // Cross-pair exchange
 
-    function crossPairExchange(
+    function crossPoolExchange(
         uint64 id,
 
-        uint32 /*prev_pair_version*/,
-        address prev_pair_left_root,
-        address prev_pair_right_root,
+        uint32 /*prev_pool_version*/,
+        uint8 /*prev_pool_type*/,
+
+        address[] prev_pool_token_roots,
 
         address spent_token_root,
         uint128 spent_amount,
@@ -1421,8 +1437,12 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         address original_gas_to,
         uint128 deploy_wallet_grams,
 
-        TvmCell payload
-    ) override external onlyPair(prev_pair_left_root, prev_pair_right_root) onlyActive {
+        TvmCell payload,
+        bool notify_success,
+        TvmCell success_payload,
+        bool notify_cancel,
+        TvmCell cancel_payload
+    ) override external onlyPair(prev_pool_token_roots[0], prev_pool_token_roots[1]) onlyActive {
 
         require(msg.sender != address(this));
 
@@ -1488,15 +1508,16 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
 
                     address next_pair = _expectedPairAddress(right_root, next_token_root);
 
-                    IDexPair(next_pair).crossPairExchange{
+                    IDexPair(next_pair).crossPoolExchange{
                         value: 0,
                         flag: MsgFlag.ALL_NOT_RESERVED
                     }(
                         id,
 
                         current_version,
-                        left_root,
-                        right_root,
+                        DexPoolTypes.CONSTANT_PRODUCT,
+
+                        _tokenRoots(),
 
                         right_root,
                         right_amount,
@@ -1506,7 +1527,11 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         original_gas_to,
                         deploy_wallet_grams,
 
-                        next_payload
+                        next_payload,
+                        notify_success,
+                        success_payload,
+                        notify_cancel,
+                        cancel_payload
                     );
                 } else {
                     IDexVault(vault).transfer{
@@ -1518,8 +1543,8 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         vault_right_wallet,
                         sender_address,
                         deploy_wallet_grams,
-                        has_next_payload,
-                        next_payload,
+                        true,
+                        success_payload,
                         left_root,
                         right_root,
                         current_version,
@@ -1533,9 +1558,6 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                     bounce: false
                 }(id);
 
-                TvmBuilder result_builder;
-                result_builder.store(id);
-
                 IDexVault(vault).transfer{
                     value: 0,
                     flag: MsgFlag.ALL_NOT_RESERVED
@@ -1546,7 +1568,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                     sender_address,
                     deploy_wallet_grams,
                     true,
-                    result_builder.toCell(),
+                    cancel_payload,
                     left_root,
                     right_root,
                     current_version,
@@ -1600,15 +1622,16 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
 
                     address next_pair = _expectedPairAddress(left_root, next_token_root);
 
-                    IDexPair(next_pair).crossPairExchange{
+                    IDexPair(next_pair).crossPoolExchange{
                         value: 0,
                         flag: MsgFlag.ALL_NOT_RESERVED
                     }(
                         id,
 
                         current_version,
-                        left_root,
-                        right_root,
+                        DexPoolTypes.CONSTANT_PRODUCT,
+
+                        _tokenRoots(),
 
                         left_root,
                         left_amount,
@@ -1618,7 +1641,11 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         original_gas_to,
                         deploy_wallet_grams,
 
-                        next_payload
+                        next_payload,
+                        notify_success,
+                        success_payload,
+                        notify_cancel,
+                        cancel_payload
                     );
                 } else {
                     IDexVault(vault).transfer{
@@ -1630,8 +1657,8 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         vault_left_wallet,
                         sender_address,
                         deploy_wallet_grams,
-                        has_next_payload,
-                        next_payload,
+                        true,
+                        success_payload,
                         left_root,
                         right_root,
                         current_version,
@@ -1645,9 +1672,6 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                     bounce: false
                 }(id);
 
-                TvmBuilder result_builder;
-                result_builder.store(id);
-
                 IDexVault(vault).transfer{
                     value: 0,
                     flag: MsgFlag.ALL_NOT_RESERVED
@@ -1658,7 +1682,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                     sender_address,
                     deploy_wallet_grams,
                     true,
-                    result_builder.toCell(),
+                    cancel_payload,
                     left_root,
                     right_root,
                     current_version,
@@ -1813,47 +1837,24 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
             );
         } else if (old_pool_type == DexPoolTypes.CONSTANT_PRODUCT) {
             active = true;
-
-            if (old_version == 1) {
-                lp_root = tokens_data_slice.decode(address);
-                TvmSlice token_balances_data_slice = tokens_data_slice.loadRefAsSlice(); // ref 2_1
-                (lp_supply, left_balance, right_balance) =
-                    token_balances_data_slice.decode(uint128, uint128, uint128);
-
-                (uint16 fee_numerator, uint16 fee_denominator) = token_balances_data_slice.decode(uint16, uint16);
-
-                fee = FeeParams(
-                    uint64(fee_denominator) * 1000,
-                    uint64(fee_numerator) * 1000,
-                    uint64(0),
-                    address(0),
-                    emptyMap
-                );
-
-                TvmSlice pair_wallets_data_slice = s.loadRefAsSlice(); // ref 3
-                (lp_wallet, left_wallet, right_wallet) = pair_wallets_data_slice.decode(address, address, address);
-                TvmSlice vault_wallets_data = s.loadRefAsSlice(); // ref 4
-                (vault_left_wallet, vault_right_wallet) = vault_wallets_data.decode(address, address);
-            } else {
-                TvmCell otherData = s.loadRef(); // ref 3
-                (
-                    lp_root,
-                    lp_wallet,
-                    lp_supply,
-                    fee,
-                    left_wallet,
-                    vault_left_wallet,
-                    left_balance,
-                    right_wallet,
-                    vault_right_wallet,
-                    right_balance
-                ) = abi.decode(otherData, (
-                    address, address, uint128,
-                    FeeParams,
-                    address, address, uint128,
-                    address, address, uint128
-                ));
-            }
+            TvmCell otherData = s.loadRef(); // ref 3
+            (
+                lp_root,
+                lp_wallet,
+                lp_supply,
+                fee,
+                left_wallet,
+                vault_left_wallet,
+                left_balance,
+                right_wallet,
+                vault_right_wallet,
+                right_balance
+            ) = abi.decode(otherData, (
+                address, address, uint128,
+                FeeParams,
+                address, address, uint128,
+                address, address, uint128
+            ));
         } else if (old_pool_type == DexPoolTypes.STABLESWAP) {
             active = true;
             TvmCell otherData = s.loadRef(); // ref 3
@@ -1959,6 +1960,15 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
             tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
             send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS, bounce: false});
         }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    function _tokenRoots() internal view returns(address[]) {
+        address[] roots = new address[](2);
+        roots[0] = left_root;
+        roots[1] = right_root;
+        return roots;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
