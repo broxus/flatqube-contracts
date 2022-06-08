@@ -1,4 +1,4 @@
-const {Migration, afterRun} = require(process.cwd() + '/scripts/utils')
+const {Migration, afterRun, displayTx} = require(process.cwd() + '/scripts/utils')
 const migration = new Migration();
 
 async function main() {
@@ -32,7 +32,7 @@ async function main() {
       value: locklift.utils.convertCrystal(6, 'nano'),
       keyPair
     });
-    console.log(`Transaction id: ${tx.transaction.id}`);
+    displayTx(tx);
   }));
 }
 

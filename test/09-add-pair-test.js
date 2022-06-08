@@ -1,6 +1,6 @@
 const {expect} = require('chai');
 const logger = require('mocha-logger');
-const {Migration, afterRun, Constants} = require(process.cwd() + '/scripts/utils');
+const {Migration, afterRun, Constants, displayTx} = require(process.cwd() + '/scripts/utils');
 const { Command } = require('commander');
 const program = new Command();
 const migration = new Migration();
@@ -53,6 +53,9 @@ describe('Check DexAccount add Pair', async function () {
     keyPairs = await locklift.keys.getKeyPairs();
     DexAccount = await locklift.factory.getContract('DexAccount');
     account = migration.load(await locklift.factory.getAccount('Wallet'), 'Account' + options.account);
+    if (locklift.tracing) {
+      locklift.tracing.allowCodes({compute: [100]});
+    }
     account.afterRun = afterRun;
     dexAccount = migration.load(DexAccount, 'DexAccount' + options.account);
     dexPair = migration.load(await locklift.factory.getContract(options.contract_name), 'DexPair' + tokenLeft.symbol + tokenRight.symbol);
@@ -90,7 +93,7 @@ describe('Check DexAccount add Pair', async function () {
         value: locklift.utils.convertCrystal(3.1, 'nano'),
         keyPair: keyPairs[options.account - 1]
       });
-      logger.log(`txId: ${tx.transaction.id}`);
+      displayTx(tx);
       await afterRun();
       await logGas();
     });

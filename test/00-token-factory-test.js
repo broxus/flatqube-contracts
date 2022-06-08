@@ -80,6 +80,9 @@ describe('TokeFactory contract', async function () {
 
       tokenFactory = migration.load(TokenFactory, 'TokenFactory');
       account = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
+      if (locklift.tracing) {
+        locklift.tracing.allowCodesForAddress(account.address, {compute: [100]});
+      }
       const [keyPair] = await locklift.keys.getKeyPairs();
       account.setKeyPair(keyPair);
       account.afterRun = afterRun;

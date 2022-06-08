@@ -1,12 +1,18 @@
-const {Migration, TOKEN_CONTRACTS_PATH, Constants, afterRun} = require(process.cwd()+'/scripts/utils')
+const {Migration, TOKEN_CONTRACTS_PATH, Constants, afterRun, displayTx} = require(process.cwd()+'/scripts/utils')
 const { Command } = require('commander');
 const program = new Command();
 
 async function main() {
+  console.log('5-deploy-test-pair.js');
   const migration = new Migration();
   const keyPairs = await locklift.keys.getKeyPairs();
 
   const account2 = migration.load(await locklift.factory.getAccount('Wallet'), 'Account2');
+
+  if (locklift.tracing) {
+    locklift.tracing.allowCodes({compute: [100]});
+  }
+
   const dexVault = migration.load(await locklift.factory.getContract('DexVault'), 'DexVault');
   const dexRoot = migration.load(await locklift.factory.getContract('DexRoot'), 'DexRoot');
 
@@ -54,7 +60,7 @@ async function main() {
       keyPair: keyPairs[1]
     });
 
-    console.log(`Transaction: ${tx.transaction.id}`);
+    displayTx(tx);
 
     await afterRun();
 
@@ -68,8 +74,6 @@ async function main() {
 
     console.log(`DexPair${pair.left}${pair.right}: ${dexPairFooBarAddress}`);
 
-    await new Promise(resolve => setTimeout(resolve, 60000));
-
     const dexPairFooBar = await locklift.factory.getContract(options.contract_name);
     dexPairFooBar.address = dexPairFooBarAddress;
     migration.store(dexPairFooBar, 'DexPair' + pair.left + pair.right);
@@ -77,13 +81,13 @@ async function main() {
     const version = await dexPairFooBar.call({method: "getVersion", params: {}})
     console.log(`DexPair${pair.left}${pair.right} version = ${version}`);
 
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    // await new Promise(resolve => setTimeout(resolve, 10000));
 
     const active = await dexPairFooBar.call({method: "isActive", params: {}})
     console.log(`DexPair${pair.left}${pair.right} active = ${active}`);
 
     const FooBarLpRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
-    FooBarLpRoot.setAddress(await dexPairFooBar.call({method: "lp_root"}));
+    FooBarLpRoot.setAddress((await dexPairFooBar.call({method: "getTokenRoots"})).lp);
 
     const FooPairWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
     FooPairWallet.setAddress(await tokenFoo.call({

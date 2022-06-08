@@ -1,5 +1,5 @@
 const {expect} = require('chai');
-const {Migration, Constants, afterRun, TOKEN_CONTRACTS_PATH, getRandomNonce} = require(process.cwd() + '/scripts/utils');
+const {Migration, Constants, afterRun, TOKEN_CONTRACTS_PATH, getRandomNonce, displayTx} = require(process.cwd() + '/scripts/utils');
 const BigNumber = require('bignumber.js');
 const { Command } = require('commander');
 const program = new Command();
@@ -7,8 +7,6 @@ BigNumber.config({EXPONENTIAL_AT: 257});
 const logger = require('mocha-logger');
 
 let tx;
-
-const logTx = (tx) => logger.success(`Transaction: ${tx.transaction.id}`);
 
 const migration = new Migration();
 
@@ -221,7 +219,7 @@ describe('Check DEX accounts interaction', async function () {
                 keyPair: keyPairs[2]
             });
 
-            logTx(tx);
+            displayTx(tx);
             
             const dexAccount3 = await DexRoot.call({
                 method: 'getExpectedAccountAddress',
@@ -275,7 +273,7 @@ describe('Check DEX accounts interaction', async function () {
                 keyPair: keyPairs[1]
             });
 
-            logTx(tx);
+            displayTx(tx);
 
             const dexAccount2End = await dexAccountBalances(DexAccount2);
             const dexAccount3End = await dexAccountBalances(DexAccount3);
@@ -318,7 +316,7 @@ describe('Check DEX accounts interaction', async function () {
                 keyPair: keyPairs[1]
             });
 
-            logTx(tx);
+            displayTx(tx);
 
             const dexAccount2End = await dexAccountBalances(DexAccount2);
             const dexAccount3End = await dexAccountBalances(DexAccount3);
@@ -366,7 +364,7 @@ describe('Check DEX accounts interaction', async function () {
                 keyPair: keyPairs[1]
             });
 
-            logTx(tx);
+            displayTx(tx);
 
             const dexAccount2End = await dexAccountBalances(DexAccount2);
             const dexAccount3End = await dexAccountBalances(DexAccount3);
@@ -419,7 +417,7 @@ describe('Check DEX accounts interaction', async function () {
                 keyPair: keyPairs[2]
             });
 
-            logTx(tx);
+            displayTx(tx);
 
             const dexAccount3End = await dexAccountBalances(DexAccount3);
             const dexEnd = await dexBalances();
@@ -478,7 +476,7 @@ describe('Check DEX accounts interaction', async function () {
                 keyPair: keyPairs[2]
             });
 
-            logTx(tx);
+            displayTx(tx);
             
             const dexAccount3end = await dexAccountBalances(DexAccount3);
             logger.log(`DexAccount#3 balance end: ` +

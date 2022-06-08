@@ -74,7 +74,7 @@ describe('Test Dex Pair contract upgrade', async function () {
     await account.runTarget({
       contract: dexRoot,
       method: 'installOrUpdatePairCode',
-      params: {code: NewDexPair.code},
+      params: {code: NewDexPair.code, pool_type: 1},
       value: locklift.utils.convertCrystal(1, 'nano'),
       keyPair
     });
@@ -88,7 +88,8 @@ describe('Test Dex Pair contract upgrade', async function () {
       params: {
         left_root: tokenFoo.address,
         right_root: tokenBar.address,
-        send_gas_to: account.address
+        send_gas_to: account.address,
+        pool_type: 1
       },
       value: locklift.utils.convertCrystal(6, 'nano'),
       keyPair

@@ -4,6 +4,10 @@ async function main() {
   const migration = new Migration();
   const account = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
 
+  if (locklift.tracing) {
+    locklift.tracing.allowCodesForAddress(account.address, {compute: [100]});
+  }
+
   const TokenFactory = await locklift.factory.getContract('TokenFactory');
 
   const TokenRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);

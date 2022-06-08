@@ -1,4 +1,4 @@
-const {Migration, TOKEN_CONTRACTS_PATH, afterRun} = require(process.cwd() + '/scripts/utils')
+const {Migration, TOKEN_CONTRACTS_PATH, afterRun, displayTx} = require(process.cwd() + '/scripts/utils')
 const migration = new Migration();
 
 async function main() {
@@ -12,7 +12,7 @@ async function main() {
   await account.runTarget({
     contract: dexRoot,
     method: 'installOrUpdatePairCode',
-    params: {code: NewDexPair.code},
+    params: {code: NewDexPair.code, pool_type: 1},
     value: locklift.utils.convertCrystal(1, 'nano'),
     keyPair
   });
@@ -32,12 +32,13 @@ async function main() {
       params: {
         left_root: pair.left.address,
         right_root: pair.right.address,
+        pool_type: 1,
         send_gas_to: account.address
       },
       value: locklift.utils.convertCrystal(6, 'nano'),
       keyPair
     });
-    console.log(`Transaction id: ${tx.transaction.id}`);
+    displayTx(tx);
   }));
 }
 

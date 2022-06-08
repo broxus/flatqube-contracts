@@ -1,3 +1,4 @@
+const {afterRun, displayTx} = require(process.cwd() + '/scripts/utils')
 const fs = require('fs');
 
 let dexAccounts;
@@ -13,10 +14,6 @@ const DEX_OWNER_WALLET_TYPE = 'SafeMultisigWallet';
 };*/
 
 const NewCodeContract = 'DexAccountV2';
-
-const afterRun = async (tx) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-};
 
 const data = fs.readFileSync('./dex_accounts.json', 'utf8');
 if (data) dexAccounts = JSON.parse(data);
@@ -73,7 +70,7 @@ async function main() {
           value: locklift.utils.convertCrystal(6, 'nano'),
           keyPair: DEX_OWNER_KEYS
       });
-      console.log(`Transaction id: ${tx.transaction.id}`);
+      displayTx(tx);
       console.log(``);
   }
 }

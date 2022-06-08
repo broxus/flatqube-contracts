@@ -1,8 +1,10 @@
 pragma ton-solidity >= 0.57.0;
 
-interface IDexRoot {
+import "../structures/IFeeParams.sol";
+
+interface IDexRoot is IFeeParams {
     event AccountCodeUpgraded(uint32 version);
-    event PairCodeUpgraded(uint32 version);
+    event PairCodeUpgraded(uint32 version, uint8 pool_type);
     event RootCodeUpgraded();
     event ActiveUpdated(bool new_active);
 
@@ -24,8 +26,17 @@ interface IDexRoot {
     function getExpectedAccountAddress(address account_owner) external view responsible returns (address);
 
     function getAccountVersion() external view responsible returns (uint32);
-    function getPairVersion() external view responsible returns (uint32);
+    function getAccountCode() external view responsible returns (TvmCell);
+    function getPairVersion(uint8 pool_type) external view responsible returns (uint32);
+    function getPairCode(uint8 pool_type) external view responsible returns (TvmCell);
 
     function isActive() external view responsible returns (bool);
     function getVault() external view responsible returns (address);
+
+    function setPairFeeParams(
+        address left_root,
+        address right_root,
+        FeeParams params,
+        address send_gas_to
+    ) external view;
 }

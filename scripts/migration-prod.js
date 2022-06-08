@@ -1,8 +1,4 @@
-const {Migration, TOKEN_CONTRACTS_PATH, afterRun, getRandomNonce} = require(process.cwd() + '/scripts/utils')
-
-const displayTx = (_tx) => {
-  console.log(`txId: ${_tx.transaction.id}`);
-};
+const {Migration, TOKEN_CONTRACTS_PATH, afterRun, getRandomNonce, displayTx} = require(process.cwd() + '/scripts/utils')
 
 const migration = new Migration();
 const newOwner = '0:0000000000000000000000000000000000000000000000000000000000000000'
@@ -78,6 +74,7 @@ async function main() {
   const DexPlatform = await locklift.factory.getContract('DexPlatform');
   const DexAccount = await locklift.factory.getContract('DexAccount');
   const DexPair = await locklift.factory.getContract('DexPair');
+  const DexStablePair = await locklift.factory.getContract('DexStablePair');
   const DexVaultLpTokenPending = await locklift.factory.getContract('DexVaultLpTokenPending');
   const DexRoot = await locklift.factory.getContract('DexRoot');
   const DexVault = await locklift.factory.getContract('DexVault');
@@ -156,11 +153,19 @@ async function main() {
   });
   displayTx(tx);
 
-  console.log(`DexRoot: installing DexPair code...`);
+  console.log(`DexRoot: installing DexPair CONSTANT_PRODUCT code...`);
   tx = await account.runTarget({
     contract: dexRoot,
     method: 'installOrUpdatePairCode',
-    params: {code: DexPair.code},
+    params: {code: DexPair.code, pool_type: 1},
+    keyPair
+  });
+  displayTx(tx);
+  console.log(`DexRoot: installing DexPair STABLESWAP code...`);
+  tx = await account.runTarget({
+    contract: dexRoot,
+    method: 'installOrUpdatePairCode',
+    params: {code: DexPair.code, pool_type: 2},
     keyPair
   });
   displayTx(tx);

@@ -1,16 +1,47 @@
 pragma ton-solidity >= 0.57.0;
 
-import "../structures/IDepositLiquidityResult.sol";
+import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 
-interface IDexPair is IDepositLiquidityResult {
+import "../structures/ITokenOperationStructure.sol";
+import "../structures/IFeeParams.sol";
 
-    event PairCodeUpgraded(uint32 version);
-    event FeesParamsUpdated(uint16 numerator, uint16 denominator);
+interface IDexPair is IFeeParams, ITokenOperationStructure, IAcceptTokensTransferCallback {
 
-    event DepositLiquidity(uint128 left, uint128 right, uint128 lp);
-    event WithdrawLiquidity(uint128 lp, uint128 left, uint128 right);
-    event ExchangeLeftToRight(uint128 left, uint128 fee, uint128 right);
-    event ExchangeRightToLeft(uint128 right, uint128 fee, uint128 left);
+    event PairCodeUpgraded(uint32 version, uint8 pool_type);
+    event FeesParamsUpdated(FeeParams params);
+
+    event DepositLiquidity(
+        address sender,
+        address owner,
+        TokenOperation[] tokens,
+        uint128 lp
+    );
+
+    event WithdrawLiquidity(
+        address sender,
+        address owner,
+        uint128 lp,
+        TokenOperation[] tokens
+    );
+
+    struct ExchangeFee {
+        address feeTokenRoot;
+        uint128 pool_fee;
+        uint128 beneficiary_fee;
+        address beneficiary;
+    }
+
+    event Exchange(
+        address sender,
+        address recipient,
+        address spentTokenRoot,
+        uint128 spentAmount,
+        address receiveTokenRoot,
+        uint128 receiveAmount,
+        ExchangeFee[] fees
+    );
+
+    event Sync(uint128[] reserves, uint128 lp_supply);
 
     struct IDexPairBalances {
         uint128 lp_supply;
@@ -26,13 +57,17 @@ interface IDexPair is IDepositLiquidityResult {
 
     function getVersion() external view responsible returns (uint32 version);
 
+    function getPoolType() external view responsible returns (uint8);
+
     function getVault() external view responsible returns (address dex_vault);
 
     function getVaultWallets() external view responsible returns (address left, address right);
 
-    function setFeeParams(uint16 nominator, uint16 denominator) external;
+    function setFeeParams(FeeParams params, address send_gas_to) external;
 
-    function getFeeParams() external view responsible returns (uint16 nominator, uint16 denominator);
+    function getFeeParams() external view responsible returns (FeeParams params);
+
+    function getAccumulatedFees() external view responsible returns (uint128[] accumulatedFees);
 
     function isActive() external view responsible returns (bool);
 
@@ -48,15 +83,13 @@ interface IDexPair is IDepositLiquidityResult {
         address receive_token_root
     ) external view responsible returns (uint128 expected_amount, uint128 expected_fee);
 
-    function expectedDepositLiquidity(
-        uint128 left_amount,
-        uint128 right_amount,
-        bool auto_change
-    ) external view responsible returns (DepositLiquidityResult);
-
     function expectedWithdrawLiquidity(
         uint128 lp_amount
     ) external view responsible returns (uint128 expected_left_amount, uint128 expected_right_amount);
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // UPGRADE
+    function upgrade(TvmCell code, uint32 new_version, uint8 new_type, address send_gas_to) external;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // INTERNAL

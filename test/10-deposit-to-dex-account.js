@@ -111,6 +111,9 @@ describe('Check Deposit to Dex Account', async function () {
     keyPairs = await locklift.keys.getKeyPairs();
     DexAccount = await locklift.factory.getContract('DexAccount');
     accountN = migration.load(await locklift.factory.getAccount('Wallet'), 'Account' + options.owner_n);
+    if (locklift.tracing) {
+      locklift.tracing.allowCodes({compute: [100]});
+    }
     accountN.afterRun = afterRun;
     dexAccountN = migration.load(DexAccount, 'DexAccount' + options.owner_n);
 
