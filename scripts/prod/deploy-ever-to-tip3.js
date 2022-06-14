@@ -15,8 +15,8 @@ async function main() {
         .option('-evroot', '--weverroot <weverRoot>', 'WEVER Root')
         .option('-ewvault', '--wevervault <weverVault>', 'WEVER Vault');
 
-    program.parse(process.argv);  
-    
+    program.parse(process.argv);
+
     const options = program.opts();
 
     if (!isValidTonAddress(options.weverroot)) {
@@ -39,7 +39,7 @@ async function main() {
 
     const response = await prompts(promptsData);
     const weverRoot_ = options.weverroot || response.weverRoot;
-    const weverVault_ = options.wevervault || response.weverRoot;
+    const weverVault_ = options.wevervault || response.weverVault;
 
     const EverToTip3 = await locklift.factory.getContract('EverToTip3');
 

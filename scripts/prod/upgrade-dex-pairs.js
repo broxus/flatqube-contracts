@@ -7,7 +7,6 @@ let dexPairs;
 
 const DEX_ROOT_ADDRESS = '0:5eb5713ea9b4a0f3a13bc91b282cde809636eb1e68d2fcb6427b9ad78a5a9008';
 
-const LEGACY = true;
 const NewPoolType = 1;
 
 const data = fs.readFileSync('./dex_pairs.json', 'utf8');
@@ -30,7 +29,7 @@ async function main() {
         console.log(`${1 + (+indx)}/${dexPairs.length}: Upgrading DexPair(${pairData.dexPair}). left = ${pairData.left}, right = ${pairData.right}`);
         const tx = await dexOwner.runTarget({
             contract: dexRoot,
-            method: LEGACY ? 'upgradeLegacyPair' : 'upgradePair',
+            method: 'upgradePair',
             params: {
                 left_root: pairData.left,
                 right_root: pairData.right,

@@ -2,7 +2,7 @@ const {expect} = require('chai');
 const logger = require('mocha-logger');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
-const {Migration, TOKEN_CONTRACTS_PATH, afterRun, Constants} = require(process.cwd() + '/scripts/utils');
+const {Migration, TOKEN_CONTRACTS_PATH, afterRun, Constants, displayTx} = require(process.cwd() + '/scripts/utils');
 const { Command } = require('commander');
 const program = new Command();
 
@@ -22,7 +22,7 @@ const options = program.opts();
 
 options.left = options.left || 'foo';
 options.right = options.right || 'bar';
-options.old_contract_name = options.old_contract_name || 'PrevDexPair';
+options.old_contract_name = options.old_contract_name || 'DexPairPrev';
 options.new_contract_name = options.new_contract_name || 'DexPair';
 options.pool_type = options.pool_type || '1';
 
@@ -73,19 +73,11 @@ const loadPairData = async (pair, contractName) => {
   data.right_balance = balances.right_balance.toString();
 
   const fee_params = await pair.call({method: 'getFeeParams'});
-  if (contractName === 'DexPairPrev') {
-    data.fee_pool = fee_params.numerator.div(fee_params.denominator).times(100).toString();
-    data.fee_beneficiary = '0';
-    data.fee_beneficiary_address = locklift.utils.zeroAddress;
-    data.threshold = {};
-    data.pool_type = 1;
-  } else {
-    data.fee_pool = fee_params.pool_numerator.div(fee_params.denominator).times(100).toString();
-    data.fee_beneficiary = fee_params.beneficiary_numerator.div(fee_params.denominator).times(100).toString();
-    data.fee_beneficiary_address = fee_params.beneficiary;
-    data.threshold = fee_params.threshold;
-    data.pool_type = (await pair.call({method: 'getPoolType'})).toNumber();
-  }
+  data.fee_pool = fee_params.pool_numerator.div(fee_params.denominator).times(100).toString();
+  data.fee_beneficiary = fee_params.beneficiary_numerator.div(fee_params.denominator).times(100).toString();
+  data.fee_beneficiary_address = fee_params.beneficiary;
+  data.threshold = fee_params.threshold;
+  data.pool_type = (await pair.call({method: 'getPoolType'})).toNumber();
 
   return data;
 }
@@ -124,7 +116,7 @@ describe('Test Dex Pair contract upgrade', async function () {
 
     const tx = await account.runTarget({
       contract: dexRoot,
-      method: options.old_contract_name === 'DexPairPrev' ? 'upgradeLegacyPair' : 'upgradePair',
+      method: 'upgradePair',
       params: {
         left_root: tokenFoo.address,
         right_root: tokenBar.address,
@@ -136,7 +128,7 @@ describe('Test Dex Pair contract upgrade', async function () {
     });
 
     console.log(`##########################`);
-    console.log(`txId: ${tx.id}`);
+    displayTx(tx);
     console.log(`##########################`);
 
     NewVersionContract.setAddress(dexPairFooBar.address);

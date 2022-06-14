@@ -1,4 +1,4 @@
-const {Migration} = require(process.cwd() + '/scripts/migration')
+const {Migration} = require(process.cwd() + '/scripts/utils')
 const { Command } = require('commander');
 
 const migration = new Migration();
@@ -16,7 +16,7 @@ async function main() {
 
     const key_number = +(options.key_number || '0');
 
-    const [keyPair] = await locklift.keys.getKeyPairs();
+    const keyPairs = await locklift.keys.getKeyPairs();
     const account = await locklift.factory.getAccount("Wallet");
     migration.load(account, `Account${key_number+1}`)
 
@@ -31,7 +31,7 @@ async function main() {
             flags: 128,
             payload: ''
         },
-        keyPair
+        keyPair: keyPairs[key_number]
     });
 }
 

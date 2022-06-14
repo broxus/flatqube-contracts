@@ -21,11 +21,25 @@
 		{
 			"name": "buildExchangePayload",
 			"inputs": [
-				{"name":"id","type":"uint64"},
-				{"name":"amount","type":"uint128"},
 				{"name":"pair","type":"address"},
+				{"name":"id","type":"uint64"},
+				{"name":"deployWalletValue","type":"uint128"},
 				{"name":"expectedAmount","type":"uint128"},
-				{"name":"deployWalletValue","type":"uint128"}
+				{"name":"amount","type":"uint128"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "buildCrossPairExchangePayload",
+			"inputs": [
+				{"name":"pair","type":"address"},
+				{"name":"id","type":"uint64"},
+				{"name":"deployWalletValue","type":"uint128"},
+				{"name":"expectedAmount","type":"uint128"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"steps","type":"tuple[]"},
+				{"name":"amount","type":"uint128"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
@@ -36,7 +50,7 @@
 			"inputs": [
 				{"name":"value0","type":"address"},
 				{"name":"amount","type":"uint128"},
-				{"name":"value2","type":"address"},
+				{"name":"sender","type":"address"},
 				{"name":"value3","type":"address"},
 				{"name":"user","type":"address"},
 				{"name":"payload","type":"cell"}
