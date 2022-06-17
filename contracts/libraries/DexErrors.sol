@@ -39,4 +39,22 @@ library DexErrors {
     uint16 constant UNSUPPORTED_POOL_TYPE            = 133;
     uint16 constant WRONG_AMOUNT                     = 134;
     uint16 constant WRONG_TOKEN_ROOT                 = 135;
+
+    /// @dev The timestamp must be positive
+    uint16 constant NON_POSITIVE_TIMESTAMP           = 136;
+
+    /// @dev fromTimestamp must be lower or equal to the toTimestamp
+    uint16 constant FROM_IS_BIGGER_THAN_TO           = 137;
+
+    /// @dev Oracle was already initialized
+    uint16 constant ALREADY_INITIALIZED              = 138;
+
+    /// @dev Oracle is not initialized
+    uint16 constant NOT_INITIALIZED                  = 139;
+
+    /// @dev Caller must be owner of the pair
+    uint16 constant CALLER_IS_NOT_OWNER              = 140;
+
+    /// @dev A new cardinality must be bigger than previous
+    uint16 constant LOWER_OR_EQUAL_CARDINALITY       = 141;
 }
