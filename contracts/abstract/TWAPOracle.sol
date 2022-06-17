@@ -38,8 +38,8 @@ abstract contract TWAPOracle is ITWAPOracle {
     }
 
     /// @dev Needs to be implemented by pair
-    /// @return Reserves Current pair's tokens reserves
-    function _getReserves() internal view virtual returns (Reserves);
+    /// @return uint128[] Current pair's tokens reserves
+    function _reserves() internal view virtual returns (uint128[]);
 
     function isInitialized() external view responsible override returns (bool) {
         return {
@@ -194,8 +194,8 @@ abstract contract TWAPOracle is ITWAPOracle {
     /// @param _timestamp UNIX timestamp in seconds of the observation
     /// @return Observation An observation that was written or an empty observation if it wasn't processed
     function write(
-        uint _token0ReserveOld,
-        uint _token1ReserveOld,
+        uint128 _token0ReserveOld,
+        uint128 _token1ReserveOld,
         uint32 _timestamp
     ) internal returns (Observation) {
         // Check that oracle is initialized or return an empty observation
@@ -214,13 +214,13 @@ abstract contract TWAPOracle is ITWAPOracle {
 
         // Calculate the interval between points and get current reserves
         uint32 timeElapsed = _timestamp - lastTimestamp;
-        Reserves reserves = _getReserves();
+        uint128[] reserves = _reserves();
 
         // Checking can oracle write this point or return an empty point
         if (timeElapsed < _minInterval) {
             uint rateDelta = _calculateRateDelta(
-                reserves.token0,
-                reserves.token1,
+                reserves[0],
+                reserves[1],
                 _token0ReserveOld,
                 _token1ReserveOld
             );
@@ -233,8 +233,8 @@ abstract contract TWAPOracle is ITWAPOracle {
         Point next = _createNextPoint(
             lastPoint,
             timeElapsed,
-            reserves.token0,
-            reserves.token1
+            reserves[0],
+            reserves[1]
         );
 
         // Write a new point
@@ -287,12 +287,12 @@ abstract contract TWAPOracle is ITWAPOracle {
 
             // If they equal to the last point then just return reserves ratio
             if (fromObservation.timestamp == lastTimestamp) {
-                Reserves reserves = _getReserves();
+                uint128[] reserves = _reserves();
 
                 rateOpt.set(
                     Rate(
-                        FixedPoint128.div(FixedPoint128.encode(uint128(reserves.token0)), uint128(reserves.token1)),
-                        FixedPoint128.div(FixedPoint128.encode(uint128(reserves.token1)), uint128(reserves.token0)),
+                        FixedPoint128.div(FixedPoint128.encode(reserves[0]), reserves[1]),
+                        FixedPoint128.div(FixedPoint128.encode(reserves[1]), reserves[0]),
                         fromObservation.timestamp,
                         toObservation.timestamp
                     )
@@ -323,16 +323,16 @@ abstract contract TWAPOracle is ITWAPOracle {
     function _createNextPoint(
         Point _previous,
         uint32 _timeElapsed,
-        uint _token0Reserve,
-        uint _token1Reserve
+        uint128 _token0Reserve,
+        uint128 _token1Reserve
     ) private pure returns (Point) {
         // Encode reserves to FP128
-        uint token0ReserveX128 = FixedPoint128.encode(uint128(_token0Reserve));
-        uint token1ReserveX128 = FixedPoint128.encode(uint128(_token1Reserve));
+        uint token0ReserveX128 = FixedPoint128.encode(_token0Reserve);
+        uint token1ReserveX128 = FixedPoint128.encode(_token1Reserve);
 
         // Calculate cumulatives' delta
-        uint price0To1CumulativeDelta = FixedPoint128.div(token0ReserveX128 * _timeElapsed, uint128(_token1Reserve));
-        uint price1To0CumulativeDelta = FixedPoint128.div(token1ReserveX128 * _timeElapsed, uint128(_token0Reserve));
+        uint price0To1CumulativeDelta = FixedPoint128.div(token0ReserveX128 * _timeElapsed, _token1Reserve);
+        uint price1To0CumulativeDelta = FixedPoint128.div(token1ReserveX128 * _timeElapsed, _token0Reserve);
 
         return Point(
             _previous.price0To1Cumulative + price0To1CumulativeDelta,
@@ -347,10 +347,10 @@ abstract contract TWAPOracle is ITWAPOracle {
     /// @param _token1ReserveOld Previous token 1 reserve
     /// @return uint Rate's percent delta in FP128 representation
     function _calculateRateDelta(
-        uint _token0ReserveNew,
-        uint _token1ReserveNew,
-        uint _token0ReserveOld,
-        uint _token1ReserveOld
+        uint128 _token0ReserveNew,
+        uint128 _token1ReserveNew,
+        uint128 _token0ReserveOld,
+        uint128 _token1ReserveOld
     ) private pure returns (uint) {
         // Check input params
         if (
@@ -362,8 +362,8 @@ abstract contract TWAPOracle is ITWAPOracle {
             return 0;
         }
 
-        uint128 numerator = uint128(_token0ReserveNew * _token1ReserveOld);
-        uint128 denominator = uint128(_token0ReserveOld * _token1ReserveNew);
+        uint128 numerator = _token0ReserveNew * _token1ReserveOld;
+        uint128 denominator = _token0ReserveOld * _token1ReserveNew;
 
         uint resultX128 = FixedPoint128.div(FixedPoint128.encode(numerator), denominator);
         uint hundredPercentsX128 = FixedPoint128.FIXED_POINT_128_MULTIPLIER;

@@ -2,11 +2,10 @@ pragma ton-solidity >= 0.57.1;
 
 import "./IOracle.sol";
 import "../structures/IRate.sol";
-import "../structures/IReserves.sol";
 
 /// @title TWAP-Oracle Interface
 /// @notice Interface for interaction with pair's TWAP-Oracle
-interface ITWAPOracle is IOracle, IRate, IReserves {
+interface ITWAPOracle is IOracle, IRate {
     /// @dev Emits when the minimum rate's delta between points was updated
     event OracleMinRateDeltaUpdated(uint);
 

@@ -33,8 +33,9 @@ import "./structures/IAmplificationCoefficient.sol";
 import "./structures/IPoolTokenData.sol";
 import "./DexPlatform.sol";
 import "./abstract/DexContractBase.sol";
+import "./abstract/TWAPOracle.sol";
 
-contract DexPair is DexContractBase, IDexConstantProductPair {
+contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // Data
@@ -1694,7 +1695,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         }
     }
 
-    function _reserves() internal view returns(uint128[]){
+    function _reserves() internal view override returns(uint128[]){
         uint128[] r = new uint128[](0);
         r.push(left_balance);
         r.push(right_balance);
