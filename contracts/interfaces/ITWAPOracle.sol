@@ -12,8 +12,7 @@ interface ITWAPOracle is IOracle, IRate {
     /// @notice Sets the minimum rate's delta between points
     /// @dev Only the pair's owner can change
     /// @param _delta Percent in FP128 representation. 0.01 * 2 ** 128 == 1%
-    /// @return bool Whether or not minRateDelta was updated
-    function setMinRateDelta(uint _delta) external responsible returns (bool);
+    function setMinRateDelta(uint _delta) external;
 
     /// @notice Get the current minimum rate delta in FP128 representation
     /// @return uint Minimum rate delta in FP128 representation

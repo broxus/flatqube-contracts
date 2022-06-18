@@ -13,9 +13,6 @@ import "../libraries/DexGas.sol";
 /// @notice Stores, calculates, and provides prices for DEX pair
 /// @dev A contract is abstract - to be sure that it will be inherited by another contract
 abstract contract TWAPOracle is ITWAPOracle {
-    /// @dev Owner of the pair
-    address private static _owner;
-
     /// @dev Historical data on prices
     mapping(uint32 => Point) private _points;
 
@@ -31,9 +28,8 @@ abstract contract TWAPOracle is ITWAPOracle {
     /// @dev Minimum rate percent delta in FP128 representation to write the next point
     uint private _minRateDelta = FixedPoint128.div(FixedPoint128.FIXED_POINT_128_MULTIPLIER, 100);
 
-    /// @dev Only the pair's owner can call a function with this modifier
-    modifier onlyOwner() {
-        require(msg.sender == _owner, DexErrors.CALLER_IS_NOT_OWNER);
+    /// @dev Only the pair's root can call a function with this modifier
+    modifier onlyRoot() virtual {
         _;
     }
 
@@ -49,18 +45,12 @@ abstract contract TWAPOracle is ITWAPOracle {
         } !_points.empty();
     }
 
-    function setMinInterval(uint8 _interval) external responsible onlyOwner override returns (bool) {
+    function setMinInterval(uint8 _interval) external onlyRoot override {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         // Update minimum interval
         _minInterval = _interval;
         emit OracleMinIntervalUpdated(_interval);
-
-        return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.ALL_NOT_RESERVED
-        } true;
     }
 
     function getMinInterval() external view responsible override returns (uint8) {
@@ -71,7 +61,7 @@ abstract contract TWAPOracle is ITWAPOracle {
         } _minInterval;
     }
 
-    function setCardinality(uint16 _newCardinality) external responsible onlyOwner override returns (bool) {
+    function setCardinality(uint16 _newCardinality) external onlyRoot override {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         // Check input params
@@ -80,12 +70,6 @@ abstract contract TWAPOracle is ITWAPOracle {
         // Update cardinality
         _cardinality = _newCardinality;
         emit OracleCardinalityUpdated(_newCardinality);
-
-        return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.ALL_NOT_RESERVED
-        } true;
     }
 
     function getCardinality() external view responsible override returns (uint16) {
@@ -96,18 +80,12 @@ abstract contract TWAPOracle is ITWAPOracle {
         } _cardinality;
     }
 
-    function setMinRateDelta(uint _delta) external responsible onlyOwner override returns (bool) {
+    function setMinRateDelta(uint _delta) external onlyRoot override {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         // Update minimum rate percent delta
         _minRateDelta = _delta;
         emit OracleMinRateDeltaUpdated(_delta);
-
-        return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.ALL_NOT_RESERVED
-        } true;
     }
 
     function getMinRateDelta() external view responsible override returns (uint) {

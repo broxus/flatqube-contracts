@@ -3109,6 +3109,237 @@ PUSHINT 130
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
+.macro setMinInterval
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexRoot.sol, 417
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 8
+ENDS
+.loc ../contracts/DexRoot.sol, 0
+CALLREF {
+	CALL $setMinInterval_internal_macro$
+}
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro setMinInterval_internal_macro
+.loc ../contracts/DexRoot.sol, 397
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 17
+SDEQ
+GETGLOB 9
+GETGLOB 20
+SDEQ
+OR
+AND
+THROWIFNOT 115
+.loc ../contracts/DexRoot.sol, 422
+PUSHINT 1000000000
+GETPARAM 7
+FIRST
+DEPTH
+ADDCONST -2
+PICK
+SUB
+UFITS 128
+MAX
+PUSHINT 2
+RAWRESERVE
+.loc ../contracts/DexRoot.sol, 424
+ROTREV
+CALLREF {
+	CALL $_expectedPairAddress_internal_macro$
+}
+NEWC
+STSLICECONST x62_
+STSLICE
+PUSHSLICE x0000000000000000000000000000d00e788f_
+STSLICER
+STU 8
+ENDC
+PUSHINT 128
+SENDRAWMSG
+.loc ../contracts/DexRoot.sol, 0
+
+.macro setCardinality
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexRoot.sol, 429
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 16
+ENDS
+.loc ../contracts/DexRoot.sol, 0
+CALLREF {
+	CALL $setCardinality_internal_macro$
+}
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro setCardinality_internal_macro
+.loc ../contracts/DexRoot.sol, 397
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 17
+SDEQ
+GETGLOB 9
+GETGLOB 20
+SDEQ
+OR
+AND
+THROWIFNOT 115
+.loc ../contracts/DexRoot.sol, 434
+PUSHINT 1000000000
+GETPARAM 7
+FIRST
+DEPTH
+ADDCONST -2
+PICK
+SUB
+UFITS 128
+MAX
+PUSHINT 2
+RAWRESERVE
+.loc ../contracts/DexRoot.sol, 436
+ROTREV
+CALLREF {
+	CALL $_expectedPairAddress_internal_macro$
+}
+NEWC
+STSLICECONST x62_
+STSLICE
+PUSHSLICE x0000000000000000000000000000cec6ddb1_
+STSLICER
+STU 16
+ENDC
+PUSHINT 128
+SENDRAWMSG
+.loc ../contracts/DexRoot.sol, 0
+
+.macro setMinRateDelta
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexRoot.sol, 441
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 256
+ENDS
+.loc ../contracts/DexRoot.sol, 0
+CALLREF {
+	CALL $setMinRateDelta_internal_macro$
+}
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro setMinRateDelta_internal_macro
+.loc ../contracts/DexRoot.sol, 397
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 17
+SDEQ
+GETGLOB 9
+GETGLOB 20
+SDEQ
+OR
+AND
+THROWIFNOT 115
+.loc ../contracts/DexRoot.sol, 446
+PUSHINT 1000000000
+GETPARAM 7
+FIRST
+DEPTH
+ADDCONST -2
+PICK
+SUB
+UFITS 128
+MAX
+PUSHINT 2
+RAWRESERVE
+.loc ../contracts/DexRoot.sol, 448
+ROTREV
+CALLREF {
+	CALL $_expectedPairAddress_internal_macro$
+}
+NEWC
+STSLICECONST x62_
+STSLICE
+PUSHSLICE x000000000000000000000000000019161c9f_
+STSLICER
+STU 256
+ENDC
+PUSHINT 128
+SENDRAWMSG
+.loc ../contracts/DexRoot.sol, 0
+
 .globl	_expectedAccountAddress_internal
 .type	_expectedAccountAddress_internal, @function
 CALL $_expectedAccountAddress_internal_macro$
@@ -3533,7 +3764,7 @@ THROW 0
 
 .macro public_function_selector
 DUP
-PUSHINT 1154017489
+PUSHINT 1025233701
 LEQ
 IFJMPREF {
 	DUP
@@ -3595,7 +3826,7 @@ IFJMPREF {
 		}
 	}
 	DUP
-	PUSHINT 746385297
+	PUSHINT 720190441
 	LEQ
 	IFJMPREF {
 		DUP
@@ -3603,6 +3834,12 @@ IFJMPREF {
 		EQUAL
 		IFJMPREF {
 			CALL $requestUpgradeAccount$
+		}
+		DUP
+		PUSHINT 676440657
+		EQUAL
+		IFJMPREF {
+			CALL $setMinRateDelta$
 		}
 		DUP
 		PUSHINT 694778722
@@ -3616,17 +3853,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $deployAccount$
 		}
+	}
+	DUP
+	PUSHINT 1025233701
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 746385297
 		EQUAL
 		IFJMPREF {
 			CALL $getExpectedPairAddress$
 		}
-	}
-	DUP
-	PUSHINT 1154017489
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 803830826
 		EQUAL
@@ -3645,22 +3882,22 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getVault$
 		}
+	}
+}
+DUP
+PUSHINT 1875732440
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 1342453134
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1154017489
 		EQUAL
 		IFJMPREF {
 			CALL $getExpectedAccountAddress$
 		}
-	}
-}
-DUP
-PUSHINT 1971306538
-LEQ
-IFJMPREF {
-	DUP
-	PUSHINT 1369532293
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1241152735
 		EQUAL
@@ -3679,17 +3916,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getPairCode$
 		}
+	}
+	DUP
+	PUSHINT 1632005121
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1369532293
 		EQUAL
 		IFJMPREF {
 			CALL $upgradeLegacyPair$
 		}
-	}
-	DUP
-	PUSHINT 1656985116
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1526386332
 		EQUAL
@@ -3708,17 +3945,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $setVaultOnce$
 		}
+	}
+	DUP
+	PUSHINT 1725189621
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1656985116
 		EQUAL
 		IFJMPREF {
 			CALL $getOwner$
 		}
-	}
-	DUP
-	PUSHINT 1782970727
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1707282005
 		EQUAL
@@ -3737,17 +3974,23 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $platform_code$
 		}
+	}
+	DUP
+	PUSHINT 1875732440
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1782970727
 		EQUAL
 		IFJMPREF {
 			CALL $deployPair$
 		}
-	}
-	DUP
-	PUSHINT 1971306538
-	LEQ
-	IFJMPREF {
+		DUP
+		PUSHINT 1790998890
+		EQUAL
+		IFJMPREF {
+			CALL $setMinInterval$
+		}
 		DUP
 		PUSHINT 1809145905
 		EQUAL
@@ -3760,6 +4003,16 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $setPairAmplificationCoefficient$
 		}
+	}
+}
+DUP
+PUSHINT 2144984146
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 1997691841
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1876367341
 		EQUAL
@@ -3772,17 +4025,18 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getPairVersion$
 		}
-	}
-}
-DUP
-PUSHINT 2144984146
-LEQ
-IFJMPREF {
-	DUP
-	PUSHINT 1982402231
-	EQUAL
-	IFJMPREF {
-		CALL $getAccountCode$
+		DUP
+		PUSHINT 1982402231
+		EQUAL
+		IFJMPREF {
+			CALL $getAccountCode$
+		}
+		DUP
+		PUSHINT 1997691841
+		EQUAL
+		IFJMPREF {
+			CALL $setCardinality$
+		}
 	}
 	DUP
 	PUSHINT 2144984146

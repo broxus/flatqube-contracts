@@ -39,4 +39,34 @@ interface IDexRoot is IFeeParams {
         FeeParams params,
         address send_gas_to
     ) external view;
+
+    /// @notice Proxy for TWAPOracle's setMinInterval
+    /// @param _leftRoot Address of the left TokenRoot
+    /// @param _rightRoot Address of the right TokenRoot
+    /// @param _interval The interval between points in seconds up to 255 seconds(4.25 minutes)
+    function setMinInterval(
+        address _leftRoot,
+        address _rightRoot,
+        uint8 _interval
+    ) external view;
+
+    /// @notice Proxy for TWAPOracle's setCardinality
+    /// @param _leftRoot Address of the left TokenRoot
+    /// @param _rightRoot Address of the right TokenRoot
+    /// @param _newCardinality A new count of observations
+    function setCardinality(
+        address _leftRoot,
+        address _rightRoot,
+        uint16 _newCardinality
+    ) external view;
+
+    /// @notice Proxy for TWAPOracle's setMinRateDelta
+    /// @param _leftRoot Address of the left TokenRoot
+    /// @param _rightRoot Address of the right TokenRoot
+    /// @param _delta Percent in FP128 representation. 0.01 * 2 ** 128 == 1%
+    function setMinRateDelta(
+        address _leftRoot,
+        address _rightRoot,
+        uint _delta
+    ) external view;
 }

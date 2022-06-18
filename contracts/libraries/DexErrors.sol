@@ -52,9 +52,6 @@ library DexErrors {
     /// @dev Oracle is not initialized
     uint16 constant NOT_INITIALIZED                  = 139;
 
-    /// @dev Caller must be owner of the pair
-    uint16 constant CALLER_IS_NOT_OWNER              = 140;
-
     /// @dev A new cardinality must be bigger than previous
-    uint16 constant LOWER_OR_EQUAL_CARDINALITY       = 141;
+    uint16 constant LOWER_OR_EQUAL_CARDINALITY       = 140;
 }

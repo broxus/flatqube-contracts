@@ -25,8 +25,7 @@ interface IOracle is IPoint, IObservation {
     /// @notice Sets the minimum interval between points
     /// @dev Only the pair's owner can change
     /// @param _interval The interval between points in seconds up to 255 seconds(4.25 minutes)
-    /// @return bool Whether or not minInterval was updated
-    function setMinInterval(uint8 _interval) external responsible returns (bool);
+    function setMinInterval(uint8 _interval) external;
 
     /// @notice Get the current minimum interval between points in seconds
     /// @return uint8 Minimum interval in seconds
@@ -35,8 +34,7 @@ interface IOracle is IPoint, IObservation {
     /// @notice Sets bigger cardinality for observations
     /// @dev Only the pair's owner can change
     /// @param _newCardinality A new count of observations
-    /// @return bool Whether or not cardinality was updated
-    function setCardinality(uint16 _newCardinality) external responsible returns (bool);
+    function setCardinality(uint16 _newCardinality) external;
 
     /// @notice Get current cardinality
     /// @return uint16 Observations' cardinality

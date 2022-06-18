@@ -1741,7 +1741,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
         _;
     }
 
-    modifier onlyRoot() {
+    modifier onlyRoot() override {
         require(msg.sender == root, DexErrors.NOT_ROOT);
         _;
     }
