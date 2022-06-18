@@ -409,4 +409,18 @@ abstract contract TWAPOracle is ITWAPOracle {
 
         return observationOpt;
     }
+
+    /// @dev Pack all oracle's data for a contract upgrade
+    /// @return TvmCell Packed data to unpack after code upgrade
+    function _packAllOracleData() internal view returns (TvmCell) {
+        TvmBuilder builder;
+
+        builder.store(_points);
+        builder.store(_cardinality);
+        builder.store(_length);
+        builder.store(_minInterval);
+        builder.store(_minRateDelta);
+
+        return builder.toCell();
+    }
 }

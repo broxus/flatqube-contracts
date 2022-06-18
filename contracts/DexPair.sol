@@ -1798,6 +1798,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
             );
 
             builder.store(other_data);   // ref3
+            builder.store(_packAllOracleData());    // ref4
 
             // set code after complete this method
             tvm.setcode(code);
