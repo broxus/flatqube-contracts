@@ -144,7 +144,7 @@ abstract contract TWAPOracle is ITWAPOracle {
     /// @dev Initializes oracle with the first point
     /// @param _timestamp UNIX timestamp in seconds of observations start
     /// @return bool Whether or not oracle was initialized
-    function initialize(uint32 _timestamp) internal returns (bool) {
+    function _initialize(uint32 _timestamp) internal returns (bool) {
         // Check input params and initialization status of the oracle
         require(_points.empty(), DexErrors.ALREADY_INITIALIZED);
         require(_timestamp > 0, DexErrors.NON_POSITIVE_TIMESTAMP);
@@ -171,7 +171,7 @@ abstract contract TWAPOracle is ITWAPOracle {
     /// @param _token1ReserveOld Previous token 1 reserve
     /// @param _timestamp UNIX timestamp in seconds of the observation
     /// @return Observation An observation that was written or an empty observation if it wasn't processed
-    function write(
+    function _write(
         uint128 _token0ReserveOld,
         uint128 _token1ReserveOld,
         uint32 _timestamp

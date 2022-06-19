@@ -240,6 +240,9 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
         TvmSlice payloadSlice = payload.toSlice();
 
+        uint128 leftTokenReserveOld = left_balance;
+        uint128 rightTokenReserveOld = right_balance;
+
         bool need_cancel = !active ||
             payloadSlice.bits() < 200 ||
             lp_supply == 0;
@@ -812,7 +815,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                 cancel_payload
             );
         } else {
-            _sync();
+            _sync(leftTokenReserveOld, rightTokenReserveOld);
         }
     }
 
@@ -852,6 +855,9 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
         require((left_amount > 0 && right_amount > 0) || (auto_change && (left_amount + right_amount > 0)),
             DexErrors.AMOUNT_TOO_LOW);
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
+
+        uint128 leftTokenReserveOld = left_balance;
+        uint128 rightTokenReserveOld = right_balance;
 
         uint128 lp_tokens_amount;
 
@@ -985,7 +991,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
             empty
         );
 
-        _sync();
+        _sync(leftTokenReserveOld, rightTokenReserveOld);
 
         ISuccessCallback(msg.sender).successCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(call_id);
     }
@@ -1153,9 +1159,12 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
         require(expected_lp_root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        uint128 leftTokenReserveOld = left_balance;
+        uint128 rightTokenReserveOld = right_balance;
+
         TokenOperation[] operations = _withdrawLiquidityBase(lp_amount, account_owner);
 
-        _sync();
+        _sync(leftTokenReserveOld, rightTokenReserveOld);
 
         IDexPairOperationCallback(account_owner).dexPairWithdrawSuccess{
             value: DexGas.OPERATION_CALLBACK_BASE + 3,
@@ -1255,6 +1264,9 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
 
             tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+            uint128 leftTokenReserveOld = left_balance;
+            uint128 rightTokenReserveOld = right_balance;
+
             left_balance += spent_amount - left_beneficiary_fee;
             right_balance -= right_amount;
 
@@ -1276,7 +1288,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                 fees
             );
 
-            _sync();
+            _sync(leftTokenReserveOld, rightTokenReserveOld);
 
             IDexPairOperationCallback(account_owner).dexPairExchangeSuccess{
                 value: DexGas.OPERATION_CALLBACK_BASE + 1,
@@ -1308,6 +1320,9 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
 
             tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+            uint128 leftTokenReserveOld = left_balance;
+            uint128 rightTokenReserveOld = right_balance;
+
             right_balance += spent_amount - right_beneficiary_fee;
             left_balance -= left_amount;
 
@@ -1329,7 +1344,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                 fees
             );
 
-            _sync();
+            _sync(leftTokenReserveOld, rightTokenReserveOld);
 
             IDexPairOperationCallback(account_owner).dexPairExchangeSuccess{
                 value: DexGas.OPERATION_CALLBACK_BASE + 1,
@@ -1449,6 +1464,9 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        uint128 leftTokenReserveOld = left_balance;
+        uint128 rightTokenReserveOld = right_balance;
+
         TvmSlice payloadSlice = payload.toSlice();
 
         uint128 expected_amount = payloadSlice.decode(uint128);
@@ -1495,7 +1513,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                     fees
                 );
 
-                _sync();
+                _sync(leftTokenReserveOld, rightTokenReserveOld);
 
                 IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
                     value: DexGas.OPERATION_CALLBACK_BASE + 4,
@@ -1609,7 +1627,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                     fees
                 );
 
-                _sync();
+                _sync(leftTokenReserveOld, rightTokenReserveOld);
 
                 IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
                     value: DexGas.OPERATION_CALLBACK_BASE + 4,
@@ -1703,7 +1721,16 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
         return r;
     }
 
-    function _sync() internal view {
+    function _sync(
+        uint128 _token0ReserveOld,
+        uint128 _token1ReserveOld
+    ) internal {
+        _write(
+            _token0ReserveOld,
+            _token1ReserveOld,
+            now
+        );
+
         emit Sync(_reserves(), lp_supply);
     }
 
@@ -1857,6 +1884,8 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                 address, address, uint128,
                 address, address, uint128
             ));
+
+            _initialize(now);
         } else if (old_pool_type == DexPoolTypes.STABLESWAP) {
             active = true;
             TvmCell otherData = s.loadRef(); // ref 3
