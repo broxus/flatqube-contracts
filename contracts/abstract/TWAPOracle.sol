@@ -17,16 +17,16 @@ abstract contract TWAPOracle is ITWAPOracle {
     mapping(uint32 => Point) private _points;
 
     /// @dev Maximum count of points up to 65535
-    uint16 private _cardinality = 1000;
+    uint16 private _cardinality;
 
     /// @dev A current count of points
     uint16 private _length;
 
     /// @dev Minimum interval in seconds between points up to 255 seconds(4.25 minutes)
-    uint8 private _minInterval = 15;
+    uint8 private _minInterval;
 
     /// @dev Minimum rate percent delta in FP128 representation to write the next point
-    uint private _minRateDelta = FixedPoint128.div(FixedPoint128.FIXED_POINT_128_MULTIPLIER, 100);
+    uint private _minRateDelta;
 
     /// @dev Only the pair's root can call a function with this modifier
     modifier onlyRoot() virtual {
@@ -43,6 +43,33 @@ abstract contract TWAPOracle is ITWAPOracle {
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } !_points.empty();
+    }
+
+    // TODO: Comment before release
+    /// @dev Only for test purposes. Comment it before release!
+    /// @param _newPoints Encoded points map
+    /// @param _newLength Size of the map
+    /// @return bool Whether or not _points was updated
+    function setPoints(
+        TvmCell _newPoints,
+        uint16 _newLength
+    ) external responsible returns (bool) {
+        tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
+
+        // Check input params
+        require(_newLength <= _cardinality, 1234);
+
+        // Update _points and _length
+        _length = _newLength;
+        _points = _newPoints
+            .toSlice()
+            .decode(mapping(uint32 => Point));
+
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.ALL_NOT_RESERVED
+        } true;
     }
 
     function setMinInterval(uint8 _interval) external onlyRoot override {
@@ -150,6 +177,11 @@ abstract contract TWAPOracle is ITWAPOracle {
         require(_timestamp > 0, DexErrors.NON_POSITIVE_TIMESTAMP);
 
         Point first = Point(0, 0);
+
+        // Initialize state
+        _cardinality = 1000;
+        _minInterval = 15;
+        _minRateDelta = FixedPoint128.div(FixedPoint128.FIXED_POINT_128_MULTIPLIER, 100);
 
         // Update _points and increase _length
         _points[_timestamp] = first;

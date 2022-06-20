@@ -97,6 +97,61 @@
 			]
 		},
 		{
+			"name": "getPoint",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"_timestamp","type":"uint32"}
+			],
+			"outputs": [
+				{"components":[{"name":"price0To1Cumulative","type":"uint256"},{"name":"price1To0Cumulative","type":"uint256"}],"name":"value0","type":"tuple"}
+			]
+		},
+		{
+			"name": "getCardinality",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint16"}
+			]
+		},
+		{
+			"name": "getLength",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint16"}
+			]
+		},
+		{
+			"name": "getMinInterval",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint8"}
+			]
+		},
+		{
+			"name": "getMinRateDelta",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint256"}
+			]
+		},
+		{
+			"name": "isInitialized",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"bool"}
+			]
+		},
+		{
 			"name": "newFunc",
 			"inputs": [
 			],
@@ -216,6 +271,11 @@
 		{"name":"_tmp_expected_callback_sender","type":"map(uint64,address)"},
 		{"name":"_tmp_sender_public_key","type":"map(uint64,uint256)"},
 		{"name":"_tmp_sender_address","type":"map(uint64,address)"},
+		{"components":[{"name":"price0To1Cumulative","type":"uint256"},{"name":"price1To0Cumulative","type":"uint256"}],"name":"_points","type":"map(uint32,tuple)"},
+		{"name":"_cardinality","type":"uint16"},
+		{"name":"_length","type":"uint16"},
+		{"name":"_minInterval","type":"uint8"},
+		{"name":"_minRateDelta","type":"uint256"},
 		{"name":"newTestField","type":"string"}
 	]
 }
