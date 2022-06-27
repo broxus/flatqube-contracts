@@ -54,4 +54,10 @@ library DexErrors {
 
     /// @dev A new cardinality must be bigger than previous
     uint16 constant LOWER_OR_EQUAL_CARDINALITY       = 140;
+
+    /// @dev Count can not be zero
+    uint16 constant NON_POSITIVE_COUNT               = 141;
+
+    /// @dev Count is bigger than current array's length
+    uint16 constant BIGGER_THAN_LENGTH               = 142;
 }

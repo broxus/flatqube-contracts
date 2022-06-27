@@ -107,6 +107,20 @@ abstract contract TWAPOracle is ITWAPOracle {
         } _cardinality;
     }
 
+    function removeLastNPoints(uint16 _count) external onlyRoot override {
+        tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
+
+        // Check input params
+        require(_count > 0, DexErrors.NON_POSITIVE_COUNT);
+        require(_count <= _length, DexErrors.BIGGER_THAN_LENGTH);
+
+        // Remove last point _count times and decrease length
+        for (uint16 i = 0; i < _count; i++) {
+            _points.delMin();
+            _length -= 1;
+        }
+    }
+
     function setMinRateDelta(uint _delta) external onlyRoot override {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 

@@ -3320,6 +3320,83 @@ PUSHINT 128
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
+.macro removeLastNPoints
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexRoot.sol, 462
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 16
+ENDS
+.loc ../contracts/DexRoot.sol, 0
+CALLREF {
+	CALL $removeLastNPoints_internal_macro$
+}
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro removeLastNPoints_internal_macro
+.loc ../contracts/DexRoot.sol, 406
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 17
+SDEQ
+GETGLOB 9
+GETGLOB 20
+SDEQ
+OR
+AND
+THROWIFNOT 115
+.loc ../contracts/DexRoot.sol, 467
+PUSHINT 1000000000
+GETPARAM 7
+FIRST
+DEPTH
+ADDCONST -2
+PICK
+SUB
+UFITS 128
+MAX
+PUSHINT 2
+RAWRESERVE
+.loc ../contracts/DexRoot.sol, 469
+ROTREV
+CALLREF {
+	CALL $_expectedPairAddress_internal_macro$
+}
+NEWC
+STSLICECONST x62_
+STSLICE
+PUSHSLICE x000000000000000000000000000092eae86d_
+STSLICER
+STU 16
+ENDC
+PUSHINT 128
+SENDRAWMSG
+.loc ../contracts/DexRoot.sol, 0
+
 .globl	_expectedAccountAddress_internal
 .type	_expectedAccountAddress_internal, @function
 CALL $_expectedAccountAddress_internal_macro$
@@ -3744,11 +3821,11 @@ THROW 0
 
 .macro public_function_selector
 DUP
-PUSHINT 1025233701
+PUSHINT 992568900
 LEQ
 IFJMPREF {
 	DUP
-	PUSHINT 308069545
+	PUSHINT 230920640
 	LEQ
 	IFJMPREF {
 		DUP
@@ -3764,22 +3841,28 @@ IFJMPREF {
 			CALL $onPairCreated$
 		}
 		DUP
+		PUSHINT 213079069
+		EQUAL
+		IFJMPREF {
+			CALL $removeLastNPoints$
+		}
+		DUP
 		PUSHINT 230920640
 		EQUAL
 		IFJMPREF {
 			CALL $forceUpgradeAccount$
 		}
+	}
+	DUP
+	PUSHINT 453826860
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 308069545
 		EQUAL
 		IFJMPREF {
 			CALL $upgradePair$
 		}
-	}
-	DUP
-	PUSHINT 565050858
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 316632852
 		EQUAL
@@ -3798,17 +3881,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $transferOwner$
 		}
+	}
+	DUP
+	PUSHINT 694778722
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 565050858
 		EQUAL
 		IFJMPREF {
 			CALL $isActive$
 		}
-	}
-	DUP
-	PUSHINT 720190441
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 588538914
 		EQUAL
@@ -3827,17 +3910,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getPendingOwner$
 		}
+	}
+	DUP
+	PUSHINT 992568900
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 720190441
 		EQUAL
 		IFJMPREF {
 			CALL $deployAccount$
 		}
-	}
-	DUP
-	PUSHINT 1025233701
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 746385297
 		EQUAL
@@ -3856,22 +3939,22 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getAccountVersion$
 		}
+	}
+}
+DUP
+PUSHINT 1809145905
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 1320360074
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1025233701
 		EQUAL
 		IFJMPREF {
 			CALL $getVault$
 		}
-	}
-}
-DUP
-PUSHINT 1875732440
-LEQ
-IFJMPREF {
-	DUP
-	PUSHINT 1342453134
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1154017489
 		EQUAL
@@ -3890,17 +3973,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $setManager$
 		}
+	}
+	DUP
+	PUSHINT 1543215676
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1342453134
 		EQUAL
 		IFJMPREF {
 			CALL $getPairCode$
 		}
-	}
-	DUP
-	PUSHINT 1632005121
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1369532293
 		EQUAL
@@ -3919,17 +4002,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $installOrUpdateAccountCode$
 		}
+	}
+	DUP
+	PUSHINT 1712122129
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1632005121
 		EQUAL
 		IFJMPREF {
 			CALL $setVaultOnce$
 		}
-	}
-	DUP
-	PUSHINT 1725189621
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1656985116
 		EQUAL
@@ -3948,17 +4031,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getManager$
 		}
+	}
+	DUP
+	PUSHINT 1809145905
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1725189621
 		EQUAL
 		IFJMPREF {
 			CALL $platform_code$
 		}
-	}
-	DUP
-	PUSHINT 1875732440
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1782970727
 		EQUAL
@@ -3977,12 +4060,6 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $acceptOwner$
 		}
-		DUP
-		PUSHINT 1875732440
-		EQUAL
-		IFJMPREF {
-			CALL $setPairAmplificationCoefficient$
-		}
 	}
 }
 DUP
@@ -3990,9 +4067,15 @@ PUSHINT 2144984146
 LEQ
 IFJMPREF {
 	DUP
-	PUSHINT 1997691841
+	PUSHINT 1982402231
 	LEQ
 	IFJMPREF {
+		DUP
+		PUSHINT 1875732440
+		EQUAL
+		IFJMPREF {
+			CALL $setPairAmplificationCoefficient$
+		}
 		DUP
 		PUSHINT 1876367341
 		EQUAL
@@ -4011,18 +4094,23 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getAccountCode$
 		}
+	}
+	DUP
+	PUSHINT 2144984146
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1997691841
 		EQUAL
 		IFJMPREF {
 			CALL $setCardinality$
 		}
-	}
-	DUP
-	PUSHINT 2144984146
-	EQUAL
-	IFJMPREF {
-		CALL $installPlatformOnce$
+		DUP
+		PUSHINT 2144984146
+		EQUAL
+		IFJMPREF {
+			CALL $installPlatformOnce$
+		}
 	}
 }
 

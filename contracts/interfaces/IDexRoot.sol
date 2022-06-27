@@ -69,4 +69,14 @@ interface IDexRoot is IFeeParams {
         address _rightRoot,
         uint _delta
     ) external view;
+
+    /// @notice Proxy for TWAPOracle's removeLastNPoints
+    /// @param _leftRoot Address of the left TokenRoot
+    /// @param _rightRoot Address of the right TokenRoot
+    /// @param _count Count of last points to remove
+    function removeLastNPoints(
+        address _leftRoot,
+        address _rightRoot,
+        uint16 _count
+    ) external view;
 }

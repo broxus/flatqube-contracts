@@ -39,4 +39,10 @@ interface IOracle is IPoint, IObservation {
     /// @notice Get current cardinality
     /// @return uint16 Observations' cardinality
     function getCardinality() external view responsible returns (uint16);
+
+    /// @notice Removes last n points from a historical array
+    /// @dev Use it if storage fees for pair upgrade are higher than fee limit
+    /// @dev Only the pair's owner can change
+    /// @param _count Count of last points to remove
+    function removeLastNPoints(uint16 _count) external;
 }

@@ -458,4 +458,16 @@ contract DexRoot is DexContractBase, IDexRoot, IResetGas, IUpgradable, IAmplific
             .setMinRateDelta{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_delta);
     }
+
+    function removeLastNPoints(
+        address _leftRoot,
+        address _rightRoot,
+        uint16 _count
+    ) override external view onlyManagerOrOwner {
+        tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
+
+        IDexConstantProductPair(_expectedPairAddress(_leftRoot, _rightRoot))
+            .removeLastNPoints{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            (_count);
+    }
 }
