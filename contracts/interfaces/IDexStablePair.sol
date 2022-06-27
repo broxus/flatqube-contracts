@@ -14,4 +14,5 @@ interface IDexStablePair is IDexPair, IAmplificationCoefficient, IDepositLiquidi
 
     function setAmplificationCoefficient(AmplificationCoefficient _A, address send_gas_to) external;
 
+    function getVirtualPrice() external view responsible returns (optional(uint256));
 }
