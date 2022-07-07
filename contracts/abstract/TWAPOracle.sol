@@ -72,7 +72,10 @@ abstract contract TWAPOracle is ITWAPOracle {
         } _cardinality;
     }
 
-    function removeLastNPoints(uint16 _count) external onlyRoot override {
+    function removeLastNPoints(
+        uint16 _count,
+        address _remainingGasTo
+    ) external onlyRoot override {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         // Check input params
@@ -84,6 +87,8 @@ abstract contract TWAPOracle is ITWAPOracle {
             _points.delMin();
             _length -= 1;
         }
+
+        _remainingGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
     }
 
     function setMinRateDelta(uint _delta) external onlyRoot override {

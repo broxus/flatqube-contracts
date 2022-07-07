@@ -462,12 +462,13 @@ contract DexRoot is DexContractBase, IDexRoot, IResetGas, IUpgradable, IAmplific
     function removeLastNPoints(
         address _leftRoot,
         address _rightRoot,
-        uint16 _count
+        uint16 _count,
+        address _remainingGasTo
     ) override external view onlyManagerOrOwner {
         tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
 
         IDexConstantProductPair(_expectedPairAddress(_leftRoot, _rightRoot))
             .removeLastNPoints{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (_count);
+            (_count, _remainingGasTo);
     }
 }

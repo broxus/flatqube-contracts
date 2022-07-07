@@ -74,9 +74,11 @@ interface IDexRoot is IFeeParams {
     /// @param _leftRoot Address of the left TokenRoot
     /// @param _rightRoot Address of the right TokenRoot
     /// @param _count Count of last points to remove
+    /// @param _remainingGasTo Recipient of the remaining gas
     function removeLastNPoints(
         address _leftRoot,
         address _rightRoot,
-        uint16 _count
+        uint16 _count,
+        address _remainingGasTo
     ) external view;
 }

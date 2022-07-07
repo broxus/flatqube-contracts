@@ -40,5 +40,9 @@ interface IOracle is IPoint, IObservation {
     /// @dev Use it if storage fees for pair upgrade are higher than fee limit
     /// @dev Only the pair's owner can change
     /// @param _count Count of last points to remove
-    function removeLastNPoints(uint16 _count) external;
+    /// @param _remainingGasTo Recipient of the remaining gas
+    function removeLastNPoints(
+        uint16 _count,
+        address _remainingGasTo
+    ) external;
 }
