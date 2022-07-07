@@ -815,7 +815,12 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                 cancel_payload
             );
         } else {
-            _sync(leftTokenReserveOld, rightTokenReserveOld);
+            _write(
+                leftTokenReserveOld,
+                rightTokenReserveOld,
+                now
+            );
+            _sync();
         }
     }
 
@@ -991,7 +996,12 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
             empty
         );
 
-        _sync(leftTokenReserveOld, rightTokenReserveOld);
+        _write(
+            leftTokenReserveOld,
+            rightTokenReserveOld,
+            now
+        );
+        _sync();
 
         ISuccessCallback(msg.sender).successCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(call_id);
     }
@@ -1164,7 +1174,12 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
 
         TokenOperation[] operations = _withdrawLiquidityBase(lp_amount, account_owner);
 
-        _sync(leftTokenReserveOld, rightTokenReserveOld);
+        _write(
+            leftTokenReserveOld,
+            rightTokenReserveOld,
+            now
+        );
+        _sync();
 
         IDexPairOperationCallback(account_owner).dexPairWithdrawSuccess{
             value: DexGas.OPERATION_CALLBACK_BASE + 3,
@@ -1288,7 +1303,12 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                 fees
             );
 
-            _sync(leftTokenReserveOld, rightTokenReserveOld);
+            _write(
+                leftTokenReserveOld,
+                rightTokenReserveOld,
+                now
+            );
+            _sync();
 
             IDexPairOperationCallback(account_owner).dexPairExchangeSuccess{
                 value: DexGas.OPERATION_CALLBACK_BASE + 1,
@@ -1344,7 +1364,12 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                 fees
             );
 
-            _sync(leftTokenReserveOld, rightTokenReserveOld);
+            _write(
+                leftTokenReserveOld,
+                rightTokenReserveOld,
+                now
+            );
+            _sync();
 
             IDexPairOperationCallback(account_owner).dexPairExchangeSuccess{
                 value: DexGas.OPERATION_CALLBACK_BASE + 1,
@@ -1513,7 +1538,12 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                     fees
                 );
 
-                _sync(leftTokenReserveOld, rightTokenReserveOld);
+                _write(
+                    leftTokenReserveOld,
+                    rightTokenReserveOld,
+                    now
+                );
+                _sync();
 
                 IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
                     value: DexGas.OPERATION_CALLBACK_BASE + 4,
@@ -1627,7 +1657,12 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                     fees
                 );
 
-                _sync(leftTokenReserveOld, rightTokenReserveOld);
+                _write(
+                    leftTokenReserveOld,
+                    rightTokenReserveOld,
+                    now
+                );
+                _sync();
 
                 IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
                     value: DexGas.OPERATION_CALLBACK_BASE + 4,
@@ -1721,16 +1756,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
         return r;
     }
 
-    function _sync(
-        uint128 _token0ReserveOld,
-        uint128 _token1ReserveOld
-    ) internal {
-        _write(
-            _token0ReserveOld,
-            _token1ReserveOld,
-            now
-        );
-
+    function _sync() view internal {
         emit Sync(_reserves(), lp_supply);
     }
 
