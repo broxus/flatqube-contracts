@@ -16,17 +16,11 @@ abstract contract TWAPOracle is ITWAPOracle {
     /// @dev Historical data on prices
     mapping(uint32 => Point) internal _points;
 
-    /// @dev Maximum count of points up to 65535
-    uint16 internal _cardinality;
-
     /// @dev A current count of points
     uint16 internal _length;
 
-    /// @dev Minimum interval in seconds between points up to 255 seconds(4.25 minutes)
-    uint8 private _minInterval;
-
-    /// @dev Minimum rate percent delta in FP128 representation to write the next point
-    uint private _minRateDelta;
+    /// @dev Oracle's options
+    OracleOptions internal _options;
 
     /// @dev Only the pair's root can call a function with this modifier
     modifier onlyRoot() virtual {
@@ -37,39 +31,28 @@ abstract contract TWAPOracle is ITWAPOracle {
     /// @return uint128[] Current pair's tokens reserves
     function _reserves() internal view virtual returns (uint128[]);
 
-    function setMinInterval(uint8 _interval) external onlyRoot override {
-        tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
-
-        // Update minimum interval
-        _minInterval = _interval;
-        emit OracleMinIntervalUpdated(_interval);
-    }
-
-    function getMinInterval() external view responsible override returns (uint8) {
-        return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.REMAINING_GAS
-        } _minInterval;
-    }
-
-    function setCardinality(uint16 _newCardinality) external onlyRoot override {
+    function setOracleOptions(
+        OracleOptions _newOptions,
+        address _remainingGasTo
+    ) external onlyRoot override {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         // Check input params
-        require(_newCardinality > _cardinality, DexErrors.LOWER_OR_EQUAL_CARDINALITY);
+        require(_newOptions.cardinality >= _options.cardinality, DexErrors.LOWER_CARDINALITY);
 
-        // Update cardinality
-        _cardinality = _newCardinality;
-        emit OracleCardinalityUpdated(_newCardinality);
+        // Update options
+        _options = _newOptions;
+        emit OracleOptionsUpdated(_newOptions);
+
+        _remainingGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
     }
 
-    function getCardinality() external view responsible override returns (uint16) {
+    function getOracleOptions() external view responsible override returns (OracleOptions) {
         return {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } _cardinality;
+        } _options;
     }
 
     function removeLastNPoints(
@@ -89,22 +72,6 @@ abstract contract TWAPOracle is ITWAPOracle {
         }
 
         _remainingGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
-    }
-
-    function setMinRateDelta(uint _delta) external onlyRoot override {
-        tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
-
-        // Update minimum rate percent delta
-        _minRateDelta = _delta;
-        emit OracleMinRateDeltaUpdated(_delta);
-    }
-
-    function getMinRateDelta() external view responsible override returns (uint) {
-        return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.REMAINING_GAS
-        } _minRateDelta;
     }
 
     function getObservation(uint32 _timestamp) external view responsible override returns (optional(Observation)) {
@@ -163,9 +130,11 @@ abstract contract TWAPOracle is ITWAPOracle {
         Point first = Point(0, 0);
 
         // Initialize state
-        _cardinality = 1000;
-        _minInterval = 15;
-        _minRateDelta = FixedPoint128.div(FixedPoint128.FIXED_POINT_128_MULTIPLIER, 100);
+        _options = OracleOptions(
+            15,
+            FixedPoint128.div(FixedPoint128.FIXED_POINT_128_MULTIPLIER, 100),
+            1000
+        );
 
         // Update _points and increase _length
         _points[_timestamp] = first;
@@ -211,7 +180,7 @@ abstract contract TWAPOracle is ITWAPOracle {
         uint128[] reserves = _reserves();
 
         // Checking can oracle write this point or return an empty point
-        if (timeElapsed < _minInterval) {
+        if (timeElapsed < _options.minInterval) {
             uint rateDelta = _calculateRateDelta(
                 reserves[0],
                 reserves[1],
@@ -219,7 +188,7 @@ abstract contract TWAPOracle is ITWAPOracle {
                 _token1ReserveOld
             );
 
-            if (rateDelta < _minRateDelta) {
+            if (rateDelta < _options.minRateDelta) {
                 return Observation(0, 0, 0);
             }
         }
@@ -235,7 +204,7 @@ abstract contract TWAPOracle is ITWAPOracle {
         _points[_timestamp] = next;
 
         // Increase length or delete the oldest point
-        if (_length < _cardinality) {
+        if (_length < _options.cardinality) {
             _length += 1;
         } else {
             _points.delMin();
@@ -432,10 +401,8 @@ abstract contract TWAPOracle is ITWAPOracle {
         TvmBuilder builder;
 
         builder.store(_points);
-        builder.store(_cardinality);
+        builder.store(_options);
         builder.store(_length);
-        builder.store(_minInterval);
-        builder.store(_minRateDelta);
 
         return builder.toCell();
     }

@@ -14,7 +14,7 @@ contract TestOracleDexPair is DexPair {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         // Check input params
-        require(_newLength <= _cardinality, 1234);
+        require(_newLength <= _options.cardinality, 1234);
 
         // Update _points and _length
         _length = _newLength;

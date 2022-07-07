@@ -353,37 +353,21 @@
 			]
 		},
 		{
-			"name": "setMinInterval",
+			"name": "setOracleOptions",
 			"inputs": [
-				{"name":"_interval","type":"uint8"}
+				{"components":[{"name":"minInterval","type":"uint8"},{"name":"minRateDelta","type":"uint256"},{"name":"cardinality","type":"uint16"}],"name":"_newOptions","type":"tuple"},
+				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
 		},
 		{
-			"name": "getMinInterval",
+			"name": "getOracleOptions",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
-				{"name":"value0","type":"uint8"}
-			]
-		},
-		{
-			"name": "setCardinality",
-			"inputs": [
-				{"name":"_newCardinality","type":"uint16"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "getCardinality",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"value0","type":"uint16"}
+				{"components":[{"name":"minInterval","type":"uint8"},{"name":"minRateDelta","type":"uint256"},{"name":"cardinality","type":"uint16"}],"name":"value0","type":"tuple"}
 			]
 		},
 		{
@@ -393,23 +377,6 @@
 				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
-			]
-		},
-		{
-			"name": "setMinRateDelta",
-			"inputs": [
-				{"name":"_delta","type":"uint256"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "getMinRateDelta",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"value0","type":"uint256"}
 			]
 		},
 		{
@@ -465,14 +432,6 @@
 	],
 	"events": [
 		{
-			"name": "OracleMinRateDeltaUpdated",
-			"inputs": [
-				{"name":"value0","type":"uint256"}
-			],
-			"outputs": [
-			]
-		},
-		{
 			"name": "OracleInitialized",
 			"inputs": [
 				{"components":[{"name":"timestamp","type":"uint32"},{"name":"price0To1Cumulative","type":"uint256"},{"name":"price1To0Cumulative","type":"uint256"}],"name":"value0","type":"tuple"}
@@ -489,17 +448,9 @@
 			]
 		},
 		{
-			"name": "OracleMinIntervalUpdated",
+			"name": "OracleOptionsUpdated",
 			"inputs": [
-				{"name":"value0","type":"uint8"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "OracleCardinalityUpdated",
-			"inputs": [
-				{"name":"value0","type":"uint16"}
+				{"components":[{"name":"minInterval","type":"uint8"},{"name":"minRateDelta","type":"uint256"},{"name":"cardinality","type":"uint16"}],"name":"value0","type":"tuple"}
 			],
 			"outputs": [
 			]
@@ -573,10 +524,8 @@
 		{"name":"_constructorFlag","type":"bool"},
 		{"name":"platform_code","type":"cell"},
 		{"components":[{"name":"price0To1Cumulative","type":"uint256"},{"name":"price1To0Cumulative","type":"uint256"}],"name":"_points","type":"map(uint32,tuple)"},
-		{"name":"_cardinality","type":"uint16"},
 		{"name":"_length","type":"uint16"},
-		{"name":"_minInterval","type":"uint8"},
-		{"name":"_minRateDelta","type":"uint256"},
+		{"components":[{"name":"minInterval","type":"uint8"},{"name":"minRateDelta","type":"uint256"},{"name":"cardinality","type":"uint16"}],"name":"_options","type":"tuple"},
 		{"name":"root","type":"address"},
 		{"name":"vault","type":"address"},
 		{"name":"active","type":"bool"},

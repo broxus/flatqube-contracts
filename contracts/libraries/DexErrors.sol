@@ -52,8 +52,8 @@ library DexErrors {
     /// @dev Oracle is not initialized
     uint16 constant NOT_INITIALIZED                  = 139;
 
-    /// @dev A new cardinality must be bigger than previous
-    uint16 constant LOWER_OR_EQUAL_CARDINALITY       = 140;
+    /// @dev A new cardinality must be bigger or equal to the previous
+    uint16 constant LOWER_CARDINALITY                = 140;
 
     /// @dev Count can not be zero
     uint16 constant NON_POSITIVE_COUNT               = 141;

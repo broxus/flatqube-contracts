@@ -1,8 +1,9 @@
 pragma ton-solidity >= 0.57.0;
 
 import "../structures/IFeeParams.sol";
+import "../structures/IOracleOptions.sol";
 
-interface IDexRoot is IFeeParams {
+interface IDexRoot is IFeeParams, IOracleOptions {
     event AccountCodeUpgraded(uint32 version);
     event PairCodeUpgraded(uint32 version, uint8 pool_type);
     event RootCodeUpgraded();
@@ -40,34 +41,16 @@ interface IDexRoot is IFeeParams {
         address send_gas_to
     ) external view;
 
-    /// @notice Proxy for TWAPOracle's setMinInterval
+    /// @notice Proxy for TWAPOracle's setOracleOptions
     /// @param _leftRoot Address of the left TokenRoot
     /// @param _rightRoot Address of the right TokenRoot
-    /// @param _interval The interval between points in seconds up to 255 seconds(4.25 minutes)
-    function setMinInterval(
+    /// @param _options New oracle's options
+    /// @param _remainingGasTo Recipient of the remaining gas
+    function setOracleOptions(
         address _leftRoot,
         address _rightRoot,
-        uint8 _interval
-    ) external view;
-
-    /// @notice Proxy for TWAPOracle's setCardinality
-    /// @param _leftRoot Address of the left TokenRoot
-    /// @param _rightRoot Address of the right TokenRoot
-    /// @param _newCardinality A new count of observations
-    function setCardinality(
-        address _leftRoot,
-        address _rightRoot,
-        uint16 _newCardinality
-    ) external view;
-
-    /// @notice Proxy for TWAPOracle's setMinRateDelta
-    /// @param _leftRoot Address of the left TokenRoot
-    /// @param _rightRoot Address of the right TokenRoot
-    /// @param _delta Percent in FP128 representation. 0.01 * 2 ** 128 == 1%
-    function setMinRateDelta(
-        address _leftRoot,
-        address _rightRoot,
-        uint _delta
+        OracleOptions _options,
+        address _remainingGasTo
     ) external view;
 
     /// @notice Proxy for TWAPOracle's removeLastNPoints

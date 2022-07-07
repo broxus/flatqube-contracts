@@ -89,21 +89,18 @@ describe('Oracle Upgrade', function () {
       });
     });
 
-    it('should check cardinality', async () => {
-      const cardinality = await pair.call({ method: 'getCardinality' });
-      expect(cardinality.toNumber()).to.be.equal(1000);
-    });
+    it('should check oracle options', async () => {
+      const options = await pair
+        .call({ method: 'getOracleOptions' })
+        .then(convertBigNumberValuesToStrings);
 
-    it('should check minimum interval', async () => {
-      const minInterval = await pair.call({ method: 'getMinInterval' });
-      expect(minInterval.toNumber()).to.be.equal(15);
-    });
-
-    it('should check minimum rate delta', async () => {
-      const minRateDelta = await pair.call({ method: 'getMinRateDelta' });
-      expect(minRateDelta).to.deep.equal(
-        convertToFixedPoint128('1').dividedToIntegerBy('100'),
-      );
+      expect(options).to.deep.equal({
+        cardinality: '1000',
+        minInterval: '15',
+        minRateDelta: convertToFixedPoint128('1')
+          .dividedToIntegerBy('100')
+          .toString()
+      });
     });
   });
 
@@ -118,54 +115,94 @@ describe('Oracle Upgrade', function () {
     it('should update cardinality', async () => {
       await account.runTarget({
         contract: root,
-        method: 'setCardinality',
+        method: 'setOracleOptions',
         params: {
           _leftRoot: tokens['ABC'].address,
           _rightRoot: tokens['XYZ'].address,
-          _newCardinality: 1100,
+          _options: {
+            cardinality: '1100',
+            minInterval: '15',
+            minRateDelta: convertToFixedPoint128('1').dividedToIntegerBy('100'),
+          },
+          _remainingGasTo: account.address,
         },
         value: locklift.utils.convertCrystal('2', 'nano'),
         keyPair: account.keyPair,
       });
-      const cardinality = await pair.call({ method: 'getCardinality' });
 
-      expect(cardinality.toNumber()).to.be.equal(1100);
+      const options = await pair
+        .call({ method: 'getOracleOptions' })
+        .then(convertBigNumberValuesToStrings);
+
+      expect(options).to.deep.equal({
+        cardinality: '1100',
+        minInterval: '15',
+        minRateDelta: convertToFixedPoint128('1')
+          .dividedToIntegerBy('100')
+          .toString()
+      });
     });
 
     it('should update minimum interval', async () => {
       await account.runTarget({
         contract: root,
-        method: 'setMinInterval',
+        method: 'setOracleOptions',
         params: {
           _leftRoot: tokens['ABC'].address,
           _rightRoot: tokens['XYZ'].address,
-          _interval: 5,
+          _options: {
+            cardinality: '1100',
+            minInterval: '5',
+            minRateDelta: convertToFixedPoint128('1').dividedToIntegerBy('100'),
+          },
+          _remainingGasTo: account.address,
         },
         value: locklift.utils.convertCrystal('2', 'nano'),
         keyPair: account.keyPair,
       });
-      const minInterval = await pair.call({ method: 'getMinInterval' });
 
-      expect(minInterval.toNumber()).to.be.equal(5);
+      const options = await pair
+        .call({ method: 'getOracleOptions' })
+        .then(convertBigNumberValuesToStrings);
+
+      expect(options).to.deep.equal({
+        cardinality: '1100',
+        minInterval: '5',
+        minRateDelta: convertToFixedPoint128('1')
+          .dividedToIntegerBy('100')
+          .toString()
+      });
     });
 
     it('should update minimum rate delta', async () => {
       await account.runTarget({
         contract: root,
-        method: 'setMinRateDelta',
+        method: 'setOracleOptions',
         params: {
           _leftRoot: tokens['ABC'].address,
           _rightRoot: tokens['XYZ'].address,
-          _delta: convertToFixedPoint128('5').dividedToIntegerBy('100'),
+          _options: {
+            cardinality: '1100',
+            minInterval: '5',
+            minRateDelta: convertToFixedPoint128('5').dividedToIntegerBy('100'),
+          },
+          _remainingGasTo: account.address,
         },
         value: locklift.utils.convertCrystal('2', 'nano'),
         keyPair: account.keyPair,
       });
-      const minRateDelta = await pair.call({ method: 'getMinRateDelta' });
 
-      expect(minRateDelta).to.deep.equal(
-        convertToFixedPoint128('5').dividedToIntegerBy('100'),
-      );
+      const options = await pair
+        .call({ method: 'getOracleOptions' })
+        .then(convertBigNumberValuesToStrings);
+
+      expect(options).to.deep.equal({
+        cardinality: '1100',
+        minInterval: '5',
+        minRateDelta: convertToFixedPoint128('5')
+          .dividedToIntegerBy('100')
+          .toString()
+      });
     });
 
     it('should update points', async () => {

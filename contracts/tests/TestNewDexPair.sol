@@ -11,9 +11,10 @@ import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "../interfaces/IDexPair.sol";
 import "../structures/ITokenOperationStructure.sol";
 import "../structures/IPoint.sol";
+import "../structures/IOracleOptions.sol";
 
 // This is just for test purposes, this is not a real contract!
-contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IPoint {
+contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IPoint, IOracleOptions {
     address root;
     address vault;
     uint32 current_version;
@@ -51,10 +52,8 @@ contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IPoint {
 
     // Oracle
     mapping(uint32 => Point) private _points;
-    uint16 private _cardinality;
+    OracleOptions private _options;
     uint16 private _length;
-    uint8 private _minInterval;
-    uint private _minRateDelta;
 
     string newTestField;
 
@@ -113,7 +112,7 @@ contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IPoint {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } _cardinality;
+        } _options.cardinality;
     }
 
     function getLength() external view responsible returns (uint16) {
@@ -129,7 +128,7 @@ contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IPoint {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } _minInterval;
+        } _options.minInterval;
     }
 
     function getMinRateDelta() external view responsible returns (uint) {
@@ -137,7 +136,7 @@ contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IPoint {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } _minRateDelta;
+        } _options.minRateDelta;
     }
 
     function isInitialized() external view responsible returns (bool) {
@@ -192,16 +191,12 @@ contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IPoint {
 
         (
             _points,
-            _cardinality,
-            _length,
-            _minInterval,
-            _minRateDelta
+            _options,
+            _length
         ) = oracleDataSlice.decode(
             mapping(uint32 => Point),
-            uint16,
-            uint16,
-            uint8,
-            uint
+            OracleOptions,
+            uint16
         );
 
         newTestField = "New Pair";

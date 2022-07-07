@@ -423,40 +423,17 @@ contract DexRoot is DexContractBase, IDexRoot, IResetGas, IUpgradable, IAmplific
 		msg.sender.transfer(0, false, 128 + 2);
 	}
 
-    function setMinInterval(
+    function setOracleOptions(
         address _leftRoot,
         address _rightRoot,
-        uint8 _interval
+        OracleOptions _options,
+        address _remainingGasTo
     ) override external view onlyManagerOrOwner {
         tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
 
         IDexConstantProductPair(_expectedPairAddress(_leftRoot, _rightRoot))
-            .setMinInterval{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (_interval);
-    }
-
-    function setCardinality(
-        address _leftRoot,
-        address _rightRoot,
-        uint16 _newCardinality
-    ) override external view onlyManagerOrOwner {
-        tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
-
-        IDexConstantProductPair(_expectedPairAddress(_leftRoot, _rightRoot))
-            .setCardinality{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (_newCardinality);
-    }
-
-    function setMinRateDelta(
-        address _leftRoot,
-        address _rightRoot,
-        uint _delta
-    ) override external view onlyManagerOrOwner {
-        tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
-
-        IDexConstantProductPair(_expectedPairAddress(_leftRoot, _rightRoot))
-            .setMinRateDelta{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (_delta);
+            .setOracleOptions{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            (_options, _remainingGasTo);
     }
 
     function removeLastNPoints(

@@ -6,18 +6,6 @@ import "../structures/IRate.sol";
 /// @title TWAP-Oracle Interface
 /// @notice Interface for interaction with pair's TWAP-Oracle
 interface ITWAPOracle is IOracle, IRate {
-    /// @dev Emits when the minimum rate's delta between points was updated
-    event OracleMinRateDeltaUpdated(uint);
-
-    /// @notice Sets the minimum rate's delta between points
-    /// @dev Only the pair's owner can change
-    /// @param _delta Percent in FP128 representation. 0.01 * 2 ** 128 == 1%
-    function setMinRateDelta(uint _delta) external;
-
-    /// @notice Get the current minimum rate delta in FP128 representation
-    /// @return uint Minimum rate delta in FP128 representation
-    function getMinRateDelta() external view responsible returns (uint);
-
     /// @notice Get observation by timestamp
     /// @param _timestamp UNIX timestamp in seconds of the observation
     /// @return optional(Observation) Observation by timestamp or null if it doesn't exist
