@@ -1885,7 +1885,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                 address, address, uint128
             ));
 
-            _initialize(now);
+            _initializeTWAPOracle(now);
         } else if (old_pool_type == DexPoolTypes.STABLESWAP) {
             active = true;
             TvmCell otherData = s.loadRef(); // ref 3

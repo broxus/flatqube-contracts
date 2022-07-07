@@ -177,7 +177,7 @@ abstract contract TWAPOracle is ITWAPOracle {
     /// @dev Initializes oracle with the first point
     /// @param _timestamp UNIX timestamp in seconds of observations start
     /// @return bool Whether or not oracle was initialized
-    function _initialize(uint32 _timestamp) internal returns (bool) {
+    function _initializeTWAPOracle(uint32 _timestamp) internal returns (bool) {
         // Check input params and initialization status of the oracle
         require(_points.empty(), DexErrors.ALREADY_INITIALIZED);
         require(_timestamp > 0, DexErrors.NON_POSITIVE_TIMESTAMP);
