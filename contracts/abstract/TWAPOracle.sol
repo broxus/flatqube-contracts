@@ -37,14 +37,6 @@ abstract contract TWAPOracle is ITWAPOracle {
     /// @return uint128[] Current pair's tokens reserves
     function _reserves() internal view virtual returns (uint128[]);
 
-    function isInitialized() external view responsible override returns (bool) {
-        return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.REMAINING_GAS
-        } !_points.empty();
-    }
-
     // TODO: Comment before release
     /// @dev Only for test purposes. Comment it before release!
     /// @param _newPoints Encoded points map

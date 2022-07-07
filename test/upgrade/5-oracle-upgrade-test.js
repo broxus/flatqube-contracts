@@ -89,11 +89,6 @@ describe('Oracle Upgrade', function () {
       });
     });
 
-    it('should check initialization', async () => {
-      const isInitialized = await pair.call({ method: 'isInitialized' });
-      expect(isInitialized).to.be.equal(true);
-    });
-
     it('should check cardinality', async () => {
       const cardinality = await pair.call({ method: 'getCardinality' });
       expect(cardinality.toNumber()).to.be.equal(1000);
@@ -193,11 +188,6 @@ describe('Oracle Upgrade', function () {
       const code = await root.call({ method: 'getPairCode', params: { pool_type: 1 } });
 
       expect(code).to.be.equal(NewDexPair.code);
-    });
-
-    it('should check initialization', async () => {
-      const isInitialized = await pair.call({ method: 'isInitialized' });
-      expect(isInitialized).to.be.equal(true);
     });
 
     it('should check cardinality', async () => {

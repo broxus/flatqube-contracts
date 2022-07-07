@@ -18,10 +18,6 @@ interface IOracle is IPoint, IObservation {
     /// @dev Emits when observations' cardinality was updated
     event OracleCardinalityUpdated(uint16);
 
-    /// @notice Whether or not oracle was initialized
-    /// @return bool Initialization status
-    function isInitialized() external view responsible returns (bool);
-
     /// @notice Sets the minimum interval between points
     /// @dev Only the pair's owner can change
     /// @param _interval The interval between points in seconds up to 255 seconds(4.25 minutes)
