@@ -96,27 +96,28 @@ abstract contract TWAPOracle is ITWAPOracle {
     function getRate(
         uint32 _fromTimestamp,
         uint32 _toTimestamp
-    ) external view responsible override returns (optional(Rate)) {
+    ) external view responsible override returns (optional(Rate), uint128[]) {
         return {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } _calculateRate(
-            _fromTimestamp,
-            _toTimestamp
+        } (
+            _calculateRate(_fromTimestamp, _toTimestamp),
+            _reserves()
         );
     }
 
     function rate(
         uint32 _fromTimestamp,
         uint32 _toTimestamp,
+        address _callbackTo,
         TvmCell _payload
     ) external view override {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        IOnRateCallback(msg.sender)
+        IOnRateCallback(_callbackTo)
             .onRateCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (_calculateRate(_fromTimestamp, _toTimestamp), _payload);
+            (_calculateRate(_fromTimestamp, _toTimestamp), _reserves(), _payload);
     }
 
     /// @dev Initializes oracle with the first point

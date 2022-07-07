@@ -24,22 +24,24 @@ interface ITWAPOracle is IOracle, IRate {
     /// will take the point with the nearest timestamp
     /// @param _fromTimestamp Start of interval for TWAP
     /// @param _toTimestamp End of interval for TWAP
-    /// @return optional(Rate) Packed rate info in the time range between _fromTimestamp and _toTimestamp
-    /// or null if impossible to calculate
+    /// @return (optional(Rate), uint128[]) Packed rate info in the time range between _fromTimestamp and _toTimestamp
+    /// or null if impossible to calculate + current pair's reserves
     function getRate(
         uint32 _fromTimestamp,
         uint32 _toTimestamp
-    ) external view responsible returns (optional(Rate));
+    ) external view responsible returns (optional(Rate), uint128[]);
 
     /// @notice Get a callback with calculated TWAP for the given interval
     /// @dev If there is no point with a timestamp equal to _fromTimestamp or _toTimestamp
     /// will take the point with the nearest timestamp
     /// @param _fromTimestamp Start of interval for TWAP
     /// @param _toTimestamp End of interval for TWAP
+    /// @param _callbackTo Recipient of the callback
     /// @param _payload Any extra data to return in callback
     function rate(
         uint32 _fromTimestamp,
         uint32 _toTimestamp,
+        address _callbackTo,
         TvmCell _payload
     ) external view;
 }
