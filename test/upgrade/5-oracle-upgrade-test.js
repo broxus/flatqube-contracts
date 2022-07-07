@@ -71,7 +71,7 @@ describe('Oracle Upgrade', function () {
 
   describe('upgrade and check current pair', () => {
     it('should upgrade and check pair code in root', async () => {
-      const DexPair = await locklift.factory.getContract('DexPair');
+      const DexPair = await locklift.factory.getContract('TestOracleDexPair');
       await upgradePair(account, root, tokens['ABC'].address, tokens['XYZ'].address, DexPair);
       DexPair.setAddress(pair.address);
       pair = DexPair;

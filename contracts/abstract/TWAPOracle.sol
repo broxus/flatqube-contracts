@@ -14,13 +14,13 @@ import "../libraries/DexGas.sol";
 /// @dev A contract is abstract - to be sure that it will be inherited by another contract
 abstract contract TWAPOracle is ITWAPOracle {
     /// @dev Historical data on prices
-    mapping(uint32 => Point) private _points;
+    mapping(uint32 => Point) internal _points;
 
     /// @dev Maximum count of points up to 65535
-    uint16 private _cardinality;
+    uint16 internal _cardinality;
 
     /// @dev A current count of points
-    uint16 private _length;
+    uint16 internal _length;
 
     /// @dev Minimum interval in seconds between points up to 255 seconds(4.25 minutes)
     uint8 private _minInterval;
@@ -36,33 +36,6 @@ abstract contract TWAPOracle is ITWAPOracle {
     /// @dev Needs to be implemented by pair
     /// @return uint128[] Current pair's tokens reserves
     function _reserves() internal view virtual returns (uint128[]);
-
-    // TODO: Comment before release
-    /// @dev Only for test purposes. Comment it before release!
-    /// @param _newPoints Encoded points map
-    /// @param _newLength Size of the map
-    /// @return bool Whether or not _points was updated
-    function setPoints(
-        TvmCell _newPoints,
-        uint16 _newLength
-    ) external responsible returns (bool) {
-        tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
-
-        // Check input params
-        require(_newLength <= _cardinality, 1234);
-
-        // Update _points and _length
-        _length = _newLength;
-        _points = _newPoints
-            .toSlice()
-            .decode(mapping(uint32 => Point));
-
-        return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.ALL_NOT_RESERVED
-        } true;
-    }
 
     function setMinInterval(uint8 _interval) external onlyRoot override {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
