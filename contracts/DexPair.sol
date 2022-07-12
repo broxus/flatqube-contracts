@@ -2021,7 +2021,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    function _tokenRoots() internal view returns(address[]) {
+    function _tokenRoots() internal view override returns(address[]) {
         address[] roots = new address[](2);
         roots[0] = left_root;
         roots[1] = right_root;

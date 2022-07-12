@@ -97,9 +97,8 @@ describe('Oracle Upgrade', function () {
       expect(options).to.deep.equal({
         cardinality: '1000',
         minInterval: '15',
-        minRateDelta: convertToFixedPoint128('1')
-          .dividedToIntegerBy('100')
-          .toString()
+        minRateDeltaNumerator: '1',
+        minRateDeltaDenominator: '100'
       });
     });
   });
@@ -122,7 +121,8 @@ describe('Oracle Upgrade', function () {
           _options: {
             cardinality: '1100',
             minInterval: '15',
-            minRateDelta: convertToFixedPoint128('1').dividedToIntegerBy('100'),
+            minRateDeltaNumerator: '1',
+            minRateDeltaDenominator: '100'
           },
           _remainingGasTo: account.address,
         },
@@ -137,9 +137,8 @@ describe('Oracle Upgrade', function () {
       expect(options).to.deep.equal({
         cardinality: '1100',
         minInterval: '15',
-        minRateDelta: convertToFixedPoint128('1')
-          .dividedToIntegerBy('100')
-          .toString()
+        minRateDeltaNumerator: '1',
+        minRateDeltaDenominator: '100'
       });
     });
 
@@ -153,7 +152,8 @@ describe('Oracle Upgrade', function () {
           _options: {
             cardinality: '1100',
             minInterval: '5',
-            minRateDelta: convertToFixedPoint128('1').dividedToIntegerBy('100'),
+            minRateDeltaNumerator: '1',
+            minRateDeltaDenominator: '100'
           },
           _remainingGasTo: account.address,
         },
@@ -168,9 +168,8 @@ describe('Oracle Upgrade', function () {
       expect(options).to.deep.equal({
         cardinality: '1100',
         minInterval: '5',
-        minRateDelta: convertToFixedPoint128('1')
-          .dividedToIntegerBy('100')
-          .toString()
+        minRateDeltaNumerator: '1',
+        minRateDeltaDenominator: '100'
       });
     });
 
@@ -184,7 +183,8 @@ describe('Oracle Upgrade', function () {
           _options: {
             cardinality: '1100',
             minInterval: '5',
-            minRateDelta: convertToFixedPoint128('5').dividedToIntegerBy('100'),
+            minRateDeltaNumerator: '5',
+            minRateDeltaDenominator: '100'
           },
           _remainingGasTo: account.address,
         },
@@ -199,9 +199,8 @@ describe('Oracle Upgrade', function () {
       expect(options).to.deep.equal({
         cardinality: '1100',
         minInterval: '5',
-        minRateDelta: convertToFixedPoint128('5')
-          .dividedToIntegerBy('100')
-          .toString()
+        minRateDeltaNumerator: '5',
+        minRateDeltaDenominator: '100'
       });
     });
 

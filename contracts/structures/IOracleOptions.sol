@@ -8,8 +8,11 @@ interface IOracleOptions {
         /// @dev Minimum interval in seconds between points up to 255 seconds(4.25 minutes)
         uint8 minInterval;
 
-        /// @dev Minimum rate percent delta in FP128 representation to write the next point
-        uint minRateDelta;
+        /// @dev Minimum rate percent delta numerator to write the next point
+        uint128 minRateDeltaNumerator;
+
+        /// @dev Minimum rate percent delta denominator to write the next point
+        uint128 minRateDeltaDenominator;
 
         /// @dev Maximum count of points up to 65535
         uint16 cardinality;

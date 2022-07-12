@@ -6,6 +6,7 @@ pragma AbiHeader pubkey;
 
 import "../libraries/DexErrors.sol";
 import "../libraries/DexGas.sol";
+import "../libraries/FixedPoint128.sol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
 import "../interfaces/IDexPair.sol";
@@ -136,7 +137,10 @@ contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IPoint, IOracle
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } _options.minRateDelta;
+        } FixedPoint128.encodeFromNumeratorAndDenominator(
+            _options.minRateDeltaNumerator,
+            _options.minRateDeltaDenominator
+        );
     }
 
     function isInitialized() external view responsible returns (bool) {

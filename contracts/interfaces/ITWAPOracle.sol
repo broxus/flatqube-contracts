@@ -44,4 +44,18 @@ interface ITWAPOracle is IOracle, IRate {
         address _callbackTo,
         TvmCell _payload
     ) external view;
+
+    /// @notice Calculates expected amount using given params and TWAP
+    /// @dev Can be reverted if impossible to calculate TWAP
+    /// @param _amount First token amount
+    /// @param _tokenRoot Address of the first token root
+    /// @param _fromTimestamp Start of interval for TWAP
+    /// @param _toTimestamp End of interval for TWAP
+    /// @return uint128 Expected amount of the second token
+    function getExpectedAmountByTWAP(
+        uint128 _amount,
+        address _tokenRoot,
+        uint32 _fromTimestamp,
+        uint32 _toTimestamp
+    ) external view responsible returns (uint128);
 }

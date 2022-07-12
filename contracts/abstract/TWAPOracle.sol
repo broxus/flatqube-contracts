@@ -31,6 +31,10 @@ abstract contract TWAPOracle is ITWAPOracle {
     /// @return uint128[] Current pair's tokens reserves
     function _reserves() internal view virtual returns (uint128[]);
 
+    /// @dev Needs to be implemented by pair
+    /// @return address[] Current pair's token roots addresses
+    function _tokenRoots() internal view virtual returns (address[]);
+
     function setOracleOptions(
         OracleOptions _newOptions,
         address _remainingGasTo
@@ -39,6 +43,7 @@ abstract contract TWAPOracle is ITWAPOracle {
 
         // Check input params
         require(_newOptions.cardinality >= _options.cardinality, DexErrors.LOWER_CARDINALITY);
+        require(_newOptions.minRateDeltaDenominator > 0, DexErrors.NON_POSITIVE_DENOMINATOR);
 
         // Update options
         _options = _newOptions;
@@ -120,6 +125,38 @@ abstract contract TWAPOracle is ITWAPOracle {
             (_calculateRate(_fromTimestamp, _toTimestamp), _reserves(), _payload);
     }
 
+    function getExpectedAmountByTWAP(
+        uint128 _amount,
+        address _tokenRoot,
+        uint32 _fromTimestamp,
+        uint32 _toTimestamp
+    ) external view responsible override returns (uint128) {
+        address[] roots = _tokenRoots();
+
+        // Check input params
+        require(_tokenRoot == roots[0] || _tokenRoot == roots[1], DexErrors.WRONG_TOKEN_ROOT);
+        require(_amount > 0, DexErrors.WRONG_AMOUNT);
+
+        optional(Rate) rateOpt = _calculateRate(_fromTimestamp, _toTimestamp);
+
+        // Revert call if rate is null
+        if (!rateOpt.hasValue()) {
+            revert(DexErrors.CAN_NOT_CALCULATE_TWAP);
+        }
+
+        bool isLeftTokenRoot = roots[0] == _tokenRoot;
+        Rate rates = rateOpt.get();
+
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } FixedPoint128.calculateExpectedAmountByRate(
+            _amount,
+            isLeftTokenRoot ? rates.price1To0 : rates.price0To1
+        );
+    }
+
     /// @dev Initializes oracle with the first point
     /// @param _timestamp UNIX timestamp in seconds of observations start
     /// @return bool Whether or not oracle was initialized
@@ -133,7 +170,8 @@ abstract contract TWAPOracle is ITWAPOracle {
         // Initialize state
         _options = OracleOptions(
             15,
-            FixedPoint128.div(FixedPoint128.FIXED_POINT_128_MULTIPLIER, 100),
+            1,
+            100,
             1000
         );
 
@@ -189,7 +227,12 @@ abstract contract TWAPOracle is ITWAPOracle {
                 _token1ReserveOld
             );
 
-            if (rateDelta < _options.minRateDelta) {
+            uint minRateDelta = FixedPoint128.encodeFromNumeratorAndDenominator(
+                _options.minRateDeltaNumerator,
+                _options.minRateDeltaDenominator
+            );
+
+            if (rateDelta < minRateDelta) {
                 return Observation(0, 0, 0);
             }
         }

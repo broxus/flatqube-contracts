@@ -60,4 +60,10 @@ library DexErrors {
 
     /// @dev Count is bigger than current array's length
     uint16 constant BIGGER_THAN_LENGTH               = 142;
+
+    /// @dev Denominator can not be zero
+    uint16 constant NON_POSITIVE_DENOMINATOR         = 143;
+
+    /// @dev Impossible to calculate TWAP for given timestamps
+    uint16 constant CAN_NOT_CALCULATE_TWAP           = 144;
 }
