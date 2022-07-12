@@ -11,127 +11,6 @@
 			]
 		},
 		{
-			"name": "getRoot",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"dex_root","type":"address"}
-			]
-		},
-		{
-			"name": "getTokenRoots",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"left","type":"address"},
-				{"name":"right","type":"address"},
-				{"name":"lp","type":"address"}
-			]
-		},
-		{
-			"name": "getTokenWallets",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"left","type":"address"},
-				{"name":"right","type":"address"},
-				{"name":"lp","type":"address"}
-			]
-		},
-		{
-			"name": "getVersion",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"version","type":"uint32"}
-			]
-		},
-		{
-			"name": "getPoolType",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"value0","type":"uint8"}
-			]
-		},
-		{
-			"name": "getVault",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"dex_vault","type":"address"}
-			]
-		},
-		{
-			"name": "getVaultWallets",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"left","type":"address"},
-				{"name":"right","type":"address"}
-			]
-		},
-		{
-			"name": "setFeeParams",
-			"inputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"params","type":"tuple"},
-				{"name":"send_gas_to","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "getFeeParams",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"value0","type":"tuple"}
-			]
-		},
-		{
-			"name": "getAccumulatedFees",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"accumulatedFees","type":"uint128[]"}
-			]
-		},
-		{
-			"name": "withdrawBeneficiaryFee",
-			"inputs": [
-				{"name":"send_gas_to","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "isActive",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"value0","type":"bool"}
-			]
-		},
-		{
-			"name": "getBalances",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"components":[{"name":"lp_supply","type":"uint128"},{"name":"left_balance","type":"uint128"},{"name":"right_balance","type":"uint128"}],"name":"value0","type":"tuple"}
-			]
-		},
-		{
 			"name": "buildExchangePayload",
 			"inputs": [
 				{"name":"id","type":"uint64"},
@@ -294,6 +173,127 @@
 				{"name":"success_payload","type":"cell"},
 				{"name":"notify_cancel","type":"bool"},
 				{"name":"cancel_payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getRoot",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"dex_root","type":"address"}
+			]
+		},
+		{
+			"name": "getTokenRoots",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"left","type":"address"},
+				{"name":"right","type":"address"},
+				{"name":"lp","type":"address"}
+			]
+		},
+		{
+			"name": "getTokenWallets",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"left","type":"address"},
+				{"name":"right","type":"address"},
+				{"name":"lp","type":"address"}
+			]
+		},
+		{
+			"name": "getVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"version","type":"uint32"}
+			]
+		},
+		{
+			"name": "getPoolType",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint8"}
+			]
+		},
+		{
+			"name": "getVault",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"dex_vault","type":"address"}
+			]
+		},
+		{
+			"name": "getVaultWallets",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"left","type":"address"},
+				{"name":"right","type":"address"}
+			]
+		},
+		{
+			"name": "getFeeParams",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"value0","type":"tuple"}
+			]
+		},
+		{
+			"name": "getAccumulatedFees",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"accumulatedFees","type":"uint128[]"}
+			]
+		},
+		{
+			"name": "isActive",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"bool"}
+			]
+		},
+		{
+			"name": "getBalances",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"components":[{"name":"lp_supply","type":"uint128"},{"name":"left_balance","type":"uint128"},{"name":"right_balance","type":"uint128"}],"name":"value0","type":"tuple"}
+			]
+		},
+		{
+			"name": "setFeeParams",
+			"inputs": [
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"params","type":"tuple"},
+				{"name":"send_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "withdrawBeneficiaryFee",
+			"inputs": [
+				{"name":"send_gas_to","type":"address"}
 			],
 			"outputs": [
 			]
