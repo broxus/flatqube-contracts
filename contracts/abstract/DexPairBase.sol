@@ -10,6 +10,7 @@ import "../interfaces/IDexVault.sol";
 import "../libraries/DexPoolTypes.sol";
 import "../libraries/DexGas.sol";
 import "../libraries/DexAddressType.sol";
+import "../libraries/DexReserveType.sol";
 
 import "../structures/IPoolTokenData.sol";
 import "../structures/IAmplificationCoefficient.sol";
@@ -27,16 +28,10 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
     // Addresses
     mapping(uint8 => address[]) internal _typeToRootAddresses;
     mapping(uint8 => address[]) internal _typeToWalletAddresses;
-
-    // Balances
-    uint128 internal _lpSupply;
-    uint128 internal _leftBalance;
-    uint128 internal _rightBalance;
+    mapping(uint8 => uint128[]) internal _typeToReserves;
 
     // Fee
     FeeParams internal _fee;
-    uint128 internal _accumulatedLeftFee;
-    uint128 internal _accumulatedRightFee;
 
     // Prevent manual transfers
     receive() external pure {
@@ -187,16 +182,11 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
 
     // return packed values of accumulated fees
     function getAccumulatedFees() override external view responsible returns (uint128[] accumulatedFees) {
-        uint128[] fees = new uint128[](2);
-
-        fees[0] = _accumulatedLeftFee;
-        fees[1] = _accumulatedRightFee;
-
         return {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } fees;
+        } _typeToReserves[DexReserveType.FEE];
     }
 
     // is pair active
@@ -215,9 +205,9 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } IDexPairBalances(
-            _lpSupply,
-            _leftBalance,
-            _rightBalance
+            _typeToReserves[DexReserveType.LP][0],
+            _typeToReserves[DexReserveType.POOL][0],
+            _typeToReserves[DexReserveType.POOL][1]
         );
     }
 
@@ -313,7 +303,7 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
 
             TvmCell otherData = abi.encode(
                 _fee,
-                _lpSupply, _leftBalance, _rightBalance,
+                _typeToReserves,
                 _typeToRootAddresses,
                 _typeToWalletAddresses
             );
@@ -372,6 +362,8 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
 
         _typeToRootAddresses[DexAddressType.RESERVE].push(leftRoot);
         _typeToRootAddresses[DexAddressType.RESERVE].push(rightRoot);
+        _typeToReserves[DexReserveType.FEE].push(0);
+        _typeToReserves[DexReserveType.FEE].push(0);
 
         if (oldVersion == 0) {
             _fee = FeeParams(1000000, 3000, 0, address(0), emptyMap);
@@ -394,13 +386,16 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
             address vaultLeftWallet;
             address rightWallet;
             address vaultRightWallet;
+            uint128 lpSupply;
+            uint128 leftBalance;
+            uint128 rightBalance;
 
             // Set reserves and fee options
             (
-                lpRoot, lpWallet, _lpSupply,
+                lpRoot, lpWallet, lpSupply,
                 _fee,
-                leftWallet, vaultLeftWallet, _leftBalance,
-                rightWallet, vaultRightWallet, _rightBalance
+                leftWallet, vaultLeftWallet, leftBalance,
+                rightWallet, vaultRightWallet, rightBalance
             ) = abi.decode(otherData, (
                 address, address, uint128,
                 FeeParams,
@@ -410,10 +405,15 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
 
             _typeToRootAddresses[DexAddressType.LP].push(lpRoot);
             _typeToWalletAddresses[DexAddressType.LP].push(lpWallet);
+            _typeToReserves[DexReserveType.LP].push(lpSupply);
+
             _typeToWalletAddresses[DexAddressType.RESERVE].push(leftWallet);
             _typeToWalletAddresses[DexAddressType.VAULT].push(vaultLeftWallet);
+            _typeToReserves[DexReserveType.POOL].push(leftBalance);
+
             _typeToWalletAddresses[DexAddressType.RESERVE].push(rightWallet);
             _typeToWalletAddresses[DexAddressType.VAULT].push(vaultRightWallet);
+            _typeToReserves[DexReserveType.POOL].push(rightBalance);
         } else if (oldPoolType == DexPoolTypes.STABLESWAP) {
             _active = true;
             TvmCell otherData = dataSlice.loadRef(); // ref 3
@@ -421,10 +421,11 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
 
             address lpRoot;
             address lpWallet;
+            uint128 lpSupply;
 
             // Set lp reserve and fee options
             (
-                lpRoot, lpWallet, _lpSupply,
+                lpRoot, lpWallet, lpSupply,
                 _fee,
                 tokensData,,
             ) = abi.decode(otherData, (
@@ -435,15 +436,17 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
                 uint256
             ));
 
+            _typeToReserves[DexReserveType.LP].push(lpSupply);
+
             // Set left reserve
             _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[0].wallet);
             _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[0].vaultWallet);
-            _leftBalance = tokensData[0].balance;
+            _typeToReserves[DexReserveType.POOL].push(tokensData[0].balance);
 
             // Set right reserve
             _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[1].wallet);
             _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[1].vaultWallet);
-            _rightBalance = tokensData[1].balance;
+            _typeToReserves[DexReserveType.POOL].push(tokensData[1].balance);
         }
 
         // Refund remaining gas
@@ -468,16 +471,21 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
             _typeToWalletAddresses[DexAddressType.LP].length == 0
         ) {
             _typeToWalletAddresses[DexAddressType.LP].push(_wallet);
+            _typeToReserves[DexReserveType.LP].push(0);
         } else if (
             msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0] &&
             _typeToWalletAddresses[DexAddressType.RESERVE].length == 0
         ) {
             _typeToWalletAddresses[DexAddressType.RESERVE].push(_wallet);
+            _typeToReserves[DexReserveType.POOL].push(0);
+            _typeToReserves[DexReserveType.FEE].push(0);
         } else if (
             msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1] &&
             _typeToWalletAddresses[DexAddressType.RESERVE].length == 1
         ) {
             _typeToWalletAddresses[DexAddressType.RESERVE].push(_wallet);
+            _typeToReserves[DexReserveType.POOL].push(0);
+            _typeToReserves[DexReserveType.FEE].push(0);
         }
 
         _tryToActivate();
@@ -572,68 +580,56 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
     ) internal {
         // Return left fee
         if (
-            (_accumulatedLeftFee > 0 && _isForce) ||
+            (_typeToReserves[DexReserveType.FEE][0] > 0 && _isForce) ||
             !_fee.threshold.exists(_typeToRootAddresses[DexAddressType.RESERVE][0]) ||
-            _accumulatedLeftFee >= _fee.threshold.at(_typeToRootAddresses[DexAddressType.RESERVE][0])
+            _typeToReserves[DexReserveType.FEE][0] >= _fee.threshold.at(_typeToRootAddresses[DexAddressType.RESERVE][0])
         ) {
             IDexAccount(_expectedAccountAddress(_fee.beneficiary))
                 .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                 (
-                    _accumulatedLeftFee,
+                    _typeToReserves[DexReserveType.FEE][0],
                     _typeToRootAddresses[DexAddressType.RESERVE][0],
                     _typeToRootAddresses[DexAddressType.RESERVE][0],
                     _typeToRootAddresses[DexAddressType.RESERVE][1],
                     _remainingGasTo
                 );
 
-            _accumulatedLeftFee = 0;
+            _typeToReserves[DexReserveType.FEE][0] = 0;
         }
 
         // Return right fee
         if (
-            (_accumulatedRightFee > 0 && _isForce) ||
+            (_typeToReserves[DexReserveType.FEE][1] > 0 && _isForce) ||
             !_fee.threshold.exists(_typeToRootAddresses[DexAddressType.RESERVE][1]) ||
-            _accumulatedRightFee >= _fee.threshold.at(_typeToRootAddresses[DexAddressType.RESERVE][1])
+            _typeToReserves[DexReserveType.FEE][1] >= _fee.threshold.at(_typeToRootAddresses[DexAddressType.RESERVE][1])
         ) {
             IDexAccount(_expectedAccountAddress(_fee.beneficiary))
                 .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                 (
-                    _accumulatedRightFee,
+                    _typeToReserves[DexReserveType.FEE][1],
                     _typeToRootAddresses[DexAddressType.RESERVE][1],
                     _typeToRootAddresses[DexAddressType.RESERVE][0],
                     _typeToRootAddresses[DexAddressType.RESERVE][1],
                     _remainingGasTo
                 );
 
-            _accumulatedRightFee = 0;
+            _typeToReserves[DexReserveType.FEE][1] = 0;
         }
     }
 
     // Pack left and right reserves and return them
     function _reserves() internal view returns (uint128[]) {
-        uint128[] reserves = new uint128[](0);
-
-        // Pack left and right tokens' reserves
-        reserves.push(_leftBalance);
-        reserves.push(_rightBalance);
-
-        return reserves;
+        return _typeToReserves[DexReserveType.POOL];
     }
 
     // Emits updated reserves
     function _sync() internal view {
-        emit Sync(_reserves(), _lpSupply);
+        emit Sync(_reserves(), _typeToReserves[DexReserveType.LP][0]);
     }
 
     // Pack left and right TIP-3 token roots and return them
     function _tokenRoots() internal view returns (address[]) {
-        address[] roots = new address[](2);
-
-        // Pack left and right TIP-3 tokens' roots
-        roots[0] = _typeToRootAddresses[DexAddressType.RESERVE][0];
-        roots[1] = _typeToRootAddresses[DexAddressType.RESERVE][1];
-
-        return roots;
+        return _typeToRootAddresses[DexAddressType.RESERVE];
     }
 
     // Deploys wallet by TIP-3 token root
