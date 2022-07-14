@@ -9,6 +9,7 @@ import "../interfaces/IDexVault.sol";
 
 import "../libraries/DexPoolTypes.sol";
 import "../libraries/DexGas.sol";
+import "../libraries/DexAddressType.sol";
 
 import "../structures/IPoolTokenData.sol";
 import "../structures/IAmplificationCoefficient.sol";
@@ -17,38 +18,25 @@ import "./DexContractBase.sol";
 
 abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
     // Base:
-    address private root;
-    address internal vault;
+    address private _root;
 
     // Custom:
-    bool internal active;
-    uint32 internal current_version;
+    bool internal _active;
+    uint32 internal _currentVersion;
 
-    // Params:
-    address internal left_root;
-    address internal right_root;
-
-    // Wallets
-    address internal lp_wallet;
-    address internal left_wallet;
-    address internal right_wallet;
-
-    // Vault wallets
-    address internal vault_left_wallet;
-    address internal vault_right_wallet;
-
-    // Liquidity tokens
-    address internal lp_root;
-    uint128 internal lp_supply;
+    // Addresses
+    mapping(uint8 => address[]) internal _typeToRootAddresses;
+    mapping(uint8 => address[]) internal _typeToWalletAddresses;
 
     // Balances
-    uint128 internal left_balance;
-    uint128 internal right_balance;
+    uint128 internal _lpSupply;
+    uint128 internal _leftBalance;
+    uint128 internal _rightBalance;
 
     // Fee
-    FeeParams internal fee;
-    uint128 internal accumulated_left_fee;
-    uint128 internal accumulated_right_fee;
+    FeeParams internal _fee;
+    uint128 internal _accumulatedLeftFee;
+    uint128 internal _accumulatedRightFee;
 
     // Prevent manual transfers
     receive() external pure {
@@ -64,45 +52,55 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
     // Modifiers
 
     modifier onlyActive() {
-        require(active, DexErrors.NOT_ACTIVE);
+        require(_active, DexErrors.NOT_ACTIVE);
         _;
     }
 
     modifier onlyLiquidityTokenRoot() {
-        require(lp_root.value != 0 && msg.sender == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
+        require(
+            _typeToRootAddresses[DexAddressType.LP][0].value != 0 &&
+            msg.sender == _typeToRootAddresses[DexAddressType.LP][0],
+            DexErrors.NOT_LP_TOKEN_ROOT
+        );
         _;
     }
 
     modifier onlyTokenRoot() {
         require(
-            (left_root.value != 0 && msg.sender == left_root) ||
-            (right_root.value != 0 && msg.sender == right_root),
+            (_typeToRootAddresses[DexAddressType.RESERVE][0].value != 0 && msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0]) ||
+            (_typeToRootAddresses[DexAddressType.RESERVE][1].value != 0 && msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1]),
             DexErrors.NOT_TOKEN_ROOT
         );
         _;
     }
 
     modifier onlyRoot() {
-        require(root.value != 0 && msg.sender == root, DexErrors.NOT_ROOT);
+        require(_root.value != 0 && msg.sender == _root, DexErrors.NOT_ROOT);
         _;
     }
 
     modifier onlyVault() {
-        require(vault.value != 0 && msg.sender == vault, DexErrors.NOT_VAULT);
+        require(
+            _typeToRootAddresses[DexAddressType.VAULT][0].value != 0 &&
+            msg.sender == _typeToRootAddresses[DexAddressType.VAULT][0],
+            DexErrors.NOT_VAULT
+        );
         _;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // Getters
 
+    // Return dex root address
     function getRoot() override external view responsible returns (address dex_root) {
         return {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } root;
+        } _root;
     }
 
+    // Return token roots addresses
     function getTokenRoots() override external view responsible returns (
         address left,
         address right,
@@ -113,13 +111,14 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } (
-            left_root,
-            right_root,
-            lp_root
+            _typeToRootAddresses[DexAddressType.RESERVE][0],
+            _typeToRootAddresses[DexAddressType.RESERVE][1],
+            _typeToRootAddresses[DexAddressType.LP][0]
         );
     }
 
-    function getTokenWallets()override external view responsible returns (
+    // Return pair's wallets addresses
+    function getTokenWallets() override external view responsible returns (
         address left,
         address right,
         address lp
@@ -129,20 +128,22 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } (
-            left_wallet,
-            right_wallet,
-            lp_wallet
+            _typeToWalletAddresses[DexAddressType.RESERVE][0],
+            _typeToWalletAddresses[DexAddressType.RESERVE][1],
+            _typeToWalletAddresses[DexAddressType.LP][0]
         );
     }
 
+    // Return current version
     function getVersion() override external view responsible returns (uint32 version) {
         return {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } current_version;
+        } _currentVersion;
     }
 
+    // Return type of the pair's pool
     function getPoolType() override external view responsible returns (uint8) {
         return {
             value: 0,
@@ -151,14 +152,16 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         } DexPoolTypes.CONSTANT_PRODUCT;
     }
 
+    // Return vault address
     function getVault() override external view responsible returns (address dex_vault) {
         return {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } vault;
+        } _typeToRootAddresses[DexAddressType.VAULT][0];
     }
 
+    // Return vault wallets addresses
     function getVaultWallets() override external view responsible returns (
         address left,
         address right
@@ -168,24 +171,26 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } (
-            vault_left_wallet,
-            vault_right_wallet
+            _typeToWalletAddresses[DexAddressType.VAULT][0],
+            _typeToWalletAddresses[DexAddressType.VAULT][1]
         );
     }
 
+    // Return fee options
     function getFeeParams() override external view responsible returns (FeeParams) {
         return {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } fee;
+        } _fee;
     }
 
+    // return packed values of accumulated fees
     function getAccumulatedFees() override external view responsible returns (uint128[] accumulatedFees) {
         uint128[] fees = new uint128[](2);
 
-        fees[0] = accumulated_left_fee;
-        fees[1] = accumulated_right_fee;
+        fees[0] = _accumulatedLeftFee;
+        fees[1] = _accumulatedRightFee;
 
         return {
             value: 0,
@@ -194,23 +199,25 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         } fees;
     }
 
+    // is pair active
     function isActive() override external view responsible returns (bool) {
         return {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } active;
+        } _active;
     }
 
+    // return current pair's reserves
     function getBalances() override external view responsible returns (IDexPairBalances) {
         return {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } IDexPairBalances(
-            lp_supply,
-            left_balance,
-            right_balance
+            _lpSupply,
+            _leftBalance,
+            _rightBalance
         );
     }
 
@@ -218,6 +225,7 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         FeeParams _params,
         address _remainingGasTo
     ) override external onlyRoot {
+        // Check input params
         require(
             _params.denominator != 0 &&
             (_params.pool_numerator + _params.beneficiary_numerator) < _params.denominator &&
@@ -228,13 +236,16 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         require(msg.value >= DexGas.SET_FEE_PARAMS_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        if (fee.beneficiary.value != 0) {
+        // Flush all fees from pair
+        if (_fee.beneficiary.value != 0) {
             _processBeneficiaryFees(true, _remainingGasTo);
         }
 
-        fee = _params;
-        emit FeesParamsUpdated(fee);
+        // Update fee options and notify
+        _fee = _params;
+        emit FeesParamsUpdated(_fee);
 
+        // Refund remaining gas
         _remainingGasTo.transfer({
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED,
@@ -243,11 +254,13 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
     }
 
     function withdrawBeneficiaryFee(address send_gas_to) external {
-        require(fee.beneficiary.value != 0 && msg.sender == fee.beneficiary, DexErrors.NOT_BENEFICIARY);
+        require(_fee.beneficiary.value != 0 && msg.sender == _fee.beneficiary, DexErrors.NOT_BENEFICIARY);
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        // Withdraw left and right accumulated fees
         _processBeneficiaryFees(true, send_gas_to);
 
+        // Refund remaining gas
         send_gas_to.transfer({
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
@@ -258,9 +271,14 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
     function checkPair(address _accountOwner, uint32) override external onlyAccount(_accountOwner) {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        // Notify account about pair
         IDexAccount(msg.sender)
             .checkPairCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (left_root, right_root, lp_root);
+            (
+                _typeToRootAddresses[DexAddressType.RESERVE][0],
+                _typeToRootAddresses[DexAddressType.RESERVE][1],
+                _typeToRootAddresses[DexAddressType.LP][0]
+            );
     }
 
     function upgrade(
@@ -269,7 +287,7 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         uint8 _newType,
         address _remainingGasTo
     ) override external onlyRoot {
-        if (current_version == _newVersion && _newType == DexPoolTypes.CONSTANT_PRODUCT) {
+        if (_currentVersion == _newVersion && _newType == DexPoolTypes.CONSTANT_PRODUCT) {
             tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
             _remainingGasTo.transfer({
@@ -278,7 +296,7 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
                 bounce: false
             });
         } else {
-            if (fee.beneficiary.value != 0) {
+            if (_fee.beneficiary.value != 0) {
                 _processBeneficiaryFees(true, _remainingGasTo);
             }
 
@@ -286,27 +304,18 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
 
             TvmBuilder builder;
 
-            builder.store(root);
-            builder.store(vault);
-            builder.store(current_version);
+            builder.store(_root);
+            builder.store(_currentVersion);
             builder.store(_newVersion);
             builder.store(_remainingGasTo);
             builder.store(DexPoolTypes.CONSTANT_PRODUCT);
             builder.store(platform_code);  // ref1 = platform_code
 
-            //Tokens
-            TvmBuilder tokensDataBuilder;
-
-            tokensDataBuilder.store(left_root);
-            tokensDataBuilder.store(right_root);
-
-            builder.storeRef(tokensDataBuilder);  // ref2
-
             TvmCell otherData = abi.encode(
-                lp_root, lp_wallet, lp_supply,
-                fee,
-                left_wallet, vault_left_wallet, left_balance,
-                right_wallet, vault_right_wallet, right_balance
+                _fee,
+                _lpSupply, _leftBalance, _rightBalance,
+                _typeToRootAddresses,
+                _typeToWalletAddresses
             );
 
             builder.store(otherData);   // ref3
@@ -325,16 +334,17 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
 
         TvmSlice dataSlice = _data.toSlice();
 
+        address vault;
         address remainingGasTo;
         uint32 oldVersion;
         uint8 oldPoolType = DexPoolTypes.CONSTANT_PRODUCT;
 
         // Unpack base data
         (
-            root,
+            _root,
             vault,
             oldVersion,
-            current_version,
+            _currentVersion,
             remainingGasTo
         ) = dataSlice.decode(
             address,
@@ -344,6 +354,8 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
             address
         );
 
+        _typeToRootAddresses[DexAddressType.VAULT].push(vault);
+
         if (dataSlice.bits() >= 8) {
             oldPoolType = dataSlice.decode(uint8);
         }
@@ -351,39 +363,69 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         // Load platform's code
         platform_code = dataSlice.loadRef(); // ref 1
 
+        address leftRoot;
+        address rightRoot;
+
         // Load tokens' roots addresses
         TvmSlice tokensDataSlice = dataSlice.loadRefAsSlice(); // ref 2
-        (left_root, right_root) = tokensDataSlice.decode(address, address);
+        (leftRoot, rightRoot) = tokensDataSlice.decode(address, address);
+
+        _typeToRootAddresses[DexAddressType.RESERVE].push(leftRoot);
+        _typeToRootAddresses[DexAddressType.RESERVE].push(rightRoot);
 
         if (oldVersion == 0) {
-            fee = FeeParams(1000000, 3000, 0, address(0), emptyMap);
+            _fee = FeeParams(1000000, 3000, 0, address(0), emptyMap);
 
-            IDexVault(vault)
+            IDexVault(_typeToRootAddresses[DexAddressType.VAULT][0])
                 .addLiquidityToken{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-                (address(this), left_root, right_root, remainingGasTo);
+                (
+                    address(this),
+                    _typeToRootAddresses[DexAddressType.RESERVE][0],
+                    _typeToRootAddresses[DexAddressType.RESERVE][1],
+                    remainingGasTo
+                );
         } else if (oldPoolType == DexPoolTypes.CONSTANT_PRODUCT) {
-            active = true;
+            _active = true;
             TvmCell otherData = dataSlice.loadRef(); // ref 3
 
+            address lpRoot;
+            address lpWallet;
+            address leftWallet;
+            address vaultLeftWallet;
+            address rightWallet;
+            address vaultRightWallet;
+
+            // Set reserves and fee options
             (
-                lp_root, lp_wallet, lp_supply,
-                fee,
-                left_wallet, vault_left_wallet, left_balance,
-                right_wallet, vault_right_wallet, right_balance
+                lpRoot, lpWallet, _lpSupply,
+                _fee,
+                leftWallet, vaultLeftWallet, _leftBalance,
+                rightWallet, vaultRightWallet, _rightBalance
             ) = abi.decode(otherData, (
                 address, address, uint128,
                 FeeParams,
                 address, address, uint128,
                 address, address, uint128
             ));
+
+            _typeToRootAddresses[DexAddressType.LP].push(lpRoot);
+            _typeToWalletAddresses[DexAddressType.LP].push(lpWallet);
+            _typeToWalletAddresses[DexAddressType.RESERVE].push(leftWallet);
+            _typeToWalletAddresses[DexAddressType.VAULT].push(vaultLeftWallet);
+            _typeToWalletAddresses[DexAddressType.RESERVE].push(rightWallet);
+            _typeToWalletAddresses[DexAddressType.VAULT].push(vaultRightWallet);
         } else if (oldPoolType == DexPoolTypes.STABLESWAP) {
-            active = true;
+            _active = true;
             TvmCell otherData = dataSlice.loadRef(); // ref 3
             IPoolTokenData.PoolTokenData[] tokensData = new IPoolTokenData.PoolTokenData[](2);
 
+            address lpRoot;
+            address lpWallet;
+
+            // Set lp reserve and fee options
             (
-                lp_root, lp_wallet, lp_supply,
-                fee,
+                lpRoot, lpWallet, _lpSupply,
+                _fee,
                 tokensData,,
             ) = abi.decode(otherData, (
                 address, address, uint128,
@@ -393,15 +435,18 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
                 uint256
             ));
 
-            left_wallet = tokensData[0].wallet;
-            vault_left_wallet = tokensData[0].vaultWallet;
-            left_balance = tokensData[0].balance;
+            // Set left reserve
+            _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[0].wallet);
+            _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[0].vaultWallet);
+            _leftBalance = tokensData[0].balance;
 
-            right_wallet = tokensData[1].wallet;
-            vault_right_wallet = tokensData[1].vaultWallet;
-            right_balance = tokensData[1].balance;
+            // Set right reserve
+            _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[1].wallet);
+            _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[1].vaultWallet);
+            _rightBalance = tokensData[1].balance;
         }
 
+        // Refund remaining gas
         remainingGasTo.transfer({
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
@@ -411,73 +456,95 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
 
     function onTokenWallet(address _wallet) external {
         require(
-            msg.sender == left_root ||
-            msg.sender == right_root ||
-            msg.sender == lp_root,
+            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0] ||
+            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1] ||
+            msg.sender == _typeToRootAddresses[DexAddressType.LP][0],
             DexErrors.NOT_ROOT
         );
 
-        if (msg.sender == lp_root && lp_wallet.value == 0) {
-            lp_wallet = _wallet;
-        } else if (msg.sender == left_root && left_wallet.value == 0) {
-            left_wallet = _wallet;
-        } else if (msg.sender == right_root && right_wallet.value == 0) {
-            right_wallet = _wallet;
+        // Set wallets addresses
+        if (
+            msg.sender == _typeToRootAddresses[DexAddressType.LP][0] &&
+            _typeToWalletAddresses[DexAddressType.LP].length == 0
+        ) {
+            _typeToWalletAddresses[DexAddressType.LP].push(_wallet);
+        } else if (
+            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0] &&
+            _typeToWalletAddresses[DexAddressType.RESERVE].length == 0
+        ) {
+            _typeToWalletAddresses[DexAddressType.RESERVE].push(_wallet);
+        } else if (
+            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1] &&
+            _typeToWalletAddresses[DexAddressType.RESERVE].length == 1
+        ) {
+            _typeToWalletAddresses[DexAddressType.RESERVE].push(_wallet);
         }
 
-        if (
-            lp_wallet.value != 0 &&
-            left_wallet.value != 0 &&
-            right_wallet.value != 0 &&
-            vault_left_wallet.value != 0 &&
-            vault_right_wallet.value != 0
-        ) {
-            active = true;
-        }
+        _tryToActivate();
     }
 
     function onVaultTokenWallet(address _wallet) external {
-        require(msg.sender == left_root || msg.sender == right_root, DexErrors.NOT_ROOT);
+        require(
+            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0] ||
+            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1],
+            DexErrors.NOT_ROOT
+        );
 
-        if (msg.sender == left_root && vault_left_wallet.value == 0) {
-            vault_left_wallet = _wallet;
-        } else if (msg.sender == right_root && vault_right_wallet.value == 0) {
-            vault_right_wallet = _wallet;
+        // Set vault wallets addresses
+        if (
+            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0] &&
+            _typeToWalletAddresses[DexAddressType.VAULT].length == 0
+        ) {
+            _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
+        } else if (
+            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1] &&
+            _typeToWalletAddresses[DexAddressType.VAULT].length == 1
+        ) {
+            _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
         }
 
+        _tryToActivate();
+    }
+
+    // Will activate pair if all wallets are set
+    function _tryToActivate() private {
         if (
-            lp_wallet.value != 0 &&
-            left_wallet.value != 0 &&
-            right_wallet.value != 0 &&
-            vault_left_wallet.value != 0 &&
-            vault_right_wallet.value != 0
+            _typeToWalletAddresses[DexAddressType.LP].length == 1 &&
+            _typeToWalletAddresses[DexAddressType.RESERVE].length == 2 &&
+            _typeToWalletAddresses[DexAddressType.VAULT].length == 2
         ) {
-            active = true;
+            _active = true;
         }
     }
 
     function liquidityTokenRootDeployed(
-        address _lpRoot,
+        address _lpRootAddress,
         address _remainingGasTo
     ) override external onlyVault {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        lp_root = _lpRoot;
+        _typeToRootAddresses[DexAddressType.LP].push(_lpRootAddress);
 
-        _configureTokenRootWallets(lp_root);
-        _configureTokenRootWallets(left_root);
-        _configureTokenRootWallets(right_root);
+        // Deploy wallets for pair
+        _configureTokenRootWallets(_typeToRootAddresses[DexAddressType.LP][0]);
+        _configureTokenRootWallets(_typeToRootAddresses[DexAddressType.RESERVE][0]);
+        _configureTokenRootWallets(_typeToRootAddresses[DexAddressType.RESERVE][1]);
 
-        IDexRoot(root)
+        // Notify root that pair was created
+        IDexRoot(_root)
             .onPairCreated{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (left_root, right_root, _remainingGasTo);
+            (
+                _typeToRootAddresses[DexAddressType.RESERVE][0],
+                _typeToRootAddresses[DexAddressType.RESERVE][1],
+                _remainingGasTo
+            );
     }
 
     function liquidityTokenRootNotDeployed(
         address,
         address _remainingGasTo
     ) override external onlyVault {
-        if (!active) {
+        if (!_active) {
             _remainingGasTo.transfer({
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO,
@@ -495,72 +562,81 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
     }
 
     function _dexRoot() override internal view returns (address) {
-        return root;
+        return _root;
     }
 
+    // Return accumulated fees
     function _processBeneficiaryFees(
         bool _isForce,
         address _remainingGasTo
     ) internal {
+        // Return left fee
         if (
-            (accumulated_left_fee > 0 && _isForce) ||
-            !fee.threshold.exists(left_root) ||
-            accumulated_left_fee >= fee.threshold.at(left_root)
+            (_accumulatedLeftFee > 0 && _isForce) ||
+            !_fee.threshold.exists(_typeToRootAddresses[DexAddressType.RESERVE][0]) ||
+            _accumulatedLeftFee >= _fee.threshold.at(_typeToRootAddresses[DexAddressType.RESERVE][0])
         ) {
-            IDexAccount(_expectedAccountAddress(fee.beneficiary))
+            IDexAccount(_expectedAccountAddress(_fee.beneficiary))
                 .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                 (
-                    accumulated_left_fee,
-                    left_root,
-                    left_root,
-                    right_root,
+                    _accumulatedLeftFee,
+                    _typeToRootAddresses[DexAddressType.RESERVE][0],
+                    _typeToRootAddresses[DexAddressType.RESERVE][0],
+                    _typeToRootAddresses[DexAddressType.RESERVE][1],
                     _remainingGasTo
                 );
 
-            accumulated_left_fee = 0;
+            _accumulatedLeftFee = 0;
         }
 
+        // Return right fee
         if (
-            (accumulated_right_fee > 0 && _isForce) ||
-            !fee.threshold.exists(right_root) ||
-            accumulated_right_fee >= fee.threshold.at(right_root)
+            (_accumulatedRightFee > 0 && _isForce) ||
+            !_fee.threshold.exists(_typeToRootAddresses[DexAddressType.RESERVE][1]) ||
+            _accumulatedRightFee >= _fee.threshold.at(_typeToRootAddresses[DexAddressType.RESERVE][1])
         ) {
-            IDexAccount(_expectedAccountAddress(fee.beneficiary))
+            IDexAccount(_expectedAccountAddress(_fee.beneficiary))
                 .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                 (
-                    accumulated_right_fee,
-                    right_root,
-                    left_root,
-                    right_root,
+                    _accumulatedRightFee,
+                    _typeToRootAddresses[DexAddressType.RESERVE][1],
+                    _typeToRootAddresses[DexAddressType.RESERVE][0],
+                    _typeToRootAddresses[DexAddressType.RESERVE][1],
                     _remainingGasTo
                 );
 
-            accumulated_right_fee = 0;
+            _accumulatedRightFee = 0;
         }
     }
 
+    // Pack left and right reserves and return them
     function _reserves() internal view returns (uint128[]) {
         uint128[] reserves = new uint128[](0);
 
-        reserves.push(left_balance);
-        reserves.push(right_balance);
+        // Pack left and right tokens' reserves
+        reserves.push(_leftBalance);
+        reserves.push(_rightBalance);
 
         return reserves;
     }
 
+    // Emits updated reserves
     function _sync() internal view {
-        emit Sync(_reserves(), lp_supply);
+        emit Sync(_reserves(), _lpSupply);
     }
 
+    // Pack left and right TIP-3 token roots and return them
     function _tokenRoots() internal view returns (address[]) {
         address[] roots = new address[](2);
 
-        roots[0] = left_root;
-        roots[1] = right_root;
+        // Pack left and right TIP-3 tokens' roots
+        roots[0] = _typeToRootAddresses[DexAddressType.RESERVE][0];
+        roots[1] = _typeToRootAddresses[DexAddressType.RESERVE][1];
 
         return roots;
     }
 
+    // Deploys wallet by TIP-3 token root
     function _configureTokenRootWallets(address _tokenRoot) private view {
         ITokenRoot(_tokenRoot)
             .deployWallet{
@@ -569,13 +645,13 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
                 callback: DexPairBase.onTokenWallet
             }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
-        if (_tokenRoot != lp_root) {
+        if (_tokenRoot != _typeToRootAddresses[DexAddressType.LP][0]) {
             ITokenRoot(_tokenRoot)
                 .walletOf{
                     value: DexGas.SEND_EXPECTED_WALLET_VALUE,
                     flag: MsgFlag.SENDER_PAYS_FEES,
                     callback: DexPairBase.onVaultTokenWallet
-                }(vault);
+                }(_typeToRootAddresses[DexAddressType.VAULT][0]);
         }
     }
 }

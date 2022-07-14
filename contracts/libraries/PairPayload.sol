@@ -78,4 +78,85 @@ library PairPayload {
 
         return builder.toCell();
     }
+
+    function decodeOnAcceptTokensTransferPayload(TvmCell _payload) public returns (
+        bool,
+        uint64,
+        uint8,
+        uint128,
+        uint128,
+        address,
+        bool,
+        TvmCell,
+        bool,
+        TvmCell,
+        bool,
+        TvmCell
+    ) {
+        TvmSlice payloadSlice = _payload.toSlice();
+
+        uint refsCount = payloadSlice.refs();
+
+        bool notifySuccess = refsCount >= 1;
+        bool notifyCancel = refsCount >= 2;
+        bool hasRef3 = refsCount >= 3;
+        bool isValid = payloadSlice.bits() >= 200;
+
+        uint8 op;
+        uint64 id;
+        uint128 deployWalletGrams;
+        uint128 expectedAmount;
+        address nextTokenRoot;
+
+        TvmCell successPayload;
+        TvmCell cancelPayload;
+        TvmCell ref3;
+
+        if (notifySuccess) {
+            successPayload = payloadSlice.loadRef();
+        }
+
+        if (notifyCancel) {
+            cancelPayload = payloadSlice.loadRef();
+        }
+
+        if (hasRef3) {
+            ref3 = payloadSlice.loadRef();
+        }
+
+        if (isValid) {
+            (
+                op,
+                id,
+                deployWalletGrams
+            ) = payloadSlice.decode(
+                uint8,
+                uint64,
+                uint128
+            );
+
+            if (payloadSlice.bits() >= 128) {
+                expectedAmount = payloadSlice.decode(uint128);
+            }
+
+            if (payloadSlice.bits() >= 267) {
+                nextTokenRoot = payloadSlice.decode(address);
+            }
+        }
+
+        return (
+            isValid,
+            id,
+            op,
+            deployWalletGrams,
+            expectedAmount,
+            nextTokenRoot,
+            hasRef3,
+            ref3,
+            notifySuccess,
+            successPayload,
+            notifyCancel,
+            cancelPayload
+        );
+    }
 }
