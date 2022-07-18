@@ -213,41 +213,18 @@ contract DexPair is DexPairBase {
                     ) {
                         _typeToReserves[DexReserveType.LP][0] += r.step_3_lp_reward;
 
-                        if (isLeftToRight) {
-                            _typeToReserves[DexReserveType.POOL][0] += _tokensAmount - step2BeneficiaryFee;
-                        } else {
-                            _typeToReserves[DexReserveType.POOL][1] += _tokensAmount - step2BeneficiaryFee;
-                        }
-
-                        if (step2BeneficiaryFee > 0) {
-                            if (isLeftToRight) {
-                                _typeToReserves[DexReserveType.FEE][0] += step2BeneficiaryFee;
-                            } else {
-                                _typeToReserves[DexReserveType.FEE][1] += step2BeneficiaryFee;
-                            }
-
-                            _processBeneficiaryFees(false, _remainingGasTo);
-                        }
-
-                        ExchangeFee[] fees;
-
-                        fees.push(
-                            ExchangeFee(
-                                fromTokenRoot,
-                                step2PoolFee,
-                                step2BeneficiaryFee,
-                                _fee.beneficiary
-                            )
-                        );
-
-                        emit Exchange(
-                            _senderAddress,
-                            _senderAddress,
+                        _exchangeBase(
+                            id,
+                            false,
+                            isLeftToRight,
+                            _tokensAmount,
+                            step2BeneficiaryFee,
+                            step2PoolFee,
+                            0,
                             fromTokenRoot,
-                            r.step_2_spent,
                             toTokenRoot,
-                            r.step_2_received,
-                            fees
+                            _senderAddress,
+                            _remainingGasTo
                         );
 
                         TokenOperation[] operations = new TokenOperation[](0);
@@ -329,60 +306,19 @@ contract DexPair is DexPairBase {
                         nextTokenRoot != toTokenRoot &&
                         nextTokenRoot != fromTokenRoot
                     ) {
-                        if (isLeftToRight) {
-                            _typeToReserves[DexReserveType.POOL][0] += _tokensAmount - beneficiaryFee;
-                            _typeToReserves[DexReserveType.POOL][1] -= amount;
-                        } else {
-                            _typeToReserves[DexReserveType.POOL][1] += _tokensAmount - beneficiaryFee;
-                            _typeToReserves[DexReserveType.POOL][0] -= amount;
-                        }
-
-                        ExchangeFee[] fees;
-
-                        fees.push(
-                            ExchangeFee(
-                                fromTokenRoot,
-                                poolFee,
-                                beneficiaryFee,
-                                _fee.beneficiary
-                            )
-                        );
-
-                        emit Exchange(
-                            _senderAddress,
-                            _senderAddress,
-                            fromTokenRoot,
+                        _exchangeBase(
+                            id,
+                            false,
+                            isLeftToRight,
                             _tokensAmount,
-                            toTokenRoot,
+                            beneficiaryFee,
+                            poolFee,
                             amount,
-                            fees
+                            fromTokenRoot,
+                            toTokenRoot,
+                            _senderAddress,
+                            _remainingGasTo
                         );
-
-                        if (beneficiaryFee > 0) {
-                            if (isLeftToRight) {
-                                _typeToReserves[DexReserveType.FEE][0] += beneficiaryFee;
-                            } else {
-                                _typeToReserves[DexReserveType.FEE][1] += beneficiaryFee;
-                            }
-
-                            _processBeneficiaryFees(false, _remainingGasTo);
-                        }
-
-                        IDexPairOperationCallback(_senderAddress)
-                            .dexPairExchangeSuccess{
-                                value: DexGas.OPERATION_CALLBACK_BASE + 40,
-                                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                                bounce: false
-                            }(
-                                id,
-                                false,
-                                IExchangeResult.ExchangeResult(
-                                    true,
-                                    _tokensAmount,
-                                    poolFee + beneficiaryFee,
-                                    amount
-                                )
-                            );
 
                         ITokenWallet(msg.sender)
                             .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
@@ -483,33 +419,20 @@ contract DexPair is DexPairBase {
     ) override external view responsible returns (DepositLiquidityResult) {
         uint128 lpReserve = _typeToReserves[DexReserveType.LP][0];
 
-        if (lpReserve == 0) {
-            return {
-                value: 0,
-                bounce: false,
-                flag: MsgFlag.REMAINING_GAS
-            } DepositLiquidityResult(
-                left_amount,
-                right_amount,
-                math.max(left_amount, right_amount),
-                false, false, 0, 0, 0, 0, 0, 0
-            );
-        } else {
-            (DepositLiquidityResult r,,) = _expectedDepositLiquidity(
-                left_amount,
-                right_amount,
-                auto_change,
-                _typeToReserves[DexReserveType.POOL][0],
-                _typeToReserves[DexReserveType.POOL][1],
-                lpReserve
-            );
+        (DepositLiquidityResult result,,) = _expectedDepositLiquidity(
+            left_amount,
+            right_amount,
+            auto_change,
+            _typeToReserves[DexReserveType.POOL][0],
+            _typeToReserves[DexReserveType.POOL][1],
+            lpReserve
+        );
 
-            return {
-                value: 0,
-                bounce: false,
-                flag: MsgFlag.REMAINING_GAS
-            } r;
-        }
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } result;
     }
 
     function depositLiquidity(
@@ -791,10 +714,23 @@ contract DexPair is DexPairBase {
         uint128,
         uint128
     ) {
+        if (_lpReserve == 0) {
+            return (
+                DepositLiquidityResult(
+                    _leftAmount,
+                    _rightAmount,
+                    math.max(_leftAmount, _rightAmount),
+                    false, false, 0, 0, 0, 0, 0, 0
+                ),
+                0,
+                0
+            );
+        }
+
         // step 1 (first deposit)
-        uint128 step1LeftDeposit = 0;
-        uint128 step1RightDeposit = 0;
-        uint128 step1LpReward = 0;
+        uint128 step1LeftDeposit;
+        uint128 step1RightDeposit;
+        uint128 step1LpReward;
 
         if (_leftAmount > 0 && _rightAmount > 0) {
             step1LeftDeposit = math.min(
@@ -964,10 +900,12 @@ contract DexPair is DexPairBase {
             lpReserve
         );
 
+        // Update reserves
         _typeToReserves[DexReserveType.POOL][0] -= leftBackAmount;
         _typeToReserves[DexReserveType.POOL][1] -= rightBackAmount;
         _typeToReserves[DexReserveType.LP][0] -= _lpAmount;
 
+        // Save operations
         TokenOperation[] operations = new TokenOperation[](0);
 
         operations.push(
@@ -984,6 +922,7 @@ contract DexPair is DexPairBase {
             )
         );
 
+        // Emit event
         emit WithdrawLiquidity(
             _sender,
             _sender,
@@ -1310,7 +1249,10 @@ contract DexPair is DexPairBase {
         uint128 _bAmount,
         uint128 _aPool,
         uint128 _bPool
-    ) private view returns (uint128, uint128) {
+    ) private view returns (
+        uint128,
+        uint128
+    ) {
         uint128 feeDMinusN = uint128(_fee.denominator - _fee.pool_numerator - _fee.beneficiary_numerator);
 
         uint128 newBPool = _bPool - _bAmount;
@@ -1328,7 +1270,10 @@ contract DexPair is DexPairBase {
             _fee.denominator
         );
 
-        return (expectedAAmount, aFee);
+        return (
+            expectedAAmount,
+            aFee
+        );
     }
 
     function _exchangeBase(
@@ -1344,6 +1289,7 @@ contract DexPair is DexPairBase {
         address _senderAddress,
         address _remainingGasTo
     ) private {
+        // Update reserves
         if (_isLeftToRight) {
             _typeToReserves[DexReserveType.POOL][0] += _spentAmount - _beneficiaryFee;
             _typeToReserves[DexReserveType.POOL][1] -= _amount;
@@ -1352,6 +1298,7 @@ contract DexPair is DexPairBase {
             _typeToReserves[DexReserveType.POOL][0] -= _amount;
         }
 
+        // Update accumulated fees
         if (_beneficiaryFee > 0) {
             if (_isLeftToRight) {
                 _typeToReserves[DexReserveType.FEE][0] += _beneficiaryFee;
@@ -1373,6 +1320,7 @@ contract DexPair is DexPairBase {
             )
         );
 
+        // Emit event
         emit Exchange(
             _senderAddress,
             _senderAddress,
@@ -1423,23 +1371,15 @@ contract DexPair is DexPairBase {
     ) override external onlyPair (
         _prevPoolTokenRoots[0],
         _prevPoolTokenRoots[1]
-    ) onlyActive {
-        require(msg.sender != address(this));
-
+    ) onlyActive notSelfCall {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        TvmSlice payloadSlice = _payload.toSlice();
-
-        uint128 expectedAmount = payloadSlice.decode(uint128);
-        address nextTokenRoot = payloadSlice.bits() >= 267 ? payloadSlice.decode(address) : address(0);
-
-        bool hasNextPayload = payloadSlice.refs() >= 1;
-
-        TvmCell nextPayload;
-
-        if (hasNextPayload) {
-            nextPayload = payloadSlice.loadRef();
-        }
+        (
+            uint128 expectedAmount,
+            address nextTokenRoot,
+            bool hasNextPayload,
+            TvmCell nextPayload
+        ) = PairPayload.decodeCrossPoolExchangePayload(_payload);
 
         bool isLeftToRight = _spentTokenRoot == _typeToRootAddresses[DexAddressType.RESERVE][0];
         address fromTokenVault = isLeftToRight ? _typeToWalletAddresses[DexAddressType.VAULT][0] : _typeToWalletAddresses[DexAddressType.VAULT][1];
@@ -1471,62 +1411,19 @@ contract DexPair is DexPairBase {
                 (poolFee > 0 || _fee.pool_numerator == 0) &&
                 (beneficiaryFee > 0 || _fee.beneficiary_numerator == 0)
             ) {
-                if (isLeftToRight) {
-                    _typeToReserves[DexReserveType.POOL][0] += _spentAmount - beneficiaryFee;
-                    _typeToReserves[DexReserveType.POOL][1] -= amount;
-                } else {
-                    _typeToReserves[DexReserveType.POOL][1] += _spentAmount - beneficiaryFee;
-                    _typeToReserves[DexReserveType.POOL][0] -= amount;
-                }
-
-                if (beneficiaryFee > 0) {
-                    if (isLeftToRight) {
-                        _typeToReserves[DexReserveType.FEE][0] += beneficiaryFee;
-                    } else {
-                        _typeToReserves[DexReserveType.FEE][1] += beneficiaryFee;
-                    }
-
-                    _processBeneficiaryFees(false, _remainingGasTo);
-                }
-
-                ExchangeFee[] fees;
-
-                fees.push(
-                    ExchangeFee(
-                        fromTokenRoot,
-                        poolFee,
-                        beneficiaryFee,
-                        _fee.beneficiary
-                    )
-                );
-
-                emit Exchange(
-                    _senderAddress,
-                    _senderAddress,
-                    fromTokenRoot,
+                _exchangeBase(
+                    _id,
+                    false,
+                    isLeftToRight,
                     _spentAmount,
-                    toTokenRoot,
+                    beneficiaryFee,
+                    poolFee,
                     amount,
-                    fees
+                    fromTokenRoot,
+                    toTokenRoot,
+                    _senderAddress,
+                    _remainingGasTo
                 );
-
-                _sync();
-
-                IDexPairOperationCallback(_senderAddress)
-                    .dexPairExchangeSuccess{
-                        value: DexGas.OPERATION_CALLBACK_BASE + 4,
-                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                        bounce: false
-                    }(
-                        _id,
-                        false,
-                        IExchangeResult.ExchangeResult(
-                            true,
-                            _spentAmount,
-                            poolFee + beneficiaryFee,
-                            amount
-                        )
-                    );
 
                 if (
                     nextTokenRoot.value != 0 &&

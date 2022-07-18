@@ -159,4 +159,31 @@ library PairPayload {
             cancelPayload
         );
     }
+
+    function decodeCrossPoolExchangePayload(TvmCell _payload) public returns (
+        uint128,
+        address,
+        bool,
+        TvmCell
+    ) {
+        TvmSlice payloadSlice = _payload.toSlice();
+
+        uint128 expectedAmount = payloadSlice.decode(uint128);
+        address nextTokenRoot = payloadSlice.bits() >= 267 ? payloadSlice.decode(address) : address(0);
+
+        bool hasNextPayload = payloadSlice.refs() >= 1;
+
+        TvmCell nextPayload;
+
+        if (hasNextPayload) {
+            nextPayload = payloadSlice.loadRef();
+        }
+
+        return (
+            expectedAmount,
+            nextTokenRoot,
+            hasNextPayload,
+            nextPayload
+        );
+    }
 }

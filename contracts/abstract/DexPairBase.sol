@@ -83,6 +83,11 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         _;
     }
 
+    modifier notSelfCall() {
+        require(msg.sender != address(this));
+        _;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // Getters
 
