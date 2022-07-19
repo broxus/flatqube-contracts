@@ -134,10 +134,13 @@ contract DexPair is DexPairBase {
                         uint128 amount,
                         uint128 poolFee,
                         uint128 beneficiaryFee
-                    ) = _expectedExchange(
+                    ) = Math.calculateExpectedExchange(
                         _tokensAmount,
                         fromReserve,
-                        toReserve
+                        toReserve,
+                        _fee.pool_numerator,
+                        _fee.beneficiary_numerator,
+                        _fee.denominator
                     );
 
                     if (
@@ -195,13 +198,16 @@ contract DexPair is DexPairBase {
                         DepositLiquidityResult r,
                         uint128 step2PoolFee,
                         uint128 step2BeneficiaryFee
-                    ) = _expectedDepositLiquidity(
+                    ) = Math.calculateExpectedDepositLiquidity(
                         _tokensAmount,
                         0,
                         true,
                         fromReserve,
                         toReserve,
-                        lpReserve
+                        lpReserve,
+                        _fee.pool_numerator,
+                        _fee.beneficiary_numerator,
+                        _fee.denominator
                     );
 
                     if (
@@ -265,10 +271,13 @@ contract DexPair is DexPairBase {
                         uint128 amount,
                         uint128 poolFee,
                         uint128 beneficiaryFee
-                    ) = _expectedExchange(
+                    ) = Math.calculateExpectedExchange(
                         _tokensAmount,
                         fromReserve,
-                        toReserve
+                        toReserve,
+                        _fee.pool_numerator,
+                        _fee.beneficiary_numerator,
+                        _fee.denominator
                     );
 
                     if (
@@ -392,13 +401,16 @@ contract DexPair is DexPairBase {
     ) override external view responsible returns (DepositLiquidityResult) {
         uint128 lpReserve = _typeToReserves[DexReserveType.LP][0];
 
-        (DepositLiquidityResult result,,) = _expectedDepositLiquidity(
+        (DepositLiquidityResult result,,) = Math.calculateExpectedDepositLiquidity(
             left_amount,
             right_amount,
             auto_change,
             _typeToReserves[DexReserveType.POOL][0],
             _typeToReserves[DexReserveType.POOL][1],
-            lpReserve
+            lpReserve,
+            _fee.pool_numerator,
+            _fee.beneficiary_numerator,
+            _fee.denominator
         );
 
         return {
@@ -458,13 +470,16 @@ contract DexPair is DexPairBase {
                 DepositLiquidityResult r,
                 uint128 step2PoolFee,
                 uint128 step2BeneficiaryFee
-            ) = _expectedDepositLiquidity(
+            ) = Math.calculateExpectedDepositLiquidity(
                 _leftAmount,
                 _rightAmount,
                 _autoChange,
                 leftReserve,
                 rightReserve,
-                lpReserve
+                lpReserve,
+                _fee.pool_numerator,
+                _fee.beneficiary_numerator,
+                _fee.denominator
             );
 
             result = r;
@@ -553,179 +568,6 @@ contract DexPair is DexPairBase {
         ISuccessCallback(msg.sender)
             .successCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_callId);
-    }
-
-    function _expectedDepositLiquidity(
-        uint128 _leftAmount,
-        uint128 _rightAmount,
-        bool _autoChange,
-        uint128 _fromReserve,
-        uint128 _toReserve,
-        uint128 _lpReserve
-    ) private view returns (
-        DepositLiquidityResult,
-        uint128,
-        uint128
-    ) {
-        if (_lpReserve == 0) {
-            return (
-                DepositLiquidityResult(
-                    _leftAmount,
-                    _rightAmount,
-                    math.max(_leftAmount, _rightAmount),
-                    false, false, 0, 0, 0, 0, 0, 0
-                ),
-                0,
-                0
-            );
-        }
-
-        // step 1 (first deposit)
-        uint128 step1LeftDeposit;
-        uint128 step1RightDeposit;
-        uint128 step1LpReward;
-
-        if (_leftAmount > 0 && _rightAmount > 0) {
-            step1LeftDeposit = math.min(
-                _leftAmount,
-                math.muldiv(_fromReserve, _rightAmount, _toReserve)
-            );
-
-            step1RightDeposit = math.min(
-                _rightAmount,
-                math.muldiv(_toReserve, _leftAmount, _fromReserve)
-            );
-
-            step1LpReward = math.max(
-                math.muldiv(step1RightDeposit, _lpReserve, _toReserve),
-                math.muldiv(step1LeftDeposit, _lpReserve, _fromReserve)
-            );
-        }
-
-        uint128 currentLeftAmount = _leftAmount - step1LeftDeposit;
-        uint128 currentRightAmount = _rightAmount - step1RightDeposit;
-        uint128 currentLeftBalance = _fromReserve + step1LeftDeposit;
-        uint128 currentRightBalance = _toReserve + step1RightDeposit;
-        uint128 currentLpSupply = _lpReserve + step1LpReward;
-
-        bool step2LeftToRight = false;
-        bool step2RightToLeft = false;
-        uint128 step2Spent = 0;
-        uint128 step2PoolFee = 0;
-        uint128 step2BeneficiaryFee = 0;
-        uint128 step2Received = 0;
-
-        uint128 step3LeftDeposit = 0;
-        uint128 step3RightDeposit = 0;
-        uint128 step3LpReward = 0;
-
-        uint256 feeD = uint256(_fee.denominator);
-        uint256 feeDMinusN = feeD - uint256(_fee.pool_numerator + _fee.beneficiary_numerator);
-        uint256 denominator = feeDMinusN * (feeD - uint256(_fee.beneficiary_numerator));
-
-        if (_autoChange && currentRightAmount > 0) {
-            // step 2 (surplus RIGHT exchange)
-            step2RightToLeft = true;
-
-            uint256 p = math.muldiv(
-                uint256(currentRightBalance),
-                feeD * (feeDMinusN + feeD),
-                denominator
-            );
-
-            uint256 q = math.muldiv(
-                uint256(currentRightBalance),
-                feeD * feeD * uint256(currentRightAmount),
-                denominator
-            );
-
-            step2Spent = Math.solveQuadraticEquationPQ(p, q);
-
-            (
-                step2Received,
-                step2PoolFee,
-                step2BeneficiaryFee
-            ) = _expectedExchange(
-                step2Spent,
-                currentRightBalance,
-                currentLeftBalance
-            );
-
-            currentRightAmount = currentRightAmount - step2Spent;
-            currentRightBalance = currentRightBalance + step2Spent - step2BeneficiaryFee;
-
-            if (currentRightAmount > 0 && step2Received > 0) {
-                // step 3 (deposit exchanged amounts)
-                step3RightDeposit = currentRightAmount;
-                step3LeftDeposit = step2Received;
-
-                step3LpReward = math.muldiv(currentRightAmount, currentLpSupply, currentRightBalance);
-            } else {
-                step2RightToLeft = false;
-                step1RightDeposit = _rightAmount;
-            }
-        } else if (_autoChange && currentLeftAmount > 0) {
-            // step 2 (surplus LEFT exchange)
-            step2LeftToRight = true;
-
-            uint256 p = math.muldiv(
-                uint256(currentLeftBalance),
-                feeD * (feeDMinusN + feeD),
-                denominator
-            );
-
-            uint256 q = math.muldiv(
-                uint256(currentLeftBalance),
-                feeD * feeD * uint256(currentLeftAmount),
-                denominator
-            );
-
-            step2Spent = Math.solveQuadraticEquationPQ(p, q);
-
-            (
-                step2Received,
-                step2PoolFee,
-                step2BeneficiaryFee
-            ) = _expectedExchange(
-                step2Spent,
-                currentLeftBalance,
-                currentRightBalance
-            );
-
-            currentLeftAmount = currentLeftAmount - step2Spent;
-            currentLeftBalance = currentLeftBalance + step2Spent - step2BeneficiaryFee;
-
-            if (currentLeftAmount > 0 && step2Received > 0) {
-                // step 3 (deposit exchanged amounts)
-                step3LeftDeposit = currentLeftAmount;
-                step3RightDeposit = step2Received;
-
-                step3LpReward = math.muldiv(currentLeftAmount, currentLpSupply, currentLeftBalance);
-            } else {
-                step2LeftToRight = false;
-                step1LeftDeposit = _leftAmount;
-            }
-        }
-
-        return (
-            DepositLiquidityResult(
-                step1LeftDeposit,
-                step1RightDeposit,
-                step1LpReward,
-
-                step2LeftToRight,
-                step2RightToLeft,
-                step2Spent,
-                step2PoolFee + step2BeneficiaryFee,
-                step2Received,
-
-                step3LeftDeposit,
-                step3RightDeposit,
-                step3LpReward
-            ),
-            step2PoolFee,
-            step2BeneficiaryFee
-        );
     }
 
     function _depositLiquidityBase(
@@ -1016,10 +858,13 @@ contract DexPair is DexPairBase {
                 uint128 amount,
                 uint128 poolFee,
                 uint128 beneficiaryFee
-            ) = _expectedExchange(
+            ) = Math.calculateExpectedExchange(
                 amount,
                 fromReserve,
-                toReserve
+                toReserve,
+                _fee.pool_numerator,
+                _fee.beneficiary_numerator,
+                _fee.denominator
             );
 
             return {
@@ -1054,10 +899,13 @@ contract DexPair is DexPairBase {
                 value: 0,
                 bounce: false,
                 flag: MsgFlag.REMAINING_GAS
-            } _expectedSpendAmount(
+            } Math.calculateExpectedSpendAmount(
                 receive_amount,
                 fromReserve,
-                toReserve
+                toReserve,
+                _fee.pool_numerator,
+                _fee.beneficiary_numerator,
+                _fee.denominator
             );
         } else {
             revert(DexErrors.NOT_TOKEN_ROOT);
@@ -1088,10 +936,13 @@ contract DexPair is DexPairBase {
                 uint128 amount,
                 uint128 poolFee,
                 uint128 beneficiaryFee
-            ) = _expectedExchange(
+            ) = Math.calculateExpectedExchange(
                 _spentAmount,
                 fromReserve,
-                toReserve
+                toReserve,
+                _fee.pool_numerator,
+                _fee.beneficiary_numerator,
+                _fee.denominator
             );
 
             require(amount <= toReserve, DexErrors.NOT_ENOUGH_FUNDS);
@@ -1132,71 +983,6 @@ contract DexPair is DexPairBase {
         } else {
             revert(DexErrors.NOT_TOKEN_ROOT);
         }
-    }
-
-    function _expectedExchange(
-        uint128 aAmount,
-        uint128 aPool,
-        uint128 bPool
-    ) private view returns (
-        uint128,
-        uint128,
-        uint128
-    ) {
-        uint128 aFee = math.muldivc(
-            aAmount,
-            _fee.pool_numerator + _fee.beneficiary_numerator,
-            _fee.denominator
-        );
-
-        uint128 aBeneficiaryFee = math.muldiv(
-            aFee,
-            _fee.beneficiary_numerator,
-            _fee.pool_numerator + _fee.beneficiary_numerator
-        );
-
-        uint128 aPoolFee = aFee - aBeneficiaryFee;
-
-        uint128 newAPool = aPool + aAmount;
-        uint128 newBPool = math.muldivc(aPool, bPool, newAPool - aFee);
-        uint128 expectedBAmount = bPool - newBPool;
-
-        return (
-            expectedBAmount,
-            aPoolFee,
-            aBeneficiaryFee
-        );
-    }
-
-    function _expectedSpendAmount(
-        uint128 _bAmount,
-        uint128 _aPool,
-        uint128 _bPool
-    ) private view returns (
-        uint128,
-        uint128
-    ) {
-        uint128 feeDMinusN = uint128(_fee.denominator - _fee.pool_numerator - _fee.beneficiary_numerator);
-
-        uint128 newBPool = _bPool - _bAmount;
-        uint128 newAPool = math.muldivc(_aPool, _bPool, newBPool);
-
-        uint128 expectedAAmount = math.muldivc(
-            newAPool - _aPool,
-            _fee.denominator,
-            feeDMinusN
-        );
-
-        uint128 aFee = math.muldivc(
-            expectedAAmount,
-            _fee.pool_numerator + _fee.beneficiary_numerator,
-            _fee.denominator
-        );
-
-        return (
-            expectedAAmount,
-            aFee
-        );
     }
 
     function _exchangeBase(
@@ -1291,7 +1077,7 @@ contract DexPair is DexPairBase {
         TvmCell _successPayload,
         bool _notifyCancel,
         TvmCell _cancelPayload
-    ) override external onlyPair (
+    ) override external onlyPair(
         _prevPoolTokenRoots[0],
         _prevPoolTokenRoots[1]
     ) onlyActive notSelfCall {
@@ -1321,10 +1107,13 @@ contract DexPair is DexPairBase {
                 uint128 amount,
                 uint128 poolFee,
                 uint128 beneficiaryFee
-            ) = _expectedExchange(
+            ) = Math.calculateExpectedExchange(
                 _spentAmount,
                 fromReserve,
-                toReserve
+                toReserve,
+                _fee.pool_numerator,
+                _fee.beneficiary_numerator,
+                _fee.denominator
             );
 
             if (
