@@ -211,8 +211,6 @@ contract DexPair is DexPairBase {
                         (step2PoolFee > 0 || _fee.pool_numerator == 0) &&
                         (step2BeneficiaryFee > 0 || _fee.beneficiary_numerator == 0)
                     ) {
-                        _typeToReserves[DexReserveType.LP][0] += r.step_3_lp_reward;
-
                         _exchangeBase(
                             id,
                             false,
@@ -227,35 +225,12 @@ contract DexPair is DexPairBase {
                             _remainingGasTo
                         );
 
-                        TokenOperation[] operations = new TokenOperation[](0);
-
-                        operations.push(
-                            TokenOperation(
-                                r.step_3_left_deposit,
-                                fromTokenRoot
-                            )
+                        _depositLiquidityBase(
+                            id,
+                            false,
+                            r,
+                            _senderAddress
                         );
-
-                        operations.push(
-                            TokenOperation(
-                                r.step_3_right_deposit,
-                                toTokenRoot
-                            )
-                        );
-
-                        emit DepositLiquidity(
-                            _senderAddress,
-                            _senderAddress,
-                            operations,
-                            r.step_3_lp_reward
-                        );
-
-                        IDexPairOperationCallback(_senderAddress)
-                            .dexPairDepositLiquiditySuccess{
-                                value: DexGas.OPERATION_CALLBACK_BASE + 20,
-                                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                                bounce: false
-                            }(id, false, r);
 
                         ITokenWallet(msg.sender)
                             .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
@@ -404,8 +379,6 @@ contract DexPair is DexPairBase {
                     notifyCancel,
                     cancelPayload
                 );
-        } else {
-            _sync();
         }
     }
 
@@ -461,59 +434,25 @@ contract DexPair is DexPairBase {
         );
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        uint128 lpTokensAmount;
+        DepositLiquidityResult result;
 
         if (lpReserve == 0) {
-            lpTokensAmount = math.max(_leftAmount, _rightAmount);
-
             _typeToReserves[DexReserveType.POOL][0] = _leftAmount;
             _typeToReserves[DexReserveType.POOL][1] = _rightAmount;
 
-            TokenOperation[] operations = new TokenOperation[](0);
-
-            operations.push(
-                TokenOperation(
-                    _leftAmount,
-                    leftTokenRoot
-                )
+            result = DepositLiquidityResult(
+                _leftAmount,
+                _rightAmount,
+                math.max(_leftAmount, _rightAmount),
+                false,
+                false,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
             );
-
-            operations.push(
-                TokenOperation(
-                    _rightAmount,
-                    rightTokenRoot
-                )
-            );
-
-            emit DepositLiquidity(
-                _accountOwner,
-                _accountOwner,
-                operations,
-                lpTokensAmount
-            );
-
-            IDexPairOperationCallback(_accountOwner)
-                .dexPairDepositLiquiditySuccess{
-                    value: DexGas.OPERATION_CALLBACK_BASE + 2,
-                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                    bounce: false
-                }(
-                    _callId,
-                    true,
-                    DepositLiquidityResult(
-                        _leftAmount,
-                        _rightAmount,
-                        lpTokensAmount,
-                        false,
-                        false,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0
-                    )
-                );
         } else {
             (
                 DepositLiquidityResult r,
@@ -528,7 +467,7 @@ contract DexPair is DexPairBase {
                 lpReserve
             );
 
-            lpTokensAmount = r.step_1_lp_reward + r.step_3_lp_reward;
+            result = r;
 
             if (_autoChange) {
                 _typeToReserves[DexReserveType.POOL][0] += _leftAmount;
@@ -546,9 +485,19 @@ contract DexPair is DexPairBase {
                     _typeToReserves[DexReserveType.FEE][0] += step2BeneficiaryFee;
                 }
 
-                if (step2BeneficiaryFee > 0) {
-                    _processBeneficiaryFees(false, _remainingGasTo);
-                }
+                _exchangeBase(
+                    _callId,
+                    true,
+                    r.step_2_left_to_right,
+                    0,
+                    0,
+                    0,
+                    0,
+                    r.step_2_left_to_right ? leftTokenRoot : rightTokenRoot,
+                    r.step_2_left_to_right ? rightTokenRoot : leftTokenRoot,
+                    _accountOwner,
+                    _remainingGasTo
+                );
             } else {
                 _typeToReserves[DexReserveType.POOL][0] += r.step_1_left_deposit;
                 _typeToReserves[DexReserveType.POOL][1] += r.step_1_right_deposit;
@@ -577,108 +526,14 @@ contract DexPair is DexPairBase {
                         );
                 }
             }
-
-            if (r.step_1_lp_reward > 0) {
-                TokenOperation[] step1Operations;
-
-                step1Operations.push(
-                    TokenOperation(
-                        r.step_1_left_deposit,
-                        leftTokenRoot
-                    )
-                );
-
-                step1Operations.push(
-                    TokenOperation(
-                        r.step_1_right_deposit,
-                        rightTokenRoot
-                    )
-                );
-
-                emit DepositLiquidity(
-                    _accountOwner,
-                    _accountOwner,
-                    step1Operations,
-                    r.step_1_lp_reward
-                );
-            }
-
-            ExchangeFee[] fees;
-
-            if (r.step_2_right_to_left) {
-                fees.push(
-                    ExchangeFee(
-                        rightTokenRoot,
-                        step2PoolFee,
-                        step2BeneficiaryFee,
-                        _fee.beneficiary
-                    )
-                );
-
-                emit Exchange(
-                    _accountOwner,
-                    _accountOwner,
-                    rightTokenRoot,
-                    r.step_2_spent,
-                    leftTokenRoot,
-                    r.step_2_received,
-                    fees
-                );
-            } else if (r.step_2_left_to_right) {
-                fees.push(
-                    ExchangeFee(
-                        leftTokenRoot,
-                        step2PoolFee,
-                        step2BeneficiaryFee,
-                        _fee.beneficiary
-                    )
-                );
-
-                emit Exchange(
-                    _accountOwner,
-                    _accountOwner,
-                    leftTokenRoot,
-                    r.step_2_spent,
-                    rightTokenRoot,
-                    r.step_2_received,
-                    fees
-                );
-            }
-
-            if (r.step_3_lp_reward > 0) {
-                TokenOperation[] step3Operations;
-
-                step3Operations.push(
-                    TokenOperation(
-                        r.step_3_left_deposit,
-                        leftTokenRoot
-                    )
-                );
-
-                step3Operations.push(
-                    TokenOperation(
-                        r.step_3_right_deposit,
-                        rightTokenRoot
-                    )
-                );
-
-                emit DepositLiquidity(
-                    _accountOwner,
-                    _accountOwner,
-                    step3Operations,
-                    r.step_3_lp_reward
-                );
-            }
-
-            IDexPairOperationCallback(_accountOwner)
-                .dexPairDepositLiquiditySuccess{
-                    value: DexGas.OPERATION_CALLBACK_BASE + 2,
-                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                    bounce: false
-                }(_callId, true, r);
         }
 
-        _typeToReserves[DexReserveType.LP][0] += lpTokensAmount;
+        _depositLiquidityBase(
+            _callId,
+            true,
+            result,
+            _accountOwner
+        );
 
         TvmCell empty;
 
@@ -687,15 +542,13 @@ contract DexPair is DexPairBase {
                 value: DexGas.DEPLOY_MINT_VALUE_BASE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
                 flag: MsgFlag.SENDER_PAYS_FEES
             }(
-                lpTokensAmount,
+                result.step_1_lp_reward + result.step_3_lp_reward,
                 _accountOwner,
                 DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
                 _remainingGasTo,
                 _remainingGasTo == _accountOwner,
                 empty
             );
-
-        _sync();
 
         ISuccessCallback(msg.sender)
             .successCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
@@ -875,8 +728,78 @@ contract DexPair is DexPairBase {
         );
     }
 
-    function _depositLiquidityBase() private {
+    function _depositLiquidityBase(
+        uint64 _callId,
+        bool _isViaAccount,
+        DepositLiquidityResult _result,
+        address _senderAddress
+    ) private {
+        address leftTokenRoot = _typeToRootAddresses[DexAddressType.RESERVE][0];
+        address rightTokenRoot = _typeToRootAddresses[DexAddressType.RESERVE][1];
+        _typeToReserves[DexReserveType.LP][0] += _result.step_1_lp_reward + _result.step_3_lp_reward;
 
+        _sync();
+
+        if (_result.step_1_lp_reward > 0) {
+            TokenOperation[] step1Operations;
+
+            step1Operations.push(
+                TokenOperation(
+                    _result.step_1_left_deposit,
+                    leftTokenRoot
+                )
+            );
+
+            step1Operations.push(
+                TokenOperation(
+                    _result.step_1_right_deposit,
+                    rightTokenRoot
+                )
+            );
+
+            emit DepositLiquidity(
+                _senderAddress,
+                _senderAddress,
+                step1Operations,
+                _result.step_1_lp_reward
+            );
+        }
+
+        if (_result.step_3_lp_reward > 0) {
+            TokenOperation[] step3Operations;
+
+            step3Operations.push(
+                TokenOperation(
+                    _result.step_3_left_deposit,
+                    leftTokenRoot
+                )
+            );
+
+            step3Operations.push(
+                TokenOperation(
+                    _result.step_3_right_deposit,
+                    rightTokenRoot
+                )
+            );
+
+            emit DepositLiquidity(
+                _senderAddress,
+                _senderAddress,
+                step3Operations,
+                _result.step_3_lp_reward
+            );
+        }
+
+        IDexPairOperationCallback(_senderAddress)
+            .dexPairDepositLiquiditySuccess{
+                value: DexGas.OPERATION_CALLBACK_BASE + 2,
+                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                bounce: false
+            }(
+                _callId,
+                _isViaAccount,
+                _result
+            );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
