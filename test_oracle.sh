@@ -39,11 +39,13 @@ npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_n
 
 # update pairs
 npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='bar' --right='qwe' --old_contract_name='DexPairPrev' --new_contract_name='TestOracleDexPair'
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPairPrev' --new_contract_name='TestOracleDexPair'
 npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='qwe' --old_contract_name='DexPairPrev' --new_contract_name='TestOracleDexPair'
 npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='tst' --old_contract_name='DexPairPrev' --new_contract_name='TestOracleDexPair'
 npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='bar' --right='tst' --old_contract_name='DexPairPrev' --new_contract_name='TestOracleDexPair'
 
 npx locklift test $NO_TRACE --tests test/52-set-oracle-points.js --left='Bar' --right='Qwe'
+npx locklift test $NO_TRACE --tests test/52-set-oracle-points.js --left='Foo' --right='Bar'
 npx locklift test $NO_TRACE --tests test/52-set-oracle-points.js --left='Foo' --right='Qwe'
 npx locklift test $NO_TRACE --tests test/52-set-oracle-points.js --left='Foo' --right='Tst'
 npx locklift test $NO_TRACE --tests test/52-set-oracle-points.js --left='Bar' --right='Tst'
@@ -59,5 +61,5 @@ npx locklift test $NO_TRACE --tests test/15-dex-account-pair-operations.js --pai
 npx locklift test $NO_TRACE --tests test/20-pair-direct-operations.js --contract_name='TestOracleDexPair'
 npx locklift test $NO_TRACE --tests test/25-dex-accounts-interaction.js --pair_contract_name='TestOracleDexPair' --account_contract_name='DexAccount'
 
-npx locklift test $NO_TRACE --tests test/50-beneficiary-fee.js --fee='{"denominator": "1000000000", "pool_numerator": "2000000", "beneficiary_numerator": "3000000"}'
-npx locklift test $NO_TRACE --tests test/50-beneficiary-fee.js --fee='{"denominator": "1000000000", "pool_numerator": "0", "beneficiary_numerator": "1000000"}'
+npx locklift test $NO_TRACE --tests test/50-beneficiary-fee.js --fee='{"denominator": "1000000000", "pool_numerator": "2000000", "beneficiary_numerator": "3000000"}' --pair_contract_name='TestOracleDexPair'
+npx locklift test $NO_TRACE --tests test/50-beneficiary-fee.js --fee='{"denominator": "1000000000", "pool_numerator": "0", "beneficiary_numerator": "1000000"}' --pair_contract_name='TestOracleDexPair'
