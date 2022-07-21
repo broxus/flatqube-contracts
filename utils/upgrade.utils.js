@@ -7,6 +7,7 @@ const logger = require('mocha-logger');
  * @param leftRoot TokenRoot contract of the left pair's token with address
  * @param rightRoot TokenRoot contract of the right pair's token with address
  * @param newPair a new DexPair contract
+ * @param poolType a new contract's type
  */
 const upgradePair = async (
   account,
@@ -14,12 +15,13 @@ const upgradePair = async (
   leftRoot,
   rightRoot,
   newPair,
+  poolType = 1,
 ) => {
   logger.log('[DexRoot] installOrUpdatePairCode...');
   await account.runTarget({
     contract: dexRoot,
     method: 'installOrUpdatePairCode',
-    params: { code: newPair.code, pool_type: 1 },
+    params: { code: newPair.code, pool_type: poolType },
     value: locklift.utils.convertCrystal(10, 'nano'),
     keyPair: account.keyPair,
   });
@@ -32,7 +34,7 @@ const upgradePair = async (
       left_root: leftRoot,
       right_root: rightRoot,
       send_gas_to: account.address,
-      pool_type: 1,
+      pool_type: poolType,
     },
     value: locklift.utils.convertCrystal(10, 'nano'),
     keyPair: account.keyPair,

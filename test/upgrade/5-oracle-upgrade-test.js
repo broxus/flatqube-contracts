@@ -275,4 +275,16 @@ describe('Oracle Upgrade', function () {
       expect(str).to.be.equal('New Pair');
     });
   });
+
+  describe('upgrade and check stable pair', () => {
+    it('should upgrade and check pair code in root', async () => {
+      const NewDexPair = await locklift.factory.getContract('DexStablePair');
+      await upgradePair(account, root, tokens['ABC'].address, tokens['XYZ'].address, NewDexPair, 2);
+      NewDexPair.setAddress(pair.address);
+      pair = NewDexPair;
+      const code = await root.call({ method: 'getPairCode', params: { pool_type: 2 } });
+
+      expect(code).to.be.equal(NewDexPair.code);
+    });
+  });
 });

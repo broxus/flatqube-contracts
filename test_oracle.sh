@@ -5,9 +5,9 @@ export NO_TRACE="--config locklift.config.js --disable-build --network local"
 npx locklift run $NO_TRACE --script scripts/0-reset-migration.js
 
 # Create ever accounts
-npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0' --balance='50'
-npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='1' --balance='50'
-npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='2' --balance='50'
+npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0' --balance='100'
+npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='1' --balance='100'
+npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='2' --balance='100'
 
 # Init dex and tokens
 npx locklift run $NO_TRACE --script scripts/0-deploy-TokenFactory.js
@@ -73,5 +73,9 @@ npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPair' --pool_type=1
 
 npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexStablePair' --new_contract_name='DexPair' --pool_type=2
+
+npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["qwe", "tst"]]' --contract_name='DexPair'
+npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='qwe' --right='tst' --account=2 --contract_name='DexPair' --ignore_already_added='true'
+npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'qwe' --right_token_id 'tst' --left_amount '10000' --right_amount '10000' --auto_change 'true' --contract_name='DexPair'
 
 npx locklift run $NO_TRACE --script scripts/update-dexRoot.js --old_contract='DexRoot' --new_contract='TestNewDexRoot'
