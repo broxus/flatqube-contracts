@@ -76,6 +76,10 @@ contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IPoint, IOracle
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } current_version;
     }
 
+    function getPoolType() external view responsible returns (uint8) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } 1;
+    }
+
     function getVault() external view responsible returns (address dex_vault) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } vault;
     }

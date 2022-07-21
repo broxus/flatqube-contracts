@@ -63,3 +63,15 @@ npx locklift test $NO_TRACE --tests test/25-dex-accounts-interaction.js --pair_c
 
 npx locklift test $NO_TRACE --tests test/50-beneficiary-fee.js --fee='{"denominator": "1000000000", "pool_numerator": "2000000", "beneficiary_numerator": "3000000"}' --pair_contract_name='TestOracleDexPair'
 npx locklift test $NO_TRACE --tests test/50-beneficiary-fee.js --fee='{"denominator": "1000000000", "pool_numerator": "0", "beneficiary_numerator": "1000000"}' --pair_contract_name='TestOracleDexPair'
+
+npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='TestNewDexPair' --pool_type=1
+npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexStablePair' --pool_type=2
+
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='bar' --right='qwe' --old_contract_name='TestOracleDexPair' --new_contract_name='TestNewDexPair'
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='TestOracleDexPair' --new_contract_name='DexStablePair' --pool_type=2
+
+npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPair' --pool_type=1
+
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexStablePair' --new_contract_name='DexPair' --pool_type=2
+
+npx locklift run $NO_TRACE --script scripts/update-dexRoot.js --old_contract='DexRoot' --new_contract='TestNewDexRoot'

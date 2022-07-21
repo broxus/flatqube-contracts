@@ -1910,8 +1910,6 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                 address, address, uint128,
                 address, address, uint128
             ));
-
-            _initializeTWAPOracle(now);
         } else if (old_pool_type == DexPoolTypes.STABLESWAP) {
             active = true;
             TvmCell otherData = s.loadRef(); // ref 3
@@ -1936,6 +1934,8 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
             vault_right_wallet = _tokenData[1].vaultWallet;
             right_balance = _tokenData[1].balance;
         }
+
+        _initializeTWAPOracle(now);
 
         send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS, bounce: false });
     }
