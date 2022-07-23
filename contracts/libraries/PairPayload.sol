@@ -1,6 +1,6 @@
 pragma ton-solidity >= 0.57.0;
 
-import "../structures/ITokenOperationStructure.sol";
+import "../structures/IExchangeStepStructure.sol";
 
 import "./DexOperationTypes.sol";
 
@@ -50,7 +50,8 @@ library PairPayload {
         uint64 _id,
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
-        ITokenOperationStructure.TokenOperation[] _steps
+        IExchangeStepStructure.ExchangeStep[] _steps,
+        address[] _pairs
     ) public returns (TvmCell) {
         require(_steps.length > 0);
 
@@ -60,7 +61,8 @@ library PairPayload {
         builder.store(_id);
         builder.store(_deployWalletGrams);
         builder.store(_expectedAmount);
-        builder.store(_steps[0].root);
+        builder.store(_pairs[0]);
+        builder.store(_steps[0].outcoming);
 
         TvmBuilder nextStepBuilder;
         nextStepBuilder.store(_steps[_steps.length - 1].amount);
@@ -68,7 +70,11 @@ library PairPayload {
         for (uint i = _steps.length - 1; i > 0; i--) {
             TvmBuilder currentStepBuilder;
 
-            currentStepBuilder.store(_steps[i - 1].amount, _steps[i].root);
+            currentStepBuilder.store(
+                _steps[i - 1].amount,
+                _pairs[i],
+                _steps[i].outcoming
+            );
             currentStepBuilder.store(nextStepBuilder.toCell());
 
             nextStepBuilder = currentStepBuilder;
@@ -85,6 +91,7 @@ library PairPayload {
         uint8,
         uint128,
         uint128,
+        address,
         address,
         bool,
         TvmCell,
@@ -107,6 +114,7 @@ library PairPayload {
         uint128 deployWalletGrams;
         uint128 expectedAmount;
         address nextTokenRoot;
+        address outcoming;
 
         TvmCell successPayload;
         TvmCell cancelPayload;
@@ -142,6 +150,10 @@ library PairPayload {
             if (payloadSlice.bits() >= 267) {
                 nextTokenRoot = payloadSlice.decode(address);
             }
+
+            if (payloadSlice.bits() >= 267) {
+                outcoming = payloadSlice.decode(address);
+            }
         }
 
         return (
@@ -151,6 +163,7 @@ library PairPayload {
             deployWalletGrams,
             expectedAmount,
             nextTokenRoot,
+            outcoming,
             hasRef3,
             ref3,
             notifySuccess,
@@ -163,13 +176,15 @@ library PairPayload {
     function decodeCrossPoolExchangePayload(TvmCell _payload) public returns (
         uint128,
         address,
+        address,
         bool,
         TvmCell
     ) {
         TvmSlice payloadSlice = _payload.toSlice();
 
         uint128 expectedAmount = payloadSlice.decode(uint128);
-        address nextTokenRoot = payloadSlice.bits() >= 267 ? payloadSlice.decode(address) : address(0);
+        address nextPair = payloadSlice.bits() >= 267 ? payloadSlice.decode(address) : address(0);
+        address outcoming = payloadSlice.bits() >= 267 ? payloadSlice.decode(address) : address(0);
 
         bool hasNextPayload = payloadSlice.refs() >= 1;
 
@@ -181,7 +196,8 @@ library PairPayload {
 
         return (
             expectedAmount,
-            nextTokenRoot,
+            nextPair,
+            outcoming,
             hasNextPayload,
             nextPayload
         );

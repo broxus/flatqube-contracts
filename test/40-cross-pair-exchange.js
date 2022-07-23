@@ -234,7 +234,8 @@ describe('Check direct DexPairFooBar operations', async function () {
                     logger.log(logStr);
 
                     steps.push({
-                        root: tokenRoots[options.route[i]].address,
+                        roots: [tokenRoots[options.route[i-1]].address, tokenRoots[options.route[i]].address],
+                        outcoming: tokenRoots[options.route[i]].address,
                         amount: new BigNumber(expected.expected_amount).dp(0, BigNumber.ROUND_DOWN).toString()
                     });
 

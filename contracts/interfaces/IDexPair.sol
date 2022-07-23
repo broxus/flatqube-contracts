@@ -3,10 +3,15 @@ pragma ton-solidity >= 0.57.0;
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 
 import "../structures/ITokenOperationStructure.sol";
+import "../structures/IExchangeStepStructure.sol";
 import "../structures/IFeeParams.sol";
 
-interface IDexPair is IFeeParams, ITokenOperationStructure, IAcceptTokensTransferCallback {
-
+interface IDexPair is
+    IFeeParams,
+    ITokenOperationStructure,
+    IAcceptTokensTransferCallback,
+    IExchangeStepStructure
+{
     event PairCodeUpgraded(uint32 version, uint8 pool_type);
     event FeesParamsUpdated(FeeParams params);
 

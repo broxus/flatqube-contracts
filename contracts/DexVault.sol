@@ -104,7 +104,7 @@ contract DexVault is DexContractBase, IDexVault, IResetGas, IUpgradable {
         address left_root,
         address right_root,
         address send_gas_to
-    ) public override onlyPair(left_root, right_root) {
+    ) public override onlyPair([left_root, right_root]) {
         tvm.rawReserve(math.max(DexGas.VAULT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
         new DexVaultLpTokenPending{
             stateInit: _buildLpTokenPendingInitData(now, pair, left_root, right_root),
@@ -181,7 +181,7 @@ contract DexVault is DexContractBase, IDexVault, IResetGas, IUpgradable {
         address right_root,
         uint32  /* pair_version */,
         address send_gas_to
-    ) external override onlyPair(left_root, right_root) {
+    ) external override onlyPair([left_root, right_root]) {
         tvm.rawReserve(math.max(DexGas.VAULT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
 
         emit PairTransferTokens(vault_wallet, amount, left_root, right_root, recipient_address);

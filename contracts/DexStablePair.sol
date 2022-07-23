@@ -473,7 +473,7 @@ contract DexStablePair is
                             empty
                         );
 
-                        address next_pair = _expectedPairAddress(tokenData[j].root, next_token_root);
+                        address next_pair = _expectedPairAddress([tokenData[j].root, next_token_root]);
 
                         IDexPair(next_pair).crossPoolExchange{
                             value: 0,
@@ -675,16 +675,15 @@ contract DexStablePair is
 
         for (TokenOperation op: operations) {
             if (op.amount >= 0) {
-                IDexAccount(msg.sender).internalPairTransfer{
-                    value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE,
-                    flag: MsgFlag.SENDER_PAYS_FEES
-                }(
-                    op.amount,
-                    op.root,
-                    tokenData[0].root,
-                    tokenData[1].root,
-                    send_gas_to
-                );
+                IDexAccount(msg.sender)
+                    .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+                    (
+                        op.amount,
+                        op.root,
+                        tokenData[0].root,
+                        tokenData[1].root,
+                        send_gas_to
+                    );
             }
         }
 
@@ -807,16 +806,15 @@ contract DexStablePair is
             dy_result.amount
         ));
 
-        IDexAccount(msg.sender).internalPairTransfer{
-            value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE,
-            flag: MsgFlag.SENDER_PAYS_FEES
-        }(
-            dy_result.amount,
-            receive_token_root,
-            tokenData[0].root,
-            tokenData[1].root,
-            send_gas_to
-        );
+        IDexAccount(msg.sender)
+            .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+            (
+                dy_result.amount,
+                receive_token_root,
+                tokenData[0].root,
+                tokenData[1].root,
+                send_gas_to
+            );
 
         ISuccessCallback(msg.sender).successCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(call_id);
     }
@@ -834,16 +832,16 @@ contract DexStablePair is
                 !fee.threshold.exists(_root) ||
                 tokenData[i].accumulatedFee >= fee.threshold[_root]
             ) {
-                IDexAccount(beneficiaryAccount).internalPairTransfer{
-                    value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE,
-                    flag: MsgFlag.SENDER_PAYS_FEES
-                }(
-                    tokenData[i].accumulatedFee,
-                    tokenData[i].root,
-                    tokenData[0].root,
-                    tokenData[1].root,
-                    send_gas_to
-                );
+                IDexAccount(beneficiaryAccount)
+                    .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+                    (
+                        tokenData[i].accumulatedFee,
+                        tokenData[i].root,
+                        tokenData[0].root,
+                        tokenData[1].root,
+                        send_gas_to
+                    );
+
                 tokenData[i].accumulatedFee = 0;
             }
         }
@@ -873,7 +871,7 @@ contract DexStablePair is
         TvmCell success_payload,
         bool notify_cancel,
         TvmCell cancel_payload
-    ) override external onlyPair(prev_pool_token_roots[0], prev_pool_token_roots[1]) {
+    ) override external onlyPair(prev_pool_token_roots) {
         require(tokenIndex.exists(spent_token_root), DexErrors.NOT_TOKEN_ROOT);
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
@@ -943,7 +941,7 @@ contract DexStablePair is
                     has_next_payload && next_payload.toSlice().bits() >= 128 &&
                     msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2) {
 
-                    address next_pair = _expectedPairAddress(tokenData[j].root, next_token_root);
+                    address next_pair = _expectedPairAddress([tokenData[j].root, next_token_root]);
 
                     IDexPair(next_pair).crossPoolExchange{
                         value: 0,
@@ -1029,11 +1027,12 @@ contract DexStablePair is
         onlyAccount(account_owner)
     {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
-        IDexAccount(msg.sender).checkPairCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
-            tokenData[0].root,
-            tokenData[1].root,
-            lp_root
-        );
+        IDexAccount(msg.sender)
+            .checkPairCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
+                tokenData[0].root,
+                tokenData[1].root,
+                lp_root
+            );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1306,7 +1305,9 @@ contract DexStablePair is
         _configureToken(tokenData[0].root);
         _configureToken(tokenData[1].root);
 
-        IDexRoot(root).onPairCreated{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(tokenData[0].root, tokenData[1].root, send_gas_to);
+        IDexRoot(root)
+            .onPairCreated{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            (tokenData[0].root, tokenData[1].root, send_gas_to);
     }
 
     function liquidityTokenRootNotDeployed(address /*lp_root_*/, address send_gas_to) override external onlyVault {

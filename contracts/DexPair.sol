@@ -72,13 +72,20 @@ contract DexPair is DexPairBase {
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        TokenOperation[] steps
-    ) external pure returns (TvmCell) {
+        ExchangeStep[] steps
+    ) external returns (TvmCell) {
+        address[] pairs;
+
+        for (uint i = 0; i < steps.length; i++) {
+            pairs.push(_expectedPairAddress(steps[i].roots));
+        }
+
         return PairPayload.buildCrossPairExchangePayload(
             id,
             deploy_wallet_grams,
             expected_amount,
-            steps
+            steps,
+            pairs
         );
     }
 
@@ -98,7 +105,8 @@ contract DexPair is DexPairBase {
             uint8 op,
             uint128 deployWalletGrams,
             uint128 expectedAmount,
-            address nextTokenRoot,
+            address nextPairOrTokenRoot,
+            address outcoming,
             bool hasRef3,
             TvmCell ref3,
             bool notifySuccess,
@@ -280,15 +288,21 @@ contract DexPair is DexPairBase {
                         _fee.denominator
                     );
 
+                    address nextPair;
+
+                    if (outcoming.value != 0) {
+                        nextPair = nextPairOrTokenRoot;
+                    } else {
+                        nextPair = _expectedPairAddress([toTokenRoot, nextPairOrTokenRoot]);
+                    }
+
                     if (
                         amount <= toReserve &&
                         amount >= expectedAmount &&
                         amount > 0 &&
                         (poolFee > 0 || _fee.pool_numerator == 0) &&
                         (beneficiaryFee > 0 || _fee.beneficiary_numerator == 0) &&
-                        nextTokenRoot.value != 0 &&
-                        nextTokenRoot != toTokenRoot &&
-                        nextTokenRoot != fromTokenRoot
+                        nextPair != address(this)
                     ) {
                         _exchangeBase(
                             id,
@@ -314,8 +328,6 @@ contract DexPair is DexPairBase {
                                 false,
                                 empty
                             );
-
-                        address nextPair = _expectedPairAddress(toTokenRoot, nextTokenRoot);
 
                         IDexPair(nextPair)
                             .crossPoolExchange{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
@@ -1077,15 +1089,13 @@ contract DexPair is DexPairBase {
         TvmCell _successPayload,
         bool _notifyCancel,
         TvmCell _cancelPayload
-    ) override external onlyPair(
-        _prevPoolTokenRoots[0],
-        _prevPoolTokenRoots[1]
-    ) onlyActive notSelfCall {
+    ) override external onlyPair(_prevPoolTokenRoots) onlyActive notSelfCall {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         (
             uint128 expectedAmount,
-            address nextTokenRoot,
+            address nextPairOrTokenRoot,
+            address outcoming,
             bool hasNextPayload,
             TvmCell nextPayload
         ) = PairPayload.decodeCrossPoolExchangePayload(_payload);
@@ -1137,16 +1147,20 @@ contract DexPair is DexPairBase {
                     _remainingGasTo
                 );
 
+                address nextPair;
+
+                if (outcoming.value != 0) {
+                    nextPair = nextPairOrTokenRoot;
+                } else {
+                    nextPair = _expectedPairAddress([toTokenRoot, nextPairOrTokenRoot]);
+                }
+
                 if (
-                    nextTokenRoot.value != 0 &&
-                    nextTokenRoot != toTokenRoot &&
-                    nextTokenRoot != fromTokenRoot &&
+                    nextPair != address(this) &&
                     hasNextPayload &&
                     nextPayload.toSlice().bits() >= 128 &&
                     msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2
                 ) {
-                    address nextPair = _expectedPairAddress(toTokenRoot, nextTokenRoot);
-
                     IDexPair(nextPair)
                         .crossPoolExchange{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                         (
