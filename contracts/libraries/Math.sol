@@ -1,20 +1,25 @@
 pragma ton-solidity >= 0.57.0;
 
 import "../structures/IDepositLiquidityResult.sol";
+import "../structures/IFeeParams.sol";
 
+/// @title Pair's Math Utility
 library Math {
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Math
-    /*
-        Solve x*x + p*x - q*x = 0;
-    */
+    /// @notice Solve x^2 + _p * x - _q * x = 0
+    /// @param _p First coefficient
+    /// @param _q Second coefficient
+    /// @return uint128 Equation's positive root
     function solveQuadraticEquationPQ(
         uint256 _p,
         uint256 _q
     ) public returns (uint128) {
+        // Find discriminant
         uint256 D = math.muldiv(_p, _p, 4) + _q;
+
+        // Calculate discriminant's square root
         uint256 Dsqrt = sqrt(D);
 
+        // Calculate positive equation's root
         if (Dsqrt > (_p /2)) {
             return uint128(Dsqrt - (_p /2));
         } else {
@@ -22,7 +27,9 @@ library Math {
         }
     }
 
-    // Babylonian method for finding sqrt
+    /// @notice Babylonian method for finding sqrt
+    /// @param _x Number to calculate square root
+    /// @return uint256 Positive root
     function sqrt(uint256 _x) public returns (uint256) {
         if (_x == 0) return 0;
 
@@ -76,32 +83,36 @@ library Math {
         return (r < r1 ? r : r1);
     }
 
+    /// @notice Calculate input amount and fee for exchange
+    /// @param _bAmount Output amount
+    /// @param _aPool Input token reserve
+    /// @param _bPool Output token reserve
+    /// @param _fee Pair's fee params
+    /// @return uint256 Positive root
     function calculateExpectedSpendAmount(
         uint128 _bAmount,
         uint128 _aPool,
         uint128 _bPool,
-        uint128 _feePoolNumerator,
-        uint128 _feeBeneficiaryNumerator,
-        uint128 _feeDenominator
+        IFeeParams.FeeParams _fee
     ) public returns (
         uint128,
         uint128
     ) {
-        uint128 feeDMinusN = uint128(_feeDenominator - _feePoolNumerator - _feeBeneficiaryNumerator);
+        uint128 feeDMinusN = uint128(_fee.denominator - _fee.pool_numerator - _fee.beneficiary_numerator);
 
         uint128 newBPool = _bPool - _bAmount;
         uint128 newAPool = math.muldivc(_aPool, _bPool, newBPool);
 
         uint128 expectedAAmount = math.muldivc(
             newAPool - _aPool,
-            _feeDenominator,
+            _fee.denominator,
             feeDMinusN
         );
 
         uint128 aFee = math.muldivc(
             expectedAAmount,
-            _feePoolNumerator + _feeBeneficiaryNumerator,
-            _feeDenominator
+            _fee.pool_numerator + _fee.beneficiary_numerator,
+            _fee.denominator
         );
 
         return (
@@ -110,16 +121,23 @@ library Math {
         );
     }
 
+    /// @notice Calculate liquidity deposit result and fees
+    /// @param _leftAmount Left token amount
+    /// @param _rightAmount Right token amount
+    /// @param _autoChange Whether or not keep ratio
+    /// @param _leftReserve Left token reserve
+    /// @param _rightReserve Right token reserve
+    /// @param _lpReserve LP token reserve
+    /// @param _fee Pair's fee params
+    /// @return uint256 Deposit result and fees
     function calculateExpectedDepositLiquidity(
         uint128 _leftAmount,
         uint128 _rightAmount,
         bool _autoChange,
-        uint128 _fromReserve,
-        uint128 _toReserve,
+        uint128 _leftReserve,
+        uint128 _rightReserve,
         uint128 _lpReserve,
-        uint128 _feePoolNumerator,
-        uint128 _feeBeneficiaryNumerator,
-        uint128 _feeDenominator
+        IFeeParams.FeeParams _fee
     ) public returns (
         IDepositLiquidityResult.DepositLiquidityResult,
         uint128,
@@ -146,24 +164,24 @@ library Math {
         if (_leftAmount > 0 && _rightAmount > 0) {
             step1LeftDeposit = math.min(
                 _leftAmount,
-                math.muldiv(_fromReserve, _rightAmount, _toReserve)
+                math.muldiv(_leftReserve, _rightAmount, _rightReserve)
             );
 
             step1RightDeposit = math.min(
                 _rightAmount,
-                math.muldiv(_toReserve, _leftAmount, _fromReserve)
+                math.muldiv(_rightReserve, _leftAmount, _leftReserve)
             );
 
             step1LpReward = math.max(
-                math.muldiv(step1RightDeposit, _lpReserve, _toReserve),
-                math.muldiv(step1LeftDeposit, _lpReserve, _fromReserve)
+                math.muldiv(step1RightDeposit, _lpReserve, _rightReserve),
+                math.muldiv(step1LeftDeposit, _lpReserve, _leftReserve)
             );
         }
 
         uint128 currentLeftAmount = _leftAmount - step1LeftDeposit;
         uint128 currentRightAmount = _rightAmount - step1RightDeposit;
-        uint128 currentLeftBalance = _fromReserve + step1LeftDeposit;
-        uint128 currentRightBalance = _toReserve + step1RightDeposit;
+        uint128 currentLeftBalance = _leftReserve + step1LeftDeposit;
+        uint128 currentRightBalance = _rightReserve + step1RightDeposit;
         uint128 currentLpSupply = _lpReserve + step1LpReward;
 
         bool step2LeftToRight = false;
@@ -177,9 +195,9 @@ library Math {
         uint128 step3RightDeposit = 0;
         uint128 step3LpReward = 0;
 
-        uint256 feeD = uint256(_feeDenominator);
-        uint256 feeDMinusN = feeD - uint256(_feePoolNumerator + _feeBeneficiaryNumerator);
-        uint256 denominator = feeDMinusN * (feeD - uint256(_feeBeneficiaryNumerator));
+        uint256 feeD = uint256(_fee.denominator);
+        uint256 feeDMinusN = feeD - uint256(_fee.pool_numerator + _fee.beneficiary_numerator);
+        uint256 denominator = feeDMinusN * (feeD - uint256(_fee.beneficiary_numerator));
 
         if (_autoChange && currentRightAmount > 0) {
             // step 2 (surplus RIGHT exchange)
@@ -207,9 +225,7 @@ library Math {
                 step2Spent,
                 currentRightBalance,
                 currentLeftBalance,
-                _feePoolNumerator,
-                _feeBeneficiaryNumerator,
-                _feeDenominator
+                _fee
             );
 
             currentRightAmount = currentRightAmount - step2Spent;
@@ -251,9 +267,7 @@ library Math {
                 step2Spent,
                 currentLeftBalance,
                 currentRightBalance,
-                _feePoolNumerator,
-                _feeBeneficiaryNumerator,
-                _feeDenominator
+                _fee
             );
 
             currentLeftAmount = currentLeftAmount - step2Spent;
@@ -292,13 +306,17 @@ library Math {
         );
     }
 
+    /// @notice Calculate output amount and fee for exchange
+    /// @param _aAmount Input amount
+    /// @param _aPool Input token reserve
+    /// @param _bPool Output token reserve
+    /// @param _fee Pair's fee params
+    /// @return uint256 Expected output amount and fees
     function calculateExpectedExchange(
         uint128 _aAmount,
         uint128 _aPool,
         uint128 _bPool,
-        uint128 _feePoolNumerator,
-        uint128 _feeBeneficiaryNumerator,
-        uint128 _feeDenominator
+        IFeeParams.FeeParams _fee
     ) public returns (
         uint128,
         uint128,
@@ -306,14 +324,14 @@ library Math {
     ) {
         uint128 aFee = math.muldivc(
             _aAmount,
-            _feePoolNumerator + _feeBeneficiaryNumerator,
-            _feeDenominator
+            _fee.pool_numerator + _fee.beneficiary_numerator,
+            _fee.denominator
         );
 
         uint128 aBeneficiaryFee = math.muldiv(
             aFee,
-            _feeBeneficiaryNumerator,
-            _feePoolNumerator + _feeBeneficiaryNumerator
+            _fee.beneficiary_numerator,
+            _fee.pool_numerator + _fee.beneficiary_numerator
         );
 
         uint128 aPoolFee = aFee - aBeneficiaryFee;

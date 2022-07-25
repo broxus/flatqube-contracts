@@ -10,9 +10,10 @@ import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
 import "../interfaces/IDexPair.sol";
 import "../structures/ITokenOperationStructure.sol";
+import "../structures/IDexPairBalances.sol";
 
 // This is just for test purposes, this is not a real contract!
-contract TestNewDexPair is ITokenOperationStructure, IFeeParams {
+contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IDexPairBalances {
     address root;
     address vault;
     uint32 current_version;
@@ -84,8 +85,8 @@ contract TestNewDexPair is ITokenOperationStructure, IFeeParams {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } active;
     }
 
-    function getBalances() external view responsible returns (IDexPair.IDexPairBalances) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } IDexPair.IDexPairBalances(
+    function getBalances() external view responsible returns (DexPairBalances) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } DexPairBalances(
             lp_supply,
             left_balance,
             right_balance

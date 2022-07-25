@@ -4,7 +4,13 @@ import "../structures/IExchangeStepStructure.sol";
 
 import "./DexOperationTypes.sol";
 
+/// @title Pair's Payload Utility
 library PairPayload {
+    /// @notice Build payload for exchange call
+    /// @param _id ID of the call
+    /// @param _deployWalletGrams Amount for new wallet deploy
+    /// @param _expectedAmount Expected receive amount
+    /// @return TvmCell Encoded payload
     function buildExchangePayload(
         uint64 _id,
         uint128 _deployWalletGrams,
@@ -20,6 +26,10 @@ library PairPayload {
         return builder.toCell();
     }
 
+    /// @notice Build payload for deposit call
+    /// @param _id ID of the call
+    /// @param _deployWalletGrams Amount for new wallet deploy
+    /// @return TvmCell Encoded payload
     function buildDepositLiquidityPayload(
         uint64 _id,
         uint128 _deployWalletGrams
@@ -33,6 +43,10 @@ library PairPayload {
         return builder.toCell();
     }
 
+    /// @notice Build payload for withdrawal call
+    /// @param _id ID of the call
+    /// @param _deployWalletGrams Amount for new wallet deploy
+    /// @return TvmCell Encoded payload
     function buildWithdrawLiquidityPayload(
         uint64 _id,
         uint128 _deployWalletGrams
@@ -46,6 +60,13 @@ library PairPayload {
         return builder.toCell();
     }
 
+    /// @notice Build payload for cross-exchange call
+    /// @param _id ID of the call
+    /// @param _deployWalletGrams Amount for new wallet deploy
+    /// @param _expectedAmount Expected receive amount
+    /// @param _steps Steps for exchanging
+    /// @param _pairs Pairs' addresses for exchanging
+    /// @return TvmCell Encoded payload
     function buildCrossPairExchangePayload(
         uint64 _id,
         uint128 _deployWalletGrams,
@@ -85,6 +106,9 @@ library PairPayload {
         return builder.toCell();
     }
 
+    /// @notice Decode payload for onAcceptTokensTransfer-callback
+    /// @param _payload Callback's payload
+    /// @return Decoded payload
     function decodeOnAcceptTokensTransferPayload(TvmCell _payload) public returns (
         bool,
         uint64,
@@ -173,6 +197,9 @@ library PairPayload {
         );
     }
 
+    /// @notice Decode payload for crossPoolExchange-callback
+    /// @param _payload Callback's payload
+    /// @return Decoded payload
     function decodeCrossPoolExchangePayload(TvmCell _payload) public returns (
         uint128,
         address,

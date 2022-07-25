@@ -15,7 +15,15 @@ abstract contract DexContractBase  {
         uint8 _typeId,
         TvmCell _params
     ) {
-        address expected = address(tvm.hash(_buildInitData(_typeId, _params)));
+        address expected = address(
+            tvm.hash(
+                _buildInitData(
+                    _typeId,
+                    _params
+                )
+            )
+        );
+
         require(msg.sender == expected, DexErrors.NOT_PLATFORM);
         _;
     }

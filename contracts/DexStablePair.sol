@@ -145,8 +145,8 @@ contract DexStablePair is
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } active;
     }
 
-    function getBalances() override external view responsible returns (IDexPairBalances) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } IDexPairBalances(
+    function getBalances() override external view responsible returns (DexPairBalances) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } DexPairBalances(
             lp_supply,
             tokenData[0].balance,
             tokenData[1].balance

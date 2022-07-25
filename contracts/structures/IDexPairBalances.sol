@@ -1,0 +1,12 @@
+pragma ton-solidity >= 0.57.0;
+
+/// @title DEX Pair Balances Interface
+/// @notice Structure for packed pair's reserves
+interface IDexPairBalances {
+    /// @dev Packed reserves of the pair
+    struct DexPairBalances {
+        uint128 lp_supply;
+        uint128 left_balance;
+        uint128 right_balance;
+    }
+}
