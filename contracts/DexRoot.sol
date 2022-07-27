@@ -359,17 +359,16 @@ contract DexRoot is
     }
 
     function setPairFeeParams(
-        address left_root,
-        address right_root,
-        FeeParams params,
-        address send_gas_to
+        address[] _roots,
+        FeeParams _params,
+        address _remainingGasTo
     ) override external view onlyManagerOrOwner {
         require(
-            params.denominator != 0 &&
-            (params.pool_numerator + params.beneficiary_numerator) < params.denominator &&
-            (params.pool_numerator + params.beneficiary_numerator) > 0 &&
-            ((params.beneficiary.value != 0 && params.beneficiary_numerator != 0) ||
-            (params.beneficiary.value == 0 && params.beneficiary_numerator == 0)),
+            _params.denominator != 0 &&
+            (_params.pool_numerator + _params.beneficiary_numerator) < _params.denominator &&
+            (_params.pool_numerator + _params.beneficiary_numerator) > 0 &&
+            ((_params.beneficiary.value != 0 && _params.beneficiary_numerator != 0) ||
+            (_params.beneficiary.value == 0 && _params.beneficiary_numerator == 0)),
             DexErrors.WRONG_FEE_PARAMS
         );
 
@@ -381,14 +380,13 @@ contract DexRoot is
             2
         );
 
-        IDexPair(_expectedPairAddress([left_root, right_root]))
+        IDexPair(_expectedPairAddress(_roots))
             .setFeeParams{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (params, send_gas_to);
+            (_params, _remainingGasTo);
     }
 
     function setPairAmplificationCoefficient(
-        address left_root,
-        address right_root,
+        address[] _roots,
         AmplificationCoefficient _A,
         address send_gas_to
     ) external view onlyManagerOrOwner {
@@ -400,7 +398,7 @@ contract DexRoot is
             2
         );
 
-        IDexStablePair(_expectedPairAddress([left_root, right_root]))
+        IDexStablePair(_expectedPairAddress(_roots))
             .setAmplificationCoefficient{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_A, send_gas_to);
     }
@@ -485,6 +483,14 @@ contract DexRoot is
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } _expectedPairAddress([left_root, right_root]);
+    }
+
+    function getExpectedPoolAddress(address[] _roots) override external view responsible returns (address) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _expectedPairAddress(_roots);
     }
 
     // Deploy child contracts

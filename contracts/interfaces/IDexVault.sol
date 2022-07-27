@@ -24,6 +24,12 @@ interface IDexVault {
         address recipient_address
     );
 
+    event PairTransferTokensV2(
+        address vaultTokenWallet,
+        uint128 amount,
+        address[] roots,
+        address recipientAddress
+    );
 
     function addLiquidityToken(address pair, address left_root, address right_root, address send_gas_to) external;
 
@@ -69,6 +75,19 @@ interface IDexVault {
         address right_root,
         uint32  pair_version,
         address send_gas_to
+    ) external;
+
+    function transferV2(
+        uint128 _amount,
+        address _tokenRoot,
+        address _vaultWallet,
+        address _recipientAddress,
+        uint128 _deployWalletGrams,
+        bool _notifyReceiver,
+        TvmCell _payload,
+        address[] _roots,
+        uint32 _pairVersion,
+        address _remainingGasTo
     ) external;
 
     function transferOwner(address new_owner) external;

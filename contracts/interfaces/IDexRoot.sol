@@ -23,6 +23,7 @@ interface IDexRoot is IFeeParams {
     function deployAccount(address account_owner, address send_gas_to) external;
 
     function getExpectedPairAddress(address left_root, address right_root) external view responsible returns (address);
+    function getExpectedPoolAddress(address[] _roots) external view responsible returns (address);
     function getExpectedAccountAddress(address account_owner) external view responsible returns (address);
 
     function getAccountVersion() external view responsible returns (uint32);
@@ -34,9 +35,8 @@ interface IDexRoot is IFeeParams {
     function getVault() external view responsible returns (address);
 
     function setPairFeeParams(
-        address left_root,
-        address right_root,
-        FeeParams params,
-        address send_gas_to
+        address[] _roots,
+        FeeParams _params,
+        address _remainingGasTo
     ) external view;
 }

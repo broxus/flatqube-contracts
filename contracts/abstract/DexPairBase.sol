@@ -284,10 +284,9 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
 
         // Notify account about pair
         IDexAccount(msg.sender)
-            .checkPairCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            .checkPoolCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (
-                _typeToRootAddresses[DexAddressType.RESERVE][0],
-                _typeToRootAddresses[DexAddressType.RESERVE][1],
+                _typeToRootAddresses[DexAddressType.RESERVE],
                 _typeToRootAddresses[DexAddressType.LP][0]
             );
     }
@@ -445,42 +444,23 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         bool _isForce,
         address _remainingGasTo
     ) internal {
-        // Withdraw left fee
-        if (
-            (_typeToReserves[DexReserveType.FEE][0] > 0 && _isForce) ||
-            !_fee.threshold.exists(_typeToRootAddresses[DexAddressType.RESERVE][0]) ||
-            _typeToReserves[DexReserveType.FEE][0] >= _fee.threshold.at(_typeToRootAddresses[DexAddressType.RESERVE][0])
-        ) {
-            IDexAccount(_expectedAccountAddress(_fee.beneficiary))
-                .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
-                (
-                    _typeToReserves[DexReserveType.FEE][0],
-                    _typeToRootAddresses[DexAddressType.RESERVE][0],
-                    _typeToRootAddresses[DexAddressType.RESERVE][0],
-                    _typeToRootAddresses[DexAddressType.RESERVE][1],
-                    _remainingGasTo
-                );
+        for (uint i = 0; i < _typeToReserves[DexReserveType.FEE].length; i++) {
+            if (
+                (_typeToReserves[DexReserveType.FEE][i] > 0 && _isForce) ||
+                !_fee.threshold.exists(_typeToRootAddresses[DexAddressType.RESERVE][i]) ||
+                _typeToReserves[DexReserveType.FEE][i] >= _fee.threshold.at(_typeToRootAddresses[DexAddressType.RESERVE][i])
+            ) {
+                IDexAccount(_expectedAccountAddress(_fee.beneficiary))
+                    .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+                    (
+                        _typeToReserves[DexReserveType.FEE][i],
+                        _typeToRootAddresses[DexAddressType.RESERVE][i],
+                        _typeToRootAddresses[DexAddressType.RESERVE],
+                        _remainingGasTo
+                    );
 
-            _typeToReserves[DexReserveType.FEE][0] = 0;
-        }
-
-        // Withdraw right fee
-        if (
-            (_typeToReserves[DexReserveType.FEE][1] > 0 && _isForce) ||
-            !_fee.threshold.exists(_typeToRootAddresses[DexAddressType.RESERVE][1]) ||
-            _typeToReserves[DexReserveType.FEE][1] >= _fee.threshold.at(_typeToRootAddresses[DexAddressType.RESERVE][1])
-        ) {
-            IDexAccount(_expectedAccountAddress(_fee.beneficiary))
-                .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
-                (
-                    _typeToReserves[DexReserveType.FEE][1],
-                    _typeToRootAddresses[DexAddressType.RESERVE][1],
-                    _typeToRootAddresses[DexAddressType.RESERVE][0],
-                    _typeToRootAddresses[DexAddressType.RESERVE][1],
-                    _remainingGasTo
-                );
-
-            _typeToReserves[DexReserveType.FEE][1] = 0;
+                    _typeToReserves[DexReserveType.FEE][i] = 0;
+            }
         }
     }
 

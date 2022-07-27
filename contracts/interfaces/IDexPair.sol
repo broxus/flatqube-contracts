@@ -212,22 +212,21 @@ interface IDexPair is
     /// @notice Perform liquidity deposit from DEX account
     /// @dev Only the DEX account can perform
     /// @param _callId Id of the call
-    /// @param _leftAmount Input left amount
-    /// @param _rightAmount Input right amount
+    /// @param _operations Input amounts
     /// @param _expectedLpRoot Address of the LP root
     /// @param _autoChange Whether or not swap token for full deposit
     /// @param _accountOwner Address of the DEX account owner
     /// @param _accountVersion Version of the account
-    /// @param _sendGasTo Receiver of the remaining gas
+    /// @param _remainingGasTo Receiver of the remaining gas
     function depositLiquidity(
         uint64 _callId,
-        uint128 _leftAmount,
-        uint128 _rightAmount,
+        TokenOperation[] _operations,
         address _expectedLpRoot,
+        uint128 _minimumLpAmount,
         bool _autoChange,
         address _accountOwner,
         uint32 _accountVersion,
-        address _sendGasTo
+        address _remainingGasTo
     ) external;
 
     /// @notice Perform liquidity withdrawal from DEX account
@@ -237,14 +236,15 @@ interface IDexPair is
     /// @param _expectedLpRoot Address of the LP root
     /// @param _accountOwner Address of the DEX account owner
     /// @param _accountVersion Version of the account
-    /// @param _sendGasTo Receiver of the remaining gas
+    /// @param _remainingGasTo Receiver of the remaining gas
     function withdrawLiquidity(
         uint64 _callId,
         uint128 _lpAmount,
         address _expectedLpRoot,
+        TokenOperation[] _expected,
         address _accountOwner,
         uint32 _accountVersion,
-        address _sendGasTo
+        address _remainingGasTo
     ) external;
 
     /// @notice Perform cross pool swap from another pair

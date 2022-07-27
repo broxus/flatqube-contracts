@@ -279,10 +279,9 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
                 contract: DexRoot,
                 method: 'setPairFeeParams',
                 params: {
-                    left_root: FooRoot.address,
-                    right_root: BarRoot.address,
-                    params: options.fee,
-                    send_gas_to: Account1.address
+                    _roots: [FooRoot.address, BarRoot.address],
+                    _params: options.fee,
+                    _remainingGasTo: Account1.address
                 },
                 keyPair: keyPairs[0]
             });

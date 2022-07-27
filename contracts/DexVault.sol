@@ -186,17 +186,55 @@ contract DexVault is DexContractBase, IDexVault, IResetGas, IUpgradable {
 
         emit PairTransferTokens(vault_wallet, amount, left_root, right_root, recipient_address);
 
-        ITokenWallet(vault_wallet).transfer{
-            value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED
-        }(
-            amount,
-            recipient_address,
-            deploy_wallet_grams,
-            send_gas_to,
-            notify_receiver,
-            payload
+        ITokenWallet(vault_wallet)
+            .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            (
+                amount,
+                recipient_address,
+                deploy_wallet_grams,
+                send_gas_to,
+                notify_receiver,
+                payload
+            );
+    }
+
+    function transferV2(
+        uint128 _amount,
+        address,
+        address _vaultWallet,
+        address _recipientAddress,
+        uint128 _deployWalletGrams,
+        bool _notifyReceiver,
+        TvmCell _payload,
+        address[] _roots,
+        uint32,
+        address _remainingGasTo
+    ) external override onlyPair(_roots) {
+        tvm.rawReserve(
+            math.max(
+                DexGas.VAULT_INITIAL_BALANCE,
+                address(this).balance - msg.value
+            ),
+            2
         );
+
+        emit PairTransferTokensV2(
+            _vaultWallet,
+            _amount,
+            _roots,
+            _recipientAddress
+        );
+
+        ITokenWallet(_vaultWallet)
+            .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            (
+                _amount,
+                _recipientAddress,
+                _deployWalletGrams,
+                _remainingGasTo,
+                _notifyReceiver,
+                _payload
+            );
     }
 
     function _buildLpTokenPendingInitData(

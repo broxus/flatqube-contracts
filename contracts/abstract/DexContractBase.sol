@@ -77,13 +77,17 @@ abstract contract DexContractBase  {
             sorted[root] = 0;
         }
 
-        TvmBuilder builder;
+        if (_roots.length < 3) {
+            TvmBuilder builder;
 
-        for ((address key, uint8 value) : sorted) {
-            builder.store(key);
+            for ((address key, uint8 value) : sorted) {
+                builder.store(key);
+            }
+
+            return builder.toCell();
+        } else {
+            return abi.encode(sorted);
         }
-
-        return builder.toCell();
     }
 
     function _buildInitData(

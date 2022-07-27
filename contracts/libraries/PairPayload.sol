@@ -1,6 +1,7 @@
 pragma ton-solidity >= 0.57.0;
 
 import "../structures/IExchangeStepStructure.sol";
+import "../structures/ITokenOperationStructure.sol";
 
 import "./DexOperationTypes.sol";
 
@@ -65,12 +66,52 @@ library PairPayload {
     /// @param _deployWalletGrams Amount for new wallet deploy
     /// @param _expectedAmount Expected receive amount
     /// @param _steps Steps for exchanging
-    /// @param _pairs Pairs' addresses for exchanging
     /// @return TvmCell Encoded payload
     function buildCrossPairExchangePayload(
         uint64 _id,
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
+        ITokenOperationStructure.TokenOperation[] _steps
+    ) public returns (TvmCell) {
+        require(_steps.length > 0);
+
+        TvmBuilder builder;
+
+        builder.store(DexOperationTypes.CROSS_PAIR_EXCHANGE);
+        builder.store(_id);
+        builder.store(_deployWalletGrams);
+        builder.store(_expectedAmount);
+        builder.store(_steps[0].root);
+
+        TvmBuilder nextStepBuilder;
+        nextStepBuilder.store(_steps[_steps.length - 1].amount);
+
+        for (uint i = _steps.length - 1; i > 0; i--) {
+            TvmBuilder currentStepBuilder;
+
+            currentStepBuilder.store(_steps[i - 1].amount, _steps[i].root);
+            currentStepBuilder.store(nextStepBuilder.toCell());
+
+            nextStepBuilder = currentStepBuilder;
+        }
+
+        builder.store(nextStepBuilder.toCell());
+
+        return builder.toCell();
+    }
+
+    /// @notice Build payload for cross-exchange call
+    /// @param _id ID of the call
+    /// @param _deployWalletGrams Amount for new wallet deploy
+    /// @param _expectedAmount Expected receive amount
+    /// @param _steps Steps for exchanging
+    /// @param _pairs Pairs' addresses for exchanging
+    /// @return TvmCell Encoded payload
+    function buildCrossPairExchangePayloadV2(
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedAmount,
+        address _outcoming,
         IExchangeStepStructure.ExchangeStep[] _steps,
         address[] _pairs
     ) public returns (TvmCell) {
@@ -83,7 +124,7 @@ library PairPayload {
         builder.store(_deployWalletGrams);
         builder.store(_expectedAmount);
         builder.store(_pairs[0]);
-        builder.store(_steps[0].outcoming);
+        builder.store(_outcoming);
 
         TvmBuilder nextStepBuilder;
         nextStepBuilder.store(_steps[_steps.length - 1].amount);
@@ -94,7 +135,7 @@ library PairPayload {
             currentStepBuilder.store(
                 _steps[i - 1].amount,
                 _pairs[i],
-                _steps[i].outcoming
+                _steps[i - 1].outcoming
             );
             currentStepBuilder.store(nextStepBuilder.toCell());
 

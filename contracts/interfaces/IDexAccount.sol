@@ -4,7 +4,6 @@ import "./ISuccessCallback.sol";
 import "../structures/ITokenOperationStructure.sol";
 
 interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
-
     struct WithdrawalParams {
         uint64  call_id;
         address recipient_address;
@@ -18,6 +17,7 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
     }
 
     event AddPair(address left_root, address right_root, address pair);
+    event AddPairV2(address[] roots, address pair);
 
     event WithdrawTokens(address root, uint128 amount, uint128 balance);
     event TransferTokens(address root, uint128 amount, uint128 balance);
@@ -29,6 +29,10 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
         uint128 right_amount,
         bool auto_change
     );
+    event DepositLiquidityV2(
+        TokenOperation[] operations,
+        bool autoChange
+    );
 
     event WithdrawLiquidity(
         uint128 lp_amount,
@@ -36,6 +40,12 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
         address lp_root,
         address left_root,
         address right_root
+    );
+    event WithdrawLiquidityV2(
+        uint128 lpAmount,
+        uint128 lpBalance,
+        address lpRoot,
+        address[] roots
     );
 
     event TokensReceived(address token_root, uint128 tokens_amount, uint128 balance, address sender_wallet);
@@ -47,7 +57,12 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
         address left_root,
         address right_root
     );
-
+    event TokensReceivedFromPairV2(
+        address tokenRoot,
+        uint128 tokensAmount,
+        uint128 balance,
+        address[] roots
+    );
 
     event OperationRollback(address token_root, uint128 amount, uint128 balance, address from);
     event ExpectedPairNotExist(address pair);
@@ -92,6 +107,15 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
         uint128 expected_amount,
         address send_gas_to
     ) external;
+    function exchangeV2(
+        uint64 _callId,
+        uint128 _spentAmount,
+        address _spentTokenRoot,
+        address _receiveTokenRoot,
+        uint128 _expectedAmount,
+        address[] _roots,
+        address _remainingGasTo
+    ) external;
 
     function withdrawLiquidity(
         uint64  call_id,
@@ -100,6 +124,13 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
         address left_root,
         address right_root,
         address send_gas_to
+    ) external;
+    function withdrawLiquidityV2(
+        uint64 _callId,
+        uint128 _lpAmount,
+        address _lpRoot,
+        TokenOperation[] _expected,
+        address _remainingGasTo
     ) external;
 
     function depositLiquidity(
@@ -112,19 +143,27 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
         bool    auto_change,
         address send_gas_to
     ) external;
+    function depositLiquidityV2(
+        uint64 _callId,
+        TokenOperation[] _operations,
+        address _expectedLpRoot,
+        uint128 _expectedLpAmount,
+        bool _autoChange,
+        address _remainingGasTo
+    ) external;
 
     function addPair(
         address left_root,
         address right_root
     ) external;
+    function addPool(address[] _roots) external;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // INTERNAL
 
-    function checkPairCallback(
-        address left_root,
-        address right_root,
-        address lp_root
+    function checkPoolCallback(
+        address[] _roots,
+        address _lpRoot
     ) external;
 
     function internalAccountTransfer(
@@ -142,5 +181,12 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
         address sender_left_root,
         address sender_right_root,
         address send_gas_to
+    ) external;
+
+    function internalPoolTransfer(
+        uint128 _amount,
+        address _tokenRoot,
+        address[] _roots,
+        address _remainingGasTo
     ) external;
 }

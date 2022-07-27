@@ -146,6 +146,17 @@
 			]
 		},
 		{
+			"name": "internalPoolTransfer",
+			"inputs": [
+				{"name":"_amount","type":"uint128"},
+				{"name":"_tokenRoot","type":"address"},
+				{"name":"_roots","type":"address[]"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "exchange",
 			"inputs": [
 				{"name":"call_id","type":"uint64"},
@@ -154,6 +165,20 @@
 				{"name":"receive_token_root","type":"address"},
 				{"name":"expected_amount","type":"uint128"},
 				{"name":"send_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "exchangeV2",
+			"inputs": [
+				{"name":"_callId","type":"uint64"},
+				{"name":"_spentAmount","type":"uint128"},
+				{"name":"_spentTokenRoot","type":"address"},
+				{"name":"_receiveTokenRoot","type":"address"},
+				{"name":"_expectedAmount","type":"uint128"},
+				{"name":"_roots","type":"address[]"},
+				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -174,6 +199,19 @@
 			]
 		},
 		{
+			"name": "depositLiquidityV2",
+			"inputs": [
+				{"name":"_callId","type":"uint64"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_operations","type":"tuple[]"},
+				{"name":"_expectedLpRoot","type":"address"},
+				{"name":"_minimumLpAmount","type":"uint128"},
+				{"name":"_autoChange","type":"bool"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "withdrawLiquidity",
 			"inputs": [
 				{"name":"call_id","type":"uint64"},
@@ -182,6 +220,18 @@
 				{"name":"left_root","type":"address"},
 				{"name":"right_root","type":"address"},
 				{"name":"send_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "withdrawLiquidityV2",
+			"inputs": [
+				{"name":"_callId","type":"uint64"},
+				{"name":"_lpAmount","type":"uint128"},
+				{"name":"_lpRoot","type":"address"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_expected","type":"tuple[]"},
+				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -196,10 +246,17 @@
 			]
 		},
 		{
-			"name": "checkPairCallback",
+			"name": "addPool",
 			"inputs": [
-				{"name":"_leftRoot","type":"address"},
-				{"name":"_rightRoot","type":"address"},
+				{"name":"_roots","type":"address[]"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "checkPoolCallback",
+			"inputs": [
+				{"name":"_roots","type":"address[]"},
 				{"name":"_lpRoot","type":"address"}
 			],
 			"outputs": [
@@ -270,6 +327,15 @@
 			]
 		},
 		{
+			"name": "AddPairV2",
+			"inputs": [
+				{"name":"roots","type":"address[]"},
+				{"name":"pair","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "WithdrawTokens",
 			"inputs": [
 				{"name":"root","type":"address"},
@@ -314,6 +380,15 @@
 			]
 		},
 		{
+			"name": "DepositLiquidityV2",
+			"inputs": [
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"operations","type":"tuple[]"},
+				{"name":"autoChange","type":"bool"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "WithdrawLiquidity",
 			"inputs": [
 				{"name":"lp_amount","type":"uint128"},
@@ -321,6 +396,17 @@
 				{"name":"lp_root","type":"address"},
 				{"name":"left_root","type":"address"},
 				{"name":"right_root","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "WithdrawLiquidityV2",
+			"inputs": [
+				{"name":"lpAmount","type":"uint128"},
+				{"name":"lpBalance","type":"uint128"},
+				{"name":"lpRoot","type":"address"},
+				{"name":"roots","type":"address[]"}
 			],
 			"outputs": [
 			]
@@ -355,6 +441,17 @@
 				{"name":"balance","type":"uint128"},
 				{"name":"left_root","type":"address"},
 				{"name":"right_root","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "TokensReceivedFromPairV2",
+			"inputs": [
+				{"name":"tokenRoot","type":"address"},
+				{"name":"tokensAmount","type":"uint128"},
+				{"name":"balance","type":"uint128"},
+				{"name":"roots","type":"address[]"}
 			],
 			"outputs": [
 			]

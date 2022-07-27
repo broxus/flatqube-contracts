@@ -582,25 +582,29 @@ contract DexStablePair is
 
     function depositLiquidity(
         uint64 call_id,
-        uint128 left_amount,
-        uint128 right_amount,
+        TokenOperation[] _operations,
         address expected_lp_root,
+        uint128 _minimumLpAmount,
         bool    auto_change,
         address account_owner,
         uint32 /*account_version*/,
         address send_gas_to
     ) override external onlyActive onlyAccount(account_owner) {
         require(expected_lp_root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
-        require(lp_supply != 0 || (left_amount > 0 && right_amount > 0), DexErrors.WRONG_LIQUIDITY);
-        require((left_amount > 0 && right_amount > 0) || (auto_change && (left_amount + right_amount > 0)),
-            DexErrors.AMOUNT_TOO_LOW);
+        require(lp_supply != 0 || (_operations[0].amount > 0 && _operations[1].amount > 0), DexErrors.WRONG_LIQUIDITY);
+        require(
+            (_operations[0].amount > 0 && _operations[1].amount > 0) ||
+            (auto_change && (_operations[0].amount + _operations[1].amount > 0)),
+            DexErrors.AMOUNT_TOO_LOW
+        );
 
         uint128[] amounts = new uint128[](0);
-        amounts.push(left_amount);
-        amounts.push(right_amount);
+        amounts.push(_operations[0].amount);
+        amounts.push(_operations[1].amount);
         optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
         require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
         DepositLiquidityResultV2 result = resultOpt.get();
+        require(result.lp_reward >= _minimumLpAmount, DexErrors.WRONG_LIQUIDITY);
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
@@ -609,17 +613,18 @@ contract DexStablePair is
         _sync();
 
         TvmCell empty;
-        ITokenRoot(lp_root).mint{
-            value: DexGas.DEPLOY_MINT_VALUE_BASE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
-            flag: MsgFlag.SENDER_PAYS_FEES
-        }(
-            result.lp_reward,
-            account_owner,
-            DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
-            send_gas_to,
-            send_gas_to == account_owner,
-            empty
-        );
+        ITokenRoot(lp_root)
+            .mint{
+                value: DexGas.DEPLOY_MINT_VALUE_BASE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
+                flag: MsgFlag.SENDER_PAYS_FEES
+            }(
+                result.lp_reward,
+                account_owner,
+                DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
+                send_gas_to,
+                send_gas_to == account_owner,
+                empty
+            );
 
         ISuccessCallback(msg.sender).successCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(call_id);
     }
@@ -656,6 +661,7 @@ contract DexStablePair is
         uint64 call_id,
         uint128 lp_amount,
         address expected_lp_root,
+        TokenOperation[] _expected,
         address account_owner,
         uint32 /*account_version*/,
         address send_gas_to
@@ -1028,9 +1034,8 @@ contract DexStablePair is
     {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
         IDexAccount(msg.sender)
-            .checkPairCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
-                tokenData[0].root,
-                tokenData[1].root,
+            .checkPoolCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
+                [tokenData[0].root, tokenData[1].root],
                 lp_root
             );
     }

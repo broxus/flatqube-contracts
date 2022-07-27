@@ -47,7 +47,20 @@
 				{"name":"id","type":"uint64"},
 				{"name":"deploy_wallet_grams","type":"uint128"},
 				{"name":"expected_amount","type":"uint128"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"roots","type":"address[]"},{"name":"outcoming","type":"address"}],"name":"steps","type":"tuple[]"}
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"steps","type":"tuple[]"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "buildCrossPairExchangePayloadV2",
+			"inputs": [
+				{"name":"_id","type":"uint64"},
+				{"name":"_deployWalletGrams","type":"uint128"},
+				{"name":"_expectedAmount","type":"uint128"},
+				{"name":"_outcoming","type":"address"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"roots","type":"address[]"},{"name":"outcoming","type":"address"}],"name":"_steps","type":"tuple[]"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
@@ -69,9 +82,9 @@
 			"name": "depositLiquidity",
 			"inputs": [
 				{"name":"_callId","type":"uint64"},
-				{"name":"_leftAmount","type":"uint128"},
-				{"name":"_rightAmount","type":"uint128"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_operations","type":"tuple[]"},
 				{"name":"_expectedLpRoot","type":"address"},
+				{"name":"_minimumLpAmount","type":"uint128"},
 				{"name":"_autoChange","type":"bool"},
 				{"name":"_accountOwner","type":"address"},
 				{"name":"value6","type":"uint32"},
@@ -97,8 +110,9 @@
 				{"name":"_callId","type":"uint64"},
 				{"name":"_lpAmount","type":"uint128"},
 				{"name":"_expectedLpRoot","type":"address"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_expected","type":"tuple[]"},
 				{"name":"_accountOwner","type":"address"},
-				{"name":"value4","type":"uint32"},
+				{"name":"value5","type":"uint32"},
 				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
