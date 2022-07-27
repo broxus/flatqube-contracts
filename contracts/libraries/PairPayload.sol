@@ -27,6 +27,29 @@ library PairPayload {
         return builder.toCell();
     }
 
+    /// @notice Build payload for exchange call
+    /// @param _id ID of the call
+    /// @param _deployWalletGrams Amount for new wallet deploy
+    /// @param _expectedAmount Expected receive amount
+    /// @return TvmCell Encoded payload
+    function buildExchangePayloadV2(
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedAmount,
+        address _outcoming
+    ) public returns (TvmCell) {
+        TvmBuilder builder;
+
+        builder.store(DexOperationTypes.EXCHANGE);
+        builder.store(_id);
+        builder.store(_deployWalletGrams);
+        builder.store(_expectedAmount);
+        builder.store(address(0));
+        builder.store(_outcoming);
+
+        return builder.toCell();
+    }
+
     /// @notice Build payload for deposit call
     /// @param _id ID of the call
     /// @param _deployWalletGrams Amount for new wallet deploy

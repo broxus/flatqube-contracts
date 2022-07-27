@@ -50,6 +50,20 @@ contract DexPair is DexPairBase {
         );
     }
 
+    function buildExchangePayloadV2(
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedAmount,
+        address _outcoming
+    ) external pure returns (TvmCell) {
+        return PairPayload.buildExchangePayloadV2(
+            _id,
+            _deployWalletGrams,
+            _expectedAmount,
+            _outcoming
+        );
+    }
+
     function buildDepositLiquidityPayload(
         uint64 id,
         uint128 deploy_wallet_grams
