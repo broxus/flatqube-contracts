@@ -191,19 +191,13 @@ interface IDexPair is
     /// @notice Perform exchange from DEX account
     /// @dev Only the DEX account can perform
     /// @param _callId Id of the call
-    /// @param _spentAmount Input amount for swap
-    /// @param _spentTokenRoot Input TokenRoot address
-    /// @param _receiveTokenRoot Output TokenRoot address
-    /// @param _expectedAmount Minimum output amount
     /// @param _accountOwner Address of the DEX account owner
     /// @param _accountVersion Version of the account
     /// @param _sendGasTo Receiver of the remaining gas
     function exchange(
         uint64 _callId,
-        uint128 _spentAmount,
-        address _spentTokenRoot,
-        address _receiveTokenRoot,
-        uint128 _expectedAmount,
+        TokenOperation _operation,
+        TokenOperation _expected,
         address _accountOwner,
         uint32 _accountVersion,
         address _sendGasTo
@@ -213,7 +207,6 @@ interface IDexPair is
     /// @dev Only the DEX account can perform
     /// @param _callId Id of the call
     /// @param _operations Input amounts
-    /// @param _expectedLpRoot Address of the LP root
     /// @param _autoChange Whether or not swap token for full deposit
     /// @param _accountOwner Address of the DEX account owner
     /// @param _accountVersion Version of the account
@@ -221,8 +214,7 @@ interface IDexPair is
     function depositLiquidity(
         uint64 _callId,
         TokenOperation[] _operations,
-        address _expectedLpRoot,
-        uint128 _minimumLpAmount,
+        TokenOperation _expected,
         bool _autoChange,
         address _accountOwner,
         uint32 _accountVersion,
@@ -232,15 +224,13 @@ interface IDexPair is
     /// @notice Perform liquidity withdrawal from DEX account
     /// @dev Only the DEX account can perform
     /// @param _callId Id of the call
-    /// @param _lpAmount Amount of LP tokens to burn
-    /// @param _expectedLpRoot Address of the LP root
+    /// @param _operation Address of the LP root
     /// @param _accountOwner Address of the DEX account owner
     /// @param _accountVersion Version of the account
     /// @param _remainingGasTo Receiver of the remaining gas
     function withdrawLiquidity(
         uint64 _callId,
-        uint128 _lpAmount,
-        address _expectedLpRoot,
+        TokenOperation _operation,
         TokenOperation[] _expected,
         address _accountOwner,
         uint32 _accountVersion,

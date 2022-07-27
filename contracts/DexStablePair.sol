@@ -583,14 +583,13 @@ contract DexStablePair is
     function depositLiquidity(
         uint64 call_id,
         TokenOperation[] _operations,
-        address expected_lp_root,
-        uint128 _minimumLpAmount,
+        TokenOperation _expected,
         bool    auto_change,
         address account_owner,
         uint32 /*account_version*/,
         address send_gas_to
     ) override external onlyActive onlyAccount(account_owner) {
-        require(expected_lp_root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
+        require(_expected.root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
         require(lp_supply != 0 || (_operations[0].amount > 0 && _operations[1].amount > 0), DexErrors.WRONG_LIQUIDITY);
         require(
             (_operations[0].amount > 0 && _operations[1].amount > 0) ||
@@ -604,7 +603,7 @@ contract DexStablePair is
         optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
         require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
         DepositLiquidityResultV2 result = resultOpt.get();
-        require(result.lp_reward >= _minimumLpAmount, DexErrors.WRONG_LIQUIDITY);
+        require(result.lp_reward >= _expected.amount, DexErrors.WRONG_LIQUIDITY);
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
@@ -659,25 +658,33 @@ contract DexStablePair is
 
     function withdrawLiquidity(
         uint64 call_id,
-        uint128 lp_amount,
-        address expected_lp_root,
+        TokenOperation _operation,
         TokenOperation[] _expected,
         address account_owner,
         uint32 /*account_version*/,
         address send_gas_to
     ) override external onlyActive onlyAccount(account_owner) {
-        require(expected_lp_root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
+        require(_operation.root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        TokenOperation[] operations = _withdrawLiquidityBase(lp_amount, account_owner);
+        TokenOperation[] operations = _withdrawLiquidityBase(_operation.amount, account_owner);
 
         _sync();
 
-        IDexPairOperationCallback(account_owner).dexPairWithdrawSuccess{
-            value: DexGas.OPERATION_CALLBACK_BASE + 3,
-            flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-            bounce: false
-        }(call_id, true, IWithdrawResult.WithdrawResult(lp_amount, operations[0].amount, operations[1].amount));
+        IDexPairOperationCallback(account_owner)
+            .dexPairWithdrawSuccess{
+                value: DexGas.OPERATION_CALLBACK_BASE + 3,
+                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                bounce: false
+            }(
+                call_id,
+                true,
+                IWithdrawResult.WithdrawResult(
+                    _operation.amount,
+                    operations[0].amount,
+                    operations[1].amount
+                )
+            );
 
         for (TokenOperation op: operations) {
             if (op.amount >= 0) {
@@ -698,7 +705,7 @@ contract DexStablePair is
             value: DexGas.BURN_VALUE,
             flag: MsgFlag.SENDER_PAYS_FEES
         }(
-            lp_amount,
+            _operation.amount,
             vault,
             send_gas_to,
             address(0),
@@ -757,28 +764,26 @@ contract DexStablePair is
 
     function exchange(
         uint64 call_id,
-        uint128 spent_amount,
-        address spent_token_root,
-        address receive_token_root,
-        uint128 expected_amount,
+        TokenOperation _operation,
+        TokenOperation _expected,
         address account_owner,
         uint32 /*account_version*/,
         address send_gas_to
     ) override external onlyActive onlyAccount(account_owner) {
-        require(tokenIndex.exists(spent_token_root) && tokenIndex.exists(receive_token_root), DexErrors.NOT_TOKEN_ROOT);
-        uint8 i = tokenIndex[spent_token_root];
-        uint8 j = tokenIndex[receive_token_root];
+        require(tokenIndex.exists(_operation.root) && tokenIndex.exists(_expected.root), DexErrors.NOT_TOKEN_ROOT);
+        uint8 i = tokenIndex[_operation.root];
+        uint8 j = tokenIndex[_expected.root];
         require(i != j && i < N_COINS && j < N_COINS, DexErrors.WRONG_TOKEN_ROOT);
-        optional(ExpectedExchangeResult) dy_result_opt = _get_dy(i, j, spent_amount);
+        optional(ExpectedExchangeResult) dy_result_opt = _get_dy(i, j, _operation.amount);
         require(dy_result_opt.hasValue(), DexErrors.WRONG_AMOUNT);
 
         ExpectedExchangeResult dy_result = dy_result_opt.get();
 
-        require(dy_result.amount >= expected_amount, DexErrors.LOW_EXCHANGE_RATE);
+        require(dy_result.amount >= _expected.amount, DexErrors.LOW_EXCHANGE_RATE);
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        tokenData[i].balance += spent_amount - dy_result.beneficiary_fee;
+        tokenData[i].balance += _operation.amount - dy_result.beneficiary_fee;
         tokenData[j].balance -= dy_result.amount;
 
         if (dy_result.beneficiary_fee > 0) {
@@ -793,7 +798,7 @@ contract DexStablePair is
             account_owner,
             account_owner,
             tokenData[i].root,
-            spent_amount,
+            _operation.amount,
             tokenData[j].root,
             dy_result.amount,
             fees
@@ -807,7 +812,7 @@ contract DexStablePair is
             bounce: false
         }(call_id, true, IExchangeResult.ExchangeResult(
             i == 0 && j == 1,
-            spent_amount,
+            _operation.amount,
             dy_result.pool_fee + dy_result.beneficiary_fee,
             dy_result.amount
         ));
@@ -816,7 +821,7 @@ contract DexStablePair is
             .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
             (
                 dy_result.amount,
-                receive_token_root,
+                _expected.root,
                 tokenData[0].root,
                 tokenData[1].root,
                 send_gas_to

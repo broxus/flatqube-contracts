@@ -152,8 +152,7 @@ contract DexPair is DexPairBase {
     function depositLiquidity(
         uint64 _callId,
         TokenOperation[] _operations,
-        address _expectedLpRoot,
-        uint128 _minimumLpAmount,
+        TokenOperation _expected,
         bool _autoChange,
         address _accountOwner,
         uint32,
@@ -166,7 +165,7 @@ contract DexPair is DexPairBase {
         uint128 leftReserve = _typeToReserves[DexReserveType.POOL][0];
         uint128 rightReserve = _typeToReserves[DexReserveType.POOL][1];
 
-        require(_expectedLpRoot == lp, DexErrors.NOT_LP_TOKEN_ROOT);
+        require(_expected.root == lp, DexErrors.NOT_LP_TOKEN_ROOT);
         require(lpReserve != 0 || (_operations[0].amount > 0 && _operations[1].amount > 0), DexErrors.WRONG_LIQUIDITY);
         require(
             (_operations[0].amount > 0 && _operations[1].amount > 0) ||
@@ -190,7 +189,7 @@ contract DexPair is DexPairBase {
             _fee
         );
 
-        require(result.step_1_lp_reward + result.step_3_lp_reward >= _minimumLpAmount, DexErrors.WRONG_LIQUIDITY);
+        require(result.step_1_lp_reward + result.step_3_lp_reward >= _expected.amount, DexErrors.WRONG_LIQUIDITY);
 
         if (lpReserve == 0) {
             _typeToReserves[DexReserveType.POOL][0] = _operations[0].amount;
@@ -446,8 +445,7 @@ contract DexPair is DexPairBase {
 
     function withdrawLiquidity(
         uint64 _callId,
-        uint128 _lpAmount,
-        address _expectedLpRoot,
+        TokenOperation _operation,
         TokenOperation[] _expected,
         address _accountOwner,
         uint32,
@@ -456,7 +454,7 @@ contract DexPair is DexPairBase {
         address lp = _typeToRootAddresses[DexAddressType.LP][0];
         address vault = _typeToRootAddresses[DexAddressType.VAULT][0];
 
-        require(_expectedLpRoot == lp, DexErrors.NOT_LP_TOKEN_ROOT);
+        require(_operation.root == lp, DexErrors.NOT_LP_TOKEN_ROOT);
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         TvmCell empty;
@@ -464,7 +462,7 @@ contract DexPair is DexPairBase {
         _withdrawBase(
             _callId,
             true,
-            _lpAmount,
+            _operation.amount,
             _accountOwner,
             _remainingGasTo,
             0,
@@ -475,7 +473,7 @@ contract DexPair is DexPairBase {
         IBurnableByRootTokenRoot(lp)
             .burnTokens{ value: DexGas.BURN_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
             (
-                _lpAmount,
+                _operation.amount,
                 vault,
                 _remainingGasTo,
                 address.makeAddrStd(0, 0),
@@ -634,34 +632,32 @@ contract DexPair is DexPairBase {
 
     function exchange(
         uint64 _callId,
-        uint128 _spentAmount,
-        address _spentTokenRoot,
-        address _receiveTokenRoot,
-        uint128 _expectedAmount,
+        TokenOperation _operation,
+        TokenOperation _expected,
         address _accountOwner,
         uint32,
         address _remainingGasTo
     ) override external onlyActive onlyAccount(_accountOwner) {
         if (
-            (_spentTokenRoot == _typeToRootAddresses[DexAddressType.RESERVE][0] && _receiveTokenRoot == _typeToRootAddresses[DexAddressType.RESERVE][1]) ||
-            (_spentTokenRoot == _typeToRootAddresses[DexAddressType.RESERVE][1] && _receiveTokenRoot == _typeToRootAddresses[DexAddressType.RESERVE][0])
+            (_operation.root == _typeToRootAddresses[DexAddressType.RESERVE][0] && _expected.root == _typeToRootAddresses[DexAddressType.RESERVE][1]) ||
+            (_operation.root == _typeToRootAddresses[DexAddressType.RESERVE][1] && _expected.root == _typeToRootAddresses[DexAddressType.RESERVE][0])
         ) {
-            uint8 spentTokenIndex = _spentTokenRoot == _typeToRootAddresses[DexAddressType.RESERVE][0] ? 0 : 1;
-            uint8 receiveTokenIndex = _spentTokenRoot == _typeToRootAddresses[DexAddressType.RESERVE][0] ? 1 : 0;
+            uint8 spentTokenIndex = _operation.root == _typeToRootAddresses[DexAddressType.RESERVE][0] ? 0 : 1;
+            uint8 receiveTokenIndex = _operation.root == _typeToRootAddresses[DexAddressType.RESERVE][0] ? 1 : 0;
 
             (
                 uint128 amount,
                 uint128 poolFee,
                 uint128 beneficiaryFee
             ) = Math.calculateExpectedExchange(
-                _spentAmount,
+                _operation.amount,
                 _typeToReserves[DexReserveType.POOL][spentTokenIndex],
                 _typeToReserves[DexReserveType.POOL][receiveTokenIndex],
                 _fee
             );
 
             require(amount <= _typeToReserves[DexReserveType.POOL][receiveTokenIndex], DexErrors.NOT_ENOUGH_FUNDS);
-            require(amount >= _expectedAmount, DexErrors.LOW_EXCHANGE_RATE);
+            require(amount >= _expected.amount, DexErrors.LOW_EXCHANGE_RATE);
             require(amount > 0, DexErrors.AMOUNT_TOO_LOW);
             require(poolFee > 0 || _fee.pool_numerator == 0, DexErrors.AMOUNT_TOO_LOW);
             require(beneficiaryFee > 0 || _fee.beneficiary_numerator == 0, DexErrors.AMOUNT_TOO_LOW);
@@ -673,7 +669,7 @@ contract DexPair is DexPairBase {
                 true,
                 spentTokenIndex,
                 receiveTokenIndex,
-                _spentAmount,
+                _operation.amount,
                 beneficiaryFee,
                 poolFee,
                 amount,
@@ -1210,7 +1206,7 @@ contract DexPair is DexPairBase {
         if (needCancel) {
             IDexPairOperationCallback(_senderAddress)
                 .dexPairOperationCancelled{
-                    value: DexGas.OPERATION_CALLBACK_BASE + 44,
+                    value: DexGas.OPERATION_CALLBACK_BASE,
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(id);

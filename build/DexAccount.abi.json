@@ -173,10 +173,8 @@
 			"name": "exchangeV2",
 			"inputs": [
 				{"name":"_callId","type":"uint64"},
-				{"name":"_spentAmount","type":"uint128"},
-				{"name":"_spentTokenRoot","type":"address"},
-				{"name":"_receiveTokenRoot","type":"address"},
-				{"name":"_expectedAmount","type":"uint128"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_operation","type":"tuple"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_expected","type":"tuple"},
 				{"name":"_roots","type":"address[]"},
 				{"name":"_remainingGasTo","type":"address"}
 			],
@@ -203,8 +201,7 @@
 			"inputs": [
 				{"name":"_callId","type":"uint64"},
 				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_operations","type":"tuple[]"},
-				{"name":"_expectedLpRoot","type":"address"},
-				{"name":"_minimumLpAmount","type":"uint128"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_expected","type":"tuple"},
 				{"name":"_autoChange","type":"bool"},
 				{"name":"_remainingGasTo","type":"address"}
 			],
@@ -228,8 +225,7 @@
 			"name": "withdrawLiquidityV2",
 			"inputs": [
 				{"name":"_callId","type":"uint64"},
-				{"name":"_lpAmount","type":"uint128"},
-				{"name":"_lpRoot","type":"address"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_operation","type":"tuple"},
 				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_expected","type":"tuple[]"},
 				{"name":"_remainingGasTo","type":"address"}
 			],
@@ -317,17 +313,7 @@
 	],
 	"events": [
 		{
-			"name": "AddPair",
-			"inputs": [
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"},
-				{"name":"pair","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "AddPairV2",
+			"name": "AddPool",
 			"inputs": [
 				{"name":"roots","type":"address[]"},
 				{"name":"pair","type":"address"}
@@ -370,18 +356,6 @@
 		{
 			"name": "DepositLiquidity",
 			"inputs": [
-				{"name":"left_root","type":"address"},
-				{"name":"left_amount","type":"uint128"},
-				{"name":"right_root","type":"address"},
-				{"name":"right_amount","type":"uint128"},
-				{"name":"auto_change","type":"bool"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "DepositLiquidityV2",
-			"inputs": [
 				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"operations","type":"tuple[]"},
 				{"name":"autoChange","type":"bool"}
 			],
@@ -390,18 +364,6 @@
 		},
 		{
 			"name": "WithdrawLiquidity",
-			"inputs": [
-				{"name":"lp_amount","type":"uint128"},
-				{"name":"lp_balance","type":"uint128"},
-				{"name":"lp_root","type":"address"},
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "WithdrawLiquidityV2",
 			"inputs": [
 				{"name":"lpAmount","type":"uint128"},
 				{"name":"lpBalance","type":"uint128"},
