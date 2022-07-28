@@ -1,21 +1,17 @@
 pragma ton-solidity >= 0.57.0;
 
-import "../structures/ITokenOperationStructure.sol";
+import "../structures/IWithdrawalParams.sol";
+import "../structures/IOperation.sol";
 
 import "./ISuccessCallback.sol";
 
-interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
-    struct WithdrawalParams {
-        uint64 call_id;
-        address recipient_address;
-        uint128 deploy_wallet_grams;
-    }
-
-    struct Operation {
-        TokenOperation[] token_operations;
-        address send_gas_to;
-        address expected_callback_sender;
-    }
+interface IDexAccount is
+    ISuccessCallback,
+    IOperation,
+    IWithdrawalParams
+{
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // EVENTS
 
     event AddPool(
         address[] roots,
@@ -68,15 +64,7 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
         address sender
     );
 
-    event TokensReceivedFromPair(
-        address token_root,
-        uint128 tokens_amount,
-        uint128 balance,
-        address left_root,
-        address right_root
-    );
-
-    event TokensReceivedFromPairV2(
+    event TokensReceivedFromPool(
         address tokenRoot,
         uint128 tokensAmount,
         uint128 balance,
@@ -96,7 +84,8 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
 
     event CodeUpgradeRequested();
 
-    event GarbageCollected();
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // GETTERS
 
     function getRoot() external view responsible returns (address);
 
@@ -106,7 +95,13 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
 
     function getVault() external view responsible returns (address);
 
-    function getWalletData(address token_root) external view responsible returns (address wallet, uint128 balance);
+    function getWalletData(address token_root) external view responsible returns (
+        address wallet,
+        uint128 balance
+    );
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // ACCOUNT ACTIONS
 
     function withdraw(
         uint64 call_id,
@@ -126,6 +121,16 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
         address send_gas_to
     ) external;
 
+    function addPair(
+        address left_root,
+        address right_root
+    ) external;
+
+    function addPool(address[] _roots) external;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // SWAP
+
     function exchange(
         uint64 call_id,
         uint128 spent_amount,
@@ -143,6 +148,9 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
         address _remainingGasTo
     ) external;
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // WITHDRAW LIQUIDITY
+
     function withdrawLiquidity(
         uint64 call_id,
         uint128 lp_amount,
@@ -158,6 +166,9 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
         TokenOperation[] _expected,
         address _remainingGasTo
     ) external;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // DEPOSIT LIQUIDITY
 
     function depositLiquidity(
         uint64 call_id,
@@ -178,13 +189,6 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
         address _remainingGasTo
     ) external;
 
-    function addPair(
-        address left_root,
-        address right_root
-    ) external;
-
-    function addPool(address[] _roots) external;
-
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // INTERNAL
 
@@ -194,20 +198,12 @@ interface IDexAccount is ISuccessCallback, ITokenOperationStructure {
     ) external;
 
     function internalAccountTransfer(
-        uint64 call_id,
-        uint128 amount,
-        address token_root,
-        address sender_owner,
-        bool willing_to_deploy,
-        address send_gas_to
-    ) external;
-
-    function internalPairTransfer(
-        uint128 amount,
-        address token_root,
-        address sender_left_root,
-        address sender_right_root,
-        address send_gas_to
+        uint64 _callId,
+        uint128 _amount,
+        address _tokenRoot,
+        address _senderOwner,
+        bool _willingToDeploy,
+        address _remainingGasTo
     ) external;
 
     function internalPoolTransfer(

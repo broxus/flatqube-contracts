@@ -80,7 +80,7 @@ abstract contract DexContractBase  {
         if (_roots.length < 3) {
             TvmBuilder builder;
 
-            for ((address key, uint8 value) : sorted) {
+            for ((address key,) : sorted) {
                 builder.store(key);
             }
 

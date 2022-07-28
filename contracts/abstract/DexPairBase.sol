@@ -53,7 +53,7 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Modifiers
+    // MODIFIERS
 
     /// @dev Only the pair's owner can call a function with this modifier
     modifier onlyActive() {
@@ -105,7 +105,7 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Getters
+    // GETTERS
 
     // Return dex root address
     function getRoot() override external view responsible returns (address dex_root) {
@@ -232,6 +232,9 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         );
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    // INTERNAL
+
     function setFeeParams(
         FeeParams _params,
         address _remainingGasTo
@@ -279,7 +282,10 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         });
     }
 
-    function checkPair(address _accountOwner, uint32) override external onlyAccount(_accountOwner) {
+    function checkPair(
+        address _accountOwner,
+        uint32
+    ) override external onlyAccount(_accountOwner) {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         // Notify account about pair
@@ -297,7 +303,10 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         uint8 _newType,
         address _remainingGasTo
     ) override external onlyRoot {
-        if (_currentVersion == _newVersion && _newType == DexPoolTypes.CONSTANT_PRODUCT) {
+        if (
+            _currentVersion == _newVersion &&
+            _newType == DexPoolTypes.CONSTANT_PRODUCT
+        ) {
             tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
             _remainingGasTo.transfer({
@@ -338,6 +347,9 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    // CALLBACKS
+
     function liquidityTokenRootDeployed(
         address _lpRootAddress,
         address _remainingGasTo
@@ -353,10 +365,9 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
 
         // Notify root that pair was created
         IDexRoot(_root)
-            .onPairCreated{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            .onPoolCreated{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (
-                _typeToRootAddresses[DexAddressType.RESERVE][0],
-                _typeToRootAddresses[DexAddressType.RESERVE][1],
+                _tokenRoots(),
                 _remainingGasTo
             );
     }
@@ -479,6 +490,18 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
     /// @return address[] Sorted TokenRoot addresses of the reserves
     function _tokenRoots() internal view returns (address[]) {
         return _typeToRootAddresses[DexAddressType.RESERVE];
+    }
+
+    function _lpRoot() internal view returns (address) {
+        return _typeToRootAddresses[DexAddressType.LP][0];
+    }
+
+    function _lpReserve() internal view returns (uint128) {
+        return _typeToReserves[DexReserveType.LP][0];
+    }
+
+    function _vaultRoot() internal view returns (address) {
+        return _typeToRootAddresses[DexAddressType.VAULT][0];
     }
 
     /// @dev Deploys wallet by TIP-3 token root and wait for callback

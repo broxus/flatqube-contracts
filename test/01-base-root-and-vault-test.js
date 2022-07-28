@@ -89,17 +89,17 @@ describe('Check for correct deployment', async function () {
         .equal(DexPlatform.code, 'Wrong platform code in DexVault');
     });
     it('Check Root address', async function () {
-      expect(await dexVault.call({method: 'root'}))
+      expect(await dexVault.call({ method: 'getRoot' }))
         .to
         .equal(dexRoot.address, 'Wrong DexRoot address in DexVault');
     });
     it('Check TokenFactory address', async function () {
-      expect(await dexVault.call({method: 'token_factory'}))
+      expect(await dexVault.call({ method: 'getTokenFactory' }))
         .to
         .equal(tokenFactory.address, 'Wrong TokenFactory address in DexVault');
     });
     it('Check DexVaultLpTokenPending code is installed', async function () {
-      expect(await dexVault.call({method: 'lp_token_pending_code'}))
+      expect(await dexVault.call({ method: 'getLpTokenPendingCode' }))
         .to
         .equal(DexVaultLpTokenPending.code, 'Wrong DexVaultLpTokenPending code in DexVault');
     });

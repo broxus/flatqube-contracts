@@ -659,7 +659,7 @@ contract DexStablePair is
     function withdrawLiquidity(
         uint64 call_id,
         TokenOperation _operation,
-        TokenOperation[] _expected,
+        TokenOperation[] /* _expected */,
         address account_owner,
         uint32 /*account_version*/,
         address send_gas_to
@@ -689,12 +689,11 @@ contract DexStablePair is
         for (TokenOperation op: operations) {
             if (op.amount >= 0) {
                 IDexAccount(msg.sender)
-                    .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+                    .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                     (
                         op.amount,
                         op.root,
-                        tokenData[0].root,
-                        tokenData[1].root,
+                        [tokenData[0].root, tokenData[1].root],
                         send_gas_to
                     );
             }
@@ -818,12 +817,11 @@ contract DexStablePair is
         ));
 
         IDexAccount(msg.sender)
-            .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+            .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
             (
                 dy_result.amount,
                 _expected.root,
-                tokenData[0].root,
-                tokenData[1].root,
+                [tokenData[0].root, tokenData[1].root],
                 send_gas_to
             );
 
@@ -844,12 +842,11 @@ contract DexStablePair is
                 tokenData[i].accumulatedFee >= fee.threshold[_root]
             ) {
                 IDexAccount(beneficiaryAccount)
-                    .internalPairTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+                    .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                     (
                         tokenData[i].accumulatedFee,
                         tokenData[i].root,
-                        tokenData[0].root,
-                        tokenData[1].root,
+                        [tokenData[0].root, tokenData[1].root],
                         send_gas_to
                     );
 
@@ -1316,8 +1313,8 @@ contract DexStablePair is
         _configureToken(tokenData[1].root);
 
         IDexRoot(root)
-            .onPairCreated{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (tokenData[0].root, tokenData[1].root, send_gas_to);
+            .onPoolCreated{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            ([tokenData[0].root, tokenData[1].root], send_gas_to);
     }
 
     function liquidityTokenRootNotDeployed(address /*lp_root_*/, address send_gas_to) override external onlyVault {

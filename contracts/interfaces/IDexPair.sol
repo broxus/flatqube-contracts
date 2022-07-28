@@ -23,6 +23,9 @@ interface IDexPair is
     ILiquidityTokenRootDeployedCallback,
     ILiquidityTokenRootNotDeployedCallback
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // EVENTS
+
     /// @dev Emits when pair's code was successfully upgraded
     event PairCodeUpgraded(
         uint32 version,
@@ -64,6 +67,9 @@ interface IDexPair is
         uint128[] reserves,
         uint128 lp_supply
     );
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // GETTERS
 
     /// @notice Get DEX root address of the pair
     /// @return dex_root DEX root address
@@ -120,6 +126,9 @@ interface IDexPair is
     /// @return DexPairBalances Current reserves of the pair
     function getBalances() external view responsible returns (DexPairBalances);
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // SWAP
+
     /// @notice Calculate expected fees and output amount for swap
     /// @param amount Input amount
     /// @param spent_token_root Input TIP-3 TokenRoot
@@ -144,50 +153,6 @@ interface IDexPair is
         uint128 expected_fee
     );
 
-    /// @notice Calculate expected output amounts after liquidity withdrawal
-    /// @param lp_amount Amount of LP tokens to burn
-    /// @return expected_left_amount Expected left and right amounts
-    function expectedWithdrawLiquidity(
-        uint128 lp_amount
-    ) external view responsible returns (
-        uint128 expected_left_amount,
-        uint128 expected_right_amount
-    );
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////
-    // INTERNAL
-
-    /// @notice Upgrades contract's code
-    /// @dev Only the DEX root can perform
-    /// @param _code Contract's new code
-    /// @param _newVersion Number of the new update
-    /// @param _newType New pool type
-    /// @param _sendGasTo Receiver of the remaining gas
-    function upgrade(
-        TvmCell _code,
-        uint32 _newVersion,
-        uint8 _newType,
-        address _sendGasTo
-    ) external;
-
-    /// @notice Set new fee configuration
-    /// @dev Only the DEX root can perform
-    /// @param _params New fee params
-    /// @param _sendGasTo Receiver of the remaining gas
-    function setFeeParams(
-        FeeParams _params,
-        address _sendGasTo
-    ) external;
-
-    /// @notice Check that pair exists from DEX account
-    /// @dev Only the DEX account can perform
-    /// @param _accountOwner Address of the DEX account owner
-    /// @param _accountVersion Version of the account
-    function checkPair(
-        address _accountOwner,
-        uint32 _accountVersion
-    ) external;
-
     /// @notice Perform exchange from DEX account
     /// @dev Only the DEX account can perform
     /// @param _callId Id of the call
@@ -201,40 +166,6 @@ interface IDexPair is
         address _accountOwner,
         uint32 _accountVersion,
         address _sendGasTo
-    ) external;
-
-    /// @notice Perform liquidity deposit from DEX account
-    /// @dev Only the DEX account can perform
-    /// @param _callId Id of the call
-    /// @param _operations Input amounts
-    /// @param _autoChange Whether or not swap token for full deposit
-    /// @param _accountOwner Address of the DEX account owner
-    /// @param _accountVersion Version of the account
-    /// @param _remainingGasTo Receiver of the remaining gas
-    function depositLiquidity(
-        uint64 _callId,
-        TokenOperation[] _operations,
-        TokenOperation _expected,
-        bool _autoChange,
-        address _accountOwner,
-        uint32 _accountVersion,
-        address _remainingGasTo
-    ) external;
-
-    /// @notice Perform liquidity withdrawal from DEX account
-    /// @dev Only the DEX account can perform
-    /// @param _callId Id of the call
-    /// @param _operation Address of the LP root
-    /// @param _accountOwner Address of the DEX account owner
-    /// @param _accountVersion Version of the account
-    /// @param _remainingGasTo Receiver of the remaining gas
-    function withdrawLiquidity(
-        uint64 _callId,
-        TokenOperation _operation,
-        TokenOperation[] _expected,
-        address _accountOwner,
-        uint32 _accountVersion,
-        address _remainingGasTo
     ) external;
 
     /// @notice Perform cross pool swap from another pair
@@ -274,5 +205,89 @@ interface IDexPair is
         TvmCell _successPayload,
         bool _notifyCancel,
         TvmCell _cancelPayload
+    ) external;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // DEPOSIT LIQUIDITY
+
+    /// @notice Perform liquidity deposit from DEX account
+    /// @dev Only the DEX account can perform
+    /// @param _callId Id of the call
+    /// @param _operations Input amounts
+    /// @param _autoChange Whether or not swap token for full deposit
+    /// @param _accountOwner Address of the DEX account owner
+    /// @param _accountVersion Version of the account
+    /// @param _remainingGasTo Receiver of the remaining gas
+    function depositLiquidity(
+        uint64 _callId,
+        TokenOperation[] _operations,
+        TokenOperation _expected,
+        bool _autoChange,
+        address _accountOwner,
+        uint32 _accountVersion,
+        address _remainingGasTo
+    ) external;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // WITHDRAW LIQUIDITY
+
+    /// @notice Calculate expected output amounts after liquidity withdrawal
+    /// @param lp_amount Amount of LP tokens to burn
+    /// @return expected_left_amount Expected left and right amounts
+    function expectedWithdrawLiquidity(
+        uint128 lp_amount
+    ) external view responsible returns (
+        uint128 expected_left_amount,
+        uint128 expected_right_amount
+    );
+
+    /// @notice Perform liquidity withdrawal from DEX account
+    /// @dev Only the DEX account can perform
+    /// @param _callId Id of the call
+    /// @param _operation Address of the LP root
+    /// @param _accountOwner Address of the DEX account owner
+    /// @param _accountVersion Version of the account
+    /// @param _remainingGasTo Receiver of the remaining gas
+    function withdrawLiquidity(
+        uint64 _callId,
+        TokenOperation _operation,
+        TokenOperation[] _expected,
+        address _accountOwner,
+        uint32 _accountVersion,
+        address _remainingGasTo
+    ) external;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // INTERNAL
+
+    /// @notice Upgrades contract's code
+    /// @dev Only the DEX root can perform
+    /// @param _code Contract's new code
+    /// @param _newVersion Number of the new update
+    /// @param _newType New pool type
+    /// @param _remainingGasTo Receiver of the remaining gas
+    function upgrade(
+        TvmCell _code,
+        uint32 _newVersion,
+        uint8 _newType,
+        address _remainingGasTo
+    ) external;
+
+    /// @notice Set new fee configuration
+    /// @dev Only the DEX root can perform
+    /// @param _params New fee params
+    /// @param _remainingGasTo Receiver of the remaining gas
+    function setFeeParams(
+        FeeParams _params,
+        address _remainingGasTo
+    ) external;
+
+    /// @notice Check that pair exists from DEX account
+    /// @dev Only the DEX account can perform
+    /// @param _accountOwner Address of the DEX account owner
+    /// @param _accountVersion Version of the account
+    function checkPair(
+        address _accountOwner,
+        uint32 _accountVersion
     ) external;
 }
