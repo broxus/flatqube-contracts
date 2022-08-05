@@ -131,25 +131,20 @@ interface IDexPair is IFeeParams, ITokenOperationStructure, IAcceptTokensTransfe
     ) external;
 
     function crossPoolExchange(
-        uint64 id,
-
-        uint32 prev_pool_version,
-        uint8 prev_pool_type,
-
-        address[] prev_pool_token_roots,
-
-        address spent_token_root,
-        uint128 spent_amount,
-
-        address sender_address,
-
-        address original_gas_to,
-        uint128 deploy_wallet_grams,
-
-        TvmCell next_payload,
-        bool notify_success,
-        TvmCell success_payload,
-        bool notify_cancel,
-        TvmCell cancel_payload
+        uint64 _id,
+        uint32 _prevPoolVersion,
+        uint8 _prevPoolType,
+        address[] _prevPoolTokenRoots,
+        address _spentTokenRoot,
+        uint128 _spentAmount,
+        address _senderAddress,
+        address _recipient,
+        address _remainingGasTo,
+        uint128 _deployWalletGrams,
+        TvmCell _nextPayload,
+        bool _notifySuccess,
+        TvmCell _successPayload,
+        bool _notifyCancel,
+        TvmCell _cancelPayload
     ) external;
 }

@@ -252,4 +252,36 @@ library DexPayloads {
             ref3
         );
     }
+
+    /**
+     * @notice Decode payload from the previous pair
+     * @param _payload Payload from the previous pair
+     * @return uint128 Minimum token amount after swap
+     * @return address Next pair's second TokenRoot address
+     * @return bool Whether or not next payload exists
+     * @return TvmCell Payload for the next pair
+     */
+    function decodeCrossPoolExchangePayload(TvmCell _payload) public returns (
+        uint128,
+        address,
+        bool,
+        TvmCell
+    ) {
+        TvmSlice slice = _payload.toSlice();
+
+        uint128 expectedAmount = slice.decode(uint128);
+        address nextTokenRoot =  slice.bits() >= 267 ? slice.decode(address) : address(0);
+        bool hasNextPayload = slice.refs() >= 1;
+
+        TvmCell nextPayload;
+
+        if (hasNextPayload) { nextPayload = slice.loadRef(); }
+
+        return (
+            expectedAmount,
+            nextTokenRoot,
+            hasNextPayload,
+            nextPayload
+        );
+    }
 }

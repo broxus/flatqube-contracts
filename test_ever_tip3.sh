@@ -1,7 +1,7 @@
 npx locklift build --config locklift.config.js
 
 export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --external-build node_modules/ton-eth-bridge-token-contracts/build --network dev3"
-export NO_TRACE="--config locklift.config.js --disable-build --network dev3"
+export NO_TRACE="--config locklift.config.js --disable-build --network local"
 
 npx locklift run $NO_TRACE --script scripts/0-reset-migration.js
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0' --balance='50'
