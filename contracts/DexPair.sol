@@ -245,6 +245,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
     ) override external {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        // Decode base data from payload
         (
             bool isValid,
             uint8 op,
@@ -256,8 +257,10 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
             address nextTokenRoot
         ) = DexPayloads.decodeOnAcceptTokensTransferData(_payload);
 
+        // Set sender as recipient if it's empty
         recipient = recipient.value == 0 ? _senderAddress : recipient;
 
+        // Decode payloads for callbacks
         (
             bool notifySuccess,
             TvmCell successPayload,
@@ -267,24 +270,26 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
             TvmCell ref3
         ) = DexPayloads.decodeOnAcceptTokensTransferPayloads(_payload);
 
+        // Check that pair, payload and liquidity are valid
         bool needCancel = !active || !isValid || lp_supply == 0;
 
         TvmCell empty;
 
         if (!needCancel) {
             if (
-                (msg.sender == left_wallet || msg.sender == right_wallet) &&
+                ((msg.sender == left_wallet && _tokenRoot == left_root) ||
+                (msg.sender == right_wallet && _tokenRoot == right_root)) &&
                 msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + deployWalletGrams
             ) {
                 bool isLeftToRight = msg.sender == left_wallet;
                 address fromRoot = isLeftToRight ? left_root : right_root;
                 address toRoot = isLeftToRight ? right_root : left_root;
-                address fromVaultWallet = isLeftToRight ? vault_left_wallet : vault_right_wallet;
                 address toVaultWallet = isLeftToRight ? vault_right_wallet : vault_left_wallet;
                 uint128 fromReserve = isLeftToRight ? left_balance : right_balance;
                 uint128 toReserve = isLeftToRight ? right_balance : left_balance;
 
                 if (op == DexOperationTypes.EXCHANGE) {
+                    // Calculate exchange result
                     (
                         uint128 amount,
                         uint128 poolFee,
@@ -295,6 +300,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         toReserve
                     );
 
+                    // Check reserves, fees and expected amount
                     if (
                         amount <= toReserve &&
                         amount >= expectedAmount &&
@@ -302,6 +308,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         (poolFee > 0 || fee.pool_numerator == 0) &&
                         (beneficiaryFee > 0 || fee.beneficiary_numerator == 0)
                     ) {
+                        // Process exchange
                         _exchangeBase(
                             id,
                             isLeftToRight,
@@ -314,6 +321,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                             poolFee
                         );
 
+                        // Transfer incoming token to vault
                         ITokenWallet(msg.sender)
                             .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                             (
@@ -325,6 +333,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                                 empty
                             );
 
+                        // Transfer outcoming token to recipient
                         IDexVault(vault)
                             .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                             (
@@ -344,7 +353,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         needCancel = true;
                     }
                 } else if (op == DexOperationTypes.DEPOSIT_LIQUIDITY) {
-                    // deposit liquidity by left side with auto exchange
+                    // Calculate deposit result
                     (
                         DepositLiquidityResult result,
                         uint128 step2PoolFee,
@@ -355,6 +364,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         true
                     );
 
+                    // Check reserves, fees and expected amount
                     if (
                         result.step_3_lp_reward > 0 &&
                         result.step_3_lp_reward >= expectedAmount &&
@@ -363,14 +373,17 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         (step2PoolFee > 0 || fee.pool_numerator == 0) &&
                         (step2BeneficiaryFee > 0 || fee.beneficiary_numerator == 0)
                     ) {
+                        // Update LP reserve
                         lp_supply += result.step_3_lp_reward;
 
+                        // Partially exchange incoming token to deposit all with right ratio
                         if (isLeftToRight) {
                             left_balance += _tokensAmount - step2BeneficiaryFee;
                         } else {
                             right_balance += _tokensAmount - step2BeneficiaryFee;
                         }
 
+                        // Process fees from swap
                         if (step2BeneficiaryFee > 0) {
                             if (isLeftToRight) {
                                 accumulated_left_fee += step2BeneficiaryFee;
@@ -392,6 +405,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                             )
                         );
 
+                        // Emit event about exchange
                         emit Exchange(
                             _senderAddress,
                             recipient,
@@ -418,6 +432,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                             )
                         );
 
+                        // Emit event about liquidity deposit
                         emit DepositLiquidity(
                             _senderAddress,
                             recipient,
@@ -425,16 +440,13 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                             result.step_3_lp_reward
                         );
 
+                        // Send callbacks about success
                         IDexPairOperationCallback(_senderAddress)
                             .dexPairDepositLiquiditySuccess{
                                 value: DexGas.OPERATION_CALLBACK_BASE,
                                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                                 bounce: false
-                            }(
-                                id,
-                                false,
-                                result
-                            );
+                            }(id, false, result);
 
                         if (recipient.value != _senderAddress.value) {
                             IDexPairOperationCallback(recipient)
@@ -442,13 +454,10 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                                     value: DexGas.OPERATION_CALLBACK_BASE,
                                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                                     bounce: false
-                                }(
-                                    id,
-                                    false,
-                                    result
-                                );
+                                }(id, false, result);
                         }
 
+                        // Transfer incoming token to vault
                         ITokenWallet(msg.sender)
                             .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                             (
@@ -460,6 +469,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                                 empty
                             );
 
+                        // Mint LP tokens to recipient
                         ITokenRoot(lp_root)
                             .mint{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                             (
@@ -473,7 +483,12 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                     } else {
                         needCancel = true;
                     }
-                } else if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE) {
+                } else if (
+                    op == DexOperationTypes.CROSS_PAIR_EXCHANGE &&
+                    notifySuccess &&
+                    successPayload.toSlice().bits() >= 128
+                ) {
+                    // Calculate exchange result
                     (
                         uint128 amount,
                         uint128 poolFee,
@@ -484,6 +499,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         toReserve
                     );
 
+                    // Check reserves, fees and expected amount
                     if (
                         amount <= toReserve &&
                         amount >= expectedAmount &&
@@ -494,6 +510,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         nextTokenRoot != right_root &&
                         nextTokenRoot != left_root
                     ) {
+                        // Process exchange
                         _exchangeBase(
                             id,
                             isLeftToRight,
@@ -506,6 +523,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                             poolFee
                         );
 
+                        // Transfer incoming token to vault
                         ITokenWallet(msg.sender)
                             .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                             (
@@ -519,6 +537,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
 
                         address nextPair = _expectedPairAddress(toRoot, nextTokenRoot);
 
+                        // Continue cross-pair exchange
                         IDexPair(nextPair)
                             .crossPoolExchange{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                             (
@@ -546,22 +565,28 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                 }
             } else if (
                 op == DexOperationTypes.WITHDRAW_LIQUIDITY &&
-                _tokenRoot == lp_root &&
                 msg.sender == lp_wallet &&
-                msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 * deployWalletGrams
+                msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + 2 * deployWalletGrams
             ) {
-                TokenOperation[] operations = _withdrawLiquidityBase(_tokensAmount, _senderAddress);
+                // Calculate withdrawal result
+                uint128 leftBackAmount =  math.muldiv(left_balance, _tokensAmount, lp_supply);
+                uint128 rightBackAmount = math.muldiv(right_balance, _tokensAmount, lp_supply);
 
+                // Check expected amounts
                 if (
-                    operations[0].amount >= expectedAmount &&
-                    operations[1].amount >= expectedAmount2
+                    leftBackAmount >= expectedAmount &&
+                    rightBackAmount >= expectedAmount2
                 ) {
-                    IWithdrawResult.WithdrawResult withdrawResult = IWithdrawResult.WithdrawResult(
+                    // Process liquidity withdrawal
+                    TokenOperation[] operations = _withdrawLiquidityBase(_tokensAmount, _senderAddress);
+
+                    IWithdrawResult.WithdrawResult result = IWithdrawResult.WithdrawResult(
                         _tokensAmount,
                         operations[0].amount,
                         operations[1].amount
                     );
 
+                    // Send callbacks about success
                     IDexPairOperationCallback(_senderAddress)
                         .dexPairWithdrawSuccess{
                             value: DexGas.OPERATION_CALLBACK_BASE,
@@ -570,7 +595,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         }(
                             id,
                             false,
-                            withdrawResult
+                            result
                         );
 
                     if (recipient.value != _senderAddress.value) {
@@ -582,10 +607,11 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                             }(
                                 id,
                                 false,
-                                withdrawResult
+                                result
                             );
                     }
 
+                    // Transfer withdrawn tokens to recipient
                     for (TokenOperation operation : operations) {
                         if (operation.amount > 0) {
                             IDexVault(vault)
@@ -608,6 +634,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         }
                     }
 
+                    // Burn LP tokens
                     IBurnableTokenWallet(msg.sender)
                         .burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                         (
@@ -625,6 +652,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         }
 
         if (needCancel) {
+            // Send callback about failed operation to user
             IDexPairOperationCallback(_senderAddress)
                 .dexPairOperationCancelled{
                     value: DexGas.OPERATION_CALLBACK_BASE,
@@ -641,6 +669,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                     }(id);
             }
 
+            // Refund incoming token
             ITokenWallet(msg.sender)
                 .transferToWallet{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                 (
@@ -651,6 +680,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                     cancelPayload
                 );
         } else {
+            // Emit updated reserves
             _sync();
         }
     }
@@ -1374,10 +1404,12 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         _prevPoolTokenRoots[0],
         _prevPoolTokenRoots[1]
     ) onlyActive {
+        // Check that sender is another pair
         require(msg.sender != address(this));
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        // Decode data from payload
         (
             uint128 expectedAmount,
             address nextTokenRoot,
@@ -1387,13 +1419,13 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
 
         if (_spentTokenRoot == left_root || _spentTokenRoot == right_root) {
             bool isLeftToRight = _spentTokenRoot == left_root;
-            address fromRoot = isLeftToRight ? left_root : right_root;
             address toRoot = isLeftToRight ? right_root : left_root;
             address fromVaultWallet = isLeftToRight ? vault_left_wallet : vault_right_wallet;
             address toVaultWallet = isLeftToRight ? vault_right_wallet : vault_left_wallet;
             uint128 fromReserve = isLeftToRight ? left_balance : right_balance;
             uint128 toReserve = isLeftToRight ? right_balance : left_balance;
 
+            // Calculate exchange result
             (
                 uint128 amount,
                 uint128 poolFee,
@@ -1404,6 +1436,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                 toReserve
             );
 
+            // Check reserves, fees and expected amount
             if (
                 amount <= toReserve &&
                 amount >= expectedAmount &&
@@ -1411,6 +1444,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                 (poolFee > 0 || fee.pool_numerator == 0) &&
                 (beneficiaryFee > 0 || fee.beneficiary_numerator == 0)
             ) {
+                // Process exchange
                 _exchangeBase(
                     _id,
                     isLeftToRight,
@@ -1423,6 +1457,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                     poolFee
                 );
 
+                // Emit updated reserves
                 _sync();
 
                 if (
@@ -1435,6 +1470,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                 ) {
                     address nextPair = _expectedPairAddress(toRoot, nextTokenRoot);
 
+                    // Continue cross-pair exchange
                     IDexPair(nextPair)
                         .crossPoolExchange{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                         (
@@ -1455,6 +1491,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                             _cancelPayload
                         );
                 } else {
+                    // Transfer final token to recipient
                     IDexVault(vault)
                         .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                         (
@@ -1472,6 +1509,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         );
                 }
             } else {
+                // Send callback about failed cross-pool exchange to user
                 IDexPairOperationCallback(_senderAddress)
                     .dexPairOperationCancelled{
                         value: DexGas.OPERATION_CALLBACK_BASE,
@@ -1488,6 +1526,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         }(_id);
                 }
 
+                // Refund incoming token to sender
                 IDexVault(vault)
                     .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                     (
