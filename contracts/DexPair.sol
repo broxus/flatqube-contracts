@@ -302,75 +302,17 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         (poolFee > 0 || fee.pool_numerator == 0) &&
                         (beneficiaryFee > 0 || fee.beneficiary_numerator == 0)
                     ) {
-                        if (isLeftToRight) {
-                            left_balance += _tokensAmount - beneficiaryFee;
-                            right_balance -= amount;
-                        } else {
-                            right_balance += _tokensAmount - beneficiaryFee;
-                            left_balance -= amount;
-                        }
-
-                        ExchangeFee[] fees;
-
-                        fees.push(
-                            ExchangeFee(
-                                fromRoot,
-                                poolFee,
-                                beneficiaryFee,
-                                fee.beneficiary
-                            )
-                        );
-
-                        emit Exchange(
+                        _exchangeBase(
+                            id,
+                            isLeftToRight,
                             _senderAddress,
                             recipient,
-                            fromRoot,
+                            _remainingGasTo,
                             _tokensAmount,
-                            toRoot,
                             amount,
-                            fees
+                            beneficiaryFee,
+                            poolFee
                         );
-
-                        if (beneficiaryFee > 0) {
-                            if (isLeftToRight) {
-                                accumulated_left_fee += beneficiaryFee;
-                            } else {
-                                accumulated_right_fee += beneficiaryFee;
-                            }
-
-                            _processBeneficiaryFees(false, _remainingGasTo);
-                        }
-
-                        IExchangeResult.ExchangeResult exchangeResult = IExchangeResult.ExchangeResult(
-                            true,
-                            _tokensAmount,
-                            poolFee + beneficiaryFee,
-                            amount
-                        );
-
-                        IDexPairOperationCallback(_senderAddress)
-                            .dexPairExchangeSuccess{
-                                value: DexGas.OPERATION_CALLBACK_BASE,
-                                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                                bounce: false
-                            }(
-                                id,
-                                false,
-                                exchangeResult
-                            );
-
-                        if (recipient.value != _senderAddress.value) {
-                            IDexPairOperationCallback(recipient)
-                                .dexPairExchangeSuccess{
-                                    value: DexGas.OPERATION_CALLBACK_BASE,
-                                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                                    bounce: false
-                                }(
-                                    id,
-                                    false,
-                                    exchangeResult
-                                );
-                        }
 
                         ITokenWallet(msg.sender)
                             .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
@@ -552,75 +494,17 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                         nextTokenRoot != right_root &&
                         nextTokenRoot != left_root
                     ) {
-                        if (isLeftToRight) {
-                            left_balance += _tokensAmount - beneficiaryFee;
-                            right_balance -= amount;
-                        } else {
-                            right_balance += _tokensAmount - beneficiaryFee;
-                            left_balance -= amount;
-                        }
-
-                        ExchangeFee[] fees;
-
-                        fees.push(
-                            ExchangeFee(
-                                fromRoot,
-                                poolFee,
-                                beneficiaryFee,
-                                fee.beneficiary
-                            )
-                        );
-
-                        emit Exchange(
+                        _exchangeBase(
+                            id,
+                            isLeftToRight,
                             _senderAddress,
                             recipient,
-                            fromRoot,
+                            _remainingGasTo,
                             _tokensAmount,
-                            toRoot,
                             amount,
-                            fees
+                            beneficiaryFee,
+                            poolFee
                         );
-
-                        if (beneficiaryFee > 0) {
-                            if (isLeftToRight) {
-                                accumulated_left_fee += beneficiaryFee;
-                            } else {
-                                accumulated_right_fee += beneficiaryFee;
-                            }
-
-                            _processBeneficiaryFees(false, _remainingGasTo);
-                        }
-
-                        IExchangeResult.ExchangeResult exchangeResult = IExchangeResult.ExchangeResult(
-                            true,
-                            _tokensAmount,
-                            poolFee + beneficiaryFee,
-                            amount
-                        );
-
-                        IDexPairOperationCallback(_senderAddress)
-                            .dexPairExchangeSuccess{
-                                value: DexGas.OPERATION_CALLBACK_BASE,
-                                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                                bounce: false
-                            }(
-                                id,
-                                false,
-                                exchangeResult
-                            );
-
-                        if (recipient.value != _senderAddress.value) {
-                            IDexPairOperationCallback(recipient)
-                                .dexPairExchangeSuccess{
-                                    value: DexGas.OPERATION_CALLBACK_BASE,
-                                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                                    bounce: false
-                                }(
-                                    id,
-                                    false,
-                                    exchangeResult
-                                );
-                        }
 
                         ITokenWallet(msg.sender)
                             .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
@@ -1334,6 +1218,99 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         return (expected_a_amount, a_fee);
     }
 
+    /**
+     * @notice Internal exchange process
+     * @param _id ID of the call
+     * @param _isLeftToRight Exchange left token to right
+     * @param _senderAddress Address of the user who sent a request
+     * @param _recipient Recipient of the outcoming token
+     * @param _remainingGasTo Recipient of the remaining gas
+     * @param _spentAmount Incoming amount
+     * @param _amount Outcoming amount
+     * @param _beneficiaryFee DEX owner fee amount
+     * @param _poolFee Liquidity providers fee amount
+     */
+    function _exchangeBase(
+        uint64 _id,
+        bool _isLeftToRight,
+        address _senderAddress,
+        address _recipient,
+        address _remainingGasTo,
+        uint128 _spentAmount,
+        uint128 _amount,
+        uint128 _beneficiaryFee,
+        uint128 _poolFee
+    ) private {
+        address fromTokenRoot = _isLeftToRight ? left_root : right_root;
+        address toTokenRoot = _isLeftToRight ? right_root : left_root;
+
+        // Update reserves
+        if (_isLeftToRight) {
+            left_balance += _spentAmount - _beneficiaryFee;
+            right_balance -= _amount;
+        } else {
+            right_balance += _spentAmount - _beneficiaryFee;
+            left_balance -= _amount;
+        }
+
+        // Process fees from swap
+        if (_beneficiaryFee > 0) {
+            if (_isLeftToRight) {
+                accumulated_left_fee += _beneficiaryFee;
+            } else {
+                accumulated_right_fee += _beneficiaryFee;
+            }
+
+            _processBeneficiaryFees(false, _remainingGasTo);
+        }
+
+        ExchangeFee[] fees;
+
+        fees.push(
+            ExchangeFee(
+                fromTokenRoot,
+                _poolFee,
+                _beneficiaryFee,
+                fee.beneficiary
+            )
+        );
+
+        // Emit event about exchange
+        emit Exchange(
+            _senderAddress,
+            _recipient,
+            fromTokenRoot,
+            _spentAmount,
+            toTokenRoot,
+            _amount,
+            fees
+        );
+
+        IExchangeResult.ExchangeResult result =  IExchangeResult.ExchangeResult(
+            _isLeftToRight,
+            _spentAmount,
+            _poolFee + _beneficiaryFee,
+            _amount
+        );
+
+        // Send callbacks about success
+        IDexPairOperationCallback(_senderAddress)
+            .dexPairExchangeSuccess{
+                value: DexGas.OPERATION_CALLBACK_BASE,
+                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                bounce: false
+            }(_id, false, result);
+
+        if (_recipient.value != _senderAddress.value) {
+            IDexPairOperationCallback(_recipient)
+                .dexPairExchangeSuccess{
+                    value: DexGas.OPERATION_CALLBACK_BASE,
+                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
+                }(_id, false, result);
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // Fee
 
@@ -1434,77 +1411,19 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                 (poolFee > 0 || fee.pool_numerator == 0) &&
                 (beneficiaryFee > 0 || fee.beneficiary_numerator == 0)
             ) {
-                if (isLeftToRight) {
-                    left_balance += _spentAmount - beneficiaryFee;
-                    right_balance -= amount;
-                } else {
-                    right_balance += _spentAmount - beneficiaryFee;
-                    left_balance -= amount;
-                }
-
-                if (beneficiaryFee > 0) {
-                    if (isLeftToRight) {
-                        accumulated_left_fee += beneficiaryFee;
-                    } else {
-                        accumulated_right_fee += beneficiaryFee;
-                    }
-
-                    _processBeneficiaryFees(false, _remainingGasTo);
-                }
-
-                ExchangeFee[] fees;
-
-                fees.push(
-                    ExchangeFee(
-                        fromRoot,
-                        poolFee,
-                        beneficiaryFee,
-                        fee.beneficiary
-                    )
-                );
-
-                emit Exchange(
+                _exchangeBase(
+                    _id,
+                    isLeftToRight,
                     _senderAddress,
                     _recipient,
-                    fromRoot,
+                    _remainingGasTo,
                     _spentAmount,
-                    toRoot,
                     amount,
-                    fees
+                    beneficiaryFee,
+                    poolFee
                 );
 
                 _sync();
-
-                IExchangeResult.ExchangeResult exchangeResult = IExchangeResult.ExchangeResult(
-                    true,
-                    _spentAmount,
-                    poolFee + beneficiaryFee,
-                    amount
-                );
-
-                IDexPairOperationCallback(_senderAddress)
-                    .dexPairExchangeSuccess{
-                        value: DexGas.OPERATION_CALLBACK_BASE,
-                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                        bounce: false
-                    }(
-                        _id,
-                        false,
-                        exchangeResult
-                    );
-
-                if (_recipient.value != _senderAddress.value) {
-                    IDexPairOperationCallback(_recipient)
-                        .dexPairExchangeSuccess{
-                            value: DexGas.OPERATION_CALLBACK_BASE,
-                            flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                            bounce: false
-                        }(
-                            _id,
-                            false,
-                            exchangeResult
-                        );
-                }
 
                 if (
                     nextTokenRoot.value != 0 &&
