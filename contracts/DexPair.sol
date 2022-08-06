@@ -180,7 +180,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         optional(address) recipient
-    ) external pure returns (TvmCell) {
+    ) external pure override returns (TvmCell) {
         return DexPayloads.buildExchangePayload(
             id,
             deploy_wallet_grams,
@@ -194,7 +194,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         uint128 deploy_wallet_grams,
         optional(uint128) expected_amount,
         optional(address) recipient
-    ) external pure returns (TvmCell) {
+    ) external pure override returns (TvmCell) {
         return DexPayloads.buildDepositLiquidityPayload(
             id,
             deploy_wallet_grams,
@@ -209,7 +209,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         optional(uint128) expected_left_amount,
         optional(uint128) expected_right_amount,
         optional(address) recipient
-    ) external pure returns (TvmCell) {
+    ) external pure override returns (TvmCell) {
         return DexPayloads.buildWithdrawLiquidityPayload(
             id,
             deploy_wallet_grams,
@@ -225,7 +225,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         uint128 expected_amount,
         TokenOperation[] steps,
         optional(address) recipient
-    ) external pure returns (TvmCell) {
+    ) external pure override returns (TvmCell) {
         return DexPayloads.buildCrossPairExchangePayload(
             id,
             deploy_wallet_grams,
