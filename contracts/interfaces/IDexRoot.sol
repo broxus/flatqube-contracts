@@ -10,6 +10,11 @@ interface IDexRoot is IFeeParams {
         uint8 poolType
     );
 
+    event PoolCodeUpgraded(
+        uint32 version,
+        uint8 poolType
+    );
+
     event RootCodeUpgraded();
 
     event ActiveUpdated(bool newActive);
@@ -38,6 +43,10 @@ interface IDexRoot is IFeeParams {
 
     function getPairCode(uint8 _poolType) external view responsible returns (TvmCell);
 
+    function getPoolVersion(uint8 _poolType) external view responsible returns (uint32);
+
+    function getPoolCode(uint8 _poolType) external view responsible returns (TvmCell);
+
     function isActive() external view responsible returns (bool);
 
     function getVault() external view responsible returns (address);
@@ -65,6 +74,11 @@ interface IDexRoot is IFeeParams {
     function deployPair(
         address left_root,
         address right_root,
+        address send_gas_to
+    ) external;
+
+    function deployStablePool(
+        address[] roots,
         address send_gas_to
     ) external;
 

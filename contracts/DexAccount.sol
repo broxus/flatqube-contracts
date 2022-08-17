@@ -717,16 +717,39 @@ contract DexAccount is
         TokenOperation[] _expected,
         address _remainingGasTo
     ) override external onlyOwner {
+        address[] roots;
+        for (TokenOperation operation : _expected) {
+            roots.push(operation.root);
+        }
+
         _withdrawLiquidityInternal(
             _callId,
+            roots,
             _operation,
             _expected,
             _remainingGasTo
         );
     }
 
+    function withdrawLiquidityOneCoin(
+        uint64 _callId,
+        address[] _roots,
+        TokenOperation _operation,
+        TokenOperation _expected,
+        address _remainingGasTo
+    ) override external onlyOwner {
+        _withdrawLiquidityInternal(
+            _callId,
+            _roots,
+            _operation,
+            [_expected],
+            _remainingGasTo
+        );
+    }
+
     function _withdrawLiquidityInternal(
         uint64 _callId,
+        address[] _roots,
         TokenOperation _operation,
         TokenOperation[] _expected,
         address _remainingGasTo
@@ -735,22 +758,16 @@ contract DexAccount is
         require(_operation.amount > 0, DexErrors.AMOUNT_TOO_LOW);
         require(msg.value >= DexGas.WITHDRAW_LIQUIDITY_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(_wallets.exists(_operation.root) && _balances.exists(_operation.root), DexErrors.UNKNOWN_TOKEN_ROOT);
-        require(_expected.length > 1, DexErrors.UNKNOWN_TOKEN_ROOT);
+        require(_roots.length > 1, DexErrors.UNKNOWN_TOKEN_ROOT);
         require(_balances[_operation.root] >= _operation.amount, DexErrors.NOT_ENOUGH_FUNDS);
 
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
-
-        address[] roots;
-
-        for (TokenOperation operation : _expected) {
-            roots.push(operation.root);
-        }
 
         address pair = address(
             tvm.hash(
                 _buildInitData(
                     DexPlatformTypes.Pool,
-                    _buildPairParams(roots)
+                    _buildPairParams(_roots)
                 )
             )
         );

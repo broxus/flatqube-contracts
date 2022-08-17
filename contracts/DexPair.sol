@@ -769,7 +769,7 @@ contract DexPair is DexPairBase {
         TvmCell _successPayload,
         bool _notifyCancel,
         TvmCell _cancelPayload
-    ) override external onlyPair(_prevPoolTokenRoots) onlyActive notSelfCall {
+    ) override external onlyPairOrVault(_prevPoolTokenRoots) onlyActive notSelfCall {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         (

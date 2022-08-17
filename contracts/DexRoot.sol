@@ -40,6 +40,8 @@ contract DexRoot is
     uint32 private _accountVersion;
     mapping(uint8 => TvmCell) private _pairCodes;
     mapping(uint8 => uint32) private _pairVersions;
+    mapping(uint8 => TvmCell) private _poolCodes;
+    mapping(uint8 => uint32) private _poolVersions;
 
     bool private _active;
 
@@ -121,6 +123,16 @@ contract DexRoot is
         } _pairVersions[pool_type];
     }
 
+    function getPoolVersion(uint8 pool_type) override external view responsible returns (uint32) {
+        require(_poolVersions.exists(pool_type), DexErrors.UNSUPPORTED_POOL_TYPE);
+
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _poolVersions[pool_type];
+    }
+
     function getPairCode(uint8 pool_type) override external view responsible returns (TvmCell) {
         require(_pairCodes.exists(pool_type), DexErrors.UNSUPPORTED_POOL_TYPE);
 
@@ -129,6 +141,16 @@ contract DexRoot is
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } _pairCodes[pool_type];
+    }
+
+    function getPoolCode(uint8 pool_type) override external view responsible returns (TvmCell) {
+        require(_poolCodes.exists(pool_type), DexErrors.UNSUPPORTED_POOL_TYPE);
+
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _poolCodes[pool_type];
     }
 
     function getVault() override external view responsible returns (address) {
@@ -196,7 +218,6 @@ contract DexRoot is
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } _manager;
-    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // SETTERS
@@ -328,6 +349,23 @@ contract DexRoot is
         });
     }
 
+    function installOrUpdatePoolCode(
+        TvmCell code,
+        uint8 pool_type
+    ) external onlyOwner {
+        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
+
+        _poolCodes[pool_type] = code;
+        _poolVersions[pool_type]++;
+
+        emit PoolCodeUpgraded(_poolVersions[pool_type], pool_type);
+
+        owner.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED
+        });
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // INTERNAL
 
@@ -344,6 +382,8 @@ contract DexRoot is
             _accountVersion,
             _pairCodes,
             _pairVersions,
+            _poolCodes,
+            _poolVersions,
             _owner,
             _vault,
             _pendingOwner
@@ -358,30 +398,24 @@ contract DexRoot is
     function onCodeUpgrade(TvmCell _data) private {
         tvm.resetStorage();
 
-        TvmSlice slice = _data.toSlice();
-
-        uint32 _pair_version;
-
         (
+            platform_code,
+            _accountCode,
             _accountVersion,
-            _pair_version,
+            _pairCodes,
+            _pairVersions,
             _owner,
             _vault,
             _pendingOwner
-        ) = slice.decode(
+        ) = abi.decode(data, (
+            TvmCell,
+            TvmCell,
             uint32,
-            uint32,
+            mapping(uint8 => TvmCell),
+            mapping(uint8 => uint32),
             address,
             address,
-            address
-        );
-
-        platform_code = slice.loadRef();
-        _accountCode = slice.loadRef();
-        TvmCell _pair_code = slice.loadRef();
-
-        _pairVersions[DexPoolTypes.CONSTANT_PRODUCT] = _pair_version;
-        _pairCodes[DexPoolTypes.CONSTANT_PRODUCT] = _pair_code;
+            address));
 
         _manager = address(0);
         _active = true;
@@ -474,7 +508,7 @@ contract DexRoot is
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
-    // PAIR
+    // PAIR/POOL
 
     function upgradePair(
         address left_root,
@@ -507,6 +541,36 @@ contract DexRoot is
             (code, version, pool_type, send_gas_to);
     }
 
+    function upgradePool(
+        address[] roots
+        uint8 pool_type,
+        address send_gas_to
+    ) external view onlyManagerOrOwner {
+        require(
+            _poolVersions.exists(pool_type) &&
+            _poolCodes.exists(pool_type),
+            DexErrors.UNSUPPORTED_POOL_TYPE
+        );
+        require(msg.value >= DexGas.UPGRADE_PAIR_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+
+        tvm.rawReserve(
+            math.max(
+                DexGas.ROOT_INITIAL_BALANCE,
+                address(this).balance - msg.value
+            ),
+            2
+        );
+
+        emit RequestedPoolUpgrade(roots);
+
+        TvmCell code = _poolCodes[pool_type];
+        uint32 version = _poolVersions[pool_type];
+
+        IDexPair(_expectedPairAddress(roots))
+            .upgrade{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            (code, version, pool_type, send_gas_to);
+    }
+
     function deployPair(
         address left_root,
         address right_root,
@@ -535,6 +599,43 @@ contract DexRoot is
         }(
             _pairCodes[DexPoolTypes.CONSTANT_PRODUCT],
             _pairVersions[DexPoolTypes.CONSTANT_PRODUCT],
+            _vault,
+            send_gas_to
+        );
+    }
+
+    function deployStablePool(
+        address[] roots,
+        address send_gas_to
+    ) override external onlyManagerOrOwner {
+        require(msg.value >= DexGas.DEPLOY_PAIR_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+
+        mapping(address => bool) _roots;
+        for (uint i = 0; i < roots.length; i++) {
+            require(roots[i].value != 0, DexErrors.WRONG_PAIR);
+            require(_roots[roots[i].value] != true, DexErrors.WRONG_PAIR);
+
+            _roots[roots[i].value] = true;
+        }
+
+        tvm.rawReserve(
+            math.max(
+                DexGas.ROOT_INITIAL_BALANCE,
+                address(this).balance - msg.value
+            ),
+            2
+        );
+
+        new DexPlatform{
+            stateInit: _buildInitData(
+                DexPlatformTypes.Pool,
+                _buildPairParams(roots)
+            ),
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED
+        }(
+            _poolCodes[DexPoolTypes.STABLESWAP],
+            _poolVersions[DexPoolTypes.STABLESWAP],
             _vault,
             send_gas_to
         );

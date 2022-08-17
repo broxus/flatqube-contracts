@@ -39,4 +39,6 @@ library DexErrors {
     uint16 constant UNSUPPORTED_POOL_TYPE            = 133;
     uint16 constant WRONG_AMOUNT                     = 134;
     uint16 constant WRONG_TOKEN_ROOT                 = 135;
+    uint16 constant NOT_LP_VAULT_WALLET              = 136;
+    uint16 constant NEITHER_PAIR_NOR_VAULT           = 137;
 }

@@ -98,6 +98,14 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
         _;
     }
 
+    /// @dev Only DEX pair or the DEX vault can call a function with this modifier
+    modifier onlyPairOrVault(address[] _roots) {
+        require(msg.sender == _expectedPairAddress(_roots) ||
+            _typeToRootAddresses[DexAddressType.VAULT][0].value != 0 &&
+            msg.sender == _typeToRootAddresses[DexAddressType.VAULT][0], DexErrors.NEITHER_PAIR_NOR_VAULT);
+        _;
+    }
+
     /// @dev Prevent function calls from the same contract
     modifier notSelfCall() {
         require(msg.sender != address(this));

@@ -33,6 +33,8 @@ interface IDexVault {
 
     function addLiquidityToken(address pair, address left_root, address right_root, address send_gas_to) external;
 
+    function addLiquidityTokenV2(address pool, address[] roots, address send_gas_to) external;
+
     function onLiquidityTokenDeployed(
         uint32 nonce,
         address pair,
