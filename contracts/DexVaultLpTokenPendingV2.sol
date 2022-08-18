@@ -62,9 +62,9 @@ contract DexVaultLpTokenPendingV2 is ITokenRootDeployedCallback, ITransferTokenR
         send_gas_to = send_gas_to_;
         deploy_value = value_;
 
-        uint8 N_COINS = roots.length;
+        N_COINS = uint8(roots.length);
 
-        root_symbols = new string[](N_COINS)
+        root_symbols = new string[](N_COINS);
         root_symbols_received = new bool[](N_COINS);
 
         for (uint8 i = 0; i < N_COINS; i++) {
@@ -96,8 +96,8 @@ contract DexVaultLpTokenPendingV2 is ITokenRootDeployedCallback, ITransferTokenR
         root_symbols_received[i] = true;
 
         bool all_symbols_received = true;
-        for (uint8 i = 0; i < N_COINS; i++) {
-            all_symbols_received = all_symbols_received && root_symbols_received[i];
+        for (uint8 idx = 0; idx < N_COINS; i++) {
+            all_symbols_received = all_symbols_received && root_symbols_received[idx];
         }
         if (all_symbols_received) {
             createLpTokenAndWallets();
@@ -181,7 +181,7 @@ contract DexVaultLpTokenPendingV2 is ITokenRootDeployedCallback, ITransferTokenR
         ITokenRoot(token_root).deployWallet{
             value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
             flag: MsgFlag.SENDER_PAYS_FEES,
-            callback: DexVaultLpTokenPending.onDeployWallet
+            callback: DexVaultLpTokenPendingV2.onDeployWallet
         }(
             wallet_owner,                  /*owner_address*/
             DexGas.DEPLOY_EMPTY_WALLET_GRAMS  /*deploy_grams*/

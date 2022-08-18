@@ -20,7 +20,7 @@ import "./libraries/DexOperationTypes.sol";
 import "./interfaces/IUpgradableByRequest.sol";
 import "./interfaces/IDexRoot.sol";
 import "./interfaces/IDexStablePair.sol";
-import "./interfaces/IDexPair.sol";
+import "./interfaces/IDexBasePool.sol";
 import "./interfaces/ISuccessCallback.sol";
 import "./interfaces/IDexAccount.sol";
 import "./interfaces/IDexVault.sol";
@@ -475,7 +475,7 @@ contract DexStablePair is
 
                         address next_pair = _expectedPairAddress([tokenData[j].root, next_token_root]);
 
-                        IDexPair(next_pair).crossPoolExchange{
+                        IDexBasePool(next_pair).crossPoolExchange{
                             value: 0,
                             flag: MsgFlag.ALL_NOT_RESERVED
                         }(
@@ -951,7 +951,7 @@ contract DexStablePair is
 
                     address next_pair = _expectedPairAddress([tokenData[j].root, next_token_root]);
 
-                    IDexPair(next_pair).crossPoolExchange{
+                    IDexBasePool(next_pair).crossPoolExchange{
                         value: 0,
                         flag: MsgFlag.ALL_NOT_RESERVED
                     }(

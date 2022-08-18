@@ -13,7 +13,7 @@ import "./abstract/DexContractBase.sol";
 
 import "./DexVaultLpTokenPendingV2.sol";
 import "./interfaces/IDexVault.sol";
-import "./interfaces/IDexPair.sol";
+import "./interfaces/IDexBasePool.sol";
 import "./interfaces/IDexAccount.sol";
 import "./interfaces/IUpgradable.sol";
 import "./interfaces/IResetGas.sol";
@@ -228,7 +228,7 @@ contract DexVault is
     function onLiquidityTokenDeployed(
         uint32 nonce,
         address pool,
-        address[] roots
+        address[] roots,
         address lp_root,
         address send_gas_to
     ) public override onlyLpTokenPending(
@@ -244,7 +244,7 @@ contract DexVault is
             2
         );
 
-        IDexPair(pool)
+        IDexBasePool(pool)
             .liquidityTokenRootDeployed{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (lp_root, send_gas_to);
     }
@@ -268,7 +268,7 @@ contract DexVault is
             2
         );
 
-        IDexPair(pool)
+        IDexBasePool(pool)
             .liquidityTokenRootNotDeployed{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (lp_root, send_gas_to);
     }
@@ -506,7 +506,7 @@ contract DexVault is
         address[] roots,
         address sender_address,
         uint128 deploy_wallet_grams,
-        address next_pool) = payloadSlice.decode(address, uint64, uint32, uint8, address[], address, uint128, address);
+        address next_pool) = payloadSlice.decode(uint64, uint32, uint8, address[], address, uint128, address);
 
         TvmCell next_payload;
         TvmCell success_payload;
@@ -531,7 +531,7 @@ contract DexVault is
 
             tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
 
-            IDexPair(next_pool).crossPoolExchange{
+            IDexBasePool(next_pool).crossPoolExchange{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED
             }(

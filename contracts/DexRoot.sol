@@ -11,7 +11,7 @@ import "./abstract/DexContractBase.sol";
 import "./interfaces/IUpgradable.sol";
 import "./interfaces/IUpgradableByRequest.sol";
 import "./interfaces/IDexRoot.sol";
-import "./interfaces/IDexPair.sol";
+import "./interfaces/IDexBasePool.sol";
 import "./interfaces/IDexStablePair.sol";
 import "./interfaces/IDexConstantProductPair.sol";
 import "./interfaces/IResetGas.sol";
@@ -218,6 +218,7 @@ contract DexRoot is
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } _manager;
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // SETTERS
@@ -360,7 +361,7 @@ contract DexRoot is
 
         emit PoolCodeUpgraded(_poolVersions[pool_type], pool_type);
 
-        owner.transfer({
+        _owner.transfer({
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED
         });
@@ -407,7 +408,7 @@ contract DexRoot is
             _owner,
             _vault,
             _pendingOwner
-        ) = abi.decode(data, (
+        ) = abi.decode(_data, (
             TvmCell,
             TvmCell,
             uint32,
@@ -536,13 +537,13 @@ contract DexRoot is
         TvmCell code = _pairCodes[pool_type];
         uint32 version = _pairVersions[pool_type];
 
-        IDexPair(_expectedPairAddress([left_root, right_root]))
+        IDexBasePool(_expectedPairAddress([left_root, right_root]))
             .upgrade{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (code, version, pool_type, send_gas_to);
     }
 
     function upgradePool(
-        address[] roots
+        address[] roots,
         uint8 pool_type,
         address send_gas_to
     ) external view onlyManagerOrOwner {
@@ -566,7 +567,7 @@ contract DexRoot is
         TvmCell code = _poolCodes[pool_type];
         uint32 version = _poolVersions[pool_type];
 
-        IDexPair(_expectedPairAddress(roots))
+        IDexBasePool(_expectedPairAddress(roots))
             .upgrade{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (code, version, pool_type, send_gas_to);
     }
@@ -613,9 +614,9 @@ contract DexRoot is
         mapping(address => bool) _roots;
         for (uint i = 0; i < roots.length; i++) {
             require(roots[i].value != 0, DexErrors.WRONG_PAIR);
-            require(_roots[roots[i].value] != true, DexErrors.WRONG_PAIR);
+            require(_roots[roots[i]] != true, DexErrors.WRONG_PAIR);
 
-            _roots[roots[i].value] = true;
+            _roots[roots[i]] = true;
         }
 
         tvm.rawReserve(
@@ -663,7 +664,7 @@ contract DexRoot is
             2
         );
 
-        IDexPair(_expectedPairAddress(_roots))
+        IDexBasePool(_expectedPairAddress(_roots))
             .setFeeParams{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_params, _remainingGasTo);
     }
