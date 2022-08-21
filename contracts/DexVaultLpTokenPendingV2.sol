@@ -39,6 +39,7 @@ contract DexVaultLpTokenPendingV2 is ITokenRootDeployedCallback, ITransferTokenR
 
     string[] root_symbols;
     bool[] root_symbols_received;
+    uint8 root_symbols_amt;
 
     uint8 N_COINS;
 
@@ -93,14 +94,13 @@ contract DexVaultLpTokenPendingV2 is ITokenRootDeployedCallback, ITransferTokenR
         uint8 i = token_index[msg.sender];
 
         root_symbols[i] = symbol;
-        root_symbols_received[i] = true;
+        if (!root_symbols_received[i]) {
+            root_symbols_amt += 1;
+            root_symbols_received[i] = true;
 
-        bool all_symbols_received = true;
-        for (uint8 idx = 0; idx < N_COINS; i++) {
-            all_symbols_received = all_symbols_received && root_symbols_received[idx];
-        }
-        if (all_symbols_received) {
-            createLpTokenAndWallets();
+            if (root_symbols_amt == N_COINS) {
+                createLpTokenAndWallets();
+            }
         }
         terminateIfEmptyQueue();
     }
