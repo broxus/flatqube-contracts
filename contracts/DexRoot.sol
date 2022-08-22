@@ -57,7 +57,7 @@ contract DexRoot is
         require(
             msg.sender.value != 0 &&
             (msg.sender == _owner || msg.sender == _manager),
-            DexErrors.NOT_VAULT
+            DexErrors.NOT_MY_OWNER
         );
         _;
     }

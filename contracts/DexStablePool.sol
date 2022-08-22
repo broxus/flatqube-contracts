@@ -1375,9 +1375,8 @@ contract DexStablePool is
             builder.store(platform_code);  // ref1 = platform_code
 
             //Tokens
-            TvmBuilder tokens_data_builder;
-            tokens_data_builder.store(_tokenRoots());
-            builder.storeRef(tokens_data_builder);  // ref2
+            TvmCell tokens_data_cell = abi.encode(_tokenRoots());
+            builder.store(tokens_data_cell);  // ref2
 
             TvmCell other_data = abi.encode(
                 lp_root,
@@ -1413,9 +1412,9 @@ contract DexStablePool is
         (root, vault, old_version, current_version, send_gas_to) = s.decode(address, address, uint32, uint32, address);
 
         platform_code = s.loadRef(); // ref 1
-        TvmSlice tokens_data_slice = s.loadRefAsSlice(); // ref 2
+        TvmCell tokens_data_cell = s.loadRef(); // ref 2
 
-        address[] roots = tokens_data_slice.decode(address[]);
+        address[] roots = abi.decode(tokens_data_cell, address[]);
         N_COINS = uint8(roots.length);
 
         for (uint8 i = 0; i < N_COINS; i++) {
@@ -1424,7 +1423,7 @@ contract DexStablePool is
 
         if (old_version == 0) {
             fee = FeeParams(1000000, 3000, 0, address(0), emptyMap);
-            A = AmplificationCoefficient(100 * N_COINS**(N_COINS -  1), 1);
+            A = AmplificationCoefficient(100 * uint128(N_COINS) ** (N_COINS - 1), 1);
 
             tokenData = new PoolTokenData[](N_COINS);
             for (uint8 i = 0; i < N_COINS; i++) {
@@ -1479,7 +1478,7 @@ contract DexStablePool is
         }(vault);
 
         if (token_root != lp_root) {
-            ITokenRoot(msg.sender).decimals{
+            ITokenRoot(token_root).decimals{
                 value: DexGas.GET_TOKEN_DECIMALS_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexStablePool.onTokenDecimals
@@ -1492,15 +1491,18 @@ contract DexStablePool is
 
         if (msg.sender == lp_root && lp_wallet.value == 0) {
             lp_wallet = wallet;
-
-            bool tokenDataInit = true;
-            for (uint i = 0; i < N_COINS; i++) {
-                tokenDataInit = tokenDataInit && tokenData[i].initialized;
-            }
-            active = tokenDataInit;
         } else {
             tokenData[tokenIndex[msg.sender]].wallet = wallet;
         }
+
+        bool allTokensIsInit = true;
+        for (uint i = 0; i < N_COINS; i++) {
+            if (!tokenData[i].initialized) {
+                allTokensIsInit = false;
+                break;
+            }
+        }
+        active = allTokensIsInit;
     }
 
     function onTokenDecimals(uint8 _decimals) external {
