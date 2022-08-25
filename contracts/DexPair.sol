@@ -303,8 +303,15 @@ contract DexPair is DexPairBase {
         address _senderAddress,
         address _recipient
     ) private {
+        uint128[] oldReserves = _reserves();
+
         _typeToReserves[DexReserveType.LP][0] += _result.step_1_lp_reward + _result.step_3_lp_reward;
 
+        _write(
+            oldReserves[0],
+            oldReserves[1],
+            now
+        );
         _sync();
 
         if (_result.step_1_lp_reward > 0) {
@@ -523,8 +530,15 @@ contract DexPair is DexPairBase {
         bool _notifySuccess,
         TvmCell _successPayload
     ) private {
+        uint128[] oldReserves = _reserves();
+
         TokenOperation[] operations = _withdrawLiquidityBase(_lpAmount, _senderAddress);
 
+        _write(
+            oldReserves[0],
+            oldReserves[1],
+            now
+        );
         _sync();
 
         IWithdrawResult.WithdrawResult result = IWithdrawResult.WithdrawResult(
@@ -748,6 +762,8 @@ contract DexPair is DexPairBase {
         address _remainingGasTo,
         address _recipient
     ) private {
+        uint128[] oldReserves = _reserves();
+
         // Update reserves
         _typeToReserves[DexReserveType.POOL][spentTokenIndex] += _spentAmount - _beneficiaryFee;
         _typeToReserves[DexReserveType.POOL][receiveTokenIndex] -= _amount;
@@ -781,6 +797,11 @@ contract DexPair is DexPairBase {
             fees
         );
 
+        _write(
+            oldReserves[0],
+            oldReserves[1],
+            now
+        );
         _sync();
 
         IExchangeResult.ExchangeResult result =  IExchangeResult.ExchangeResult(

@@ -4,16 +4,26 @@ pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
+import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
+
 import "../libraries/DexErrors.sol";
 import "../libraries/DexGas.sol";
-import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
+import "../libraries/FixedPoint128.sol";
 
 import "../interfaces/IDexPair.sol";
 import "../structures/ITokenOperationStructure.sol";
 import "../structures/IDexPairBalances.sol";
+import "../structures/IPoint.sol";
+import "../structures/IOracleOptions.sol";
 
 // This is just for test purposes, this is not a real contract!
-contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IDexPairBalances {
+contract TestNewDexPair is
+    ITokenOperationStructure,
+    IFeeParams,
+    IDexPairBalances,
+    IPoint,
+    IOracleOptions
+{
     address root;
     address vault;
     uint32 current_version;
@@ -48,6 +58,11 @@ contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IDexPairBalance
     mapping(uint64 => address) _tmp_expected_callback_sender;
     mapping(uint64 => uint256) _tmp_sender_public_key;
     mapping(uint64 => address) _tmp_sender_address;
+
+    // Oracle
+    mapping(uint32 => Point) private _points;
+    OracleOptions private _options;
+    uint16 private _length;
 
     string newTestField;
 
@@ -93,6 +108,57 @@ contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IDexPairBalance
         );
     }
 
+    function getPoint(uint32 _timestamp) external view responsible returns (Point) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _points[_timestamp];
+    }
+
+    function getCardinality() external view responsible returns (uint16) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _options.cardinality;
+    }
+
+    function getLength() external view responsible returns (uint16) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _length;
+    }
+
+    function getMinInterval() external view responsible returns (uint8) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _options.minInterval;
+    }
+
+    function getMinRateDelta() external view responsible returns (uint) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } FixedPoint128.encodeFromNumeratorAndDenominator(
+            _options.minRateDeltaNumerator,
+            _options.minRateDeltaDenominator
+        );
+    }
+
+    function isInitialized() external view responsible returns (bool) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } !_points.empty();
+    }
+
     function onCodeUpgrade(TvmCell data) private {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 2);
         tvm.resetStorage();
@@ -108,40 +174,42 @@ contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IDexPairBalance
         platform_code = s.loadRef(); // ref 1
 
         TvmSlice tokens_data_slice =  s.loadRefAsSlice(); // ref 2
-        (left_root, right_root, lp_root) = tokens_data_slice.decode(address, address, address);
 
-        TvmSlice token_balances_data_slice = tokens_data_slice.loadRefAsSlice(); // ref 2_1
-        (lp_supply, left_balance, right_balance) =
-        token_balances_data_slice.decode(uint128, uint128, uint128);
+        (left_root, right_root) = tokens_data_slice.decode(address, address);
 
-        TvmSlice fee_data_slice = tokens_data_slice.loadRefAsSlice();
+        TvmCell otherDataCell = s.loadRef();    // ref 3
+
         (
-            uint64 denominator,
-            uint64 pool_numerator,
-            uint64 beneficiary_numerator,
-            address beneficiary,
-            uint128 threshold_left,
-            uint128 threshold_right
-        ) = fee_data_slice.decode(uint64, uint64, uint64, address, uint128, uint128);
+            lp_root,
+            lp_wallet,
+            lp_supply,
 
-        mapping(address => uint128) fee_threshold;
+            fee,
+            left_wallet,
+            vault_left_wallet,
+            left_balance,
 
-        fee_threshold[left_root] = threshold_left;
-        fee_threshold[right_root] = threshold_right;
+            right_wallet,
+            vault_right_wallet,
+            right_balance
+        ) = abi.decode(otherDataCell, (
+            address, address, uint128,
+            FeeParams,
+            address, address, uint128,
+            address, address, uint128
+        ));
 
-        fee = FeeParams(
-            denominator,
-            pool_numerator,
-            beneficiary_numerator,
-            beneficiary,
-            fee_threshold
+        TvmSlice oracleDataSlice = s.loadRefAsSlice();  // ref 4
+
+        (
+            _points,
+            _options,
+            _length
+        ) = oracleDataSlice.decode(
+            mapping(uint32 => Point),
+            OracleOptions,
+            uint16
         );
-
-        TvmSlice pair_wallets_data_slice = s.loadRefAsSlice(); // ref 3
-        (lp_wallet, left_wallet, right_wallet) = pair_wallets_data_slice.decode(address, address, address);
-
-        TvmSlice vault_wallets_data = s.loadRefAsSlice(); // ref 4
-        (vault_left_wallet, vault_right_wallet) = vault_wallets_data.decode(address, address);
 
         newTestField = "New Pair";
 

@@ -3,12 +3,17 @@ pragma ton-solidity >= 0.57.0;
 import "../structures/IDepositLiquidityResult.sol";
 
 import "./IDexPair.sol";
+import "./ITWAPOracle.sol";
 
 /**
  * @title DEX Pair Interface
  * @notice Interface for pair with constant product formula logic aka k = y * x
  */
-interface IDexConstantProductPair is IDexPair, IDepositLiquidityResult {
+interface IDexConstantProductPair is
+    IDexPair,
+    IDepositLiquidityResult,
+    ITWAPOracle
+{
     /**
      * @notice Calculate expected result of liquidity deposit for given amounts
      * @param left_amount Amount of the left token for deposit

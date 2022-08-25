@@ -358,32 +358,28 @@ contract DexRoot is
     function onCodeUpgrade(TvmCell _data) private {
         tvm.resetStorage();
 
-        TvmSlice slice = _data.toSlice();
-
-        uint32 _pair_version;
-
         (
+            platform_code,
+            _accountCode,
             _accountVersion,
-            _pair_version,
+            _pairCodes,
+            _pairVersions,
             _owner,
             _vault,
             _pendingOwner
-        ) = slice.decode(
+        ) = abi.decode(_data, (
+            TvmCell,
+            TvmCell,
             uint32,
-            uint32,
+            mapping(uint8 => TvmCell),
+            mapping(uint8 => uint32),
             address,
             address,
             address
-        );
-
-        platform_code = slice.loadRef();
-        _accountCode = slice.loadRef();
-        TvmCell _pair_code = slice.loadRef();
-
-        _pairVersions[DexPoolTypes.CONSTANT_PRODUCT] = _pair_version;
-        _pairCodes[DexPoolTypes.CONSTANT_PRODUCT] = _pair_code;
+        ));
 
         _manager = address(0);
+
         _active = true;
     }
 
@@ -620,5 +616,31 @@ contract DexRoot is
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
         });
+    }
+
+    function setOracleOptions(
+        address _leftRoot,
+        address _rightRoot,
+        OracleOptions _options,
+        address _remainingGasTo
+    ) override external view onlyManagerOrOwner {
+        tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
+
+        IDexConstantProductPair(_expectedPairAddress([_leftRoot, _rightRoot]))
+            .setOracleOptions{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            (_options, _remainingGasTo);
+    }
+
+    function removeLastNPoints(
+        address _leftRoot,
+        address _rightRoot,
+        uint16 _count,
+        address _remainingGasTo
+    ) override external view onlyManagerOrOwner {
+        tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
+
+        IDexConstantProductPair(_expectedPairAddress([_leftRoot, _rightRoot]))
+            .removeLastNPoints{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            (_count, _remainingGasTo);
     }
 }
