@@ -7,11 +7,13 @@ pragma AbiHeader pubkey;
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
+import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensMintCallback.sol";
 
 import "./abstract/DexContractBase.sol";
 
+import "./DexVaultLpTokenPendingV2.sol";
 import "./interfaces/IDexVault.sol";
-import "./interfaces/IDexPair.sol";
+import "./interfaces/IDexBasePool.sol";
 import "./interfaces/IDexAccount.sol";
 import "./interfaces/IUpgradable.sol";
 import "./interfaces/IResetGas.sol";
@@ -19,13 +21,12 @@ import "./interfaces/IResetGas.sol";
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
 
-import "./DexVaultLpTokenPending.sol";
-
 contract DexVault is
     DexContractBase,
     IDexVault,
     IResetGas,
-    IUpgradable
+    IUpgradable,
+    IAcceptTokensMintCallback
 {
     uint32 private static _nonce;
 
@@ -44,17 +45,15 @@ contract DexVault is
 
     modifier onlyLpTokenPending(
         uint32 nonce,
-        address pair,
-        address left_root,
-        address right_root
+        address pool,
+        address[] roots
     ) {
         address expected = address(
             tvm.hash(
                 _buildLpTokenPendingInitData(
                     nonce,
-                    pair,
-                    left_root,
-                    right_root
+                    pool,
+                    roots
                 )
             )
         );
@@ -190,13 +189,32 @@ contract DexVault is
             ),
             2
         );
-
-        new DexVaultLpTokenPending{
+        new DexVaultLpTokenPendingV2{
             stateInit: _buildLpTokenPendingInitData(
                 now,
                 pair,
-                left_root,
-                right_root
+                [left_root, right_root]
+            ),
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED
+        }(
+            _tokenFactory,
+            msg.value,
+            send_gas_to
+        );
+    }
+
+    function addLiquidityTokenV2(
+        address pool,
+        address[] roots,
+        address send_gas_to
+    ) public override onlyPair(roots) {
+        tvm.rawReserve(math.max(DexGas.VAULT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
+        new DexVaultLpTokenPendingV2{
+            stateInit: _buildLpTokenPendingInitData(
+                now,
+                pool,
+                roots
             ),
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED
@@ -209,16 +227,14 @@ contract DexVault is
 
     function onLiquidityTokenDeployed(
         uint32 nonce,
-        address pair,
-        address left_root,
-        address right_root,
+        address pool,
+        address[] roots,
         address lp_root,
         address send_gas_to
     ) public override onlyLpTokenPending(
         nonce,
-        pair,
-        left_root,
-        right_root
+        pool,
+        roots
     ) {
         tvm.rawReserve(
             math.max(
@@ -228,23 +244,21 @@ contract DexVault is
             2
         );
 
-        IDexPair(pair)
+        IDexBasePool(pool)
             .liquidityTokenRootDeployed{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (lp_root, send_gas_to);
     }
 
     function onLiquidityTokenNotDeployed(
         uint32 nonce,
-        address pair,
-        address left_root,
-        address right_root,
+        address pool,
+        address[] roots,
         address lp_root,
         address send_gas_to
     ) public override onlyLpTokenPending(
         nonce,
-        pair,
-        left_root,
-        right_root
+        pool,
+        roots
     ) {
         tvm.rawReserve(
             math.max(
@@ -254,7 +268,7 @@ contract DexVault is
             2
         );
 
-        IDexPair(pair)
+        IDexBasePool(pool)
             .liquidityTokenRootNotDeployed{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (lp_root, send_gas_to);
     }
@@ -387,18 +401,16 @@ contract DexVault is
 
     function _buildLpTokenPendingInitData(
         uint32 nonce,
-        address pair,
-        address left_root,
-        address right_root
+        address pool,
+        address[] roots
     ) private view returns (TvmCell) {
         return tvm.buildStateInit({
-            contr: DexVaultLpTokenPending,
+            contr: DexVaultLpTokenPendingV2,
             varInit: {
                 _nonce: nonce,
                 vault: address(this),
-                pair: pair,
-                left_root: left_root,
-                right_root: right_root
+                pool: pool,
+                roots: roots
             },
             pubkey: 0,
             code: _lpTokenPendingCode
@@ -475,5 +487,94 @@ contract DexVault is
         IResetGas(target)
             .resetGas{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (receiver);
+    }
+
+    function onAcceptTokensMint(
+        address tokenRoot,
+        uint128 amount,
+        address remainingGasTo,
+        TvmCell payload
+    ) override external {
+        TvmSlice payloadSlice = payload.toSlice();
+
+        address lp_vault_wallet = payloadSlice.decode(address);
+        require(msg.sender.value != 0 && msg.sender == lp_vault_wallet, DexErrors.NOT_LP_VAULT_WALLET);
+
+        (uint64 id,
+        uint32 current_version,
+        uint8 current_type,
+        address[] roots,
+        address sender_address,
+        uint128 deploy_wallet_grams,
+        address next_pool) = payloadSlice.decode(uint64, uint32, uint8, address[], address, uint128, address);
+
+        TvmCell next_payload;
+        TvmCell success_payload;
+        TvmCell cancel_payload;
+
+        bool has_next_payload = payloadSlice.refs() >= 1;
+        bool notify_success = payloadSlice.refs() >= 2;
+        bool notify_cancel = payloadSlice.refs() >= 3;
+
+        if (has_next_payload) {
+            next_payload = payloadSlice.loadRef();
+        }
+        if (notify_success) {
+            success_payload = payloadSlice.loadRef();
+        }
+        if (notify_cancel) {
+            cancel_payload = payloadSlice.loadRef();
+        }
+
+        if (next_pool.value != 0 && next_pool != _expectedPairAddress(roots) &&
+            has_next_payload && next_payload.toSlice().bits() >= 395) {
+
+            tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
+
+            IDexBasePool(next_pool).crossPoolExchange{
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED
+            }(
+                id,
+
+                current_version,
+                current_type,
+
+                roots,
+
+                tokenRoot,
+                amount,
+
+                sender_address,
+                sender_address,
+
+                remainingGasTo,
+                deploy_wallet_grams,
+
+                next_payload,
+                notify_success,
+                success_payload,
+                notify_cancel,
+                cancel_payload
+            );
+        } else {
+            emit PairTransferTokensV2(
+                lp_vault_wallet,
+                amount,
+                roots,
+                sender_address
+            );
+
+            ITokenWallet(lp_vault_wallet)
+                .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+                (
+                    amount,
+                    sender_address,
+                    deploy_wallet_grams,
+                    remainingGasTo,
+                    true,
+                    success_payload
+                );
+        }
     }
 }

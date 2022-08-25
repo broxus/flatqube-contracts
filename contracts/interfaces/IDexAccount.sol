@@ -167,6 +167,14 @@ interface IDexAccount is
         address _remainingGasTo
     ) external;
 
+    function withdrawLiquidityOneCoin(
+        uint64 _callId,
+        address[] _roots,
+        TokenOperation _operation,
+        TokenOperation _expected,
+        address _remainingGasTo
+    ) external;
+
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // DEPOSIT LIQUIDITY
 

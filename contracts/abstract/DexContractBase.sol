@@ -86,7 +86,11 @@ abstract contract DexContractBase  {
 
             return builder.toCell();
         } else {
-            return abi.encode(sorted);
+            address[] r = new address[](0);
+            for ((address key,) : sorted) {
+                r.push(key);
+            }
+            return abi.encode(r);
         }
     }
 

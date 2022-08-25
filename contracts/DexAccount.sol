@@ -13,7 +13,7 @@ import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransfe
 import "./interfaces/IUpgradableByRequest.sol";
 import "./interfaces/IDexRoot.sol";
 import "./interfaces/IDexAccount.sol";
-import "./interfaces/IDexPair.sol";
+import "./interfaces/IDexBasePool.sol";
 import "./interfaces/IDexVault.sol";
 import "./interfaces/IResetGas.sol";
 import "./interfaces/IDexAccountOwner.sol";
@@ -589,7 +589,7 @@ contract DexAccount is
             pair
         );
 
-        IDexPair(pair)
+        IDexBasePool(pair)
             .exchange{ value: 0, bounce: true, flag: MsgFlag.ALL_NOT_RESERVED }
             (
                 _callId,
@@ -679,7 +679,7 @@ contract DexAccount is
             pair
         );
 
-        IDexPair(pair)
+        IDexBasePool(pair)
             .depositLiquidity{ value: 0, bounce: true, flag: MsgFlag.ALL_NOT_RESERVED }
             (
                 _callId,
@@ -705,6 +705,7 @@ contract DexAccount is
     ) override external onlyOwner {
         _withdrawLiquidityInternal(
             call_id,
+            [left_root, right_root],
             TokenOperation(lp_amount, lp_root),
             [TokenOperation(0, left_root), TokenOperation(0, right_root)],
             send_gas_to
@@ -717,16 +718,39 @@ contract DexAccount is
         TokenOperation[] _expected,
         address _remainingGasTo
     ) override external onlyOwner {
+        address[] roots;
+        for (TokenOperation operation : _expected) {
+            roots.push(operation.root);
+        }
+
         _withdrawLiquidityInternal(
             _callId,
+            roots,
             _operation,
             _expected,
             _remainingGasTo
         );
     }
 
+    function withdrawLiquidityOneCoin(
+        uint64 _callId,
+        address[] _roots,
+        TokenOperation _operation,
+        TokenOperation _expected,
+        address _remainingGasTo
+    ) override external onlyOwner {
+        _withdrawLiquidityInternal(
+            _callId,
+            _roots,
+            _operation,
+            [_expected],
+            _remainingGasTo
+        );
+    }
+
     function _withdrawLiquidityInternal(
         uint64 _callId,
+        address[] _roots,
         TokenOperation _operation,
         TokenOperation[] _expected,
         address _remainingGasTo
@@ -735,22 +759,16 @@ contract DexAccount is
         require(_operation.amount > 0, DexErrors.AMOUNT_TOO_LOW);
         require(msg.value >= DexGas.WITHDRAW_LIQUIDITY_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(_wallets.exists(_operation.root) && _balances.exists(_operation.root), DexErrors.UNKNOWN_TOKEN_ROOT);
-        require(_expected.length > 1, DexErrors.UNKNOWN_TOKEN_ROOT);
+        require(_roots.length > 1, DexErrors.UNKNOWN_TOKEN_ROOT);
         require(_balances[_operation.root] >= _operation.amount, DexErrors.NOT_ENOUGH_FUNDS);
 
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
-
-        address[] roots;
-
-        for (TokenOperation operation : _expected) {
-            roots.push(operation.root);
-        }
 
         address pair = address(
             tvm.hash(
                 _buildInitData(
                     DexPlatformTypes.Pool,
-                    _buildPairParams(roots)
+                    _buildPairParams(_roots)
                 )
             )
         );
@@ -761,7 +779,7 @@ contract DexAccount is
             _operation.amount,
             _balances[_operation.root],
             _operation.root,
-            roots
+            _roots
         );
 
         address remainingGasTo = _remainingGasTo.value == 0 ? _owner : _remainingGasTo;
@@ -772,7 +790,7 @@ contract DexAccount is
             pair
         );
 
-        IDexPair(pair)
+        IDexBasePool(pair)
             .withdrawLiquidity{ value: 0, bounce: true, flag: MsgFlag.ALL_NOT_RESERVED }
             (
                 _callId,
@@ -815,7 +833,7 @@ contract DexAccount is
 
         emit AddPool(_roots, pair);
 
-        IDexPair(pair)
+        IDexBasePool(pair)
             .checkPair{ value: 0, bounce: true, flag: MsgFlag.ALL_NOT_RESERVED }
             (_owner, _currentVersion);
     }
@@ -958,8 +976,8 @@ contract DexAccount is
         uint32 functionId = _body.decode(uint32);
 
         if (
-            functionId == tvm.functionId(IDexPair.exchange) ||
-            functionId == tvm.functionId(IDexPair.depositLiquidity) ||
+            functionId == tvm.functionId(IDexBasePool.exchange) ||
+            functionId == tvm.functionId(IDexBasePool.depositLiquidity) ||
             functionId == tvm.functionId(IDexAccount.internalAccountTransfer) ||
             functionId == tvm.functionId(IDexVault.withdraw)
         ) {
@@ -1003,7 +1021,7 @@ contract DexAccount is
                     });
                 }
             }
-        } else if (functionId == tvm.functionId(IDexPair.checkPair)) {
+        } else if (functionId == tvm.functionId(IDexBasePool.checkPair)) {
             emit ExpectedPairNotExist(msg.sender);
 
             IDexAccountOwner(_owner)

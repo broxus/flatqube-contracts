@@ -41,7 +41,27 @@
 			]
 		},
 		{
+			"name": "getPoolVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"pool_type","type":"uint8"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
 			"name": "getPairCode",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"pool_type","type":"uint8"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "getPoolCode",
 			"inputs": [
 				{"name":"answerId","type":"uint32"},
 				{"name":"pool_type","type":"uint8"}
@@ -198,6 +218,15 @@
 			]
 		},
 		{
+			"name": "installOrUpdatePoolCode",
+			"inputs": [
+				{"name":"code","type":"cell"},
+				{"name":"pool_type","type":"uint8"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "upgrade",
 			"inputs": [
 				{"name":"code","type":"cell"}
@@ -253,10 +282,29 @@
 			]
 		},
 		{
+			"name": "upgradePool",
+			"inputs": [
+				{"name":"roots","type":"address[]"},
+				{"name":"pool_type","type":"uint8"},
+				{"name":"send_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "deployPair",
 			"inputs": [
 				{"name":"left_root","type":"address"},
 				{"name":"right_root","type":"address"},
+				{"name":"send_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "deployStablePool",
+			"inputs": [
+				{"name":"roots","type":"address[]"},
 				{"name":"send_gas_to","type":"address"}
 			],
 			"outputs": [
@@ -353,6 +401,15 @@
 			]
 		},
 		{
+			"name": "PoolCodeUpgraded",
+			"inputs": [
+				{"name":"version","type":"uint32"},
+				{"name":"poolType","type":"uint8"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "RootCodeUpgraded",
 			"inputs": [
 			],
@@ -420,6 +477,8 @@
 		{"name":"_accountVersion","type":"uint32"},
 		{"name":"_pairCodes","type":"map(uint8,cell)"},
 		{"name":"_pairVersions","type":"map(uint8,uint32)"},
+		{"name":"_poolCodes","type":"map(uint8,cell)"},
+		{"name":"_poolVersions","type":"map(uint8,uint32)"},
 		{"name":"_active","type":"bool"},
 		{"name":"_owner","type":"address"},
 		{"name":"_vault","type":"address"},

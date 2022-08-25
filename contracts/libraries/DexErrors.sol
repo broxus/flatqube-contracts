@@ -66,4 +66,7 @@ library DexErrors {
 
     /// @dev Impossible to calculate TWAP for given timestamps
     uint16 constant CAN_NOT_CALCULATE_TWAP           = 144;
+
+    uint16 constant NOT_LP_VAULT_WALLET              = 145;
+    uint16 constant NEITHER_PAIR_NOR_VAULT           = 146;
 }

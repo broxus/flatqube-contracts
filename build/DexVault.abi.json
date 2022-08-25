@@ -109,12 +109,21 @@
 			]
 		},
 		{
+			"name": "addLiquidityTokenV2",
+			"inputs": [
+				{"name":"pool","type":"address"},
+				{"name":"roots","type":"address[]"},
+				{"name":"send_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "onLiquidityTokenDeployed",
 			"inputs": [
 				{"name":"nonce","type":"uint32"},
-				{"name":"pair","type":"address"},
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"},
+				{"name":"pool","type":"address"},
+				{"name":"roots","type":"address[]"},
 				{"name":"lp_root","type":"address"},
 				{"name":"send_gas_to","type":"address"}
 			],
@@ -125,9 +134,8 @@
 			"name": "onLiquidityTokenNotDeployed",
 			"inputs": [
 				{"name":"nonce","type":"uint32"},
-				{"name":"pair","type":"address"},
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"},
+				{"name":"pool","type":"address"},
+				{"name":"roots","type":"address[]"},
 				{"name":"lp_root","type":"address"},
 				{"name":"send_gas_to","type":"address"}
 			],
@@ -206,6 +214,17 @@
 			"inputs": [
 				{"name":"target","type":"address"},
 				{"name":"receiver","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onAcceptTokensMint",
+			"inputs": [
+				{"name":"tokenRoot","type":"address"},
+				{"name":"amount","type":"uint128"},
+				{"name":"remainingGasTo","type":"address"},
+				{"name":"payload","type":"cell"}
 			],
 			"outputs": [
 			]

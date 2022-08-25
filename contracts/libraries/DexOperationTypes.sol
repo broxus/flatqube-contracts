@@ -5,4 +5,5 @@ library DexOperationTypes {
     uint8 constant DEPOSIT_LIQUIDITY = 2;
     uint8 constant WITHDRAW_LIQUIDITY = 3;
     uint8 constant CROSS_PAIR_EXCHANGE = 4;
+    uint8 constant WITHDRAW_LIQUIDITY_ONE_COIN = 5;
 }
