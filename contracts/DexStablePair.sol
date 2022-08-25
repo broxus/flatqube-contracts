@@ -490,6 +490,7 @@ contract DexStablePair is
                             dy_result.amount,
 
                             sender_address,
+                            sender_address,
 
                             original_gas_to,
                             deploy_wallet_grams,
@@ -870,6 +871,7 @@ contract DexStablePair is
         uint128 spent_amount,
 
         address sender_address,
+        address,
 
         address original_gas_to,
         uint128 deploy_wallet_grams,
@@ -965,6 +967,7 @@ contract DexStablePair is
                         tokenData[j].root,
                         dy_result.amount,
 
+                        sender_address,
                         sender_address,
 
                         original_gas_to,

@@ -168,22 +168,23 @@ interface IDexPair is
         address _sendGasTo
     ) external;
 
-    /// @notice Perform cross pool swap from another pair
-    /// @dev Only the DEX pair can perform
-    /// @param _id Id of the call
+    /// @notice Continue cross-pool exchange chain from the previous pair
+    /// @dev Only other DEX pair can call
+    /// @param _id ID of the call
     /// @param _prevPoolVersion Version of the previous pair
     /// @param _prevPoolType Type of the previous pair
-    /// @param _prevPoolTokenRoots TokenRoots of the previous pair
-    /// @param _spentTokenRoot Input TokenRoot address
-    /// @param _spentAmount Input amount
-    /// @param _senderAddress Address of the sender
-    /// @param _originalGasTo Receiver of the remaining gas
-    /// @param _deployWalletGrams Amount to spent for new wallet deploy
+    /// @param _prevPoolTokenRoots TIP-3 TokenRoots addresses of the previous pair
+    /// @param _spentTokenRoot TokenRoot address of the incoming token
+    /// @param _spentAmount Amount of the incoming token
+    /// @param _senderAddress Address of the user who sent a cross-pool request
+    /// @param _recipient Recipient of the final outcoming token
+    /// @param _remainingGasTo Recipient of the remaining gas
+    /// @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
     /// @param _nextPayload Payload for the next pair
-    /// @param _notifySuccess Whether or not notify if swap was executed
-    /// @param _successPayload Payload for callback about successful swap
-    /// @param _notifyCancel Whether or not notify if swap was failed
-    /// @param _cancelPayload Payload for callback about failed swap
+    /// @param _notifySuccess Whether or not notify after success exchange
+    /// @param _successPayload Payload for success callback
+    /// @param _notifyCancel Whether or not notify after failed exchange
+    /// @param _cancelPayload Payload for cancel callback
     function crossPoolExchange(
         uint64 _id,
 
@@ -196,8 +197,8 @@ interface IDexPair is
         uint128 _spentAmount,
 
         address _senderAddress,
-
-        address _originalGasTo,
+        address _recipient,
+        address _remainingGasTo,
         uint128 _deployWalletGrams,
 
         TvmCell _nextPayload,
