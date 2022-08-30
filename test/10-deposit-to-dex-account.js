@@ -147,7 +147,7 @@ describe('Check Deposit to Dex Account', async function () {
           value: locklift.utils.convertCrystal('0.5', 'nano'),
           keyPair: keyPairs[options.owner_n - 1]
         });
-        logger.log('Foo balance changes:')
+        logger.log(tokenData.symbol + ' balance changes:');
         await displayBalancesChanges(deposit);
         await logGas();
       });

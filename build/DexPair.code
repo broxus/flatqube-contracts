@@ -10917,103 +10917,6 @@ PUSHCONT {
 IF
 THROW 0
 
-.globl	Math_with_obj_calculateExpectedSpendAmount
-.type	Math_with_obj_calculateExpectedSpendAmount, @function
-CALL $Math_with_obj_calculateExpectedSpendAmount_macro$
-
-.macro Math_with_obj_calculateExpectedSpendAmount_macro
-.loc ../contracts/libraries/Math.sol, 101
-DUP
-FIRST
-OVER
-SECOND
-SUB
-UFITS 128
-OVER
-THIRD
-SUB
-UFITS 128
-.loc ../contracts/libraries/Math.sol, 103
-PUSH2 S2, S4
-SUB
-UFITS 128
-.loc ../contracts/libraries/Math.sol, 104
-PUSH S4
-ROLL 4
-ROT
-MULDIVC
-UFITS 128
-.loc ../contracts/libraries/Math.sol, 106
-ROLL 3
-SUB
-UFITS 128
-PUSH S2
-FIRST
-ROT
-MULDIVC
-UFITS 128
-.loc ../contracts/libraries/Math.sol, 112
-PUSH2 S0, S1
-SECOND
-PUSH S3
-THIRD
-ADD
-UFITS 128
-ROLL 3
-FIRST
-MULDIVC
-UFITS 128
-.loc ../contracts/libraries/Math.sol, 0
-
-.globl	Math_no_obj_calculateExpectedSpendAmount
-.type	Math_no_obj_calculateExpectedSpendAmount, @function
-CALL $Math_no_obj_calculateExpectedSpendAmount_macro$
-
-.macro Math_no_obj_calculateExpectedSpendAmount_macro
-.loc ../contracts/libraries/Math.sol, 101
-DUP
-FIRST
-OVER
-SECOND
-SUB
-UFITS 128
-OVER
-THIRD
-SUB
-UFITS 128
-.loc ../contracts/libraries/Math.sol, 103
-PUSH S2
-ROLL 5
-SUB
-UFITS 128
-.loc ../contracts/libraries/Math.sol, 104
-PUSH S4
-ROLL 4
-ROT
-MULDIVC
-UFITS 128
-.loc ../contracts/libraries/Math.sol, 106
-ROLL 3
-SUB
-UFITS 128
-PUSH S2
-FIRST
-ROT
-MULDIVC
-UFITS 128
-.loc ../contracts/libraries/Math.sol, 112
-PUSH2 S0, S1
-SECOND
-PUSH S3
-THIRD
-ADD
-UFITS 128
-ROLL 3
-FIRST
-MULDIVC
-UFITS 128
-.loc ../contracts/libraries/Math.sol, 0
-
 .globl	Math_with_obj_calculateExpectedDepositLiquidity
 .type	Math_with_obj_calculateExpectedDepositLiquidity, @function
 CALL $Math_with_obj_calculateExpectedDepositLiquidity_macro$
@@ -11583,413 +11486,6 @@ BLKSWAP 4, 7
 TUPLE 11
 ROTREV
 BLKDROP2 9, 3
-.loc ../contracts/libraries/Math.sol, 0
-
-.globl	Math_with_obj_solveQuadraticEquationPQ
-.type	Math_with_obj_solveQuadraticEquationPQ, @function
-CALL $Math_with_obj_solveQuadraticEquationPQ_macro$
-
-.macro Math_with_obj_solveQuadraticEquationPQ_macro
-.loc ../contracts/libraries/Math.sol, 17
-PUSH2 S1, S1
-PUSHINT 4
-MULDIV
-UFITS 256
-ADD
-.loc ../contracts/libraries/Math.sol, 20
-CALLREF {
-	CALL $Math_no_obj_sqrt_macro$
-}
-.loc ../contracts/libraries/Math.sol, 23
-PUSH2 S0, S1
-RSHIFT 1
-GREATER
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 24
-	OVER
-	RSHIFT 1
-	SUB
-	UFITS 128
-	.loc ../contracts/libraries/Math.sol, 0
-}
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 26
-	OVER
-	RSHIFT 1
-	SUBR
-	UFITS 128
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IFELSE
-.loc ../contracts/libraries/Math.sol, 0
-
-.globl	Math_no_obj_solveQuadraticEquationPQ
-.type	Math_no_obj_solveQuadraticEquationPQ, @function
-CALL $Math_no_obj_solveQuadraticEquationPQ_macro$
-
-.macro Math_no_obj_solveQuadraticEquationPQ_macro
-.loc ../contracts/libraries/Math.sol, 17
-PUSH2 S1, S1
-PUSHINT 4
-MULDIV
-UFITS 256
-ADD
-.loc ../contracts/libraries/Math.sol, 20
-CALLREF {
-	CALL $Math_no_obj_sqrt_macro$
-}
-.loc ../contracts/libraries/Math.sol, 23
-PUSH2 S0, S1
-RSHIFT 1
-GREATER
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 24
-	SWAP
-	RSHIFT 1
-	SUB
-	UFITS 128
-	.loc ../contracts/libraries/Math.sol, 0
-}
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 26
-	SWAP
-	RSHIFT 1
-	SUBR
-	UFITS 128
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IFELSE
-.loc ../contracts/libraries/Math.sol, 0
-
-.globl	Math_with_obj_sqrt
-.type	Math_with_obj_sqrt, @function
-CALL $Math_with_obj_sqrt_macro$
-
-.macro Math_with_obj_sqrt_macro
-.loc ../contracts/libraries/Math.sol, 34
-DUP
-PUSHCONT {
-	PUSHINT 0
-}
-IFNOTJMP
-.loc ../contracts/libraries/Math.sol, 36
-DUP
-.loc ../contracts/libraries/Math.sol, 37
-PUSHINT 1
-.loc ../contracts/libraries/Math.sol, 39
-OVER
-PUSHINT 340282366920938463463374607431768211456
-GEQ
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 40
-	OVER
-	RSHIFT 128
-	POP S2
-	.loc ../contracts/libraries/Math.sol, 41
-	LSHIFT 64
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 44
-OVER
-PUSHINT 18446744073709551616
-GEQ
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 45
-	OVER
-	RSHIFT 64
-	POP S2
-	.loc ../contracts/libraries/Math.sol, 46
-	LSHIFT 32
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 49
-OVER
-PUSHINT 4294967296
-GEQ
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 50
-	OVER
-	RSHIFT 32
-	POP S2
-	.loc ../contracts/libraries/Math.sol, 51
-	LSHIFT 16
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 54
-OVER
-PUSHINT 65536
-GEQ
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 55
-	OVER
-	RSHIFT 16
-	POP S2
-	.loc ../contracts/libraries/Math.sol, 56
-	LSHIFT 8
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 59
-OVER
-PUSHINT 256
-GEQ
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 60
-	OVER
-	RSHIFT 8
-	POP S2
-	.loc ../contracts/libraries/Math.sol, 61
-	LSHIFT 4
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 64
-OVER
-GTINT 15
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 65
-	OVER
-	RSHIFT 4
-	POP S2
-	.loc ../contracts/libraries/Math.sol, 66
-	LSHIFT 2
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 69
-SWAP
-GTINT 7
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 70
-	LSHIFT 1
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 73
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 74
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 75
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 76
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 77
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 78
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 79
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 81
-DUP2
-DIV
-.loc ../contracts/libraries/Math.sol, 83
-DUP2
-LESS
-PUSHCONT {
-	OVER
-}
-PUSHCONT {
-	DUP
-}
-IFELSE
-BLKDROP2 2, 1
-.loc ../contracts/libraries/Math.sol, 0
-
-.globl	Math_no_obj_sqrt
-.type	Math_no_obj_sqrt, @function
-CALL $Math_no_obj_sqrt_macro$
-
-.macro Math_no_obj_sqrt_macro
-.loc ../contracts/libraries/Math.sol, 34
-DUP
-PUSHCONT {
-	DROP
-	PUSHINT 0
-}
-IFNOTJMP
-.loc ../contracts/libraries/Math.sol, 36
-DUP
-.loc ../contracts/libraries/Math.sol, 37
-PUSHINT 1
-.loc ../contracts/libraries/Math.sol, 39
-OVER
-PUSHINT 340282366920938463463374607431768211456
-GEQ
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 40
-	OVER
-	RSHIFT 128
-	POP S2
-	.loc ../contracts/libraries/Math.sol, 41
-	LSHIFT 64
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 44
-OVER
-PUSHINT 18446744073709551616
-GEQ
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 45
-	OVER
-	RSHIFT 64
-	POP S2
-	.loc ../contracts/libraries/Math.sol, 46
-	LSHIFT 32
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 49
-OVER
-PUSHINT 4294967296
-GEQ
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 50
-	OVER
-	RSHIFT 32
-	POP S2
-	.loc ../contracts/libraries/Math.sol, 51
-	LSHIFT 16
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 54
-OVER
-PUSHINT 65536
-GEQ
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 55
-	OVER
-	RSHIFT 16
-	POP S2
-	.loc ../contracts/libraries/Math.sol, 56
-	LSHIFT 8
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 59
-OVER
-PUSHINT 256
-GEQ
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 60
-	OVER
-	RSHIFT 8
-	POP S2
-	.loc ../contracts/libraries/Math.sol, 61
-	LSHIFT 4
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 64
-OVER
-GTINT 15
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 65
-	OVER
-	RSHIFT 4
-	POP S2
-	.loc ../contracts/libraries/Math.sol, 66
-	LSHIFT 2
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 69
-SWAP
-GTINT 7
-PUSHCONT {
-	.loc ../contracts/libraries/Math.sol, 70
-	LSHIFT 1
-	.loc ../contracts/libraries/Math.sol, 0
-}
-IF
-.loc ../contracts/libraries/Math.sol, 73
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 74
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 75
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 76
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 77
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 78
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 79
-PUSH2 S0, S1
-ROT
-DIV
-ADD
-RSHIFT 1
-.loc ../contracts/libraries/Math.sol, 81
-TUCK
-DIV
-.loc ../contracts/libraries/Math.sol, 83
-DUP2
-LESS
-PUSHCONT {
-	OVER
-}
-PUSHCONT {
-	DUP
-}
-IFELSE
-BLKDROP2 2, 1
 .loc ../contracts/libraries/Math.sol, 0
 
 .globl	Math_with_obj_calculateExpectedExchange
@@ -13210,6 +12706,510 @@ IF
 .loc ../contracts/libraries/PairPayload.sol, 288
 BLKDROP2 1, 5
 .loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	Math_with_obj_solveQuadraticEquationPQ
+.type	Math_with_obj_solveQuadraticEquationPQ, @function
+CALL $Math_with_obj_solveQuadraticEquationPQ_macro$
+
+.macro Math_with_obj_solveQuadraticEquationPQ_macro
+.loc ../contracts/libraries/Math.sol, 17
+PUSH2 S1, S1
+PUSHINT 4
+MULDIV
+UFITS 256
+ADD
+.loc ../contracts/libraries/Math.sol, 20
+CALLREF {
+	CALL $Math_no_obj_sqrt_macro$
+}
+.loc ../contracts/libraries/Math.sol, 23
+PUSH2 S0, S1
+RSHIFT 1
+GREATER
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 24
+	OVER
+	RSHIFT 1
+	SUB
+	UFITS 128
+	.loc ../contracts/libraries/Math.sol, 0
+}
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 26
+	OVER
+	RSHIFT 1
+	SUBR
+	UFITS 128
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IFELSE
+.loc ../contracts/libraries/Math.sol, 0
+
+.globl	Math_no_obj_solveQuadraticEquationPQ
+.type	Math_no_obj_solveQuadraticEquationPQ, @function
+CALL $Math_no_obj_solveQuadraticEquationPQ_macro$
+
+.macro Math_no_obj_solveQuadraticEquationPQ_macro
+.loc ../contracts/libraries/Math.sol, 17
+PUSH2 S1, S1
+PUSHINT 4
+MULDIV
+UFITS 256
+ADD
+.loc ../contracts/libraries/Math.sol, 20
+CALLREF {
+	CALL $Math_no_obj_sqrt_macro$
+}
+.loc ../contracts/libraries/Math.sol, 23
+PUSH2 S0, S1
+RSHIFT 1
+GREATER
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 24
+	SWAP
+	RSHIFT 1
+	SUB
+	UFITS 128
+	.loc ../contracts/libraries/Math.sol, 0
+}
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 26
+	SWAP
+	RSHIFT 1
+	SUBR
+	UFITS 128
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IFELSE
+.loc ../contracts/libraries/Math.sol, 0
+
+.globl	Math_with_obj_sqrt
+.type	Math_with_obj_sqrt, @function
+CALL $Math_with_obj_sqrt_macro$
+
+.macro Math_with_obj_sqrt_macro
+.loc ../contracts/libraries/Math.sol, 34
+DUP
+PUSHCONT {
+	PUSHINT 0
+}
+IFNOTJMP
+.loc ../contracts/libraries/Math.sol, 36
+DUP
+.loc ../contracts/libraries/Math.sol, 37
+PUSHINT 1
+.loc ../contracts/libraries/Math.sol, 39
+OVER
+PUSHINT 340282366920938463463374607431768211456
+GEQ
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 40
+	OVER
+	RSHIFT 128
+	POP S2
+	.loc ../contracts/libraries/Math.sol, 41
+	LSHIFT 64
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 44
+OVER
+PUSHINT 18446744073709551616
+GEQ
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 45
+	OVER
+	RSHIFT 64
+	POP S2
+	.loc ../contracts/libraries/Math.sol, 46
+	LSHIFT 32
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 49
+OVER
+PUSHINT 4294967296
+GEQ
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 50
+	OVER
+	RSHIFT 32
+	POP S2
+	.loc ../contracts/libraries/Math.sol, 51
+	LSHIFT 16
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 54
+OVER
+PUSHINT 65536
+GEQ
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 55
+	OVER
+	RSHIFT 16
+	POP S2
+	.loc ../contracts/libraries/Math.sol, 56
+	LSHIFT 8
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 59
+OVER
+PUSHINT 256
+GEQ
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 60
+	OVER
+	RSHIFT 8
+	POP S2
+	.loc ../contracts/libraries/Math.sol, 61
+	LSHIFT 4
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 64
+OVER
+GTINT 15
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 65
+	OVER
+	RSHIFT 4
+	POP S2
+	.loc ../contracts/libraries/Math.sol, 66
+	LSHIFT 2
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 69
+SWAP
+GTINT 7
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 70
+	LSHIFT 1
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 73
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 74
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 75
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 76
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 77
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 78
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 79
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 81
+DUP2
+DIV
+.loc ../contracts/libraries/Math.sol, 83
+DUP2
+LESS
+PUSHCONT {
+	OVER
+}
+PUSHCONT {
+	DUP
+}
+IFELSE
+BLKDROP2 2, 1
+.loc ../contracts/libraries/Math.sol, 0
+
+.globl	Math_no_obj_sqrt
+.type	Math_no_obj_sqrt, @function
+CALL $Math_no_obj_sqrt_macro$
+
+.macro Math_no_obj_sqrt_macro
+.loc ../contracts/libraries/Math.sol, 34
+DUP
+PUSHCONT {
+	DROP
+	PUSHINT 0
+}
+IFNOTJMP
+.loc ../contracts/libraries/Math.sol, 36
+DUP
+.loc ../contracts/libraries/Math.sol, 37
+PUSHINT 1
+.loc ../contracts/libraries/Math.sol, 39
+OVER
+PUSHINT 340282366920938463463374607431768211456
+GEQ
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 40
+	OVER
+	RSHIFT 128
+	POP S2
+	.loc ../contracts/libraries/Math.sol, 41
+	LSHIFT 64
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 44
+OVER
+PUSHINT 18446744073709551616
+GEQ
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 45
+	OVER
+	RSHIFT 64
+	POP S2
+	.loc ../contracts/libraries/Math.sol, 46
+	LSHIFT 32
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 49
+OVER
+PUSHINT 4294967296
+GEQ
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 50
+	OVER
+	RSHIFT 32
+	POP S2
+	.loc ../contracts/libraries/Math.sol, 51
+	LSHIFT 16
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 54
+OVER
+PUSHINT 65536
+GEQ
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 55
+	OVER
+	RSHIFT 16
+	POP S2
+	.loc ../contracts/libraries/Math.sol, 56
+	LSHIFT 8
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 59
+OVER
+PUSHINT 256
+GEQ
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 60
+	OVER
+	RSHIFT 8
+	POP S2
+	.loc ../contracts/libraries/Math.sol, 61
+	LSHIFT 4
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 64
+OVER
+GTINT 15
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 65
+	OVER
+	RSHIFT 4
+	POP S2
+	.loc ../contracts/libraries/Math.sol, 66
+	LSHIFT 2
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 69
+SWAP
+GTINT 7
+PUSHCONT {
+	.loc ../contracts/libraries/Math.sol, 70
+	LSHIFT 1
+	.loc ../contracts/libraries/Math.sol, 0
+}
+IF
+.loc ../contracts/libraries/Math.sol, 73
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 74
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 75
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 76
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 77
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 78
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 79
+PUSH2 S0, S1
+ROT
+DIV
+ADD
+RSHIFT 1
+.loc ../contracts/libraries/Math.sol, 81
+TUCK
+DIV
+.loc ../contracts/libraries/Math.sol, 83
+DUP2
+LESS
+PUSHCONT {
+	OVER
+}
+PUSHCONT {
+	DUP
+}
+IFELSE
+BLKDROP2 2, 1
+.loc ../contracts/libraries/Math.sol, 0
+
+.globl	Math_with_obj_calculateExpectedSpendAmount
+.type	Math_with_obj_calculateExpectedSpendAmount, @function
+CALL $Math_with_obj_calculateExpectedSpendAmount_macro$
+
+.macro Math_with_obj_calculateExpectedSpendAmount_macro
+.loc ../contracts/libraries/Math.sol, 101
+DUP
+FIRST
+OVER
+SECOND
+SUB
+UFITS 128
+OVER
+THIRD
+SUB
+UFITS 128
+.loc ../contracts/libraries/Math.sol, 103
+PUSH2 S2, S4
+SUB
+UFITS 128
+.loc ../contracts/libraries/Math.sol, 104
+PUSH S4
+ROLL 4
+ROT
+MULDIVC
+UFITS 128
+.loc ../contracts/libraries/Math.sol, 106
+ROLL 3
+SUB
+UFITS 128
+PUSH S2
+FIRST
+ROT
+MULDIVC
+UFITS 128
+.loc ../contracts/libraries/Math.sol, 112
+PUSH2 S0, S1
+SECOND
+PUSH S3
+THIRD
+ADD
+UFITS 128
+ROLL 3
+FIRST
+MULDIVC
+UFITS 128
+.loc ../contracts/libraries/Math.sol, 0
+
+.globl	Math_no_obj_calculateExpectedSpendAmount
+.type	Math_no_obj_calculateExpectedSpendAmount, @function
+CALL $Math_no_obj_calculateExpectedSpendAmount_macro$
+
+.macro Math_no_obj_calculateExpectedSpendAmount_macro
+.loc ../contracts/libraries/Math.sol, 101
+DUP
+FIRST
+OVER
+SECOND
+SUB
+UFITS 128
+OVER
+THIRD
+SUB
+UFITS 128
+.loc ../contracts/libraries/Math.sol, 103
+PUSH S2
+ROLL 5
+SUB
+UFITS 128
+.loc ../contracts/libraries/Math.sol, 104
+PUSH S4
+ROLL 4
+ROT
+MULDIVC
+UFITS 128
+.loc ../contracts/libraries/Math.sol, 106
+ROLL 3
+SUB
+UFITS 128
+PUSH S2
+FIRST
+ROT
+MULDIVC
+UFITS 128
+.loc ../contracts/libraries/Math.sol, 112
+PUSH2 S0, S1
+SECOND
+PUSH S3
+THIRD
+ADD
+UFITS 128
+ROLL 3
+FIRST
+MULDIVC
+UFITS 128
+.loc ../contracts/libraries/Math.sol, 0
 
 .macro new_array_line_653_column_56_ast_id_4723
 PUSHREF

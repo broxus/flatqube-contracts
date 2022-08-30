@@ -161,6 +161,7 @@ class Migration {
 }
 
 function logExpectedDepositV2(expected, tokens) {
+  let N_COINS = tokens.length;
   logger.log(`Deposit: `);
   for (var i = 0; i < N_COINS; i++) {
     if (new BigNumber(expected.amounts[i]).gt(0)) {
@@ -251,7 +252,7 @@ async function expectedDepositLiquidity(pairAddress, contractName, tokens, amoun
 
   let LP_REWARD = "0";
 
-  if (contractName === "DexStablePair") {
+  if (contractName === "DexStablePair" || contractName === "DexStablePool") {
     const expected = await pair.call({
       method: 'expectedDepositLiquidityV2',
       params: {

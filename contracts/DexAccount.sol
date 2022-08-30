@@ -650,6 +650,10 @@ contract DexAccount is
         require(_operations.length > 1, DexErrors.WRONG_PAIR);
         require(msg.value >= DexGas.DEPOSIT_LIQUIDITY_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(_wallets.exists(_expected.root) && _balances.exists(_expected.root), DexErrors.UNKNOWN_TOKEN_ROOT);
+        for (TokenOperation operation : _operations) {
+            require(_wallets.exists(operation.root) && _balances.exists(operation.root), DexErrors.UNKNOWN_TOKEN_ROOT);
+            require(_balances[operation.root] >= operation.amount, DexErrors.NOT_ENOUGH_FUNDS);
+        }
 
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
 
@@ -718,6 +722,8 @@ contract DexAccount is
         TokenOperation[] _expected,
         address _remainingGasTo
     ) override external onlyOwner {
+        require(_expected.length > 1, DexErrors.WRONG_PAIR);
+
         address[] roots;
         for (TokenOperation operation : _expected) {
             roots.push(operation.root);
@@ -739,6 +745,8 @@ contract DexAccount is
         TokenOperation _expected,
         address _remainingGasTo
     ) override external onlyOwner {
+        require(_roots.length > 2, DexErrors.WRONG_PAIR);
+
         _withdrawLiquidityInternal(
             _callId,
             _roots,
@@ -759,7 +767,6 @@ contract DexAccount is
         require(_operation.amount > 0, DexErrors.AMOUNT_TOO_LOW);
         require(msg.value >= DexGas.WITHDRAW_LIQUIDITY_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(_wallets.exists(_operation.root) && _balances.exists(_operation.root), DexErrors.UNKNOWN_TOKEN_ROOT);
-        require(_roots.length > 1, DexErrors.UNKNOWN_TOKEN_ROOT);
         require(_balances[_operation.root] >= _operation.amount, DexErrors.NOT_ENOUGH_FUNDS);
 
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);

@@ -29,7 +29,8 @@ async function main() {
   const DexAccount = await locklift.factory.getContract(options.account_contract_name);
   const DexPair = await locklift.factory.getContract(options.pair_contract_name);
   const DexStablePair = await locklift.factory.getContract('DexStablePair');
-  const DexVaultLpTokenPending = await locklift.factory.getContract('DexVaultLpTokenPending');
+  const DexStablePool = await locklift.factory.getContract('DexStablePool');
+  const DexVaultLpTokenPending = await locklift.factory.getContract('DexVaultLpTokenPendingV2');
 
   const [keyPair] = await locklift.keys.getKeyPairs();
 
@@ -127,6 +128,17 @@ async function main() {
       keyPair
     });
     displayTx(tx);
+
+    if (options.pair_contract_name === 'DexStablePool' && options.root_contract_name === 'DexRoot') {
+      console.log(`DexRoot: installing DexStablePool code...`);
+      tx = await account.runTarget({
+        contract: dexRoot,
+        method: 'installOrUpdatePoolCode',
+        params: {code: DexStablePool.code, pool_type: 2},
+        keyPair
+      });
+      displayTx(tx);
+    }
     // console.log(`DexRoot: installing DexPair STABLESWAP code...`);
     // tx = await account.runTarget({
     //   contract: dexRoot,
