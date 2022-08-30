@@ -473,10 +473,22 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 const expectedAccountSpentAmount = new BigNumber(accountStart.token_balances[i])
                     .minus(new BigNumber(expected.expected_amount).shiftedBy(-tokens[i].decimals)).toString();
 
-                expect(expectedDexReceivedAmount).to.equal(dexEnd.token_balances[j].toString(), `Wrong DEX ${tokens[j].symbol} balance`);
-                expect(expectedDexSpentAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
-                expect(expectedAccountReceivedAmount).to.equal(accountEnd.token_balances[j].toString(), `Wrong Account#3 ${tokens[j].symbol} balance`);
-                expect(expectedAccountSpentAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
+                if (tokens[j].decimals <= tokens[i].decimals) {
+                    expect(expectedDexReceivedAmount).to.equal(dexEnd.token_balances[j].toString(), `Wrong DEX ${tokens[j].symbol} balance`);
+                    expect(expectedDexSpentAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
+                    expect(expectedAccountReceivedAmount).to.equal(accountEnd.token_balances[j].toString(), `Wrong Account#3 ${tokens[j].symbol} balance`);
+                    expect(expectedAccountSpentAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
+                } else {
+                    let diff = new BigNumber(1).shiftedBy(-tokens[i].decimals); // (j_decimals - i_decimals) + j_decimals
+
+                    expect(new BigNumber(expectedDexReceivedAmount).toNumber()).to.greaterThanOrEqual(new BigNumber(dexEnd.token_balances[j]).toNumber(), `Wrong DEX ${tokens[j].symbol} balance`);
+                    expect(new BigNumber(expectedDexReceivedAmount).minus(diff).toNumber()).to.lessThan(new BigNumber(dexEnd.token_balances[j]).toNumber(), `Wrong DEX ${tokens[j].symbol} balance`);
+                    expect(expectedDexSpentAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
+                    expect(new BigNumber(expectedAccountReceivedAmount).toNumber()).to.lessThanOrEqual(new BigNumber(accountEnd.token_balances[j]).toNumber(), `Wrong Account#3 ${tokens[j].symbol} balance`);
+                    expect(new BigNumber(expectedAccountReceivedAmount).plus(diff).toNumber()).to.greaterThan(new BigNumber(accountEnd.token_balances[j]).toNumber(), `Wrong Account#3 ${tokens[j].symbol} balance`);
+                    expect(expectedAccountSpentAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
+                }
+
             });
         }
 
@@ -542,7 +554,6 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
             const expectedAccountReceivedAmount = new BigNumber(accountStart.token_balances[j])
                 .plus(new BigNumber(expected.expected_amount).shiftedBy(-tokens[j].decimals)).toString();
             const expectedAccountSpentAmount = new BigNumber(accountStart.token_balances[i]).minus(new BigNumber(AMOUNT).shiftedBy(-tokens[i].decimals)).toString();
-
             expect(expectedDexSpentAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
             expect(expectedDexReceivedAmount).to.equal(dexEnd.token_balances[j].toString(), `Wrong DEX ${tokens[j].symbol} balance`);
             expect(expectedAccountSpentAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
@@ -551,7 +562,6 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
     });
 
     describe('Direct deposit liquidity (positive)', async function () {
-
         it('0050 # Account#3 deposit single coin liquidity (small amount)', async function () {
             let i = 0;
 
