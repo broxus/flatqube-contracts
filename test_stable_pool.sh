@@ -7,7 +7,7 @@ npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='1' --balance='50'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='2' --balance='50'
 npx locklift run $NO_TRACE --script scripts/0-deploy-TokenFactory.js
-npx locklift run $NO_TRACE --script scripts/1-deploy-vault-and-root.js --pair_contract_name='DexStablePool' --root_contract_name='DexRoot'
+npx locklift run $NO_TRACE --script scripts/1-deploy-vault-and-root.js --pair_contract_name='DexPair' --pool_contract_name='DexStablePool' --root_contract_name='DexRoot'
 npx locklift run $NO_TRACE --script scripts/2-deploy-test-tokens.js --tokens='["foo","bar","qwe","tst"]'
 npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"account":2,"amount":2000000,"token":"foo"},{"account":2,"amount":2000000,"token":"bar"},{"account":2,"amount":1000000,"token":"qwe"},{"account":2,"amount":1000000,"token":"tst"},{"account":3,"amount":2000000,"token":"foo"},{"account":3,"amount":2000000,"token":"bar"},{"account":3,"amount":1000000,"token":"qwe"}]'
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2

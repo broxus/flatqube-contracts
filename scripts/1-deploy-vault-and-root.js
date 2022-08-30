@@ -5,7 +5,8 @@ const program = new Command();
 program
     .allowUnknownOption()
     .option('-rcn, --root_contract_name <root_contract_name>', 'DexPair contract name')
-    .option('-pcn, --pair_contract_name <pair_contract_name>', 'DexPair contract name')
+    .option('-prcn, --pair_contract_name <pair_contract_name>', 'DexPair contract name')
+    .option('-plcn, --pool_contract_name <pool_contract_name>', 'DexPool contract name')
     .option('-acn, --account_contract_name <account_contract_name>', 'DexAccount contract name');
 
 program.parse(process.argv);
@@ -13,6 +14,7 @@ program.parse(process.argv);
 const options = program.opts();
 options.root_contract_name = options.root_contract_name || 'DexRoot';
 options.pair_contract_name = options.pair_contract_name || 'DexPair';
+options.pool_contract_name = options.pool_contract_name || 'DexStablePool';
 options.account_contract_name = options.account_contract_name || 'DexAccount';
 
 let tx;
@@ -129,7 +131,7 @@ async function main() {
     });
     displayTx(tx);
 
-    if (options.pair_contract_name === 'DexStablePool' && options.root_contract_name === 'DexRoot') {
+    if (options.pool_contract_name === 'DexStablePool' && options.root_contract_name === 'DexRoot') {
       console.log(`DexRoot: installing DexStablePool code...`);
       tx = await account.runTarget({
         contract: dexRoot,

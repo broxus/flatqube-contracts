@@ -491,7 +491,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
             const poolStart = await dexPoolInfo();
             logBalances('start', dexStart, accountStart, poolStart);
 
-            const AMOUNT = 100 * Math.pow(10, tokens[i].decimals - tokens[j].decimals);
+            const AMOUNT = 100 * Math.pow(10, Math.max(tokens[i].decimals - tokens[j].decimals, 0));
 
             const expected = await DexPool.call({
                 method: 'expectedExchange', params: {
