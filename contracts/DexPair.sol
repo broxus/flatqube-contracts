@@ -1890,6 +1890,8 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                 right_root,
                 send_gas_to
             );
+
+            _initializeTWAPOracle(now);
         } else if (old_pool_type == DexPoolTypes.CONSTANT_PRODUCT) {
             active = true;
             TvmCell otherData = s.loadRef(); // ref 3
@@ -1910,6 +1912,19 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
                 address, address, uint128,
                 address, address, uint128
             ));
+            if (s.refs() > 0) {
+                TvmSlice oracleDataSlice = s.loadRefAsSlice();  // ref 4
+
+                (
+                    _points,
+                    _options,
+                    _length
+                ) = oracleDataSlice.decode(
+                    mapping(uint32 => Point),
+                    OracleOptions,
+                    uint16
+                );
+            }
         } else if (old_pool_type == DexPoolTypes.STABLESWAP) {
             active = true;
             TvmCell otherData = s.loadRef(); // ref 3
@@ -1933,9 +1948,9 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
             right_wallet = _tokenData[1].wallet;
             vault_right_wallet = _tokenData[1].vaultWallet;
             right_balance = _tokenData[1].balance;
-        }
 
-        _initializeTWAPOracle(now);
+            _initializeTWAPOracle(now);
+        }
 
         send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS, bounce: false });
     }

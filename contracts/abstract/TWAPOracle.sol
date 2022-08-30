@@ -338,8 +338,8 @@ abstract contract TWAPOracle is ITWAPOracle {
         uint token1ReserveX128 = FixedPoint128.encode(_token1Reserve);
 
         // Calculate cumulatives' delta
-        uint price0To1CumulativeDelta = FixedPoint128.div(token0ReserveX128 * _timeElapsed, _token1Reserve);
-        uint price1To0CumulativeDelta = FixedPoint128.div(token1ReserveX128 * _timeElapsed, _token0Reserve);
+        uint price0To1CumulativeDelta = math.muldiv(token0ReserveX128, _timeElapsed, _token1Reserve);
+        uint price1To0CumulativeDelta = math.muldiv(token1ReserveX128, _timeElapsed, _token0Reserve);
 
         return Point(
             _previous.price0To1Cumulative + price0To1CumulativeDelta,
@@ -369,14 +369,16 @@ abstract contract TWAPOracle is ITWAPOracle {
             return 0;
         }
 
-        uint128 numerator = _token0ReserveNew * _token1ReserveOld;
-        uint128 denominator = _token0ReserveOld * _token1ReserveNew;
-
-        uint resultX128 = FixedPoint128.div(FixedPoint128.encode(numerator), denominator);
-        uint hundredPercentsX128 = FixedPoint128.FIXED_POINT_128_MULTIPLIER;
+        uint resultX128 = math.muldiv(
+            math.muldiv(uint256(_token0ReserveNew), FixedPoint128.FIXED_POINT_128_MULTIPLIER, _token0ReserveOld),
+            _token1ReserveOld,
+            _token1ReserveNew
+        );
 
         // Percent delta can be negative
-        return hundredPercentsX128 > resultX128 ? hundredPercentsX128 - resultX128 : resultX128 - hundredPercentsX128;
+        return FixedPoint128.FIXED_POINT_128_MULTIPLIER > resultX128 ?
+            FixedPoint128.FIXED_POINT_128_MULTIPLIER - resultX128 :
+            resultX128 - FixedPoint128.FIXED_POINT_128_MULTIPLIER;
     }
 
     /// @dev Calculates observation by timestamp
