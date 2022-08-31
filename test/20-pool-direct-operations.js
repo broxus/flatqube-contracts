@@ -48,6 +48,8 @@ const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
 
 let keyPairs;
 
+let LP_AMOUNT;
+
 async function dexBalances() {
     const token_balances = [];
     for (let i = 0; i < N_COINS; i++) {
@@ -317,7 +319,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     }
                 }));
 
-                migration.store(tokenWallets3[j], 'BarWallet3');
+                migration.store(tokenWallets3[j], tokens[j].symbol + 'Wallet3');
 
                 const dexEnd = await dexBalances();
                 const accountEnd = await account3balances();
@@ -797,7 +799,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
 
             const expected = await DexPool.call({
                 method: 'expectedWithdrawLiquidity', params: {
-                    lp_amount: new BigNumber(accountStart.lp).shiftedBy(Constants.LP_DECIMALS).toString()
+                    lp_amount: new BigNumber(accountStart.lp).shiftedBy(Constants.LP_DECIMALS).dividedToIntegerBy(2).toString()
                 }
             });
 
@@ -823,7 +825,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 contract: poolLpWallet3,
                 method: 'transfer',
                 params: {
-                    amount: new BigNumber(accountStart.lp).shiftedBy(Constants.LP_DECIMALS).toString(),
+                    amount: new BigNumber(accountStart.lp).shiftedBy(Constants.LP_DECIMALS).dividedToIntegerBy(2).toString(),
                     recipient: DexPool.address,
                     deployWalletValue: 0,
                     remainingGasTo: Account3.address,
@@ -865,164 +867,301 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
         });
     });
 
-    // describe('Direct exchange (negative)', async function () {
-    //
-    //     it('0100 # Account#3 exchange FOO to BAR (empty payload)', async function () {
-    //         logger.log('#################################################');
-    //         logger.log('# Account#3 exchange FOO to BAR (empty payload)');
-    //         const dexStart = await dexBalances();
-    //         const accountStart = await account3balances();
-    //         const pairStart = await dexPairInfo();
-    //         logBalances('start', dexStart, accountStart, pairStart);
-    //
-    //         const TOKENS_TO_EXCHANGE = 100;
-    //
-    //         const expected = await DexPairFooBar.call({
-    //             method: 'expectedExchange', params: {
-    //                 amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.foo.decimals).toString(),
-    //                 spent_token_root: FooRoot.address
-    //             }
-    //         });
-    //
-    //         tx = await Account3.runTarget({
-    //             contract: FooWallet3,
-    //             method: 'transfer',
-    //             params: {
-    //                 amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.foo.decimals).toString(),
-    //                 recipient: DexPairFooBar.address,
-    //                 deployWalletValue: 0,
-    //                 remainingGasTo: Account3.address,
-    //                 notify: true,
-    //                 payload: EMPTY_TVM_CELL
-    //             },
-    //             value: locklift.utils.convertCrystal('2.3', 'nano'),
-    //             keyPair: keyPairs[2]
-    //         });
-    //
-    //         displayTx(tx);
-    //
-    //         const dexEnd = await dexBalances();
-    //         const accountEnd = await account3balances();
-    //         const pairEnd = await dexPairInfo();
-    //         logBalances('end', dexEnd, accountEnd, pairEnd);
-    //         await logGas();
-    //
-    //         expect(dexStart.foo).to.equal(dexEnd.foo, 'Wrong DEX FOO balance');
-    //         expect(dexStart.bar).to.equal(dexEnd.bar, 'Wrong DEX BAR balance');
-    //         expect(accountStart.foo).to.equal(accountEnd.foo, 'Wrong Account#3 FOO balance');
-    //         expect(accountStart.bar).to.equal(accountEnd.bar, 'Wrong Account#3 BAR balance');
-    //     });
-    //
-    //     it('0110 # Account#3 exchange FOO to BAR (low gas)', async function () {
-    //         logger.log('#################################################');
-    //         logger.log('# Account#3 exchange FOO to BAR (low gas)');
-    //         const dexStart = await dexBalances();
-    //         const accountStart = await account3balances();
-    //         const pairStart = await dexPairInfo();
-    //         logBalances('start', dexStart, accountStart, pairStart);
-    //
-    //         const TOKENS_TO_EXCHANGE = 100;
-    //
-    //         const expected = await DexPairFooBar.call({
-    //             method: 'expectedExchange', params: {
-    //                 amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.foo.decimals).toString(),
-    //                 spent_token_root: FooRoot.address
-    //             }
-    //         });
-    //
-    //         const payload = await DexPairFooBar.call({
-    //             method: 'buildExchangePayload', params: {
-    //                 id: 0,
-    //                 deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
-    //                 expected_amount: expected.expected_amount
-    //             }
-    //         });
-    //
-    //         tx = await Account3.runTarget({
-    //             contract: FooWallet3,
-    //             method: 'transfer',
-    //             params: {
-    //                 amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.foo.decimals).toString(),
-    //                 recipient: DexPairFooBar.address,
-    //                 deployWalletValue: 0,
-    //                 remainingGasTo: Account3.address,
-    //                 notify: true,
-    //                 payload: payload
-    //             },
-    //             value: locklift.utils.convertCrystal('1', 'nano'),
-    //             keyPair: keyPairs[2]
-    //         });
-    //
-    //         displayTx(tx);
-    //
-    //         const dexEnd = await dexBalances();
-    //         const accountEnd = await account3balances();
-    //         const pairEnd = await dexPairInfo();
-    //         logBalances('end', dexEnd, accountEnd, pairEnd);
-    //         await logGas();
-    //
-    //         expect(dexStart.foo).to.equal(dexEnd.foo, 'Wrong DEX FOO balance');
-    //         expect(dexStart.bar).to.equal(dexEnd.bar, 'Wrong DEX BAR balance');
-    //         expect(accountStart.foo).to.equal(accountEnd.foo, 'Wrong Account#3 FOO balance');
-    //         expect(accountStart.bar).to.equal(accountEnd.bar, 'Wrong Account#3 BAR balance');
-    //     });
-    //
-    //     it('0120 # Account#3 exchange FOO to BAR (wrong rate)', async function () {
-    //         logger.log('#################################################');
-    //         logger.log('# Account#3 exchange FOO to BAR (wrong rate)');
-    //         const dexStart = await dexBalances();
-    //         const accountStart = await account3balances();
-    //         const pairStart = await dexPairInfo();
-    //         logBalances('start', dexStart, accountStart, pairStart);
-    //
-    //         const TOKENS_TO_EXCHANGE = 100;
-    //
-    //         const expected = await DexPairFooBar.call({
-    //             method: 'expectedExchange', params: {
-    //                 amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.foo.decimals).toString(),
-    //                 spent_token_root: FooRoot.address
-    //             }
-    //         });
-    //
-    //         logger.log(`Spent amount: ${TOKENS_TO_EXCHANGE} FOO`);
-    //         logger.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.foo.decimals).toString()} FOO`);
-    //         logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
-    //
-    //         const payload = await DexPairFooBar.call({
-    //             method: 'buildExchangePayload', params: {
-    //                 id: 0,
-    //                 deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
-    //                 expected_amount: new BigNumber(expected.expected_amount).plus(1).toString()
-    //             }
-    //         });
-    //
-    //         tx = await Account3.runTarget({
-    //             contract: FooWallet3,
-    //             method: 'transfer',
-    //             params: {
-    //                 amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.foo.decimals).toString(),
-    //                 recipient: DexPairFooBar.address,
-    //                 deployWalletValue: 0,
-    //                 remainingGasTo: Account3.address,
-    //                 notify: true,
-    //                 payload: payload
-    //             },
-    //             value: locklift.utils.convertCrystal('2.3', 'nano'),
-    //             keyPair: keyPairs[2]
-    //         });
-    //
-    //         displayTx(tx);
-    //
-    //         const dexEnd = await dexBalances();
-    //         const accountEnd = await account3balances();
-    //         const pairEnd = await dexPairInfo();
-    //         logBalances('end', dexEnd, accountEnd, pairEnd);
-    //         await logGas();
-    //
-    //         expect(dexStart.foo).to.equal(dexEnd.foo, 'Wrong DEX FOO balance');
-    //         expect(dexStart.bar).to.equal(dexEnd.bar, 'Wrong DEX BAR balance');
-    //         expect(accountStart.foo).to.equal(accountEnd.foo, 'Wrong Account#3 FOO balance');
-    //         expect(accountStart.bar).to.equal(accountEnd.bar, 'Wrong Account#3 BAR balance');
-    //     });
-    // });
+    describe('Direct withdraw single coin liquidity (positive)', async function () {
+        it('0080 # Account#3 direct withdraw single coin liquidity (small amount)', async function () {
+            let i = 0;
+
+            logger.log('#################################################');
+            logger.log(`# Account#3 direct withdraw ${tokens[i].symbol} liquidity (small amount)`);
+            const dexStart = await dexBalances();
+            const accountStart = await account3balances();
+            const poolStart = await dexPoolInfo();
+            logBalances('start', dexStart, accountStart, poolStart);
+
+            const expected = await DexPool.call({
+                method: 'expectedWithdrawLiquidityOneCoin', params: {
+                    lp_amount: 1000,
+                    outcoming: tokenRoots[i].address
+                }
+            });
+
+            logger.log(`Expected amount: ${new BigNumber(expected.amount).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
+            logger.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
+
+            const payload = await DexPool.call({
+                method: 'buildWithdrawLiquidityOneCoinPayload', params: {
+                    id: 0,
+                    deploy_wallet_grams: 0,
+                    expected_amount: expected.amount,
+                    outcoming: tokenRoots[i].address
+                }
+            });
+
+            tx = await Account3.runTarget({
+                contract: poolLpWallet3,
+                method: 'transfer',
+                params: {
+                    amount: 1000,
+                    recipient: DexPool.address,
+                    deployWalletValue: 0,
+                    remainingGasTo: Account3.address,
+                    notify: true,
+                    payload: payload
+                },
+                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                keyPair: keyPairs[2]
+            });
+
+            displayTx(tx);
+
+            const dexEnd = await dexBalances();
+            const accountEnd = await account3balances();
+            const poolEnd = await dexPoolInfo();
+            logBalances('end', dexEnd, accountEnd, poolEnd);
+            await logGas();
+
+            const expectedDexAmount = new BigNumber(dexStart.token_balances[i])
+                .minus(new BigNumber(expected.amount).shiftedBy(-tokens[i].decimals)).toString();
+            const expectedAccountAmount = new BigNumber(accountStart.token_balances[i])
+                .plus(new BigNumber(expected.amount).shiftedBy(-tokens[i].decimals)).toString();
+
+            expect(poolEnd.lp_supply_actual).to.equal(poolEnd.lp_supply, 'Wrong LP supply');
+            expect(expectedDexAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
+            expect(expectedAccountAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
+        });
+
+        for (let i = 0; i < N_COINS; i++) {
+            it('0090 # Account#3 direct withdraw single coin liquidity', async function () {
+                logger.log('#################################################');
+                logger.log(`# Account#3 direct withdraw ${tokens[i].symbol} liquidity`);
+                const dexStart = await dexBalances();
+                const accountStart = await account3balances();
+                const poolStart = await dexPoolInfo();
+                logBalances('start', dexStart, accountStart, poolStart);
+
+                if (!LP_AMOUNT) {
+                    LP_AMOUNT = new BigNumber(accountStart.lp).shiftedBy(Constants.LP_DECIMALS).dividedToIntegerBy(N_COINS);
+                }
+
+                const expected = await DexPool.call({
+                    method: 'expectedWithdrawLiquidityOneCoin', params: {
+                        lp_amount: LP_AMOUNT.toString(),
+                        outcoming: tokenRoots[i].address
+                    }
+                });
+
+                logger.log(`Expected amount: ${new BigNumber(expected.amount).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
+                logger.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
+
+                const payload = await DexPool.call({
+                    method: 'buildWithdrawLiquidityOneCoinPayload', params: {
+                        id: 0,
+                        deploy_wallet_grams: 0,
+                        expected_amount: expected.amount,
+                        outcoming: tokenRoots[i].address
+                    }
+                });
+
+                tx = await Account3.runTarget({
+                    contract: poolLpWallet3,
+                    method: 'transfer',
+                    params: {
+                        amount: LP_AMOUNT.toString(),
+                        recipient: DexPool.address,
+                        deployWalletValue: 0,
+                        remainingGasTo: Account3.address,
+                        notify: true,
+                        payload: payload
+                    },
+                    value: locklift.utils.convertCrystal('2.3', 'nano'),
+                    keyPair: keyPairs[2]
+                });
+
+                displayTx(tx);
+
+                const dexEnd = await dexBalances();
+                const accountEnd = await account3balances();
+                const poolEnd = await dexPoolInfo();
+                logBalances('end', dexEnd, accountEnd, poolEnd);
+                await logGas();
+
+                const expectedDexAmount = new BigNumber(dexStart.token_balances[i])
+                    .minus(new BigNumber(expected.amount).shiftedBy(-tokens[i].decimals)).toString();
+                const expectedAccountAmount = new BigNumber(accountStart.token_balances[i])
+                    .plus(new BigNumber(expected.amount).shiftedBy(-tokens[i].decimals)).toString();
+
+                expect(poolEnd.lp_supply_actual).to.equal(poolEnd.lp_supply, 'Wrong LP supply');
+                expect(expectedDexAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
+                expect(expectedAccountAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
+            });
+        }
+    });
+
+    describe('Direct exchange (negative)', async function () {
+
+        let i = 0;
+        let j = 1;
+        it('0100 # Account#3 exchange Coin_1 to Coin_2 (empty payload)', async function () {
+            logger.log('#################################################');
+            logger.log(`# Account#3 exchange ${tokens[i].symbol} to ${tokens[j].symbol} (empty payload)`);
+            const dexStart = await dexBalances();
+            const accountStart = await account3balances();
+            const poolStart = await dexPoolInfo();
+            logBalances('start', dexStart, accountStart, poolStart);
+
+            const TOKENS_TO_EXCHANGE = 100;
+
+            const expected = await DexPool.call({
+                method: 'expectedExchange', params: {
+                    amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(tokens[i].decimals).toString(),
+                    spent_token_root: tokenRoots[i].address,
+                    receive_token_root: tokenRoots[j].address
+                }
+            });
+
+            tx = await Account3.runTarget({
+                contract: tokenWallets3[i],
+                method: 'transfer',
+                params: {
+                    amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(tokens[i].decimals).toString(),
+                    recipient: DexPool.address,
+                    deployWalletValue: 0,
+                    remainingGasTo: Account3.address,
+                    notify: true,
+                    payload: EMPTY_TVM_CELL
+                },
+                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                keyPair: keyPairs[2]
+            });
+
+            displayTx(tx);
+
+            const dexEnd = await dexBalances();
+            const accountEnd = await account3balances();
+            const poolEnd = await dexPoolInfo();
+            logBalances('end', dexEnd, accountEnd, poolEnd);
+            await logGas();
+
+            expect(dexStart.token_balances[i]).to.equal(dexEnd.token_balances[i], `Wrong DEX ${tokens[i].symbol} balance`);
+            expect(dexStart.token_balances[j]).to.equal(dexEnd.token_balances[j], `Wrong DEX ${tokens[j].symbol} balance`);
+            expect(accountStart.token_balances[i]).to.equal(accountEnd.token_balances[i], `Wrong Account#3 ${tokens[i].symbol} balance`);
+            expect(accountStart.token_balances[j]).to.equal(accountEnd.token_balances[j], `Wrong Account#3 ${tokens[j].symbol} balance`);
+        });
+
+        it('0110 # Account#3 exchange Coin_1 to Coin_2 (low gas)', async function () {
+            logger.log('#################################################');
+            logger.log(`# Account#3 exchange ${tokens[i].symbol} to ${tokens[j].symbol} (low gas)`);
+            const dexStart = await dexBalances();
+            const accountStart = await account3balances();
+            const poolStart = await dexPoolInfo();
+            logBalances('start', dexStart, accountStart, poolStart);
+
+            const TOKENS_TO_EXCHANGE = 100;
+
+            const expected = await DexPool.call({
+                method: 'expectedExchange', params: {
+                    amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(tokens[i].decimals).toString(),
+                    spent_token_root: tokenRoots[i].address,
+                    receive_token_root: tokenRoots[j].address
+                }
+            });
+
+            const payload = await DexPool.call({
+                method: 'buildExchangePayload', params: {
+                    id: 0,
+                    deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
+                    expected_amount: expected.expected_amount,
+                    outcoming: tokenRoots[j].address
+                }
+            });
+
+            tx = await Account3.runTarget({
+                contract: tokenWallets3[i],
+                method: 'transfer',
+                params: {
+                    amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(Constants.tokens.foo.decimals).toString(),
+                    recipient: DexPool.address,
+                    deployWalletValue: 0,
+                    remainingGasTo: Account3.address,
+                    notify: true,
+                    payload: payload
+                },
+                value: locklift.utils.convertCrystal('1', 'nano'),
+                keyPair: keyPairs[2]
+            });
+
+            displayTx(tx);
+
+            const dexEnd = await dexBalances();
+            const accountEnd = await account3balances();
+            const poolEnd = await dexPoolInfo();
+            logBalances('end', dexEnd, accountEnd, poolEnd);
+            await logGas();
+
+            expect(dexStart.token_balances[i]).to.equal(dexEnd.token_balances[i], `Wrong DEX ${tokens[i].symbol} balance`);
+            expect(dexStart.token_balances[j]).to.equal(dexEnd.token_balances[j], `Wrong DEX ${tokens[j].symbol} balance`);
+            expect(accountStart.token_balances[i]).to.equal(accountEnd.token_balances[i], `Wrong Account#3 ${tokens[i].symbol} balance`);
+            expect(accountStart.token_balances[j]).to.equal(accountEnd.token_balances[j], `Wrong Account#3 ${tokens[j].symbol} balance`);
+        });
+
+        it('0120 # Account#3 exchange Coin_1 to Coin_2 (wrong rate)', async function () {
+            logger.log('#################################################');
+            logger.log(`# Account#3 exchange ${tokens[i].symbol} to ${tokens[j].symbol} (wrong rate)`);
+            const dexStart = await dexBalances();
+            const accountStart = await account3balances();
+            const poolStart = await dexPoolInfo();
+            logBalances('start', dexStart, accountStart, poolStart);
+
+            const TOKENS_TO_EXCHANGE = 100;
+
+            const expected = await DexPool.call({
+                method: 'expectedExchange', params: {
+                    amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(tokens[i].decimals).toString(),
+                    spent_token_root: tokenRoots[i].address,
+                    receive_token_root: tokenRoots[j].address
+                }
+            });
+
+            logger.log(`Spent amount: ${TOKENS_TO_EXCHANGE} ${tokens[i].symbol}`);
+            logger.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.foo.decimals).toString()} ${tokens[i].symbol}`);
+            logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.bar.decimals).toString()} ${tokens[j].symbol}`);
+
+            const payload = await DexPool.call({
+                method: 'buildExchangePayload', params: {
+                    id: 0,
+                    deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
+                    expected_amount: new BigNumber(expected.expected_amount).plus(1).toString(),
+                    outcoming: tokenRoots[j].address
+                }
+            });
+
+            tx = await Account3.runTarget({
+                contract: tokenWallets3[i],
+                method: 'transfer',
+                params: {
+                    amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(tokens[i].decimals).toString(),
+                    recipient: DexPool.address,
+                    deployWalletValue: 0,
+                    remainingGasTo: Account3.address,
+                    notify: true,
+                    payload: payload
+                },
+                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                keyPair: keyPairs[2]
+            });
+
+            displayTx(tx);
+
+            const dexEnd = await dexBalances();
+            const accountEnd = await account3balances();
+            const poolEnd = await dexPoolInfo();
+            logBalances('end', dexEnd, accountEnd, poolEnd);
+            await logGas();
+
+            expect(dexStart.token_balances[i]).to.equal(dexEnd.token_balances[i], `Wrong DEX ${tokens[i].symbol} balance`);
+            expect(dexStart.token_balances[j]).to.equal(dexEnd.token_balances[j], `Wrong DEX ${tokens[j].symbol} balance`);
+            expect(accountStart.token_balances[i]).to.equal(accountEnd.token_balances[i], `Wrong Account#3 ${tokens[i].symbol} balance`);
+            expect(accountStart.token_balances[j]).to.equal(accountEnd.token_balances[j], `Wrong Account#3 ${tokens[j].symbol} balance`);
+        });
+    });
 });
