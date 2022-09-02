@@ -109,33 +109,22 @@ async function main() {
   });
   displayTx(tx);
 
-  if (options.root_contract_name === 'DexRootPrev') {
-    console.log(`DexRoot: installing DexPair code...`);
-    tx = await account.runTarget({
-      contract: dexRoot,
-      method: 'installOrUpdatePairCode',
-      params: {code: DexPair.code},
-      keyPair
-    });
-    displayTx(tx);
-  } else {
-    console.log(`DexRoot: installing DexPair CONSTANT_PRODUCT code...`);
-    tx = await account.runTarget({
-      contract: dexRoot,
-      method: 'installOrUpdatePairCode',
-      params: {code: DexPair.code, pool_type: 1},
-      keyPair
-    });
-    displayTx(tx);
-    // console.log(`DexRoot: installing DexPair STABLESWAP code...`);
-    // tx = await account.runTarget({
-    //   contract: dexRoot,
-    //   method: 'installOrUpdatePairCode',
-    //   params: {code: DexStablePair.code, pool_type: 2},
-    //   keyPair
-    // });
-    // displayTx(tx);
-  }
+  console.log(`DexRoot: installing DexPair CONSTANT_PRODUCT code...`);
+  tx = await account.runTarget({
+    contract: dexRoot,
+    method: 'installOrUpdatePairCode',
+    params: {code: DexPair.code, pool_type: 1},
+    keyPair
+  });
+  displayTx(tx);
+  // console.log(`DexRoot: installing DexPair STABLESWAP code...`);
+  // tx = await account.runTarget({
+  //   contract: dexRoot,
+  //   method: 'installOrUpdatePairCode',
+  //   params: {code: DexStablePair.code, pool_type: 2},
+  //   keyPair
+  // });
+  // displayTx(tx);
 
   console.log(`DexRoot: set Dex is active...`);
   tx = await account.runTarget({

@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const OLD_DEX_PAIR_CODE_HASH = '11e918a3bf13f14b355bf675f7d6ab6c0ab6d60ebd6c15f888372c82dd0f6397';
+const OLD_DEX_PAIR_CODE_HASH = 'cd9ec28ec9dfce0ec7e6128d987e5d63f4855217fb9d7d886846538ab6412ef2';
 const DEX_ROOT_ADDRESS = '0:5eb5713ea9b4a0f3a13bc91b282cde809636eb1e68d2fcb6427b9ad78a5a9008';
 
 async function main() {
