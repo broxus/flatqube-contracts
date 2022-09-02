@@ -1,8 +1,9 @@
 pragma ton-solidity >= 0.57.0;
 
 import "../structures/IFeeParams.sol";
+import "../structures/IOracleOptions.sol";
 
-interface IDexRoot is IFeeParams {
+interface IDexRoot is IFeeParams, IOracleOptions {
     event AccountCodeUpgraded(uint32 version);
     event PairCodeUpgraded(uint32 version, uint8 pool_type);
     event RootCodeUpgraded();
@@ -38,5 +39,29 @@ interface IDexRoot is IFeeParams {
         address right_root,
         FeeParams params,
         address send_gas_to
+    ) external view;
+
+    /// @notice Proxy for TWAPOracle's setOracleOptions
+    /// @param _leftRoot Address of the left TokenRoot
+    /// @param _rightRoot Address of the right TokenRoot
+    /// @param _options New oracle's options
+    /// @param _remainingGasTo Recipient of the remaining gas
+    function setOracleOptions(
+        address _leftRoot,
+        address _rightRoot,
+        OracleOptions _options,
+        address _remainingGasTo
+    ) external view;
+
+    /// @notice Proxy for TWAPOracle's removeLastNPoints
+    /// @param _leftRoot Address of the left TokenRoot
+    /// @param _rightRoot Address of the right TokenRoot
+    /// @param _count Count of last points to remove
+    /// @param _remainingGasTo Recipient of the remaining gas
+    function removeLastNPoints(
+        address _leftRoot,
+        address _rightRoot,
+        uint16 _count,
+        address _remainingGasTo
     ) external view;
 }
