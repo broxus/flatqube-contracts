@@ -646,7 +646,6 @@ contract DexStablePair is
     function expectedWithdrawLiquidity(
         uint128 lp_amount
     ) override external view responsible returns (uint128 expected_left_amount, uint128 expected_right_amount) {
-        //FIXME: refactor?
         uint128 left_back_amount =  math.muldiv(tokenData[0].balance, lp_amount, lp_supply);
         uint128 right_back_amount = math.muldiv(tokenData[1].balance, lp_amount, lp_supply);
 
@@ -1148,7 +1147,7 @@ contract DexStablePair is
 
         if (old_version == 0) {
             fee = FeeParams(1000000, 3000, 0, address(0), emptyMap);
-            A = AmplificationCoefficient(1, 1);
+            A = AmplificationCoefficient(200, 1);
 
             tokenData = new PoolTokenData[](N_COINS);
             tokenData[0] = PoolTokenData(left_root, address(0), address(0), 0, 0, 0, 0, 0, false, false);
@@ -1179,7 +1178,7 @@ contract DexStablePair is
             active = lp_wallet.value != 0 && tokenData[0].initialized && tokenData[1].initialized;
         } else if(old_pool_type == DexPoolTypes.CONSTANT_PRODUCT) {
             active = false;
-            A = AmplificationCoefficient(1, 1);
+            A = AmplificationCoefficient(200, 1);
             uint128 left_balance;
             uint128 right_balance;
             address left_wallet;
@@ -1318,6 +1317,75 @@ contract DexStablePair is
         }
     }
 
+    function getVirtualPrice() override external view responsible returns (optional(uint256)) {
+        optional(uint256) result;
+
+        if (lp_supply != 0) {
+            uint256[] xp = new uint256[](0);
+
+            for (PoolTokenData t: tokenData) {
+                xp.push(math.muldiv(t.rate, t.balance, PRECISION));
+            }
+
+            optional(uint256) D_opt = _get_D(xp);
+
+            if (D_opt.hasValue()) {
+                uint256 value = uint256(math.muldiv(D_opt.get(), 10**18, lp_supply));
+                result.set(math.muldiv(value, 10**9, PRECISION));
+            }
+        }
+
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } result;
+    }
+
+    function getPriceImpact(
+        uint128 amount,
+        address spent_token_root,
+        uint128 price_amount
+    ) external view returns (optional(uint256)) {
+        optional(uint256) result;
+
+        if (tokenIndex.exists(spent_token_root) && price_amount != 0 && amount != 0) {
+
+            uint8 i = tokenIndex[spent_token_root];
+            uint8 j = i == 0 ? 1 : 0;
+
+            uint128[] reserves_mem = _reserves();
+            uint256[] xp_mem = _xp_mem(reserves_mem);
+
+            optional(ExpectedExchangeResult) old_price_res =
+                _get_dy_mem(i, j, price_amount, xp_mem);
+
+            optional(ExpectedExchangeResult) dy_result_opt =
+                _get_dy_mem(i, j, amount, xp_mem);
+
+            if (
+                dy_result_opt.hasValue() &&
+                old_price_res.hasValue()
+            ) {
+                uint128 old_price = old_price_res.get().amount;
+                ExpectedExchangeResult dy_result = dy_result_opt.get();
+
+                reserves_mem[i] += amount - dy_result.beneficiary_fee;
+                reserves_mem[j] -= dy_result.amount;
+
+                optional(ExpectedExchangeResult) new_price_res =
+                    _get_dy_mem(i, j, price_amount, _xp_mem(reserves_mem));
+
+                if (new_price_res.hasValue()) {
+                    result.set(
+                        math.muldiv(
+                            uint256(old_price - new_price_res.get().amount),
+                            10**20,
+                            old_price
+                        )
+                    );
+                }
+            }
+        }
+
+        return result;
+    }
 
     // Stable math ##############################################
     function _get_D(uint256[] _xp) internal view returns(optional(uint256)) {
@@ -1414,18 +1482,23 @@ contract DexStablePair is
         uint128 beneficiary_fee;
     }
 
+
     function _get_dy(uint8 i, uint8 j, uint128 _dx) internal view returns (optional(ExpectedExchangeResult)) {
-        optional(ExpectedExchangeResult) result;
-
-        uint128 x_fee = math.muldivc(_dx, fee.pool_numerator + fee.beneficiary_numerator, fee.denominator);
-        uint128 x_beneficiary_fee = math.muldiv(x_fee, fee.beneficiary_numerator, fee.pool_numerator + fee.beneficiary_numerator);
-        uint128 x_pool_fee = x_fee - x_beneficiary_fee;
-
         uint256[] xp = new uint256[](0);
 
         for (PoolTokenData t: tokenData) {
             xp.push(math.muldiv(t.rate, t.balance, PRECISION));
         }
+
+        return _get_dy_mem(i, j, _dx, xp);
+    }
+
+    function _get_dy_mem(uint8 i, uint8 j, uint128 _dx, uint256[] xp) internal view returns (optional(ExpectedExchangeResult)) {
+        optional(ExpectedExchangeResult) result;
+
+        uint128 x_fee = math.muldivc(_dx, fee.pool_numerator + fee.beneficiary_numerator, fee.denominator);
+        uint128 x_beneficiary_fee = math.muldiv(x_fee, fee.beneficiary_numerator, fee.pool_numerator + fee.beneficiary_numerator);
+        uint128 x_pool_fee = x_fee - x_beneficiary_fee;
 
         uint256 x = xp[i] + math.muldiv(_dx - x_fee, tokenData[i].rate, PRECISION);
         optional(uint256) y_opt = _get_y(i, j, x, xp);
@@ -1624,7 +1697,7 @@ contract DexStablePair is
                     spent_amount = r.differences[i];
                 } else {
                     deposits.push(TokenOperation(
-                        r.result_balances[i] - tokenData[i].balance + r.differences[i] - r.pool_fees[i], tokenData[i].root
+                        r.result_balances[i] + r.differences[i] - tokenData[i].balance - r.pool_fees[i], tokenData[i].root
                     ));
                     receive_root = tokenData[i].root;
                     receive_amount = r.differences[i];
