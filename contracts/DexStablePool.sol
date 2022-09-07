@@ -16,6 +16,7 @@ import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "./libraries/DexOperationTypes.sol";
+import "./libraries/PairPayload.sol";
 
 import "./interfaces/IUpgradableByRequest.sol";
 import "./interfaces/IDexRoot.sol";
@@ -216,29 +217,26 @@ contract DexStablePool is
         uint128 expected_amount,
         address outcoming
     )  external pure returns (TvmCell) {
-        TvmBuilder builder;
-        builder.store(DexOperationTypes.EXCHANGE);
-        builder.store(id);
-        builder.store(deploy_wallet_grams);
-        builder.store(expected_amount);
-        builder.store(outcoming);
-        return builder.toCell();
+        return PairPayload.buildExchangePayloadV2(
+            id,
+            deploy_wallet_grams,
+            expected_amount,
+            outcoming
+        );
     }
 
     function buildDepositLiquidityPayload(uint64 id, uint128 deploy_wallet_grams) external pure returns (TvmCell) {
-        TvmBuilder builder;
-        builder.store(DexOperationTypes.DEPOSIT_LIQUIDITY);
-        builder.store(id);
-        builder.store(deploy_wallet_grams);
-        return builder.toCell();
+        return PairPayload.buildDepositLiquidityPayload(
+            id,
+            deploy_wallet_grams
+        );
     }
 
     function buildWithdrawLiquidityPayload(uint64 id, uint128 deploy_wallet_grams) external pure returns (TvmCell) {
-        TvmBuilder builder;
-        builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY);
-        builder.store(id);
-        builder.store(deploy_wallet_grams);
-        return builder.toCell();
+        return PairPayload.buildWithdrawLiquidityPayload(
+            id,
+            deploy_wallet_grams
+        );
     }
 
     function buildWithdrawLiquidityOneCoinPayload(
@@ -247,13 +245,12 @@ contract DexStablePool is
         uint128 expected_amount,
         address outcoming
     ) external pure returns (TvmCell) {
-        TvmBuilder builder;
-        builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN);
-        builder.store(id);
-        builder.store(deploy_wallet_grams);
-        builder.store(expected_amount);
-        builder.store(outcoming);
-        return builder.toCell();
+        return PairPayload.buildWithdrawLiquidityOneCoinPayload(
+            id,
+            deploy_wallet_grams,
+            expected_amount,
+            outcoming
+        );
     }
 
     function buildCrossPairExchangePayload(
@@ -263,44 +260,21 @@ contract DexStablePool is
         address outcoming,
         ExchangeStep[] steps
     ) external view returns (TvmCell) {
-        require(steps.length > 0);
+        address[] pools;
 
-        address[] pairs;
-
-        // Calculate pairs' addresses by token roots
+        // Calculate pools' addresses by token roots
         for (uint i = 0; i < steps.length; i++) {
-            pairs.push(_expectedPairAddress(steps[i].roots));
+            pools.push(_expectedPairAddress(steps[i].roots));
         }
 
-        TvmBuilder builder;
-
-        builder.store(DexOperationTypes.CROSS_PAIR_EXCHANGE);
-        builder.store(id);
-        builder.store(deployWalletGrams);
-        builder.store(expectedAmount);
-        builder.store(outcoming);
-        builder.store(pairs[0]);
-
-        TvmBuilder nextStepBuilder;
-        nextStepBuilder.store(steps[steps.length - 1].amount);
-        nextStepBuilder.store(steps[steps.length - 1].outcoming);
-
-        for (uint i = steps.length - 1; i > 0; i--) {
-            TvmBuilder currentStepBuilder;
-
-            currentStepBuilder.store(
-                steps[i - 1].amount,
-                steps[i - 1].outcoming,
-                pairs[i]
-            );
-            currentStepBuilder.store(nextStepBuilder.toCell());
-
-            nextStepBuilder = currentStepBuilder;
-        }
-
-        builder.store(nextStepBuilder.toCell());
-
-        return builder.toCell();
+        return PairPayload.buildCrossPairExchangePayloadV2(
+            id,
+            deployWalletGrams,
+            expectedAmount,
+            outcoming,
+            steps,
+            pools
+        );
     }
 
     function onAcceptTokensTransfer(
@@ -313,10 +287,26 @@ contract DexStablePool is
     ) override external {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        TvmSlice payloadSlice = payload.toSlice();
+        (
+            bool is_valid,
+            uint64 id,
+            uint8 op,
+            uint128 deploy_wallet_grams,
+            uint128 expected_amount,
+            address next_pool,
+            address outcoming,
+            bool hasRef3,
+            TvmCell ref3,
+            bool notify_success,
+            TvmCell success_payload,
+            bool notify_cancel,
+            TvmCell cancel_payload
+        ) = PairPayload.decodeOnAcceptTokensTransferPayload(payload);
+
+        TvmCell empty;
 
         bool need_cancel = !active ||
-        payloadSlice.bits() < 200 ||
+        !is_valid ||
         lp_supply == 0 ||
         msg.sender.value == 0 ||
         msg.value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2;
@@ -329,26 +319,7 @@ contract DexStablePool is
             msg.sender != tokenData[tokenIndex.at(token_root)].wallet;
         }
 
-        bool notify_success = payloadSlice.refs() >= 1;
-        bool notify_cancel = payloadSlice.refs() >= 2;
-        bool hasRef3 = payloadSlice.refs() >= 3;
-        TvmCell empty;
-        TvmCell success_payload;
-        TvmCell cancel_payload;
-        TvmCell ref3;
-        if (notify_success) {
-            success_payload = payloadSlice.loadRef();
-        }
-        if (notify_cancel) {
-            cancel_payload = payloadSlice.loadRef();
-        }
-        if (hasRef3) {
-            ref3 = payloadSlice.loadRef();
-        }
-
         if (!need_cancel) {
-            (uint8 op, uint64 id, uint128 deploy_wallet_grams) = payloadSlice.decode(uint8, uint64, uint128);
-
             if (msg.sender == lp_wallet) {
                 if (op == DexOperationTypes.WITHDRAW_LIQUIDITY) {
 
@@ -388,7 +359,6 @@ contract DexStablePool is
                     );
 
                 } else if (op == DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN) {
-                    (uint128 expected_amount, address outcoming) = payloadSlice.decode(uint128, address);
                     optional(TokenOperation) operation_opt;
 
                     if (tokenIndex.exists(outcoming)) {
@@ -432,8 +402,7 @@ contract DexStablePool is
                     need_cancel = true;
                 }
             } else {
-                if (op == DexOperationTypes.EXCHANGE && payloadSlice.bits() >= 128) {
-                    (uint128 expected_amount, address outcoming) = payloadSlice.decode(uint128, address);
+                if (op == DexOperationTypes.EXCHANGE) {
                     optional(ExpectedExchangeResult) dy_result_opt;
 
                     if (tokenIndex.exists(outcoming)) {
@@ -516,11 +485,9 @@ contract DexStablePool is
                     }
                 } else if (
                     op == DexOperationTypes.CROSS_PAIR_EXCHANGE &&
-                    payloadSlice.bits() >= 395 &&
                     notify_success &&
                     success_payload.toSlice().bits() >= 128
                 ) {
-                    (uint128 expected_amount, address outcoming, address next_pool) = payloadSlice.decode(uint128, address, address);
                     optional(TokenOperation) operation_opt;
 
                     if (outcoming == lp_root && token_root != lp_root) { // deposit liquidity
@@ -704,12 +671,6 @@ contract DexStablePool is
         }
 
         if (need_cancel) {
-            uint64 id = 0;
-
-            if (payload.toSlice().bits() >= 72) {
-                (,id) = payload.toSlice().decode(uint8, uint64);
-            }
-
             IDexPairOperationCallback(sender_address).dexPairOperationCancelled{
                 value: DexGas.OPERATION_CALLBACK_BASE + 44,
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -1093,22 +1054,19 @@ contract DexStablePool is
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        TvmCell empty;
-        TvmSlice payloadSlice = payload.toSlice();
-        bool has_next_payload = payloadSlice.refs() >= 1;
-        TvmCell next_payload;
-        if (has_next_payload) {
-            next_payload = payloadSlice.loadRef();
-        }
+        (
+            uint128 expected_amount,
+            address next_pool,
+            address outcoming,
+            bool has_next_payload,
+            TvmCell next_payload
+        ) = PairPayload.decodeCrossPoolExchangePayload(payload);
 
-        bool need_cancel = !active ||
-            msg.sender == address(this) ||
-            payloadSlice.bits() < 395;  // 128 + 267
+        TvmCell empty;
+
+        bool need_cancel = !active || msg.sender == address(this);
 
         if (!need_cancel) {
-            (uint128 expected_amount, address outcoming) = payloadSlice.decode(uint128, address);
-            address next_pool = payloadSlice.bits() >= 267 ? payloadSlice.decode(address) : address(0);
-
             optional(TokenOperation) operation_opt;
 
             if (outcoming == lp_root && spent_token_root != lp_root) { // deposit liquidity
@@ -1173,8 +1131,7 @@ contract DexStablePool is
 
                 if (
                     !dy_result_opt.hasValue() ||
-                    dy_result_opt.get().amount < expected_amount ||
-                    next_pool.value == 0
+                    dy_result_opt.get().amount < expected_amount
                 ) {
                     need_cancel = true;
                 } else {
@@ -1603,7 +1560,7 @@ contract DexStablePool is
     ) external view returns (optional(uint256)) {
         optional(uint256) result;
 
-        if (tokenIndex.exists(spent_token_root) && price_amount != 0 && amount != 0) {
+        if (tokenIndex.exists(spent_token_root) && tokenIndex.exists(receive_token_root) && price_amount != 0 && amount != 0) {
 
             uint8 i = tokenIndex[spent_token_root];
             uint8 j = tokenIndex[receive_token_root];
@@ -1933,10 +1890,8 @@ contract DexStablePool is
         address user
     ) private {
 
-        address spent_root;
-        uint128 spent_amount;
-        address receive_root;
-        uint128 receive_amount;
+        optional(TokenOperation) spent_token;
+        TokenOperation[] receive_tokens;
         ExchangeFee[] fees;
         TokenOperation[] deposits;
 
@@ -1948,14 +1903,12 @@ contract DexStablePool is
                         r.result_balances[i] - tokenData[i].balance - r.differences[i] - r.pool_fees[i],
                         tokenData[i].root
                     ));
-                    spent_root = tokenData[i].root;
-                    spent_amount = r.differences[i];
+                    spent_token = TokenOperation(r.differences[i], tokenData[i].root);
                 } else {
                     deposits.push(TokenOperation(
                         r.result_balances[i] + r.differences[i] - tokenData[i].balance - r.pool_fees[i], tokenData[i].root
                     ));
-                    receive_root = tokenData[i].root;
-                    receive_amount = r.differences[i];
+                    receive_tokens.push(TokenOperation(r.differences[i], tokenData[i].root));
                 }
             } else {
                 deposits.push(TokenOperation(r.result_balances[i] - tokenData[i].balance, tokenData[i].root));
@@ -1967,14 +1920,12 @@ contract DexStablePool is
 
         lp_supply += r.lp_reward;
 
-        if (spent_root.value != 0 && receive_root.value != 0) {
-            emit Exchange(
+        if (spent_token.hasValue() && receive_tokens.length != 0) {
+            emit MultilateralExchange(
                 user,
                 user,
-                spent_root,
-                spent_amount,
-                receive_root,
-                receive_amount,
+                spent_token.get(),
+                receive_tokens,
                 fees
             );
         }

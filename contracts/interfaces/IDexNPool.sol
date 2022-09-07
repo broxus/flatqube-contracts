@@ -8,6 +8,15 @@ interface IDexNPool is IDexBasePool, IDexPoolBalances {
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // EVENTS
 
+    /// @dev Emits when swap between a sending and several receiving tokens was successfully processed
+    event MultilateralExchange(
+        address sender,
+        address recipient,
+        TokenOperation spentToken,
+        TokenOperation[] receiveTokens,
+        ExchangeFee[] fees
+    );
+
     /// @dev Emits when pool's code was successfully upgraded
     event PoolCodeUpgraded(
         uint32 version,

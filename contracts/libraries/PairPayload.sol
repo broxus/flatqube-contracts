@@ -84,6 +84,29 @@ library PairPayload {
         return builder.toCell();
     }
 
+    /// @notice Build payload for single coin withdrawal call
+    /// @param _id ID of the call
+    /// @param _deployWalletGrams Amount for new wallet deploy
+    /// @param _expectedAmount Expected receive amount
+    /// @return TvmCell Encoded payload
+    function buildWithdrawLiquidityOneCoinPayload(
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedAmount,
+        address _outcoming
+    ) public returns (TvmCell) {
+        TvmBuilder builder;
+
+        builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN);
+        builder.store(_id);
+        builder.store(_deployWalletGrams);
+        builder.store(_expectedAmount);
+        builder.store(address(0));
+        builder.store(_outcoming);
+
+        return builder.toCell();
+    }
+
     /// @notice Build payload for cross-exchange call
     /// @param _id ID of the call
     /// @param _deployWalletGrams Amount for new wallet deploy
@@ -151,6 +174,8 @@ library PairPayload {
 
         TvmBuilder nextStepBuilder;
         nextStepBuilder.store(_steps[_steps.length - 1].amount);
+        nextStepBuilder.store(address(0));
+        nextStepBuilder.store(_steps[_steps.length - 1].outcoming);
 
         for (uint i = _steps.length - 1; i > 0; i--) {
             TvmBuilder currentStepBuilder;
