@@ -36,8 +36,8 @@ options.right_amount = options.right_amount || '2';
 options.auto_change = options.auto_change === 'true';
 options.contract_name = options.contract_name || 'DexPair';
 
-const left_token = Constants.tokens[options.left_token_id];
-const right_token = Constants.tokens[options.right_token_id];
+const left_token = options.left_token_id.slice(-2) === 'Lp' ? {name: options.left_token_id, symbol: options.left_token_id, decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[options.left_token_id];
+const right_token = options.right_token_id.slice(-2) === 'Lp' ? {name: options.right_token_id, symbol: options.right_token_id, decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[options.right_token_id];
 
 let DexRoot;
 let DexPairFooBar;

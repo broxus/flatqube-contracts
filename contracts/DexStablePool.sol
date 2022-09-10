@@ -320,67 +320,25 @@ contract DexStablePool is
         }
 
         if (!need_cancel) {
-            if (msg.sender == lp_wallet) {
-                if (op == DexOperationTypes.WITHDRAW_LIQUIDITY) {
+            if (msg.sender == lp_wallet && op == DexOperationTypes.WITHDRAW_LIQUIDITY) {
 
-                    TokenOperation[] operations = _withdrawLiquidityBase(tokens_amount, sender_address);
+                TokenOperation[] operations = _withdrawLiquidityBase(tokens_amount, sender_address);
 
-                    IDexPairOperationCallback(sender_address).dexPairWithdrawSuccessV2{
-                        value: DexGas.OPERATION_CALLBACK_BASE + 30,
-                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                        bounce: false
-                    }(id, false, IWithdrawResultV2.WithdrawResultV2(tokens_amount, operations));
+                IDexPairOperationCallback(sender_address).dexPairWithdrawSuccessV2{
+                    value: DexGas.OPERATION_CALLBACK_BASE + 30,
+                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
+                }(id, false, IWithdrawResultV2.WithdrawResultV2(tokens_amount, operations));
 
-                    for (uint8 ii = 0; ii < N_COINS; ii++) {
-                        if (operations[ii].amount >= 0) {
-                            IDexVault(vault).transferV2{
-                                value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
-                                flag: MsgFlag.SENDER_PAYS_FEES
-                            }(
-                                operations[ii].amount,
-                                operations[ii].root,
-                                tokenData[ii].vaultWallet,
-                                sender_address,
-                                deploy_wallet_grams,
-                                notify_success,
-                                success_payload,
-                                _tokenRoots(),
-                                current_version,
-                                original_gas_to
-                            );
-                        }
-                    }
-
-                    IBurnableTokenWallet(msg.sender).burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
-                        tokens_amount,
-                        original_gas_to,
-                        address.makeAddrStd(0, 0),
-                        empty
-                    );
-
-                } else if (op == DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN) {
-                    optional(TokenOperation) operation_opt;
-
-                    if (tokenIndex.exists(outcoming)) {
-                        operation_opt = _withdrawLiquidityOneCoin(tokens_amount, tokenIndex[outcoming], expected_amount, sender_address);
-                    }
-
-                    if (operation_opt.hasValue()) {
-                        TokenOperation operation = operation_opt.get();
-
-                        IDexPairOperationCallback(sender_address).dexPairWithdrawSuccessV2{
-                            value: DexGas.OPERATION_CALLBACK_BASE + 30,
-                            flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                            bounce: false
-                        }(id, false, IWithdrawResultV2.WithdrawResultV2(tokens_amount, [operation]));
-
+                for (uint8 ii = 0; ii < N_COINS; ii++) {
+                    if (operations[ii].amount >= 0) {
                         IDexVault(vault).transferV2{
                             value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
                             flag: MsgFlag.SENDER_PAYS_FEES
                         }(
-                            operation.amount,
-                            operation.root,
-                            tokenData[tokenIndex[outcoming]].vaultWallet,
+                            operations[ii].amount,
+                            operations[ii].root,
+                            tokenData[ii].vaultWallet,
                             sender_address,
                             deploy_wallet_grams,
                             notify_success,
@@ -389,44 +347,228 @@ contract DexStablePool is
                             current_version,
                             original_gas_to
                         );
+                    }
+                }
 
-                        IBurnableTokenWallet(msg.sender).burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
+                IBurnableTokenWallet(msg.sender).burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
+                    tokens_amount,
+                    original_gas_to,
+                    address.makeAddrStd(0, 0),
+                    empty
+                );
+
+            } else if (msg.sender == lp_wallet && op == DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN) {
+                optional(TokenOperation) operation_opt;
+
+                if (tokenIndex.exists(outcoming)) {
+                    operation_opt = _withdrawLiquidityOneCoin(tokens_amount, tokenIndex[outcoming], expected_amount, sender_address);
+                }
+
+                if (operation_opt.hasValue()) {
+                    TokenOperation operation = operation_opt.get();
+
+                    IDexPairOperationCallback(sender_address).dexPairWithdrawSuccessV2{
+                        value: DexGas.OPERATION_CALLBACK_BASE + 30,
+                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                        bounce: false
+                    }(id, false, IWithdrawResultV2.WithdrawResultV2(tokens_amount, [operation]));
+
+                    IDexVault(vault).transferV2{
+                        value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
+                        flag: MsgFlag.SENDER_PAYS_FEES
+                    }(
+                        operation.amount,
+                        operation.root,
+                        tokenData[tokenIndex[outcoming]].vaultWallet,
+                        sender_address,
+                        deploy_wallet_grams,
+                        notify_success,
+                        success_payload,
+                        _tokenRoots(),
+                        current_version,
+                        original_gas_to
+                    );
+
+                    IBurnableTokenWallet(msg.sender).burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
+                        tokens_amount,
+                        original_gas_to,
+                        address.makeAddrStd(0, 0),
+                        empty);
+                } else {
+                    need_cancel = true;
+                }
+            } else if (msg.sender != lp_wallet && op == DexOperationTypes.EXCHANGE) {
+                optional(ExpectedExchangeResult) dy_result_opt;
+
+                if (tokenIndex.exists(outcoming)) {
+                    dy_result_opt = _get_dy(tokenIndex[token_root], tokenIndex[outcoming], tokens_amount);
+                }
+
+                if (!dy_result_opt.hasValue() || dy_result_opt.get().amount < expected_amount) {
+                    need_cancel = true;
+                } else {
+                    uint8 i = tokenIndex[token_root];
+                    uint8 j = tokenIndex[outcoming];
+
+                    ExpectedExchangeResult dy_result = dy_result_opt.get();
+
+                    tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee;
+                    tokenData[j].balance -= dy_result.amount;
+
+                    ExchangeFee[] fees = new ExchangeFee[](0);
+                    fees.push(ExchangeFee(
+                            tokenData[i].root,
+                            dy_result.pool_fee,
+                            dy_result.beneficiary_fee,
+                            fee.beneficiary
+                    ));
+
+                    emit Exchange(
+                        sender_address,
+                        sender_address,
+                        tokenData[i].root,
+                        tokens_amount,
+                        tokenData[j].root,
+                        dy_result.amount,
+                        fees
+                    );
+
+                    if (dy_result.beneficiary_fee > 0) {
+                        tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
+                        _processBeneficiaryFees(false, original_gas_to);
+                    }
+
+                    IDexPairOperationCallback(sender_address).dexPairExchangeSuccessV2{
+                        value: DexGas.OPERATION_CALLBACK_BASE + 10,
+                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                        bounce: false
+                    }(id, false, IExchangeResultV2.ExchangeResultV2(
+                            token_root,
+                            outcoming,
+                            tokens_amount,
+                            dy_result.pool_fee + dy_result.beneficiary_fee,
+                            dy_result.amount
+                        ));
+
+                    ITokenWallet(msg.sender).transfer{
+                        value: DexGas.TRANSFER_TOKENS_VALUE,
+                        flag: MsgFlag.SENDER_PAYS_FEES
+                    }(
+                        tokens_amount,
+                        vault,
+                        0,
+                        original_gas_to,
+                        false,
+                        empty
+                    );
+
+                    IDexVault(vault).transferV2{
+                        value: 0,
+                        flag: MsgFlag.ALL_NOT_RESERVED
+                    }(
+                        dy_result.amount,
+                        tokenData[j].root,
+                        tokenData[j].vaultWallet,
+                        sender_address,
+                        deploy_wallet_grams,
+                        notify_success,
+                        success_payload,
+                        _tokenRoots(),
+                        current_version,
+                        original_gas_to
+                    );
+                }
+            } else if (
+                op == DexOperationTypes.CROSS_PAIR_EXCHANGE &&
+                notify_success &&
+                success_payload.toSlice().bits() >= 128
+            ) {
+                optional(TokenOperation) operation_opt;
+
+                if (outcoming == lp_root && token_root != lp_root) { // deposit liquidity
+                    uint128[] amounts = new uint128[](N_COINS);
+                    amounts[tokenIndex[token_root]] = tokens_amount;
+                    optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
+
+                    if (!resultOpt.hasValue()) {
+                        need_cancel = true;
+                    } else {
+                        DepositLiquidityResultV2 result = resultOpt.get();
+                        _applyAddLiquidity(result, id, false, sender_address);
+
+                        TvmBuilder builder;
+                        builder.store(lp_vault_wallet);
+
+                        TvmCell exchange_data = abi.encode(
+                            id,
+                            current_version,
+                            DexPoolTypes.STABLESWAP,
+                            _tokenRoots(),
+                            sender_address,
+                            deploy_wallet_grams,
+                            next_pool
+                        );
+                        builder.store(exchange_data);
+
+                        builder.store(success_payload); // actually it is next_payload
+                        builder.store(cancel_payload);  // actually it is success_payload
+                        builder.store(ref3);            // actually it is cancel_payload
+
+                        ITokenRoot(lp_root).mint{
+                            value: 0,
+                            flag: MsgFlag.ALL_NOT_RESERVED
+                        }(
+                            result.lp_reward,
+                            vault,
+                            deploy_wallet_grams,
+                            original_gas_to,
+                            true,
+                            builder.toCell()
+                        );
+                    }
+                } else if (token_root == lp_root) { // withdraw liquidity
+
+                    if (tokenIndex.exists(outcoming)) {
+                        operation_opt = _withdrawLiquidityOneCoin(tokens_amount, tokenIndex[outcoming], expected_amount, sender_address);
+                    }
+
+                    if (!operation_opt.hasValue()) {
+                        need_cancel = true;
+                    } else {
+                        IBurnableTokenWallet(msg.sender).burn{
+                            value: DexGas.BURN_VALUE,
+                            flag: MsgFlag.SENDER_PAYS_FEES
+                        }(
                             tokens_amount,
                             original_gas_to,
                             address.makeAddrStd(0, 0),
                             empty);
-                    } else {
-                        need_cancel = true;
                     }
-                } else {
-                    need_cancel = true;
-                }
-            } else {
-                if (op == DexOperationTypes.EXCHANGE) {
+                } else { // exchange
                     optional(ExpectedExchangeResult) dy_result_opt;
 
-                    if (tokenIndex.exists(outcoming)) {
+                    if (tokenIndex.exists(outcoming) && token_root != outcoming) {
                         dy_result_opt = _get_dy(tokenIndex[token_root], tokenIndex[outcoming], tokens_amount);
                     }
 
-                    if (!dy_result_opt.hasValue() || dy_result_opt.get().amount < expected_amount) {
+                    if (
+                        !dy_result_opt.hasValue() ||
+                        dy_result_opt.get().amount < expected_amount ||
+                        next_pool.value == 0
+                    ) {
                         need_cancel = true;
                     } else {
                         uint8 i = tokenIndex[token_root];
                         uint8 j = tokenIndex[outcoming];
 
                         ExpectedExchangeResult dy_result = dy_result_opt.get();
+                        operation_opt = TokenOperation(dy_result.amount, tokenData[j].root);
 
                         tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee;
                         tokenData[j].balance -= dy_result.amount;
 
-                        ExchangeFee[] fees = new ExchangeFee[](0);
-                        fees.push(ExchangeFee(
-                                tokenData[i].root,
-                                dy_result.pool_fee,
-                                dy_result.beneficiary_fee,
-                                fee.beneficiary
-                            ));
+                        ExchangeFee[] fees;
+                        fees.push(ExchangeFee(tokenData[i].root, dy_result.pool_fee, dy_result.beneficiary_fee, fee.beneficiary));
 
                         emit Exchange(
                             sender_address,
@@ -442,231 +584,89 @@ contract DexStablePool is
                             tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
                             _processBeneficiaryFees(false, original_gas_to);
                         }
-
-                        IDexPairOperationCallback(sender_address).dexPairExchangeSuccessV2{
-                            value: DexGas.OPERATION_CALLBACK_BASE + 10,
-                            flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                            bounce: false
-                        }(id, false, IExchangeResultV2.ExchangeResultV2(
-                                token_root,
-                                outcoming,
-                                tokens_amount,
-                                dy_result.pool_fee + dy_result.beneficiary_fee,
-                                dy_result.amount
-                            ));
-
-                        ITokenWallet(msg.sender).transfer{
-                            value: DexGas.TRANSFER_TOKENS_VALUE,
-                            flag: MsgFlag.SENDER_PAYS_FEES
-                        }(
-                            tokens_amount,
-                            vault,
-                            0,
-                            original_gas_to,
-                            false,
-                            empty
-                        );
-
-                        IDexVault(vault).transferV2{
-                            value: 0,
-                            flag: MsgFlag.ALL_NOT_RESERVED
-                        }(
-                            dy_result.amount,
-                            tokenData[j].root,
-                            tokenData[j].vaultWallet,
-                            sender_address,
-                            deploy_wallet_grams,
-                            notify_success,
-                            success_payload,
-                            _tokenRoots(),
-                            current_version,
-                            original_gas_to
-                        );
                     }
-                } else if (
-                    op == DexOperationTypes.CROSS_PAIR_EXCHANGE &&
-                    notify_success &&
-                    success_payload.toSlice().bits() >= 128
-                ) {
-                    optional(TokenOperation) operation_opt;
-
-                    if (outcoming == lp_root && token_root != lp_root) { // deposit liquidity
-                        uint128[] amounts = new uint128[](N_COINS);
-                        amounts[tokenIndex[token_root]] = tokens_amount;
-                        optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
-
-                        if (!resultOpt.hasValue()) {
-                            need_cancel = true;
-                        } else {
-                            DepositLiquidityResultV2 result = resultOpt.get();
-                            _applyAddLiquidity(result, id, false, sender_address);
-
-                            TvmBuilder builder;
-                            builder.store(lp_vault_wallet);
-
-                            builder.store(id);
-                            builder.store(current_version);
-                            builder.store(DexPoolTypes.STABLESWAP);
-                            builder.store(_tokenRoots());
-                            builder.store(sender_address);
-                            builder.store(deploy_wallet_grams);
-                            builder.store(next_pool);
-
-                            builder.store(success_payload); // actually it is next_payload
-                            builder.store(cancel_payload);  // actually it is success_payload
-                            builder.store(ref3);            // actually it is cancel_payload
-
-                            ITokenRoot(lp_root).mint{
-                                value: 0,
-                                flag: MsgFlag.ALL_NOT_RESERVED
-                            }(
-                                result.lp_reward,
-                                lp_vault_wallet,
-                                deploy_wallet_grams,
-                                original_gas_to,
-                                notify_success,
-                                builder.toCell()
-                            );
-                        }
-                    } else if (token_root == lp_root) { // withdraw liquidity
-
-                        if (tokenIndex.exists(outcoming)) {
-                            operation_opt = _withdrawLiquidityOneCoin(tokens_amount, tokenIndex[outcoming], expected_amount, sender_address);
-                        }
-
-                        if (!operation_opt.hasValue()) {
-                            need_cancel = true;
-                        } else {
-                            IBurnableTokenWallet(msg.sender).burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
-                                tokens_amount,
-                                original_gas_to,
-                                address.makeAddrStd(0, 0),
-                                empty);
-                        }
-                    } else { // exchange
-                        optional(ExpectedExchangeResult) dy_result_opt;
-
-                        if (tokenIndex.exists(outcoming) && token_root != outcoming) {
-                            dy_result_opt = _get_dy(tokenIndex[token_root], tokenIndex[outcoming], tokens_amount);
-                        }
-
-                        if (
-                            !dy_result_opt.hasValue() ||
-                            dy_result_opt.get().amount < expected_amount ||
-                            next_pool.value == 0
-                        ) {
-                            need_cancel = true;
-                        } else {
-                            uint8 i = tokenIndex[token_root];
-                            uint8 j = tokenIndex[outcoming];
-
-                            ExpectedExchangeResult dy_result = dy_result_opt.get();
-                            operation_opt = TokenOperation(dy_result.amount, tokenData[j].root);
-
-                            tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee;
-                            tokenData[j].balance -= dy_result.amount;
-
-                            ExchangeFee[] fees;
-                            fees.push(ExchangeFee(tokenData[i].root, dy_result.pool_fee, dy_result.beneficiary_fee, fee.beneficiary));
-
-                            emit Exchange(
-                                sender_address,
-                                sender_address,
-                                tokenData[i].root,
-                                tokens_amount,
-                                tokenData[j].root,
-                                dy_result.amount,
-                                fees
-                            );
-
-                            if (dy_result.beneficiary_fee > 0) {
-                                tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
-                                _processBeneficiaryFees(false, original_gas_to);
-                            }
-                        }
-                    }
-
-                    if (!need_cancel) {
-                        if (token_root != lp_root) { // deposit or exchange
-                            ITokenWallet(msg.sender).transfer{
-                                value: DexGas.TRANSFER_TOKENS_VALUE,
-                                flag: MsgFlag.SENDER_PAYS_FEES
-                            }(
-                                tokens_amount,
-                                vault,
-                                0,
-                                original_gas_to,
-                                false,
-                                empty
-                            );
-                        }
-
-                        if (outcoming != lp_root) { // withdraw or exchange
-                            IDexBasePool(next_pool).crossPoolExchange{
-                                value: 0,
-                                flag: MsgFlag.ALL_NOT_RESERVED
-                            }(
-                                id,
-
-                                current_version,
-                                DexPoolTypes.STABLESWAP,
-
-                                _tokenRoots(),
-
-                                operation_opt.get().root,
-                                operation_opt.get().amount,
-
-                                sender_address,
-
-                                original_gas_to,
-                                deploy_wallet_grams,
-
-                                success_payload,    // actually it is next_payload
-                                notify_cancel,      // actually it is notify_success
-                                cancel_payload,     // actually it is success_payload
-                                hasRef3,            // actually it is notify_cancel
-                                ref3                // actually it is cancel_payload
-                            );
-                        }
-                    }
-                } else if (op == DexOperationTypes.DEPOSIT_LIQUIDITY) {
-                    uint128[] amounts = new uint128[](N_COINS);
-                    amounts[tokenIndex[token_root]] = tokens_amount;
-                    optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
-
-                    if (!resultOpt.hasValue()) {
-                        need_cancel = true;
-                    } else {
-                        DepositLiquidityResultV2 result = resultOpt.get();
-                        _applyAddLiquidity(result, id, false, sender_address);
-
-                        ITokenWallet(msg.sender).transfer{
-                            value: DexGas.TRANSFER_TOKENS_VALUE,
-                            flag: MsgFlag.SENDER_PAYS_FEES
-                        }(
-                            tokens_amount,
-                            vault,
-                            0,
-                            original_gas_to,
-                            false,
-                            empty
-                        );
-
-                        ITokenRoot(lp_root).mint{
-                            value: 0,
-                            flag: MsgFlag.ALL_NOT_RESERVED
-                        }(
-                            result.lp_reward,
-                            sender_address,
-                            deploy_wallet_grams,
-                            original_gas_to,
-                            notify_success,
-                            success_payload
-                        );
-                    }
-                } else {
-                    need_cancel = true;
                 }
+
+                if (!need_cancel) {
+                    if (token_root != lp_root) { // deposit or exchange
+                        ITokenWallet(msg.sender).transfer{
+                            value: DexGas.TRANSFER_TOKENS_VALUE,
+                            flag: MsgFlag.SENDER_PAYS_FEES
+                        }(
+                            tokens_amount,
+                            vault,
+                            0,
+                            original_gas_to,
+                            false,
+                            empty
+                        );
+                    }
+
+                    if (outcoming != lp_root) { // withdraw or exchange
+                        IDexBasePool(next_pool).crossPoolExchange{
+                            value: 0,
+                            flag: MsgFlag.ALL_NOT_RESERVED
+                        }(
+                            id,
+
+                            current_version,
+                            DexPoolTypes.STABLESWAP,
+
+                            _tokenRoots(),
+
+                            operation_opt.get().root,
+                            operation_opt.get().amount,
+
+                            sender_address,
+
+                            original_gas_to,
+                            deploy_wallet_grams,
+
+                            success_payload,    // actually it is next_payload
+                            notify_cancel,      // actually it is notify_success
+                            cancel_payload,     // actually it is success_payload
+                            hasRef3,            // actually it is notify_cancel
+                            ref3                // actually it is cancel_payload
+                        );
+                    }
+                }
+            } else if (msg.sender != lp_wallet && op == DexOperationTypes.DEPOSIT_LIQUIDITY) {
+                uint128[] amounts = new uint128[](N_COINS);
+                amounts[tokenIndex[token_root]] = tokens_amount;
+                optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
+
+                if (!resultOpt.hasValue()) {
+                    need_cancel = true;
+                } else {
+                    DepositLiquidityResultV2 result = resultOpt.get();
+                    _applyAddLiquidity(result, id, false, sender_address);
+
+                    ITokenWallet(msg.sender).transfer{
+                        value: DexGas.TRANSFER_TOKENS_VALUE,
+                        flag: MsgFlag.SENDER_PAYS_FEES
+                    }(
+                        tokens_amount,
+                        vault,
+                        0,
+                        original_gas_to,
+                        false,
+                        empty
+                    );
+
+                    ITokenRoot(lp_root).mint{
+                        value: 0,
+                        flag: MsgFlag.ALL_NOT_RESERVED
+                    }(
+                        result.lp_reward,
+                        sender_address,
+                        deploy_wallet_grams,
+                        original_gas_to,
+                        notify_success,
+                        success_payload
+                    );
+                }
+            } else {
+                need_cancel = true;
             }
         }
 
@@ -1050,7 +1050,7 @@ contract DexStablePool is
         bool notify_cancel,
         TvmCell cancel_payload
     ) override external onlyPairOrVault(prev_pool_token_roots) {
-        require(tokenIndex.exists(spent_token_root), DexErrors.NOT_TOKEN_ROOT);
+        require(tokenIndex.exists(spent_token_root) || spent_token_root == lp_root, DexErrors.NOT_TOKEN_ROOT);
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
@@ -1083,13 +1083,16 @@ contract DexStablePool is
                     TvmBuilder builder;
                     builder.store(lp_vault_wallet);
 
-                    builder.store(id);
-                    builder.store(current_version);
-                    builder.store(DexPoolTypes.STABLESWAP);
-                    builder.store(_tokenRoots());
-                    builder.store(sender_address);
-                    builder.store(deploy_wallet_grams);
-                    builder.store(next_pool);
+                    TvmCell exchange_data = abi.encode(
+                        id,
+                        current_version,
+                        DexPoolTypes.STABLESWAP,
+                        _tokenRoots(),
+                        sender_address,
+                        deploy_wallet_grams,
+                        next_pool
+                    );
+                    builder.store(exchange_data);
 
                     builder.store(next_payload);
                     builder.store(success_payload);
@@ -1100,10 +1103,10 @@ contract DexStablePool is
                         flag: MsgFlag.ALL_NOT_RESERVED
                     }(
                         result.lp_reward,
-                        lp_vault_wallet,
+                        vault,
                         deploy_wallet_grams,
                         original_gas_to,
-                        notify_success,
+                        true,
                         builder.toCell()
                     );
                 }
@@ -1116,11 +1119,17 @@ contract DexStablePool is
                 if (!operation_opt.hasValue()) {
                     need_cancel = true;
                 } else {
-                    IBurnableTokenWallet(msg.sender).burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
+                    IDexVault(vault).burn{
+                        value: DexGas.BURN_VALUE,
+                        flag: MsgFlag.SENDER_PAYS_FEES
+                    }(
+                        _tokenRoots(),
+                        lp_vault_wallet,
                         spent_amount,
                         original_gas_to,
                         address.makeAddrStd(0, 0),
-                        empty);
+                        empty
+                    );
                 }
             } else { // exchange
                 optional(ExpectedExchangeResult) dy_result_opt;

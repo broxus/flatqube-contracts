@@ -47,7 +47,7 @@ async function logGas() {
 }
 
 const loadWallets = async (data) => {
-  const tokenData = Constants.tokens[data.tokenId];
+  const tokenData = data.tokenId.slice(-2) === 'Lp' ? {name: data.tokenId, symbol: data.tokenId, decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[data.tokenId];
   data.tokenRoot = migration.load(
     await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH),
     tokenData.symbol + 'Root'
@@ -120,7 +120,7 @@ describe('Check Deposit to Dex Account', async function () {
     for (const deposit of deposits) {
       deposit.history = [];
       await loadWallets(deposit);
-      const tokenData = Constants.tokens[deposit.tokenId];
+      const tokenData = deposit.tokenId.slice(-2) === 'Lp' ? {name: deposit.tokenId, symbol: deposit.tokenId, decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[deposit.tokenId];
       displayBalances(tokenData.symbol, deposit);
     }
 
@@ -129,7 +129,7 @@ describe('Check Deposit to Dex Account', async function () {
   })
 
   for (const deposit of deposits) {
-    const tokenData = Constants.tokens[deposit.tokenId];
+    const tokenData = deposit.tokenId.slice(-2) === 'Lp' ? {name: deposit.tokenId, symbol: deposit.tokenId, decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[deposit.tokenId];
     describe(`Check ${tokenData.symbol} make deposit to dex account`, async function () {
       before(`Make ${tokenData.symbol} deposit`, async function () {
         logger.log('#################################################');

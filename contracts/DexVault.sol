@@ -7,6 +7,7 @@ pragma AbiHeader pubkey;
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
+import "ton-eth-bridge-token-contracts/contracts/interfaces/IBurnableTokenWallet.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensMintCallback.sol";
 
 import "./abstract/DexContractBase.sol";
@@ -500,13 +501,15 @@ contract DexVault is
         address lp_vault_wallet = payloadSlice.decode(address);
         require(msg.sender.value != 0 && msg.sender == lp_vault_wallet, DexErrors.NOT_LP_VAULT_WALLET);
 
+        TvmCell exchange_data = payloadSlice.loadRef();
+
         (uint64 id,
         uint32 current_version,
         uint8 current_type,
         address[] roots,
         address sender_address,
         uint128 deploy_wallet_grams,
-        address next_pool) = payloadSlice.decode(uint64, uint32, uint8, address[], address, uint128, address);
+        address next_pool) = abi.decode(exchange_data, (uint64, uint32, uint8, address[], address, uint128, address));
 
         TvmCell next_payload;
         TvmCell success_payload;
@@ -575,5 +578,23 @@ contract DexVault is
                     success_payload
                 );
         }
+    }
+
+    function burn(
+        address[] _roots,
+        address _lpVaultWallet,
+        uint128 _amount,
+        address _remainingGasTo,
+        address _callbackTo,
+        TvmCell _payload
+    ) external override onlyPair(_roots) {
+        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
+
+        IBurnableTokenWallet(_lpVaultWallet).burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
+            _amount,
+            _remainingGasTo,
+            _callbackTo,
+            _payload
+        );
     }
 }

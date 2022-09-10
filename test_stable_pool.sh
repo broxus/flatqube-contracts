@@ -26,4 +26,19 @@ npx locklift test $NO_TRACE --tests test/15-dex-account-pool-operations.js --roo
 
 npx locklift test $NO_TRACE --tests test/20-pool-direct-operations.js --roots='["foo", "bar", "qwe"]' --contract_name='DexStablePool'
 
-npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=1000 --pool_route='[["foo","bar","qwe"],["qwe","tst","coin"]]' --token_route='["bar","qwe","coin"]' --pair_contract_name='DexPair' --pool_contract_name='DexStablePool'
+npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["tst", "FooBarQweLp"],["tst","coin"],["tst","foo"]]' --contract_name='DexPair'
+npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='tst' --right='FooBarQweLp' --account=2 --contract_name='DexPair' --ignore_already_added='true'
+npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='tst' --right='coin' --account=2 --contract_name='DexPair' --ignore_already_added='true'
+npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='tst' --right='foo' --account=2 --contract_name='DexPair' --ignore_already_added='true'
+npx locklift test $NO_TRACE --tests test/12-pool-deposit-liquidity.js --roots='["foo", "bar", "qwe"]' --amounts='[100000, 100000, 100000]' --contract_name='DexStablePool'
+npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits='[{ "tokenId": "FooBarQweLp", "amount": 30000 }]'
+npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'tst' --right_token_id 'FooBarQweLp' --left_amount '10000' --right_amount '10000' --auto_change 'false' --contract_name='DexPair'
+npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'tst' --right_token_id 'coin' --left_amount '10000' --right_amount '10000' --auto_change 'false' --contract_name='DexPair'
+npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'tst' --right_token_id 'foo' --left_amount '10000' --right_amount '10000' --auto_change 'false' --contract_name='DexPair'
+
+npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=1000 --pool_route='[["foo","bar","qwe"],["tst","FooBarQweLp"],["tst","coin"]]' --token_route='["bar","FooBarQweLp","tst","coin"]' --pair_contract_name='DexPair' --pool_contract_name='DexStablePool'
+npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=1000 --pool_route='[["tst","coin"],["tst","FooBarQweLp"],["foo","bar","qwe"]]' --token_route='["coin","tst","FooBarQweLp","qwe"]' --pair_contract_name='DexPair' --pool_contract_name='DexStablePool'
+npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=1000 --pool_route='[["tst","foo"],["foo","bar","qwe"]]' --token_route='["tst","foo","FooBarQweLp"]' --pair_contract_name='DexPair' --pool_contract_name='DexStablePool'
+npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=50 --pool_route='[["foo","bar","qwe"],["tst","foo"]]' --token_route='["FooBarQweLp","foo","tst"]' --pair_contract_name='DexPair' --pool_contract_name='DexStablePool'
+npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=1000 --pool_route='[["foo","bar","qwe"],["tst","foo"],["qwe", "tst", "coin"]]' --token_route='["bar","foo","tst","qwe"]' --pair_contract_name='DexPair' --pool_contract_name='DexStablePool'
+npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=1000 --pool_route='[["foo","bar","qwe"],["qwe", "tst", "coin"]]' --token_route='["bar","qwe","tst"]'

@@ -23,8 +23,8 @@ options.account = options.account || 2;
 options.ignore_already_added = options.ignore_already_added === 'true';
 options.contract_name = options.contract_name || 'DexPair';
 
-const tokenLeft = Constants.tokens[options.left];
-const tokenRight = Constants.tokens[options.right];
+const tokenLeft = options.left.slice(-2) === 'Lp' ? {name: options.left, symbol: options.left, decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[options.left];
+const tokenRight = options.right.slice(-2) === 'Lp' ? {name: options.right, symbol: options.right, decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[options.right];
 
 let DexAccount;
 

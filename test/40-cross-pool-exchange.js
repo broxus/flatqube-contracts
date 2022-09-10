@@ -23,7 +23,7 @@ program.parse(process.argv);
 const options = program.opts();
 
 options.amount = options.amount ? +options.amount : 100;
-options.token_route = options.token_route ? JSON.parse(options.token_route) : ['foo', 'tst', 'bar'];
+options.token_route = options.token_route ? JSON.parse(options.token_route) : ["foo","tst","bar"];
 options.pool_route = options.pool_route ? JSON.parse(options.pool_route) : [["foo","tst"],["bar","tst"]];
 options.wrong_pool = options.wrong_pool ? JSON.parse(options.wrong_pool) : [];
 options.pair_contract_name = options.pair_contract_name || 'DexPair';
@@ -45,9 +45,9 @@ let keyPairs;
 async function dexBalances() {
     const balances = {};
 
-    for (const r of options.token_route) {
-        balances[r] = await dexWallets[r].call({method: 'balance', params: {}}).then(n => {
-            return new BigNumber(n).shiftedBy(-Constants.tokens[r].decimals).toString();
+    for (const tokenId of options.token_route) {
+        balances[tokenId] = await dexWallets[tokenId].call({method: 'balance', params: {}}).then(n => {
+            return new BigNumber(n).shiftedBy(-tokens[tokenId].decimals).toString();
         });
     }
 
@@ -57,9 +57,9 @@ async function dexBalances() {
 async function account3balances() {
     const balances = {};
 
-    for (const r of options.token_route) {
-        await accountWallets[r].call({method: 'balance', params: {}}).then(n => {
-            balances[r] = new BigNumber(n).shiftedBy(-Constants.tokens[r].decimals).toString();
+    for (const tokenId of options.token_route) {
+        await accountWallets[tokenId].call({method: 'balance', params: {}}).then(n => {
+            balances[tokenId] = new BigNumber(n).shiftedBy(-tokens[tokenId].decimals).toString();
         }).catch(e => {/*ignored*/});
     }
 
@@ -93,11 +93,13 @@ async function dexPoolInfo(pool_tokens) {
         }
         return {
             symbols: token_symbols,
-            balances: token_balances
+            balances: token_balances,
+            lp_symbol: poolName + 'Lp',
+            lp_supply: '0'
         };
     }
 
-    let token_symbols, token_balances;
+    let token_symbols, token_balances, lp_supply;
     if (pool_tokens.length === 2) { // pairs
         const Pool = await locklift.factory.getContract(options.pair_contract_name);
 
@@ -108,6 +110,8 @@ async function dexPoolInfo(pool_tokens) {
         }
         const poolRoots = await Pool.call({method: 'getTokenRoots', params: {}});
         const balances = await Pool.call({method: 'getBalances', params: {}});
+
+        lp_supply = new BigNumber(balances.lp_supply).shiftedBy(-tokens[poolName + 'Lp'].decimals).toString();
 
         token_symbols = [tokens[pool_tokens[0]].symbol, tokens[pool_tokens[1]].symbol];
         if (poolRoots.left === tokenRoots[pool_tokens[0]].address) {
@@ -123,6 +127,8 @@ async function dexPoolInfo(pool_tokens) {
         migration.load(Pool, `DexPool${poolName}`);
         const poolRoots = (await Pool.call({method: 'getTokenRoots', params: {}})).roots;
         const balances = await Pool.call({method: 'getBalances', params: {}});
+
+        lp_supply = new BigNumber(balances.lp_supply).shiftedBy(-tokens[poolName + 'Lp'].decimals).toString();
 
         token_symbols = [];
         token_balances = [];
@@ -140,14 +146,16 @@ async function dexPoolInfo(pool_tokens) {
 
     return {
         symbols: token_symbols,
-        balances: token_balances
+        balances: token_balances,
+        lp_symbol: poolName + 'Lp',
+        lp_supply: lp_supply
     };
 }
 
 function logBalances(header, dex, account, pools) {
-    let dexStr = `DEX balance ${header}: ` + options.token_route.map(r => `${dex[r]} ${Constants.tokens[r].symbol}`).join(', ');
+    let dexStr = `DEX balance ${header}: ` + options.token_route.map(r => `${dex[r]} ${tokens[r].symbol}`).join(', ');
     let accountStr = `Account#3 balance ${header}: ` + options.token_route.map(r =>
-        `${account[r] || 0} ${Constants.tokens[r].symbol}` + (account[r] === undefined ? ' (not deployed)' : '')
+        `${account[r] || 0} ${tokens[r].symbol}` + (account[r] === undefined ? ' (not deployed)' : '')
     ).join(', ');
 
     accountStr += ', ' + account.ton + ' TON';
@@ -162,9 +170,9 @@ function logBalances(header, dex, account, pools) {
 
         let logs = `DexPool#${poolName}: `;
         for (let i = 0; i < p.symbols.length; i++) {
-            logs += `${p.balances[i]} ${p.symbols[i]}`;
-            logs += i === p.symbols.length ? '.' : ', ';
+            logs += `${p.balances[i]} ${p.symbols[i]}, `;
         }
+        logs += `${p.lp_supply} ${p.lp_symbol}`;
         logger.log(logs);
     });
 }
@@ -198,42 +206,24 @@ describe('Check direct operations', async function () {
         logger.log('DexVault: ' + DexVault.address);
         logger.log('Account#3: ' + Account3.address);
 
-        for (const tokenId of options.token_route) {
-            const dexWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
-            const accountWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
-
-            if (migration.exists(Constants.tokens[tokenId].symbol + 'Wallet3')) {
-                migration.load(accountWallet, Constants.tokens[tokenId].symbol + 'Wallet3');
-                logger.log(`${Constants.tokens[tokenId].symbol}Wallet#3: ${accountWallet.address}`);
-            } else {
-                const expectedAccountWallet = await root.call({
-                    method: 'walletOf',
-                    params: {
-                        walletOwner: Account3.address
-                    }
-                });
-                accountWallet.setAddress(expectedAccountWallet);
-                logger.log(`${Constants.tokens[tokenId].symbol}Wallet#3: ${expectedAccountWallet} (not deployed)`);
-            }
-
-            migration.load(dexWallet, Constants.tokens[tokenId].symbol + 'VaultWallet');
-            dexWallets[tokenId] = dexWallet;
-            accountWallets[tokenId] = accountWallet;
-            logger.log(`${Constants.tokens[tokenId].symbol}VaultWallet: ${dexWallet.address}`);
-        }
         for (const pool_tokens of options.pool_route) {
             let poolName = '';
             for (let token of pool_tokens) {
-                tokens[token] = Constants.tokens[token];
+                if (token.slice(-2) === 'Lp') {
+                    tokens[token] = {name: token, symbol: token, decimals: Constants.LP_DECIMALS, upgradeable: true};
+                } else {
+                    tokens[token] = Constants.tokens[token];
+                }
                 poolName += tokens[token].symbol;
 
                 if (tokenRoots[token] === undefined) {
                     const root = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
-                    migration.load(root, Constants.tokens[token].symbol + 'Root');
+                    migration.load(root, tokens[token].symbol + 'Root');
                     tokenRoots[token] = root;
-                    logger.log(`${Constants.tokens[token].symbol}TokenRoot: ${root.address}`);
+                    logger.log(`${tokens[token].symbol}TokenRoot: ${root.address}`);
                 }
             }
+            tokens[poolName + 'Lp'] = {name: poolName + 'Lp', symbol: poolName + 'Lp', decimals: Constants.LP_DECIMALS, upgradeable: true};
 
             let pool;
             if (pool_tokens.length === 2) { // pair
@@ -263,6 +253,38 @@ describe('Check direct operations', async function () {
             poolsContracts[poolName] = pool;
         }
 
+        for (const tokenId of options.token_route) {
+            const dexWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
+            const accountWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
+
+            let tokenName = tokenId.slice(-2) === 'Lp' ? tokenId : Constants.tokens[tokenId].symbol;
+            if (tokenRoots[tokenName] === undefined) {
+                tokens[tokenName] = {name: tokenName, symbol: tokenName, decimals: Constants.LP_DECIMALS, upgradeable: true};
+                const root = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
+                migration.load(root, tokenName + 'Root');
+                tokenRoots[tokenName] = root;
+                logger.log(`${tokenName}TokenRoot: ${root.address}`);
+            }
+            if (migration.exists(tokenName + 'Wallet3')) {
+                migration.load(accountWallet, tokenName + 'Wallet3');
+                logger.log(`${tokenName}Wallet#3: ${accountWallet.address}`);
+            } else {
+                const expectedAccountWallet = await tokenRoots[tokenName].call({
+                    method: 'walletOf',
+                    params: {
+                        walletOwner: Account3.address
+                    }
+                });
+                accountWallet.setAddress(expectedAccountWallet);
+                logger.log(`${tokenName}Wallet#3: ${expectedAccountWallet} (not deployed)`);
+            }
+
+            migration.load(dexWallet, tokenName + 'VaultWallet');
+            dexWallets[tokenId] = dexWallet;
+            accountWallets[tokenId] = accountWallet;
+            logger.log(`${tokenName}VaultWallet: ${dexWallet.address}`);
+        }
+
         await migration.balancesCheckpoint();
     });
 
@@ -283,7 +305,8 @@ describe('Check direct operations', async function () {
 
             const expectedPoolBalances = {};
             const steps = [];
-            let currentAmount = new BigNumber(options.amount).shiftedBy(Constants.tokens[options.token_route[0]].decimals).toString();
+            let currentAmount = new BigNumber(options.amount)
+                .shiftedBy(tokens[options.token_route[0]].decimals).toString();
 
             // Calculate expected result
             logger.log(`### EXPECTED ###`);
@@ -319,34 +342,78 @@ describe('Check direct operations', async function () {
                     for (let token of options.pool_route[i - 1]) {
                         poolName += tokens[token].symbol;
                     }
-                    let expected;
-                    if (options.pool_route[i - 1].length === 2) { // pair
+
+                    let expected, expected_amount;
+                    let spent_token_idx;
+                    if (options.token_route[i - 1].slice(-2) === 'Lp' && !options.pool_route[i - 1].includes(options.token_route[i - 1])) { // spent token is lp token of the current pool
                         expected = await poolsContracts[poolName].call({
-                            method: 'expectedExchange', params: {
-                                amount: currentAmount,
-                                spent_token_root: tokenRoots[options.token_route[i - 1]].address
+                            method: 'expectedWithdrawLiquidityOneCoin', params: {
+                                lp_amount: currentAmount,
+                                outcoming: tokenRoots[options.token_route[i]].address
                             }
                         });
-                    } else { // pool
+                        expected_amount = expected.amount;
+                    } else if (options.token_route[i].slice(-2) === 'Lp' && !options.pool_route[i - 1].includes(options.token_route[i])) { // receive token is lp token of the current pool
+                        const poolRoots = (await poolsContracts[poolName].call({method: 'getTokenRoots', params: {}})).roots;
+                        const amounts = [];
+                        for (let idx = 0; idx < poolRoots.length; idx++) {
+                            for (let token of options.pool_route[i - 1]) {
+                                if (poolRoots[idx] === tokenRoots[token].address) {
+                                    if (token === options.token_route[i - 1]) {
+                                        amounts.push(currentAmount);
+                                        spent_token_idx = idx;
+                                    } else {
+                                        amounts.push('0');
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+
                         expected = await poolsContracts[poolName].call({
-                            method: 'expectedExchange', params: {
-                                amount: currentAmount,
-                                spent_token_root: tokenRoots[options.token_route[i - 1]].address,
-                                receive_token_root: tokenRoots[options.token_route[i]].address
+                            method: 'expectedDepositLiquidityV2', params: {
+                                amounts: amounts,
                             }
                         });
+                        expected_amount = expected.lp_reward;
+                    } else {
+                        if (options.pool_route[i - 1].length === 2) { // pair
+                            expected = await poolsContracts[poolName].call({
+                                method: 'expectedExchange', params: {
+                                    amount: currentAmount,
+                                    spent_token_root: tokenRoots[options.token_route[i - 1]].address
+                                }
+                            });
+                        } else { // pool
+                            expected = await poolsContracts[poolName].call({
+                                method: 'expectedExchange', params: {
+                                    amount: currentAmount,
+                                    spent_token_root: tokenRoots[options.token_route[i - 1]].address,
+                                    receive_token_root: tokenRoots[options.token_route[i]].address
+                                }
+                            });
+                        }
+                        expected_amount = expected.expected_amount;
                     }
+
                     console.log()
                     let tokenLeft = tokens[options.token_route[i - 1]];
                     let tokenRight = tokens[options.token_route[i]];
                     let logStr = `${new BigNumber(currentAmount).shiftedBy(-tokenLeft.decimals)} ${tokenLeft.symbol}`;
                     logStr += ' -> ';
-                    logStr += `${new BigNumber(expected.expected_amount).shiftedBy(-tokenRight.decimals)} ${tokenRight.symbol}`;
-                    logStr += `, fee = ${new BigNumber(expected.expected_fee).shiftedBy(-tokenLeft.decimals)} ${tokenLeft.symbol}`;
+                    logStr += `${new BigNumber(expected_amount).shiftedBy(-tokenRight.decimals)} ${tokenRight.symbol}`;
+                    if (options.token_route[i - 1].slice(-2) === 'Lp' && !options.pool_route[i - 1].includes(options.token_route[i - 1])) { // spent token is lp token of the current pool
+                        logStr += `, fee = ${new BigNumber(expected.expected_fee).shiftedBy(-tokenRight.decimals)} ${tokenRight.symbol}`;
+                    } else if (options.token_route[i].slice(-2) === 'Lp' && !options.pool_route[i - 1].includes(options.token_route[i])) { // receive token is lp token of the current pool
+                        logStr += `, fee = ${new BigNumber(expected.pool_fees[spent_token_idx]).plus(expected.beneficiary_fees[spent_token_idx])
+                            .shiftedBy(-tokenLeft.decimals)} ${tokenLeft.symbol}`;
+                    } else {
+                        logStr += `, fee = ${new BigNumber(expected.expected_fee).shiftedBy(-tokenLeft.decimals)} ${tokenLeft.symbol}`;
+                    }
                     logger.log(logStr);
 
                     steps.push({
-                        amount: new BigNumber(expected.expected_amount).dp(0, BigNumber.ROUND_DOWN).toString(),
+                        amount: new BigNumber(expected_amount).dp(0, BigNumber.ROUND_DOWN).toString(),
                         roots: pool_roots,
                         outcoming: tokenRoots[options.token_route[i]].address
                     });
@@ -359,7 +426,7 @@ describe('Check direct operations', async function () {
                             );
                         } else if (options.pool_route[i - 1][idx] === options.token_route[i]) {
                             expected_balances.push(
-                                new BigNumber(poolsStart[poolName].balances[idx]).minus(new BigNumber(expected.expected_amount).shiftedBy(-tokenRight.decimals)).toString()
+                                new BigNumber(poolsStart[poolName].balances[idx]).minus(new BigNumber(expected_amount).shiftedBy(-tokenRight.decimals)).toString()
                             );
                         } else {
                             expected_balances.push(
@@ -367,9 +434,18 @@ describe('Check direct operations', async function () {
                             );
                         }
                     }
-                    expectedPoolBalances[poolName] = expected_balances;
+                    let expected_lp_supply;
+                    if (options.token_route[i - 1].slice(-2) === 'Lp' && !options.pool_route[i - 1].includes(options.token_route[i - 1])) { // spent token is lp token of the current pool
+                        expected_lp_supply = new BigNumber(poolsStart[poolName].lp_supply).minus(new BigNumber(currentAmount).shiftedBy(-tokenLeft.decimals)).toString()
+                    } else if (options.token_route[i].slice(-2) === 'Lp' && !options.pool_route[i - 1].includes(options.token_route[i])) { // receive token is lp token of the current pool
+                        expected_lp_supply = new BigNumber(poolsStart[poolName].lp_supply).plus(new BigNumber(expected_amount).shiftedBy(-tokenRight.decimals)).toString()
+                    } else {
+                        expected_lp_supply = poolsStart[poolName].lp_supply;
+                    }
 
-                    currentAmount = expected.expected_amount.toString();
+                    expectedPoolBalances[poolName] = {lp_supply: expected_lp_supply, balances: expected_balances};
+
+                    currentAmount = expected_amount.toString();
                 }
             }
             logger.log('');
@@ -417,7 +493,8 @@ describe('Check direct operations', async function () {
                 contract: accountWallets[options.token_route[0]],
                 method: 'transfer',
                 params: {
-                    amount: new BigNumber(options.amount).shiftedBy(Constants.tokens[options.token_route[0]].decimals).toString(),
+                    amount: new BigNumber(options.amount)
+                        .shiftedBy(tokens[options.token_route[0]].decimals).toString(),
                     recipient: firstPool.address,
                     deployWalletValue: 0,
                     remainingGasTo: Account3.address,
@@ -447,33 +524,44 @@ describe('Check direct operations', async function () {
 
             const expectedAccountFirst = new BigNumber(accountStart[options.token_route[0]] || 0).minus(options.amount).toString();
             const expectedAccountLast = new BigNumber(currentAmount)
-                .shiftedBy(-Constants.tokens[lastTokenN].decimals)
+                .shiftedBy(-tokens[lastTokenN].decimals)
                 .plus(accountStart[lastTokenN] || 0).toString();
 
             expect(expectedAccountFirst).to.equal(accountEnd[options.token_route[0]],
-                `Account#3 wrong ${Constants.tokens[options.token_route[0]].symbol} balance`);
+                `Account#3 wrong ${tokens[options.token_route[0]].symbol} balance`);
             expect(expectedAccountLast).to.equal(accountEnd[lastTokenN],
-                `Account#3 wrong ${Constants.tokens[lastTokenN].symbol} balance`);
+                `Account#3 wrong ${tokens[lastTokenN].symbol} balance`);
 
-            const expectedDexFirst = new BigNumber(dexStart[options.token_route[0]] || 0).plus(options.amount).toString();
-            const expectedDexLast = new BigNumber(dexStart[lastTokenN])
-                .minus(
-                    new BigNumber(currentAmount)
-                        .shiftedBy(-Constants.tokens[lastTokenN].decimals)
-                ).toString();
+            let expectedDexLast, expectedDexFirst;
+            if (options.token_route[0].slice(-2) === 'Lp' && !options.pool_route[0].includes(options.token_route[0])) { // burn lp token (not transfer to vault)
+                expectedDexFirst = new BigNumber(dexStart[options.token_route[0]]).toString();
+            } else {
+                expectedDexFirst = new BigNumber(dexStart[options.token_route[0]] || 0).plus(options.amount).toString();
+            }
+
+            if (lastTokenN.slice(-2) === 'Lp' && !options.pool_route[options.pool_route.length - 1].includes(lastTokenN)) { // mint lp token (not transfer from vault)
+                expectedDexLast = new BigNumber(dexStart[lastTokenN]).toString();
+            } else {
+                expectedDexLast = new BigNumber(dexStart[lastTokenN])
+                    .minus(
+                        new BigNumber(currentAmount)
+                            .shiftedBy(-tokens[lastTokenN].decimals)
+                    ).toString();
+            }
 
             expect(expectedDexFirst).to.equal(dexEnd[options.token_route[0]],
-                `DexVault wrong ${Constants.tokens[options.token_route[0]].symbol} balance`);
+                `DexVault wrong ${tokens[options.token_route[0]].symbol} balance`);
             expect(expectedDexLast).to.equal(dexEnd[lastTokenN],
-                `DexVault wrong ${Constants.tokens[lastTokenN].symbol} balance`);
-
+                `DexVault wrong ${tokens[lastTokenN].symbol} balance`);
 
             for (let poolName in poolsEnd) {
                 if (expectedPoolBalances[poolName]) {
-                    for (let idx = 0; idx < expectedPoolBalances[poolName].length; idx++) {
-                        expect(new BigNumber(poolsEnd[poolName].balances[idx]).toString()).to.equal(expectedPoolBalances[poolName][idx],
+                    for (let idx = 0; idx < expectedPoolBalances[poolName].balances.length; idx++) {
+                        expect(new BigNumber(poolsEnd[poolName].balances[idx]).toString()).to.equal(expectedPoolBalances[poolName].balances[idx],
                             `DexPair${poolName} wrong ${poolsEnd[poolName].symbols[idx]} balance`);
                     }
+                    expect(new BigNumber(poolsEnd[poolName].lp_supply).toString()).to.equal(expectedPoolBalances[poolName].lp_supply,
+                        `DexPair${poolName} wrong ${poolsEnd[poolName].lp_symbol} balance`);
                 }
             }
         });

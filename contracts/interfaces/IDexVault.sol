@@ -90,6 +90,15 @@ interface IDexVault {
         address _remainingGasTo
     ) external;
 
+    function burn(
+        address[] _roots,
+        address _lpVaultWallet,
+        uint128 _amount,
+        address _remainingGasTo,
+        address _callbackTo,
+        TvmCell _payload
+    ) external;
+
     function transferOwner(address new_owner) external;
     function acceptOwner() external;
 
