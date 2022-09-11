@@ -602,7 +602,7 @@ contract DexStablePair is
         address account_owner,
         uint32 /*account_version*/,
         address send_gas_to
-    ) override external onlyActive onlyAconlyAccountcount(account_owner) {
+    ) override external onlyActive onlyAccount(account_owner) {
         require(_expected.root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
         require(lp_supply != 0 || (_operations[0].amount > 0 && _operations[1].amount > 0), DexErrors.WRONG_LIQUIDITY);
         require(
