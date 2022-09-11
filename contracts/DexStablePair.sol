@@ -16,6 +16,7 @@ import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "./libraries/DexOperationTypes.sol";
+import "./libraries/PairPayload.sol";
 
 import "./interfaces/IUpgradableByRequest.sol";
 import "./interfaces/IDexRoot.sol";
@@ -199,28 +200,39 @@ contract DexStablePair is
     // Direct operations
 
     function buildExchangePayload(uint64 id, uint128 deploy_wallet_grams, uint128 expected_amount) external pure returns (TvmCell) {
-        TvmBuilder builder;
-        builder.store(DexOperationTypes.EXCHANGE);
-        builder.store(id);
-        builder.store(deploy_wallet_grams);
-        builder.store(expected_amount);
-        return builder.toCell();
+        return PairPayload.buildExchangePayload(
+            id,
+            deploy_wallet_grams,
+            expected_amount
+        );
+    }
+
+    function buildExchangePayloadV2(
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedAmount,
+        address _outcoming
+    ) external pure returns (TvmCell) {
+        return PairPayload.buildExchangePayloadV2(
+            _id,
+            _deployWalletGrams,
+            _expectedAmount,
+            _outcoming
+        );
     }
 
     function buildDepositLiquidityPayload(uint64 id, uint128 deploy_wallet_grams) external pure returns (TvmCell) {
-        TvmBuilder builder;
-        builder.store(DexOperationTypes.DEPOSIT_LIQUIDITY);
-        builder.store(id);
-        builder.store(deploy_wallet_grams);
-        return builder.toCell();
+        return PairPayload.buildDepositLiquidityPayload(
+            id,
+            deploy_wallet_grams
+        );
     }
 
     function buildWithdrawLiquidityPayload(uint64 id, uint128 deploy_wallet_grams) external pure returns (TvmCell) {
-        TvmBuilder builder;
-        builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY);
-        builder.store(id);
-        builder.store(deploy_wallet_grams);
-        return builder.toCell();
+        return PairPayload.buildWithdrawLiquidityPayload(
+            id,
+            deploy_wallet_grams
+        );
     }
 
     function buildCrossPairExchangePayload(
@@ -229,28 +241,36 @@ contract DexStablePair is
         uint128 expected_amount,
         TokenOperation[] steps
     ) external pure returns (TvmCell) {
-        require(steps.length > 0);
-        TvmBuilder builder;
+        return PairPayload.buildCrossPairExchangePayload(
+            id,
+            deploy_wallet_grams,
+            expected_amount,
+            steps
+        );
+    }
 
-        builder.store(DexOperationTypes.CROSS_PAIR_EXCHANGE);
-        builder.store(id);
-        builder.store(deploy_wallet_grams);
-        builder.store(expected_amount);
-        builder.store(steps[0].root);
+    function buildCrossPairExchangePayloadV2(
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedAmount,
+        address _outcoming,
+        ExchangeStep[] _steps
+    ) external view returns (TvmCell) {
+        address[] pairs;
 
-        TvmBuilder next_step_builder;
-        next_step_builder.store(steps[steps.length - 1].amount);
-
-        for (uint i = steps.length - 1; i > 0; i--) {
-            TvmBuilder current_step_builder;
-            current_step_builder.store(steps[i - 1].amount, steps[i].root);
-            current_step_builder.store(next_step_builder.toCell());
-            next_step_builder = current_step_builder;
+        // Calculate pairs' addresses by token roots
+        for (uint i = 0; i < _steps.length; i++) {
+            pairs.push(_expectedPairAddress(_steps[i].roots));
         }
 
-        builder.store(next_step_builder.toCell());
-
-        return builder.toCell();
+        return PairPayload.buildCrossPairExchangePayloadV2(
+            _id,
+            _deployWalletGrams,
+            _expectedAmount,
+            _outcoming,
+            _steps,
+            pairs
+        );
     }
 
     function onAcceptTokensTransfer(
@@ -263,13 +283,31 @@ contract DexStablePair is
     ) override external {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        (
+            bool is_valid,
+            uint64 id,
+            uint8 op,
+            uint128 deploy_wallet_grams,
+            uint128 expected_amount,
+            address next_pair_or_token_root,
+            address outcoming,
+            bool hasRef3,
+            TvmCell ref3,
+            bool notify_success,
+            TvmCell success_payload,
+            bool notify_cancel,
+            TvmCell cancel_payload
+        ) = PairPayload.decodeOnAcceptTokensTransferPayload(payload);
+
         TvmSlice payloadSlice = payload.toSlice();
 
+        TvmCell empty;
+
         bool need_cancel = !active ||
-            payloadSlice.bits() < 200 ||
-            lp_supply == 0 ||
-            msg.sender.value == 0 ||
-            msg.value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2;
+        !is_valid ||
+        lp_supply == 0 ||
+        msg.sender.value == 0 ||
+        msg.value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2;
 
         if (token_root == lp_root) {
             need_cancel = need_cancel || msg.sender != lp_wallet;
@@ -279,26 +317,7 @@ contract DexStablePair is
             msg.sender != tokenData[tokenIndex.at(token_root)].wallet;
         }
 
-        bool notify_success = payloadSlice.refs() >= 1;
-        bool notify_cancel = payloadSlice.refs() >= 2;
-        bool hasRef3 = payloadSlice.refs() >= 3;
-        TvmCell empty;
-        TvmCell success_payload;
-        TvmCell cancel_payload;
-        TvmCell ref3;
-        if (notify_success) {
-            success_payload = payloadSlice.loadRef();
-        }
-        if (notify_cancel) {
-            cancel_payload = payloadSlice.loadRef();
-        }
-        if (hasRef3) {
-            ref3 = payloadSlice.loadRef();
-        }
-
         if (!need_cancel) {
-            (uint8 op, uint64 id, uint128 deploy_wallet_grams) = payloadSlice.decode(uint8, uint64, uint128);
-
             if (msg.sender == lp_wallet) {
                 if (op == DexOperationTypes.WITHDRAW_LIQUIDITY) {
 
@@ -346,7 +365,6 @@ contract DexStablePair is
                 uint8 j = i == 0 ? 1 : 0;
 
                 if (op == DexOperationTypes.EXCHANGE && payloadSlice.bits() >= 128) {
-                    uint128 expected_amount = payloadSlice.decode(uint128);
                     optional(ExpectedExchangeResult) dy_result_opt = _get_dy(i, j, tokens_amount);
 
                     if (!dy_result_opt.hasValue() || dy_result_opt.get().amount < expected_amount) {
@@ -422,19 +440,15 @@ contract DexStablePair is
                     }
                 } else if (
                    op == DexOperationTypes.CROSS_PAIR_EXCHANGE &&
-                   payloadSlice.bits() >= 395 &&
                    notify_success &&
                    success_payload.toSlice().bits() >= 128
                 ) {
-                    (uint128 expected_amount, address next_token_root) = payloadSlice.decode(uint128, address);
-
                     optional(ExpectedExchangeResult) dy_result_opt = _get_dy(i, j, tokens_amount);
 
                     if (
                         !dy_result_opt.hasValue() ||
                         dy_result_opt.get().amount < expected_amount ||
-                        next_token_root.value == 0 ||
-                        tokenIndex.exists(next_token_root)
+                        next_pair_or_token_root.value == 0
                     ) {
                         need_cancel = true;
                     } else {
@@ -473,7 +487,13 @@ contract DexStablePair is
                             empty
                         );
 
-                        address next_pair = _expectedPairAddress([tokenData[j].root, next_token_root]);
+                        address next_pair;
+
+                        if (outcoming.value != 0) {
+                            next_pair = next_pair_or_token_root;
+                        } else {
+                            next_pair = _expectedPairAddress([tokenData[j].root, next_pair_or_token_root]);
+                        }
 
                         IDexBasePool(next_pair).crossPoolExchange{
                             value: 0,
@@ -545,12 +565,6 @@ contract DexStablePair is
         }
 
         if (need_cancel) {
-            uint64 id = 0;
-
-            if (payload.toSlice().bits() >= 72) {
-                (,id) = payload.toSlice().decode(uint8, uint64);
-            }
-
             IDexPairOperationCallback(sender_address).dexPairOperationCancelled{
                 value: DexGas.OPERATION_CALLBACK_BASE + 44,
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -588,7 +602,7 @@ contract DexStablePair is
         address account_owner,
         uint32 /*account_version*/,
         address send_gas_to
-    ) override external onlyActive onlyAccount(account_owner) {
+    ) override external onlyActive onlyAconlyAccountcount(account_owner) {
         require(_expected.root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
         require(lp_supply != 0 || (_operations[0].amount > 0 && _operations[1].amount > 0), DexErrors.WRONG_LIQUIDITY);
         require(
@@ -884,19 +898,18 @@ contract DexStablePair is
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        (
+            uint128 expected_amount,
+            address next_pair_or_token_root,
+            address outcoming,
+            bool has_next_payload,
+            TvmCell next_payload
+        ) = PairPayload.decodeCrossPoolExchangePayload(payload);
+
         uint8 i = tokenIndex.at(spent_token_root);
         uint8 j = i == 0 ? 1 : 0;
 
-        TvmSlice payloadSlice = payload.toSlice();
-        bool has_next_payload = payloadSlice.refs() >= 1;
-        TvmCell next_payload;
-        if (has_next_payload) {
-            next_payload = payloadSlice.loadRef();
-        }
-
-        bool need_cancel = !active ||
-            msg.sender == address(this) ||
-            payloadSlice.bits() < 128;
+        bool need_cancel = !active || msg.sender == address(this);
 
         optional(ExpectedExchangeResult) dy_result_opt;
 
@@ -907,8 +920,6 @@ contract DexStablePair is
 
         if (!need_cancel) {
             ExpectedExchangeResult dy_result = dy_result_opt.get();
-            uint128 expected_amount = payloadSlice.decode(uint128);
-            address next_token_root =  payloadSlice.bits() >= 267 ? payloadSlice.decode(address) : address(0);
 
            if (dy_result.amount >= expected_amount) {
                 tokenData[i].balance += spent_amount - dy_result.beneficiary_fee;
@@ -945,11 +956,17 @@ contract DexStablePair is
                     dy_result.amount
                 ));
 
-                if (next_token_root.value != 0 && next_token_root != tokenData[j].root && next_token_root != tokenData[i].root &&
+               address next_pair;
+
+               if (outcoming.value != 0) {
+                   next_pair = next_pair_or_token_root;
+               } else {
+                   next_pair = _expectedPairAddress([tokenData[j].root, next_pair_or_token_root]);
+               }
+
+                if (next_pair.value != 0 && next_pair != address(this) &&
                     has_next_payload && next_payload.toSlice().bits() >= 128 &&
                     msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2) {
-
-                    address next_pair = _expectedPairAddress([tokenData[j].root, next_token_root]);
 
                     IDexBasePool(next_pair).crossPoolExchange{
                         value: 0,
@@ -1248,7 +1265,7 @@ contract DexStablePair is
                 callback: DexStablePair.onVaultTokenWallet
            }(vault);
 
-           ITokenRoot(msg.sender).decimals{
+           ITokenRoot(token_root).decimals{
                 value: DexGas.GET_TOKEN_DECIMALS_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexStablePair.onTokenDecimals
