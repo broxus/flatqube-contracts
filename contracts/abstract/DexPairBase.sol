@@ -332,6 +332,7 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
             TvmBuilder builder;
 
             builder.store(_root);
+            builder.store(_typeToRootAddresses[DexAddressType.VAULT][0]);
             builder.store(_currentVersion);
             builder.store(_newVersion);
             builder.store(_remainingGasTo);
@@ -345,7 +346,7 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
                 _typeToWalletAddresses
             );
 
-            builder.store(otherData);   // ref3
+            builder.store(otherData);   // ref2
 
             // set code after complete this method
             tvm.setcode(_code);

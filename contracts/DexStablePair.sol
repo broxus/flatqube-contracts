@@ -17,6 +17,8 @@ import "./libraries/DexGas.sol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "./libraries/DexOperationTypes.sol";
 import "./libraries/PairPayload.sol";
+import "./libraries/DexAddressType.sol";
+import "./libraries/DexReserveType.sol";
 
 import "./interfaces/IUpgradableByRequest.sol";
 import "./interfaces/IDexRoot.sol";
@@ -1167,13 +1169,14 @@ contract DexStablePair is
         }
 
         platform_code = s.loadRef(); // ref 1
-        TvmSlice tokens_data_slice = s.loadRefAsSlice(); // ref 2
-
-        (address left_root, address right_root) = tokens_data_slice.decode(address, address);
-        tokenIndex[left_root] = 0;
-        tokenIndex[right_root] = 1;
 
         if (old_version == 0) {
+            TvmSlice tokens_data_slice = s.loadRefAsSlice(); // ref 2
+
+            (address left_root, address right_root) = tokens_data_slice.decode(address, address);
+            tokenIndex[left_root] = 0;
+            tokenIndex[right_root] = 1;
+
             fee = FeeParams(1000000, 3000, 0, address(0), emptyMap);
             A = AmplificationCoefficient(200, 1);
 
@@ -1188,6 +1191,12 @@ contract DexStablePair is
                 send_gas_to
             );
         } else if (old_pool_type == DexPoolTypes.STABLESWAP) {
+            TvmSlice tokens_data_slice = s.loadRefAsSlice(); // ref 2
+
+            (address left_root, address right_root) = tokens_data_slice.decode(address, address);
+            tokenIndex[left_root] = 0;
+            tokenIndex[right_root] = 1;
+
             TvmCell otherData = s.loadRef(); // ref 3
 
             (
@@ -1207,41 +1216,41 @@ contract DexStablePair is
         } else if(old_pool_type == DexPoolTypes.CONSTANT_PRODUCT) {
             active = false;
             A = AmplificationCoefficient(200, 1);
-            uint128 left_balance;
-            uint128 right_balance;
-            address left_wallet;
-            address right_wallet;
-            address vault_left_wallet;
-            address vault_right_wallet;
 
-            TvmCell otherData = s.loadRef(); // ref 3
+            mapping(uint8 => uint128[]) type_to_reserves;
+            mapping(uint8 => address[]) type_to_root_addresses;
+            mapping(uint8 => address[]) type_to_wallet_addresses;
+
+            TvmCell otherData = s.loadRef(); // ref 2
             (
-                lp_root,
-                lp_wallet,
-                lp_supply,
                 fee,
-                left_wallet,
-                vault_left_wallet,
-                left_balance,
-                right_wallet,
-                vault_right_wallet,
-                right_balance
+                type_to_reserves,
+                type_to_root_addresses,
+                type_to_wallet_addresses
             ) = abi.decode(otherData, (
-                address, address, uint128,
                 FeeParams,
-                address, address, uint128,
-                address, address, uint128
+                mapping(uint8 => uint128[]),
+                mapping(uint8 => address[]),
+                mapping(uint8 => address[])
             ));
 
+            lp_root = type_to_root_addresses[DexAddressType.LP][0];
+            lp_wallet = type_to_wallet_addresses[DexAddressType.LP][0];
+            lp_supply = type_to_reserves[DexReserveType.LP][0];
+
+            tokenIndex[type_to_root_addresses[DexAddressType.RESERVE][0]] = 0;
+            tokenIndex[type_to_root_addresses[DexAddressType.RESERVE][1]] = 1;
+
             tokenData = new PoolTokenData[](N_COINS);
-            tokenData[0] = PoolTokenData(left_root, left_wallet, vault_left_wallet, left_balance, 0, 0, 0, 0, false, false);
-            tokenData[1] = PoolTokenData(right_root, right_wallet, vault_right_wallet, right_balance, 0, 0, 0, 0, false, false);
-            ITokenRoot(left_root).decimals{
+            tokenData[0] = PoolTokenData(type_to_root_addresses[DexAddressType.RESERVE][0], type_to_wallet_addresses[DexAddressType.RESERVE][0], type_to_wallet_addresses[DexAddressType.VAULT][0], type_to_reserves[DexReserveType.POOL][0], 0, 0, 0, 0, false, false);
+            tokenData[1] = PoolTokenData(type_to_root_addresses[DexAddressType.RESERVE][1], type_to_wallet_addresses[DexAddressType.RESERVE][1], type_to_wallet_addresses[DexAddressType.VAULT][1], type_to_reserves[DexReserveType.POOL][1], 0, 0, 0, 0, false, false);
+
+            ITokenRoot(type_to_root_addresses[DexAddressType.RESERVE][0]).decimals{
                 value: DexGas.GET_TOKEN_DECIMALS_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexStablePair.onTokenDecimals
             }();
-            ITokenRoot(right_root).decimals{
+            ITokenRoot(type_to_root_addresses[DexAddressType.RESERVE][1]).decimals{
                 value: DexGas.GET_TOKEN_DECIMALS_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexStablePair.onTokenDecimals
