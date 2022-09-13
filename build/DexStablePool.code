@@ -12938,12 +12938,10 @@ CALL $_applyAddLiquidity_internal_macro$
 
 .macro _applyAddLiquidity_internal_macro
 .loc ../contracts/DexStablePool.sol, 1902
-NULL
-.loc ../contracts/DexStablePool.sol, 1903
 PUSHINT 0
 NEWDICT
 PAIR
-BLKPUSH 2, 0
+BLKPUSH 3, 0
 .loc ../contracts/DexStablePool.sol, 1907
 PUSHINT 0
 PUSHCONT {
@@ -13150,14 +13148,14 @@ PUSHCONT {
 			PAIR
 			POP S2
 			.loc ../contracts/DexStablePool.sol, 1915
-			PUSH2 S0, S8
+			PUSH3 S4, S0, S8
 			INDEX 5
 			SECOND
 			PUSHINT 32
 			DICTUGET
 			THROWIFNOT 50
 			PLDU 128
-			OVER
+			PUSH S2
 			GETGLOB 15
 			SECOND
 			PUSHINT 32
@@ -13188,6 +13186,21 @@ PUSHCONT {
 				TUPLE 10
 			}
 			FIRST
+			PAIR
+			CALLREF {
+				UNPAIR
+				SWAP
+				NEWC
+				STU 128
+				STSLICE
+			}
+			SWAP
+			UNPAIR
+			OVER
+			INC
+			ROLLREV 3
+			PUSHINT 32
+			DICTUSETB
 			PAIR
 			POP S5
 		}
@@ -13618,8 +13631,8 @@ UFITS 128
 SETGLOB 21
 .loc ../contracts/DexStablePool.sol, 1932
 PUSH S3
-ISNULL
-NOT
+FIRST
+NEQINT 0
 PUSH S3
 FIRST
 NEQINT 0
@@ -13627,9 +13640,6 @@ AND
 PUSHCONT {
 	.loc ../contracts/DexStablePool.sol, 1933
 	PUSH3 S1, S2, S3
-	DUP
-	ISNULL
-	THROWIF 63
 	PUSH2 S7, S7
 	PUSHREFSLICE {
 		.blob xc0000000000000000000000001
@@ -13638,7 +13648,7 @@ PUSHCONT {
 	STSLICE
 	ROLLREV 5
 	NEWC
-	STSLICECONST x14b3b828
+	STSLICECONST x72de58c4
 	STSLICE
 	ROLLREV 4
 	NEWC
@@ -13646,13 +13656,6 @@ PUSHCONT {
 	SWAP
 	UNPAIR
 	XCHG S2
-	STU 128
-	ROLLREV 3
-	NEWC
-	STSLICE
-	SWAP
-	UNPAIR
-	XCHG S2
 	STU 32
 	STDICT
 	SWAP
@@ -13660,7 +13663,11 @@ PUSHCONT {
 	XCHG S2
 	STU 32
 	STDICT
-	STBREFR
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 32
+	STDICT
 	STBREFR
 	STBREFR
 	ENDC

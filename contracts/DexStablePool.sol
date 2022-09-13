@@ -1899,7 +1899,7 @@ contract DexStablePool is
         address user
     ) private {
 
-        optional(TokenOperation) spent_token;
+        TokenOperation[] spent_tokens;
         TokenOperation[] receive_tokens;
         ExchangeFee[] fees;
         TokenOperation[] deposits;
@@ -1912,7 +1912,7 @@ contract DexStablePool is
                         r.result_balances[i] - tokenData[i].balance - r.differences[i] - r.pool_fees[i],
                         tokenData[i].root
                     ));
-                    spent_token = TokenOperation(r.differences[i], tokenData[i].root);
+                    spent_tokens.push(TokenOperation(r.differences[i], tokenData[i].root));
                 } else {
                     deposits.push(TokenOperation(
                         r.result_balances[i] + r.differences[i] - tokenData[i].balance - r.pool_fees[i], tokenData[i].root
@@ -1929,11 +1929,11 @@ contract DexStablePool is
 
         lp_supply += r.lp_reward;
 
-        if (spent_token.hasValue() && receive_tokens.length != 0) {
+        if (spent_tokens.length != 0 && receive_tokens.length != 0) {
             emit MultilateralExchange(
                 user,
                 user,
-                spent_token.get(),
+                spent_tokens,
                 receive_tokens,
                 fees
             );

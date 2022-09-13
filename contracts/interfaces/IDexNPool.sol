@@ -12,7 +12,7 @@ interface IDexNPool is IDexBasePool, IDexPoolBalances {
     event MultilateralExchange(
         address sender,
         address recipient,
-        TokenOperation spentToken,
+        TokenOperation[] spentTokens,
         TokenOperation[] receiveTokens,
         ExchangeFee[] fees
     );
