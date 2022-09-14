@@ -54,6 +54,8 @@ contract LimitOrder is
 	uint8 prevState;
 	uint256 emergencyManager;
 
+	bool autoExchange;
+
 	constructor(
 		uint128 expectedAmount_,
 		uint128 initialAmount_,
@@ -149,6 +151,7 @@ contract LimitOrder is
 
 		if (msg.sender == dexRoot) {
 			dexPair = inAddress;
+			autoExchange = true;
 		} else if (msg.sender == spentTokenRoot) {
 			spentWallet = inAddress;
 		} else if (msg.sender == receiveTokenRoot) {
@@ -156,7 +159,6 @@ contract LimitOrder is
 		}
 
 		if (
-			dexPair.value != 0 &&
 			spentWallet.value != 0 &&
 			receiveWallet.value != 0
 		) {
@@ -188,7 +190,7 @@ contract LimitOrder is
 		override
 		returns (uint8)
 	{
-		return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} state;
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } state;
 	}
 
 	function getInitParams()
@@ -261,9 +263,6 @@ contract LimitOrder is
 				changeState(LimitOrderStatus.Active);
 			}
 		} else {
-			// 	if (
-			// 	msg.sender == receiveWallet && tokenRoot == receiveTokenRoot
-			// ) {
 			if ((msg.sender.value != 0 && msg.sender == receiveWallet) && state == LimitOrderStatus.Active) {
 				TvmSlice payloadSlice = payload.toSlice();
 				if (payloadSlice.bits() >= 128) {
@@ -336,7 +335,10 @@ contract LimitOrder is
 								);
 							}
 
-							if (currentAmountSpentToken - transferAmount > 0) {
+							currentAmountSpentToken -= transferAmount;
+							currentAmountReceiveToken -= amount;
+
+							if (currentAmountSpentToken > 0) {
 								emit LimitOrderPartExchange(
 									spentTokenRoot,
 									transferAmount,
@@ -359,9 +361,6 @@ contract LimitOrder is
 								true,
 								emptyPayload
 							);
-
-							currentAmountSpentToken -= transferAmount;
-							currentAmountReceiveToken -= amount;
 						}
 					} else {
 						needCancel = true;
@@ -481,10 +480,17 @@ contract LimitOrder is
 			msg.pubkey() == backendPubKey,
 			LimitOrderErrors.NOT_BACKEND_PUB_KEY
 		);
+
 		require(
 			state == LimitOrderStatus.Active,
 			LimitOrderErrors.NOT_ACTIVE_LIMIT_ORDER
 		);
+
+		require(
+			autoExchange == true,
+			LimitOrderErrors.NOT_AUTO_EXCHANGE
+		);
+
 		require(
 			address(this).balance > LimitOrderGas.SWAP_BACK_MIN_VALUE + 0.1 ton,
 			LimitOrderErrors.VALUE_TOO_LOW
@@ -531,6 +537,13 @@ contract LimitOrder is
 			state == LimitOrderStatus.Active,
 			LimitOrderErrors.NOT_ACTIVE_LIMIT_ORDER
 		);
+
+		require(
+			autoExchange == true,
+			LimitOrderErrors.NOT_AUTO_EXCHANGE
+		);
+
+
 		require(
 			msg.value >= LimitOrderGas.SWAP_MIN_VALUE,
 			LimitOrderErrors.VALUE_TOO_LOW

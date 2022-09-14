@@ -12,7 +12,7 @@ interface ILimitOrderFactory {
         address newOwner
     );
    
-    event LimitOrderRootCodeUpgraded();
+    event LimitOrderRootCodeUpgraded(uint32 _versionLimitOrderRoot);
     event LimitOrderCodeUpgraded();
     event LimitOrderCodeClosedUpgraded();
     event LimitOrderCodePlatformUpgraded();
@@ -21,7 +21,6 @@ interface ILimitOrderFactory {
         address limitOrderRoot,
         address tokenRoot
     );
-    
 
     event LimitOrderFactoryUpgrade();
 
