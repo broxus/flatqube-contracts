@@ -10,7 +10,7 @@ IFREF {
 GETGLOB 6
 THROWIF 51
 ENDS
-.loc ../contracts/tests/TestNewDexRoot.sol, 29
+.loc ../contracts/tests/TestNewDexRoot.sol, 30
 THROW 100
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 
@@ -23,7 +23,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexRoot.sol, 31
+.loc ../contracts/tests/TestNewDexRoot.sol, 32
 LDU 32
 GETGLOB 4
 ROT
@@ -95,7 +95,7 @@ IFREF {
 THROW 0
 
 .macro getVault_internal_macro
-.loc ../contracts/tests/TestNewDexRoot.sol, 32
+.loc ../contracts/tests/TestNewDexRoot.sol, 33
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -116,7 +116,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexRoot.sol, 35
+.loc ../contracts/tests/TestNewDexRoot.sol, 36
 LDU 32
 GETGLOB 4
 ROT
@@ -188,7 +188,7 @@ IFREF {
 THROW 0
 
 .macro getOwner_internal_macro
-.loc ../contracts/tests/TestNewDexRoot.sol, 36
+.loc ../contracts/tests/TestNewDexRoot.sol, 37
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -209,7 +209,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexRoot.sol, 39
+.loc ../contracts/tests/TestNewDexRoot.sol, 40
 LDU 32
 GETGLOB 4
 ROT
@@ -281,7 +281,7 @@ IFREF {
 THROW 0
 
 .macro getPendingOwner_internal_macro
-.loc ../contracts/tests/TestNewDexRoot.sol, 40
+.loc ../contracts/tests/TestNewDexRoot.sol, 41
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -302,7 +302,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexRoot.sol, 43
+.loc ../contracts/tests/TestNewDexRoot.sol, 44
 LDU 32
 GETGLOB 4
 ROT
@@ -367,7 +367,7 @@ IFREF {
 THROW 0
 
 .macro getAccountVersion_internal_macro
-.loc ../contracts/tests/TestNewDexRoot.sol, 44
+.loc ../contracts/tests/TestNewDexRoot.sol, 45
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -394,6 +394,7 @@ GETGLOB 4
 ROT
 SETINDEXQ 5
 SETGLOB 4
+LDU 8
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
@@ -410,7 +411,7 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x0000000000000000000000002ab95e20e_
+	PUSHSLICE x0000000000000000000000003d5ff00aa_
 	STSLICER
 	STU 32
 	ENDC
@@ -454,6 +455,14 @@ THROW 0
 
 .macro getPairVersion_internal_macro
 .loc ../contracts/tests/TestNewDexRoot.sol, 48
+DUP
+GETGLOB 15
+PUSHINT 8
+DICTUGET
+NULLSWAPIFNOT
+NIP
+THROWIFNOT 133
+.loc ../contracts/tests/TestNewDexRoot.sol, 49
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -463,6 +472,203 @@ PUSHINT 64
 SETINDEXQ 4
 SETGLOB 4
 GETGLOB 15
+PUSHINT 8
+DICTUGET
+PUSHCONT {
+	PLDU 32
+}
+PUSHCONT {
+	PUSHINT 0
+}
+IFELSE
+.loc ../contracts/tests/TestNewDexRoot.sol, 0
+
+.macro getPairCode
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewDexRoot.sol, 52
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+LDU 8
+ENDS
+.loc ../contracts/tests/TestNewDexRoot.sol, 0
+CALLREF {
+	CALL $getPairCode_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHSLICE x00000000000000000000000034010d63a_
+	STSLICER
+	STREF
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	PUSHINT 2
+	STZEROES
+	STI 1
+	PUSHINT 3
+	STZEROES
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 106
+	STZEROES
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STREF
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getPairCode_internal_macro
+.loc ../contracts/tests/TestNewDexRoot.sol, 53
+DUP
+GETGLOB 14
+PUSHINT 8
+DICTUGET
+NULLSWAPIFNOT
+NIP
+THROWIFNOT 133
+.loc ../contracts/tests/TestNewDexRoot.sol, 54
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+GETGLOB 14
+PUSHINT 8
+DICTUGETREF
+PUSHCONT {
+	PUSHREF {
+	}
+}
+IFNOT
+.loc ../contracts/tests/TestNewDexRoot.sol, 0
+
+.macro getAccountCode
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewDexRoot.sol, 57
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/tests/TestNewDexRoot.sol, 0
+CALLREF {
+	CALL $getAccountCode_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHSLICE x0000000000000000000000003d8a43ade_
+	STSLICER
+	STREF
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	PUSHINT 2
+	STZEROES
+	STI 1
+	PUSHINT 3
+	STZEROES
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 106
+	STZEROES
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STREF
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getAccountCode_internal_macro
+.loc ../contracts/tests/TestNewDexRoot.sol, 58
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+GETGLOB 12
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 
 .macro setActive
@@ -474,7 +680,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexRoot.sol, 51
+.loc ../contracts/tests/TestNewDexRoot.sol, 61
 LDI 1
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
@@ -488,11 +694,11 @@ CALLREF {
 THROW 0
 
 .macro setActive_internal_macro
-.loc ../contracts/tests/TestNewDexRoot.sol, 52
+.loc ../contracts/tests/TestNewDexRoot.sol, 62
 PUSHINT 1000000000
 PUSHINT 2
 RAWRESERVE
-.loc ../contracts/tests/TestNewDexRoot.sol, 53
+.loc ../contracts/tests/TestNewDexRoot.sol, 63
 DUP
 PUSHCONT {
 	DROP
@@ -511,7 +717,8 @@ PUSHCONT {
 		GETGLOB 13
 		GTINT 0
 		GETGLOB 15
-		GTINT 0
+		DICTEMPTY
+		NOT
 		AND
 		AND
 	}
@@ -519,16 +726,16 @@ PUSHCONT {
 }
 IF
 PUSHCONT {
-	.loc ../contracts/tests/TestNewDexRoot.sol, 54
+	.loc ../contracts/tests/TestNewDexRoot.sol, 70
 	TRUE
 }
 PUSHCONT {
-	.loc ../contracts/tests/TestNewDexRoot.sol, 56
+	.loc ../contracts/tests/TestNewDexRoot.sol, 72
 	FALSE
 }
 IFELSE
 SETGLOB 16
-.loc ../contracts/tests/TestNewDexRoot.sol, 58
+.loc ../contracts/tests/TestNewDexRoot.sol, 74
 GETGLOB 17
 NEWC
 STSLICECONST x62_
@@ -549,7 +756,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexRoot.sol, 61
+.loc ../contracts/tests/TestNewDexRoot.sol, 77
 LDU 32
 GETGLOB 4
 ROT
@@ -614,7 +821,7 @@ IFREF {
 THROW 0
 
 .macro isActive_internal_macro
-.loc ../contracts/tests/TestNewDexRoot.sol, 62
+.loc ../contracts/tests/TestNewDexRoot.sol, 78
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -628,7 +835,7 @@ GETGLOB 16
 
 .internal-alias :onCodeUpgrade, 2
 .internal :onCodeUpgrade
-.loc ../contracts/tests/TestNewDexRoot.sol, 66
+.loc ../contracts/tests/TestNewDexRoot.sol, 82
 PUSHINT 0
 SETGLOB 10
 PUSHREF {
@@ -639,10 +846,9 @@ PUSHREF {
 SETGLOB 12
 PUSHINT 0
 SETGLOB 13
-PUSHREF {
-}
+NEWDICT
 SETGLOB 14
-PUSHINT 0
+NEWDICT
 SETGLOB 15
 PUSHINT 0
 SETGLOB 16
@@ -661,54 +867,44 @@ SETGLOB 19
 PUSHREF {
 }
 SETGLOB 20
-.loc ../contracts/tests/TestNewDexRoot.sol, 67
+.loc ../contracts/tests/TestNewDexRoot.sol, 84
 CTOS
-.loc ../contracts/tests/TestNewDexRoot.sol, 68
-DUP
+LDREF
+LDREF
 LDU 32
-LDU 32
+LDDICT
+LDREF
+ENDS
+CTOS
+LDDICT
 LDMSGADDR
+LDREF
+ENDS
+CTOS
 LDMSGADDR
+LDREF
+ENDS
+CTOS
 LDMSGADDR
-POP S6
-REVERSE 5, 0
+ENDS
+REVERSE 8, 0
+SETGLOB 11
+SETGLOB 12
 SETGLOB 13
+SETGLOB 14
 SETGLOB 15
 SETGLOB 17
 SETGLOB 18
 SETGLOB 19
-.loc ../contracts/tests/TestNewDexRoot.sol, 71
-DUP
-LDREF
-POP S2
-SETGLOB 11
-.loc ../contracts/tests/TestNewDexRoot.sol, 72
-DUP
-LDREF
-POP S2
-SETGLOB 12
-.loc ../contracts/tests/TestNewDexRoot.sol, 73
-LDREF
-DROP
-SETGLOB 14
-.loc ../contracts/tests/TestNewDexRoot.sol, 75
+.loc ../contracts/tests/TestNewDexRoot.sol, 104
 TRUE
-MYADDR
-NEWC
-STSLICECONST x62_
-STSLICE
-PUSHSLICE x3989680000000000000000000000000000b5f59d39_
-STSLICER
-STI 1
-ENDC
-PUSHINT 0
-SENDRAWMSG
-.loc ../contracts/tests/TestNewDexRoot.sol, 77
+SETGLOB 16
+.loc ../contracts/tests/TestNewDexRoot.sol, 106
 PUSHREF {
 	.blob x4e657720526f6f74
 }
 SETGLOB 20
-.loc ../contracts/tests/TestNewDexRoot.sol, 79
+.loc ../contracts/tests/TestNewDexRoot.sol, 108
 GETGLOB 17
 NEWC
 STSLICECONST x62_
@@ -734,7 +930,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexRoot.sol, 82
+.loc ../contracts/tests/TestNewDexRoot.sol, 111
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
@@ -772,7 +968,7 @@ THROW 0
 CALL $newFunc_internal_macro$
 
 .macro newFunc_internal_macro
-.loc ../contracts/tests/TestNewDexRoot.sol, 83
+.loc ../contracts/tests/TestNewDexRoot.sol, 112
 GETGLOB 20
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 
@@ -787,8 +983,11 @@ LDU 32
 LDREF
 LDREF
 LDU 32
+LDDICT
 LDREF
-LDU 32
+ENDS
+CTOS
+LDDICT
 LDI 1
 LDMSGADDR
 LDREF
@@ -840,10 +1039,9 @@ PUSHCONT {
 	}
 	DUP
 	PUSHINT 0
-	PUSHREF {
-	}
-	PUSHINT 0
+	NEWDICT
 	DUP
+	PUSHINT 0
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
@@ -895,8 +1093,10 @@ STU 32
 STREF
 STREF
 STU 32
-STREF
-STU 32
+STDICT
+ROLLREV 6
+NEWC
+STDICT
 STI 1
 STSLICE
 ROLLREV 3
@@ -906,6 +1106,7 @@ ROTREV
 NEWC
 STSLICE
 STREF
+STBREFR
 STBREFR
 STBREFR
 ENDC
@@ -1066,29 +1267,9 @@ PUSHCONT {
 IF
 THROW 0
 
-.macro pair_code
-DROP
-ENDS
-CALLREF {
-	CALL $c4_to_c7$
-}
-GETGLOB 14
-OVER
-PUSHCONT {
-	PUSHSLICE xc0000000000000000000000000bd092577
-	NEWC
-	STSLICE
-	STREF
-	ENDC
-	PUSHINT 0
-	SENDRAWMSG
-}
-IF
-THROW 0
-
 .macro public_function_selector
 DUP
-PUSHINT 719681667
+PUSHINT 992568900
 LEQ
 IFJMPREF {
 	DUP
@@ -1110,28 +1291,16 @@ IFJMPREF {
 		CALL $getPendingOwner$
 	}
 	DUP
-	PUSHINT 719681667
-	EQUAL
-	IFJMPREF {
-		CALL $getPairVersion$
-	}
-}
-DUP
-PUSHINT 1526386332
-LEQ
-IFJMPREF {
-	DUP
 	PUSHINT 992568900
 	EQUAL
 	IFJMPREF {
 		CALL $getAccountVersion$
 	}
-	DUP
-	PUSHINT 1024009591
-	EQUAL
-	IFJMPREF {
-		CALL $pair_code$
-	}
+}
+DUP
+PUSHINT 1656985116
+LEQ
+IFJMPREF {
 	DUP
 	PUSHINT 1025233701
 	EQUAL
@@ -1139,22 +1308,28 @@ IFJMPREF {
 		CALL $getVault$
 	}
 	DUP
+	PUSHINT 1342453134
+	EQUAL
+	IFJMPREF {
+		CALL $getPairCode$
+	}
+	DUP
 	PUSHINT 1526386332
 	EQUAL
 	IFJMPREF {
 		CALL $setActive$
 	}
-}
-DUP
-PUSHINT 1777126941
-LEQ
-IFJMPREF {
 	DUP
 	PUSHINT 1656985116
 	EQUAL
 	IFJMPREF {
 		CALL $getOwner$
 	}
+}
+DUP
+PUSHINT 1971306538
+LEQ
+IFJMPREF {
 	DUP
 	PUSHINT 1725189621
 	EQUAL
@@ -1173,5 +1348,17 @@ IFJMPREF {
 	IFJMPREF {
 		CALL $account_code$
 	}
+	DUP
+	PUSHINT 1971306538
+	EQUAL
+	IFJMPREF {
+		CALL $getPairVersion$
+	}
+}
+DUP
+PUSHINT 1982402231
+EQUAL
+IFJMPREF {
+	CALL $getAccountCode$
 }
 

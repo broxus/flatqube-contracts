@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "migration-prod": "locklift run --config locklift.config.js --network main --script scripts/migration-prod.js && locklift test --config locklift.config.js --network main --test test/prod",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:oracle-upgrade": "npx locklift test --config locklift.config.js --disable-build --network local --tests test/upgrade/5-oracle-upgrade-test.js"
   },
   "author": "aleksandr-hramcov <aleksandr.hramcov@gmail.com>",
-  "license": "Apache-2.0",
+  "license": "AGPL-3.0",
   "dependencies": {
     "@tonclient/core": "^1.30.0",
     "@tonclient/lib-node": "^1.30.0",
@@ -23,6 +24,6 @@
   },
   "devDependencies": {
     "@broxus/contracts": "^1.0.4",
-    "locklift": "^1.5.1"
+    "locklift": "^1.5.3"
   }
 }

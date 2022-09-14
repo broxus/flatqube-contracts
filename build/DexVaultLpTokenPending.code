@@ -225,7 +225,7 @@ PUSHCONT {
 	IF
 }
 IFELSE
-.loc ../contracts/DexVaultLpTokenPending.sol, 202
+.loc ../contracts/DexVaultLpTokenPending.sol, 203
 DROP
 GETGLOB 23
 PUSHCONT {
@@ -640,6 +640,15 @@ THROW 0
 .macro onDeployWallet_internal_macro
 .loc ../contracts/DexVaultLpTokenPending.sol, 186
 DROP
+CALLREF {
+	CALL $isSenderExpectedToken_internal_macro$
+}
+GETGLOB 9
+GETGLOB 19
+SDEQ
+OR
+THROWIFNOT 126
+.loc ../contracts/DexVaultLpTokenPending.sol, 187
 GETGLOB 23
 DEC
 UFITS 8
@@ -651,19 +660,19 @@ SETGLOB 23
 CALL $lpTokenSymbol_internal_macro$
 
 .macro lpTokenSymbol_internal_macro
-.loc ../contracts/DexVaultLpTokenPending.sol, 190
-GETGLOB 10
 .loc ../contracts/DexVaultLpTokenPending.sol, 191
+GETGLOB 10
+.loc ../contracts/DexVaultLpTokenPending.sol, 192
 ROT
 CALLREF {
 	CALL $concatenateStrings_macro$
 }
-.loc ../contracts/DexVaultLpTokenPending.sol, 192
+.loc ../contracts/DexVaultLpTokenPending.sol, 193
 GETGLOB 11
 CALLREF {
 	CALL $concatenateStrings_macro$
 }
-.loc ../contracts/DexVaultLpTokenPending.sol, 193
+.loc ../contracts/DexVaultLpTokenPending.sol, 194
 SWAP
 CALLREF {
 	CALL $concatenateStrings_macro$
@@ -675,7 +684,7 @@ CALLREF {
 CALL $isSenderExpectedToken_internal_macro$
 
 .macro isSenderExpectedToken_internal_macro
-.loc ../contracts/DexVaultLpTokenPending.sol, 198
+.loc ../contracts/DexVaultLpTokenPending.sol, 199
 GETGLOB 9
 GETGLOB 16
 SDEQ
@@ -694,7 +703,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexVaultLpTokenPending.sol, 208
+.loc ../contracts/DexVaultLpTokenPending.sol, 209
 CALLREF {
 	CALL $isSenderExpectedToken_internal_macro$
 }
@@ -707,13 +716,13 @@ SDEQ
 OR
 OR
 PUSHCONT {
-	.loc ../contracts/DexVaultLpTokenPending.sol, 209
+	.loc ../contracts/DexVaultLpTokenPending.sol, 210
 	GETGLOB 23
 	DEC
 	UFITS 8
 	DUP
 	SETGLOB 23
-	.loc ../contracts/DexVaultLpTokenPending.sol, 202
+	.loc ../contracts/DexVaultLpTokenPending.sol, 203
 	PUSHCONT {
 		.loc ../contracts/DexVaultLpTokenPending.sol, 140
 		GETGLOB 21

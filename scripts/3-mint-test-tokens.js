@@ -1,19 +1,14 @@
-const {Migration, TOKEN_CONTRACTS_PATH, Constants, EMPTY_TVM_CELL} = require(process.cwd()+'/scripts/utils');
+const {Migration, TOKEN_CONTRACTS_PATH, Constants, EMPTY_TVM_CELL, afterRun} = require(process.cwd()+'/scripts/utils');
 const { Command } = require('commander');
 const program = new Command();
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
-
-const afterRun = async (tx) => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-};
 
 async function main() {
   const migration = new Migration();
   const [keyPair] = await locklift.keys.getKeyPairs();
 
   const rootOwner = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
-
   rootOwner.afterRun = afterRun;
 
   program
@@ -52,7 +47,7 @@ async function main() {
 
     const token = Constants.tokens[mint.token];
     const account = migration.load(await locklift.factory.getAccount('Wallet'), 'Account' + mint.account);
-    const amount = new BigNumber(mint.amount).shiftedBy(token.decimals);
+    const amount = new BigNumber(mint.amount).shiftedBy(token.decimals).toFixed();
 
     const tokenRoot = migration.load(
         await locklift.factory.getContract(

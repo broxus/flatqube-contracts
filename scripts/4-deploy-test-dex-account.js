@@ -19,6 +19,9 @@ async function main() {
   const keyPairs = await locklift.keys.getKeyPairs();
 
   const accountN = migration.load(await locklift.factory.getAccount('Wallet'), 'Account' + options.owner_n);
+  if (locklift.tracing) {
+    locklift.tracing.allowCodesForAddress(accountN.address, {compute: [100]});
+  }
   const dexRoot = migration.load(await locklift.factory.getContract('DexRoot'), 'DexRoot');
   await accountN.runTarget({
     contract: dexRoot,

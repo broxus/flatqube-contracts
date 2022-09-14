@@ -1,6 +1,14 @@
 const {expect} = require('chai');
-const {Migration, afterRun, Constants, getRandomNonce, TOKEN_CONTRACTS_PATH} = require(process.cwd() + '/scripts/utils');
-const { Command } = require('commander');
+const {
+    Migration,
+    afterRun,
+    Constants,
+    getRandomNonce,
+    TOKEN_CONTRACTS_PATH,
+    displayTx,
+    expectedDepositLiquidity
+} = require(process.cwd() + '/scripts/utils');
+const {Command} = require('commander');
 const program = new Command();
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
@@ -46,45 +54,6 @@ let IS_FOO_LEFT;
 
 let keyPairs;
 
-function logExpectedDeposit(expected) {
-
-    const left_decimals = IS_FOO_LEFT ? left_token.decimals : right_token.decimals;
-    const right_decimals = IS_FOO_LEFT ? right_token.decimals : left_token.decimals;
-
-    logger.log(`Expected result: `);
-    if (expected.step_1_lp_reward.isZero()) {
-        logger.log(`    Step 1: skipped`);
-    } else {
-        logger.log(`    Step 1: `);
-        logger.log(`        Left deposit = ${expected.step_1_left_deposit.shiftedBy(-left_decimals).toFixed(left_decimals)}`);
-        logger.log(`        Right deposit = ${expected.step_1_right_deposit.shiftedBy(-right_decimals).toFixed(right_decimals)}`);
-        logger.log(`        LP reward = ${expected.step_1_lp_reward.shiftedBy(-Constants.LP_DECIMALS).toFixed(Constants.LP_DECIMALS)}`);
-    }
-    if (expected.step_2_left_to_right) {
-        logger.log(`    Step 2: `);
-        logger.log(`        Left amount for change = ${expected.step_2_spent.shiftedBy(-left_decimals).toFixed(left_decimals)}`);
-        logger.log(`        Left fee = ${expected.step_2_fee.shiftedBy(-left_decimals).toFixed(left_decimals)}`);
-        logger.log(`        Right received amount = ${expected.step_2_received.shiftedBy(-right_decimals).toFixed(right_decimals)}`);
-    } else if (expected.step_2_right_to_left) {
-        logger.log(`    Step 2: `);
-        logger.log(`        Right amount for change = ${expected.step_2_spent.shiftedBy(-right_decimals).toFixed(right_decimals)}`);
-        logger.log(`        Right fee = ${expected.step_2_fee.shiftedBy(-right_decimals).toFixed(right_decimals)}`);
-        logger.log(`        Left received amount = ${expected.step_2_received.shiftedBy(-left_decimals).toFixed(left_decimals)}`);
-    } else {
-        logger.log(`    Step 2: skipped`);
-    }
-    if (expected.step_3_lp_reward.isZero()) {
-        logger.log(`    Step 3: skipped`);
-    } else {
-        logger.log(`    Step 3: `);
-        logger.log(`        Left deposit = ${expected.step_3_left_deposit.shiftedBy(-left_decimals).toFixed(left_decimals)}`);
-        logger.log(`        Right deposit = ${expected.step_3_right_deposit.shiftedBy(-right_decimals).toFixed(right_decimals)}`);
-        logger.log(`        LP reward = ${expected.step_3_lp_reward.shiftedBy(-Constants.LP_DECIMALS).toFixed(Constants.LP_DECIMALS)}`);
-    }
-    logger.log(`    TOTAL: `);
-    logger.log(`        LP reward = ${expected.step_1_lp_reward.plus(expected.step_3_lp_reward).shiftedBy(-Constants.LP_DECIMALS).toFixed(Constants.LP_DECIMALS)}`);
-}
-
 async function dexAccountBalances(account) {
     const foo = new BigNumber((await account.call({
         method: 'getWalletData', params: {
@@ -105,15 +74,18 @@ async function dexAccountBalances(account) {
     let walletFoo = 0;
     await FooWallet2.call({method: 'balance', params: {}}).then(n => {
         walletFoo = new BigNumber(n).shiftedBy(-left_token.decimals).toString();
-    }).catch(e => {/*ignored*/});
+    }).catch(e => {/*ignored*/
+    });
     let walletBar = 0;
     await BarWallet2.call({method: 'balance', params: {}}).then(n => {
         walletBar = new BigNumber(n).shiftedBy(-right_token.decimals).toString();
-    }).catch(e => {/*ignored*/});
+    }).catch(e => {/*ignored*/
+    });
     let walletLp = 0;
     await FooBarLpWallet2.call({method: 'balance', params: {}}).then(n => {
         walletLp = new BigNumber(n).shiftedBy(-Constants.LP_DECIMALS).toString();
-    }).catch(e => {/*ignored*/});
+    }).catch(e => {/*ignored*/
+    });
 
     return {foo, bar, lp, walletFoo, walletBar, walletLp};
 }
@@ -154,6 +126,10 @@ describe('DexAccount interact with DexPair', async function () {
     before('Load contracts', async function () {
         keyPairs = await locklift.keys.getKeyPairs();
 
+        if (locklift.tracing) {
+            locklift.tracing.allowCodes({compute: [100]});
+        }
+
         DexRoot = await locklift.factory.getContract('DexRoot');
         DexPairFooBar = await locklift.factory.getContract(options.contract_name);
         FooRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
@@ -165,11 +141,13 @@ describe('DexAccount interact with DexPair', async function () {
         FooWallet2 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
         BarWallet2 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
 
+        let symbols = left_token.symbol + right_token.symbol;
+
         migration.load(DexRoot, 'DexRoot');
-        migration.load(DexPairFooBar, 'DexPair' + left_token.symbol + right_token.symbol);
+        migration.load(DexPairFooBar, 'DexPair' + symbols);
         migration.load(FooRoot, left_token.symbol + 'Root');
         migration.load(BarRoot, right_token.symbol + 'Root');
-        migration.load(FooBarLpRoot, left_token.symbol + right_token.symbol + 'LpRoot');
+        migration.load(FooBarLpRoot, symbols + 'LpRoot');
         migration.load(Account2, 'Account2');
         migration.load(DexAccount2, 'DexAccount2');
 
@@ -177,8 +155,8 @@ describe('DexAccount interact with DexPair', async function () {
 
 
         if (migration.exists(`${left_token.symbol}${right_token.symbol}LpWallet2`)) {
-            migration.load(FooBarLpWallet2, `${left_token.symbol}${right_token.symbol}LpWallet2`);
-            logger.log(`${left_token.symbol}${right_token.symbol}LpWallet#2: ${FooBarLpWallet2.address}`);
+            migration.load(FooBarLpWallet2, `${symbols}LpWallet2`);
+            logger.log(`${symbols}LpWallet#2: ${FooBarLpWallet2.address}`);
         } else {
             const expected = await FooBarLpRoot.call({
                 method: 'walletOf',
@@ -187,8 +165,8 @@ describe('DexAccount interact with DexPair', async function () {
                 }
             });
             FooBarLpWallet2.setAddress(expected);
-            migration.store(FooBarLpWallet2, `${left_token.symbol}${right_token.symbol}LpWallet2`);
-            logger.log(`${left_token.symbol}${right_token.symbol}LpWallet#2: ${expected} (not deployed)`);
+            migration.store(FooBarLpWallet2, `${symbols}LpWallet2`);
+            logger.log(`${symbols}LpWallet#2: ${expected} (not deployed)`);
         }
 
         if (migration.exists(`${right_token.symbol}Wallet2`)) {
@@ -225,10 +203,10 @@ describe('DexAccount interact with DexPair', async function () {
         IS_FOO_LEFT = pairRoots.left === FooRoot.address;
 
         logger.log('DexRoot: ' + DexRoot.address);
-        logger.log(`DexPair${left_token.symbol}${right_token.symbol}: ` + DexPairFooBar.address);
+        logger.log(`DexPair${symbols}: ` + DexPairFooBar.address);
         logger.log(`${left_token.symbol}Root: ` + FooRoot.address);
         logger.log(`${right_token.symbol}Root: ` + BarRoot.address);
-        logger.log(`${left_token.symbol}${right_token.symbol}LpRoot: ` + FooBarLpRoot.address);
+        logger.log(`${symbols}LpRoot: ` + FooBarLpRoot.address);
         logger.log('Account#2: ' + Account2.address);
         logger.log('DexAccount#2: ' + DexAccount2.address);
 
@@ -248,7 +226,7 @@ describe('DexAccount interact with DexPair', async function () {
             logger.log(`DexPair start: ` +
                 `${dexPairInfoStart.foo} ${left_token.symbol}, ${dexPairInfoStart.bar} ${right_token.symbol}, ` +
                 `LP SUPPLY (PLAN): ${dexPairInfoStart.lp_supply || "0"} LP, ` +
-                `LP SUPPLY (ACTUAL): ${dexPairInfoStart.lp_supply_actual|| "0"} LP`);
+                `LP SUPPLY (ACTUAL): ${dexPairInfoStart.lp_supply_actual || "0"} LP`);
 
             const LEFT_AMOUNT = IS_FOO_LEFT ?
                 new BigNumber(options.left_amount).shiftedBy(left_token.decimals).toString() :
@@ -258,19 +236,13 @@ describe('DexAccount interact with DexPair', async function () {
                 new BigNumber(options.right_amount).shiftedBy(right_token.decimals).toString() :
                 new BigNumber(options.left_amount).shiftedBy(left_token.decimals).toString();
 
-            const expected = await DexPairFooBar.call({
-                method: 'expectedDepositLiquidity',
-                params: {
-                    left_amount: LEFT_AMOUNT,
-                    right_amount: RIGHT_AMOUNT,
-                    auto_change: options.auto_change
-                }
-            });
-
-            const LP_REWARD = new BigNumber(expected.step_1_lp_reward)
-                .plus(expected.step_3_lp_reward).shiftedBy(-9).toString();
-
-            logExpectedDeposit(expected);
+            let LP_REWARD = await expectedDepositLiquidity(
+                DexPairFooBar.address,
+                options.contract_name,
+                IS_FOO_LEFT ? [left_token, right_token] : [right_token, left_token],
+                [LEFT_AMOUNT, RIGHT_AMOUNT],
+                options.auto_change
+            );
 
             const tx = await Account2.runTarget({
                 contract: DexAccount2,
@@ -289,7 +261,7 @@ describe('DexAccount interact with DexPair', async function () {
                 keyPair: keyPairs[1]
             });
 
-            logger.success(`Transaction: ${tx.transaction.id}`);
+            displayTx(tx);
 
             const dexAccount2End = await dexAccountBalances(DexAccount2);
             const dexPairInfoEnd = await dexPairInfo();

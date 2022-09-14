@@ -37,7 +37,7 @@ abstract contract DexContractBase  {
 
     function _expectedPairAddress(address left_root, address right_root) internal view returns (address) {
         return address(tvm.hash(_buildInitData(
-            DexPlatformTypes.Pair,
+            DexPlatformTypes.Pool,
             _buildPairParams(left_root, right_root)
         )));
     }

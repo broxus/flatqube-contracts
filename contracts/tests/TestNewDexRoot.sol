@@ -15,8 +15,9 @@ contract NewDexRoot {
     TvmCell public platform_code;
     TvmCell public account_code;
     uint32 account_version;
-    TvmCell public pair_code;
-    uint32 pair_version;
+    mapping(uint8 => TvmCell) pair_codes;
+    mapping(uint8 => uint32) pair_versions;
+
 
     bool active;
 
@@ -43,19 +44,34 @@ contract NewDexRoot {
     function getAccountVersion() external view responsible returns (uint32) {
         return{ value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } account_version;
     }
+    function getPairVersion(uint8 pool_type)  external view responsible returns (uint32) {
+        require(pair_versions.exists(pool_type), DexErrors.UNSUPPORTED_POOL_TYPE);
+        return{ value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pair_versions[pool_type];
+    }
 
-    function getPairVersion() external view responsible returns (uint32) {
-        return{ value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pair_version;
+    function getPairCode(uint8 pool_type)  external view responsible returns (TvmCell) {
+        require(pair_codes.exists(pool_type), DexErrors.UNSUPPORTED_POOL_TYPE);
+        return{ value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pair_codes[pool_type];
+    }
+
+    function getAccountCode()  external view responsible returns (TvmCell) {
+        return{ value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } account_code;
     }
 
     function setActive(bool new_active) external {
         tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
-        if (new_active && !platform_code.toSlice().empty() && vault.value != 0 && account_version > 0 && pair_version > 0) {
+        if (
+            new_active &&
+            !platform_code.toSlice().empty() &&
+            vault.value != 0 &&
+            account_version > 0 &&
+            !pair_versions.empty()
+        ) {
             active = true;
         } else {
             active = false;
         }
-        owner.transfer({value : 0, flag : MsgFlag.ALL_NOT_RESERVED});
+        owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
     }
 
     function isActive() external view responsible returns (bool) {
@@ -64,15 +80,28 @@ contract NewDexRoot {
 
     function onCodeUpgrade(TvmCell data) private {
         tvm.resetStorage();
-        TvmSlice s = data.toSlice();
-        (account_version, pair_version, owner, vault, pending_owner) =
-        s.decode(uint32, uint32, address, address, address);
 
-        platform_code = s.loadRef();
-        account_code = s.loadRef();
-        pair_code = s.loadRef();
+        (
+            platform_code,
+            account_code,
+            account_version,
+            pair_codes,
+            pair_versions,
+            owner,
+            vault,
+            pending_owner
+        ) = abi.decode(data, (
+            TvmCell,
+            TvmCell,
+            uint32,
+            mapping(uint8 => TvmCell),
+            mapping(uint8 => uint32),
+            address,
+            address,
+            address
+        ));
 
-        this.setActive(true);
+        active = true;
 
         newTestField = "New Root";
 

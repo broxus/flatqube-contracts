@@ -17,6 +17,7 @@ library DexGas {
     uint128 constant TRANSFER_ROOT_OWNERSHIP_VALUE  = 0.5 ton;
     uint128 constant DEPLOY_TOKEN_ROOT_VALUE        = 2 ton;
     uint128 constant GET_TOKEN_DETAILS_VALUE        = 0.5 ton;
+    uint128 constant GET_TOKEN_DECIMALS_VALUE       = 0.5 ton;
 
     uint128 constant PLATFORM_DEPLOY_VALUE          = 0.1 ton;
     uint128 constant SET_PLATFORM_CODE_VALUE        = 0.1 ton;
@@ -54,5 +55,6 @@ library DexGas {
     uint128 constant ADD_PAIR_MIN_VALUE             = 3 ton;
 
     uint128 constant OPERATION_CALLBACK_BASE        = 0.01 ton;
+    uint128 constant SET_FEE_PARAMS_MIN_VALUE       = 1 ton;
 
 }

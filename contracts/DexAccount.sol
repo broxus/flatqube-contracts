@@ -309,7 +309,7 @@ contract DexAccount is
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
 
         address pair = address(tvm.hash(_buildInitData(
-            DexPlatformTypes.Pair,
+            DexPlatformTypes.Pool,
             _buildPairParams(spent_token_root, receive_token_root)
         )));
 
@@ -365,7 +365,7 @@ contract DexAccount is
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
 
         address pair = address(tvm.hash(_buildInitData(
-            DexPlatformTypes.Pair,
+            DexPlatformTypes.Pool,
             _buildPairParams(left_root, right_root)
         )));
 
@@ -413,7 +413,7 @@ contract DexAccount is
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
 
         address pair = address(tvm.hash(_buildInitData(
-            DexPlatformTypes.Pair,
+            DexPlatformTypes.Pool,
             _buildPairParams(left_root, right_root)
         )));
 
@@ -450,7 +450,7 @@ contract DexAccount is
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
 
         address expected = address(tvm.hash(_buildInitData(
-            DexPlatformTypes.Pair,
+            DexPlatformTypes.Pool,
             _buildPairParams(left_root, right_root)
         )));
 

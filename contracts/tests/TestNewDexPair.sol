@@ -6,13 +6,16 @@ pragma AbiHeader pubkey;
 
 import "../libraries/DexErrors.sol";
 import "../libraries/DexGas.sol";
+import "../libraries/FixedPoint128.sol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
 import "../interfaces/IDexPair.sol";
 import "../structures/ITokenOperationStructure.sol";
+import "../structures/IPoint.sol";
+import "../structures/IOracleOptions.sol";
 
 // This is just for test purposes, this is not a real contract!
-contract TestNewDexPair is ITokenOperationStructure {
+contract TestNewDexPair is ITokenOperationStructure, IFeeParams, IPoint, IOracleOptions {
     address root;
     address vault;
     uint32 current_version;
@@ -38,8 +41,7 @@ contract TestNewDexPair is ITokenOperationStructure {
     uint128 public left_balance;
     uint128 public right_balance;
     // Fee
-    uint16 fee_numerator;
-    uint16 fee_denominator;
+    FeeParams fee;
 
     // v2
     uint64 _nonce;
@@ -48,6 +50,11 @@ contract TestNewDexPair is ITokenOperationStructure {
     mapping(uint64 => address) _tmp_expected_callback_sender;
     mapping(uint64 => uint256) _tmp_sender_public_key;
     mapping(uint64 => address) _tmp_sender_address;
+
+    // Oracle
+    mapping(uint32 => Point) private _points;
+    OracleOptions private _options;
+    uint16 private _length;
 
     string newTestField;
 
@@ -69,6 +76,10 @@ contract TestNewDexPair is ITokenOperationStructure {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } current_version;
     }
 
+    function getPoolType() external view responsible returns (uint8) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } 1;
+    }
+
     function getVault() external view responsible returns (address dex_vault) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } vault;
     }
@@ -77,8 +88,8 @@ contract TestNewDexPair is ITokenOperationStructure {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (vault_left_wallet, vault_right_wallet);
     }
 
-    function getFeeParams() external view responsible returns (uint16 numerator, uint16 denominator) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee_numerator, fee_denominator);
+    function getFeeParams() external view responsible returns (FeeParams) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } fee;
     }
 
     function isActive() external view responsible returns (bool) {
@@ -91,6 +102,57 @@ contract TestNewDexPair is ITokenOperationStructure {
             left_balance,
             right_balance
         );
+    }
+
+    function getPoint(uint32 _timestamp) external view responsible returns (Point) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _points[_timestamp];
+    }
+
+    function getCardinality() external view responsible returns (uint16) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _options.cardinality;
+    }
+
+    function getLength() external view responsible returns (uint16) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _length;
+    }
+
+    function getMinInterval() external view responsible returns (uint8) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _options.minInterval;
+    }
+
+    function getMinRateDelta() external view responsible returns (uint) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } FixedPoint128.encodeFromNumeratorAndDenominator(
+            _options.minRateDeltaNumerator,
+            _options.minRateDeltaDenominator
+        );
+    }
+
+    function isInitialized() external view responsible returns (bool) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } !_points.empty();
     }
 
     function onCodeUpgrade(TvmCell data) private {
@@ -108,17 +170,42 @@ contract TestNewDexPair is ITokenOperationStructure {
         platform_code = s.loadRef(); // ref 1
 
         TvmSlice tokens_data_slice =  s.loadRefAsSlice(); // ref 2
-        (left_root, right_root, lp_root) = tokens_data_slice.decode(address, address, address);
+        (left_root, right_root) = tokens_data_slice.decode(address, address);
 
-        TvmSlice token_balances_data_slice = tokens_data_slice.loadRefAsSlice(); // ref 2_1
-        (lp_supply, left_balance, right_balance, fee_numerator, fee_denominator) =
-        token_balances_data_slice.decode(uint128, uint128, uint128, uint16, uint16);
+        TvmCell otherDataCell = s.loadRef();    // ref 3
 
-        TvmSlice pair_wallets_data_slice = s.loadRefAsSlice(); // ref 3
-        (lp_wallet, left_wallet, right_wallet) = pair_wallets_data_slice.decode(address, address, address);
+        (
+            lp_root,
+            lp_wallet,
+            lp_supply,
 
-        TvmSlice vault_wallets_data = s.loadRefAsSlice(); // ref 4
-        (vault_left_wallet, vault_right_wallet) = vault_wallets_data.decode(address, address);
+            fee,
+
+            left_wallet,
+            vault_left_wallet,
+            left_balance,
+
+            right_wallet,
+            vault_right_wallet,
+            right_balance
+        ) = abi.decode(otherDataCell, (
+            address, address, uint128,
+            FeeParams,
+            address, address, uint128,
+            address, address, uint128
+        ));
+
+        TvmSlice oracleDataSlice = s.loadRefAsSlice();  // ref 4
+
+        (
+            _points,
+            _options,
+            _length
+        ) = oracleDataSlice.decode(
+            mapping(uint32 => Point),
+            OracleOptions,
+            uint16
+        );
 
         newTestField = "New Pair";
 

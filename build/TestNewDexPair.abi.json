@@ -51,6 +51,15 @@
 			]
 		},
 		{
+			"name": "getPoolType",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint8"}
+			]
+		},
+		{
 			"name": "getVault",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
@@ -75,8 +84,7 @@
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
-				{"name":"numerator","type":"uint16"},
-				{"name":"denominator","type":"uint16"}
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"value0","type":"tuple"}
 			]
 		},
 		{
@@ -95,6 +103,61 @@
 			],
 			"outputs": [
 				{"components":[{"name":"lp_supply","type":"uint128"},{"name":"left_balance","type":"uint128"},{"name":"right_balance","type":"uint128"}],"name":"value0","type":"tuple"}
+			]
+		},
+		{
+			"name": "getPoint",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"_timestamp","type":"uint32"}
+			],
+			"outputs": [
+				{"components":[{"name":"price0To1Cumulative","type":"uint256"},{"name":"price1To0Cumulative","type":"uint256"}],"name":"value0","type":"tuple"}
+			]
+		},
+		{
+			"name": "getCardinality",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint16"}
+			]
+		},
+		{
+			"name": "getLength",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint16"}
+			]
+		},
+		{
+			"name": "getMinInterval",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint8"}
+			]
+		},
+		{
+			"name": "getMinRateDelta",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint256"}
+			]
+		},
+		{
+			"name": "isInitialized",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"bool"}
 			]
 		},
 		{
@@ -210,14 +273,16 @@
 		{"name":"lp_supply","type":"uint128"},
 		{"name":"left_balance","type":"uint128"},
 		{"name":"right_balance","type":"uint128"},
-		{"name":"fee_numerator","type":"uint16"},
-		{"name":"fee_denominator","type":"uint16"},
+		{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"fee","type":"tuple"},
 		{"name":"_nonce","type":"uint64"},
 		{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_tmp_operations","type":"map(uint64,tuple)"},
 		{"name":"_tmp_send_gas_to","type":"map(uint64,address)"},
 		{"name":"_tmp_expected_callback_sender","type":"map(uint64,address)"},
 		{"name":"_tmp_sender_public_key","type":"map(uint64,uint256)"},
 		{"name":"_tmp_sender_address","type":"map(uint64,address)"},
+		{"components":[{"name":"price0To1Cumulative","type":"uint256"},{"name":"price1To0Cumulative","type":"uint256"}],"name":"_points","type":"map(uint32,tuple)"},
+		{"components":[{"name":"minInterval","type":"uint8"},{"name":"minRateDeltaNumerator","type":"uint128"},{"name":"minRateDeltaDenominator","type":"uint128"},{"name":"cardinality","type":"uint16"}],"name":"_options","type":"tuple"},
+		{"name":"_length","type":"uint16"},
 		{"name":"newTestField","type":"string"}
 	]
 }

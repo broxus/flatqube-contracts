@@ -15,8 +15,8 @@ async function main() {
         .option('-evroot', '--weverroot <weverRoot>', 'WEVER Root')
         .option('-ewvault', '--wevervault <weverVault>', 'WEVER Vault');
 
-    program.parse(process.argv);  
-    
+    program.parse(process.argv);
+
     const options = program.opts();
 
     if (!isValidTonAddress(options.weverroot)) {

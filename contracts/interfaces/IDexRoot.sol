@@ -1,8 +1,11 @@
 pragma ton-solidity >= 0.57.0;
 
-interface IDexRoot {
+import "../structures/IFeeParams.sol";
+import "../structures/IOracleOptions.sol";
+
+interface IDexRoot is IFeeParams, IOracleOptions {
     event AccountCodeUpgraded(uint32 version);
-    event PairCodeUpgraded(uint32 version);
+    event PairCodeUpgraded(uint32 version, uint8 pool_type);
     event RootCodeUpgraded();
     event ActiveUpdated(bool new_active);
 
@@ -24,8 +27,41 @@ interface IDexRoot {
     function getExpectedAccountAddress(address account_owner) external view responsible returns (address);
 
     function getAccountVersion() external view responsible returns (uint32);
-    function getPairVersion() external view responsible returns (uint32);
+    function getAccountCode() external view responsible returns (TvmCell);
+    function getPairVersion(uint8 pool_type) external view responsible returns (uint32);
+    function getPairCode(uint8 pool_type) external view responsible returns (TvmCell);
 
     function isActive() external view responsible returns (bool);
     function getVault() external view responsible returns (address);
+
+    function setPairFeeParams(
+        address left_root,
+        address right_root,
+        FeeParams params,
+        address send_gas_to
+    ) external view;
+
+    /// @notice Proxy for TWAPOracle's setOracleOptions
+    /// @param _leftRoot Address of the left TokenRoot
+    /// @param _rightRoot Address of the right TokenRoot
+    /// @param _options New oracle's options
+    /// @param _remainingGasTo Recipient of the remaining gas
+    function setOracleOptions(
+        address _leftRoot,
+        address _rightRoot,
+        OracleOptions _options,
+        address _remainingGasTo
+    ) external view;
+
+    /// @notice Proxy for TWAPOracle's removeLastNPoints
+    /// @param _leftRoot Address of the left TokenRoot
+    /// @param _rightRoot Address of the right TokenRoot
+    /// @param _count Count of last points to remove
+    /// @param _remainingGasTo Recipient of the remaining gas
+    function removeLastNPoints(
+        address _leftRoot,
+        address _rightRoot,
+        uint16 _count,
+        address _remainingGasTo
+    ) external view;
 }
