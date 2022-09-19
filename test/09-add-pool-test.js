@@ -99,7 +99,7 @@ describe('Check DexAccount add Pool', async function () {
             for (let i = 0; i < N_COINS; i++) {
                 expect((await dexAccount.call({method: 'getWalletData', params: {token_root: token_roots[i]}})).wallet)
                     .to
-                    .not.equal(locklift.ton.zero_address, 'DexAccount wallet address for' + tokens[i].symbol + 'Root is empty');
+                    .not.equal(locklift.ton.zero_address, 'DexAccount wallet address for ' + tokens[i].symbol + 'Root is empty');
             }
             expect((await dexAccount.call({method: 'getWalletData', params: {token_root: lp_root}})).wallet)
                 .to

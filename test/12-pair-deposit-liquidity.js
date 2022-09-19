@@ -23,7 +23,8 @@ program
     .option('-la, --left_amount <left_amount>', 'left amount')
     .option('-ra, --right_amount <right_amount>', 'right amount')
     .option('-ac, --auto_change <auto_change>', 'auto change')
-    .option('-cn, --contract_name <contract_name>', 'DexPair contract name');
+    .option('-cn, --contract_name <contract_name>', 'DexPair contract name')
+    .option('-acn, --account_contract_name <account_contract_name>', 'DexAccount contract name');
 
 program.parse(process.argv);
 
@@ -35,6 +36,7 @@ options.left_amount = options.left_amount || '1';
 options.right_amount = options.right_amount || '2';
 options.auto_change = options.auto_change === 'true';
 options.contract_name = options.contract_name || 'DexPair';
+options.account_contract_name = options.account_contract_name || 'DexAccount';
 
 const left_token = options.left_token_id.slice(-2) === 'Lp' ? {name: options.left_token_id, symbol: options.left_token_id, decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[options.left_token_id];
 const right_token = options.right_token_id.slice(-2) === 'Lp' ? {name: options.right_token_id, symbol: options.right_token_id, decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[options.right_token_id];
@@ -136,7 +138,7 @@ describe('DexAccount interact with DexPair', async function () {
         BarRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
         FooBarLpRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
         Account2 = await locklift.factory.getAccount('Wallet');
-        DexAccount2 = await locklift.factory.getContract('DexAccount');
+        DexAccount2 = await locklift.factory.getContract(options.account_contract_name);
         FooBarLpWallet2 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
         FooWallet2 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
         BarWallet2 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);

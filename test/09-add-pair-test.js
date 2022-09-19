@@ -11,7 +11,8 @@ program
     .option('-r, --right <right>', 'right root')
     .option('-a, --account <account>', 'dex account number')
     .option('-ig, --ignore_already_added <ignore_already_added>', 'ignore already added check')
-    .option('-cn, --contract_name <contract_name>', 'DexPair contract name');
+    .option('-cn, --contract_name <contract_name>', 'DexPair contract name')
+    .option('-acn, --account_contract_name <account_contract_name>', 'DexAccount contract name');
 
 program.parse(process.argv);
 
@@ -22,6 +23,7 @@ options.right = options.right || 'bar';
 options.account = options.account || 2;
 options.ignore_already_added = options.ignore_already_added === 'true';
 options.contract_name = options.contract_name || 'DexPair';
+options.account_contract_name = options.account_contract_name || 'DexAccount';
 
 const tokenLeft = options.left.slice(-2) === 'Lp' ? {name: options.left, symbol: options.left, decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[options.left];
 const tokenRight = options.right.slice(-2) === 'Lp' ? {name: options.right, symbol: options.right, decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[options.right];
@@ -51,7 +53,7 @@ describe('Check DexAccount add Pair', async function () {
   this.timeout(Constants.TESTS_TIMEOUT);
   before('Load contracts', async function () {
     keyPairs = await locklift.keys.getKeyPairs();
-    DexAccount = await locklift.factory.getContract('DexAccount');
+    DexAccount = await locklift.factory.getContract(options.account_contract_name);
     account = migration.load(await locklift.factory.getAccount('Wallet'), 'Account' + options.account);
     if (locklift.tracing) {
       locklift.tracing.allowCodes({compute: [100]});

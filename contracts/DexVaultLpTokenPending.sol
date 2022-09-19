@@ -13,7 +13,6 @@ import "ton-eth-bridge-token-contracts/contracts/interfaces/ITransferableOwnersh
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITransferTokenRootOwnershipCallback.sol";
 import "ton-eth-bridge-token-contracts/contracts/structures/ICallbackParamsStructure.sol";
 
-// deprecated
 contract DexVaultLpTokenPending is ITokenRootDeployedCallback, ITransferTokenRootOwnershipCallback {
 
     string LP_TOKEN_SYMBOL_PREFIX = "FlatQube-LP-";
@@ -130,7 +129,7 @@ contract DexVaultLpTokenPending is ITokenRootDeployedCallback, ITransferTokenRoo
             IDexVault(vault).onLiquidityTokenDeployed{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO
-            }(_nonce, pair, [left_root, right_root], lp_token_root, send_gas_to);
+            }(_nonce, pair, left_root, right_root, lp_token_root, send_gas_to);
         } else {
             _onLiquidityTokenNotDeployed();
         }
@@ -140,7 +139,7 @@ contract DexVaultLpTokenPending is ITokenRootDeployedCallback, ITransferTokenRoo
         IDexVault(vault).onLiquidityTokenNotDeployed{
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO
-        }(_nonce, pair, [left_root, right_root], lp_token_root, send_gas_to);
+        }(_nonce, pair, left_root, right_root, lp_token_root, send_gas_to);
     }
 
     function createLpTokenAndWallets() private {

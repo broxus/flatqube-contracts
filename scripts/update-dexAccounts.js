@@ -6,13 +6,13 @@ async function main() {
   rootOwner.afterRun = afterRun;
   const [keyPair] = await locklift.keys.getKeyPairs();
   const dexRoot = migration.load(await locklift.factory.getContract('DexRoot'), 'DexRoot');
-  const NewDexAccount = await locklift.factory.getContract('NewDexAccount');
+  const DexAccount = await locklift.factory.getContract('DexAccount');
 
   console.log(`Installing new DexAccount contract in DexRoot: ${dexRoot.address}`);
   await rootOwner.runTarget({
     contract: dexRoot,
     method: 'installOrUpdateAccountCode',
-    params: {code: NewDexAccount.code},
+    params: {code: DexAccount.code},
     value: locklift.utils.convertCrystal(1, 'nano'),
     keyPair
   });
