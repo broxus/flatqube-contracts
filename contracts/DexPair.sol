@@ -875,16 +875,25 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
             lp_tokens_amount = r.step_1_lp_reward + r.step_3_lp_reward;
 
             if (auto_change) {
-                left_balance = left_balance + left_amount;
-                right_balance = right_balance + right_amount;
-
                 if (r.step_2_right_to_left) {
-                    require(r.step_2_received <= left_balance + r.step_1_left_deposit, DexErrors.NOT_ENOUGH_FUNDS);
-                    right_balance -= step_2_beneficiary_fee;
+                    require(
+                        r.step_2_received <= left_balance + r.step_1_left_deposit,
+                        DexErrors.NOT_ENOUGH_FUNDS
+                    );
+
+                    left_balance += left_amount;
+                    right_balance += right_amount - step_2_beneficiary_fee;
+
                     accumulated_right_fee += step_2_beneficiary_fee;
                 } else if (r.step_2_left_to_right) {
-                    require(r.step_2_received <= right_balance + r.step_1_right_deposit, DexErrors.NOT_ENOUGH_FUNDS);
-                    left_balance -= step_2_beneficiary_fee;
+                    require(
+                        r.step_2_received <= right_balance + r.step_1_right_deposit,
+                        DexErrors.NOT_ENOUGH_FUNDS
+                    );
+
+                    left_balance += left_amount - step_2_beneficiary_fee;
+                    right_balance += right_amount;
+
                     accumulated_left_fee += step_2_beneficiary_fee;
                 }
 
