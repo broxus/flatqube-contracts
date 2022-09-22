@@ -2,22 +2,37 @@ pragma ton-solidity >= 0.57.0;
 
 import "./IDexBasePool.sol";
 import "../structures/IDexPoolBalances.sol";
+import "../structures/IDepositLiquidityResultV2.sol";
+import "../structures/IWithdrawResultV2.sol";
 
-interface IDexNPool is IDexBasePool, IDexPoolBalances {
+interface IDexNPool is IDexBasePool, IDexPoolBalances, IDepositLiquidityResultV2, IWithdrawResultV2 {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // EVENTS
 
-    /// @dev Emits when swap between a sending and several receiving tokens was successfully processed
-    event MultilateralExchange(
+    /// @dev Emits when liquidity deposit was successfully processed
+    event DepositLiquidityV2(
         address sender,
-        address recipient,
-        TokenOperation[] spentTokens,
-        TokenOperation[] receiveTokens,
-        ExchangeFee[] fees
+        address owner,
+        TokenOperation[] tokens,
+        ExchangeFee[] fees,
+        TokenOperation[] spent_differences,
+        TokenOperation[] receive_differences,
+        uint128 lp
     );
 
-    /// @dev Emits when pool's code was successfully upgraded
+    /// @dev Emits when liquidity withdrawal was successfully processed
+    event WithdrawLiquidityV2(
+        address sender,
+        address owner,
+        uint128 lp,
+        TokenOperation[] tokens,
+        ExchangeFee[] fees,
+        TokenOperation[] spent_differences,
+        TokenOperation[] receive_differences
+    );
+
+/// @dev Emits when pool's code was successfully upgraded
     event PoolCodeUpgraded(
         uint32 version,
         uint8 pool_type
@@ -52,27 +67,35 @@ interface IDexNPool is IDexBasePool, IDexPoolBalances {
     function getBalances() external view responsible returns (DexPoolBalances);
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // DEPOSIT LIQUIDITY
+
+    /// @notice Calculate expected LP tokens amount after liquidity deposit
+    /// @param amounts Input amounts
+    function expectedDepositLiquidityV2(
+        uint128[] amounts
+    ) external view responsible returns (
+        DepositLiquidityResultV2
+    );
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
     // WITHDRAW LIQUIDITY
 
     /// @notice Calculate expected output amounts after liquidity withdrawal
     /// @param lp_amount Amount of LP tokens to burn
-    /// @return amounts Expected left and right amounts
     function expectedWithdrawLiquidity(
         uint128 lp_amount
     ) external view responsible returns (
-        uint128[] amounts
+        WithdrawResultV2
     );
 
     /// @notice Calculate expected output amount after a single coin withdrawal
     /// @param lp_amount Amount of LP tokens to burn
     /// @param outcoming Withdrawal token address
-    /// @return amount Expected output amount and fee after withdrawal
     function expectedWithdrawLiquidityOneCoin(
         uint128 lp_amount,
         address outcoming
     ) external view responsible returns (
-        uint128 amount,
-        uint128 expected_fee
+        WithdrawResultV2
     );
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -346,13 +346,16 @@ describe('Check direct operations', async function () {
                     let expected, expected_amount;
                     let spent_token_idx;
                     if (options.token_route[i - 1].slice(-2) === 'Lp' && !options.pool_route[i - 1].includes(options.token_route[i - 1])) { // spent token is lp token of the current pool
+                        const poolRoots = (await poolsContracts[poolName].call({method: 'getTokenRoots', params: {}})).roots;
+                        const outcomingIndex = poolRoots.findIndex((root) => root === tokenRoots[options.token_route[i]].address);
+
                         expected = await poolsContracts[poolName].call({
                             method: 'expectedWithdrawLiquidityOneCoin', params: {
                                 lp_amount: currentAmount,
                                 outcoming: tokenRoots[options.token_route[i]].address
                             }
                         });
-                        expected_amount = expected.amount;
+                        expected_amount = expected.amounts[outcomingIndex];
                     } else if (options.token_route[i].slice(-2) === 'Lp' && !options.pool_route[i - 1].includes(options.token_route[i])) { // receive token is lp token of the current pool
                         const poolRoots = (await poolsContracts[poolName].call({method: 'getTokenRoots', params: {}})).roots;
                         const amounts = [];

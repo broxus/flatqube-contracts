@@ -248,7 +248,7 @@
 				{"name":"lp_amount","type":"uint128"}
 			],
 			"outputs": [
-				{"name":"amounts","type":"uint128[]"}
+				{"components":[{"name":"lp_amount","type":"uint128"},{"name":"old_balances","type":"uint128[]"},{"name":"amounts","type":"uint128[]"},{"name":"result_balances","type":"uint128[]"},{"name":"invariant","type":"uint128"},{"name":"differences","type":"uint128[]"},{"name":"sell","type":"bool[]"},{"name":"pool_fees","type":"uint128[]"},{"name":"beneficiary_fees","type":"uint128[]"}],"name":"value0","type":"tuple"}
 			]
 		},
 		{
@@ -259,8 +259,7 @@
 				{"name":"outcoming","type":"address"}
 			],
 			"outputs": [
-				{"name":"amount","type":"uint128"},
-				{"name":"expected_fee","type":"uint128"}
+				{"components":[{"name":"lp_amount","type":"uint128"},{"name":"old_balances","type":"uint128[]"},{"name":"amounts","type":"uint128[]"},{"name":"result_balances","type":"uint128[]"},{"name":"invariant","type":"uint128"},{"name":"differences","type":"uint128[]"},{"name":"sell","type":"bool[]"},{"name":"pool_fees","type":"uint128[]"},{"name":"beneficiary_fees","type":"uint128[]"}],"name":"value0","type":"tuple"}
 			]
 		},
 		{
@@ -440,13 +439,29 @@
 			]
 		},
 		{
-			"name": "MultilateralExchange",
+			"name": "DepositLiquidityV2",
 			"inputs": [
 				{"name":"sender","type":"address"},
-				{"name":"recipient","type":"address"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"spentTokens","type":"tuple[]"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"receiveTokens","type":"tuple[]"},
-				{"components":[{"name":"feeTokenRoot","type":"address"},{"name":"pool_fee","type":"uint128"},{"name":"beneficiary_fee","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fees","type":"tuple[]"}
+				{"name":"owner","type":"address"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"tokens","type":"tuple[]"},
+				{"components":[{"name":"feeTokenRoot","type":"address"},{"name":"pool_fee","type":"uint128"},{"name":"beneficiary_fee","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fees","type":"tuple[]"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"spent_differences","type":"tuple[]"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"receive_differences","type":"tuple[]"},
+				{"name":"lp","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "WithdrawLiquidityV2",
+			"inputs": [
+				{"name":"sender","type":"address"},
+				{"name":"owner","type":"address"},
+				{"name":"lp","type":"uint128"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"tokens","type":"tuple[]"},
+				{"components":[{"name":"feeTokenRoot","type":"address"},{"name":"pool_fee","type":"uint128"},{"name":"beneficiary_fee","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fees","type":"tuple[]"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"spent_differences","type":"tuple[]"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"receive_differences","type":"tuple[]"}
 			],
 			"outputs": [
 			]

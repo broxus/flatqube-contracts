@@ -2,13 +2,10 @@ pragma ton-solidity >= 0.57.0;
 
 import "./IDexNPool.sol";
 import "../structures/IAmplificationCoefficient.sol";
-import "../structures/IDepositLiquidityResultV2.sol";
 
-interface IDexStablePool is IDexNPool, IAmplificationCoefficient, IDepositLiquidityResultV2 {
+interface IDexStablePool is IDexNPool, IAmplificationCoefficient {
 
     event AmplificationCoefficientUpdated(AmplificationCoefficient A);
-
-    function expectedDepositLiquidityV2(uint128[] amounts) external view responsible returns (DepositLiquidityResultV2);
 
     function getAmplificationCoefficient() external view responsible returns (AmplificationCoefficient);
 
