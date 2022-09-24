@@ -47,6 +47,8 @@ npx locklift test $DEFAULT_PARAMS --tests test/30-install-pool-code.js --contrac
 # test stable pool
 npx locklift run $NO_TRACE --script scripts/5-deploy-test-pool.js --pools='[["foo", "bar", "qwe"],["qwe","tst","coin"]]' --contract_name='DexStablePool'
 
+#npx locklift test $NO_TRACE --tests test/35-upgrade-pool.js --roots='["foo", "bar", "qwe"]' --old_contract_name='DexStablePool' --new_contract_name='DexStablePool' --pool_type=2
+
 npx locklift test $NO_TRACE --tests test/09-add-pool-test.js --roots='["foo", "bar", "qwe"]' --account=2 --contract_name='DexStablePool' --ignore_already_added='true'
 npx locklift test $NO_TRACE --tests test/09-add-pool-test.js --roots='["qwe", "tst", "coin"]' --account=2 --contract_name='DexStablePool' --ignore_already_added='true'
 

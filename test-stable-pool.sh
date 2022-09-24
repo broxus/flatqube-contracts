@@ -29,7 +29,7 @@ npx locklift test $NO_TRACE --tests test/15-dex-account-pool-operations.js --roo
 
 npx locklift test $NO_TRACE --tests test/20-pool-direct-operations.js --roots='["foo", "bar", "qwe"]' --contract_name='DexStablePool'
 
-# cross-pool-exchange test (dex-pair)
+# cross-pool-exchange test
 npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["tst", "FooBarQweLp"],["tst","coin"],["tst","foo"],["coin","foo"]]' --contract_name='DexPair'
 npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='tst' --right='FooBarQweLp' --account=2 --contract_name='DexPair' --ignore_already_added='true'
 npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='tst' --right='coin' --account=2 --contract_name='DexPair' --ignore_already_added='true'
