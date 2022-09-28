@@ -1,6 +1,6 @@
 pragma ton-solidity >= 0.57.0;
 
-library LimitOrderStatus {
+library OrderStatus {
     uint8 constant Initialize     = 0;
     uint8 constant AwaitTokens    = 1;
     uint8 constant Active         = 2;

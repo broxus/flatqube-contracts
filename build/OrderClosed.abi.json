@@ -1,0 +1,132 @@
+{
+	"ABI version": 2,
+	"version": "2.2",
+	"header": ["pubkey", "time", "expire"],
+	"functions": [
+		{
+			"name": "constructor",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "currentStatus",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint8"}
+			]
+		},
+		{
+			"name": "initParams",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"components":[{"name":"orderRoot","type":"address"},{"name":"factoryOrderRoot","type":"address"},{"name":"ownerAddress","type":"address"},{"name":"spentTokenRoot","type":"address"},{"name":"receiveTokenRoot","type":"address"}],"name":"value0","type":"tuple"}
+			]
+		},
+		{
+			"name": "getDetails",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"components":[{"name":"orderRoot","type":"address"},{"name":"owner","type":"address"},{"name":"swapAttempt","type":"uint64"},{"name":"state","type":"uint8"},{"name":"spentToken","type":"address"},{"name":"receiveToken","type":"address"},{"name":"spentWallet","type":"address"},{"name":"receiveWallet","type":"address"},{"name":"expectedAmount","type":"uint128"},{"name":"initialAmount","type":"uint128"},{"name":"currentAmountSpentToken","type":"uint128"}],"name":"value0","type":"tuple"}
+			]
+		},
+		{
+			"name": "onAcceptTokensTransfer",
+			"inputs": [
+				{"name":"value0","type":"address"},
+				{"name":"amount","type":"uint128"},
+				{"name":"sender","type":"address"},
+				{"name":"value3","type":"address"},
+				{"name":"originalGasTo","type":"address"},
+				{"name":"value5","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "enableEmergency",
+			"inputs": [
+				{"name":"_emergencyManager","type":"uint256"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "disableEmergency",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "proxyTokensTransfer",
+			"inputs": [
+				{"name":"_tokenWallet","type":"address"},
+				{"name":"_gasValue","type":"uint128"},
+				{"name":"_amount","type":"uint128"},
+				{"name":"_recipient","type":"address"},
+				{"name":"_deployWalletValue","type":"uint128"},
+				{"name":"_remainingGasTo","type":"address"},
+				{"name":"_notify","type":"bool"},
+				{"name":"_payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "sendGas",
+			"inputs": [
+				{"name":"to","type":"address"},
+				{"name":"_value","type":"uint128"},
+				{"name":"_flag","type":"uint16"}
+			],
+			"outputs": [
+			]
+		}
+	],
+	"data": [
+		{"key":1,"name":"factory","type":"address"},
+		{"key":2,"name":"root","type":"address"},
+		{"key":3,"name":"owner","type":"address"},
+		{"key":4,"name":"spentToken","type":"address"},
+		{"key":5,"name":"receiveToken","type":"address"}
+	],
+	"events": [
+		{
+			"name": "StateChanged",
+			"inputs": [
+				{"name":"from","type":"uint8"},
+				{"name":"to","type":"uint8"},
+				{"components":[{"name":"orderRoot","type":"address"},{"name":"owner","type":"address"},{"name":"swapAttempt","type":"uint64"},{"name":"state","type":"uint8"},{"name":"spentToken","type":"address"},{"name":"receiveToken","type":"address"},{"name":"spentWallet","type":"address"},{"name":"receiveWallet","type":"address"},{"name":"expectedAmount","type":"uint128"},{"name":"initialAmount","type":"uint128"},{"name":"currentAmountSpentToken","type":"uint128"}],"name":"value2","type":"tuple"}
+			],
+			"outputs": [
+			]
+		}
+	],
+	"fields": [
+		{"name":"_pubkey","type":"uint256"},
+		{"name":"_timestamp","type":"uint64"},
+		{"name":"_constructorFlag","type":"bool"},
+		{"name":"factory","type":"address"},
+		{"name":"root","type":"address"},
+		{"name":"owner","type":"address"},
+		{"name":"spentToken","type":"address"},
+		{"name":"receiveToken","type":"address"},
+		{"name":"expectedAmount","type":"uint128"},
+		{"name":"initialAmount","type":"uint128"},
+		{"name":"currentAmountSpentToken","type":"uint128"},
+		{"name":"spentWallet","type":"address"},
+		{"name":"receiveWallet","type":"address"},
+		{"name":"state","type":"uint8"},
+		{"name":"swapAttempt","type":"uint64"},
+		{"name":"prevState","type":"uint8"},
+		{"name":"emergencyManager","type":"uint256"}
+	]
+}

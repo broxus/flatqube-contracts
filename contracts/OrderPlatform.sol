@@ -6,9 +6,9 @@ pragma AbiHeader pubkey;
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
-contract LimitOrderPlatform {
-	address static spenTokenRoot;
-	address static factoryLimitOrder;
+contract OrderPlatform {
+	address static factory;
+	address static spentToken;
 	TvmCell static params;
 
 	constructor(
@@ -16,11 +16,11 @@ contract LimitOrderPlatform {
 		uint32 version,
 		address sendGasTo
 	) public {
-		if (msg.sender == factoryLimitOrder) {
+		if (msg.sender.value != 0 && msg.sender == factory) {
 			initialize(code, version, sendGasTo);
 		} else {
 			sendGasTo.transfer({
-				velue: 0,
+				value: 0,
 				flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO,
 				bounce: false
 			});
@@ -32,20 +32,19 @@ contract LimitOrderPlatform {
 		uint32 version,
 		address sendGasTo
 	) private {
+
+		TvmBuilder builder;
+		builder.store(factory);
+		builder.store(spentToken);
+		builder.store(uint32(0));
+		builder.store(version);
+		builder.store(sendGasTo);
+		builder.store(params);
+		
 		tvm.setcode(code);
 		tvm.setCurrentCode(code);
 
-		onCodeUpgrade(
-			abi.encode(
-				spentTokenRoot,
-				factoryLimitOrder,
-				uint32(0),
-				version,
-				sendGasTo,
-				tvm.code,
-				params
-			)
-		);
+		onCodeUpgrade(builder.toCell());
 	}
 
 	function onCodeUpgrade(TvmCell data) private {}

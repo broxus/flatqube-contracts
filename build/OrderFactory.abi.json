@@ -1,0 +1,297 @@
+{
+	"ABI version": 2,
+	"version": "2.2",
+	"header": ["pubkey", "time", "expire"],
+	"functions": [
+		{
+			"name": "constructor",
+			"inputs": [
+				{"name":"_owner","type":"address"},
+				{"name":"_version","type":"uint32"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onOrderRootDeployed",
+			"inputs": [
+				{"name":"_orderRoot","type":"address"},
+				{"name":"token","type":"address"},
+				{"name":"sendGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "transferOwner",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"newOwner","type":"address"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "acceptOwner",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getOwner",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getPendingOwner",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "getVersionRoot",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "getVersionOrder",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "getVersionOrderClosed",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "codeOrderRoot",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "codeOrder",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "codeOrderClosed",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "setEmergency",
+			"inputs": [
+				{"name":"enabled","type":"bool"},
+				{"name":"orderAddress","type":"address"},
+				{"name":"manager","type":"uint256"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "upgradeOrderRoot",
+			"inputs": [
+				{"name":"orderAddress","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setPlatformCodeOnce",
+			"inputs": [
+				{"name":"_orderPlatform","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setOrderRootCode",
+			"inputs": [
+				{"name":"_orderRootCode","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setOrderCode",
+			"inputs": [
+				{"name":"_orderCode","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setOrderClosedCode",
+			"inputs": [
+				{"name":"_orderClosedCode","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "createOrderRoot",
+			"inputs": [
+				{"name":"token","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getExpectedAddressOrderRoot",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"token","type":"address"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "upgrade",
+			"inputs": [
+				{"name":"newCode","type":"cell"},
+				{"name":"newVersion","type":"uint32"},
+				{"name":"sendGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		}
+	],
+	"data": [
+		{"key":1,"name":"randomNonce","type":"uint32"},
+		{"key":2,"name":"dexRoot","type":"address"}
+	],
+	"events": [
+		{
+			"name": "RequestedOwnerTransfer",
+			"inputs": [
+				{"name":"oldOwner","type":"address"},
+				{"name":"newOwner","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "OwnerTransferAccepted",
+			"inputs": [
+				{"name":"oldOwner","type":"address"},
+				{"name":"newOwner","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "OrderRootCodeUpgraded",
+			"inputs": [
+				{"name":"oldVersion","type":"uint32"},
+				{"name":"newVersion","type":"uint32"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "OrderCodeUpgraded",
+			"inputs": [
+				{"name":"oldVersion","type":"uint32"},
+				{"name":"newVersion","type":"uint32"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "OrderClosedCodeUpgraded",
+			"inputs": [
+				{"name":"oldVersion","type":"uint32"},
+				{"name":"newVersion","type":"uint32"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "PlatformCodeUpgraded",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "CreateOrderRoot",
+			"inputs": [
+				{"name":"order","type":"address"},
+				{"name":"token","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "OrderFactoryUpgrade",
+			"inputs": [
+				{"name":"oldVersion","type":"uint32"},
+				{"name":"newVersion","type":"uint32"}
+			],
+			"outputs": [
+			]
+		}
+	],
+	"fields": [
+		{"name":"_pubkey","type":"uint256"},
+		{"name":"_timestamp","type":"uint64"},
+		{"name":"_constructorFlag","type":"bool"},
+		{"name":"randomNonce","type":"uint32"},
+		{"name":"dexRoot","type":"address"},
+		{"name":"currentVersion","type":"uint32"},
+		{"name":"versionOrderRoot","type":"uint32"},
+		{"name":"versionOrder","type":"uint32"},
+		{"name":"versionOrderClosed","type":"uint32"},
+		{"name":"owner","type":"address"},
+		{"name":"pendingOwner","type":"address"},
+		{"name":"orderRootCode","type":"cell"},
+		{"name":"orderPlatformCode","type":"cell"},
+		{"name":"orderCode","type":"cell"},
+		{"name":"orderClosedCode","type":"cell"}
+	]
+}

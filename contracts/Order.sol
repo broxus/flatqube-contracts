@@ -4,13 +4,13 @@ pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
-import "./libraries/LimitOrderGas.sol";
-import "./libraries/LimitOrderErrors.sol";
+import "./libraries/OrderGas.sol";
+import "./libraries/OrderErrors.sol";
+import "./libraries/OrderStatus.sol";
+import "./libraries/OrderOperationStatus.sol";
 import "./libraries/DexOperationTypes.sol";
-import "./libraries/LimitOrderStatus.sol";
-import "./libraries/LimitOrderOperationStatus.sol";
 
-import "./interfaces/ILimitOrder.sol";
+import "./interfaces/IOrder.sol";
 import "./interfaces/IHasEmergencyMode.sol";
 import "./interfaces/IDexRoot.sol";
 
@@ -20,16 +20,16 @@ import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/TIP3TokenWallet.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 
-contract LimitOrder is
+contract Order is
 	IAcceptTokensTransferCallback,
-	ILimitOrder,
+	IOrder,
 	IHasEmergencyMode
 {
-	address static factoryOrderRoot;
-	address static limitOrderRoot;
-	address static ownerAddress;
-	address static spentTokenRoot;
-	address static receiveTokenRoot;
+	address static factory;
+	address static root;
+	address static owner;
+	address static spentToken;
+	address static receiveToken;
 	uint64 static timeTx;
 	uint64 static nowTx;
 
@@ -39,14 +39,14 @@ contract LimitOrder is
 	uint128 currentAmountSpentToken;
 	uint128 currentAmountReceiveToken;
 
-	uint256 backendPubKey;
+	uint256 backPK;
 	address dexRoot;
 	address dexPair;
 
 	address spentWallet;
 	address receiveWallet;
 
-	TvmCell limitOrderCodeClosed;
+	TvmCell codeClosed;
 
 	uint8 state;
 	uint64 swapAttempt;
@@ -56,54 +56,61 @@ contract LimitOrder is
 
 	bool autoExchange;
 
+	event dddd(
+		uint msgSenderValue,
+		address msgSender, 
+		uint8 stateTT,
+		address senderNN,
+		address tokenRootRR,
+		uint128 amounttt
+	);
+
 	constructor(
-		uint128 expectedAmount_,
-		uint128 initialAmount_,
-		uint256 backendPubKey_,
-		address dexRoot_,
-		TvmCell limitOrderCodeClosed_
+		uint128 _expectedAmount,
+		uint128 _initialAmount,
+		uint256 _backPK,
+		address _dexRoot,
+		TvmCell _codeClosed
 	) public {
-		changeState(LimitOrderStatus.Initialize);
+		changeState(OrderStatus.Initialize);
 		optional(TvmCell) optSalt = tvm.codeSalt(tvm.code());
-		require(optSalt.hasValue(), LimitOrderErrors.EMPTY_SALT_IN_ORDER);
-		(address limitOrderRootSalt, address tokenRootSalt) = optSalt
+		require(optSalt.hasValue(), OrderErrors.EMPTY_SALT_IN_ORDER);
+		(address rootSalt, address tokenRootSalt) = optSalt
 			.get()
 			.toSlice()
 			.decode(address, address);
 
 		if (
-			limitOrderRootSalt == limitOrderRoot &&
-			tokenRootSalt == receiveTokenRoot &&
+			rootSalt == root &&
+			tokenRootSalt == receiveToken &&
 			msg.sender.value != 0 &&
-			msg.sender == limitOrderRoot
+			msg.sender == root
 		) {
 			tvm.rawReserve(address(this).balance - msg.value, 0);
 
-			expectedAmount = expectedAmount_;
-			initialAmount = initialAmount_;
-			currentAmountSpentToken = initialAmount;
-			currentAmountReceiveToken = expectedAmount;
-			backendPubKey = backendPubKey_;
-			dexRoot = dexRoot_;
-			limitOrderCodeClosed = limitOrderCodeClosed_;
+			currentAmountReceiveToken = expectedAmount = _expectedAmount;
+			currentAmountSpentToken = initialAmount = _initialAmount;
+			backPK = _backPK;
+			dexRoot = _dexRoot;
+			codeClosed = _codeClosed;
 
 			IDexRoot(dexRoot).getExpectedPairAddress{
-				value: LimitOrderGas.GET_DEX_PAIR,
+				value: OrderGas.GET_DEX_PAIR,
 				flag: MsgFlag.SENDER_PAYS_FEES,
-				callback: LimitOrder.getBeginData
-			}(spentTokenRoot, receiveTokenRoot);
+				callback: Order.onBeginData
+			}(spentToken, receiveToken);
 
-			ITokenRoot(spentTokenRoot).deployWallet{
-				value: LimitOrderGas.DEPLOY_EMPTY_WALLET_VALUE,
+			ITokenRoot(spentToken).deployWallet{
+				value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
 				flag: MsgFlag.SENDER_PAYS_FEES,
-				callback: LimitOrder.getBeginData
-			}(address(this), LimitOrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
+				callback: Order.onBeginData
+			}(address(this), OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
-			ITokenRoot(receiveTokenRoot).deployWallet{
-				value: LimitOrderGas.DEPLOY_EMPTY_WALLET_VALUE,
+			ITokenRoot(receiveToken).deployWallet{
+				value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
 				flag: MsgFlag.SENDER_PAYS_FEES,
-				callback: LimitOrder.getBeginData
-			}(address(this), LimitOrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
+				callback: Order.onBeginData
+			}(address(this), OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 		} else {
 			msg.sender.transfer(
 				0,
@@ -113,18 +120,18 @@ contract LimitOrder is
 		}
 	}
 
-	modifier onlyLimitOrderFactory() {
+	modifier onlyFactory() {
 		require(
-			msg.sender.value != 0 && msg.sender == factoryOrderRoot,
-			LimitOrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT
+			msg.sender.value != 0 && msg.sender == factory,
+			OrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT
 		);
 		_;
 	}
 
-	modifier onlyLimitOrderOwner() {
+	modifier onlyOwner() {
 		require(
-			(msg.sender.value != 0 && msg.sender == ownerAddress),
-			LimitOrderErrors.NOT_LIMIT_ORDER_OWNER
+			(msg.sender.value != 0 && msg.sender == owner),
+			OrderErrors.NOT_LIMIT_ORDER_OWNER
 		);
 		_;
 	}
@@ -135,26 +142,26 @@ contract LimitOrder is
 				((msg.sender.value != 0 &&
 					msg.sender.value == emergencyManager) ||
 					msg.pubkey() == emergencyManager),
-			LimitOrderErrors.NOT_EMERGENCY_MANAGER
+			OrderErrors.NOT_EMERGENCY_MANAGER
 		);
 		_;
 	}
 
-	function getBeginData(address inAddress) external {
+	function onBeginData(address inAddress) external {
 		require(
 			msg.sender.value != 0 &&
 				(msg.sender == dexRoot ||
-					msg.sender == spentTokenRoot ||
-					msg.sender == receiveTokenRoot),
-			LimitOrderErrors.NOT_BEGIN_DATA
+					msg.sender == spentToken ||
+					msg.sender == receiveToken),
+			OrderErrors.NOT_BEGIN_DATA
 		);
 
 		if (msg.sender == dexRoot) {
 			dexPair = inAddress;
 			autoExchange = true;
-		} else if (msg.sender == spentTokenRoot) {
+		} else if (msg.sender == spentToken) {
 			spentWallet = inAddress;
-		} else if (msg.sender == receiveTokenRoot) {
+		} else if (msg.sender == receiveToken) {
 			receiveWallet = inAddress;
 		}
 
@@ -163,27 +170,29 @@ contract LimitOrder is
 			receiveWallet.value != 0
 		) {
 			TIP3TokenWallet(receiveWallet).balance{
-				value: LimitOrderGas.GET_BALANCE_WALLET,
+				value: OrderGas.GET_BALANCE_WALLET,
 				flag: MsgFlag.SENDER_PAYS_FEES,
-				callback: LimitOrder.getBalanceReceiveWallet
+				callback: Order.onBalanceReceiveWallet
 			}();
 		}
 	}
 
-	function getBalanceReceiveWallet(uint128 _balance) external {
+	function onBalanceReceiveWallet(uint128 _balance) external {
 		require(
 			msg.sender.value != 0 && msg.sender == receiveWallet,
-			LimitOrderErrors.NOT_WALLET_TOKEN_2
+			OrderErrors.NOT_WALLET_TOKEN_2
 		);
 
-		if (_balance >= expectedAmount) {
-			changeState(LimitOrderStatus.Active);
-		} else {
-			changeState(LimitOrderStatus.AwaitTokens);
+		if (state != OrderStatus.Active) {
+			if (_balance >= expectedAmount) {
+				changeState(OrderStatus.Active);
+			} else {
+				changeState(OrderStatus.AwaitTokens);
+			}
 		}
 	}
 
-	function getCurrentStatus()
+	function currentStatus()
 		external
 		view
 		responsible
@@ -193,24 +202,24 @@ contract LimitOrder is
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } state;
 	}
 
-	function getInitParams()
+	function initParams()
 		external
 		view
 		responsible
 		override
-		returns (LimitOrderInitParams)
+		returns (InitParams)
 	{
 		return
 			{
 				value: 0,
 				bounce: false,
 				flag: MsgFlag.REMAINING_GAS
-			} LimitOrderInitParams(
-				limitOrderRoot,
-				factoryOrderRoot,
-				ownerAddress,
-				spentTokenRoot,
-				receiveTokenRoot,
+			} InitParams(
+				factory,
+				root,
+				owner,
+				spentToken,
+				receiveToken,
 				timeTx,
 				nowTx
 			);
@@ -221,14 +230,14 @@ contract LimitOrder is
 		view
 		responsible
 		override
-		returns (LimitOrderDetails)
+		returns (Details)
 	{
 		return
 			{
 				value: 0,
 				bounce: false,
 				flag: MsgFlag.REMAINING_GAS
-			} builderDetails();
+			} buildDetails();
 	}
 
 	function buildPayload(uint128 deployWalletValue)
@@ -252,28 +261,28 @@ contract LimitOrder is
 		TvmCell emptyPayload;
 		bool needCancel = false;
 		bool makeReserve = false;
-
+		
+		emit dddd(msg.sender.value, msg.sender, state, sender, tokenRoot, amount);
 		if (
-			sender == limitOrderRoot &&
-			tokenRoot == spentTokenRoot &&
-			state == LimitOrderStatus.AwaitTokens &&
-			amount >= expectedAmount
+			sender == root &&
+			tokenRoot == spentToken &&
+			(state == OrderStatus.Initialize || state == OrderStatus.AwaitTokens) &&
+			amount >= initialAmount &&
+			msg.sender.value != 0 && msg.sender == spentWallet
 		) {
-			if (msg.sender.value != 0 && msg.sender == spentWallet) {
-				changeState(LimitOrderStatus.Active);
-			}
+			changeState(OrderStatus.Active);
 		} else {
-			if ((msg.sender.value != 0 && msg.sender == receiveWallet) && state == LimitOrderStatus.Active) {
+			if ((msg.sender.value != 0 && msg.sender == receiveWallet) && state == OrderStatus.Active) {
 				TvmSlice payloadSlice = payload.toSlice();
 				if (payloadSlice.bits() >= 128) {
 					uint128 deployWalletValue = payloadSlice.decode(uint128);
 					if (
 						msg.value >=
-						LimitOrderGas.FILL_ORDER_MIN_VALUE + deployWalletValue
+						OrderGas.FILL_ORDER_MIN_VALUE + deployWalletValue
 					) {
 						if (amount > currentAmountReceiveToken) {
 							ITokenWallet(msg.sender).transfer{
-								value: LimitOrderGas.TRANSFER_MIN_VALUE,
+								value: OrderGas.TRANSFER_MIN_VALUE,
 								flag: MsgFlag.SENDER_PAYS_FEES,
 								bounce: false
 							}(
@@ -286,7 +295,7 @@ contract LimitOrder is
 							);
 
 							ITokenWallet(spentWallet).transfer{
-								value: LimitOrderGas.TRANSFER_MIN_VALUE,
+								value: OrderGas.TRANSFER_MIN_VALUE,
 								flag: MsgFlag.SENDER_PAYS_FEES,
 								bounce: false
 							}(
@@ -299,12 +308,12 @@ contract LimitOrder is
 							);
 
 							ITokenWallet(receiveWallet).transfer{
-								value: LimitOrderGas.TRANSFER_MIN_VALUE,
+								value: OrderGas.TRANSFER_MIN_VALUE,
 								flag: MsgFlag.SENDER_PAYS_FEES,
 								bounce: false
 							}(
 								currentAmountReceiveToken,
-								ownerAddress,
+								owner,
 								uint128(0),
 								originalGasTo,
 								true,
@@ -322,7 +331,7 @@ contract LimitOrder is
 							);
 							if (transferAmount > 0) {
 								ITokenWallet(spentWallet).transfer{
-									value: LimitOrderGas.TRANSFER_MIN_VALUE,
+									value: OrderGas.TRANSFER_MIN_VALUE,
 									flag: MsgFlag.SENDER_PAYS_FEES,
 									bounce: false
 								}(
@@ -339,10 +348,10 @@ contract LimitOrder is
 							currentAmountReceiveToken -= amount;
 
 							if (currentAmountSpentToken > 0) {
-								emit LimitOrderPartExchange(
-									spentTokenRoot,
+								emit PartExchange(
+									spentToken,
 									transferAmount,
-									receiveTokenRoot,
+									receiveToken,
 									amount,
 									currentAmountSpentToken,
 									currentAmountReceiveToken
@@ -350,12 +359,12 @@ contract LimitOrder is
 							}
 
 							ITokenWallet(receiveWallet).transfer{
-								value: LimitOrderGas.TRANSFER_MIN_VALUE,
+								value: OrderGas.TRANSFER_MIN_VALUE,
 								flag: MsgFlag.SENDER_PAYS_FEES,
 								bounce: false
 							}(
 								amount,
-								ownerAddress,
+								owner,
 								uint128(0),
 								originalGasTo,
 								true,
@@ -368,13 +377,13 @@ contract LimitOrder is
 				} else {
 					needCancel = true;
 				}
-			} else if (state == LimitOrderStatus.SwapInProgress) {
+			} else if (state == OrderStatus.SwapInProgress) {
 				TvmSlice payloadSlice = payload.toSlice();
 				if (payloadSlice.bits() >= 8) {
 					uint8 operationStatus = payloadSlice.decode(uint8);
 					if (
-						(msg.sender.value != 0 && msg.sender == receiveWallet && tokenRoot == receiveTokenRoot)
-						&& operationStatus == LimitOrderOperationStatus.SUCCESS &&
+						(msg.sender.value != 0 && msg.sender == receiveWallet && tokenRoot == receiveToken)
+						&& operationStatus == OrderOperationStatus.SUCCESS &&
 						amount >= currentAmountReceiveToken
 					) {
 						makeReserve = true;
@@ -386,12 +395,12 @@ contract LimitOrder is
 
 						// send owner
 						ITokenWallet(receiveWallet).transfer{
-							value: LimitOrderGas.TRANSFER_MIN_VALUE,
+							value: OrderGas.TRANSFER_MIN_VALUE,
 							flag: MsgFlag.SENDER_PAYS_FEES,
 							bounce: false
 						}(
 							currentAmountReceiveToken,
-							ownerAddress,
+							owner,
 							0,
 							originalGasTo,
 							true,
@@ -401,7 +410,7 @@ contract LimitOrder is
 						if (amount - currentAmountReceiveToken > 0) {
 							// send the difference swap to initiator
 							ITokenWallet(receiveWallet).transfer{
-								value: LimitOrderGas.TRANSFER_MIN_VALUE,
+								value: OrderGas.TRANSFER_MIN_VALUE,
 								flag: MsgFlag.SENDER_PAYS_FEES,
 								bounce: false
 							}(
@@ -417,29 +426,26 @@ contract LimitOrder is
 						currentAmountReceiveToken = 0;
 						currentAmountSpentToken = 0;
 					} else if (
-						(msg.sender.value != 0 && msg.sender == spentWallet && tokenRoot == spentTokenRoot) &&
-						operationStatus == LimitOrderOperationStatus.CANCEL
+						(msg.sender.value != 0 && msg.sender == spentWallet && tokenRoot == spentToken) &&
+						operationStatus == OrderOperationStatus.CANCEL
 					) {
-						changeState(LimitOrderStatus.Active);
+						changeState(OrderStatus.Active);
 					}
 				}
 			} else {
 				needCancel = true;
 			}
-			// } else {
-			// 	needCancel = true;
 		}
 
 		if (currentAmountReceiveToken == 0 && currentAmountSpentToken == 0) {
-			changeState(LimitOrderStatus.Filled);
-			closeLimitOrder();
+			changeState(OrderStatus.Filled);
+			close();
 		} else if (makeReserve) {
 			tvm.rawReserve(
 				math.max(
 					address(this).balance - msg.value,
-					LimitOrderGas.FILL_ORDER_MIN_VALUE
-				),
-				0
+					OrderGas.FILL_ORDER_MIN_VALUE
+				), 0
 			);
 			sender.transfer(
 				0,
@@ -452,62 +458,69 @@ contract LimitOrder is
 			tvm.rawReserve(
 				math.max(
 					address(this).balance - msg.value,
-					LimitOrderGas.FILL_ORDER_MIN_VALUE
-				),
-				0
+					OrderGas.FILL_ORDER_MIN_VALUE
+				), 0
 			);
+			
 			ITokenWallet(msg.sender).transfer{
 				value: 0,
 				flag: MsgFlag.ALL_NOT_RESERVED,
 				bounce: false
-			}(amount, sender, uint128(0), originalGasTo, true, emptyPayload);
+			}(
+				amount, 
+				sender, 
+				uint128(0), 
+				originalGasTo, 
+				true, 
+				emptyPayload
+			);
 		}
 	}
 
-	function cancelOrder() external onlyLimitOrderOwner {
+	function cancel() external onlyOwner {
 		require(
-			state == LimitOrderStatus.Active,
-			LimitOrderErrors.NOT_ACTIVE_LIMIT_ORDER
+			state == OrderStatus.Active,
+			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
 		);
-		changeState(LimitOrderStatus.Cancelled);
+		changeState(OrderStatus.Cancelled);
 
 		tvm.accept();
-		closeLimitOrder();
+		close();
 	}
 
-	function backLimitOrderSwap() external {
+	function backendSwap() external {
 		require(
-			msg.pubkey() == backendPubKey,
-			LimitOrderErrors.NOT_BACKEND_PUB_KEY
+			msg.pubkey() == backPK,
+			OrderErrors.NOT_BACKEND_PUB_KEY
 		);
 
 		require(
-			state == LimitOrderStatus.Active,
-			LimitOrderErrors.NOT_ACTIVE_LIMIT_ORDER
+			state == OrderStatus.Active,
+			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
 		);
 
 		require(
 			autoExchange == true,
-			LimitOrderErrors.NOT_AUTO_EXCHANGE
+			OrderErrors.NOT_AUTO_EXCHANGE
 		);
 
 		require(
-			address(this).balance > LimitOrderGas.SWAP_BACK_MIN_VALUE + 0.1 ton,
-			LimitOrderErrors.VALUE_TOO_LOW
+			address(this).balance > OrderGas.SWAP_BACK_MIN_VALUE + 0.1 ton,
+			OrderErrors.VALUE_TOO_LOW
 		);
 
 		tvm.accept();
 		swapAttempt++;
-		changeState(LimitOrderStatus.SwapInProgress);
+		changeState(OrderStatus.SwapInProgress);
 
 		TvmBuilder successBuilder;
-		successBuilder.store(LimitOrderOperationStatus.SUCCESS);
+		successBuilder.store(OrderOperationStatus.SUCCESS);
 		successBuilder.store(swapAttempt);
-		successBuilder.store(ownerAddress);
+		successBuilder.store(owner);
 		successBuilder.store(uint128(0));
 
 		TvmBuilder cancelBuilder;
-		cancelBuilder.store(LimitOrderOperationStatus.CANCEL);
+		cancelBuilder.store(OrderOperationStatus.CANCEL);
 		cancelBuilder.store(swapAttempt);
 
 		TvmBuilder builder;
@@ -520,7 +533,7 @@ contract LimitOrder is
 		builder.storeRef(cancelBuilder);
 
 		ITokenWallet(spentWallet).transfer{
-			value: LimitOrderGas.SWAP_BACK_MIN_VALUE,
+			value: OrderGas.SWAP_BACK_MIN_VALUE,
 			flag: MsgFlag.SENDER_PAYS_FEES
 		}(
 			currentAmountSpentToken,
@@ -532,41 +545,41 @@ contract LimitOrder is
 		);
 	}
 
-	function limitOrderSwap(uint128 deployWalletValue) external {
+	function swap(uint128 deployWalletValue) external {
 		require(
-			state == LimitOrderStatus.Active,
-			LimitOrderErrors.NOT_ACTIVE_LIMIT_ORDER
+			state == OrderStatus.Active,
+			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
 		);
 
 		require(
 			autoExchange == true,
-			LimitOrderErrors.NOT_AUTO_EXCHANGE
+			OrderErrors.NOT_AUTO_EXCHANGE
 		);
 
 
 		require(
-			msg.value >= LimitOrderGas.SWAP_MIN_VALUE,
-			LimitOrderErrors.VALUE_TOO_LOW
+			msg.value >= OrderGas.SWAP_MIN_VALUE,
+			OrderErrors.VALUE_TOO_LOW
 		);
 
 		tvm.rawReserve(
 			math.max(
 				address(this).balance - msg.value,
-				LimitOrderGas.SWAP_MIN_VALUE
+				OrderGas.SWAP_MIN_VALUE
 			),
 			0
 		);
 		swapAttempt++;
-		changeState(LimitOrderStatus.SwapInProgress);
+		changeState(OrderStatus.SwapInProgress);
 
 		TvmBuilder successBuilder;
-		successBuilder.store(LimitOrderOperationStatus.SUCCESS);
+		successBuilder.store(OrderOperationStatus.SUCCESS);
 		successBuilder.store(swapAttempt);
 		successBuilder.store(msg.sender);
 		successBuilder.store(deployWalletValue);
 
 		TvmBuilder cancelBuilder;
-		cancelBuilder.store(LimitOrderOperationStatus.CANCEL);
+		cancelBuilder.store(OrderOperationStatus.CANCEL);
 		cancelBuilder.store(swapAttempt);
 
 		TvmBuilder builder;
@@ -594,22 +607,22 @@ contract LimitOrder is
 	function changeState(uint8 newState) private {
 		uint8 prevStateN = state;
 		state = newState;
-		emit LimitOrderStateChanged(prevStateN, newState, builderDetails());
+		emit StateChanged(prevStateN, newState, buildDetails());
 	}
 
-	function builderDetails() private view returns (LimitOrderDetails) {
+	function buildDetails() private view returns (Details) {
 		return
-			LimitOrderDetails(
-				limitOrderRoot,
-				ownerAddress,
-				backendPubKey,
+			Details(
+				root,
+				owner,
+				backPK,
 				dexRoot,
 				dexPair,
 				msg.sender,
 				swapAttempt,
 				state,
-				spentTokenRoot,
-				receiveTokenRoot,
+				spentToken,
+				receiveToken,
 				spentWallet,
 				receiveWallet,
 				expectedAmount,
@@ -619,24 +632,24 @@ contract LimitOrder is
 			);
 	}
 
-	function closeLimitOrder() internal {
+	function close() internal {
 		require(
-			state == LimitOrderStatus.Filled ||
-				state == LimitOrderStatus.Cancelled,
-			LimitOrderErrors.NOT_FILLED_OR_CANCEL_STATUS_LIMIT_OEDER
+			state == OrderStatus.Filled ||
+				state == OrderStatus.Cancelled,
+			OrderErrors.NOT_FILLED_OR_CANCEL_STATUS_LIMIT_OEDER
 		);
 
 		TvmBuilder builder;
-		builder.store(factoryOrderRoot);
+		builder.store(factory);
 
-		if (state == LimitOrderStatus.Filled) {
+		if (state == OrderStatus.Filled) {
 			builder.store("Filled");
 		} else {
 			builder.store("Cancelled");
 		}
 
 		TvmCell saltNewCode = tvm.setCodeSalt(
-			limitOrderCodeClosed,
+			codeClosed,
 			builder.toCell()
 		);
 
@@ -645,16 +658,16 @@ contract LimitOrder is
 
 		TvmBuilder builderUpg;
 		builderUpg.store(state);
-		builderUpg.store(ownerAddress);
-		builderUpg.store(factoryOrderRoot);
-		builderUpg.store(limitOrderRoot);
+		builderUpg.store(owner);
+		builderUpg.store(factory);
+		builderUpg.store(root);
 		builderUpg.store(swapAttempt);
 
 		TvmBuilder builderTokens;
 		builderTokens.store(spentWallet);
 		builderTokens.store(currentAmountSpentToken);
-		builderTokens.store(spentTokenRoot);
-		builderTokens.store(receiveTokenRoot);
+		builderTokens.store(spentToken);
+		builderTokens.store(receiveToken);
 		builderUpg.storeRef(builderTokens);
 
 		TvmBuilder builderSum;
@@ -669,36 +682,36 @@ contract LimitOrder is
 	function enableEmergency(uint256 _emergencyManager)
 		external
 		override
-		onlyLimitOrderFactory
+		onlyFactory
 	{
-		require(msg.sender.value != 0 && msg.sender == factoryOrderRoot);
+		require(msg.sender.value != 0 && msg.sender == factory);
 		require(
-			state != LimitOrderStatus.Emergency,
-			LimitOrderErrors.EMERGENCY_STATUS_NOW
+			state != OrderStatus.Emergency,
+			OrderErrors.EMERGENCY_STATUS_NOW
 		);
 
 		prevState = state;
-		state = LimitOrderStatus.Emergency;
+		state = OrderStatus.Emergency;
 		emergencyManager = _emergencyManager;
 
-		emit LimitOrderStateChanged(prevState, state, builderDetails());
+		emit StateChanged(prevState, state, buildDetails());
 	}
 
-	function disableEmergency() external override onlyLimitOrderFactory {
-		require(msg.sender.value != 0 && msg.sender == factoryOrderRoot);
+	function disableEmergency() external override onlyFactory {
+		require(msg.sender.value != 0 && msg.sender == factory);
 		require(
-			state == LimitOrderStatus.Emergency,
-			LimitOrderErrors.EMERGENCY_STATUS_NOW
+			state == OrderStatus.Emergency,
+			OrderErrors.EMERGENCY_STATUS_NOW
 		);
 
 		state = prevState;
 		prevState = 0;
 		emergencyManager = 0;
 
-		emit LimitOrderStateChanged(
-			LimitOrderStatus.Emergency,
+		emit StateChanged(
+			OrderStatus.Emergency,
 			state,
-			builderDetails()
+			buildDetails()
 		);
 	}
 
@@ -713,8 +726,8 @@ contract LimitOrder is
 		TvmCell _payload
 	) public view onlyEmergencyManager {
 		require(
-			state == LimitOrderStatus.Emergency,
-			LimitOrderErrors.NOT_EMERGENCY_STATUS_NOW
+			state == OrderStatus.Emergency,
+			OrderErrors.NOT_EMERGENCY_STATUS_NOW
 		);
 		tvm.accept();
 
@@ -733,15 +746,15 @@ contract LimitOrder is
 
 	function sendGas(
 		address to,
-		uint128 value_,
-		uint16 flag_
-	) public view onlyEmergencyManager {
+		uint128 _value,
+		uint16 _flag
+	) public view onlyEmergencyManager { 
 		require(
-			state == LimitOrderStatus.Emergency,
-			LimitOrderErrors.NOT_EMERGENCY_STATUS_NOW
+			state == OrderStatus.Emergency,
+			OrderErrors.NOT_EMERGENCY_STATUS_NOW
 		);
 		tvm.accept();
-		to.transfer({value: value_, flag: flag_, bounce: false});
+		to.transfer({value: _value, flag: _flag, bounce: false});
 	}
 
 	function onCodeUpgrade(TvmCell data) private {}

@@ -43,4 +43,3 @@ npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='tst' --right
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='0'
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='1'
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='2'
->>>>>>> master

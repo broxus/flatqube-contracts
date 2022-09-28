@@ -1,0 +1,145 @@
+{
+	"ABI version": 2,
+	"version": "2.2",
+	"header": ["pubkey", "time", "expire"],
+	"functions": [
+		{
+			"name": "constructor",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onTokenWallet",
+			"inputs": [
+				{"name":"_wallet","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onTokenWalletReceive",
+			"inputs": [
+				{"name":"_wallet","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "getSpentToken",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getFactory",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "buildPayload",
+			"inputs": [
+				{"name":"tokenReceive","type":"address"},
+				{"name":"expectedTokenAmount","type":"uint128"},
+				{"name":"deployWalletValue","type":"uint128"},
+				{"name":"backPK","type":"uint256"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "onAcceptTokensTransfer",
+			"inputs": [
+				{"name":"tokenRoot","type":"address"},
+				{"name":"amount","type":"uint128"},
+				{"name":"sender","type":"address"},
+				{"name":"value3","type":"address"},
+				{"name":"originalGasTo","type":"address"},
+				{"name":"payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "expectedAddressOrder",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"_factory","type":"address"},
+				{"name":"_root","type":"address"},
+				{"name":"_owner","type":"address"},
+				{"name":"_spentToken","type":"address"},
+				{"name":"_receiveToken","type":"address"},
+				{"name":"timeTx","type":"uint64"},
+				{"name":"nowTx","type":"uint64"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "upgrade",
+			"inputs": [
+				{"name":"_code","type":"cell"},
+				{"name":"_newVersion","type":"uint32"},
+				{"name":"_sendGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		}
+	],
+	"data": [
+	],
+	"events": [
+		{
+			"name": "CreateOrder",
+			"inputs": [
+				{"name":"order","type":"address"},
+				{"name":"spentToken","type":"address"},
+				{"name":"spentAmount","type":"uint128"},
+				{"name":"receiveToken","type":"address"},
+				{"name":"expectedAmount","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "OrderRootCodeUpgraded",
+			"inputs": [
+				{"name":"newVersion","type":"uint32"}
+			],
+			"outputs": [
+			]
+		}
+	],
+	"fields": [
+		{"name":"_pubkey","type":"uint256"},
+		{"name":"_timestamp","type":"uint64"},
+		{"name":"_constructorFlag","type":"bool"},
+		{"name":"factory","type":"address"},
+		{"name":"spentToken","type":"address"},
+		{"name":"version","type":"uint32"},
+		{"name":"orderCode","type":"cell"},
+		{"name":"orderClosedCode","type":"cell"},
+		{"name":"spentTokenWallet","type":"address"},
+		{"name":"deployer","type":"address"},
+		{"name":"dexRoot","type":"address"}
+	]
+}

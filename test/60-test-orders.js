@@ -8,10 +8,9 @@ const migration = new Migration();
 
 let keyPairs;
 
-let factoryLimitOrder;
-let RootlimitOrderBar;
-let LimitOrder;
-let LimitOrderBarWallet;
+let factoryOrder;
+let RootOrderBar;
+let Order;
 
 let rootTokenBar;
 let rootTokenRecieve;
@@ -38,16 +37,16 @@ let account6;
 let barWallet6;
 let tstWallet6;
 
-describe('Check limit orders', async function () {
+describe('Check orders', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
 
     before('Load contracts', async function () {
         keyPairs = await locklift.keys.getKeyPairs();
         dexPair = migration.load(await locklift.factory.getContract('DexPair'), 'DexPairBarTst');
 
-        factoryLimitOrder = migration.load(await locklift.factory.getContract('LimitOrderFactory'), 'LimitOrderFactory');
-        RootlimitOrderBar = await locklift.factory.getContract('LimitOrderRoot');
-        LimitOrder = await locklift.factory.getContract('LimitOrder');
+        factoryOrder = migration.load(await locklift.factory.getContract('OrderFactory'), 'OrderFactory');
+        RootOrderBar = await locklift.factory.getContract('OrderRoot');
+        Order = await locklift.factory.getContract('Order');
 
         rootTokenBar = migration.load(await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH), 'BarRoot');
         rootTokenRecieve = migration.load(await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH), 'TstRoot');
@@ -67,13 +66,13 @@ describe('Check limit orders', async function () {
         barWallet6 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
         tstWallet6 = migration.load(await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH), 'TstWallet6');
 
-        const rootLimitOrder = await factoryLimitOrder.call({
-            method: 'getExpectedAddressLimitOrderRoot',
-            params: { tokenRoot: rootTokenBar.address }
+        const rootOrder = await factoryOrder.call({
+            method: 'getExpectedAddressOrderRoot',
+            params: { token: rootTokenBar.address }
         });
 
-        RootlimitOrderBar.setAddress(rootLimitOrder);
-        migration.store(RootlimitOrderBar, 'LimitOrderRoot');
+        RootOrderBar.setAddress(rootOrder);
+        migration.store(RootOrderBar, 'OrderRoot');
 
         account1 = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
         account2 = migration.load(await locklift.factory.getAccount('Wallet'), 'Account2');
@@ -127,8 +126,8 @@ describe('Check limit orders', async function () {
         barWallet6.setAddress(tokenWalletAddressBarWallet6);
         migration.store(barWallet6, 'BarWallet6');
 
-        logger.log(`LimitOrderFactory: ${factoryLimitOrder.address}`);
-        logger.log(`LimitOrderRoot: ${RootlimitOrderBar.address}`);
+        logger.log(`OrderFactory: ${factoryOrder.address}`);
+        logger.log(`OrderRoot: ${RootOrderBar.address}`);
         logger.log(`Account1: ${account1.address}`);
         logger.log('')
         logger.log(`Account2: ${account2.address}`);
@@ -153,7 +152,7 @@ describe('Check limit orders', async function () {
         logger.log('')
     });
 
-    describe('Direct execution Limit order', async function () {
+    describe('Direct execution Order', async function () {
         it('Check full execution, case 1.1', async function () {
             logger.log(`#############################`);
             logger.log(``);
@@ -168,14 +167,14 @@ describe('Check limit orders', async function () {
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
             const params = {
-                tokenRootReceive: rootTokenRecieve.address,
+                tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
-                backPubKey: 0
+                backPK: 0
             }
 
-            logger.log(`LimitOrderRoot.buildPayload(${JSON.stringify(params)})`);
-            const payload = await RootlimitOrderBar.call({
+            logger.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.call({
                 method: 'buildPayload',
                 params: params
             });
@@ -183,7 +182,7 @@ describe('Check limit orders', async function () {
 
             logger.log(`BarWallet3(${barWallet3.address}).transfer()
                 amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-                recipient: ${RootlimitOrderBar.address},
+                recipient: ${RootOrderBar.address},
                 deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
                 remainingGasTo: ${account3.address},
                 notify: ${true},
@@ -194,7 +193,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                    recipient: RootlimitOrderBar.address,
+                    recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account3.address,
                     notify: true,
@@ -203,18 +202,18 @@ describe('Check limit orders', async function () {
                 value: locklift.utils.convertCrystal(6, 'nano'),
                 keyPair: keyPairs[2]
             });
-            logger.log(`Create Limit order txId: ${tx.transaction.id}`);
+            logger.log(`Create Order txId: ${tx.transaction.id}`);
 
-            const events = await waitEventsCreateLimitOrder(1);
+            const events = await waitEventsCreateOrder(1);
             events.forEach(event => {
-                if (event.name == 'CreateLimitOrder') {
-                    LimitOrder.setAddress(event.value.limitOrder);
-                    migration.store(LimitOrder, 'LimitOrder');
-                    logger.log(`Limit order: ${LimitOrder.address}`);
+                if (event.name == 'CreateOrder') {
+                    Order.setAddress(event.value.order);
+                    migration.store(Order, 'Order');
+                    logger.log(`Order: ${Order.address}`);
                 }
             });
 
-            const payloadLO = await LimitOrder.call({
+            const payloadLO = await Order.call({
                 method: 'buildPayload',
                 params: {
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano')
@@ -226,7 +225,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    recipient: LimitOrder.address,
+                    recipient: Order.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account4.address,
                     notify: true,
@@ -236,7 +235,7 @@ describe('Check limit orders', async function () {
                 keyPair: keyPairs[3]
             });
 
-            logger.log(`Hit to Limit order txId: ${tx2.transaction.id}`);
+            logger.log(`Hit to Order txId: ${tx2.transaction.id}`);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -257,7 +256,7 @@ describe('Check limit orders', async function () {
             expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Accoun4 Tst balance');
         });
 
-        it('Check partial esxecution Limit order, case 2.1', async function () {
+        it('Check partial esxecution Order, case 2.1', async function () {
             logger.log(`#############################`);
             logger.log(``);
             const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -281,14 +280,14 @@ describe('Check limit orders', async function () {
             TOKENS_TO_EXCHANGE2_ACC4 = 10;
 
             const params = {
-                tokenRootReceive: rootTokenRecieve.address,
+                tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.convertCrystal(0.2, 'nano'),
-                backPubKey: 0
+                backPK: 0
             }
 
-            logger.log(`LimitOrderRoot.buildPayload(${JSON.stringify(params)})`);
-            const payload = await RootlimitOrderBar.call({
+            logger.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.call({
                 method: 'buildPayload',
                 params: params
             });
@@ -296,7 +295,7 @@ describe('Check limit orders', async function () {
 
             logger.log(`BarWallet3(${barWallet3.address}).transfer()
                     amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-                    recipient: ${RootlimitOrderBar.address},
+                    recipient: ${RootOrderBar.address},
                     deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
                     remainingGasTo: ${account3.address},
                     notify: ${true},
@@ -308,7 +307,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                    recipient: RootlimitOrderBar.address,
+                    recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.2, 'nano'),
                     remainingGasTo: account3.address,
                     notify: true,
@@ -319,16 +318,16 @@ describe('Check limit orders', async function () {
             });
             logger.log(`txId: ${tx.transaction.id}`);
 
-            const events = await waitEventsCreateLimitOrder(1);
+            const events = await waitEventsCreateOrder(1);
             events.forEach(event => {
-                if (event.name == 'CreateLimitOrder') {
-                    LimitOrder.setAddress(event.value.limitOrder);
-                    migration.store(LimitOrder, 'LimitOrder');
-                    logger.log(`Limit order: ${LimitOrder.address}`);
+                if (event.name == 'CreateOrder') {
+                    Order.setAddress(event.value.order);
+                    migration.store(Order, 'Order');
+                    logger.log(`Order: ${Order.address}`);
                 }
             });
 
-            const payloadLO = await LimitOrder.call({
+            const payloadLO = await Order.call({
                 method: 'buildPayload',
                 params: {
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano')
@@ -340,7 +339,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    recipient: LimitOrder.address,
+                    recipient: Order.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account4.address,
                     notify: true,
@@ -355,7 +354,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC4).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    recipient: LimitOrder.address,
+                    recipient: Order.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account5.address,
                     notify: true,
@@ -392,7 +391,7 @@ describe('Check limit orders', async function () {
             expect(expectedAccount5Tst).to.equal(balanceTstAcc5End.token.toString(), 'Wrong Accoun5 Tst balance');
         });
 
-        it('Check partial execution Limit order, case 2.2', async function () {
+        it('Check partial execution Order, case 2.2', async function () {
             logger.log(`#############################`);
             logger.log(``);
             const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -422,14 +421,14 @@ describe('Check limit orders', async function () {
             TOKENS_TO_EXCHANGE2_ACC5 = 10;
 
             const params = {
-                tokenRootReceive: rootTokenRecieve.address,
+                tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
-                backPubKey: 0
+                backPK: 0
             }
 
-            logger.log(`LimitOrderRoot.buildPayload(${JSON.stringify(params)})`);
-            const payload = await RootlimitOrderBar.call({
+            logger.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.call({
                 method: 'buildPayload',
                 params: params
             });
@@ -437,7 +436,7 @@ describe('Check limit orders', async function () {
 
             logger.log(`BarWallet3(${barWallet3.address}).transfer()
                         amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-                        recipient: ${RootlimitOrderBar.address},
+                        recipient: ${RootOrderBar.address},
                         deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
                         remainingGasTo: ${account3.address},
                         notify: ${true},
@@ -449,7 +448,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                    recipient: RootlimitOrderBar.address,
+                    recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.2, 'nano'),
                     remainingGasTo: account3.address,
                     notify: true,
@@ -460,16 +459,16 @@ describe('Check limit orders', async function () {
             });
             logger.log(`txId: ${tx.transaction.id}`);
 
-            const events = await waitEventsCreateLimitOrder(1);
+            const events = await waitEventsCreateOrder(1);
             events.forEach(event => {
-                if (event.name == 'CreateLimitOrder') {
-                    LimitOrder.setAddress(event.value.limitOrder);
-                    migration.store(LimitOrder, 'LimitOrder');
-                    logger.log(`Limit order: ${LimitOrder.address}`);
+                if (event.name == 'CreateOrder') {
+                    Order.setAddress(event.value.order);
+                    migration.store(Order, 'Order');
+                    logger.log(`Order: ${Order.address}`);
                 }
             });
 
-            const payloadLO = await LimitOrder.call({
+            const payloadLO = await Order.call({
                 method: 'buildPayload',
                 params: {
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano')
@@ -481,7 +480,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    recipient: LimitOrder.address,
+                    recipient: Order.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account4.address,
                     notify: true,
@@ -496,7 +495,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC4).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    recipient: LimitOrder.address,
+                    recipient: Order.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account5.address,
                     notify: true,
@@ -511,7 +510,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC5).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    recipient: LimitOrder.address,
+                    recipient: Order.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account6.address,
                     notify: true,
@@ -556,7 +555,7 @@ describe('Check limit orders', async function () {
             expect(expectedAccount6Tst).to.equal(balanceTstAcc6End.token.toString(), 'Wrong Accoun6 Tst balance');
         });
 
-        it('Check partial execution Limit order, case 2.3', async function () {
+        it('Check partial execution Order, case 2.3', async function () {
             logger.log(`#############################`);
             logger.log(``);
             const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -586,14 +585,14 @@ describe('Check limit orders', async function () {
             TOKENS_TO_EXCHANGE2_ACC5 = 20;
 
             const params = {
-                tokenRootReceive: rootTokenRecieve.address,
+                tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
-                backPubKey: 0
+                backPK: 0
             }
 
-            logger.log(`LimitOrderRoot.buildPayload(${JSON.stringify(params)})`);
-            const payload = await RootlimitOrderBar.call({
+            logger.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.call({
                 method: 'buildPayload',
                 params: params
             });
@@ -601,7 +600,7 @@ describe('Check limit orders', async function () {
 
             logger.log(`BarWallet3(${barWallet3.address}).transfer()
                                 amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-                                recipient: ${RootlimitOrderBar.address},
+                                recipient: ${RootOrderBar.address},
                                 deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
                                 remainingGasTo: ${account3.address},
                                 notify: ${true},
@@ -613,7 +612,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                    recipient: RootlimitOrderBar.address,
+                    recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account3.address,
                     notify: true,
@@ -624,16 +623,16 @@ describe('Check limit orders', async function () {
             });
             logger.log(`txId: ${tx.transaction.id}`);
 
-            const events = await waitEventsCreateLimitOrder(1);
+            const events = await waitEventsCreateOrder(1);
             events.forEach(event => {
-                if (event.name == 'CreateLimitOrder') {
-                    LimitOrder.setAddress(event.value.limitOrder);
-                    migration.store(LimitOrder, 'LimitOrder');
-                    logger.log(`Limit order: ${LimitOrder.address}`);
+                if (event.name == 'CreateOrder') {
+                    Order.setAddress(event.value.order);
+                    migration.store(Order, 'Order');
+                    logger.log(`Order: ${Order.address}`);
                 }
             });
 
-            const payloadLO = await LimitOrder.call({
+            const payloadLO = await Order.call({
                 method: 'buildPayload',
                 params: {
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano')
@@ -645,7 +644,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    recipient: LimitOrder.address,
+                    recipient: Order.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account4.address,
                     notify: true,
@@ -661,7 +660,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC4).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    recipient: LimitOrder.address,
+                    recipient: Order.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account5.address,
                     notify: true,
@@ -677,7 +676,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC5).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    recipient: LimitOrder.address,
+                    recipient: Order.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account6.address,
                     notify: true,
@@ -722,7 +721,7 @@ describe('Check limit orders', async function () {
             expect(expectedAccount6Tst).to.equal(balanceTstAcc6End.token.toString(), 'Wrong Accoun6 Tst balance');
         });
 
-        it('Check create Limit order and closed, case 3.1', async function () {
+        it('Check create order and closed, case 3.1', async function () {
             logger.log(`#############################`);
             logger.log(``);
             const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -732,14 +731,14 @@ describe('Check limit orders', async function () {
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
             const params = {
-                tokenRootReceive: rootTokenRecieve.address,
+                tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
-                backPubKey: 0
+                backPK: 0
             }
 
-            logger.log(`LimitOrderRoot.buildPayload(${JSON.stringify(params)})`);
-            const payload = await RootlimitOrderBar.call({
+            logger.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.call({
                 method: 'buildPayload',
                 params: params
             });
@@ -747,7 +746,7 @@ describe('Check limit orders', async function () {
 
             logger.log(`BarWallet3(${barWallet3.address}).transfer()
             amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-            recipient: ${RootlimitOrderBar.address},
+            recipient: ${RootOrderBar.address},
             deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
             remainingGasTo: ${account3.address},
             notify: ${true},
@@ -758,7 +757,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                    recipient: RootlimitOrderBar.address,
+                    recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account3.address,
                     notify: true,
@@ -769,26 +768,26 @@ describe('Check limit orders', async function () {
             });
             logger.log(`txId: ${tx.transaction.id}`);
 
-            const events = await waitEventsCreateLimitOrder(1);
+            const events = await waitEventsCreateOrder(1);
             events.forEach(event => {
-                if (event.name == 'CreateLimitOrder') {
-                    LimitOrder.setAddress(event.value.limitOrder);
-                    migration.store(LimitOrder, 'LimitOrder');
-                    logger.log(`Limit order: ${LimitOrder.address}`);
+                if (event.name == 'CreateOrder') {
+                    Order.setAddress(event.value.order);
+                    migration.store(Order, 'Order');
+                    logger.log(`Order: ${Order.address}`);
                 }
             });
 
             const tx1 = await account3.runTarget({
-                contract: LimitOrder,
-                method: 'cancelOrder',
+                contract: Order,
+                method: 'cancel',
                 params: {},
                 keyPair: keyPairs[2]
             });
 
             logger.log(`txId: ${tx1.transaction.id}`);
 
-            const stateLO = await LimitOrder.call({
-                method: 'getCurrentStatus',
+            const stateLO = await Order.call({
+                method: 'currentStatus',
                 params: {}
             });
 
@@ -799,10 +798,10 @@ describe('Check limit orders', async function () {
             expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Accoun3 Bar balance');
             expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Accoun3 Tst balance');
             expect(stateLO.toString()).to.equal(new BigNumber(5).toString(), 'Wrong status Limit order');
-            expect(await locklift.utils.convertCrystal((await locklift.ton.getBalance(LimitOrder.address)), 'ton').toNumber()).to.equal(0, 'Wrong LimitOrder Ever balance');
+            expect(await locklift.utils.convertCrystal((await locklift.ton.getBalance(Order.address)), 'ton').toNumber()).to.equal(0, 'Wrong Order Ever balance');
         });
 
-        it('Check partial execution Limit order and closed, case 3.2', async function () {
+        it('Check partial execution order and closed, case 3.2', async function () {
             logger.log(`#############################`);
             logger.log(``);
             const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -818,14 +817,14 @@ describe('Check limit orders', async function () {
 
             TOKENS_TO_EXCHANGE2_ACC3 = 10;
             const params = {
-                tokenRootReceive: rootTokenRecieve.address,
+                tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
-                backPubKey: 0
+                backPK: 0
             }
 
-            logger.log(`LimitOrderRoot.buildPayload(${JSON.stringify(params)})`);
-            const payload = await RootlimitOrderBar.call({
+            logger.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.call({
                 method: 'buildPayload',
                 params: params
             });
@@ -833,7 +832,7 @@ describe('Check limit orders', async function () {
 
             logger.log(`BarWallet3(${barWallet3.address}).transfer()
             amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-            recipient: ${RootlimitOrderBar.address},
+            recipient: ${RootOrderBar.address},
             deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
             remainingGasTo: ${account3.address},
             notify: ${true},
@@ -845,7 +844,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                    recipient: RootlimitOrderBar.address,
+                    recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account3.address,
                     notify: true,
@@ -856,16 +855,16 @@ describe('Check limit orders', async function () {
             });
             logger.log(`txId: ${tx.transaction.id}`);
 
-            const events = await waitEventsCreateLimitOrder(1);
+            const events = await waitEventsCreateOrder(1);
             events.forEach(event => {
-                if (event.name == 'CreateLimitOrder') {
-                    LimitOrder.setAddress(event.value.limitOrder);
-                    migration.store(LimitOrder, 'LimitOrder');
-                    logger.log(`Limit order: ${LimitOrder.address}`);
+                if (event.name == 'CreateOrder') {
+                    Order.setAddress(event.value.order);
+                    migration.store(Order, 'Order');
+                    logger.log(`Order: ${Order.address}`);
                 }
             });
 
-            const payloadLO = await LimitOrder.call({
+            const payloadLO = await Order.call({
                 method: 'buildPayload',
                 params: {
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano')
@@ -877,7 +876,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    recipient: LimitOrder.address,
+                    recipient: Order.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account4.address,
                     notify: true,
@@ -888,14 +887,14 @@ describe('Check limit orders', async function () {
             });
 
             await account3.runTarget({
-                contract: LimitOrder,
-                method: 'cancelOrder',
+                contract: Order,
+                method: 'cancel',
                 params: {},
                 keyPair: keyPairs[2]
             });
 
-            const stateLO = await LimitOrder.call({
-                method: 'getCurrentStatus',
+            const stateLO = await Order.call({
+                method: 'currentStatus',
                 params: {}
             });
 
@@ -917,10 +916,10 @@ describe('Check limit orders', async function () {
             expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Accoun4 Bar balance');
             expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Accoun4 Tst balance');
             expect(stateLO.toString()).to.equal(new BigNumber(5).toString(), 'Wrong status Limit order');
-            expect(await locklift.utils.convertCrystal((await locklift.ton.getBalance(LimitOrder.address)), 'ton').toNumber()).to.equal(0, 'Wrong LimitOrder Ever balance');
+            expect(await locklift.utils.convertCrystal((await locklift.ton.getBalance(Order.address)), 'ton').toNumber()).to.equal(0, 'Wrong Order Ever balance');
         });
 
-        it('Check execution closed Limit order, case 4.1', async function () {
+        it('Check execution closed order, case 4.1', async function () {
             logger.log(`#############################`);
             logger.log(``);
             const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -934,14 +933,14 @@ describe('Check limit orders', async function () {
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
             const params = {
-                tokenRootReceive: rootTokenRecieve.address,
+                tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.convertCrystal(0.2, 'nano'),
-                backPubKey: 0
+                backPK: 0
             }
 
-            logger.log(`LimitOrderRoot.buildPayload(${JSON.stringify(params)})`);
-            const payload = await RootlimitOrderBar.call({
+            logger.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.call({
                 method: 'buildPayload',
                 params: params
             });
@@ -949,7 +948,7 @@ describe('Check limit orders', async function () {
 
             logger.log(`BarWallet3(${barWallet3.address}).transfer()
             amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-            recipient: ${RootlimitOrderBar.address},
+            recipient: ${RootOrderBar.address},
             deployWalletValue: ${locklift.utils.convertCrystal(0.2, 'nano')},
             remainingGasTo: ${account3.address},
             notify: ${true},
@@ -960,7 +959,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                    recipient: RootlimitOrderBar.address,
+                    recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.2, 'nano'),
                     remainingGasTo: account3.address,
                     notify: true,
@@ -971,16 +970,16 @@ describe('Check limit orders', async function () {
             });
             logger.log(`txId: ${tx.transaction.id}`);
 
-            const events = await waitEventsCreateLimitOrder(1);
+            const events = await waitEventsCreateOrder(1);
             events.forEach(event => {
-                if (event.name == 'CreateLimitOrder') {
-                    LimitOrder.setAddress(event.value.limitOrder);
-                    migration.store(LimitOrder, 'LimitOrder');
-                    logger.log(`Limit order: ${LimitOrder.address}`);
+                if (event.name == 'CreateOrder') {
+                    Order.setAddress(event.value.order);
+                    migration.store(Order, 'Order');
+                    logger.log(`Order: ${Order.address}`);
                 }
             });
 
-            const payloadLO = await LimitOrder.call({
+            const payloadLO = await Order.call({
                 method: 'buildPayload',
                 params: {
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano')
@@ -988,8 +987,8 @@ describe('Check limit orders', async function () {
             });
 
             await account3.runTarget({
-                contract: LimitOrder,
-                method: 'cancelOrder',
+                contract: Order,
+                method: 'cancel',
                 params: {},
                 keyPair: keyPairs[2]
             });
@@ -999,7 +998,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                    recipient: LimitOrder.address,
+                    recipient: Order.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account4.address,
                     notify: true,
@@ -1019,8 +1018,8 @@ describe('Check limit orders', async function () {
             const balanceTstAcc4End = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
             displayLog(balanceBarAcc4End, balanceTstAcc4End, false, 'Account4');
 
-            const stateLO = await LimitOrder.call({
-                method: 'getCurrentStatus',
+            const stateLO = await Order.call({
+                method: 'currentStatus',
                 params: {}
             });
 
@@ -1029,11 +1028,13 @@ describe('Check limit orders', async function () {
             expect(balanceBarAcc4Start.token.toString()).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Accoun4 Bar balance');
             expect(balanceTstAcc4Start.token.toString()).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Accoun4 Tst balance');
             expect(stateLO.toString()).to.equal(new BigNumber(5).toString(), 'Wrong status Limit order');
+
+            sleep(1000);
         });
     });
 
-    describe('Execution Limit order via DEX ', async function () {
-        it('Limit order from backend SUCCESS', async function () {
+    describe('Execution order via DEX ', async function () {
+        it('Order from backend SUCCESS', async function () {
             logger.log(`#############################`);
             logger.log(``);
 
@@ -1048,14 +1049,14 @@ describe('Check limit orders', async function () {
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
             const params = {
-                tokenRootReceive: rootTokenRecieve.address,
+                tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
-                backPubKey: new BigNumber(keyPairs[3].public, 16).toString(10)
+                backPK: new BigNumber(keyPairs[3].public, 16).toString(10)
             }
 
-            logger.log(`LimitOrderRoot.buildPayload(${JSON.stringify(params)})`);
-            const payload = await RootlimitOrderBar.call({
+            logger.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.call({
                 method: 'buildPayload',
                 params: params
             });
@@ -1063,7 +1064,7 @@ describe('Check limit orders', async function () {
 
             logger.log(`BarWallet3(${barWallet3.address}).transfer()
                                 amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-                                recipient: ${RootlimitOrderBar.address},
+                                recipient: ${RootOrderBar.address},
                                 deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
                                 remainingGasTo: ${account3.address},
                                 notify: ${true},
@@ -1074,7 +1075,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                    recipient: RootlimitOrderBar.address,
+                    recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account3.address,
                     notify: true,
@@ -1083,14 +1084,14 @@ describe('Check limit orders', async function () {
                 value: locklift.utils.convertCrystal(6, 'nano'),
                 keyPair: keyPairs[2]
             });
-            logger.log(`Create Limit order txId: ${tx.transaction.id}`);
+            logger.log(`Create Order txId: ${tx.transaction.id}`);
 
-            const events = await waitEventsCreateLimitOrder(1);
+            const events = await waitEventsCreateOrder(1);
             events.forEach(event => {
-                if (event.name == 'CreateLimitOrder') {
-                    LimitOrder.setAddress(event.value.limitOrder);
-                    migration.store(LimitOrder, 'LimitOrder');
-                    logger.log(`Limit order: ${LimitOrder.address}`);
+                if (event.name == 'CreateOrder') {
+                    Order.setAddress(event.value.order);
+                    migration.store(Order, 'Order');
+                    logger.log(`Order: ${Order.address}`);
                 }
             });
 
@@ -1106,8 +1107,8 @@ describe('Check limit orders', async function () {
             logger.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
             logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
-            const txForSwap = await LimitOrder.run({
-                method: 'backLimitOrderSwap',
+            const txForSwap = await Order.run({
+                method: 'backendSwap',
                 params: {},
                 value: locklift.utils.convertCrystal(6, 'nano'),
                 keyPair: keyPairs[3]
@@ -1124,7 +1125,8 @@ describe('Check limit orders', async function () {
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Accoun3 Bar balance');
         });
 
-        it('Limit order from backend CANCEL', async function () {
+        it('Order from backend CANCEL', async function () {
+            sleep(1000);
             logger.log(`#############################`);
             logger.log(``);
 
@@ -1139,14 +1141,14 @@ describe('Check limit orders', async function () {
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 60;
             const params = {
-                tokenRootReceive: rootTokenRecieve.address,
+                tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
-                backPubKey: new BigNumber(keyPairs[3].public, 16).toString(10)
+                backPK: new BigNumber(keyPairs[3].public, 16).toString(10)
             }
 
-            logger.log(`LimitOrderRoot.buildPayload(${JSON.stringify(params)})`);
-            const payload = await RootlimitOrderBar.call({
+            logger.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.call({
                 method: 'buildPayload',
                 params: params
             });
@@ -1154,7 +1156,7 @@ describe('Check limit orders', async function () {
 
             logger.log(`BarWallet3(${barWallet3.address}).transfer()
                                         amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-                                        recipient: ${RootlimitOrderBar.address},
+                                        recipient: ${RootOrderBar.address},
                                         deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
                                         remainingGasTo: ${account3.address},
                                         notify: ${true},
@@ -1165,7 +1167,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                    recipient: RootlimitOrderBar.address,
+                    recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account3.address,
                     notify: true,
@@ -1174,14 +1176,14 @@ describe('Check limit orders', async function () {
                 value: locklift.utils.convertCrystal(6, 'nano'),
                 keyPair: keyPairs[2]
             });
-            logger.log(`Create Limit order txId: ${tx.transaction.id}`);
+            logger.log(`Create Order txId: ${tx.transaction.id}`);
 
-            const events = await waitEventsCreateLimitOrder(1);
+            const events = await waitEventsCreateOrder(1);
             events.forEach(event => {
-                if (event.name == 'CreateLimitOrder') {
-                    LimitOrder.setAddress(event.value.limitOrder);
-                    migration.store(LimitOrder, 'LimitOrder');
-                    logger.log(`Limit order: ${LimitOrder.address}`);
+                if (event.name == 'CreateOrder') {
+                    Order.setAddress(event.value.order);
+                    migration.store(Order, 'Order');
+                    logger.log(`Order: ${Order.address}`);
                 }
             });
 
@@ -1197,8 +1199,8 @@ describe('Check limit orders', async function () {
             logger.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
             logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
-            const txForSwap = await LimitOrder.run({
-                method: 'backLimitOrderSwap',
+            const txForSwap = await Order.run({
+                method: 'backendSwap',
                 params: {},
                 value: locklift.utils.convertCrystal(6, 'nano'),
                 keyPair: keyPairs[3]
@@ -1212,15 +1214,15 @@ describe('Check limit orders', async function () {
             displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
 
             expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Accoun3 Bar balance');
-            const stateLO = await LimitOrder.call({
-                method: 'getCurrentStatus',
+            const stateLO = await Order.call({
+                method: 'currentStatus',
                 params: {}
             });
 
             expect(stateLO.toString()).to.equal(new BigNumber(2).toString(), 'Wrong status Limit order');
         });
 
-        it('Limit order from user SUCCESS', async function () {
+        it('Order from user SUCCESS', async function () {
             logger.log(`#############################`);
             logger.log(``);
 
@@ -1236,14 +1238,14 @@ describe('Check limit orders', async function () {
             TOKENS_TO_EXCHANGE2 = 20;
 
             const params = {
-                tokenRootReceive: rootTokenRecieve.address,
+                tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.convertCrystal(0.2, 'nano'),
-                backPubKey: 0
+                backPK: 0
             }
 
-            logger.log(`LimitOrderRoot.buildPayload(${JSON.stringify(params)})`);
-            const payload = await RootlimitOrderBar.call({
+            logger.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.call({
                 method: 'buildPayload',
                 params: params
             });
@@ -1251,7 +1253,7 @@ describe('Check limit orders', async function () {
 
             logger.log(`BarWallet3(${barWallet3.address}).transfer()
                             amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-                            recipient: ${RootlimitOrderBar.address},
+                            recipient: ${RootOrderBar.address},
                             deployWalletValue: ${locklift.utils.convertCrystal(0.2, 'nano')},
                             remainingGasTo: ${account3.address},
                             notify: ${true},
@@ -1262,7 +1264,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                    recipient: RootlimitOrderBar.address,
+                    recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account3.address,
                     notify: true,
@@ -1271,14 +1273,14 @@ describe('Check limit orders', async function () {
                 value: locklift.utils.convertCrystal(6, 'nano'),
                 keyPair: keyPairs[2]
             });
-            logger.log(`Create Limit order txId: ${tx.transaction.id}`);
+            logger.log(`Create Order txId: ${tx.transaction.id}`);
 
-            const events = await waitEventsCreateLimitOrder(1);
+            const events = await waitEventsCreateOrder(1);
             events.forEach(event => {
-                if (event.name == 'CreateLimitOrder') {
-                    LimitOrder.setAddress(event.value.limitOrder);
-                    migration.store(LimitOrder, 'LimitOrder');
-                    logger.log(`Limit order: ${LimitOrder.address}`);
+                if (event.name == 'CreateOrder') {
+                    Order.setAddress(event.value.order);
+                    migration.store(Order, 'Order');
+                    logger.log(`Order: ${Order.address}`);
                 }
             });
 
@@ -1295,8 +1297,8 @@ describe('Check limit orders', async function () {
             logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
             const txForSwap = await account4.runTarget({
-                contract: LimitOrder,
-                method: 'limitOrderSwap',
+                contract: Order,
+                method: 'swap',
                 params: {
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano')
                 },
@@ -1305,8 +1307,8 @@ describe('Check limit orders', async function () {
             });
             console.log('Tx: ', txForSwap.id);
 
-            const stateLO2 = await LimitOrder.call({
-                method: 'getCurrentStatus',
+            const stateLO2 = await Order.call({
+                method: 'currentStatus',
                 params: {}
             });
 
@@ -1330,7 +1332,8 @@ describe('Check limit orders', async function () {
             expect(stateLO2.toString()).to.equal(new BigNumber(3).toString(), 'Wrong status Limit order');
         });
 
-        it('Limit order from user CANCEL', async function () {
+        it('Order from user CANCEL', async function () {
+            sleep(1000);
             logger.log(`#############################`);
             logger.log(``);
 
@@ -1348,14 +1351,14 @@ describe('Check limit orders', async function () {
             TOKENS_TO_EXCHANGE2 = 60;
 
             const params = {
-                tokenRootReceive: rootTokenRecieve.address,
+                tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.convertCrystal(0.2, 'nano'),
-                backPubKey: 0
+                backPK: 0
             }
 
-            logger.log(`LimitOrderRoot.buildPayload(${JSON.stringify(params)})`);
-            const payload = await RootlimitOrderBar.call({
+            logger.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.call({
                 method: 'buildPayload',
                 params: params
             });
@@ -1363,7 +1366,7 @@ describe('Check limit orders', async function () {
 
             logger.log(`BarWallet3(${barWallet3.address}).transfer()
                                 amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-                                recipient: ${RootlimitOrderBar.address},
+                                recipient: ${RootOrderBar.address},
                                 deployWalletValue: ${locklift.utils.convertCrystal(0.2, 'nano')},
                                 remainingGasTo: ${account3.address},
                                 notify: ${true},
@@ -1374,7 +1377,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                    recipient: RootlimitOrderBar.address,
+                    recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account3.address,
                     notify: true,
@@ -1385,18 +1388,18 @@ describe('Check limit orders', async function () {
             });
             logger.log(`Create Limit order txId: ${tx.transaction.id}`);
 
-            const events = await waitEventsCreateLimitOrder(1);
+            const events = await waitEventsCreateOrder(1);
             events.forEach(event => {
-                if (event.name == 'CreateLimitOrder') {
-                    LimitOrder.setAddress(event.value.limitOrder);
-                    migration.store(LimitOrder, 'LimitOrder');
-                    logger.log(`Limit order: ${LimitOrder.address}`);
+                if (event.name == 'CreateOrder') {
+                    Order.setAddress(event.value.order);
+                    migration.store(Order, 'Order');
+                    logger.log(`Limit order: ${Order.address}`);
                 }
             });
 
             const txForSwap = await account4.runTarget({
-                contract: LimitOrder,
-                method: 'limitOrderSwap',
+                contract: Order,
+                method: 'swap',
                 params: {
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano')
                 },
@@ -1405,8 +1408,8 @@ describe('Check limit orders', async function () {
             });
             console.log('Tx: ', txForSwap.id);
 
-            const stateLO2 = await LimitOrder.call({
-                method: 'getCurrentStatus',
+            const stateLO2 = await Order.call({
+                method: 'currentStatus',
                 params: {}
             });
 
@@ -1443,14 +1446,14 @@ describe('Check limit orders', async function () {
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
             const params = {
-                tokenRootReceive: rootTokenRecieve.address,
+                tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
-                backPubKey: 0
+                backPK: 0
             }
 
-            logger.log(`LimitOrderRoot.buildPayload(${JSON.stringify(params)})`);
-            const payload = await RootlimitOrderBar.call({
+            logger.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.call({
                 method: 'buildPayload',
                 params: params
             });
@@ -1458,7 +1461,7 @@ describe('Check limit orders', async function () {
 
             logger.log(`BarWallet3(${barWallet3.address}).transfer()
                         amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-                        recipient: ${RootlimitOrderBar.address},
+                        recipient: ${RootOrderBar.address},
                         deployWalletValue: ${locklift.utils.convertCrystal(0.1, 'nano')},
                         remainingGasTo: ${account3.address},
                         notify: ${true},
@@ -1469,7 +1472,7 @@ describe('Check limit orders', async function () {
                 method: 'transfer',
                 params: {
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                    recipient: RootlimitOrderBar.address,
+                    recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
                     remainingGasTo: account3.address,
                     notify: true,
@@ -1478,31 +1481,31 @@ describe('Check limit orders', async function () {
                 value: locklift.utils.convertCrystal(6, 'nano'),
                 keyPair: keyPairs[2]
             });
-            logger.log(`Create Limit order txId: ${tx.transaction.id}`);
+            logger.log(`Create Order txId: ${tx.transaction.id}`);
 
-            const events = await waitEventsCreateLimitOrder(1);
+            const events = await waitEventsCreateOrder(1);
             events.forEach(event => {
-                if (event.name == 'CreateLimitOrder') {
-                    LimitOrder.setAddress(event.value.limitOrder);
-                    migration.store(LimitOrder, 'LimitOrder');
-                    logger.log(`Limit order: ${LimitOrder.address}`);
+                if (event.name == 'CreateOrder') {
+                    Order.setAddress(event.value.order);
+                    migration.store(Order, 'Order');
+                    logger.log(`Order: ${Order.address}`);
                 }
             });
 
             await account1.runTarget({
-                contract: factoryLimitOrder,
+                contract: factoryOrder,
                 method: 'setEmergency',
                 params: {
                     enabled: true,
-                    limitOrderAddress: LimitOrder.address,
+                    orderAddress: Order.address,
                     manager: new BigNumber(keyPairs[0].public, 16).toString(10)
                 },
                 value: locklift.utils.convertCrystal('0.4', 'nano'),
                 keyPair: keyPairs[0]
             });
 
-            const stateLO1 = await LimitOrder.call({
-                method: 'getCurrentStatus',
+            const stateLO1 = await Order.call({
+                method: 'currentStatus',
                 params: {}
             });
 
@@ -1510,11 +1513,11 @@ describe('Check limit orders', async function () {
 
             consttokenWalletBarToken = await rootTokenBar.call({
                 method: 'walletOf', params: {
-                    walletOwner: LimitOrder.address
+                    walletOwner: Order.address
                 }
             });
 
-            await LimitOrder.run({
+            await Order.run({
                 method: 'proxyTokensTransfer',
                 params: {
                     _tokenWallet: consttokenWalletBarToken,
@@ -1531,19 +1534,19 @@ describe('Check limit orders', async function () {
             });
 
             await account1.runTarget({
-                contract: factoryLimitOrder,
+                contract: factoryOrder,
                 method: 'setEmergency',
                 params: {
                     enabled: false,
-                    limitOrderAddress: LimitOrder.address,
+                    orderAddress: Order.address,
                     manager: new BigNumber(keyPairs[1].public, 16).toString(10)
                 },
                 value: locklift.utils.convertCrystal('0.4', 'nano'),
                 keyPair: keyPairs[0]
             });
 
-            const stateLO2 = await LimitOrder.call({
-                method: 'getCurrentStatus',
+            const stateLO2 = await Order.call({
+                method: 'currentStatus',
                 params: {}
             });
 
@@ -1572,13 +1575,13 @@ async function accountTokenBalances(contract, decimals) {
     return { token }
 }
 
-async function waitEventsCreateLimitOrder(limit) {
+async function waitEventsCreateOrder(limit) {
     const {
         result
     } = await this.locklift.ton.client.net.query_collection({
         collection: 'messages',
         filter: {
-            src: { eq: RootlimitOrderBar.address },
+            src: { eq: RootOrderBar.address },
             msg_type: { eq: 2 },
         },
         order: [{ path: 'created_at', direction: "DESC" }, { path: 'created_lt', direction: "DESC" }],
@@ -1591,7 +1594,7 @@ async function waitEventsCreateLimitOrder(limit) {
         const decodedMessage = await this.locklift.ton.client.abi.decode_message_body({
             abi: {
                 type: 'Contract',
-                value: RootlimitOrderBar.abi
+                value: RootOrderBar.abi
             },
             body: message.body,
             is_internal: false

@@ -1,6 +1,6 @@
 pragma ton-solidity >= 0.57.0;
 
-library LimitOrderErrors {
+library OrderErrors {
     uint16 constant NOT_OWNER                               = 300;
     uint16 constant NOT_PENDING_OWNER                       = 301;
     uint16 constant VALUE_TOO_LOW                           = 302;
@@ -19,4 +19,6 @@ library LimitOrderErrors {
     uint16 constant EMERGENCY_MANAGER_NOT_EMPTY              = 315;
     uint16 constant EMERGENCY_STATUS_NOW                    = 316;
     uint16 constant NOT_EMERGENCY_STATUS_NOW                = 317;
+    uint16 constant NOT_AUTO_EXCHANGE                       = 318;
+    uint16 constant PLATFORM_CODE_NON_EMPTY                 = 319;
 }
