@@ -590,7 +590,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
             const payload = await DexPool.call({
                 method: 'buildDepositLiquidityPayload', params: {
                     id: 0,
-                    deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano')
+                    deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
+                    expected_amount: new BigNumber(LP_REWARD).shiftedBy(Constants.LP_DECIMALS).toString()
                 }
             });
 
@@ -740,7 +741,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
             const payload = await DexPool.call({
                 method: 'buildWithdrawLiquidityPayload', params: {
                     id: 0,
-                    deploy_wallet_grams: 0
+                    deploy_wallet_grams: 0,
+                    expected_amount: expected.amounts
                 }
             });
 

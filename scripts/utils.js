@@ -32,7 +32,7 @@ async function sleep(ms) {
 }
 
 const afterRun = async (tx) => {
-   await new Promise(resolve => setTimeout(resolve, 3000));
+   await new Promise(resolve => setTimeout(resolve, 5000));
 };
 
 const displayTx = (_tx) => {

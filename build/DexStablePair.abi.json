@@ -154,7 +154,8 @@
 			"inputs": [
 				{"name":"id","type":"uint64"},
 				{"name":"deploy_wallet_grams","type":"uint128"},
-				{"name":"expected_amount","type":"uint128"}
+				{"name":"expected_amount","type":"uint128"},
+				{"name":"recipient","type":"optional(address)"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
@@ -166,7 +167,8 @@
 				{"name":"_id","type":"uint64"},
 				{"name":"_deployWalletGrams","type":"uint128"},
 				{"name":"_expectedAmount","type":"uint128"},
-				{"name":"_outcoming","type":"address"}
+				{"name":"_outcoming","type":"address"},
+				{"name":"_recipient","type":"optional(address)"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
@@ -176,7 +178,9 @@
 			"name": "buildDepositLiquidityPayload",
 			"inputs": [
 				{"name":"id","type":"uint64"},
-				{"name":"deploy_wallet_grams","type":"uint128"}
+				{"name":"deploy_wallet_grams","type":"uint128"},
+				{"name":"expected_amount","type":"optional(uint128)"},
+				{"name":"recipient","type":"optional(address)"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
@@ -186,7 +190,10 @@
 			"name": "buildWithdrawLiquidityPayload",
 			"inputs": [
 				{"name":"id","type":"uint64"},
-				{"name":"deploy_wallet_grams","type":"uint128"}
+				{"name":"deploy_wallet_grams","type":"uint128"},
+				{"name":"expected_left_amount","type":"optional(uint128)"},
+				{"name":"expected_right_amount","type":"optional(uint128)"},
+				{"name":"recipient","type":"optional(address)"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
@@ -198,7 +205,8 @@
 				{"name":"id","type":"uint64"},
 				{"name":"deploy_wallet_grams","type":"uint128"},
 				{"name":"expected_amount","type":"uint128"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"steps","type":"tuple[]"}
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"steps","type":"tuple[]"},
+				{"name":"recipient","type":"optional(address)"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
@@ -211,7 +219,8 @@
 				{"name":"_deployWalletGrams","type":"uint128"},
 				{"name":"_expectedAmount","type":"uint128"},
 				{"name":"_outcoming","type":"address"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"roots","type":"address[]"},{"name":"outcoming","type":"address"}],"name":"_steps","type":"tuple[]"}
+				{"components":[{"name":"amount","type":"uint128"},{"name":"roots","type":"address[]"},{"name":"outcoming","type":"address"}],"name":"_steps","type":"tuple[]"},
+				{"name":"_recipient","type":"optional(address)"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
@@ -270,7 +279,7 @@
 			"inputs": [
 				{"name":"call_id","type":"uint64"},
 				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_operation","type":"tuple"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"value2","type":"tuple[]"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_expected","type":"tuple[]"},
 				{"name":"account_owner","type":"address"},
 				{"name":"value4","type":"uint32"},
 				{"name":"send_gas_to","type":"address"}
@@ -325,6 +334,7 @@
 				{"name":"spent_token_root","type":"address"},
 				{"name":"spent_amount","type":"uint128"},
 				{"name":"sender_address","type":"address"},
+				{"name":"recipient","type":"address"},
 				{"name":"original_gas_to","type":"address"},
 				{"name":"deploy_wallet_grams","type":"uint128"},
 				{"name":"payload","type":"cell"},

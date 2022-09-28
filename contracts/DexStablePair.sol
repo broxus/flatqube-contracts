@@ -201,11 +201,17 @@ contract DexStablePair is
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // Direct operations
 
-    function buildExchangePayload(uint64 id, uint128 deploy_wallet_grams, uint128 expected_amount) external pure returns (TvmCell) {
+    function buildExchangePayload(
+        uint64 id,
+        uint128 deploy_wallet_grams,
+        uint128 expected_amount,
+        optional(address) recipient
+    ) external pure returns (TvmCell) {
         return PairPayload.buildExchangePayload(
             id,
             deploy_wallet_grams,
-            expected_amount
+            expected_amount,
+            recipient.hasValue() ? recipient.get() : address(0)
         );
     }
 
@@ -213,27 +219,47 @@ contract DexStablePair is
         uint64 _id,
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
-        address _outcoming
+        address _outcoming,
+        optional(address) _recipient
     ) external pure returns (TvmCell) {
         return PairPayload.buildExchangePayloadV2(
             _id,
             _deployWalletGrams,
+            _recipient.hasValue() ? _recipient.get() : address(0),
             _expectedAmount,
             _outcoming
         );
     }
 
-    function buildDepositLiquidityPayload(uint64 id, uint128 deploy_wallet_grams) external pure returns (TvmCell) {
+    function buildDepositLiquidityPayload(
+        uint64 id,
+        uint128 deploy_wallet_grams,
+        optional(uint128) expected_amount,
+        optional(address) recipient
+    ) external pure returns (TvmCell) {
         return PairPayload.buildDepositLiquidityPayload(
             id,
-            deploy_wallet_grams
+            deploy_wallet_grams,
+            expected_amount.hasValue() ? expected_amount.get() : 0,
+            recipient.hasValue() ? recipient.get() : address(0)
         );
     }
 
-    function buildWithdrawLiquidityPayload(uint64 id, uint128 deploy_wallet_grams) external pure returns (TvmCell) {
+    function buildWithdrawLiquidityPayload(
+        uint64 id,
+        uint128 deploy_wallet_grams,
+        optional(uint128) expected_left_amount,
+        optional(uint128) expected_right_amount,
+        optional(address) recipient
+    ) external pure returns (TvmCell) {
         return PairPayload.buildWithdrawLiquidityPayload(
             id,
-            deploy_wallet_grams
+            deploy_wallet_grams,
+            [
+                expected_left_amount.hasValue() ? expected_left_amount.get() : 0,
+                expected_right_amount.hasValue() ? expected_right_amount.get() : 0
+            ],
+            recipient.hasValue() ? recipient.get() : address(0)
         );
     }
 
@@ -241,13 +267,15 @@ contract DexStablePair is
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        TokenOperation[] steps
+        TokenOperation[] steps,
+        optional(address) recipient
     ) external pure returns (TvmCell) {
         return PairPayload.buildCrossPairExchangePayload(
             id,
             deploy_wallet_grams,
             expected_amount,
-            steps
+            steps,
+            recipient.hasValue() ? recipient.get() : address(0)
         );
     }
 
@@ -256,7 +284,8 @@ contract DexStablePair is
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
         address _outcoming,
-        ExchangeStep[] _steps
+        ExchangeStep[] _steps,
+        optional(address) _recipient
     ) external view returns (TvmCell) {
         address[] pairs;
 
@@ -268,6 +297,7 @@ contract DexStablePair is
         return PairPayload.buildCrossPairExchangePayloadV2(
             _id,
             _deployWalletGrams,
+            _recipient.hasValue() ? _recipient.get() : address(0),
             _expectedAmount,
             _outcoming,
             _steps,
@@ -285,23 +315,35 @@ contract DexStablePair is
     ) override external {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        // Decode base data from payload
         (
             bool is_valid,
-            uint64 id,
             uint8 op,
+            uint64 id,
             uint128 deploy_wallet_grams,
-            uint128 expected_amount,
+            address recipient,
+            uint128[] expected_amounts,
             address next_pair_or_token_root,
-            address outcoming,
-            bool hasRef3,
-            TvmCell ref3,
+            address outcoming
+        ) = PairPayload.decodeOnAcceptTokensTransferData(payload);
+
+        uint128 expected_amount = 0;
+        if (expected_amounts.length == 1) {
+            expected_amount = expected_amounts[0];
+        }
+
+        // Set sender as recipient if it's empty
+        recipient = recipient.value == 0 ? sender_address : recipient;
+
+        // Decode payloads for callbacks
+        (
             bool notify_success,
             TvmCell success_payload,
             bool notify_cancel,
-            TvmCell cancel_payload
-        ) = PairPayload.decodeOnAcceptTokensTransferPayload(payload);
-
-        TvmSlice payloadSlice = payload.toSlice();
+            TvmCell cancel_payload,
+            bool hasRef3,
+            TvmCell ref3
+        ) = PairPayload.decodeOnAcceptTokensTransferPayloads(payload);
 
         TvmCell empty;
 
@@ -323,42 +365,55 @@ contract DexStablePair is
             if (msg.sender == lp_wallet) {
                 if (op == DexOperationTypes.WITHDRAW_LIQUIDITY) {
 
-                    TokenOperation[] operations = _withdrawLiquidityBase(tokens_amount, sender_address);
+                    optional(TokenOperation[]) operationsOpt = _withdrawLiquidityBase(tokens_amount, expected_amounts, sender_address, recipient);
 
-                    IDexPairOperationCallback(sender_address).dexPairWithdrawSuccess{
-                        value: DexGas.OPERATION_CALLBACK_BASE + 30,
-                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                        bounce: false
-                    }(id, false, IWithdrawResult.WithdrawResult(tokens_amount, operations[0].amount, operations[1].amount));
+                    if (!operationsOpt.hasValue()) {
+                        need_cancel = true;
+                    } else {
+                        TokenOperation[] operations = operationsOpt.get();
 
-                    for (uint8 ii = 0; ii < N_COINS; ii++) {
-                        if (operations[ii].amount >= 0) {
-                            IDexVault(vault).transfer{
-                                value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
-                                flag: MsgFlag.SENDER_PAYS_FEES
-                            }(
-                                operations[ii].amount,
-                                operations[ii].root,
-                                tokenData[ii].vaultWallet,
-                                sender_address,
-                                deploy_wallet_grams,
-                                notify_success,
-                                success_payload,
-                                tokenData[0].root,
-                                tokenData[1].root,
-                                current_version,
-                                original_gas_to
-                            );
+                        IDexPairOperationCallback(sender_address).dexPairWithdrawSuccess{
+                            value: DexGas.OPERATION_CALLBACK_BASE + 30,
+                            flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                            bounce: false
+                        }(id, false, IWithdrawResult.WithdrawResult(tokens_amount, operations[0].amount, operations[1].amount));
+
+                        if (recipient != sender_address) {
+                            IDexPairOperationCallback(recipient).dexPairWithdrawSuccess{
+                                value: DexGas.OPERATION_CALLBACK_BASE,
+                                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                                bounce: false
+                            }(id, false, IWithdrawResult.WithdrawResult(tokens_amount, operations[0].amount, operations[1].amount));
                         }
+
+                        for (uint8 ii = 0; ii < N_COINS; ii++) {
+                            if (operations[ii].amount >= 0) {
+                                IDexVault(vault).transfer{
+                                    value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
+                                    flag: MsgFlag.SENDER_PAYS_FEES
+                                }(
+                                    operations[ii].amount,
+                                    operations[ii].root,
+                                    tokenData[ii].vaultWallet,
+                                    recipient,
+                                    deploy_wallet_grams,
+                                    notify_success,
+                                    success_payload,
+                                    tokenData[0].root,
+                                    tokenData[1].root,
+                                    current_version,
+                                    original_gas_to
+                                );
+                            }
+                        }
+
+                        IBurnableTokenWallet(msg.sender).burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
+                            tokens_amount,
+                            original_gas_to,
+                            address.makeAddrStd(0, 0),
+                            empty
+                        );
                     }
-
-                    IBurnableTokenWallet(msg.sender).burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
-                        tokens_amount,
-                        original_gas_to,
-                        address.makeAddrStd(0, 0),
-                        empty
-                    );
-
                 } else {
                     need_cancel = true;
                 }
@@ -366,7 +421,7 @@ contract DexStablePair is
                 uint8 i = tokenIndex[token_root];
                 uint8 j = i == 0 ? 1 : 0;
 
-                if (op == DexOperationTypes.EXCHANGE && payloadSlice.bits() >= 128) {
+                if (op == DexOperationTypes.EXCHANGE) {
                     optional(ExpectedExchangeResult) dy_result_opt = _get_dy(i, j, tokens_amount);
 
                     if (!dy_result_opt.hasValue() || dy_result_opt.get().amount < expected_amount) {
@@ -387,7 +442,7 @@ contract DexStablePair is
 
                         emit Exchange(
                             sender_address,
-                            sender_address,
+                            recipient,
                             tokenData[i].root,
                             tokens_amount,
                             tokenData[j].root,
@@ -411,6 +466,19 @@ contract DexStablePair is
                             dy_result.amount
                         ));
 
+                        if (recipient != sender_address) {
+                            IDexPairOperationCallback(recipient).dexPairExchangeSuccess{
+                                value: DexGas.OPERATION_CALLBACK_BASE,
+                                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                                bounce: false
+                            }(id, false, IExchangeResult.ExchangeResult(
+                                i == 0 && j == 1,
+                                tokens_amount,
+                                dy_result.pool_fee + dy_result.beneficiary_fee,
+                                dy_result.amount
+                            ));
+                        }
+
                         ITokenWallet(msg.sender).transfer{
                             value: DexGas.TRANSFER_TOKENS_VALUE,
                             flag: MsgFlag.SENDER_PAYS_FEES
@@ -430,7 +498,7 @@ contract DexStablePair is
                             dy_result.amount,
                             tokenData[j].root,
                             tokenData[j].vaultWallet,
-                            sender_address,
+                            recipient,
                             deploy_wallet_grams,
                             notify_success,
                             success_payload,
@@ -464,7 +532,7 @@ contract DexStablePair is
 
                         emit Exchange(
                             sender_address,
-                            sender_address,
+                            recipient,
                             tokenData[i].root,
                             tokens_amount,
                             tokenData[j].root,
@@ -512,6 +580,7 @@ contract DexStablePair is
                             dy_result.amount,
 
                             sender_address,
+                            recipient,
 
                             original_gas_to,
                             deploy_wallet_grams,
@@ -530,11 +599,11 @@ contract DexStablePair is
                     amounts[j] = 0;
                     optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
 
-                    if (!resultOpt.hasValue()) {
+                    if (!resultOpt.hasValue() || resultOpt.get().lp_reward < expected_amount) {
                         need_cancel = true;
                     } else {
                         DepositLiquidityResultV2 result = resultOpt.get();
-                        _applyAddLiquidity(result, id, false, sender_address);
+                        _applyAddLiquidity(result, id, false, sender_address, recipient);
 
                         ITokenWallet(msg.sender).transfer{
                             value: DexGas.TRANSFER_TOKENS_VALUE,
@@ -553,7 +622,7 @@ contract DexStablePair is
                             flag: MsgFlag.ALL_NOT_RESERVED
                         }(
                             result.lp_reward,
-                            sender_address,
+                            recipient,
                             deploy_wallet_grams,
                             original_gas_to,
                             notify_success,
@@ -623,7 +692,7 @@ contract DexStablePair is
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        _applyAddLiquidity(result, call_id, true, account_owner);
+        _applyAddLiquidity(result, call_id, true, account_owner, account_owner);
 
         _sync();
 
@@ -647,18 +716,23 @@ contract DexStablePair is
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // Withdraw liquidity
 
-    function _withdrawLiquidityBase(uint128 lp_amount, address user) private returns (TokenOperation[]) {
-        TokenOperation[] operations = new TokenOperation[](0);
+    function _withdrawLiquidityBase(uint128 lp_amount, uint128[] expected_amounts, address sender_address, address recipient) private returns (optional(TokenOperation[])) {
+        optional(TokenOperation[]) operations;
 
+        TokenOperation[] ops = new TokenOperation[](0);
         for (uint8 i = 0; i < N_COINS; i++) {
             uint128 amount = math.muldiv(tokenData[i].balance, lp_amount, lp_supply);
+            if (amount < expected_amounts[i]) {
+                return operations;
+            }
             tokenData[i].balance -= amount;
-            operations.push(TokenOperation(amount, tokenData[i].root));
+            ops.push(TokenOperation(amount, tokenData[i].root));
         }
 
+        operations.set(ops);
         lp_supply -= lp_amount;
 
-        emit WithdrawLiquidity(user, user, lp_amount, operations);
+        emit WithdrawLiquidity(sender_address, recipient, lp_amount, ops);
 
         return operations;
     }
@@ -675,7 +749,7 @@ contract DexStablePair is
     function withdrawLiquidity(
         uint64 call_id,
         TokenOperation _operation,
-        TokenOperation[] /* _expected */,
+        TokenOperation[] _expected,
         address account_owner,
         uint32 /*account_version*/,
         address send_gas_to
@@ -683,8 +757,15 @@ contract DexStablePair is
         require(_operation.root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        TokenOperation[] operations = _withdrawLiquidityBase(_operation.amount, account_owner);
+        uint128[] expected_amounts = new uint128[](N_COINS);
+        for (TokenOperation amt: _expected) {
+            expected_amounts[tokenIndex[amt.root]] = amt.amount;
+        }
 
+        optional(TokenOperation[]) operationsOpt = _withdrawLiquidityBase(_operation.amount, expected_amounts, account_owner, account_owner);
+        require(operationsOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
+
+        TokenOperation[] operations = operationsOpt.get();
         _sync();
 
         IDexPairOperationCallback(account_owner)
@@ -886,6 +967,7 @@ contract DexStablePair is
         uint128 spent_amount,
 
         address sender_address,
+        address recipient,
 
         address original_gas_to,
         uint128 deploy_wallet_grams,
@@ -932,7 +1014,7 @@ contract DexStablePair is
 
                 emit Exchange(
                     sender_address,
-                    sender_address,
+                    recipient,
                     tokenData[i].root,
                     spent_amount,
                     tokenData[j].root,
@@ -957,6 +1039,19 @@ contract DexStablePair is
                     dy_result.pool_fee + dy_result.beneficiary_fee,
                     dy_result.amount
                 ));
+
+                if (recipient != sender_address) {
+                    IDexPairOperationCallback(recipient).dexPairExchangeSuccess{
+                        value: DexGas.OPERATION_CALLBACK_BASE,
+                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                        bounce: false
+                    }(id, false, IExchangeResult.ExchangeResult(
+                        true,
+                        spent_amount,
+                        dy_result.pool_fee + dy_result.beneficiary_fee,
+                        dy_result.amount
+                    ));
+                }
 
                address next_pair;
 
@@ -985,6 +1080,7 @@ contract DexStablePair is
                         dy_result.amount,
 
                         sender_address,
+                        recipient,
 
                         original_gas_to,
                         deploy_wallet_grams,
@@ -1003,7 +1099,7 @@ contract DexStablePair is
                         dy_result.amount,
                         tokenData[j].root,
                         tokenData[j].vaultWallet,
-                        sender_address,
+                        recipient,
                         deploy_wallet_grams,
                         true,
                         success_payload,
@@ -1024,6 +1120,14 @@ contract DexStablePair is
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 bounce: false
             }(id);
+
+            if (recipient != sender_address) {
+                IDexPairOperationCallback(recipient).dexPairOperationCancelled{
+                    value: DexGas.OPERATION_CALLBACK_BASE,
+                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
+                }(id);
+            }
 
             IDexVault(vault).transfer{
                 value: 0,
@@ -1714,7 +1818,8 @@ contract DexStablePair is
         DepositLiquidityResultV2 r,
         uint64 call_id,
         bool via_account,
-        address user
+        address sender_address,
+        address recipient
     ) private {
 
         address spent_root;
@@ -1753,8 +1858,8 @@ contract DexStablePair is
 
         if (spent_root.value != 0 && receive_root.value != 0) {
             emit Exchange(
-                user,
-                user,
+                sender_address,
+                recipient,
                 spent_root,
                 spent_amount,
                 receive_root,
@@ -1763,12 +1868,20 @@ contract DexStablePair is
             );
         }
 
-        emit DepositLiquidity(user, user, deposits, r.lp_reward);
+        emit DepositLiquidity(sender_address, recipient, deposits, r.lp_reward);
 
-        IDexPairOperationCallback(user).dexPairDepositLiquiditySuccessV2{
+        IDexPairOperationCallback(sender_address).dexPairDepositLiquiditySuccessV2{
             value: DexGas.OPERATION_CALLBACK_BASE + 2,
             flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
             bounce: false
         }(call_id, via_account, r);
+
+        if (recipient != sender_address) {
+            IDexPairOperationCallback(recipient).dexPairDepositLiquiditySuccessV2{
+                value: DexGas.OPERATION_CALLBACK_BASE,
+                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                bounce: false
+            }(call_id, via_account, r);
+        }
     }
 }

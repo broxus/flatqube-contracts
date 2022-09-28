@@ -508,8 +508,9 @@ contract DexVault is
         uint8 current_type,
         address[] roots,
         address sender_address,
+        address recipient,
         uint128 deploy_wallet_grams,
-        address next_pool) = abi.decode(exchange_data, (uint64, uint32, uint8, address[], address, uint128, address));
+        address next_pool) = abi.decode(exchange_data, (uint64, uint32, uint8, address[], address, address, uint128, address));
 
         TvmCell next_payload;
         TvmCell success_payload;
@@ -549,6 +550,7 @@ contract DexVault is
                 amount,
 
                 sender_address,
+                recipient,
 
                 remainingGasTo,
                 deploy_wallet_grams,
@@ -564,14 +566,14 @@ contract DexVault is
                 lp_vault_wallet,
                 amount,
                 roots,
-                sender_address
+                recipient
             );
 
             ITokenWallet(lp_vault_wallet)
                 .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                 (
                     amount,
-                    sender_address,
+                    recipient,
                     deploy_wallet_grams,
                     remainingGasTo,
                     true,

@@ -6,8 +6,7 @@ import "./IDexBasePool.sol";
 
 /// @title DEX Pair Interface
 /// @notice Interface for interaction with DEX pair
-interface IDexPair is IDexBasePool, IDexPairBalances {
-
+interface IDexPair is IDexPairBalances, IDexBasePool {
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // EVENTS
 

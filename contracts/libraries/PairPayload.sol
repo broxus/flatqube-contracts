@@ -5,24 +5,32 @@ import "../structures/ITokenOperationStructure.sol";
 
 import "./DexOperationTypes.sol";
 
-/// @title Pair's Payload Utility
+/**
+ * @title DEX Pair Payloads Utility
+ * @notice Utility for building pair's payloads
+ */
 library PairPayload {
-    /// @notice Build payload for exchange call
-    /// @param _id ID of the call
-    /// @param _deployWalletGrams Amount for new wallet deploy
-    /// @param _expectedAmount Expected receive amount
-    /// @return TvmCell Encoded payload
+    /**
+     * @notice Build payload for TIP-3 token transfer with exchange operation
+     * @param _id ID of the call
+     * @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
+     * @param _expectedAmount Minimum token amount after swap
+     * @param _recipient Address of the receiver
+     * @return TvmCell Encoded payload for transfer
+     */
     function buildExchangePayload(
         uint64 _id,
         uint128 _deployWalletGrams,
-        uint128 _expectedAmount
+        uint128 _expectedAmount,
+        address _recipient
     ) public returns (TvmCell) {
         TvmBuilder builder;
 
         builder.store(DexOperationTypes.EXCHANGE);
         builder.store(_id);
         builder.store(_deployWalletGrams);
-        builder.store(_expectedAmount);
+        builder.store(_recipient);
+        builder.store(abi.encode([_expectedAmount]));
 
         return builder.toCell();
     }
@@ -35,6 +43,7 @@ library PairPayload {
     function buildExchangePayloadV2(
         uint64 _id,
         uint128 _deployWalletGrams,
+        address _recipient,
         uint128 _expectedAmount,
         address _outcoming
     ) public returns (TvmCell) {
@@ -43,43 +52,60 @@ library PairPayload {
         builder.store(DexOperationTypes.EXCHANGE);
         builder.store(_id);
         builder.store(_deployWalletGrams);
-        builder.store(_expectedAmount);
+        builder.store(_recipient);
+        builder.store(abi.encode([_expectedAmount]));
         builder.store(address(0));
         builder.store(_outcoming);
 
         return builder.toCell();
     }
 
-    /// @notice Build payload for deposit call
-    /// @param _id ID of the call
-    /// @param _deployWalletGrams Amount for new wallet deploy
-    /// @return TvmCell Encoded payload
+    /**
+     * @notice Build payload for TIP-3 token transfer with liquidity deposit operation
+     * @param _id ID of the call
+     * @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
+     * @param _expectedAmount Minimum LP token amount after deposit
+     * @param _recipient Address of the receiver
+     * @return TvmCell Encoded payload for transfer
+     */
     function buildDepositLiquidityPayload(
         uint64 _id,
-        uint128 _deployWalletGrams
+        uint128 _deployWalletGrams,
+        uint128 _expectedAmount,
+        address _recipient
     ) public returns (TvmCell) {
         TvmBuilder builder;
 
         builder.store(DexOperationTypes.DEPOSIT_LIQUIDITY);
         builder.store(_id);
         builder.store(_deployWalletGrams);
+        builder.store(_recipient);
+        builder.store(abi.encode([_expectedAmount]));
 
         return builder.toCell();
     }
 
-    /// @notice Build payload for withdrawal call
-    /// @param _id ID of the call
-    /// @param _deployWalletGrams Amount for new wallet deploy
-    /// @return TvmCell Encoded payload
+    /**
+     * @notice Build payload for TIP-3 token transfer with liquidity withdrawal operation
+     * @param _id ID of the call
+     * @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
+     * @param _expectedAmounts Minimum pair's token amounts after withdrawal
+     * @param _recipient Address of the receiver
+     * @return TvmCell Encoded payload for transfer
+     */
     function buildWithdrawLiquidityPayload(
         uint64 _id,
-        uint128 _deployWalletGrams
+        uint128 _deployWalletGrams,
+        uint128[] _expectedAmounts,
+        address _recipient
     ) public returns (TvmCell) {
         TvmBuilder builder;
 
         builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY);
         builder.store(_id);
         builder.store(_deployWalletGrams);
+        builder.store(_recipient);
+        builder.store(abi.encode(_expectedAmounts));
 
         return builder.toCell();
     }
@@ -92,6 +118,7 @@ library PairPayload {
     function buildWithdrawLiquidityOneCoinPayload(
         uint64 _id,
         uint128 _deployWalletGrams,
+        address _recipient,
         uint128 _expectedAmount,
         address _outcoming
     ) public returns (TvmCell) {
@@ -100,36 +127,46 @@ library PairPayload {
         builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN);
         builder.store(_id);
         builder.store(_deployWalletGrams);
-        builder.store(_expectedAmount);
+        builder.store(_recipient);
+        builder.store(abi.encode([_expectedAmount]));
         builder.store(address(0));
         builder.store(_outcoming);
 
         return builder.toCell();
     }
 
-    /// @notice Build payload for cross-exchange call
-    /// @param _id ID of the call
-    /// @param _deployWalletGrams Amount for new wallet deploy
-    /// @param _expectedAmount Expected receive amount
-    /// @param _steps Steps for exchanging
-    /// @return TvmCell Encoded payload
+    /**
+     * @notice Build payload for TIP-3 token transfer with cross-pair exchange operation
+     * @param _id ID of the call
+     * @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
+     * @param _expectedAmount Minimum token amount after the first swap
+     * @param _steps Next pairs' root and expected amount
+     * @param _recipient Address of the receiver
+     * @return TvmCell Encoded payload for transfer
+     */
     function buildCrossPairExchangePayload(
         uint64 _id,
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
-        ITokenOperationStructure.TokenOperation[] _steps
+        ITokenOperationStructure.TokenOperation[] _steps,
+        address _recipient
     ) public returns (TvmCell) {
+        // Check that at least 1 next pair is exists
         require(_steps.length > 0);
 
+        // Pack data for the first pair
         TvmBuilder builder;
 
         builder.store(DexOperationTypes.CROSS_PAIR_EXCHANGE);
         builder.store(_id);
         builder.store(_deployWalletGrams);
-        builder.store(_expectedAmount);
+        builder.store(_recipient);
+        builder.store(abi.encode([_expectedAmount]));
         builder.store(_steps[0].root);
 
+        // Pack data for next pairs
         TvmBuilder nextStepBuilder;
+
         nextStepBuilder.store(_steps[_steps.length - 1].amount);
 
         for (uint i = _steps.length - 1; i > 0; i--) {
@@ -149,6 +186,7 @@ library PairPayload {
     /// @notice Build payload for cross-exchange call
     /// @param _id ID of the call
     /// @param _deployWalletGrams Amount for new wallet deploy
+    /// @param _recipient Address of the receiver
     /// @param _expectedAmount Expected receive amount
     /// @param _steps Steps for exchanging
     /// @param _pairs Pairs' addresses for exchanging
@@ -156,6 +194,7 @@ library PairPayload {
     function buildCrossPairExchangePayloadV2(
         uint64 _id,
         uint128 _deployWalletGrams,
+        address _recipient,
         uint128 _expectedAmount,
         address _outcoming,
         IExchangeStepStructure.ExchangeStep[] _steps,
@@ -168,7 +207,8 @@ library PairPayload {
         builder.store(DexOperationTypes.CROSS_PAIR_EXCHANGE);
         builder.store(_id);
         builder.store(_deployWalletGrams);
-        builder.store(_expectedAmount);
+        builder.store(_recipient);
+        builder.store(abi.encode([_expectedAmount]));
         builder.store(_pairs[0]);
         builder.store(_outcoming);
 
@@ -195,17 +235,91 @@ library PairPayload {
         return builder.toCell();
     }
 
-    /// @notice Decode payload for onAcceptTokensTransfer-callback
-    /// @param _payload Callback's payload
-    /// @return Decoded payload
-    function decodeOnAcceptTokensTransferPayload(TvmCell _payload) public returns (
+    /**
+     * @notice Decode user's params from onAcceptTokensTransfer callback
+     * @param _payload Payload from transfer callback
+     * @return bool Whether or not payload is valid
+     * @return uint8 ID of the call
+     * @return uint64 Type of the operation
+     * @return uint128 Amount of EVER for a new TIP-3 wallet deploy
+     * @return address Address of the receiver
+     * @return uint128 Expected amount or expected left amount for liquidity withdrawal
+     * @return uint128 Expected right amount for liquidity withdrawal
+     * @return address Next TokenRoot address for cross-pair exchange
+     */
+    function decodeOnAcceptTokensTransferData(TvmCell _payload) public returns (
         bool,
-        uint64,
         uint8,
-        uint128,
+        uint64,
         uint128,
         address,
+        uint128[],
         address,
+        address
+    ) {
+        TvmSlice slice = _payload.toSlice();
+
+        // Check size
+        bool isValid = slice.bits() >= 467;
+
+        // Default empty params
+        uint8 op;
+        uint64 id;
+        uint128 deployWalletGrams;
+        address recipient;
+        uint128[] expectedAmounts;
+        address nextPoolOrTokenRoot;
+        address outcoming;
+
+        if (isValid) {
+            (
+                op,
+                id,
+                deployWalletGrams,
+                recipient
+            ) = slice.decode(
+                uint8,
+                uint64,
+                uint128,
+                address
+            );
+
+            if (slice.refs() >= 1) {
+                TvmCell expectedAmountsData = slice.loadRef();
+                expectedAmounts = abi.decode(expectedAmountsData, uint128[]);
+            }
+
+            if (slice.bits() >= 267) {
+                nextPoolOrTokenRoot = slice.decode(address);
+            }
+            if (slice.bits() >= 267) {
+                outcoming = slice.decode(address);
+            }
+        }
+
+        return (
+            isValid,
+            op,
+            id,
+            deployWalletGrams,
+            recipient,
+            expectedAmounts,
+            nextPoolOrTokenRoot,
+            outcoming
+        );
+    }
+
+    /**
+     * @notice Decode user's payloads from onAcceptTokensTransfer callback
+     * @param _payload Payload from transfer callback
+     * @return bool Whether or not success payload exists
+     * @return TvmCell Payload for success
+     * @return bool Whether or not cancel payload exists
+     * @return TvmCell Payload for cancel
+     * @return bool Whether or not other data exists
+     * @return TvmCell Other data
+     */
+    function decodeOnAcceptTokensTransferPayloads(TvmCell _payload) public returns (
         bool,
         TvmCell,
         bool,
@@ -213,82 +327,46 @@ library PairPayload {
         bool,
         TvmCell
     ) {
-        TvmSlice payloadSlice = _payload.toSlice();
+        TvmSlice slice = _payload.toSlice();
+        uint8 refs = slice.refs();
 
-        uint refsCount = payloadSlice.refs();
-
-        bool notifySuccess = refsCount >= 1;
-        bool notifyCancel = refsCount >= 2;
-        bool hasRef3 = refsCount >= 3;
-        bool isValid = payloadSlice.bits() >= 200;
-
-        uint8 op;
-        uint64 id;
-        uint128 deployWalletGrams;
-        uint128 expectedAmount;
-        address nextTokenRoot;
-        address outcoming;
+        // Check size
+        bool notifySuccess = refs >= 2;
+        bool notifyCancel = refs >= 3;
+        bool hasRef3 = refs == 4;
 
         TvmCell successPayload;
         TvmCell cancelPayload;
         TvmCell ref3;
 
-        if (notifySuccess) {
-            successPayload = payloadSlice.loadRef();
+        if (refs >= 1) {
+            slice.loadRef();
         }
 
-        if (notifyCancel) {
-            cancelPayload = payloadSlice.loadRef();
-        }
+        if (notifySuccess) { successPayload = slice.loadRef(); }
 
-        if (hasRef3) {
-            ref3 = payloadSlice.loadRef();
-        }
+        if (notifyCancel) { cancelPayload = slice.loadRef(); }
 
-        if (isValid) {
-            (
-                op,
-                id,
-                deployWalletGrams
-            ) = payloadSlice.decode(
-                uint8,
-                uint64,
-                uint128
-            );
-
-            if (payloadSlice.bits() >= 128) {
-                expectedAmount = payloadSlice.decode(uint128);
-            }
-
-            if (payloadSlice.bits() >= 267) {
-                nextTokenRoot = payloadSlice.decode(address);
-            }
-
-            if (payloadSlice.bits() >= 267) {
-                outcoming = payloadSlice.decode(address);
-            }
-        }
+        if (hasRef3) { ref3 = slice.loadRef(); }
 
         return (
-            isValid,
-            id,
-            op,
-            deployWalletGrams,
-            expectedAmount,
-            nextTokenRoot,
-            outcoming,
-            hasRef3,
-            ref3,
             notifySuccess,
             successPayload,
             notifyCancel,
-            cancelPayload
+            cancelPayload,
+            hasRef3,
+            ref3
         );
     }
 
-    /// @notice Decode payload for crossPoolExchange-callback
-    /// @param _payload Callback's payload
-    /// @return Decoded payload
+    /**
+     * @notice Decode payload from the previous pair
+     * @param _payload Payload from the previous pair
+     * @return uint128 Minimum token amount after swap
+     * @return address Next pair's second TokenRoot address
+     * @return bool Whether or not next payload exists
+     * @return TvmCell Payload for the next pair
+     */
     function decodeCrossPoolExchangePayload(TvmCell _payload) public returns (
         uint128,
         address,
@@ -296,23 +374,20 @@ library PairPayload {
         bool,
         TvmCell
     ) {
-        TvmSlice payloadSlice = _payload.toSlice();
+        TvmSlice slice = _payload.toSlice();
 
-        uint128 expectedAmount = payloadSlice.decode(uint128);
-        address nextPair = payloadSlice.bits() >= 267 ? payloadSlice.decode(address) : address(0);
-        address outcoming = payloadSlice.bits() >= 267 ? payloadSlice.decode(address) : address(0);
-
-        bool hasNextPayload = payloadSlice.refs() >= 1;
+        uint128 expectedAmount = slice.decode(uint128);
+        address nextPoolOrTokenRoot = slice.bits() >= 267 ? slice.decode(address) : address(0);
+        address outcoming = slice.bits() >= 267 ? slice.decode(address) : address(0);
+        bool hasNextPayload = slice.refs() >= 1;
 
         TvmCell nextPayload;
 
-        if (hasNextPayload) {
-            nextPayload = payloadSlice.loadRef();
-        }
+        if (hasNextPayload) { nextPayload = slice.loadRef(); }
 
         return (
             expectedAmount,
-            nextPair,
+            nextPoolOrTokenRoot,
             outcoming,
             hasNextPayload,
             nextPayload

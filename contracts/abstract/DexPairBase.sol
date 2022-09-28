@@ -16,11 +16,16 @@ import "../structures/IPoolTokenData.sol";
 import "../structures/IAmplificationCoefficient.sol";
 
 import "./DexContractBase.sol";
+import "./TWAPOracle.sol";
 
 /// @title DEX Pair Base
 /// @notice Base implementation of the DEX pair
 /// @dev A contract is abstract - to be sure that it will be inherited by another contract
-abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
+abstract contract DexPairBase is
+    DexContractBase,
+    IDexConstantProductPair,
+    TWAPOracle
+{
     /// @dev DexRoot address
     address private _root;
 
@@ -83,7 +88,7 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
     }
 
     /// @dev Only the DEX root can call a function with this modifier
-    modifier onlyRoot() {
+    modifier onlyRoot() override {
         require(_root.value != 0 && msg.sender == _root, DexErrors.NOT_ROOT);
         _;
     }
@@ -486,7 +491,7 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
 
     /// @dev Pack left and right reserves and return them
     /// @return uint128[] Reserves' values sorted by reserves roots
-    function _reserves() internal view returns (uint128[]) {
+    function _reserves() internal view override returns (uint128[]) {
         return _typeToReserves[DexReserveType.POOL];
     }
 
@@ -497,7 +502,7 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
 
     /// @dev Pack left and right TIP-3 token roots and return them
     /// @return address[] Sorted TokenRoot addresses of the reserves
-    function _tokenRoots() internal view returns (address[]) {
+    function _tokenRoots() internal view override returns (address[]) {
         return _typeToRootAddresses[DexAddressType.RESERVE];
     }
 
@@ -684,6 +689,8 @@ abstract contract DexPairBase is DexContractBase, IDexConstantProductPair {
             _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[1].vaultWallet);
             _typeToReserves[DexReserveType.POOL].push(tokensData[1].balance);
         }
+
+        _initializeTWAPOracle(now);
 
         // Refund remaining gas
         remainingGasTo.transfer({
