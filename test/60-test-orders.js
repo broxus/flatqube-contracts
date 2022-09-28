@@ -519,7 +519,8 @@ describe('Check orders', async function () {
                 value: locklift.utils.convertCrystal(3, 'nano'),
                 keyPair: keyPairs[5]
             });
-
+            
+            sleep(1000);
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
             displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
@@ -685,6 +686,8 @@ describe('Check orders', async function () {
                 value: locklift.utils.convertCrystal(3, 'nano'),
                 keyPair: keyPairs[5]
             });
+
+            sleep(1000);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -1126,7 +1129,6 @@ describe('Check orders', async function () {
         });
 
         it('Order from backend CANCEL', async function () {
-            sleep(1000);
             logger.log(`#############################`);
             logger.log(``);
 
@@ -1139,7 +1141,7 @@ describe('Check orders', async function () {
             displayLog(balanceBarAcc4Start, balanceTstAcc4Start, true, "Account4");
 
             TOKENS_TO_EXCHANGE1 = 10;
-            TOKENS_TO_EXCHANGE2 = 60;
+            TOKENS_TO_EXCHANGE2 = 100;
             const params = {
                 tokenReceive: rootTokenRecieve.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
@@ -1208,7 +1210,7 @@ describe('Check orders', async function () {
 
             console.log('Tx: ', txForSwap.id);
 
-            sleep(3000);
+            sleep(10000);
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
             displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
@@ -1312,7 +1314,7 @@ describe('Check orders', async function () {
                 params: {}
             });
 
-            sleep(1000);
+            sleep(10000);
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
             displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
@@ -1348,7 +1350,7 @@ describe('Check orders', async function () {
             logger.log(`Account4 Ever balance start: ${ever !== undefined ? ever + ' EVER' : 'EVER'}`);
 
             TOKENS_TO_EXCHANGE1 = 10;
-            TOKENS_TO_EXCHANGE2 = 60;
+            TOKENS_TO_EXCHANGE2 = 100;
 
             const params = {
                 tokenReceive: rootTokenRecieve.address,
@@ -1413,7 +1415,7 @@ describe('Check orders', async function () {
                 params: {}
             });
 
-            sleep(1000);
+            sleep(10000);
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
             displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
