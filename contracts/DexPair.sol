@@ -33,8 +33,9 @@ import "./structures/IAmplificationCoefficient.sol";
 import "./structures/IPoolTokenData.sol";
 import "./DexPlatform.sol";
 import "./abstract/DexContractBase.sol";
+import "./abstract/TWAPOracle.sol";
 
-contract DexPair is DexContractBase, IDexConstantProductPair {
+contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // Data
@@ -238,6 +239,9 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
     ) override external {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
         TvmSlice payloadSlice = payload.toSlice();
+
+        uint128 leftTokenReserveOld = left_balance;
+        uint128 rightTokenReserveOld = right_balance;
 
         bool need_cancel = !active ||
             payloadSlice.bits() < 200 ||
@@ -811,6 +815,11 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                 cancel_payload
             );
         } else {
+            _write(
+                leftTokenReserveOld,
+                rightTokenReserveOld,
+                now
+            );
             _sync();
         }
     }
@@ -851,6 +860,9 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         require((left_amount > 0 && right_amount > 0) || (auto_change && (left_amount + right_amount > 0)),
             DexErrors.AMOUNT_TOO_LOW);
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
+
+        uint128 leftTokenReserveOld = left_balance;
+        uint128 rightTokenReserveOld = right_balance;
 
         uint128 lp_tokens_amount;
 
@@ -993,6 +1005,11 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
             empty
         );
 
+        _write(
+            leftTokenReserveOld,
+            rightTokenReserveOld,
+            now
+        );
         _sync();
 
         ISuccessCallback(msg.sender).successCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(call_id);
@@ -1161,8 +1178,16 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         require(expected_lp_root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        uint128 leftTokenReserveOld = left_balance;
+        uint128 rightTokenReserveOld = right_balance;
+
         TokenOperation[] operations = _withdrawLiquidityBase(lp_amount, account_owner);
 
+        _write(
+            leftTokenReserveOld,
+            rightTokenReserveOld,
+            now
+        );
         _sync();
 
         IDexPairOperationCallback(account_owner).dexPairWithdrawSuccess{
@@ -1263,6 +1288,9 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
 
             tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+            uint128 leftTokenReserveOld = left_balance;
+            uint128 rightTokenReserveOld = right_balance;
+
             left_balance += spent_amount - left_beneficiary_fee;
             right_balance -= right_amount;
 
@@ -1284,6 +1312,11 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                 fees
             );
 
+            _write(
+                leftTokenReserveOld,
+                rightTokenReserveOld,
+                now
+            );
             _sync();
 
             IDexPairOperationCallback(account_owner).dexPairExchangeSuccess{
@@ -1316,6 +1349,9 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
 
             tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+            uint128 leftTokenReserveOld = left_balance;
+            uint128 rightTokenReserveOld = right_balance;
+
             right_balance += spent_amount - right_beneficiary_fee;
             left_balance -= left_amount;
 
@@ -1337,6 +1373,11 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                 fees
             );
 
+            _write(
+                leftTokenReserveOld,
+                rightTokenReserveOld,
+                now
+            );
             _sync();
 
             IDexPairOperationCallback(account_owner).dexPairExchangeSuccess{
@@ -1457,6 +1498,9 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        uint128 leftTokenReserveOld = left_balance;
+        uint128 rightTokenReserveOld = right_balance;
+
         TvmSlice payloadSlice = payload.toSlice();
 
         uint128 expected_amount = payloadSlice.decode(uint128);
@@ -1503,6 +1547,11 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                     fees
                 );
 
+                _write(
+                    leftTokenReserveOld,
+                    rightTokenReserveOld,
+                    now
+                );
                 _sync();
 
                 IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
@@ -1617,6 +1666,11 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                     fees
                 );
 
+                _write(
+                    leftTokenReserveOld,
+                    rightTokenReserveOld,
+                    now
+                );
                 _sync();
 
                 IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
@@ -1703,7 +1757,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         }
     }
 
-    function _reserves() internal view returns(uint128[]){
+    function _reserves() internal view override returns(uint128[]){
         uint128[] r = new uint128[](0);
         r.push(left_balance);
         r.push(right_balance);
@@ -1711,7 +1765,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         return r;
     }
 
-    function _sync() internal view {
+    function _sync() view internal {
         emit Sync(_reserves(), lp_supply);
     }
 
@@ -1749,7 +1803,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
         _;
     }
 
-    modifier onlyRoot() {
+    modifier onlyRoot() override {
         require(msg.sender == root, DexErrors.NOT_ROOT);
         _;
     }
@@ -1806,6 +1860,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
             );
 
             builder.store(other_data);   // ref3
+            builder.store(_packAllOracleData());    // ref4
 
             // set code after complete this method
             tvm.setcode(code);
@@ -1844,6 +1899,8 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                 right_root,
                 send_gas_to
             );
+
+            _initializeTWAPOracle(now);
         } else if (old_pool_type == DexPoolTypes.CONSTANT_PRODUCT) {
             active = true;
             TvmCell otherData = s.loadRef(); // ref 3
@@ -1864,6 +1921,19 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
                 address, address, uint128,
                 address, address, uint128
             ));
+            if (s.refs() > 0) {
+                TvmSlice oracleDataSlice = s.loadRefAsSlice();  // ref 4
+
+                (
+                    _points,
+                    _options,
+                    _length
+                ) = oracleDataSlice.decode(
+                    mapping(uint32 => Point),
+                    OracleOptions,
+                    uint16
+                );
+            }
         } else if (old_pool_type == DexPoolTypes.STABLESWAP) {
             active = true;
             TvmCell otherData = s.loadRef(); // ref 3
@@ -1887,6 +1957,8 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
             right_wallet = _tokenData[1].wallet;
             vault_right_wallet = _tokenData[1].vaultWallet;
             right_balance = _tokenData[1].balance;
+
+            _initializeTWAPOracle(now);
         }
 
         send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS, bounce: false });
@@ -1973,7 +2045,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    function _tokenRoots() internal view returns(address[]) {
+    function _tokenRoots() internal view override returns(address[]) {
         address[] roots = new address[](2);
         roots[0] = left_root;
         roots[1] = right_root;

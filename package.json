@@ -6,7 +6,8 @@
   "scripts": {
     "build": "locklift build --config locklift.config.js",
     "migration-prod": "locklift run --config locklift.config.js --network main --script scripts/migration-prod.js && locklift test --config locklift.config.js --network main --test test/prod",
-    "test": "sh test.sh"
+    "test": "sh test.sh",
+    "test:oracle-upgrade": "npx locklift test --config locklift.config.js --disable-build --network local --tests test/upgrade/5-oracle-upgrade-test.js"
   },
   "author": "aleksandr-hramcov <aleksandr.hramcov@gmail.com>",
   "license": "AGPL-3.0",

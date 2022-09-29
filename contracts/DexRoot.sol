@@ -167,21 +167,30 @@ contract DexRoot is DexContractBase, IDexRoot, IResetGas, IUpgradable, IAmplific
 
     function onCodeUpgrade(TvmCell data) private {
         tvm.resetStorage();
-        TvmSlice s = data.toSlice();
-        uint32 _pair_version;
-        (account_version, _pair_version, owner, vault, pending_owner) =
-            s.decode(uint32, uint32, address, address, address);
-        platform_code = s.loadRef();
-        account_code = s.loadRef();
-        TvmCell _pair_code = s.loadRef();
 
-        pair_versions[DexPoolTypes.CONSTANT_PRODUCT] = _pair_version;
-        pair_codes[DexPoolTypes.CONSTANT_PRODUCT] = _pair_code;
+        (
+            platform_code,
+            account_code,
+            account_version,
+            pair_codes,
+            pair_versions,
+            owner,
+            vault,
+            pending_owner
+        ) = abi.decode(data, (
+            TvmCell,
+            TvmCell,
+            uint32,
+            mapping(uint8 => TvmCell),
+            mapping(uint8 => uint32),
+            address,
+            address,
+            address
+        ));
 
         manager = address(0);
 
         active = true;
-
     }
 
     function requestUpgradeAccount(
@@ -413,4 +422,30 @@ contract DexRoot is DexContractBase, IDexRoot, IResetGas, IUpgradable, IAmplific
         manager = address(0);
 		msg.sender.transfer(0, false, 128 + 2);
 	}
+
+    function setOracleOptions(
+        address _leftRoot,
+        address _rightRoot,
+        OracleOptions _options,
+        address _remainingGasTo
+    ) override external view onlyManagerOrOwner {
+        tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
+
+        IDexConstantProductPair(_expectedPairAddress(_leftRoot, _rightRoot))
+            .setOracleOptions{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            (_options, _remainingGasTo);
+    }
+
+    function removeLastNPoints(
+        address _leftRoot,
+        address _rightRoot,
+        uint16 _count,
+        address _remainingGasTo
+    ) override external view onlyManagerOrOwner {
+        tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
+
+        IDexConstantProductPair(_expectedPairAddress(_leftRoot, _rightRoot))
+            .removeLastNPoints{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            (_count, _remainingGasTo);
+    }
 }
