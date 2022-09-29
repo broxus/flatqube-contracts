@@ -676,9 +676,10 @@ contract DexAccount is
         if (
             functionId == tvm.functionId(IDexPair.exchange) ||
             functionId == tvm.functionId(IDexPair.depositLiquidity) ||
+            functionId == tvm.functionId(IDexPair.withdrawLiquidity) ||
             functionId == tvm.functionId(IDexAccount.internalAccountTransfer) ||
-            functionId == tvm.functionId(IDexVault.withdraw))
-        {
+            functionId == tvm.functionId(IDexVault.withdraw)
+        ) {
             uint64 call_id = body.decode(uint64);
 
             if (_tmp_operations.exists(call_id)) {

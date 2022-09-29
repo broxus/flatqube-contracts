@@ -218,6 +218,11 @@ abstract contract TWAPOracle is ITWAPOracle {
         uint32 timeElapsed = _timestamp - lastTimestamp;
         uint128[] reserves = _reserves();
 
+        // Check that pair has reserves
+        if (reserves[0] == 0 || reserves[1] == 0) {
+            return Observation(0, 0, 0);
+        }
+
         // Checking can oracle write this point or return an empty point
         if (timeElapsed < _options.minInterval) {
             uint rateDelta = _calculateRateDelta(
