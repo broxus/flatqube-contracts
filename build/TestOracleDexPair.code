@@ -10873,13 +10873,44 @@ CALLREF {
 	CALL $_reserves_internal_macro$
 }
 .loc ../contracts/abstract/TWAPOracle.sol, 222
+PUSHINT 0
+OVER
+SECOND
+PUSHINT 32
+DICTUGET
+THROWIFNOT 50
+PLDU 128
+EQINT 0
+DUP
+PUSHCONT {
+	DROP
+	PUSHINT 1
+	OVER
+	SECOND
+	PUSHINT 32
+	DICTUGET
+	THROWIFNOT 50
+	PLDU 128
+	EQINT 0
+}
+IFNOT
+PUSHCONT {
+	.loc ../contracts/abstract/TWAPOracle.sol, 223
+	PUSHINT 0
+	BLKPUSH 2, 0
+	TRIPLE
+	BLKDROP2 6, 1
+	.loc ../contracts/abstract/TWAPOracle.sol, 0
+}
+IFJMP
+.loc ../contracts/abstract/TWAPOracle.sol, 227
 FALSE ; decl return flag
 PUSH S2
 GETGLOB 13
 FIRST
 LESS
 PUSHCONT {
-	.loc ../contracts/abstract/TWAPOracle.sol, 223
+	.loc ../contracts/abstract/TWAPOracle.sol, 228
 	PUSHINT 0
 	PUSH S2
 	SECOND
@@ -10898,7 +10929,7 @@ PUSHCONT {
 	CALLREF {
 		CALL $_calculateRateDelta_internal_macro$
 	}
-	.loc ../contracts/abstract/TWAPOracle.sol, 230
+	.loc ../contracts/abstract/TWAPOracle.sol, 235
 	GETGLOB 13
 	SECOND
 	GETGLOB 13
@@ -10906,10 +10937,10 @@ PUSHCONT {
 	CALLREF {
 		CALL $FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_macro$
 	}
-	.loc ../contracts/abstract/TWAPOracle.sol, 235
+	.loc ../contracts/abstract/TWAPOracle.sol, 240
 	LESS
 	PUSHCONT {
-		.loc ../contracts/abstract/TWAPOracle.sol, 236
+		.loc ../contracts/abstract/TWAPOracle.sol, 241
 		PUSHINT 0
 		BLKPUSH 2, 0
 		TRIPLE
@@ -10923,7 +10954,7 @@ PUSHCONT {
 IF
 .loc ../contracts/abstract/TWAPOracle.sol, 0
 IFRET
-.loc ../contracts/abstract/TWAPOracle.sol, 240
+.loc ../contracts/abstract/TWAPOracle.sol, 245
 ROTREV
 PUSHINT 0
 PUSH S3
@@ -10942,7 +10973,7 @@ PLDU 128
 CALLREF {
 	CALL $_createNextPoint_internal_macro$
 }
-.loc ../contracts/abstract/TWAPOracle.sol, 248
+.loc ../contracts/abstract/TWAPOracle.sol, 253
 OVER
 GETGLOB 11
 PUSH S2
@@ -10957,20 +10988,20 @@ ROTREV
 PUSHINT 32
 DICTUSETB
 SETGLOB 11
-.loc ../contracts/abstract/TWAPOracle.sol, 251
+.loc ../contracts/abstract/TWAPOracle.sol, 256
 GETGLOB 12
 GETGLOB 13
 INDEX 3
 LESS
 PUSHCONT {
-	.loc ../contracts/abstract/TWAPOracle.sol, 252
+	.loc ../contracts/abstract/TWAPOracle.sol, 257
 	GETGLOB 12
 	INC
 	UFITS 16
 	SETGLOB 12
 }
 PUSHCONT {
-	.loc ../contracts/abstract/TWAPOracle.sol, 254
+	.loc ../contracts/abstract/TWAPOracle.sol, 259
 	GETGLOB 11
 	PUSHINT 32
 	DICTUREMMIN
@@ -10987,13 +11018,13 @@ PUSHCONT {
 	SETGLOB 11
 }
 IFELSE
-.loc ../contracts/abstract/TWAPOracle.sol, 257
+.loc ../contracts/abstract/TWAPOracle.sol, 262
 TUCK
 FIRST
 ROT
 SECOND
 TRIPLE
-.loc ../contracts/abstract/TWAPOracle.sol, 263
+.loc ../contracts/abstract/TWAPOracle.sol, 268
 DUP
 PUSHSLICE xc00000000000000000000000007409cda5
 NEWC
@@ -11007,7 +11038,7 @@ STU 256
 ENDC
 PUSHINT 0
 SENDRAWMSG
-.loc ../contracts/abstract/TWAPOracle.sol, 265
+.loc ../contracts/abstract/TWAPOracle.sol, 270
 BLKDROP2 2, 1
 .loc ../contracts/abstract/TWAPOracle.sol, 0
 
@@ -11016,38 +11047,38 @@ BLKDROP2 2, 1
 CALL $_calculateRate_internal_macro$
 
 .macro _calculateRate_internal_macro
-.loc ../contracts/abstract/TWAPOracle.sol, 280
+.loc ../contracts/abstract/TWAPOracle.sol, 285
 GETGLOB 11
 DICTEMPTY
 THROWIF 139
-.loc ../contracts/abstract/TWAPOracle.sol, 281
+.loc ../contracts/abstract/TWAPOracle.sol, 286
 DUP2
 LESS
 THROWIFNOT 137
-.loc ../contracts/abstract/TWAPOracle.sol, 282
+.loc ../contracts/abstract/TWAPOracle.sol, 287
 OVER
 GTINT 0
 THROWIFNOT 136
-.loc ../contracts/abstract/TWAPOracle.sol, 284
+.loc ../contracts/abstract/TWAPOracle.sol, 289
 NULL
-.loc ../contracts/abstract/TWAPOracle.sol, 287
+.loc ../contracts/abstract/TWAPOracle.sol, 292
 ROT
 CALLREF {
 	CALL $_calculateObservation_internal_macro$
 }
-.loc ../contracts/abstract/TWAPOracle.sol, 288
+.loc ../contracts/abstract/TWAPOracle.sol, 293
 ROT
 CALLREF {
 	CALL $_calculateObservation_internal_macro$
 }
-.loc ../contracts/abstract/TWAPOracle.sol, 291
+.loc ../contracts/abstract/TWAPOracle.sol, 296
 OVER
 FIRST
 OVER
 FIRST
 EQUAL
 PUSHCONT {
-	.loc ../contracts/abstract/TWAPOracle.sol, 293
+	.loc ../contracts/abstract/TWAPOracle.sol, 298
 	GETGLOB 11
 	PUSHINT 32
 	DICTUMAX
@@ -11065,16 +11096,16 @@ PUSHCONT {
 	THROWIF 63
 	UNPAIR
 	DROP
-	.loc ../contracts/abstract/TWAPOracle.sol, 296
+	.loc ../contracts/abstract/TWAPOracle.sol, 301
 	PUSH S2
 	FIRST
 	EQUAL
 	PUSHCONT {
-		.loc ../contracts/abstract/TWAPOracle.sol, 297
+		.loc ../contracts/abstract/TWAPOracle.sol, 302
 		CALLREF {
 			CALL $_reserves_internal_macro$
 		}
-		.loc ../contracts/abstract/TWAPOracle.sol, 299
+		.loc ../contracts/abstract/TWAPOracle.sol, 304
 		PUSHINT 0
 		OVER
 		SECOND
@@ -11126,14 +11157,14 @@ PUSHCONT {
 	IF
 }
 PUSHCONT {
-	.loc ../contracts/abstract/TWAPOracle.sol, 309
+	.loc ../contracts/abstract/TWAPOracle.sol, 314
 	DUP
 	FIRST
 	PUSH S2
 	FIRST
 	SUB
 	UFITS 32
-	.loc ../contracts/abstract/TWAPOracle.sol, 311
+	.loc ../contracts/abstract/TWAPOracle.sol, 316
 	OVER
 	SECOND
 	PUSH S3
@@ -11158,7 +11189,7 @@ PUSHCONT {
 	POP S3
 }
 IFELSE
-.loc ../contracts/abstract/TWAPOracle.sol, 321
+.loc ../contracts/abstract/TWAPOracle.sol, 326
 DROP2
 .loc ../contracts/abstract/TWAPOracle.sol, 0
 
@@ -11167,28 +11198,28 @@ DROP2
 CALL $_createNextPoint_internal_macro$
 
 .macro _createNextPoint_internal_macro
-.loc ../contracts/abstract/TWAPOracle.sol, 337
+.loc ../contracts/abstract/TWAPOracle.sol, 342
 OVER
 CALLREF {
 	CALL $FixedPoint128_no_obj_encode_macro$
 }
-.loc ../contracts/abstract/TWAPOracle.sol, 338
+.loc ../contracts/abstract/TWAPOracle.sol, 343
 OVER
 CALLREF {
 	CALL $FixedPoint128_no_obj_encode_macro$
 }
-.loc ../contracts/abstract/TWAPOracle.sol, 341
+.loc ../contracts/abstract/TWAPOracle.sol, 346
 SWAP
 PUSH S4
 ROLL 3
 MULDIV
 UFITS 256
-.loc ../contracts/abstract/TWAPOracle.sol, 342
+.loc ../contracts/abstract/TWAPOracle.sol, 347
 SWAP
 SWAP2
 MULDIV
 UFITS 256
-.loc ../contracts/abstract/TWAPOracle.sol, 344
+.loc ../contracts/abstract/TWAPOracle.sol, 349
 PUSH S2
 FIRST
 ROT
@@ -11205,7 +11236,7 @@ PAIR
 CALL $_calculateRateDelta_internal_macro$
 
 .macro _calculateRateDelta_internal_macro
-.loc ../contracts/abstract/TWAPOracle.sol, 363
+.loc ../contracts/abstract/TWAPOracle.sol, 368
 PUSH S3
 EQINT 0
 PUSH S3
@@ -11218,13 +11249,13 @@ OR
 OR
 OR
 PUSHCONT {
-	.loc ../contracts/abstract/TWAPOracle.sol, 369
+	.loc ../contracts/abstract/TWAPOracle.sol, 374
 	BLKDROP 4
 	PUSHINT 0
 	.loc ../contracts/abstract/TWAPOracle.sol, 0
 }
 IFJMP
-.loc ../contracts/abstract/TWAPOracle.sol, 372
+.loc ../contracts/abstract/TWAPOracle.sol, 377
 ROLL 3
 PUSHINT 340282366920938463463374607431768211456
 ROLL 3
@@ -11233,7 +11264,7 @@ UFITS 256
 XCHG S2
 MULDIV
 UFITS 256
-.loc ../contracts/abstract/TWAPOracle.sol, 379
+.loc ../contracts/abstract/TWAPOracle.sol, 384
 PUSHINT 340282366920938463463374607431768211456
 OVER
 GREATER
@@ -11258,12 +11289,12 @@ NIP
 CALL $_calculateObservation_internal_macro$
 
 .macro _calculateObservation_internal_macro
-.loc ../contracts/abstract/TWAPOracle.sol, 388
+.loc ../contracts/abstract/TWAPOracle.sol, 393
 PUSHINT 0
 BLKPUSH 2, 0
-.loc ../contracts/abstract/TWAPOracle.sol, 389
+.loc ../contracts/abstract/TWAPOracle.sol, 394
 PAIR
-.loc ../contracts/abstract/TWAPOracle.sol, 391
+.loc ../contracts/abstract/TWAPOracle.sol, 396
 PUSH S2
 GETGLOB 11
 PUSHINT 32
@@ -11277,11 +11308,11 @@ IFREF {
 	PAIR
 	PAIR
 }
-.loc ../contracts/abstract/TWAPOracle.sol, 394
+.loc ../contracts/abstract/TWAPOracle.sol, 399
 DUP
 ISNULL
 PUSHCONT {
-	.loc ../contracts/abstract/TWAPOracle.sol, 395
+	.loc ../contracts/abstract/TWAPOracle.sol, 400
 	BLKPUSH 2, 0
 	ISNULL
 	THROWIF 63
@@ -11291,12 +11322,12 @@ PUSHCONT {
 	.loc ../contracts/abstract/TWAPOracle.sol, 0
 }
 IFNOT
-.loc ../contracts/abstract/TWAPOracle.sol, 399
+.loc ../contracts/abstract/TWAPOracle.sol, 404
 DROP
 PUSH2 S1, S2
 NEQ
 PUSHCONT {
-	.loc ../contracts/abstract/TWAPOracle.sol, 400
+	.loc ../contracts/abstract/TWAPOracle.sol, 405
 	PUSH S2
 	GETGLOB 11
 	PUSHINT 32
@@ -11310,16 +11341,16 @@ PUSHCONT {
 		PAIR
 		PAIR
 	}
-	.loc ../contracts/abstract/TWAPOracle.sol, 403
+	.loc ../contracts/abstract/TWAPOracle.sol, 408
 	DUP
 	ISNULL
 	PUSHCONT {
-		.loc ../contracts/abstract/TWAPOracle.sol, 404
+		.loc ../contracts/abstract/TWAPOracle.sol, 409
 		BLKPUSH 2, 0
 		ISNULL
 		THROWIF 63
 		UNPAIR
-		.loc ../contracts/abstract/TWAPOracle.sol, 405
+		.loc ../contracts/abstract/TWAPOracle.sol, 410
 		PUSH S4
 		LESSINT 1
 		DUP
@@ -11334,12 +11365,12 @@ PUSHCONT {
 			LESS
 		}
 		IFNOT
-		.loc ../contracts/abstract/TWAPOracle.sol, 407
+		.loc ../contracts/abstract/TWAPOracle.sol, 412
 		PUSHCONT {
-			.loc ../contracts/abstract/TWAPOracle.sol, 408
+			.loc ../contracts/abstract/TWAPOracle.sol, 413
 			OVER
 			POP S5
-			.loc ../contracts/abstract/TWAPOracle.sol, 409
+			.loc ../contracts/abstract/TWAPOracle.sol, 414
 			DUP
 			POP S4
 			.loc ../contracts/abstract/TWAPOracle.sol, 0
@@ -11353,7 +11384,7 @@ PUSHCONT {
 	DROP
 }
 IF
-.loc ../contracts/abstract/TWAPOracle.sol, 414
+.loc ../contracts/abstract/TWAPOracle.sol, 419
 TUCK
 FIRST
 ROT
@@ -11367,7 +11398,7 @@ NIP
 CALL $_tryGetObservationByTimestamp_internal_macro$
 
 .macro _tryGetObservationByTimestamp_internal_macro
-.loc ../contracts/abstract/TWAPOracle.sol, 425
+.loc ../contracts/abstract/TWAPOracle.sol, 430
 DUP
 GETGLOB 11
 PUSHINT 32
@@ -11379,17 +11410,17 @@ IFREF {
 	ENDS
 	PAIR
 }
-.loc ../contracts/abstract/TWAPOracle.sol, 426
+.loc ../contracts/abstract/TWAPOracle.sol, 431
 NULL
-.loc ../contracts/abstract/TWAPOracle.sol, 429
+.loc ../contracts/abstract/TWAPOracle.sol, 434
 OVER
 ISNULL
 PUSHCONT {
-	.loc ../contracts/abstract/TWAPOracle.sol, 430
+	.loc ../contracts/abstract/TWAPOracle.sol, 435
 	PUSH2 S1, S1
 	ISNULL
 	THROWIF 63
-	.loc ../contracts/abstract/TWAPOracle.sol, 432
+	.loc ../contracts/abstract/TWAPOracle.sol, 437
 	PUSH2 S3, S0
 	FIRST
 	ROT
@@ -11399,7 +11430,7 @@ PUSHCONT {
 	.loc ../contracts/abstract/TWAPOracle.sol, 0
 }
 IFNOT
-.loc ../contracts/abstract/TWAPOracle.sol, 441
+.loc ../contracts/abstract/TWAPOracle.sol, 446
 BLKDROP2 2, 1
 .loc ../contracts/abstract/TWAPOracle.sol, 0
 
@@ -11408,11 +11439,11 @@ BLKDROP2 2, 1
 CALL $_packAllOracleData_internal_macro$
 
 .macro _packAllOracleData_internal_macro
-.loc ../contracts/abstract/TWAPOracle.sol, 449
+.loc ../contracts/abstract/TWAPOracle.sol, 454
 GETGLOB 11
 NEWC
 STDICT
-.loc ../contracts/abstract/TWAPOracle.sol, 450
+.loc ../contracts/abstract/TWAPOracle.sol, 455
 GETGLOB 13
 UNTUPLE 4
 REVERSE 5, 0
@@ -11420,11 +11451,11 @@ STU 8
 STU 128
 STU 128
 STU 16
-.loc ../contracts/abstract/TWAPOracle.sol, 451
+.loc ../contracts/abstract/TWAPOracle.sol, 456
 GETGLOB 12
 SWAP
 STU 16
-.loc ../contracts/abstract/TWAPOracle.sol, 453
+.loc ../contracts/abstract/TWAPOracle.sol, 458
 ENDC
 .loc ../contracts/abstract/TWAPOracle.sol, 0
 
