@@ -34,7 +34,10 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         address newOwner
     );
 
-    event NewPoolCreated(address[] roots);
+    event NewPoolCreated(
+        address[] roots,
+        uint8 poolType
+    );
 
     function getAccountVersion() external view responsible returns (uint32);
 
@@ -85,6 +88,7 @@ interface IDexRoot is IFeeParams, IOracleOptions {
 
     function onPoolCreated(
         address[] _roots,
+        uint8 _poolType,
         address _remainingGasTo
     ) external;
 

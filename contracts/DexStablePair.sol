@@ -1449,7 +1449,7 @@ contract DexStablePair is
 
         IDexRoot(root)
             .onPoolCreated{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            ([tokenData[0].root, tokenData[1].root], send_gas_to);
+            ([tokenData[0].root, tokenData[1].root], DexPoolTypes.STABLESWAP, send_gas_to);
     }
 
     function liquidityTokenRootNotDeployed(address /*lp_root_*/, address send_gas_to) override external onlyVault {

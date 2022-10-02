@@ -709,6 +709,7 @@ contract DexRoot is
 
     function onPoolCreated(
         address[] _roots,
+        uint8 _poolType,
         address _remainingGasTo
     ) override external onlyPair(_roots) {
         tvm.rawReserve(
@@ -719,7 +720,7 @@ contract DexRoot is
             2
         );
 
-        emit NewPoolCreated(_roots);
+        emit NewPoolCreated(_roots, _poolType);
 
         _remainingGasTo.transfer({
             value: 0,

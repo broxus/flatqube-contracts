@@ -382,6 +382,7 @@ abstract contract DexPairBase is
             .onPoolCreated{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (
                 _tokenRoots(),
+                DexPoolTypes.CONSTANT_PRODUCT,
                 _remainingGasTo
             );
     }

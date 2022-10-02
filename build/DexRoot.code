@@ -3823,6 +3823,7 @@ PUSHCONT {
 	ROTREV
 	PAIR
 	SWAP
+	LDU 8
 	LDREF
 	ENDS
 	CTOS
@@ -3833,6 +3834,7 @@ PUSHCONT {
 	ROTREV
 	PAIR
 	SWAP
+	LDU 8
 }
 IFELSE
 LDMSGADDR
@@ -3850,14 +3852,14 @@ THROW 0
 .macro onPoolCreated_internal_macro
 .loc ../contracts/DexRoot.sol, 710
 GETGLOB 9
-PUSH S2
+PUSH S3
 .loc ../contracts/abstract/DexContractBase.sol, 37
 CALLREF {
 	CALL $_expectedPairAddress_internal_macro$
 }
 SDEQ
 THROWIFNOT 106
-.loc ../contracts/DexRoot.sol, 714
+.loc ../contracts/DexRoot.sol, 715
 PUSHINT 1000000000
 GETPARAM 7
 FIRST
@@ -3869,9 +3871,9 @@ UFITS 128
 MAX
 PUSHINT 2
 RAWRESERVE
-.loc ../contracts/DexRoot.sol, 722
-SWAP
-PUSHSLICE xc000000000000000000000000074d542f5
+.loc ../contracts/DexRoot.sol, 723
+XCHG S2
+PUSHSLICE xc000000000000000000000000056c8dff7
 NEWC
 STSLICE
 SWAP
@@ -3879,10 +3881,11 @@ UNPAIR
 XCHG S2
 STU 32
 STDICT
+STU 8
 ENDC
 PUSHINT 0
 SENDRAWMSG
-.loc ../contracts/DexRoot.sol, 724
+.loc ../contracts/DexRoot.sol, 725
 NEWC
 STSLICECONST x62_
 STSLICE
@@ -3904,7 +3907,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexRoot.sol, 730
+.loc ../contracts/DexRoot.sol, 731
 OVER
 PUSHCONT {
 	LDREF
@@ -3954,7 +3957,7 @@ SDEQ
 OR
 AND
 THROWIFNOT 100
-.loc ../contracts/DexRoot.sol, 736
+.loc ../contracts/DexRoot.sol, 737
 PUSHINT 1000000000
 GETPARAM 7
 FIRST
@@ -3966,7 +3969,7 @@ UFITS 128
 MAX
 PUSHINT 2
 RAWRESERVE
-.loc ../contracts/DexRoot.sol, 738
+.loc ../contracts/DexRoot.sol, 739
 REVERSE 4, 0
 PUSHINT 0
 NEWDICT
@@ -4016,7 +4019,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexRoot.sol, 743
+.loc ../contracts/DexRoot.sol, 744
 OVER
 PUSHCONT {
 	LDREF
@@ -4060,7 +4063,7 @@ SDEQ
 OR
 AND
 THROWIFNOT 100
-.loc ../contracts/DexRoot.sol, 749
+.loc ../contracts/DexRoot.sol, 750
 PUSHINT 1000000000
 GETPARAM 7
 FIRST
@@ -4072,7 +4075,7 @@ UFITS 128
 MAX
 PUSHINT 2
 RAWRESERVE
-.loc ../contracts/DexRoot.sol, 751
+.loc ../contracts/DexRoot.sol, 752
 REVERSE 4, 0
 PUSHINT 0
 NEWDICT
@@ -4663,7 +4666,7 @@ THROW 0
 
 .macro public_function_selector
 DUP
-PUSHINT 950829274
+PUSHINT 992568900
 LEQ
 IFJMPREF {
 	DUP
@@ -4696,7 +4699,7 @@ IFJMPREF {
 		}
 	}
 	DUP
-	PUSHINT 546958835
+	PUSHINT 565050858
 	LEQ
 	IFJMPREF {
 		DUP
@@ -4712,28 +4715,22 @@ IFJMPREF {
 			CALL $transferOwner$
 		}
 		DUP
-		PUSHINT 523215392
-		EQUAL
-		IFJMPREF {
-			CALL $onPoolCreated$
-		}
-		DUP
 		PUSHINT 546958835
 		EQUAL
 		IFJMPREF {
 			CALL $getPoolCode$
 		}
-	}
-	DUP
-	PUSHINT 694778722
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 565050858
 		EQUAL
 		IFJMPREF {
 			CALL $isActive$
 		}
+	}
+	DUP
+	PUSHINT 720190441
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 580056873
 		EQUAL
@@ -4752,17 +4749,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getPendingOwner$
 		}
-	}
-	DUP
-	PUSHINT 950829274
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 720190441
 		EQUAL
 		IFJMPREF {
 			CALL $deployAccount$
 		}
+	}
+	DUP
+	PUSHINT 992568900
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 746385297
 		EQUAL
@@ -4781,6 +4778,12 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getManager$
 		}
+		DUP
+		PUSHINT 992568900
+		EQUAL
+		IFJMPREF {
+			CALL $getAccountVersion$
+		}
 	}
 }
 DUP
@@ -4792,12 +4795,6 @@ IFJMPREF {
 	LEQ
 	IFJMPREF {
 		DUP
-		PUSHINT 992568900
-		EQUAL
-		IFJMPREF {
-			CALL $getAccountVersion$
-		}
-		DUP
 		PUSHINT 1025233701
 		EQUAL
 		IFJMPREF {
@@ -4808,6 +4805,12 @@ IFJMPREF {
 		EQUAL
 		IFJMPREF {
 			CALL $getExpectedAccountAddress$
+		}
+		DUP
+		PUSHINT 1155507718
+		EQUAL
+		IFJMPREF {
+			CALL $onPoolCreated$
 		}
 		DUP
 		PUSHINT 1241152735
