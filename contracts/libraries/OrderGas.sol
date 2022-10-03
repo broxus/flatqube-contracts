@@ -8,7 +8,7 @@ library OrderGas {
     uint128 constant DEPLOY_EMPTY_WALLET_VALUE       = 0.5 ever;
     uint128 constant GET_DEX_PAIR                    = 0.1 ever;
     uint128 constant GET_BALANCE_WALLET              = 0.1 ever;
-    uint128 constant TRANSFER_MIN_VALUE              = 0.2 ever;
+    uint128 constant TRANSFER_MIN_VALUE              = 1 ever;
     uint128 constant DEPLOY_EMPTY_WALLET_GRAMS       = 0.2 ever; 
     uint128 constant FILL_ORDER_MIN_VALUE            = 1 ever;
     uint128 constant SWAP_BACK_MIN_VALUE             = 3 ever;

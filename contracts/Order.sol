@@ -56,15 +56,6 @@ contract Order is
 
 	bool autoExchange;
 
-	event dddd(
-		uint msgSenderValue,
-		address msgSender, 
-		uint8 stateTT,
-		address senderNN,
-		address tokenRootRR,
-		uint128 amounttt
-	);
-
 	constructor(
 		uint128 _expectedAmount,
 		uint128 _initialAmount,
@@ -262,7 +253,6 @@ contract Order is
 		bool needCancel = false;
 		bool makeReserve = false;
 		
-		emit dddd(msg.sender.value, msg.sender, state, sender, tokenRoot, amount);
 		if (
 			sender == root &&
 			tokenRoot == spentToken &&
