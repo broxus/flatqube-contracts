@@ -612,6 +612,7 @@ contract DexRoot is
         address send_gas_to
     ) override external onlyManagerOrOwner {
         require(msg.value >= DexGas.DEPLOY_PAIR_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(roots.length > 2, DexErrors.WRONG_PAIR);
         require(_poolCodes.exists(DexPoolTypes.STABLESWAP), DexErrors.PAIR_CODE_EMPTY);
 
         mapping(address => bool) _roots;
