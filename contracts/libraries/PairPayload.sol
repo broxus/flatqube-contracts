@@ -29,8 +29,8 @@ library PairPayload {
         builder.store(DexOperationTypes.EXCHANGE);
         builder.store(_id);
         builder.store(_deployWalletGrams);
+        builder.store(_expectedAmount);
         builder.store(_recipient);
-        builder.store(abi.encode([_expectedAmount]));
 
         return builder.toCell();
     }
@@ -52,9 +52,8 @@ library PairPayload {
         builder.store(DexOperationTypes.EXCHANGE);
         builder.store(_id);
         builder.store(_deployWalletGrams);
+        builder.store(_expectedAmount);
         builder.store(_recipient);
-        builder.store(abi.encode([_expectedAmount]));
-        builder.store(address(0));
         builder.store(_outcoming);
 
         return builder.toCell();
@@ -79,8 +78,8 @@ library PairPayload {
         builder.store(DexOperationTypes.DEPOSIT_LIQUIDITY);
         builder.store(_id);
         builder.store(_deployWalletGrams);
+        builder.store(_expectedAmount);
         builder.store(_recipient);
-        builder.store(abi.encode([_expectedAmount]));
 
         return builder.toCell();
     }
@@ -101,7 +100,8 @@ library PairPayload {
     ) public returns (TvmCell) {
         TvmBuilder builder;
 
-        builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY);
+        // DexOperationTypes.WITHDRAW_LIQUIDITY for the previous versions of payloads (w/o _expectedAmounts and _recipient)
+        builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY_V2);
         builder.store(_id);
         builder.store(_deployWalletGrams);
         builder.store(_recipient);
@@ -127,9 +127,8 @@ library PairPayload {
         builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN);
         builder.store(_id);
         builder.store(_deployWalletGrams);
+        builder.store(_expectedAmount);
         builder.store(_recipient);
-        builder.store(abi.encode([_expectedAmount]));
-        builder.store(address(0));
         builder.store(_outcoming);
 
         return builder.toCell();
@@ -141,15 +140,13 @@ library PairPayload {
      * @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
      * @param _expectedAmount Minimum token amount after the first swap
      * @param _steps Next pairs' root and expected amount
-     * @param _recipient Address of the receiver
      * @return TvmCell Encoded payload for transfer
      */
     function buildCrossPairExchangePayload(
         uint64 _id,
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
-        ITokenOperationStructure.TokenOperation[] _steps,
-        address _recipient
+        ITokenOperationStructure.TokenOperation[] _steps
     ) public returns (TvmCell) {
         // Check that at least 1 next pair is exists
         require(_steps.length > 0);
@@ -160,8 +157,7 @@ library PairPayload {
         builder.store(DexOperationTypes.CROSS_PAIR_EXCHANGE);
         builder.store(_id);
         builder.store(_deployWalletGrams);
-        builder.store(_recipient);
-        builder.store(abi.encode([_expectedAmount]));
+        builder.store(_expectedAmount);
         builder.store(_steps[0].root);
 
         // Pack data for next pairs
@@ -204,13 +200,13 @@ library PairPayload {
 
         TvmBuilder builder;
 
-        builder.store(DexOperationTypes.CROSS_PAIR_EXCHANGE);
+        builder.store(DexOperationTypes.CROSS_PAIR_EXCHANGE_V2);
         builder.store(_id);
         builder.store(_deployWalletGrams);
-        builder.store(_recipient);
-        builder.store(abi.encode([_expectedAmount]));
         builder.store(_pairs[0]);
+        builder.store(_recipient);
         builder.store(_outcoming);
+        builder.store(abi.encode([_expectedAmount]));
 
         TvmBuilder nextStepBuilder;
         nextStepBuilder.store(_steps[_steps.length - 1].amount);
@@ -266,34 +262,42 @@ library PairPayload {
         uint8 op;
         uint64 id;
         uint128 deployWalletGrams;
+        optional(uint128) expectedAmount;
         address recipient;
-        uint128[] expectedAmounts;
         address nextPoolOrTokenRoot;
         address outcoming;
+        uint128[] expectedAmounts;
 
         if (isValid) {
             (
                 op,
                 id,
-                deployWalletGrams,
-                recipient
+                deployWalletGrams
             ) = slice.decode(
                 uint8,
                 uint64,
-                uint128,
-                address
+                uint128
             );
 
-            if (slice.refs() >= 1) {
-                TvmCell expectedAmountsData = slice.loadRef();
-                expectedAmounts = abi.decode(expectedAmountsData, uint128[]);
+            if (slice.bits() >= 128 && op != DexOperationTypes.WITHDRAW_LIQUIDITY_V2 && op != DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
+                expectedAmount = slice.decode(uint128);
+            }
+
+            if (slice.bits() >= 267 && (op == DexOperationTypes.CROSS_PAIR_EXCHANGE || op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2)) {
+                nextPoolOrTokenRoot = slice.decode(address);
             }
 
             if (slice.bits() >= 267) {
-                nextPoolOrTokenRoot = slice.decode(address);
+                recipient = slice.decode(address);
             }
+
             if (slice.bits() >= 267) {
                 outcoming = slice.decode(address);
+            }
+
+            if (slice.refs() >= 1 && (op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2 || op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2)) {
+                TvmCell expectedAmountsData = slice.loadRef();
+                expectedAmounts = abi.decode(expectedAmountsData, uint128[]);
             }
         }
 
@@ -303,7 +307,7 @@ library PairPayload {
             id,
             deployWalletGrams,
             recipient,
-            expectedAmounts,
+            expectedAmount.hasValue() ? [expectedAmount.get()] : expectedAmounts,
             nextPoolOrTokenRoot,
             outcoming
         );
@@ -319,7 +323,7 @@ library PairPayload {
      * @return bool Whether or not other data exists
      * @return TvmCell Other data
      */
-    function decodeOnAcceptTokensTransferPayloads(TvmCell _payload) public returns (
+    function decodeOnAcceptTokensTransferPayloads(TvmCell _payload, uint8 op) public returns (
         bool,
         TvmCell,
         bool,
@@ -331,16 +335,24 @@ library PairPayload {
         uint8 refs = slice.refs();
 
         // Check size
-        bool notifySuccess = refs >= 2;
-        bool notifyCancel = refs >= 3;
-        bool hasRef3 = refs == 4;
+        bool notifySuccess;
+        bool notifyCancel;
+        bool hasRef3;
 
         TvmCell successPayload;
         TvmCell cancelPayload;
         TvmCell ref3;
 
-        if (refs >= 1) {
+        if (op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2 || op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
+            notifySuccess = refs >= 2;
+            notifyCancel = refs >= 3;
+            hasRef3 = refs == 4;
+
             slice.loadRef();
+        } else {
+            notifySuccess = refs >= 1;
+            notifyCancel = refs >= 2;
+            hasRef3 = refs >= 3;
         }
 
         if (notifySuccess) { successPayload = slice.loadRef(); }

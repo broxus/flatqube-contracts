@@ -215,22 +215,6 @@ contract DexStablePair is
         );
     }
 
-    function buildExchangePayloadV2(
-        uint64 _id,
-        uint128 _deployWalletGrams,
-        uint128 _expectedAmount,
-        address _outcoming,
-        optional(address) _recipient
-    ) external pure returns (TvmCell) {
-        return PairPayload.buildExchangePayloadV2(
-            _id,
-            _deployWalletGrams,
-            _recipient.hasValue() ? _recipient.get() : address(0),
-            _expectedAmount,
-            _outcoming
-        );
-    }
-
     function buildDepositLiquidityPayload(
         uint64 id,
         uint128 deploy_wallet_grams,
@@ -267,15 +251,13 @@ contract DexStablePair is
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        TokenOperation[] steps,
-        optional(address) recipient
+        TokenOperation[] steps
     ) external pure returns (TvmCell) {
         return PairPayload.buildCrossPairExchangePayload(
             id,
             deploy_wallet_grams,
             expected_amount,
-            steps,
-            recipient.hasValue() ? recipient.get() : address(0)
+            steps
         );
     }
 
@@ -343,7 +325,7 @@ contract DexStablePair is
             TvmCell cancel_payload,
             bool hasRef3,
             TvmCell ref3
-        ) = PairPayload.decodeOnAcceptTokensTransferPayloads(payload);
+        ) = PairPayload.decodeOnAcceptTokensTransferPayloads(payload, op);
 
         TvmCell empty;
 
@@ -363,7 +345,7 @@ contract DexStablePair is
 
         if (!need_cancel) {
             if (msg.sender == lp_wallet) {
-                if (op == DexOperationTypes.WITHDRAW_LIQUIDITY) {
+                if (op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
 
                     optional(TokenOperation[]) operationsOpt = _withdrawLiquidityBase(tokens_amount, expected_amounts, sender_address, recipient);
 
@@ -509,7 +491,8 @@ contract DexStablePair is
                         );
                     }
                 } else if (
-                   op == DexOperationTypes.CROSS_PAIR_EXCHANGE &&
+                   (op == DexOperationTypes.CROSS_PAIR_EXCHANGE ||
+                   op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) &&
                    notify_success &&
                    success_payload.toSlice().bits() >= 128
                 ) {

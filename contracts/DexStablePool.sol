@@ -247,7 +247,7 @@ contract DexStablePool is
         optional(uint128[]) expected_amounts,
         optional(address) recipient
     ) external view returns (TvmCell) {
-        uint128[] expected;
+        uint128[] expected ;
         if (expected_amounts.hasValue()) {
             expected = expected_amounts.get();
         }
@@ -344,7 +344,7 @@ contract DexStablePool is
             TvmCell cancel_payload,
             bool hasRef3,
             TvmCell ref3
-        ) = PairPayload.decodeOnAcceptTokensTransferPayloads(payload);
+        ) = PairPayload.decodeOnAcceptTokensTransferPayloads(payload, op);
 
         TvmCell empty;
 
@@ -363,7 +363,7 @@ contract DexStablePool is
         }
 
         if (!need_cancel) {
-            if (msg.sender == lp_wallet && op == DexOperationTypes.WITHDRAW_LIQUIDITY) {
+            if (msg.sender == lp_wallet && (op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2)) {
 
                 optional(WithdrawResultV2) result_opt = _expectedWithdrawLiquidity(tokens_amount);
 
@@ -547,7 +547,8 @@ contract DexStablePool is
                     );
                 }
             } else if (
-                op == DexOperationTypes.CROSS_PAIR_EXCHANGE &&
+                (op == DexOperationTypes.CROSS_PAIR_EXCHANGE ||
+                op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) &&
                 notify_success &&
                 success_payload.toSlice().bits() >= 128
             ) {
