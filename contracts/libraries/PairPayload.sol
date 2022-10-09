@@ -256,7 +256,7 @@ library PairPayload {
         TvmSlice slice = _payload.toSlice();
 
         // Check size
-        bool isValid = slice.bits() >= 467;
+        bool isValid = slice.bits() >= 200;
 
         // Default empty params
         uint8 op;
