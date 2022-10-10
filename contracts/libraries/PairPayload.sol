@@ -140,13 +140,15 @@ library PairPayload {
      * @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
      * @param _expectedAmount Minimum token amount after the first swap
      * @param _steps Next pairs' root and expected amount
+     * @param _recipient Address of the receiver
      * @return TvmCell Encoded payload for transfer
      */
     function buildCrossPairExchangePayload(
         uint64 _id,
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
-        ITokenOperationStructure.TokenOperation[] _steps
+        ITokenOperationStructure.TokenOperation[] _steps,
+        address _recipient
     ) public returns (TvmCell) {
         // Check that at least 1 next pair is exists
         require(_steps.length > 0);
@@ -159,6 +161,7 @@ library PairPayload {
         builder.store(_deployWalletGrams);
         builder.store(_expectedAmount);
         builder.store(_steps[0].root);
+        builder.store(_recipient);
 
         // Pack data for next pairs
         TvmBuilder nextStepBuilder;

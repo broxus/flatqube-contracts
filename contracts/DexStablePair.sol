@@ -251,13 +251,15 @@ contract DexStablePair is
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        TokenOperation[] steps
+        TokenOperation[] steps,
+        optional(address) recipient
     ) external pure returns (TvmCell) {
         return PairPayload.buildCrossPairExchangePayload(
             id,
             deploy_wallet_grams,
             expected_amount,
-            steps
+            steps,
+            recipient.hasValue() ? recipient.get() : address(0)
         );
     }
 

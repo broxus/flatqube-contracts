@@ -80,12 +80,14 @@ interface IDexConstantProductPair is
      * @param deploy_wallet_grams Amount of EVER for a new TIP-3 wallet deploy
      * @param expected_amount Minimum token amount after the first swap
      * @param steps Next pairs' root and expected amount
+     * @param recipient Address of the receiver
      * @return TvmCell Encoded payload for transfer
      */
     function buildCrossPairExchangePayload(
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        TokenOperation[] steps
+        TokenOperation[] steps,
+        optional(address) recipient
     ) external pure returns (TvmCell);
 }
