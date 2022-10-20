@@ -19,15 +19,19 @@ import "./interfaces/IDexAccount.sol";
 import "./interfaces/IUpgradable.sol";
 import "./interfaces/IResetGas.sol";
 
+import "./structures/INextExchangeData.sol";
+
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
+import "./libraries/DexOperationTypes.sol";
 
 contract DexVault is
     DexContractBase,
     IDexVault,
     IResetGas,
     IUpgradable,
-    IAcceptTokensMintCallback
+    IAcceptTokensMintCallback,
+    INextExchangeData
 {
     uint32 private static _nonce;
 
@@ -496,88 +500,109 @@ contract DexVault is
         address remainingGasTo,
         TvmCell payload
     ) override external {
+        tvm.rawReserve(
+            math.max(
+                DexGas.VAULT_INITIAL_BALANCE,
+                address(this).balance - msg.value
+            ),
+            2
+        );
+
         TvmSlice payloadSlice = payload.toSlice();
 
-        address lp_vault_wallet = payloadSlice.decode(address);
-        require(msg.sender.value != 0 && msg.sender == lp_vault_wallet, DexErrors.NOT_LP_VAULT_WALLET);
+        address lpVaultWallet = payloadSlice.decode(address);
+        require(msg.sender.value != 0 && msg.sender == lpVaultWallet, DexErrors.NOT_LP_VAULT_WALLET);
 
-        TvmCell exchange_data = payloadSlice.loadRef();
+        TvmCell exchangeData = payloadSlice.loadRef();
 
         (uint64 id,
-        uint32 current_version,
-        uint8 current_type,
+        uint32 currentVersion,
+        uint8 currentType,
         address[] roots,
-        address sender_address,
+        address senderAddress,
         address recipient,
-        uint128 deploy_wallet_grams,
-        address next_pool) = abi.decode(exchange_data, (uint64, uint32, uint8, address[], address, address, uint128, address));
+        uint128 deployWalletGrams,
+        NextExchangeData[] nextSteps) = abi.decode(exchangeData, (uint64, uint32, uint8, address[], address, address, uint128, NextExchangeData[]));
 
-        TvmCell next_payload;
-        TvmCell success_payload;
-        TvmCell cancel_payload;
+        TvmCell successPayload;
+        TvmCell cancelPayload;
 
-        bool has_next_payload = payloadSlice.refs() >= 1;
-        bool notify_success = payloadSlice.refs() >= 2;
-        bool notify_cancel = payloadSlice.refs() >= 3;
+        bool notifySuccess = payloadSlice.refs() >= 1;
+        bool notifyCancel = payloadSlice.refs() >= 2;
 
-        if (has_next_payload) {
-            next_payload = payloadSlice.loadRef();
+        if (notifySuccess) {
+            successPayload = payloadSlice.loadRef();
         }
-        if (notify_success) {
-            success_payload = payloadSlice.loadRef();
-        }
-        if (notify_cancel) {
-            cancel_payload = payloadSlice.loadRef();
+        if (notifyCancel) {
+            cancelPayload = payloadSlice.loadRef();
         }
 
-        if (next_pool.value != 0 && next_pool != _expectedPairAddress(roots) &&
-            has_next_payload && next_payload.toSlice().bits() >= 395) {
+        bool needCancel = false;
 
-            tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
+        uint256 denominator = 0;
+        uint32 msgValueDenominator = 0;
+        address prevPool = _expectedPairAddress(roots);
 
-            IDexBasePool(next_pool).crossPoolExchange{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED
-            }(
-                id,
+        for (NextExchangeData nextStep: nextSteps) {
+            if (nextStep.poolRoot.value == 0 || nextStep.poolRoot == prevPool ||
+                nextStep.numerator == 0 || nextStep.msgValueNumerator == 0) {
 
-                current_version,
-                current_type,
+                needCancel = true;
+            }
+            denominator += nextStep.numerator;
+            msgValueDenominator += nextStep.msgValueNumerator;
+        }
 
-                roots,
+        if (!needCancel && nextSteps.length > 0) {
+            for (NextExchangeData nextStep: nextSteps) {
+                uint128 value = math.muldiv(msg.value, nextStep.msgValueNumerator, msgValueDenominator);
+                uint128 nextPoolAmount = uint128(math.muldiv(amount, nextStep.numerator, denominator));
 
-                tokenRoot,
-                amount,
+                IDexBasePool(nextStep.poolRoot).crossPoolExchange{
+                    value: value,
+                    flag: 0
+                }(
+                    id,
 
-                sender_address,
-                recipient,
+                    currentVersion,
+                    currentType,
 
-                remainingGasTo,
-                deploy_wallet_grams,
+                    roots,
 
-                next_payload,
-                notify_success,
-                success_payload,
-                notify_cancel,
-                cancel_payload
-            );
+                    DexOperationTypes.CROSS_PAIR_EXCHANGE_V2,
+                    tokenRoot,
+                    nextPoolAmount,
+
+                    senderAddress,
+                    recipient,
+
+                    remainingGasTo,
+                    deployWalletGrams,
+
+                    nextStep.payload,
+                    notifySuccess,
+                    successPayload,
+                    notifyCancel,
+                    cancelPayload
+                );
+            }
         } else {
             emit PairTransferTokensV2(
-                lp_vault_wallet,
+                lpVaultWallet,
                 amount,
                 roots,
                 recipient
             );
 
-            ITokenWallet(lp_vault_wallet)
+            ITokenWallet(lpVaultWallet)
                 .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                 (
                     amount,
                     recipient,
-                    deploy_wallet_grams,
+                    deployWalletGrams,
                     remainingGasTo,
                     true,
-                    success_payload
+                    successPayload
                 );
         }
     }
@@ -590,7 +615,12 @@ contract DexVault is
         address _callbackTo,
         TvmCell _payload
     ) external override onlyPair(_roots) {
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
+        tvm.rawReserve(
+            math.max(
+                DexGas.VAULT_INITIAL_BALANCE,
+                address(this).balance - msg.value
+            ),
+            2);
 
         IBurnableTokenWallet(_lpVaultWallet).burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
             _amount,

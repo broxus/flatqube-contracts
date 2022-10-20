@@ -5,5 +5,7 @@ interface IExchangeStepStructure {
         uint128 amount;
         address[] roots;
         address outcoming;
+        uint128 numerator;
+        uint32[] nextStepIndices;
     }
 }

@@ -2,6 +2,7 @@ pragma ton-solidity >= 0.57.0;
 
 import "../structures/IExchangeStepStructure.sol";
 import "../structures/ITokenOperationStructure.sol";
+import "../structures/INextExchangeData.sol";
 
 import "./DexOperationTypes.sol";
 
@@ -188,7 +189,7 @@ library PairPayload {
     /// @param _recipient Address of the receiver
     /// @param _expectedAmount Expected receive amount
     /// @param _steps Steps for exchanging
-    /// @param _pairs Pairs' addresses for exchanging
+    /// @param _pools Pairs' addresses for exchanging
     /// @return TvmCell Encoded payload
     function buildCrossPairExchangePayloadV2(
         uint64 _id,
@@ -196,8 +197,9 @@ library PairPayload {
         address _recipient,
         uint128 _expectedAmount,
         address _outcoming,
+        uint32[] _nextStepIndices,
         IExchangeStepStructure.ExchangeStep[] _steps,
-        address[] _pairs
+        address[] _pools
     ) public returns (TvmCell) {
         require(_steps.length > 0);
 
@@ -206,32 +208,50 @@ library PairPayload {
         builder.store(DexOperationTypes.CROSS_PAIR_EXCHANGE_V2);
         builder.store(_id);
         builder.store(_deployWalletGrams);
-        builder.store(_pairs[0]);
+
+        builder.store(_expectedAmount);
         builder.store(_recipient);
         builder.store(_outcoming);
-        builder.store(abi.encode([_expectedAmount]));
 
-        TvmBuilder nextStepBuilder;
-        nextStepBuilder.store(_steps[_steps.length - 1].amount);
-        nextStepBuilder.store(address(0));
-        nextStepBuilder.store(_steps[_steps.length - 1].outcoming);
-
-        for (uint i = _steps.length - 1; i > 0; i--) {
-            TvmBuilder currentStepBuilder;
-
-            currentStepBuilder.store(
-                _steps[i - 1].amount,
-                _pairs[i],
-                _steps[i - 1].outcoming
-            );
-            currentStepBuilder.store(nextStepBuilder.toCell());
-
-            nextStepBuilder = currentStepBuilder;
+        INextExchangeData.NextExchangeData[] nextSteps;
+        for (uint32 idx : _nextStepIndices) {
+            (TvmCell nextPayload, uint32 msgValueNumerator) = _encodeCrossPairExchangeData(_steps, _pools, idx);
+            nextSteps.push(INextExchangeData.NextExchangeData(
+                _steps[idx].numerator,
+                _pools[idx],
+                nextPayload,
+                msgValueNumerator
+            ));
         }
 
-        builder.store(nextStepBuilder.toCell());
+        TvmCell nextStepsCell = abi.encode(nextSteps);
+        builder.store(nextStepsCell);
 
         return builder.toCell();
+    }
+
+    function _encodeCrossPairExchangeData(
+        IExchangeStepStructure.ExchangeStep[] _steps,
+        address[] _pools,
+        uint32 _currentIdx
+    ) private returns (TvmCell, uint32) {
+        INextExchangeData.NextExchangeData[] nextSteps;
+        uint32 nextLevelNodes = 0;
+        for (uint32 idx : _steps[_currentIdx].nextStepIndices) {
+            (TvmCell nextPayload, uint32 msgValueNumerator) = _encodeCrossPairExchangeData(_steps, _pools, idx);
+            nextLevelNodes += msgValueNumerator;
+            nextSteps.push(INextExchangeData.NextExchangeData(
+                _steps[idx].numerator,
+                _pools[idx],
+                nextPayload,
+                msgValueNumerator
+            ));
+        }
+
+        return (
+            abi.encode(_steps[_currentIdx].amount, _steps[_currentIdx].outcoming, nextSteps),
+            uint32(nextLevelNodes + math.max(nextSteps.length, 1))
+        );
     }
 
     /**
@@ -254,7 +274,7 @@ library PairPayload {
         address,
         uint128[],
         address,
-        address
+        INextExchangeData.NextExchangeData[]
     ) {
         TvmSlice slice = _payload.toSlice();
 
@@ -267,9 +287,10 @@ library PairPayload {
         uint128 deployWalletGrams;
         optional(uint128) expectedAmount;
         address recipient;
-        address nextPoolOrTokenRoot;
+        address nextTokenRoot;
         address outcoming;
         uint128[] expectedAmounts;
+        INextExchangeData.NextExchangeData[] nextSteps;
 
         if (isValid) {
             (
@@ -282,12 +303,12 @@ library PairPayload {
                 uint128
             );
 
-            if (slice.bits() >= 128 && op != DexOperationTypes.WITHDRAW_LIQUIDITY_V2 && op != DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
+            if (slice.bits() >= 128 && op != DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
                 expectedAmount = slice.decode(uint128);
             }
 
-            if (slice.bits() >= 267 && (op == DexOperationTypes.CROSS_PAIR_EXCHANGE || op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2)) {
-                nextPoolOrTokenRoot = slice.decode(address);
+            if (slice.bits() >= 267 && op == DexOperationTypes.CROSS_PAIR_EXCHANGE) {
+                nextTokenRoot = slice.decode(address);
             }
 
             if (slice.bits() >= 267) {
@@ -298,9 +319,23 @@ library PairPayload {
                 outcoming = slice.decode(address);
             }
 
-            if (slice.refs() >= 1 && (op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2 || op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2)) {
-                TvmCell expectedAmountsData = slice.loadRef();
-                expectedAmounts = abi.decode(expectedAmountsData, uint128[]);
+            if (slice.refs() >= 1) {
+                TvmCell dataCell = slice.loadRef();
+                if (op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
+                    expectedAmounts = abi.decode(dataCell, uint128[]);
+                }
+                if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
+                    nextSteps = abi.decode(dataCell, INextExchangeData.NextExchangeData[]);
+                }
+            }
+
+            if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE && nextTokenRoot.value != 0 && slice.refs() >= 1) {
+                nextSteps.push(INextExchangeData.NextExchangeData(
+                    1,
+                    nextTokenRoot,
+                    slice.loadRef(),
+                    1
+                ));
             }
         }
 
@@ -311,8 +346,8 @@ library PairPayload {
             deployWalletGrams,
             recipient,
             expectedAmount.hasValue() ? [expectedAmount.get()] : expectedAmounts,
-            nextPoolOrTokenRoot,
-            outcoming
+            outcoming,
+            nextSteps
         );
     }
 
@@ -346,7 +381,10 @@ library PairPayload {
         TvmCell cancelPayload;
         TvmCell ref3;
 
-        if (op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2 || op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
+        if (op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2 ||
+            op == DexOperationTypes.CROSS_PAIR_EXCHANGE ||
+            op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
+
             notifySuccess = refs >= 2;
             notifyCancel = refs >= 3;
             hasRef3 = refs == 4;
@@ -377,35 +415,42 @@ library PairPayload {
     /**
      * @notice Decode payload from the previous pair
      * @param _payload Payload from the previous pair
+     * @param _op Operation type
      * @return uint128 Minimum token amount after swap
-     * @return address Next pair's second TokenRoot address
-     * @return bool Whether or not next payload exists
-     * @return TvmCell Payload for the next pair
+     * @return address Received token's root address
+     * @return INextExchangeData.NextExchangeData[] List of the next pools
      */
-    function decodeCrossPoolExchangePayload(TvmCell _payload) public returns (
+    function decodeCrossPoolExchangePayload(TvmCell _payload, uint8 _op) public returns (
         uint128,
         address,
-        address,
-        bool,
-        TvmCell
+        INextExchangeData.NextExchangeData[]
     ) {
-        TvmSlice slice = _payload.toSlice();
+        uint128 expectedAmount;
+        address outcoming;
+        INextExchangeData.NextExchangeData[] nextSteps;
 
-        uint128 expectedAmount = slice.decode(uint128);
-        address nextPoolOrTokenRoot = slice.bits() >= 267 ? slice.decode(address) : address(0);
-        address outcoming = slice.bits() >= 267 ? slice.decode(address) : address(0);
-        bool hasNextPayload = slice.refs() >= 1;
+        if (_op == DexOperationTypes.CROSS_PAIR_EXCHANGE) {
+            TvmSlice slice = _payload.toSlice();
 
-        TvmCell nextPayload;
+            expectedAmount = slice.decode(uint128);
+            bool hasNextPayload = slice.refs() >= 1;
 
-        if (hasNextPayload) { nextPayload = slice.loadRef(); }
+            if (hasNextPayload) {
+                nextSteps.push(INextExchangeData.NextExchangeData(
+                    1,
+                    slice.bits() >= 267 ? slice.decode(address) : address(0), // next token root
+                    slice.loadRef(),
+                    1
+                ));
+            }
+        } else if (_op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
+            (expectedAmount, outcoming, nextSteps) = abi.decode(_payload, (uint128, address, INextExchangeData.NextExchangeData[]));
+        }
 
         return (
             expectedAmount,
-            nextPoolOrTokenRoot,
             outcoming,
-            hasNextPayload,
-            nextPayload
+            nextSteps
         );
     }
 }

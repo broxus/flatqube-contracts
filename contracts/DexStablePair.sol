@@ -32,6 +32,7 @@ import "./structures/IWithdrawResult.sol";
 import "./structures/ITokenOperationStructure.sol";
 import "./interfaces/IDexPairOperationCallback.sol";
 import "./structures/IDepositLiquidityResultV2.sol";
+import "./structures/INextExchangeData.sol";
 
 import "./DexPlatform.sol";
 import "./abstract/DexContractBase.sol";
@@ -40,7 +41,8 @@ import "./structures/IPoolTokenData.sol";
 contract DexStablePair is
     DexContractBase,
     IDexStablePair,
-    IPoolTokenData
+    IPoolTokenData,
+    INextExchangeData
 {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -264,28 +266,30 @@ contract DexStablePair is
     }
 
     function buildCrossPairExchangePayloadV2(
-        uint64 _id,
-        uint128 _deployWalletGrams,
-        uint128 _expectedAmount,
-        address _outcoming,
-        ExchangeStep[] _steps,
-        optional(address) _recipient
+        uint64 id,
+        uint128 deployWalletGrams,
+        uint128 expectedAmount,
+        address outcoming,
+        uint32[] nextStepIndices,
+        ExchangeStep[] steps,
+        optional(address) recipient
     ) external view returns (TvmCell) {
-        address[] pairs;
+        address[] pools;
 
-        // Calculate pairs' addresses by token roots
-        for (uint i = 0; i < _steps.length; i++) {
-            pairs.push(_expectedPairAddress(_steps[i].roots));
+        // Calculate pools' addresses by token roots
+        for (uint32 i = 0; i < steps.length; i++) {
+            pools.push(_expectedPairAddress(steps[i].roots));
         }
 
         return PairPayload.buildCrossPairExchangePayloadV2(
-            _id,
-            _deployWalletGrams,
-            _recipient.hasValue() ? _recipient.get() : address(0),
-            _expectedAmount,
-            _outcoming,
-            _steps,
-            pairs
+            id,
+            deployWalletGrams,
+            recipient.hasValue() ? recipient.get() : address(0),
+            expectedAmount,
+            outcoming,
+            nextStepIndices,
+            steps,
+            pools
         );
     }
 
@@ -307,9 +311,14 @@ contract DexStablePair is
             uint128 deploy_wallet_grams,
             address recipient,
             uint128[] expected_amounts,
-            address next_pair_or_token_root,
-            address outcoming
+            /*address outcoming*/,
+            NextExchangeData[] next_steps
         ) = PairPayload.decodeOnAcceptTokensTransferData(payload);
+
+        if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE && next_steps.length > 0) {
+            // actually poolRoot is a tokenRoot here, so
+            next_steps[0].poolRoot = _expectedPairAddress([token_root, next_steps[0].poolRoot]);
+        }
 
         uint128 expected_amount = 0;
         if (expected_amounts.length == 1) {
@@ -325,8 +334,8 @@ contract DexStablePair is
             TvmCell success_payload,
             bool notify_cancel,
             TvmCell cancel_payload,
-            bool hasRef3,
-            TvmCell ref3
+            /*bool hasRef3*/,
+            /*TvmCell ref3*/
         ) = PairPayload.decodeOnAcceptTokensTransferPayloads(payload, op);
 
         TvmCell empty;
@@ -335,7 +344,7 @@ contract DexStablePair is
         !is_valid ||
         lp_supply == 0 ||
         msg.sender.value == 0 ||
-        msg.value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2;
+        msg.value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + deploy_wallet_grams;
 
         if (token_root == lp_root) {
             need_cancel = need_cancel || msg.sender != lp_wallet;
@@ -347,7 +356,8 @@ contract DexStablePair is
 
         if (!need_cancel) {
             if (msg.sender == lp_wallet) {
-                if (op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
+                if ((op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) &&
+                    msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + N_COINS * deploy_wallet_grams) {
 
                     optional(TokenOperation[]) operationsOpt = _withdrawLiquidityBase(tokens_amount, expected_amounts, sender_address, recipient);
 
@@ -495,15 +505,27 @@ contract DexStablePair is
                 } else if (
                    (op == DexOperationTypes.CROSS_PAIR_EXCHANGE ||
                    op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) &&
-                   notify_success &&
-                   success_payload.toSlice().bits() >= 128
+                   next_steps.length > 0
                 ) {
                     optional(ExpectedExchangeResult) dy_result_opt = _get_dy(i, j, tokens_amount);
+
+                    uint256 denominator = 0;
+                    uint32 msg_value_denominator = 0;
+
+                    for (NextExchangeData next_step: next_steps) {
+                        if (next_step.poolRoot.value == 0 || next_step.poolRoot == address(this) ||
+                        next_step.numerator == 0 || next_step.msgValueNumerator == 0) {
+
+                            need_cancel = true;
+                        }
+                        denominator += next_step.numerator;
+                        msg_value_denominator += next_step.msgValueNumerator;
+                    }
 
                     if (
                         !dy_result_opt.hasValue() ||
                         dy_result_opt.get().amount < expected_amount ||
-                        next_pair_or_token_root.value == 0
+                        need_cancel
                     ) {
                         need_cancel = true;
                     } else {
@@ -542,40 +564,39 @@ contract DexStablePair is
                             empty
                         );
 
-                        address next_pair;
+                        uint128 aval_balance = address(this).balance - DexGas.PAIR_INITIAL_BALANCE;
+                        for (NextExchangeData next_step: next_steps) {
+                            uint128 value = math.muldiv(aval_balance, next_step.msgValueNumerator, msg_value_denominator);
+                            uint128 next_pool_amount = uint128(math.muldiv(dy_result.amount, next_step.numerator, denominator));
 
-                        if (outcoming.value != 0) {
-                            next_pair = next_pair_or_token_root;
-                        } else {
-                            next_pair = _expectedPairAddress([tokenData[j].root, next_pair_or_token_root]);
+                            IDexBasePool(next_step.poolRoot).crossPoolExchange{
+                                value: value,
+                                flag: 0
+                            }(
+                                id,
+
+                                current_version,
+                                DexPoolTypes.STABLESWAP,
+
+                                _tokenRoots(),
+
+                                op,
+                                tokenData[j].root,
+                                next_pool_amount,
+
+                                sender_address,
+                                recipient,
+
+                                original_gas_to,
+                                deploy_wallet_grams,
+
+                                next_step.payload,
+                                notify_success,
+                                success_payload,
+                                notify_cancel,
+                                cancel_payload
+                            );
                         }
-
-                        IDexBasePool(next_pair).crossPoolExchange{
-                            value: 0,
-                            flag: MsgFlag.ALL_NOT_RESERVED
-                        }(
-                            id,
-
-                            current_version,
-                            DexPoolTypes.STABLESWAP,
-
-                            _tokenRoots(),
-
-                            tokenData[j].root,
-                            dy_result.amount,
-
-                            sender_address,
-                            recipient,
-
-                            original_gas_to,
-                            deploy_wallet_grams,
-
-                            success_payload,    // actually it is next_payload
-                            notify_cancel,      // actually it is notify_success
-                            cancel_payload,     // actually it is success_payload
-                            hasRef3,            // actually it is notify_success
-                            ref3                // actually it is cancel_payload
-                        );
                     }
                 } else if (op == DexOperationTypes.DEPOSIT_LIQUIDITY) {
 
@@ -948,6 +969,7 @@ contract DexStablePair is
 
         address[] prev_pool_token_roots,
 
+        uint8 op,
         address spent_token_root,
         uint128 spent_amount,
 
@@ -969,14 +991,17 @@ contract DexStablePair is
 
         (
             uint128 expected_amount,
-            address next_pair_or_token_root,
-            address outcoming,
-            bool has_next_payload,
-            TvmCell next_payload
-        ) = PairPayload.decodeCrossPoolExchangePayload(payload);
+            /*address outcoming*/,
+            NextExchangeData[] next_steps
+        ) = PairPayload.decodeCrossPoolExchangePayload(payload, op);
 
         uint8 i = tokenIndex.at(spent_token_root);
         uint8 j = i == 0 ? 1 : 0;
+
+        if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE && next_steps.length > 0) {
+            // actually poolRoot is a tokenRoot here, so
+            next_steps[0].poolRoot = _expectedPairAddress([_tokenRoots()[j], next_steps[0].poolRoot]);
+        }
 
         bool need_cancel = !active || msg.sender == address(this);
 
@@ -1038,44 +1063,55 @@ contract DexStablePair is
                     ));
                 }
 
-               address next_pair;
+               uint256 denominator = 0;
+               uint32 msg_value_denominator = 0;
 
-               if (outcoming.value != 0) {
-                   next_pair = next_pair_or_token_root;
-               } else {
-                   next_pair = _expectedPairAddress([tokenData[j].root, next_pair_or_token_root]);
+               bool is_steps_array_valid = true;
+               for (NextExchangeData next_step: next_steps) {
+                   if (next_step.poolRoot.value == 0 || next_step.poolRoot == address(this) ||
+                   next_step.numerator == 0 || next_step.msgValueNumerator == 0) {
+
+                       is_steps_array_valid = false;
+                   }
+                   denominator += next_step.numerator;
+                   msg_value_denominator += next_step.msgValueNumerator;
                }
 
-                if (next_pair.value != 0 && next_pair != address(this) &&
-                    has_next_payload && next_payload.toSlice().bits() >= 128 &&
-                    msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2) {
+                if (is_steps_array_valid && next_steps.length > 0 && msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2) {
 
-                    IDexBasePool(next_pair).crossPoolExchange{
-                        value: 0,
-                        flag: MsgFlag.ALL_NOT_RESERVED
-                    }(
-                        id,
+                    uint128 aval_balance = address(this).balance - DexGas.PAIR_INITIAL_BALANCE;
+                    for (NextExchangeData next_step: next_steps) {
+                        uint128 value = math.muldiv(aval_balance, next_step.msgValueNumerator, msg_value_denominator);
+                        uint128 next_pool_amount = uint128(math.muldiv(dy_result.amount, next_step.numerator, denominator));
 
-                        current_version,
-                        DexPoolTypes.STABLESWAP,
+                        IDexBasePool(next_step.poolRoot).crossPoolExchange{
+                            value: value,
+                            flag: 0
+                        }(
+                            id,
 
-                        _tokenRoots(),
+                            current_version,
+                            DexPoolTypes.STABLESWAP,
 
-                        tokenData[j].root,
-                        dy_result.amount,
+                            _tokenRoots(),
 
-                        sender_address,
-                        recipient,
+                            op,
+                            tokenData[j].root,
+                            next_pool_amount,
 
-                        original_gas_to,
-                        deploy_wallet_grams,
+                            sender_address,
+                            recipient,
 
-                        next_payload,
-                        notify_success,
-                        success_payload,
-                        notify_cancel,
-                        cancel_payload
-                    );
+                            original_gas_to,
+                            deploy_wallet_grams,
+
+                            next_step.payload,
+                            notify_success,
+                            success_payload,
+                            notify_cancel,
+                            cancel_payload
+                        );
+                    }
                 } else {
                     IDexVault(vault).transfer{
                         value: 0,
@@ -1094,9 +1130,9 @@ contract DexStablePair is
                         original_gas_to
                     );
                 }
-            } else {
+           } else {
                 need_cancel = true;
-            }
+           }
         }
 
         if (need_cancel) {

@@ -115,6 +115,7 @@ interface IDexBasePool is
     /// @param _prevPoolVersion Version of the previous pool
     /// @param _prevPoolType Type of the previous pool
     /// @param _prevPoolTokenRoots TokenRoots of the previous pool
+    /// @param _op Operation type
     /// @param _spentTokenRoot Input TokenRoot address
     /// @param _spentAmount Input amount
     /// @param _senderAddress Address of the sender
@@ -133,6 +134,7 @@ interface IDexBasePool is
 
         address[] _prevPoolTokenRoots,
 
+        uint8 _op,
         address _spentTokenRoot,
         uint128 _spentAmount,
 

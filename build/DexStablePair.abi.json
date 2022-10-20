@@ -202,12 +202,13 @@
 		{
 			"name": "buildCrossPairExchangePayloadV2",
 			"inputs": [
-				{"name":"_id","type":"uint64"},
-				{"name":"_deployWalletGrams","type":"uint128"},
-				{"name":"_expectedAmount","type":"uint128"},
-				{"name":"_outcoming","type":"address"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"roots","type":"address[]"},{"name":"outcoming","type":"address"}],"name":"_steps","type":"tuple[]"},
-				{"name":"_recipient","type":"optional(address)"}
+				{"name":"id","type":"uint64"},
+				{"name":"deployWalletGrams","type":"uint128"},
+				{"name":"expectedAmount","type":"uint128"},
+				{"name":"outcoming","type":"address"},
+				{"name":"nextStepIndices","type":"uint32[]"},
+				{"components":[{"name":"amount","type":"uint128"},{"name":"roots","type":"address[]"},{"name":"outcoming","type":"address"},{"name":"numerator","type":"uint128"},{"name":"nextStepIndices","type":"uint32[]"}],"name":"steps","type":"tuple[]"},
+				{"name":"recipient","type":"optional(address)"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
@@ -318,6 +319,7 @@
 				{"name":"value1","type":"uint32"},
 				{"name":"value2","type":"uint8"},
 				{"name":"prev_pool_token_roots","type":"address[]"},
+				{"name":"op","type":"uint8"},
 				{"name":"spent_token_root","type":"address"},
 				{"name":"spent_amount","type":"uint128"},
 				{"name":"sender_address","type":"address"},

@@ -1,4 +1,4 @@
-.version sol 0.57.1
+.version sol 0.59.0
 
 .macro constructor
 DROP
@@ -97,8 +97,8 @@ SECOND
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHSLICE x43b9aca00000000000000000000000000003_
-STSLICER
+PUSHINT 2949852426645541256083542794369173188247553
+STUR 143
 ROTREV
 PUSHSLICE x31edd4c750bfca9f
 NEWC
@@ -284,14 +284,9 @@ SETGLOB 12
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 116
 SECOND
 SDEQ
-PUSHCONT {
-	.loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 117
-	CALLREF {
-		CALL $setUpTokenWallet_internal_macro$
-	}
-	.loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
+IFNOTREF {
+	CALL $setUpTokenWallet_internal_macro$
 }
-IFNOT
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 
 .macro withdraw

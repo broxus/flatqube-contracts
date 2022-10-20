@@ -33,6 +33,7 @@ import "./structures/ITokenOperationStructure.sol";
 import "./structures/IDepositLiquidityResultV2.sol";
 import "./structures/IDexPoolBalances.sol";
 import "./structures/IPoolTokenData.sol";
+import "./structures/INextExchangeData.sol";
 
 import "./abstract/DexContractBase.sol";
 import "./DexPlatform.sol";
@@ -41,7 +42,8 @@ import "./TokenFactory.sol";
 contract DexStablePool is
     DexContractBase,
     IDexStablePool,
-    IPoolTokenData
+    IPoolTokenData,
+    INextExchangeData
 {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // Data
@@ -283,13 +285,14 @@ contract DexStablePool is
         uint128 deployWalletGrams,
         uint128 expectedAmount,
         address outcoming,
+        uint32[] nextStepIndices,
         ExchangeStep[] steps,
         optional(address) recipient
     ) external view returns (TvmCell) {
         address[] pools;
 
         // Calculate pools' addresses by token roots
-        for (uint i = 0; i < steps.length; i++) {
+        for (uint32 i = 0; i < steps.length; i++) {
             pools.push(_expectedPairAddress(steps[i].roots));
         }
 
@@ -299,6 +302,7 @@ contract DexStablePool is
             recipient.hasValue() ? recipient.get() : address(0),
             expectedAmount,
             outcoming,
+            nextStepIndices,
             steps,
             pools
         );
@@ -322,8 +326,8 @@ contract DexStablePool is
             uint128 deploy_wallet_grams,
             address recipient,
             uint128[] expected_amounts,
-            address next_pool,
-            address outcoming
+            address outcoming,
+            NextExchangeData[] next_steps
         ) = PairPayload.decodeOnAcceptTokensTransferData(payload);
 
         uint128 expected_amount = 0;
@@ -352,18 +356,21 @@ contract DexStablePool is
         !is_valid ||
         lp_supply == 0 ||
         msg.sender.value == 0 ||
-        msg.value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2;
+        msg.value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + deploy_wallet_grams;
 
         if (token_root == lp_root) {
             need_cancel = need_cancel || msg.sender != lp_wallet;
         } else {
             need_cancel = need_cancel ||
             !tokenIndex.exists(token_root) ||
+            !tokenIndex.exists(outcoming) ||
             msg.sender != tokenData[tokenIndex.at(token_root)].wallet;
         }
 
         if (!need_cancel) {
-            if (msg.sender == lp_wallet && (op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2)) {
+            if (msg.sender == lp_wallet &&
+                (op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) &&
+                msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + N_COINS * deploy_wallet_grams) {
 
                 optional(WithdrawResultV2) result_opt = _expectedWithdrawLiquidity(tokens_amount);
 
@@ -410,6 +417,7 @@ contract DexStablePool is
                     need_cancel = true;
                 }
             } else if (msg.sender == lp_wallet && op == DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN) {
+
                 optional(WithdrawResultV2) result_opt;
 
                 uint8 i = tokenIndex[outcoming];
@@ -452,6 +460,7 @@ contract DexStablePool is
                     need_cancel = true;
                 }
             } else if (msg.sender != lp_wallet && op == DexOperationTypes.EXCHANGE) {
+
                 optional(ExpectedExchangeResult) dy_result_opt;
 
                 if (tokenIndex.exists(outcoming)) {
@@ -546,122 +555,131 @@ contract DexStablePool is
                         original_gas_to
                     );
                 }
-            } else if (
-                (op == DexOperationTypes.CROSS_PAIR_EXCHANGE ||
-                op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) &&
-                notify_success &&
-                success_payload.toSlice().bits() >= 128
-            ) {
+            } else if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2 && next_steps.length > 0) {
+
                 TokenOperation operation;
 
-                if (outcoming == lp_root && token_root != lp_root) { // deposit liquidity
-                    uint128[] amounts = new uint128[](N_COINS);
-                    amounts[tokenIndex[token_root]] = tokens_amount;
-                    optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
+                uint256 denominator = 0;
+                uint32 msg_value_denominator = 0;
 
-                    if (!resultOpt.hasValue() || resultOpt.get().lp_reward < expected_amount) {
+                for (NextExchangeData next_step: next_steps) {
+                    if (next_step.poolRoot.value == 0 || next_step.poolRoot == address(this) ||
+                        next_step.numerator == 0 || next_step.msgValueNumerator == 0) {
+
                         need_cancel = true;
-                    } else {
-                        DepositLiquidityResultV2 result = resultOpt.get();
-                        _applyAddLiquidity(result, id, false, sender_address, recipient);
-
-                        TvmBuilder builder;
-                        builder.store(lp_vault_wallet);
-
-                        TvmCell exchange_data = abi.encode(
-                            id,
-                            current_version,
-                            DexPoolTypes.STABLESWAP,
-                            _tokenRoots(),
-                            sender_address,
-                            recipient,
-                            deploy_wallet_grams,
-                            next_pool
-                        );
-                        builder.store(exchange_data);
-
-                        builder.store(success_payload); // actually it is next_payload
-                        builder.store(cancel_payload);  // actually it is success_payload
-                        builder.store(ref3);            // actually it is cancel_payload
-
-                        ITokenRoot(lp_root).mint{
-                            value: 0,
-                            flag: MsgFlag.ALL_NOT_RESERVED
-                        }(
-                            result.lp_reward,
-                            vault,
-                            deploy_wallet_grams,
-                            original_gas_to,
-                            true,
-                            builder.toCell()
-                        );
                     }
-                } else if (token_root == lp_root) { // withdraw liquidity
+                    denominator += next_step.numerator;
+                    msg_value_denominator += next_step.msgValueNumerator;
+                }
 
-                    optional(WithdrawResultV2) result_opt;
+                if (!need_cancel) {
+                    if (outcoming == lp_root && token_root != lp_root) { // deposit liquidity
+                        uint128[] amounts = new uint128[](N_COINS);
+                        amounts[tokenIndex[token_root]] = tokens_amount;
+                        optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
 
-                    if (tokenIndex.exists(outcoming)) {
-                        result_opt = _expectedWithdrawLiquidityOneCoin(tokens_amount, tokenIndex[outcoming]);
-                    }
+                        if (!resultOpt.hasValue() || resultOpt.get().lp_reward < expected_amount) {
+                            need_cancel = true;
+                        } else {
+                            DepositLiquidityResultV2 result = resultOpt.get();
+                            _applyAddLiquidity(result, id, false, sender_address, recipient);
 
-                    if (!result_opt.hasValue() || result_opt.get().amounts[tokenIndex[outcoming]] < expected_amount) {
-                        need_cancel = true;
-                    } else {
-                        WithdrawResultV2 result = result_opt.get();
-                        uint8 j = tokenIndex[outcoming];
+                            TvmBuilder builder;
+                            builder.store(lp_vault_wallet);
 
-                        _applyWithdrawLiquidity(result, id, false, sender_address, recipient);
+                            TvmCell exchange_data = abi.encode(
+                                id,
+                                current_version,
+                                DexPoolTypes.STABLESWAP,
+                                _tokenRoots(),
+                                sender_address,
+                                recipient,
+                                deploy_wallet_grams,
+                                next_steps
+                            );
+                            builder.store(exchange_data);
 
-                        operation = TokenOperation(result.amounts[j], tokenData[j].root);
+                            builder.store(success_payload);
+                            builder.store(cancel_payload);
 
-                        IBurnableTokenWallet(msg.sender).burn{
-                            value: DexGas.BURN_VALUE,
-                            flag: MsgFlag.SENDER_PAYS_FEES
-                        }(
-                            tokens_amount,
-                            original_gas_to,
-                            address.makeAddrStd(0, 0),
-                            empty);
-                    }
-                } else { // exchange
-                    optional(ExpectedExchangeResult) dy_result_opt;
+                            ITokenRoot(lp_root).mint{
+                                value: 0,
+                                flag: MsgFlag.ALL_NOT_RESERVED
+                            }(
+                                result.lp_reward,
+                                vault,
+                                deploy_wallet_grams,
+                                original_gas_to,
+                                true,
+                                builder.toCell()
+                            );
+                        }
+                    } else if (token_root == lp_root) { // withdraw liquidity
 
-                    if (tokenIndex.exists(outcoming) && token_root != outcoming) {
-                        dy_result_opt = _get_dy(tokenIndex[token_root], tokenIndex[outcoming], tokens_amount);
-                    }
+                        optional(WithdrawResultV2) result_opt;
 
-                    if (
-                        !dy_result_opt.hasValue() ||
-                        dy_result_opt.get().amount < expected_amount ||
-                        next_pool.value == 0
-                    ) {
-                        need_cancel = true;
-                    } else {
-                        uint8 i = tokenIndex[token_root];
-                        uint8 j = tokenIndex[outcoming];
+                        if (tokenIndex.exists(outcoming)) {
+                            result_opt = _expectedWithdrawLiquidityOneCoin(tokens_amount, tokenIndex[outcoming]);
+                        }
 
-                        ExpectedExchangeResult dy_result = dy_result_opt.get();
-                        operation = TokenOperation(dy_result.amount, tokenData[j].root);
+                        if (!result_opt.hasValue() || result_opt.get().amounts[tokenIndex[outcoming]] < expected_amount) {
+                            need_cancel = true;
+                        } else {
+                            WithdrawResultV2 result = result_opt.get();
+                            uint8 j = tokenIndex[outcoming];
 
-                        tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee;
-                        tokenData[j].balance -= dy_result.amount;
+                            _applyWithdrawLiquidity(result, id, false, sender_address, recipient);
 
-                        ExchangeFee[] fees;
-                        fees.push(ExchangeFee(tokenData[i].root, dy_result.pool_fee, dy_result.beneficiary_fee, fee.beneficiary));
+                            operation = TokenOperation(result.amounts[j], tokenData[j].root);
 
-                        emit Exchange(
-                            sender_address,
-                            recipient,
-                            tokenData[i].root,
-                            tokens_amount,
-                            tokenData[j].root,
-                            dy_result.amount,
-                            fees
-                        );
+                            IBurnableTokenWallet(msg.sender).burn{
+                                value: DexGas.BURN_VALUE,
+                                flag: MsgFlag.SENDER_PAYS_FEES
+                            }(
+                                tokens_amount,
+                                original_gas_to,
+                                address.makeAddrStd(0, 0),
+                                empty);
+                        }
+                    } else { // exchange
+                        optional(ExpectedExchangeResult) dy_result_opt;
 
-                        if (dy_result.beneficiary_fee > 0) {
-                            tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
-                            _processBeneficiaryFees(false, original_gas_to);
+                        if (tokenIndex.exists(outcoming) && token_root != outcoming) {
+                            dy_result_opt = _get_dy(tokenIndex[token_root], tokenIndex[outcoming], tokens_amount);
+                            }
+
+                        if (
+                            !dy_result_opt.hasValue() ||
+                            dy_result_opt.get().amount < expected_amount
+                        ) {
+                            need_cancel = true;
+                        } else {
+                            uint8 i = tokenIndex[token_root];
+                            uint8 j = tokenIndex[outcoming];
+
+                            ExpectedExchangeResult dy_result = dy_result_opt.get();
+                            operation = TokenOperation(dy_result.amount, tokenData[j].root);
+
+                            tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee;
+                            tokenData[j].balance -= dy_result.amount;
+
+                            ExchangeFee[] fees;
+                            fees.push(ExchangeFee(tokenData[i].root, dy_result.pool_fee, dy_result.beneficiary_fee, fee.beneficiary));
+
+                            emit Exchange(
+                                sender_address,
+                                recipient,
+                                tokenData[i].root,
+                                tokens_amount,
+                                tokenData[j].root,
+                                dy_result.amount,
+                                fees
+                            );
+
+                            if (dy_result.beneficiary_fee > 0) {
+                                tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
+                                _processBeneficiaryFees(false, original_gas_to);
+                            }
                         }
                     }
                 }
@@ -682,35 +700,43 @@ contract DexStablePool is
                     }
 
                     if (outcoming != lp_root) { // withdraw or exchange
-                        IDexBasePool(next_pool).crossPoolExchange{
-                            value: 0,
-                            flag: MsgFlag.ALL_NOT_RESERVED
-                        }(
-                            id,
+                        uint128 aval_balance = address(this).balance - DexGas.PAIR_INITIAL_BALANCE;
+                        for (NextExchangeData next_step: next_steps) {
+                            uint128 value = math.muldiv(aval_balance, next_step.msgValueNumerator, msg_value_denominator);
+                            uint128 next_pool_amount = uint128(math.muldiv(operation.amount, next_step.numerator, denominator));
 
-                            current_version,
-                            DexPoolTypes.STABLESWAP,
+                            IDexBasePool(next_step.poolRoot).crossPoolExchange{
+                                value: value,
+                                flag: 0
+                            }(
+                                id,
 
-                            _tokenRoots(),
+                                current_version,
+                                DexPoolTypes.STABLESWAP,
 
-                            operation.root,
-                            operation.amount,
+                                _tokenRoots(),
 
-                            sender_address,
-                            recipient,
+                                op,
+                                operation.root,
+                                next_pool_amount,
 
-                            original_gas_to,
-                            deploy_wallet_grams,
+                                sender_address,
+                                recipient,
 
-                            success_payload,    // actually it is next_payload
-                            notify_cancel,      // actually it is notify_success
-                            cancel_payload,     // actually it is success_payload
-                            hasRef3,            // actually it is notify_cancel
-                            ref3                // actually it is cancel_payload
-                        );
+                                original_gas_to,
+                                deploy_wallet_grams,
+
+                                next_step.payload,
+                                notify_success,
+                                success_payload,
+                                notify_cancel,
+                                cancel_payload
+                            );
+                        }
                     }
                 }
-            } else if (msg.sender != lp_wallet && op == DexOperationTypes.DEPOSIT_LIQUIDITY) {
+            } else if (msg.sender != lp_wallet && op == DexOperationTypes.DEPOSIT_LIQUIDITY
+                && msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + deploy_wallet_grams) {
                 uint128[] amounts = new uint128[](N_COINS);
                 amounts[tokenIndex[token_root]] = tokens_amount;
                 optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
@@ -1083,6 +1109,7 @@ contract DexStablePool is
 
         address[] prev_pool_token_roots,
 
+        uint8 op,
         address spent_token_root,
         uint128 spent_amount,
 
@@ -1104,11 +1131,9 @@ contract DexStablePool is
 
         (
             uint128 expected_amount,
-            address next_pool,
             address outcoming,
-            bool has_next_payload,
-            TvmCell next_payload
-        ) = PairPayload.decodeCrossPoolExchangePayload(payload);
+            NextExchangeData[] next_steps
+        ) = PairPayload.decodeCrossPoolExchangePayload(payload, op);
 
         TvmCell empty;
 
@@ -1139,11 +1164,10 @@ contract DexStablePool is
                         sender_address,
                         recipient,
                         deploy_wallet_grams,
-                        next_pool
+                        next_steps
                     );
                     builder.store(exchange_data);
 
-                    builder.store(next_payload);
                     builder.store(success_payload);
                     builder.store(cancel_payload);
 
@@ -1246,35 +1270,55 @@ contract DexStablePool is
                 }
 
                 if (outcoming != lp_root) { // withdraw or exchange
-                    if (next_pool.value != 0 && next_pool != address(this) && has_next_payload &&
-                        next_payload.toSlice().bits() >= 395 && msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2) {
 
-                        IDexBasePool(next_pool).crossPoolExchange{
-                            value: 0,
-                            flag: MsgFlag.ALL_NOT_RESERVED
-                        }(
-                            id,
+                    uint256 denominator = 0;
+                    uint32 msg_value_denominator = 0;
 
-                            current_version,
-                            DexPoolTypes.STABLESWAP,
+                    bool is_steps_array_valid = true;
+                    for (NextExchangeData next_step: next_steps) {
+                        if (next_step.poolRoot.value == 0 || next_step.poolRoot == address(this) ||
+                            next_step.numerator == 0 || next_step.msgValueNumerator == 0) {
 
-                            _tokenRoots(),
+                            is_steps_array_valid = false;
+                        }
+                        denominator += next_step.numerator;
+                        msg_value_denominator += next_step.msgValueNumerator;
+                    }
 
-                            operation.root,
-                            operation.amount,
+                    if (is_steps_array_valid && next_steps.length > 0 && msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2) {
+                        uint128 aval_balance = address(this).balance - DexGas.PAIR_INITIAL_BALANCE;
+                        for (NextExchangeData next_step: next_steps) {
+                            uint128 value = math.muldiv(aval_balance, next_step.msgValueNumerator, msg_value_denominator);
+                            uint128 next_pool_amount = uint128(math.muldiv(operation.amount, next_step.numerator, denominator));
 
-                            sender_address,
-                            recipient,
+                            IDexBasePool(next_step.poolRoot).crossPoolExchange{
+                                value: value,
+                                flag: 0
+                            }(
+                                id,
 
-                            original_gas_to,
-                            deploy_wallet_grams,
+                                current_version,
+                                DexPoolTypes.STABLESWAP,
 
-                            next_payload,
-                            notify_success,
-                            success_payload,
-                            notify_cancel,
-                            cancel_payload
-                        );
+                                _tokenRoots(),
+
+                                op,
+                                operation.root,
+                                next_pool_amount,
+
+                                sender_address,
+                                recipient,
+
+                                original_gas_to,
+                                deploy_wallet_grams,
+
+                                next_step.payload,
+                                notify_success,
+                                success_payload,
+                                notify_cancel,
+                                cancel_payload
+                            );
+                        }
                     } else {
                         uint8 j = tokenIndex[operation.root];
 
