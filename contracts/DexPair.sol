@@ -907,17 +907,14 @@ contract DexPair is DexPairBase, INextExchangeData {
                 );
 
                 uint256 denominator = 0;
-                uint32 msgValueDenominator = 0;
-
                 bool isStepsArrayValid = true;
                 for (NextExchangeData nextStep: nextSteps) {
                     if (nextStep.poolRoot.value == 0 || nextStep.poolRoot == address(this) ||
-                    nextStep.numerator == 0 || nextStep.msgValueNumerator == 0) {
+                        nextStep.numerator == 0 || nextStep.leaves == 0) {
 
                         isStepsArrayValid = false;
                     }
                     denominator += nextStep.numerator;
-                    msgValueDenominator += nextStep.msgValueNumerator;
                 }
 
                 if (nextSteps.length > 0 &&
@@ -925,14 +922,21 @@ contract DexPair is DexPairBase, INextExchangeData {
                     msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2
                 ) {
                     // Continue cross-pair exchange
-                    uint128 avalBalance = address(this).balance - DexGas.PAIR_INITIAL_BALANCE;
+                    uint128 value = 0;
+                    uint8 flag = MsgFlag.ALL_NOT_RESERVED;
+
                     for (NextExchangeData nextStep: nextSteps) {
-                        uint128 value = math.muldiv(avalBalance, nextStep.msgValueNumerator, msgValueDenominator);
                         uint128 nextPoolAmount = uint128(math.muldiv(amount, nextStep.numerator, denominator));
 
+                        if (nextSteps.length > 1) {
+                            value = nextStep.nestedNodes * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + nextStep.leaves * DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2;
+                            flag = MsgFlag.SENDER_PAYS_FEES;
+                        }
                         IDexPair(nextStep.poolRoot)
-                            .crossPoolExchange{ value: value, flag: 0 }
-                            (
+                            .crossPoolExchange{
+                                value: value,
+                                flag: flag
+                            }(
                                 _id,
                                 _currentVersion,
                                 DexPoolTypes.CONSTANT_PRODUCT,
@@ -950,6 +954,10 @@ contract DexPair is DexPairBase, INextExchangeData {
                                 _notifyCancel,
                                 _cancelPayload
                             );
+                    }
+
+                    if (nextSteps.length > 1) {
+                        _remainingGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
                     }
                 } else {
                     // Transfer final token to recipient
@@ -1033,11 +1041,6 @@ contract DexPair is DexPairBase, INextExchangeData {
             /*address outcoming*/,
             NextExchangeData[] nextSteps
         ) = PairPayload.decodeOnAcceptTokensTransferData(_payload);
-
-        if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE && nextSteps.length > 0) {
-            // actually poolRoot is a tokenRoot here, so
-            nextSteps[0].poolRoot = _expectedPairAddress([_tokenRoot, nextSteps[0].poolRoot]);
-        }
 
         uint128 expectedAmount = 0;
         if (expectedAmounts.length == 1) {
@@ -1213,6 +1216,11 @@ contract DexPair is DexPairBase, INextExchangeData {
                     op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) &&
                     nextSteps.length > 0
                 ) {
+                    if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE) {
+                        // actually poolRoot is a tokenRoot here, so
+                        nextSteps[0].poolRoot = _expectedPairAddress([_tokenRoots()[receiveTokenIndex], nextSteps[0].poolRoot]);
+                    }
+
                     // Calculate exchange result
                     (
                         uint128 amount,
@@ -1226,16 +1234,13 @@ contract DexPair is DexPairBase, INextExchangeData {
                     );
 
                     uint256 denominator = 0;
-                    uint32 msgValueDenominator = 0;
-
                     for (NextExchangeData nextStep: nextSteps) {
                         if (nextStep.poolRoot.value == 0 || nextStep.poolRoot == address(this) ||
-                            nextStep.numerator == 0 || nextStep.msgValueNumerator == 0) {
+                            nextStep.numerator == 0 || nextStep.leaves == 0) {
 
                             needCancel = true;
                         }
                         denominator += nextStep.numerator;
-                        msgValueDenominator += nextStep.msgValueNumerator;
                     }
 
                     // Check reserves, fees and expected amount
@@ -1275,14 +1280,22 @@ contract DexPair is DexPairBase, INextExchangeData {
                             );
 
                         // Continue cross-pair exchange
-                        uint128 avalBalance = address(this).balance - DexGas.PAIR_INITIAL_BALANCE;
+                        uint128 value = 0;
+                        uint8 flag = MsgFlag.ALL_NOT_RESERVED;
+
                         for (NextExchangeData nextStep: nextSteps) {
-                            uint128 value = math.muldiv(avalBalance, nextStep.msgValueNumerator, msgValueDenominator);
                             uint128 nextPoolAmount = uint128(math.muldiv(amount, nextStep.numerator, denominator));
 
+                            if (nextSteps.length > 1) {
+                                value = nextStep.nestedNodes * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + nextStep.leaves * DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2;
+                                flag = MsgFlag.SENDER_PAYS_FEES;
+                            }
+
                             IDexPair(nextStep.poolRoot)
-                                .crossPoolExchange{ value: value, flag: 0 }
-                                (
+                                .crossPoolExchange{
+                                    value: value,
+                                    flag: flag
+                                }(
                                     id,
                                     _currentVersion,
                                     DexPoolTypes.CONSTANT_PRODUCT,
@@ -1300,6 +1313,10 @@ contract DexPair is DexPairBase, INextExchangeData {
                                     notifyCancel,
                                     cancelPayload
                                 );
+                        }
+
+                        if (nextSteps.length > 1) {
+                            _remainingGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
                         }
                     } else {
                         needCancel = true;

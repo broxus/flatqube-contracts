@@ -5,6 +5,7 @@ interface INextExchangeData {
         uint128 numerator;
         address poolRoot;
         TvmCell payload;
-        uint32 msgValueNumerator;
+        uint32 nestedNodes;
+        uint32 leaves;
     }
 }

@@ -40,6 +40,7 @@ library DexGas {
     uint128 constant DIRECT_PAIR_OP_MIN_VALUE       = 1.5 ton;
     uint128 constant DIRECT_PAIR_OP_MIN_VALUE_V2    = 2 ton;
     uint128 constant SUCCESS_CALLBACK_VALUE         = 0.1 ton;
+    uint128 constant CROSS_POOL_EXCHANGE_MIN_VALUE  = 0.5 ton;
 
     uint128 constant VAULT_TRANSFER_BASE_VALUE      = 0.25 ton;
     uint128 constant VAULT_TRANSFER_BASE_VALUE_V2   = 0.5 ton;

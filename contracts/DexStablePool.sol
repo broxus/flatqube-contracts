@@ -346,8 +346,8 @@ contract DexStablePool is
             TvmCell success_payload,
             bool notify_cancel,
             TvmCell cancel_payload,
-            bool hasRef3,
-            TvmCell ref3
+            /*bool hasRef3*/,
+            /*TvmCell ref3*/
         ) = PairPayload.decodeOnAcceptTokensTransferPayloads(payload, op);
 
         TvmCell empty;
@@ -560,16 +560,13 @@ contract DexStablePool is
                 TokenOperation operation;
 
                 uint256 denominator = 0;
-                uint32 msg_value_denominator = 0;
-
                 for (NextExchangeData next_step: next_steps) {
                     if (next_step.poolRoot.value == 0 || next_step.poolRoot == address(this) ||
-                        next_step.numerator == 0 || next_step.msgValueNumerator == 0) {
+                        next_step.numerator == 0 || next_step.leaves == 0) {
 
                         need_cancel = true;
                     }
                     denominator += next_step.numerator;
-                    msg_value_denominator += next_step.msgValueNumerator;
                 }
 
                 if (!need_cancel) {
@@ -700,14 +697,20 @@ contract DexStablePool is
                     }
 
                     if (outcoming != lp_root) { // withdraw or exchange
-                        uint128 aval_balance = address(this).balance - DexGas.PAIR_INITIAL_BALANCE;
+                        uint128 value = 0;
+                        uint8 flag = MsgFlag.ALL_NOT_RESERVED;
+
                         for (NextExchangeData next_step: next_steps) {
-                            uint128 value = math.muldiv(aval_balance, next_step.msgValueNumerator, msg_value_denominator);
                             uint128 next_pool_amount = uint128(math.muldiv(operation.amount, next_step.numerator, denominator));
+
+                            if (next_steps.length > 1) {
+                                value = next_step.nestedNodes * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + next_step.leaves * DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2;
+                                flag = MsgFlag.SENDER_PAYS_FEES;
+                            }
 
                             IDexBasePool(next_step.poolRoot).crossPoolExchange{
                                 value: value,
-                                flag: 0
+                                flag: flag
                             }(
                                 id,
 
@@ -732,6 +735,10 @@ contract DexStablePool is
                                 notify_cancel,
                                 cancel_payload
                             );
+                        }
+
+                        if (next_steps.length > 1) {
+                            original_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
                         }
                     }
                 }
@@ -1272,28 +1279,31 @@ contract DexStablePool is
                 if (outcoming != lp_root) { // withdraw or exchange
 
                     uint256 denominator = 0;
-                    uint32 msg_value_denominator = 0;
-
                     bool is_steps_array_valid = true;
                     for (NextExchangeData next_step: next_steps) {
                         if (next_step.poolRoot.value == 0 || next_step.poolRoot == address(this) ||
-                            next_step.numerator == 0 || next_step.msgValueNumerator == 0) {
+                            next_step.numerator == 0 || next_step.leaves == 0) {
 
                             is_steps_array_valid = false;
                         }
                         denominator += next_step.numerator;
-                        msg_value_denominator += next_step.msgValueNumerator;
                     }
 
                     if (is_steps_array_valid && next_steps.length > 0 && msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2) {
-                        uint128 aval_balance = address(this).balance - DexGas.PAIR_INITIAL_BALANCE;
+                        uint128 value = 0;
+                        uint8 flag = MsgFlag.ALL_NOT_RESERVED;
+
                         for (NextExchangeData next_step: next_steps) {
-                            uint128 value = math.muldiv(aval_balance, next_step.msgValueNumerator, msg_value_denominator);
                             uint128 next_pool_amount = uint128(math.muldiv(operation.amount, next_step.numerator, denominator));
+
+                            if (next_steps.length > 1) {
+                                value = next_step.nestedNodes * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + next_step.leaves * DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2;
+                                flag = MsgFlag.SENDER_PAYS_FEES;
+                            }
 
                             IDexBasePool(next_step.poolRoot).crossPoolExchange{
                                 value: value,
-                                flag: 0
+                                flag: flag
                             }(
                                 id,
 
@@ -1318,6 +1328,10 @@ contract DexStablePool is
                                 notify_cancel,
                                 cancel_payload
                             );
+                        }
+
+                        if (next_steps.length > 1) {
+                            original_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
                         }
                     } else {
                         uint8 j = tokenIndex[operation.root];

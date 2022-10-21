@@ -215,12 +215,13 @@ library PairPayload {
 
         INextExchangeData.NextExchangeData[] nextSteps;
         for (uint32 idx : _nextStepIndices) {
-            (TvmCell nextPayload, uint32 msgValueNumerator) = _encodeCrossPairExchangeData(_steps, _pools, idx);
+            (TvmCell nextPayload, uint32 nestedNodes, uint32 leaves) = _encodeCrossPairExchangeData(_steps, _pools, idx);
             nextSteps.push(INextExchangeData.NextExchangeData(
                 _steps[idx].numerator,
                 _pools[idx],
                 nextPayload,
-                msgValueNumerator
+                nestedNodes,
+                leaves
             ));
         }
 
@@ -234,23 +235,27 @@ library PairPayload {
         IExchangeStepStructure.ExchangeStep[] _steps,
         address[] _pools,
         uint32 _currentIdx
-    ) private returns (TvmCell, uint32) {
+    ) private returns (TvmCell, uint32, uint32) {
         INextExchangeData.NextExchangeData[] nextSteps;
         uint32 nextLevelNodes = 0;
+        uint32 nextLevelLeaves = 0;
         for (uint32 idx : _steps[_currentIdx].nextStepIndices) {
-            (TvmCell nextPayload, uint32 msgValueNumerator) = _encodeCrossPairExchangeData(_steps, _pools, idx);
-            nextLevelNodes += msgValueNumerator;
+            (TvmCell nextPayload, uint32 nestedNodes, uint32 leaves) = _encodeCrossPairExchangeData(_steps, _pools, idx);
+            nextLevelNodes += nestedNodes;
+            nextLevelLeaves += leaves;
             nextSteps.push(INextExchangeData.NextExchangeData(
                 _steps[idx].numerator,
                 _pools[idx],
                 nextPayload,
-                msgValueNumerator
+                nestedNodes,
+                leaves
             ));
         }
 
         return (
             abi.encode(_steps[_currentIdx].amount, _steps[_currentIdx].outcoming, nextSteps),
-            uint32(nextLevelNodes + math.max(nextSteps.length, 1))
+            nextLevelNodes + uint32(nextSteps.length),
+            nextSteps.length > 0 ? nextLevelLeaves : 1
         );
     }
 
@@ -327,15 +332,15 @@ library PairPayload {
                 if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
                     nextSteps = abi.decode(dataCell, INextExchangeData.NextExchangeData[]);
                 }
-            }
-
-            if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE && nextTokenRoot.value != 0 && slice.refs() >= 1) {
-                nextSteps.push(INextExchangeData.NextExchangeData(
-                    1,
-                    nextTokenRoot,
-                    slice.loadRef(),
-                    1
-                ));
+                if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE && nextTokenRoot.value != 0) {
+                    nextSteps.push(INextExchangeData.NextExchangeData(
+                            1,
+                            nextTokenRoot,
+                            dataCell,
+                            1,
+                            1
+                        ));
+                }
             }
         }
 
@@ -436,10 +441,12 @@ library PairPayload {
             bool hasNextPayload = slice.refs() >= 1;
 
             if (hasNextPayload) {
+                address tokenRoot = slice.bits() >= 267 ? slice.decode(address) : address(0);
                 nextSteps.push(INextExchangeData.NextExchangeData(
                     1,
-                    slice.bits() >= 267 ? slice.decode(address) : address(0), // next token root
+                    tokenRoot,
                     slice.loadRef(),
+                    1,
                     1
                 ));
             }
