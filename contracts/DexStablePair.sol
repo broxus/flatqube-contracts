@@ -266,29 +266,29 @@ contract DexStablePair is
     }
 
     function buildCrossPairExchangePayloadV2(
-        uint64 id,
-        uint128 deployWalletGrams,
-        uint128 expectedAmount,
-        address outcoming,
-        uint32[] nextStepIndices,
-        ExchangeStep[] steps,
-        optional(address) recipient
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedAmount,
+        address _outcoming,
+        uint32[] _nextStepIndices,
+        ExchangeStep[] _steps,
+        optional(address) _recipient
     ) external view returns (TvmCell) {
         address[] pools;
 
         // Calculate pools' addresses by token roots
-        for (uint32 i = 0; i < steps.length; i++) {
-            pools.push(_expectedPairAddress(steps[i].roots));
+        for (uint32 i = 0; i < _steps.length; i++) {
+            pools.push(_expectedPairAddress(_steps[i].roots));
         }
 
         return PairPayload.buildCrossPairExchangePayloadV2(
-            id,
-            deployWalletGrams,
-            recipient.hasValue() ? recipient.get() : address(0),
-            expectedAmount,
-            outcoming,
-            nextStepIndices,
-            steps,
+            _id,
+            _deployWalletGrams,
+            _recipient.hasValue() ? _recipient.get() : address(0),
+            _expectedAmount,
+            _outcoming,
+            _nextStepIndices,
+            _steps,
             pools
         );
     }

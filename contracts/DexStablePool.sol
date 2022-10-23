@@ -363,7 +363,6 @@ contract DexStablePool is
         } else {
             need_cancel = need_cancel ||
             !tokenIndex.exists(token_root) ||
-            !tokenIndex.exists(outcoming) ||
             msg.sender != tokenData[tokenIndex.at(token_root)].wallet;
         }
 

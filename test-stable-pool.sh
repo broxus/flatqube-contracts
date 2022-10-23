@@ -29,7 +29,7 @@ npx locklift test $NO_TRACE --tests test/15-dex-account-pool-operations.js --roo
 
 npx locklift test $NO_TRACE --tests test/20-pool-direct-operations.js --roots='["foo", "bar", "qwe"]' --contract_name='DexStablePool'
 
-# cross-pool-exchange test
+# cross-pool-exchange test (prepare)
 npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["tst", "FooBarQweLp"],["tst","coin"],["tst","foo"],["coin","foo"]]' --contract_name='DexPair'
 npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='tst' --right='FooBarQweLp' --account=2 --contract_name='DexPair' --ignore_already_added='true'
 npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='tst' --right='coin' --account=2 --contract_name='DexPair' --ignore_already_added='true'
@@ -59,6 +59,9 @@ npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='foo' --righ
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'foo' --right_token_id 'bar' --left_amount '10000' --right_amount '10000' --contract_name='DexPair'
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexStablePair' --pool_type=2
 npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPair' --new_contract_name='DexStablePair' --pool_type=2
-npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=1000 --pool_route='[["foo","bar"],["foo","bar","qwe"]]' --token_route='["foo","bar","qwe"]'
-npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=1000 --pool_route='[["foo","bar","qwe"],["foo","bar"]]' --token_route='["qwe","bar","foo"]'
-npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=1000 --pool_route='[["foo","bar","qwe"],["foo","bar"],["tst","foo"]]' --token_route='["qwe","bar","foo","tst"]'
+npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=1000 --pool_route='[["foo","bar"],["foo","bar","qwe"]]' --token_route='["foo","bar","qwe"]' --pair_contract_name='DexStablePair'
+npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=1000 --pool_route='[["foo","bar","qwe"],["foo","bar"]]' --token_route='["qwe","bar","foo"]' --pair_contract_name='DexStablePair'
+npx locklift test $NO_TRACE --tests test/40-cross-pool-exchange.js --amount=1000 --pool_route='[["foo","bar","qwe"],["foo","bar"],["tst","foo"]]' --token_route='["qwe","bar","foo","tst"]' --pair_contract_name='DexStablePair'
+
+# split-cross-pool-exchange test
+npx locklift test $NO_TRACE --tests test/40-split-cross-pool-exchange.js --amount=1000 --start_token='qwe' --route='[{"outcoming": "bar", "roots": ["foo","bar","qwe"], "numerator": 1, "nextSteps": [{"outcoming": "foo", "roots": ["foo","bar"], "numerator": 1, "nextSteps": [{"outcoming": "tst", "roots": ["tst","foo"], "numerator": 2, "nextSteps": []},{"outcoming": "coin", "roots": ["foo","coin"], "numerator": 3, "nextSteps": [{"outcoming": "tst", "roots": ["qwe", "tst", "coin"], "numerator": 1, "nextSteps": []}]}]}]}]'
