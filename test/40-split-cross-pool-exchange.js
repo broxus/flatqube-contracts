@@ -301,8 +301,8 @@ describe('Check direct operations', async function () {
         await migration.balancesCheckpoint();
     });
 
-    describe('Direct cross-pool exchange', async function () {
-        it('Account#3 cross-pool exchange', async function () {
+    describe('Direct split-cross-pool exchange', async function () {
+        it('Account#3 split-cross-pool exchange', async function () {
             logger.log('#################################################');
 
             async function getRouteDexPoolsInfo(route, poolsMap) {

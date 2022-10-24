@@ -642,7 +642,7 @@ contract DexStablePool is
 
                         if (tokenIndex.exists(outcoming) && token_root != outcoming) {
                             dy_result_opt = _get_dy(tokenIndex[token_root], tokenIndex[outcoming], tokens_amount);
-                            }
+                        }
 
                         if (
                             !dy_result_opt.hasValue() ||
@@ -1261,19 +1261,6 @@ contract DexStablePool is
             }
 
             if (!need_cancel) {
-                if (spent_token_root != lp_root) { // deposit or exchange
-                    ITokenWallet(msg.sender).transfer{
-                        value: DexGas.TRANSFER_TOKENS_VALUE,
-                        flag: MsgFlag.SENDER_PAYS_FEES
-                    }(
-                        spent_amount,
-                        vault,
-                        0,
-                        original_gas_to,
-                        false,
-                        empty
-                    );
-                }
 
                 if (outcoming != lp_root) { // withdraw or exchange
 
