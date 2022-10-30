@@ -541,31 +541,39 @@ contract DexVault is
 
         uint256 denominator = 0;
         address prevPool = _expectedPairAddress(roots);
-
-        for (NextExchangeData nextStep: nextSteps) {
+        uint32 allNestedNodes = uint32(nextSteps.length);
+        uint32 allLeaves = 0;
+        uint32 maxNestedNodes = 0;
+        uint32 maxNestedNodesIdx = 0;
+        for (uint32 i = 0; i < nextSteps.length; i++) {
+            NextExchangeData nextStep = nextSteps[i];
             if (nextStep.poolRoot.value == 0 || nextStep.poolRoot == prevPool ||
                 nextStep.numerator == 0 || nextStep.leaves == 0) {
 
                 needCancel = true;
+                break;
+            }
+            if (nextStep.nestedNodes > maxNestedNodes) {
+                maxNestedNodes = nextStep.nestedNodes;
+                maxNestedNodesIdx = i;
             }
             denominator += nextStep.numerator;
+            allNestedNodes += nextStep.nestedNodes;
+            allLeaves += nextStep.leaves;
         }
 
-        if (!needCancel && nextSteps.length > 0) {
-            uint128 value = 0;
-            uint8 flag = MsgFlag.ALL_NOT_RESERVED;
+        if (!needCancel && nextSteps.length > 0 && msg.value >= DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * allNestedNodes + 0.1 ton) {
+            uint128 extraValue = msg.value - DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * allNestedNodes - 0.1 ton;
 
-            for (NextExchangeData nextStep: nextSteps) {
+            for (uint32 i = 0; i < nextSteps.length; i++) {
+                NextExchangeData nextStep = nextSteps[i];
+
                 uint128 nextPoolAmount = uint128(math.muldiv(amount, nextStep.numerator, denominator));
-
-                if (nextSteps.length > 1) {
-                    value = nextStep.nestedNodes * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + nextStep.leaves * DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2;
-                    flag = MsgFlag.SENDER_PAYS_FEES;
-                }
+                uint128 currentExtraValue = math.muldiv(nextStep.leaves, extraValue, allLeaves);
 
                 IDexBasePool(nextStep.poolRoot).crossPoolExchange{
-                    value: value,
-                    flag: flag
+                    value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + currentExtraValue,
+                    flag: i == maxNestedNodesIdx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
                 }(
                     id,
 
@@ -590,10 +598,6 @@ contract DexVault is
                     notifyCancel,
                     cancelPayload
                 );
-            }
-
-            if (nextSteps.length > 1) {
-                remainingGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
             }
         } else {
             emit PairTransferTokensV2(

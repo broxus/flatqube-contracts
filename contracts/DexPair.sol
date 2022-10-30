@@ -908,35 +908,43 @@ contract DexPair is DexPairBase, INextExchangeData {
 
                 uint256 denominator = 0;
                 bool isStepsArrayValid = true;
-                for (NextExchangeData nextStep: nextSteps) {
+                uint32 allNestedNodes = uint32(nextSteps.length);
+                uint32 allLeaves = 0;
+                uint32 maxNestedNodes = 0;
+                uint32 maxNestedNodesIdx = 0;
+                for (uint32 i = 0; i < nextSteps.length; i++) {
+                    NextExchangeData nextStep = nextSteps[i];
                     if (nextStep.poolRoot.value == 0 || nextStep.poolRoot == address(this) ||
                         nextStep.numerator == 0 || nextStep.leaves == 0) {
 
                         isStepsArrayValid = false;
+                        break;
+                    }
+                    if (nextStep.nestedNodes > maxNestedNodes) {
+                        maxNestedNodes = nextStep.nestedNodes;
+                        maxNestedNodesIdx = i;
                     }
                     denominator += nextStep.numerator;
+                    allNestedNodes += nextStep.nestedNodes;
+                    allLeaves += nextStep.leaves;
                 }
-
                 if (nextSteps.length > 0 &&
                     isStepsArrayValid &&
-                    msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2
+                    msg.value >= DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * (1 + allNestedNodes)
                 ) {
                     // Continue cross-pair exchange
-                    uint128 value = 0;
-                    uint8 flag = MsgFlag.ALL_NOT_RESERVED;
+                    uint128 extraValue = msg.value - DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * (1 + allNestedNodes);
 
-                    for (NextExchangeData nextStep: nextSteps) {
+                    for (uint32 i = 0; i < nextSteps.length; i++) {
+                        NextExchangeData nextStep = nextSteps[i];
+
                         uint128 nextPoolAmount = uint128(math.muldiv(amount, nextStep.numerator, denominator));
+                        uint128 currentExtraValue = math.muldiv(nextStep.leaves, extraValue, allLeaves);
 
-                        if (nextSteps.length > 1) {
-                            value = nextStep.nestedNodes * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + nextStep.leaves * DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2;
-                            flag = MsgFlag.SENDER_PAYS_FEES;
-                        }
-                        IDexPair(nextStep.poolRoot)
-                            .crossPoolExchange{
-                                value: value,
-                                flag: flag
-                            }(
+                        IDexBasePool(nextStep.poolRoot).crossPoolExchange{
+                            value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + currentExtraValue,
+                            flag: i == maxNestedNodesIdx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
+                        }(
                                 _id,
                                 _currentVersion,
                                 DexPoolTypes.CONSTANT_PRODUCT,
@@ -954,10 +962,6 @@ contract DexPair is DexPairBase, INextExchangeData {
                                 _notifyCancel,
                                 _cancelPayload
                             );
-                    }
-
-                    if (nextSteps.length > 1) {
-                        _remainingGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
                     }
                 } else {
                     // Transfer final token to recipient
@@ -1234,14 +1238,28 @@ contract DexPair is DexPairBase, INextExchangeData {
                     );
 
                     uint256 denominator = 0;
-                    for (NextExchangeData nextStep: nextSteps) {
+                    uint32 allNestedNodes = uint32(nextSteps.length);
+                    uint32 allLeaves = 0;
+                    uint32 maxNestedNodes = 0;
+                    uint32 maxNestedNodesIdx = 0;
+                    for (uint32 i = 0; i < nextSteps.length; i++) {
+                        NextExchangeData nextStep = nextSteps[i];
                         if (nextStep.poolRoot.value == 0 || nextStep.poolRoot == address(this) ||
                             nextStep.numerator == 0 || nextStep.leaves == 0) {
 
                             needCancel = true;
+                            break;
+                        }
+                        if (nextStep.nestedNodes > maxNestedNodes) {
+                            maxNestedNodes = nextStep.nestedNodes;
+                            maxNestedNodesIdx = i;
                         }
                         denominator += nextStep.numerator;
+                        allNestedNodes += nextStep.nestedNodes;
+                        allLeaves += nextStep.leaves;
                     }
+
+                    needCancel = needCancel || msg.value < DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * (1 + allNestedNodes);
 
                     // Check reserves, fees and expected amount
                     if (
@@ -1280,43 +1298,35 @@ contract DexPair is DexPairBase, INextExchangeData {
                             );
 
                         // Continue cross-pair exchange
-                        uint128 value = 0;
-                        uint8 flag = MsgFlag.ALL_NOT_RESERVED;
+                        uint128 extraValue = msg.value - DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * (1 + allNestedNodes);
 
-                        for (NextExchangeData nextStep: nextSteps) {
+                        for (uint32 i = 0; i < nextSteps.length; i++) {
+                            NextExchangeData nextStep = nextSteps[i];
+
                             uint128 nextPoolAmount = uint128(math.muldiv(amount, nextStep.numerator, denominator));
+                            uint128 currentExtraValue = math.muldiv(nextStep.leaves, extraValue, allLeaves);
 
-                            if (nextSteps.length > 1) {
-                                value = nextStep.nestedNodes * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + nextStep.leaves * DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2;
-                                flag = MsgFlag.SENDER_PAYS_FEES;
-                            }
-
-                            IDexPair(nextStep.poolRoot)
-                                .crossPoolExchange{
-                                    value: value,
-                                    flag: flag
-                                }(
-                                    id,
-                                    _currentVersion,
-                                    DexPoolTypes.CONSTANT_PRODUCT,
-                                    _tokenRoots(),
-                                    op,
-                                    _tokenRoots()[receiveTokenIndex],
-                                    nextPoolAmount,
-                                    _senderAddress,
-                                    recipient,
-                                    _remainingGasTo,
-                                    deployWalletGrams,
-                                    nextStep.payload,
-                                    notifySuccess,
-                                    successPayload,
-                                    notifyCancel,
-                                    cancelPayload
-                                );
-                        }
-
-                        if (nextSteps.length > 1) {
-                            _remainingGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
+                            IDexBasePool(nextStep.poolRoot).crossPoolExchange{
+                                value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + currentExtraValue,
+                                flag: i == maxNestedNodesIdx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
+                            }(
+                                id,
+                                _currentVersion,
+                                DexPoolTypes.CONSTANT_PRODUCT,
+                                _tokenRoots(),
+                                op,
+                                _tokenRoots()[receiveTokenIndex],
+                                nextPoolAmount,
+                                _senderAddress,
+                                recipient,
+                                _remainingGasTo,
+                                deployWalletGrams,
+                                nextStep.payload,
+                                notifySuccess,
+                                successPayload,
+                                notifyCancel,
+                                cancelPayload
+                            );
                         }
                     } else {
                         needCancel = true;
