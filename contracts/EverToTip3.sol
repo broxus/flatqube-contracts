@@ -61,9 +61,17 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         address pair,
         uint64 id,
         uint128 deployWalletValue,
-        uint128 expectedAmount
+        uint128 expectedAmount,
+        optional(address) recipient
     ) external pure returns (TvmCell) {
-        return EverToTip3Payloads.buildExchangePayload(pair, id, deployWalletValue, expectedAmount, 0);
+        return EverToTip3Payloads.buildExchangePayload(
+            pair,
+            id,
+            deployWalletValue,
+            expectedAmount,
+            0,
+            recipient.hasValue() ? recipient.get() : address(0)
+        );
     }
 
     // Payload constructor swap Ever -> Tip-3 via cross-pair
@@ -72,9 +80,42 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         uint64 id,
         uint128 deployWalletValue,
         uint128 expectedAmount,
-        ITokenOperationStructure.TokenOperation[] steps
+        ITokenOperationStructure.TokenOperation[] steps,
+        optional(address) recipient
     ) external pure returns (TvmCell) {
-        return EverToTip3Payloads.buildCrossPairExchangePayload(pair, id, deployWalletValue, expectedAmount, steps, 0);
+        return EverToTip3Payloads.buildCrossPairExchangePayload(
+            pair,
+            id,
+            deployWalletValue,
+            expectedAmount,
+            steps,
+            0,
+            recipient.hasValue() ? recipient.get() : address(0)
+        );
+    }
+
+    // Payload constructor swap Ever -> Tip-3 via split-cross-pool
+    function buildCrossPairExchangePayloadV2(
+        address pool,
+        uint64 id,
+        uint128 deployWalletValue,
+        uint128 expectedAmount,
+        address outcoming,
+        uint32[] nextStepIndices,
+        EverToTip3ExchangeStep[] steps,
+        optional(address) recipient
+    ) external pure returns (TvmCell) {
+        return EverToTip3Payloads.buildCrossPairExchangePayloadV2(
+            pool,
+            id,
+            deployWalletValue,
+            expectedAmount,
+            outcoming,
+            nextStepIndices,
+            steps,
+            0,
+            recipient.hasValue() ? recipient.get() : address(0)
+        );
     }
 
     struct DecodedMintPayload {

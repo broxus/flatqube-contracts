@@ -57,9 +57,17 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         uint64 id,
         uint128 deployWalletValue,
         uint128 expectedAmount,
-        uint128 amount
+        uint128 amount,
+        optional(address) recipient
     ) external pure returns (TvmCell) {
-        return EverToTip3Payloads.buildExchangePayload(pair, id, deployWalletValue, expectedAmount, amount);
+        return EverToTip3Payloads.buildExchangePayload(
+            pair,
+            id,
+            deployWalletValue,
+            expectedAmount,
+            amount,
+            recipient.hasValue() ? recipient.get() : address(0)
+        );
     }
 
     // Payload constructor swap Ever -> Tip-3 via cross-pair
@@ -69,9 +77,43 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         uint128 deployWalletValue,
         uint128 expectedAmount,
         ITokenOperationStructure.TokenOperation[] steps,
-        uint128 amount
+        uint128 amount,
+        optional(address) recipient
     ) external pure returns (TvmCell) {
-        return EverToTip3Payloads.buildCrossPairExchangePayload(pair, id, deployWalletValue, expectedAmount, steps, amount);
+        return EverToTip3Payloads.buildCrossPairExchangePayload(
+            pair,
+            id,
+            deployWalletValue,
+            expectedAmount,
+            steps,
+            amount,
+            recipient.hasValue() ? recipient.get() : address(0)
+        );
+    }
+
+    // Payload constructor swap Ever -> Tip-3 via split-cross-pool
+    function buildCrossPairExchangePayloadV2(
+        address pool,
+        uint64 id,
+        uint128 deployWalletValue,
+        uint128 expectedAmount,
+        address outcoming,
+        uint32[] nextStepIndices,
+        EverToTip3ExchangeStep[] steps,
+        uint128 amount,
+        optional(address) recipient
+    ) external pure returns (TvmCell) {
+        return EverToTip3Payloads.buildCrossPairExchangePayloadV2(
+            pool,
+            id,
+            deployWalletValue,
+            expectedAmount,
+            outcoming,
+            nextStepIndices,
+            steps,
+            amount,
+            recipient.hasValue() ? recipient.get() : address(0)
+        );
     }
 
      //Callback
