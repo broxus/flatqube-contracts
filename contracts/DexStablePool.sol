@@ -218,49 +218,38 @@ contract DexStablePool is
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         address outcoming,
-        optional(address) recipient
+        address recipient
     )  external pure returns (TvmCell) {
-        return PairPayload.buildExchangePayloadV2(
-            id,
-            deploy_wallet_grams,
-            recipient.hasValue() ? recipient.get() : address(0),
-            expected_amount,
-            outcoming
-        );
+        return PairPayload.buildExchangePayloadV2(id, deploy_wallet_grams, expected_amount, recipient, outcoming);
     }
 
     function buildDepositLiquidityPayload(
         uint64 id,
         uint128 deploy_wallet_grams,
-        optional(uint128) expected_amount,
-        optional(address) recipient
+        uint128 expected_amount,
+        address recipient
     ) external pure returns (TvmCell) {
-        return PairPayload.buildDepositLiquidityPayload(
+        return PairPayload.buildDepositLiquidityPayloadV2(
             id,
             deploy_wallet_grams,
-            expected_amount.hasValue() ? expected_amount.get() : 0,
-            recipient.hasValue() ? recipient.get() : address(0)
+            expected_amount,
+            recipient
         );
     }
 
     function buildWithdrawLiquidityPayload(
         uint64 id,
         uint128 deploy_wallet_grams,
-        optional(uint128[]) expected_amounts,
-        optional(address) recipient
+        uint128[] expected_amounts,
+        address recipient
     ) external view returns (TvmCell) {
-        uint128[] expected ;
-        if (expected_amounts.hasValue()) {
-            expected = expected_amounts.get();
-        }
+        require(expected_amounts.length == 0 || expected_amounts.length == N_COINS);
 
-        require(expected.length == 0 || expected.length == N_COINS);
-
-        return PairPayload.buildWithdrawLiquidityPayload(
+        return PairPayload.buildWithdrawLiquidityPayloadV2(
             id,
             deploy_wallet_grams,
-            expected,
-            recipient.hasValue() ? recipient.get() : address(0)
+            expected_amounts,
+            recipient
         );
     }
 
@@ -269,12 +258,12 @@ contract DexStablePool is
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         address outcoming,
-        optional(address) recipient
+        address recipient
     ) external pure returns (TvmCell) {
         return PairPayload.buildWithdrawLiquidityOneCoinPayload(
             id,
             deploy_wallet_grams,
-            recipient.hasValue() ? recipient.get() : address(0),
+            recipient,
             expected_amount,
             outcoming
         );
@@ -287,7 +276,7 @@ contract DexStablePool is
         address outcoming,
         uint32[] nextStepIndices,
         ExchangeStep[] steps,
-        optional(address) recipient
+        address recipient
     ) external view returns (TvmCell) {
         address[] pools;
 
@@ -299,7 +288,7 @@ contract DexStablePool is
         return PairPayload.buildCrossPairExchangePayloadV2(
             id,
             deployWalletGrams,
-            recipient.hasValue() ? recipient.get() : address(0),
+            recipient,
             expectedAmount,
             outcoming,
             nextStepIndices,
@@ -330,10 +319,8 @@ contract DexStablePool is
             NextExchangeData[] next_steps
         ) = PairPayload.decodeOnAcceptTokensTransferData(payload);
 
-        uint128 expected_amount = 0;
-        if (expected_amounts.length == 1) {
-            expected_amount = expected_amounts[0];
-        } else if (expected_amounts.length == 0) {
+        uint128 expected_amount = expected_amounts.length == 1 ? expected_amounts[0] : 0;
+        if (expected_amounts.length == 0) {
             expected_amounts = new uint128[](N_COINS);
         }
 
@@ -368,7 +355,7 @@ contract DexStablePool is
 
         if (!need_cancel) {
             if (msg.sender == lp_wallet &&
-                (op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) &&
+                op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2 &&
                 msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + N_COINS * deploy_wallet_grams) {
 
                 optional(WithdrawResultV2) result_opt = _expectedWithdrawLiquidity(tokens_amount);
@@ -458,7 +445,7 @@ contract DexStablePool is
                 } else {
                     need_cancel = true;
                 }
-            } else if (msg.sender != lp_wallet && op == DexOperationTypes.EXCHANGE) {
+            } else if (msg.sender != lp_wallet && op == DexOperationTypes.EXCHANGE_V2) {
 
                 optional(ExpectedExchangeResult) dy_result_opt;
 
@@ -748,7 +735,7 @@ contract DexStablePool is
                         }
                     }
                 }
-            } else if (msg.sender != lp_wallet && op == DexOperationTypes.DEPOSIT_LIQUIDITY
+            } else if (msg.sender != lp_wallet && op == DexOperationTypes.DEPOSIT_LIQUIDITY_V2
                 && msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + deploy_wallet_grams) {
                 uint128[] amounts = new uint128[](N_COINS);
                 amounts[tokenIndex[token_root]] = tokens_amount;

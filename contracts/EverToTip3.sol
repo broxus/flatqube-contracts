@@ -10,7 +10,7 @@ import "./libraries/EverToTip3Payloads.sol";
 import "./libraries/DexOperationTypes.sol";
 import "./libraries/EverToTip3OperationStatus.sol";
 
-import "./structures/ITokenOperationStructure.sol";
+import "./structures/INextExchangeData.sol";
 
 import "./interfaces/IEverVault.sol";
 import "./interfaces/IEverTip3SwapEvents.sol";
@@ -57,12 +57,12 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
     }
 
     // Payload constructor swap Ever -> Tip-3
-    function buildExchangePayload(
+    function buildExchangePayloadV2(
         address pair,
         uint64 id,
         uint128 deployWalletValue,
         uint128 expectedAmount,
-        optional(address) recipient
+        address recipient
     ) external pure returns (TvmCell) {
         return EverToTip3Payloads.buildExchangePayload(
             pair,
@@ -70,27 +70,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
             deployWalletValue,
             expectedAmount,
             0,
-            recipient.hasValue() ? recipient.get() : address(0)
-        );
-    }
-
-    // Payload constructor swap Ever -> Tip-3 via cross-pair
-    function buildCrossPairExchangePayload(
-        address pair,
-        uint64 id,
-        uint128 deployWalletValue,
-        uint128 expectedAmount,
-        ITokenOperationStructure.TokenOperation[] steps,
-        optional(address) recipient
-    ) external pure returns (TvmCell) {
-        return EverToTip3Payloads.buildCrossPairExchangePayload(
-            pair,
-            id,
-            deployWalletValue,
-            expectedAmount,
-            steps,
-            0,
-            recipient.hasValue() ? recipient.get() : address(0)
+            recipient
         );
     }
 
@@ -102,8 +82,8 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         uint128 expectedAmount,
         address outcoming,
         uint32[] nextStepIndices,
-        EverToTip3ExchangeStep[] steps,
-        optional(address) recipient
+        EverToTip3Payloads.EverToTip3ExchangeStep[] steps,
+        address recipient
     ) external pure returns (TvmCell) {
         return EverToTip3Payloads.buildCrossPairExchangePayloadV2(
             pool,
@@ -114,7 +94,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
             nextStepIndices,
             steps,
             0,
-            recipient.hasValue() ? recipient.get() : address(0)
+            recipient
         );
     }
 

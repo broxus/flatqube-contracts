@@ -12,7 +12,7 @@ import "./libraries/EverToTip3OperationStatus.sol";
 import "./interfaces/IEverTip3SwapEvents.sol";
 import "./interfaces/IEverTip3SwapCallbacks.sol";
 
-import "./structures/ITokenOperationStructure.sol";
+import "./structures/INextExchangeData.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
@@ -54,21 +54,21 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
     }
 
     // Payload constructor swap TIP-3 -> Ever
-    function buildExchangePayload(
+    function buildExchangePayloadV2(
         address pair,
         uint64 id,
         uint128 expectedAmount,
-        optional(address) recipient
+        address recipient
     ) public pure returns (TvmCell) {
         TvmBuilder builder;
         TvmBuilder pairPayload;
 
         //595
-        pairPayload.store(DexOperationTypes.EXCHANGE);
+        pairPayload.store(DexOperationTypes.EXCHANGE_V2);
         pairPayload.store(id);
         pairPayload.store(uint128(0));
         pairPayload.store(expectedAmount);
-        pairPayload.store(recipient.hasValue() ? recipient.get() : address(0));
+        pairPayload.store(recipient);
 
         TvmBuilder successPayload;
         successPayload.store(EverToTip3OperationStatus.SUCCESS);
@@ -88,55 +88,12 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         return builder.toCell();
     }
 
-    function buildCrossPairExchangePayload(
-        address pair,
-        uint64 id,
-        uint128 deployWalletValue,
-        uint128 expectedAmount,
-        ITokenOperationStructure.TokenOperation[] steps,
-        optional(address) recipient
-    ) public pure returns (TvmCell) {
-        require(steps.length > 0);
-
-        TvmBuilder builder;
-        TvmBuilder pairPayload;
-
-        // 595
-        pairPayload.store(DexOperationTypes.CROSS_PAIR_EXCHANGE);
-        pairPayload.store(id);
-        pairPayload.store(deployWalletValue);
-        pairPayload.store(expectedAmount);
-        pairPayload.store(steps[0].root);
-        pairPayload.store(recipient.hasValue() ? recipient.get() : address(0));
-
-        TvmBuilder nextStepBuilder;
-        nextStepBuilder.store(steps[steps.length - 1].amount);
-
-        for (uint i = steps.length - 1; i > 0; i--) {
-            TvmBuilder currentStepBuilder;
-            currentStepBuilder.store(steps[i - 1].amount, steps[i].root);
-            currentStepBuilder.store(nextStepBuilder.toCell());
-            nextStepBuilder = currentStepBuilder;
-        }
-
-        TvmBuilder successPayload;
-        successPayload.store(EverToTip3OperationStatus.SUCCESS);
-        successPayload.store(id);
-
-        TvmBuilder cancelPayload;
-        cancelPayload.store(EverToTip3OperationStatus.CANCEL);
-        cancelPayload.store(id);
-        cancelPayload.store(deployWalletValue);
-
-        pairPayload.storeRef(nextStepBuilder);
-        pairPayload.storeRef(successPayload);
-        pairPayload.storeRef(cancelPayload);
-
-        builder.store(EverToTip3OperationStatus.SWAP);
-        builder.store(pair);
-        builder.storeRef(pairPayload);
-
-        return builder.toCell();
+    struct Tip3ToEverExchangeStep {
+        uint128 amount;
+        address pool;
+        address outcoming;
+        uint128 numerator;
+        uint32[] nextStepIndices;
     }
 
     // Payload constructor swap TIP-3 -> Ever via split-cross-pool
@@ -147,8 +104,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         uint128 expectedAmount,
         address outcoming,
         uint32[] nextStepIndices,
-        EverToTip3ExchangeStep[] steps,
-        uint128 amount,
+        Tip3ToEverExchangeStep[] steps,
         address recipient
     ) public returns (TvmCell) {
         require(steps.length > 0);
@@ -197,7 +153,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
     }
 
     function _encodeCrossPairExchangeData(
-        EverToTip3ExchangeStep[] _steps,
+        Tip3ToEverExchangeStep[] _steps,
         uint32 _currentIdx
     ) private returns (TvmCell, uint32, uint32) {
         INextExchangeData.NextExchangeData[] nextSteps;

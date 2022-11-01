@@ -32,14 +32,38 @@ interface IDexConstantProductPair is
      * @param id ID of the call
      * @param deploy_wallet_grams Amount of EVER for a new TIP-3 wallet deploy
      * @param expected_amount Minimum token amount after swap
-     * @param recipient Address of the receiver
      * @return TvmCell Encoded payload for transfer
      */
     function buildExchangePayload(
         uint64 id,
         uint128 deploy_wallet_grams,
+        uint128 expected_amount
+    ) external pure returns (TvmCell);
+
+    /**
+     * @notice Build payload for TIP-3 token transfer with exchange operation
+     * @param id ID of the call
+     * @param deploy_wallet_grams Amount of EVER for a new TIP-3 wallet deploy
+     * @param expected_amount Minimum token amount after swap
+     * @param recipient Address of the receiver
+     * @return TvmCell Encoded payload for transfer
+     */
+    function buildExchangePayloadV2(
+        uint64 id,
+        uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        optional(address) recipient
+        address recipient
+    ) external pure returns (TvmCell);
+
+    /**
+     * @notice Build payload for TIP-3 token transfer with liquidity deposit operation
+     * @param id ID of the call
+     * @param deploy_wallet_grams Amount of EVER for a new TIP-3 wallet deploy
+     * @return TvmCell Encoded payload for transfer
+     */
+    function buildDepositLiquidityPayload(
+        uint64 id,
+        uint128 deploy_wallet_grams
     ) external pure returns (TvmCell);
 
     /**
@@ -50,11 +74,22 @@ interface IDexConstantProductPair is
      * @param recipient Address of the receiver
      * @return TvmCell Encoded payload for transfer
      */
-    function buildDepositLiquidityPayload(
+    function buildDepositLiquidityPayloadV2(
         uint64 id,
         uint128 deploy_wallet_grams,
-        optional(uint128) expected_amount,
-        optional(address) recipient
+        uint128 expected_amount,
+        address recipient
+    ) external pure returns (TvmCell);
+
+    /**
+     * @notice Build payload for TIP-3 token transfer with liquidity withdrawal operation
+     * @param id ID of the call
+     * @param deploy_wallet_grams Amount of EVER for a new TIP-3 wallet deploy
+     * @return TvmCell Encoded payload for transfer
+     */
+    function buildWithdrawLiquidityPayload(
+        uint64 id,
+        uint128 deploy_wallet_grams
     ) external pure returns (TvmCell);
 
     /**
@@ -66,12 +101,12 @@ interface IDexConstantProductPair is
      * @param recipient Address of the receiver
      * @return TvmCell Encoded payload for transfer
      */
-    function buildWithdrawLiquidityPayload(
+    function buildWithdrawLiquidityPayloadV2(
         uint64 id,
         uint128 deploy_wallet_grams,
-        optional(uint128) expected_left_amount,
-        optional(uint128) expected_right_amount,
-        optional(address) recipient
+        uint128 expected_left_amount,
+        uint128 expected_right_amount,
+        address recipient
     ) external pure returns (TvmCell);
 
     /**
@@ -80,14 +115,12 @@ interface IDexConstantProductPair is
      * @param deploy_wallet_grams Amount of EVER for a new TIP-3 wallet deploy
      * @param expected_amount Minimum token amount after the first swap
      * @param steps Next pairs' root and expected amount
-     * @param recipient Address of the receiver
      * @return TvmCell Encoded payload for transfer
      */
     function buildCrossPairExchangePayload(
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        TokenOperation[] steps,
-        optional(address) recipient
+        TokenOperation[] steps
     ) external pure returns (TvmCell);
 }

@@ -16,14 +16,12 @@ library PairPayload {
      * @param _id ID of the call
      * @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
      * @param _expectedAmount Minimum token amount after swap
-     * @param _recipient Address of the receiver
      * @return TvmCell Encoded payload for transfer
      */
     function buildExchangePayload(
         uint64 _id,
         uint128 _deployWalletGrams,
-        uint128 _expectedAmount,
-        address _recipient
+        uint128 _expectedAmount
     ) public returns (TvmCell) {
         TvmBuilder builder;
 
@@ -31,7 +29,6 @@ library PairPayload {
         builder.store(_id);
         builder.store(_deployWalletGrams);
         builder.store(_expectedAmount);
-        builder.store(_recipient);
 
         return builder.toCell();
     }
@@ -40,17 +37,19 @@ library PairPayload {
     /// @param _id ID of the call
     /// @param _deployWalletGrams Amount for new wallet deploy
     /// @param _expectedAmount Expected receive amount
+    /// @param _recipient Address of the receiver
+    /// @param _outcoming Received token root
     /// @return TvmCell Encoded payload
     function buildExchangePayloadV2(
         uint64 _id,
         uint128 _deployWalletGrams,
-        address _recipient,
         uint128 _expectedAmount,
+        address _recipient,
         address _outcoming
     ) public returns (TvmCell) {
         TvmBuilder builder;
 
-        builder.store(DexOperationTypes.EXCHANGE);
+        builder.store(DexOperationTypes.EXCHANGE_V2);
         builder.store(_id);
         builder.store(_deployWalletGrams);
         builder.store(_expectedAmount);
@@ -64,11 +63,30 @@ library PairPayload {
      * @notice Build payload for TIP-3 token transfer with liquidity deposit operation
      * @param _id ID of the call
      * @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
+     * @return TvmCell Encoded payload for transfer
+     */
+    function buildDepositLiquidityPayload(
+        uint64 _id,
+        uint128 _deployWalletGrams
+    ) public returns (TvmCell) {
+        TvmBuilder builder;
+
+        builder.store(DexOperationTypes.DEPOSIT_LIQUIDITY);
+        builder.store(_id);
+        builder.store(_deployWalletGrams);
+
+        return builder.toCell();
+    }
+
+    /**
+     * @notice Build payload for TIP-3 token transfer with liquidity deposit operation
+     * @param _id ID of the call
+     * @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
      * @param _expectedAmount Minimum LP token amount after deposit
      * @param _recipient Address of the receiver
      * @return TvmCell Encoded payload for transfer
      */
-    function buildDepositLiquidityPayload(
+    function buildDepositLiquidityPayloadV2(
         uint64 _id,
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
@@ -76,7 +94,7 @@ library PairPayload {
     ) public returns (TvmCell) {
         TvmBuilder builder;
 
-        builder.store(DexOperationTypes.DEPOSIT_LIQUIDITY);
+        builder.store(DexOperationTypes.DEPOSIT_LIQUIDITY_V2);
         builder.store(_id);
         builder.store(_deployWalletGrams);
         builder.store(_expectedAmount);
@@ -89,11 +107,30 @@ library PairPayload {
      * @notice Build payload for TIP-3 token transfer with liquidity withdrawal operation
      * @param _id ID of the call
      * @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
+     * @return TvmCell Encoded payload for transfer
+     */
+    function buildWithdrawLiquidityPayload(
+        uint64 _id,
+        uint128 _deployWalletGrams
+    ) public returns (TvmCell) {
+        TvmBuilder builder;
+
+        builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY);
+        builder.store(_id);
+        builder.store(_deployWalletGrams);
+
+        return builder.toCell();
+    }
+
+    /**
+     * @notice Build payload for TIP-3 token transfer with liquidity withdrawal operation
+     * @param _id ID of the call
+     * @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
      * @param _expectedAmounts Minimum pair's token amounts after withdrawal
      * @param _recipient Address of the receiver
      * @return TvmCell Encoded payload for transfer
      */
-    function buildWithdrawLiquidityPayload(
+    function buildWithdrawLiquidityPayloadV2(
         uint64 _id,
         uint128 _deployWalletGrams,
         uint128[] _expectedAmounts,
@@ -101,7 +138,6 @@ library PairPayload {
     ) public returns (TvmCell) {
         TvmBuilder builder;
 
-        // DexOperationTypes.WITHDRAW_LIQUIDITY for the previous versions of payloads (w/o _expectedAmounts and _recipient)
         builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY_V2);
         builder.store(_id);
         builder.store(_deployWalletGrams);
@@ -141,15 +177,13 @@ library PairPayload {
      * @param _deployWalletGrams Amount of EVER for a new TIP-3 wallet deploy
      * @param _expectedAmount Minimum token amount after the first swap
      * @param _steps Next pairs' root and expected amount
-     * @param _recipient Address of the receiver
      * @return TvmCell Encoded payload for transfer
      */
     function buildCrossPairExchangePayload(
         uint64 _id,
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
-        ITokenOperationStructure.TokenOperation[] _steps,
-        address _recipient
+        ITokenOperationStructure.TokenOperation[] _steps
     ) public returns (TvmCell) {
         // Check that at least 1 next pair is exists
         require(_steps.length > 0);
@@ -162,7 +196,6 @@ library PairPayload {
         builder.store(_deployWalletGrams);
         builder.store(_expectedAmount);
         builder.store(_steps[0].root);
-        builder.store(_recipient);
 
         // Pack data for next pairs
         TvmBuilder nextStepBuilder;

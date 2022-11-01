@@ -43,46 +43,76 @@ contract DexPair is DexPairBase, INextExchangeData {
     function buildExchangePayload(
         uint64 id,
         uint128 deploy_wallet_grams,
-        uint128 expected_amount,
-        optional(address) recipient
+        uint128 expected_amount
     ) external pure override returns (TvmCell) {
         return PairPayload.buildExchangePayload(
             id,
             deploy_wallet_grams,
+            expected_amount
+        );
+    }
+
+    function buildExchangePayloadV2(
+        uint64 id,
+        uint128 deploy_wallet_grams,
+        uint128 expected_amount,
+        address recipient
+    ) external pure override returns (TvmCell) {
+        return PairPayload.buildExchangePayloadV2(
+            id,
+            deploy_wallet_grams,
             expected_amount,
-            recipient.hasValue() ? recipient.get() : address(0)
+            recipient,
+            address(0)
         );
     }
 
     function buildDepositLiquidityPayload(
         uint64 id,
-        uint128 deploy_wallet_grams,
-        optional(uint128) expected_amount,
-        optional(address) recipient
+        uint128 deploy_wallet_grams
     ) external pure override returns (TvmCell) {
         return PairPayload.buildDepositLiquidityPayload(
             id,
+            deploy_wallet_grams
+        );
+    }
+
+    function buildDepositLiquidityPayloadV2(
+        uint64 id,
+        uint128 deploy_wallet_grams,
+        uint128 expected_amount,
+        address recipient
+    ) external pure override returns (TvmCell) {
+        return PairPayload.buildDepositLiquidityPayloadV2(
+            id,
             deploy_wallet_grams,
-            expected_amount.hasValue() ? expected_amount.get() : 0,
-            recipient.hasValue() ? recipient.get() : address(0)
+            expected_amount,
+            recipient
         );
     }
 
     function buildWithdrawLiquidityPayload(
         uint64 id,
-        uint128 deploy_wallet_grams,
-        optional(uint128) expected_left_amount,
-        optional(uint128) expected_right_amount,
-        optional(address) recipient
+        uint128 deploy_wallet_grams
     ) external pure override returns (TvmCell) {
         return PairPayload.buildWithdrawLiquidityPayload(
             id,
+            deploy_wallet_grams
+        );
+    }
+
+    function buildWithdrawLiquidityPayloadV2(
+        uint64 id,
+        uint128 deploy_wallet_grams,
+        uint128 expected_left_amount,
+        uint128 expected_right_amount,
+        address recipient
+    ) external pure override returns (TvmCell) {
+        return PairPayload.buildWithdrawLiquidityPayloadV2(
+            id,
             deploy_wallet_grams,
-            [
-                expected_left_amount.hasValue() ? expected_left_amount.get() : 0,
-                expected_right_amount.hasValue() ? expected_right_amount.get() : 0
-            ],
-            recipient.hasValue() ? recipient.get() : address(0)
+            [expected_left_amount, expected_right_amount],
+            recipient
         );
     }
 
@@ -90,15 +120,13 @@ contract DexPair is DexPairBase, INextExchangeData {
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        TokenOperation[] steps,
-        optional(address) recipient
+        TokenOperation[] steps
     ) external pure override returns (TvmCell) {
         return PairPayload.buildCrossPairExchangePayload(
             id,
             deploy_wallet_grams,
             expected_amount,
-            steps,
-            recipient.hasValue() ? recipient.get() : address(0)
+            steps
         );
     }
 
@@ -109,7 +137,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         address _outcoming,
         uint32[] _nextStepIndices,
         ExchangeStep[] _steps,
-        optional(address) _recipient
+        address _recipient
     ) external view returns (TvmCell) {
         address[] pools;
 
@@ -121,7 +149,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         return PairPayload.buildCrossPairExchangePayloadV2(
             _id,
             _deployWalletGrams,
-            _recipient.hasValue() ? _recipient.get() : address(0),
+            _recipient,
             _expectedAmount,
             _outcoming,
             _nextStepIndices,
@@ -1046,9 +1074,9 @@ contract DexPair is DexPairBase, INextExchangeData {
             NextExchangeData[] nextSteps
         ) = PairPayload.decodeOnAcceptTokensTransferData(_payload);
 
-        uint128 expectedAmount = 0;
-        if (expectedAmounts.length == 1) {
-            expectedAmount = expectedAmounts[0];
+        uint128 expectedAmount = expectedAmounts.length == 1 ? expectedAmounts[0] : 0;
+        if (expectedAmounts.length == 0) {
+            expectedAmounts = new uint128[](2);
         }
 
         // Set sender as recipient if it's empty
@@ -1078,7 +1106,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                 uint8 spentTokenIndex = _tokenRoot == _typeToRootAddresses[DexAddressType.RESERVE][0] ? 0 : 1;
                 uint8 receiveTokenIndex = _tokenRoot == _typeToRootAddresses[DexAddressType.RESERVE][0] ? 1 : 0;
 
-                if (op == DexOperationTypes.EXCHANGE) {
+                if (op == DexOperationTypes.EXCHANGE || op == DexOperationTypes.EXCHANGE_V2) {
                     // Calculate exchange result
                     (
                         uint128 amount,
@@ -1144,7 +1172,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                     } else {
                         needCancel = true;
                     }
-                } else if (op == DexOperationTypes.DEPOSIT_LIQUIDITY) {
+                } else if (op == DexOperationTypes.DEPOSIT_LIQUIDITY || op == DexOperationTypes.DEPOSIT_LIQUIDITY_V2) {
                     // Calculate deposit result
                     (
                         DepositLiquidityResult r,

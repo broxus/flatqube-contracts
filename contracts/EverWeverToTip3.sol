@@ -9,7 +9,7 @@ import "./libraries/EverToTip3Errors.sol";
 import "./libraries/EverToTip3Payloads.sol";
 
 import "./interfaces/IEverVault.sol";
-import "./structures/ITokenOperationStructure.sol";
+import "./structures/INextExchangeData.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
@@ -70,27 +70,6 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         );
     }
 
-    // Payload constructor swap Ever -> Tip-3 via cross-pair
-    function buildCrossPairExchangePayload(
-        address pair,
-        uint64 id,
-        uint128 deployWalletValue,
-        uint128 expectedAmount,
-        ITokenOperationStructure.TokenOperation[] steps,
-        uint128 amount,
-        optional(address) recipient
-    ) external pure returns (TvmCell) {
-        return EverToTip3Payloads.buildCrossPairExchangePayload(
-            pair,
-            id,
-            deployWalletValue,
-            expectedAmount,
-            steps,
-            amount,
-            recipient.hasValue() ? recipient.get() : address(0)
-        );
-    }
-
     // Payload constructor swap Ever -> Tip-3 via split-cross-pool
     function buildCrossPairExchangePayloadV2(
         address pool,
@@ -99,7 +78,7 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         uint128 expectedAmount,
         address outcoming,
         uint32[] nextStepIndices,
-        EverToTip3ExchangeStep[] steps,
+        EverToTip3Payloads.EverToTip3ExchangeStep[] steps,
         uint128 amount,
         optional(address) recipient
     ) external pure returns (TvmCell) {
