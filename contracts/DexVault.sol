@@ -18,6 +18,7 @@ import "./interfaces/IDexBasePool.sol";
 import "./interfaces/IDexAccount.sol";
 import "./interfaces/IUpgradable.sol";
 import "./interfaces/IResetGas.sol";
+import "./interfaces/IDexPairOperationCallback.sol";
 
 import "./structures/INextExchangeData.sol";
 
@@ -600,22 +601,38 @@ contract DexVault is
                 );
             }
         } else {
-            emit PairTransferTokensV2(
-                lpVaultWallet,
-                amount,
-                roots,
-                recipient
-            );
+            if (nextSteps.length == 0) {
+                emit PairTransferTokensV2(
+                    lpVaultWallet,
+                    amount,
+                    roots,
+                    recipient
+                );
+            } else {
+                IDexPairOperationCallback(senderAddress).dexPairOperationCancelled{
+                    value: DexGas.OPERATION_CALLBACK_BASE + 44,
+                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
+                }(id);
+
+                if (recipient != senderAddress) {
+                    IDexPairOperationCallback(recipient).dexPairOperationCancelled{
+                        value: DexGas.OPERATION_CALLBACK_BASE,
+                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                        bounce: false
+                    }(id);
+                }
+            }
 
             ITokenWallet(lpVaultWallet)
                 .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                 (
                     amount,
-                    recipient,
+                    nextSteps.length == 0 ? recipient : senderAddress,
                     deployWalletGrams,
                     remainingGasTo,
                     true,
-                    successPayload
+                    nextSteps.length == 0 ? successPayload : cancelPayload
                 );
         }
     }

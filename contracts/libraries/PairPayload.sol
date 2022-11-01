@@ -350,7 +350,11 @@ library PairPayload {
             }
 
             if (slice.bits() >= 267) {
-                recipient = slice.decode(address);
+                // prevent the possibility to set recipient at the same time as old operation type
+                recipient = op == DexOperationTypes.EXCHANGE
+                    || op == DexOperationTypes.DEPOSIT_LIQUIDITY
+                    || op == DexOperationTypes.WITHDRAW_LIQUIDITY
+                    || op == DexOperationTypes.CROSS_PAIR_EXCHANGE ? address(0) : slice.decode(address);
             }
 
             if (slice.bits() >= 267) {

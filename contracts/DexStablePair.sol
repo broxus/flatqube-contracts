@@ -1165,6 +1165,22 @@ contract DexStablePair is
                         );
                     }
                 } else {
+                    if (next_steps.length != 0) {
+                        IDexPairOperationCallback(sender_address).dexPairOperationCancelled{
+                        value: DexGas.OPERATION_CALLBACK_BASE + 44,
+                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                        bounce: false
+                        }(id);
+
+                        if (recipient != sender_address) {
+                            IDexPairOperationCallback(recipient).dexPairOperationCancelled{
+                            value: DexGas.OPERATION_CALLBACK_BASE,
+                            flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                            bounce: false
+                            }(id);
+                        }
+                    }
+
                     IDexVault(vault).transfer{
                         value: 0,
                         flag: MsgFlag.ALL_NOT_RESERVED
@@ -1172,10 +1188,10 @@ contract DexStablePair is
                         dy_result.amount,
                         tokenData[j].root,
                         tokenData[j].vaultWallet,
-                        recipient,
+                        next_steps.length == 0 ? recipient : sender_address,
                         deploy_wallet_grams,
                         true,
-                        success_payload,
+                        next_steps.length == 0 ? success_payload : cancel_payload,
                         tokenData[0].root,
                         tokenData[1].root,
                         current_version,

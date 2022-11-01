@@ -992,17 +992,32 @@ contract DexPair is DexPairBase, INextExchangeData {
                             );
                     }
                 } else {
-                    // Transfer final token to recipient
+                    if (nextSteps.length != 0) {
+                        IDexPairOperationCallback(_senderAddress).dexPairOperationCancelled{
+                            value: DexGas.OPERATION_CALLBACK_BASE + 44,
+                            flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                            bounce: false
+                        }(_id);
+
+                        if (_recipient != _senderAddress) {
+                            IDexPairOperationCallback(_recipient).dexPairOperationCancelled{
+                                value: DexGas.OPERATION_CALLBACK_BASE,
+                                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                                bounce: false
+                            }(_id);
+                        }
+                    }
+                    // Transfer final token to recipient in the case of success or to sender otherwise
                     IDexVault(_vaultRoot())
                         .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                         (
                             amount,
                             _tokenRoots()[receiveTokenIndex],
                             _typeToWalletAddresses[DexAddressType.VAULT][receiveTokenIndex],
-                            _recipient,
+                            nextSteps.length == 0 ? _recipient : _senderAddress,
                             _deployWalletGrams,
                             true,
-                            _successPayload,
+                            nextSteps.length == 0 ? _successPayload : _cancelPayload,
                             _tokenRoots()[spentTokenIndex],
                             _tokenRoots()[receiveTokenIndex],
                             _currentVersion,

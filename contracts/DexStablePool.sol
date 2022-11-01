@@ -1321,6 +1321,22 @@ contract DexStablePool is
                     } else {
                         uint8 j = tokenIndex[operation.root];
 
+                        if (next_steps.length != 0) {
+                            IDexPairOperationCallback(sender_address).dexPairOperationCancelled{
+                                value: DexGas.OPERATION_CALLBACK_BASE + 44,
+                                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                                bounce: false
+                            }(id);
+
+                            if (recipient != sender_address) {
+                                IDexPairOperationCallback(recipient).dexPairOperationCancelled{
+                                    value: DexGas.OPERATION_CALLBACK_BASE,
+                                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                                    bounce: false
+                                }(id);
+                            }
+                        }
+
                         IDexVault(vault).transferV2{
                             value: 0,
                             flag: MsgFlag.ALL_NOT_RESERVED
@@ -1328,10 +1344,10 @@ contract DexStablePool is
                             operation.amount,
                             tokenData[j].root,
                             tokenData[j].vaultWallet,
-                            recipient,
+                            next_steps.length == 0 ? recipient : sender_address,
                             deploy_wallet_grams,
                             true,
-                            success_payload,
+                            next_steps.length == 0 ? success_payload : cancel_payload,
                             _tokenRoots(),
                             current_version,
                             original_gas_to
