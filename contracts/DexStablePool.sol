@@ -409,7 +409,7 @@ contract DexStablePool is
                 uint8 i = tokenIndex[outcoming];
 
                 if (tokenIndex.exists(outcoming)) {
-                    result_opt = _expectedWithdrawLiquidityOneCoin(tokens_amount, i);
+                    result_opt = _expectedWithdrawLiquidityOneCoin(tokens_amount, i, _reserves(), lp_supply);
                 }
 
                 if (result_opt.hasValue()) {
@@ -573,7 +573,7 @@ contract DexStablePool is
                     if (outcoming == lp_root && token_root != lp_root) { // deposit liquidity
                         uint128[] amounts = new uint128[](N_COINS);
                         amounts[tokenIndex[token_root]] = tokens_amount;
-                        optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
+                        optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts, _reserves(), lp_supply);
 
                         if (!resultOpt.hasValue() || resultOpt.get().lp_reward < expected_amount) {
                             need_cancel = true;
@@ -616,7 +616,7 @@ contract DexStablePool is
                         optional(WithdrawResultV2) result_opt;
 
                         if (tokenIndex.exists(outcoming)) {
-                            result_opt = _expectedWithdrawLiquidityOneCoin(tokens_amount, tokenIndex[outcoming]);
+                            result_opt = _expectedWithdrawLiquidityOneCoin(tokens_amount, tokenIndex[outcoming], _reserves(), lp_supply);
                         }
 
                         if (!result_opt.hasValue() || result_opt.get().amounts[tokenIndex[outcoming]] < expected_amount) {
@@ -739,7 +739,7 @@ contract DexStablePool is
                 && msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + deploy_wallet_grams) {
                 uint128[] amounts = new uint128[](N_COINS);
                 amounts[tokenIndex[token_root]] = tokens_amount;
-                optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
+                optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts, _reserves(), lp_supply);
 
                 if (!resultOpt.hasValue() || resultOpt.get().lp_reward < expected_amount) {
                     need_cancel = true;
@@ -810,7 +810,7 @@ contract DexStablePool is
     function expectedDepositLiquidityV2(
         uint128[] amounts
     ) override external view responsible returns (DepositLiquidityResultV2) {
-        optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
+        optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts, _reserves(), lp_supply);
         require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } resultOpt.get();
     }
@@ -843,7 +843,7 @@ contract DexStablePool is
         for (TokenOperation op: _operations) {
             amounts.push(op.amount);
         }
-        optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
+        optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts, _reserves(), lp_supply);
         require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
         DepositLiquidityResultV2 result = resultOpt.get();
         require(result.lp_reward >= _expected.amount, DexErrors.WRONG_LIQUIDITY);
@@ -889,7 +889,7 @@ contract DexStablePool is
     ) override external view responsible returns (WithdrawResultV2) {
         require(tokenIndex.exists(outcoming), DexErrors.NOT_TOKEN_ROOT);
 
-        optional(WithdrawResultV2) resultOpt = _expectedWithdrawLiquidityOneCoin(lp_amount, tokenIndex[outcoming]);
+        optional(WithdrawResultV2) resultOpt = _expectedWithdrawLiquidityOneCoin(lp_amount, tokenIndex[outcoming], _reserves(), lp_supply);
         require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
 
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } resultOpt.get();
@@ -908,7 +908,7 @@ contract DexStablePool is
 
         optional(WithdrawResultV2) resultOpt;
         if (_expected.length == 1) {
-            resultOpt = _expectedWithdrawLiquidityOneCoin(_operation.amount, tokenIndex[_expected[0].root]);
+            resultOpt = _expectedWithdrawLiquidityOneCoin(_operation.amount, tokenIndex[_expected[0].root], _reserves(), lp_supply);
         } else {
             resultOpt = _expectedWithdrawLiquidity(_operation.amount);
         }
@@ -1145,7 +1145,7 @@ contract DexStablePool is
             if (outcoming == lp_root && spent_token_root != lp_root) { // deposit liquidity
                 uint128[] amounts = new uint128[](N_COINS);
                 amounts[tokenIndex[spent_token_root]] = spent_amount;
-                optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
+                optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts, _reserves(), lp_supply);
 
                 if (!resultOpt.hasValue() || resultOpt.get().lp_reward < expected_amount) {
                     need_cancel = true;
@@ -1187,7 +1187,7 @@ contract DexStablePool is
                 optional(WithdrawResultV2) result_opt;
 
                 if (tokenIndex.exists(outcoming)) {
-                    result_opt = _expectedWithdrawLiquidityOneCoin(spent_amount, tokenIndex[outcoming]);
+                    result_opt = _expectedWithdrawLiquidityOneCoin(spent_amount, tokenIndex[outcoming], _reserves(), lp_supply);
                 }
 
                 if (!result_opt.hasValue() || result_opt.get().amounts[tokenIndex[outcoming]] < expected_amount) {
@@ -1733,6 +1733,99 @@ contract DexStablePool is
         return result;
     }
 
+    function getDepositPriceImpact(
+        uint128 amount,
+        address spent_token_root,
+        uint128 price_amount
+    ) external view returns (optional(uint256)) {
+        optional(uint256) result;
+
+        if (tokenIndex.exists(spent_token_root) && price_amount != 0 && amount != 0) {
+
+            uint8 i = tokenIndex[spent_token_root];
+            uint128[] reserves_mem = _reserves();
+
+            uint128[] price_amounts = new uint128[](N_COINS);
+            price_amounts[i] = price_amount;
+
+            uint128[] amounts = new uint128[](N_COINS);
+            amounts[i] = amount;
+
+            optional(DepositLiquidityResultV2) old_price_res = _expectedDepositLiquidity(price_amounts, reserves_mem, lp_supply);
+
+            optional(DepositLiquidityResultV2) result_opt = _expectedDepositLiquidity(amounts, reserves_mem, lp_supply);
+
+            if (
+                result_opt.hasValue() &&
+                old_price_res.hasValue()
+            ) {
+                uint128 old_price = old_price_res.get().lp_reward;
+                DepositLiquidityResultV2 deposit_result = result_opt.get();
+
+                for (uint8 idx = 0; idx < N_COINS; idx++) {
+                    reserves_mem[idx] = deposit_result.result_balances[idx];
+                }
+                uint128 new_lp_supply = lp_supply + deposit_result.lp_reward;
+
+                optional(DepositLiquidityResultV2) new_price_res = _expectedDepositLiquidity(price_amounts, reserves_mem, new_lp_supply);
+
+                if (new_price_res.hasValue()) {
+                    result.set(
+                        math.muldiv(
+                            uint256(old_price - new_price_res.get().lp_reward),
+                            10**20,
+                            old_price
+                        )
+                    );
+                }
+            }
+        }
+
+        return result;
+    }
+
+    function getWithdrawalPriceImpact(
+        uint128 amount,
+        address receive_token_root,
+        uint128 price_amount
+    ) external view returns (optional(uint256)) {
+        optional(uint256) result;
+
+        if (tokenIndex.exists(receive_token_root) && price_amount != 0 && amount != 0 && amount + price_amount <= lp_supply) {
+
+            uint8 j = tokenIndex[receive_token_root];
+            uint128[] reserves_mem = _reserves();
+
+            optional(WithdrawResultV2) old_price_res = _expectedWithdrawLiquidityOneCoin(price_amount, j, reserves_mem, lp_supply);
+
+            optional(WithdrawResultV2) result_opt = _expectedWithdrawLiquidityOneCoin(amount, j, reserves_mem, lp_supply);
+
+            if (
+                result_opt.hasValue() &&
+                old_price_res.hasValue()
+            ) {
+                uint128 old_price = old_price_res.get().amounts[j];
+                WithdrawResultV2 withdrawal_result = result_opt.get();
+
+                reserves_mem[j] = withdrawal_result.result_balances[j];
+                uint128 new_lp_supply = lp_supply - withdrawal_result.lp_amount;
+
+                optional(WithdrawResultV2) new_price_res = _expectedWithdrawLiquidityOneCoin(price_amount, j, reserves_mem, new_lp_supply);
+
+                if (new_price_res.hasValue()) {
+                    result.set(
+                        math.muldiv(
+                            uint256(old_price - new_price_res.get().amounts[j]),
+                            10**20,
+                            old_price
+                        )
+                    );
+                }
+            }
+        }
+
+        return result;
+    }
 
     // Stable math ##############################################
     function _get_D(uint256[] _xp) internal view returns(optional(uint256)) {
@@ -1929,10 +2022,8 @@ contract DexStablePool is
         emit Sync(_reserves(), lp_supply);
     }
 
-    function _expectedDepositLiquidity(uint128[] _amounts) private view returns(optional(DepositLiquidityResultV2)) {
+    function _expectedDepositLiquidity(uint128[] _amounts, uint128[] old_balances, uint128 old_lp_supply) private view returns(optional(DepositLiquidityResultV2)) {
         optional(DepositLiquidityResultV2) result;
-
-        uint128[] old_balances = _reserves();
 
         optional(uint256) D0_opt = _get_D(_xp_mem(old_balances));
 
@@ -1959,7 +2050,7 @@ contract DexStablePool is
         optional(uint256) D1_opt = _get_D(_xp_mem(new_balances));
 
         //  # dev: initial deposit requires all coins
-        if (lp_supply == 0 && hasZeroBalance || !D0_opt.hasValue() || !D1_opt.hasValue()) {
+        if (old_lp_supply == 0 && hasZeroBalance || !D0_opt.hasValue() || !D1_opt.hasValue()) {
             return result;
         }
 
@@ -1972,7 +2063,7 @@ contract DexStablePool is
 
         optional(uint256) D2_opt;
 
-        if (lp_supply > 0) {
+        if (old_lp_supply > 0) {
             uint128 fee_numerator = math.muldiv(fee.pool_numerator + fee.beneficiary_numerator, N_COINS, (4 * (N_COINS - 1)));
 
             for (uint8 i = 0; i < N_COINS; i++) {
@@ -1989,7 +2080,7 @@ contract DexStablePool is
             }
             D2_opt = _get_D(_xp_mem(new_balances));
             if (D2_opt.hasValue()) {
-                lp_reward = uint128(math.muldiv(lp_supply, (D2_opt.get() - D0), D0));
+                lp_reward = uint128(math.muldiv(old_lp_supply, (D2_opt.get() - D0), D0));
             }
         } else {
             D2_opt.set(D1);
@@ -2139,7 +2230,7 @@ contract DexStablePool is
         return result;
     }
 
-    function _expectedWithdrawLiquidityOneCoin(uint128 token_amount, uint8 i) internal view returns(optional(WithdrawResultV2)) {
+    function _expectedWithdrawLiquidityOneCoin(uint128 token_amount, uint8 i, uint128[] old_balances, uint128 old_lp_supply) internal view returns(optional(WithdrawResultV2)) {
         AmplificationCoefficient amp = A;
         uint128 fee_numerator = math.muldiv(fee.pool_numerator + fee.beneficiary_numerator, N_COINS, (4 * (N_COINS - 1)));
 
@@ -2151,7 +2242,6 @@ contract DexStablePool is
         bool[] sell = new bool[](N_COINS);
         uint128[] amounts = new uint128[](N_COINS);
 
-        uint128[] old_balances = _reserves();
         uint256[] xp_mem = _xp_mem(old_balances);
 
         uint128[] result_balances = old_balances;
@@ -2159,7 +2249,7 @@ contract DexStablePool is
         optional(uint256) D0_opt = _get_D(xp_mem);
         uint256 D0 = D0_opt.get();
 
-        optional(uint256) D1_opt = D0 - math.muldiv(token_amount, D0, lp_supply);
+        optional(uint256) D1_opt = D0 - math.muldiv(token_amount, D0, old_lp_supply);
         uint256 D1 = D1_opt.get();
 
         uint256[] xp_reduced = xp_mem;
