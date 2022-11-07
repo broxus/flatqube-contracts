@@ -1017,7 +1017,9 @@ contract DexPair is DexPairBase, INextExchangeData {
                             nextSteps.length == 0 ? _recipient : _senderAddress,
                             _deployWalletGrams,
                             true,
-                            nextSteps.length == 0 ? _successPayload : _cancelPayload,
+                            nextSteps.length == 0
+                                ? PairPayload.buildSuccessPayload(_op, _successPayload, _senderAddress)
+                                : PairPayload.buildCancelPayload(_op, 0, _cancelPayload, nextSteps), // todo add error code
                             _tokenRoots()[spentTokenIndex],
                             _tokenRoots()[receiveTokenIndex],
                             _currentVersion,
@@ -1052,7 +1054,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                         _senderAddress,
                         _deployWalletGrams,
                         true,
-                        _cancelPayload,
+                        PairPayload.buildCancelPayload(_op, 0, _cancelPayload, nextSteps), // todo add error code,
                         _tokenRoots()[spentTokenIndex],
                         _tokenRoots()[receiveTokenIndex],
                         _currentVersion,
@@ -1178,7 +1180,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                                 recipient,
                                 deployWalletGrams,
                                 notifySuccess,
-                                successPayload,
+                                PairPayload.buildSuccessPayload(op, successPayload, _senderAddress),
                                 _tokenRoots()[spentTokenIndex],
                                 _tokenRoots()[receiveTokenIndex],
                                 _currentVersion,
@@ -1253,7 +1255,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                                 deployWalletGrams,
                                 _remainingGasTo,
                                 notifySuccess,
-                                successPayload
+                                PairPayload.buildSuccessPayload(op, successPayload, _senderAddress)
                             );
                     } else {
                         needCancel = true;
@@ -1402,7 +1404,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                         _remainingGasTo,
                         deployWalletGrams,
                         notifySuccess,
-                        successPayload
+                        PairPayload.buildSuccessPayload(op, successPayload, _senderAddress)
                     );
 
                     // Burn LP tokens
@@ -1448,7 +1450,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                     _senderWallet,
                     _remainingGasTo,
                     notifyCancel,
-                    cancelPayload
+                    PairPayload.buildCancelPayload(op, 0, cancelPayload, nextSteps) // todo add error code
                 );
         }
     }

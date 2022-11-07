@@ -384,7 +384,7 @@ contract DexStablePool is
                                     recipient,
                                     deploy_wallet_grams,
                                     notify_success,
-                                    success_payload,
+                                    PairPayload.buildSuccessPayload(op, success_payload, sender_address),
                                     _tokenRoots(),
                                     current_version,
                                     original_gas_to
@@ -430,7 +430,7 @@ contract DexStablePool is
                             recipient,
                             deploy_wallet_grams,
                             notify_success,
-                            success_payload,
+                            PairPayload.buildSuccessPayload(op, success_payload, sender_address),
                             _tokenRoots(),
                             current_version,
                             original_gas_to
@@ -535,7 +535,7 @@ contract DexStablePool is
                         recipient,
                         deploy_wallet_grams,
                         notify_success,
-                        success_payload,
+                        PairPayload.buildSuccessPayload(op, success_payload, sender_address),
                         _tokenRoots(),
                         current_version,
                         original_gas_to
@@ -768,7 +768,7 @@ contract DexStablePool is
                         deploy_wallet_grams,
                         original_gas_to,
                         notify_success,
-                        success_payload
+                        PairPayload.buildSuccessPayload(op, success_payload, sender_address)
                     );
                 }
             } else {
@@ -796,7 +796,7 @@ contract DexStablePool is
                 sender_wallet,
                 original_gas_to,
                 notify_cancel,
-                cancel_payload
+                PairPayload.buildCancelPayload(op, 0, cancel_payload, next_steps) // todo add error code
             );
         } else {
             _sync();
@@ -1347,7 +1347,9 @@ contract DexStablePool is
                             next_steps.length == 0 ? recipient : sender_address,
                             deploy_wallet_grams,
                             true,
-                            next_steps.length == 0 ? success_payload : cancel_payload,
+                            next_steps.length == 0
+                                ? PairPayload.buildSuccessPayload(op, success_payload, sender_address)
+                                : PairPayload.buildCancelPayload(op, 0, cancel_payload, next_steps), // todo add error code
                             _tokenRoots(),
                             current_version,
                             original_gas_to
@@ -1382,7 +1384,7 @@ contract DexStablePool is
                 sender_address,
                 deploy_wallet_grams,
                 true,
-                cancel_payload,
+                PairPayload.buildCancelPayload(op, 0, cancel_payload, next_steps),
                 _tokenRoots(),
                 current_version,
                 original_gas_to

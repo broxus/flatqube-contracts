@@ -415,7 +415,7 @@ contract DexStablePair is
                                     recipient,
                                     deploy_wallet_grams,
                                     notify_success,
-                                    success_payload,
+                                    PairPayload.buildSuccessPayload(op, success_payload, sender_address),
                                     tokenData[0].root,
                                     tokenData[1].root,
                                     current_version,
@@ -518,7 +518,7 @@ contract DexStablePair is
                             recipient,
                             deploy_wallet_grams,
                             notify_success,
-                            success_payload,
+                            PairPayload.buildSuccessPayload(op, success_payload, sender_address),
                             tokenData[0].root,
                             tokenData[1].root,
                             current_version,
@@ -673,7 +673,7 @@ contract DexStablePair is
                             deploy_wallet_grams,
                             original_gas_to,
                             notify_success,
-                            success_payload
+                            PairPayload.buildSuccessPayload(op, success_payload, sender_address)
                         );
                     }
                 } else {
@@ -694,7 +694,7 @@ contract DexStablePair is
                 sender_wallet,
                 original_gas_to,
                 notify_cancel,
-                cancel_payload
+                PairPayload.buildCancelPayload(op, 0, success_payload, next_steps) // todo add error code
             );
         } else {
             _sync();
@@ -1191,7 +1191,9 @@ contract DexStablePair is
                         next_steps.length == 0 ? recipient : sender_address,
                         deploy_wallet_grams,
                         true,
-                        next_steps.length == 0 ? success_payload : cancel_payload,
+                        next_steps.length == 0
+                            ? PairPayload.buildSuccessPayload(op, success_payload, sender_address)
+                            : PairPayload.buildCancelPayload(op, 0, cancel_payload, next_steps), // todo add error code
                         tokenData[0].root,
                         tokenData[1].root,
                         current_version,
@@ -1228,7 +1230,7 @@ contract DexStablePair is
                 sender_address,
                 deploy_wallet_grams,
                 true,
-                cancel_payload,
+                PairPayload.buildCancelPayload(op, 0, cancel_payload, next_steps), // todo add error code,
                 tokenData[0].root,
                 tokenData[1].root,
                 current_version,

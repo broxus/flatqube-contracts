@@ -25,6 +25,7 @@ import "./structures/INextExchangeData.sol";
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
 import "./libraries/DexOperationTypes.sol";
+import "./libraries/PairPayload.sol";
 
 contract DexVault is
     DexContractBase,
@@ -514,6 +515,8 @@ contract DexVault is
         address lpVaultWallet = payloadSlice.decode(address);
         require(msg.sender.value != 0 && msg.sender == lpVaultWallet, DexErrors.NOT_LP_VAULT_WALLET);
 
+        uint8 op = DexOperationTypes.CROSS_PAIR_EXCHANGE_V2;
+
         TvmCell exchangeData = payloadSlice.loadRef();
 
         (uint64 id,
@@ -583,7 +586,7 @@ contract DexVault is
 
                     roots,
 
-                    DexOperationTypes.CROSS_PAIR_EXCHANGE_V2,
+                    op,
                     tokenRoot,
                     nextPoolAmount,
 
@@ -632,7 +635,9 @@ contract DexVault is
                     deployWalletGrams,
                     remainingGasTo,
                     true,
-                    nextSteps.length == 0 ? successPayload : cancelPayload
+                    nextSteps.length == 0
+                        ? PairPayload.buildSuccessPayload(op, successPayload, senderAddress)
+                        : PairPayload.buildCancelPayload(op, 0, cancelPayload, nextSteps) // todo add error code
                 );
         }
     }

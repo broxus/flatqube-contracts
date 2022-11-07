@@ -497,4 +497,68 @@ library PairPayload {
             nextSteps
         );
     }
+
+    function buildCancelPayload(
+        uint8 op,
+        uint16 errorCode,
+        TvmCell origPayload,
+        INextExchangeData.NextExchangeData[] nextSteps
+    ) public returns (TvmCell) {
+        if (op == DexOperationTypes.EXCHANGE
+            || op == DexOperationTypes.DEPOSIT_LIQUIDITY
+            || op == DexOperationTypes.WITHDRAW_LIQUIDITY
+            || op == DexOperationTypes.CROSS_PAIR_EXCHANGE) {
+
+            return origPayload;
+        }
+
+        TvmBuilder builder;
+
+        builder.store(uint8(200)); // code for V2 Operation type
+        builder.store(op);
+        builder.store(errorCode);
+        builder.store(origPayload);
+
+        if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
+            TvmBuilder data;
+
+            uint32 leaves = 0;
+            for (INextExchangeData.NextExchangeData step: nextSteps) {
+                leaves += step.leaves;
+            }
+            data.store(leaves);
+
+            builder.store(data.toCell());
+            builder.store(abi.encode(nextSteps));
+        }
+
+        return builder.toCell();
+    }
+
+    function buildSuccessPayload(
+        uint8 op,
+        TvmCell origPayload,
+        address senderAddress
+    ) public returns (TvmCell) {
+        if (op == DexOperationTypes.EXCHANGE
+            || op == DexOperationTypes.DEPOSIT_LIQUIDITY
+            || op == DexOperationTypes.WITHDRAW_LIQUIDITY
+            || op == DexOperationTypes.CROSS_PAIR_EXCHANGE) {
+
+            return origPayload;
+        }
+
+        TvmBuilder builder;
+
+        builder.store(uint8(200)); // code for V2 Operation type
+        builder.store(op);
+        builder.store(origPayload);
+
+        TvmBuilder data;
+        data.store(senderAddress);
+
+        builder.store(data.toCell());
+
+        return builder.toCell();
+    }
 }
