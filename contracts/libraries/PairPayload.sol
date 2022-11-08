@@ -514,7 +514,7 @@ library PairPayload {
 
         TvmBuilder builder;
 
-        builder.store(uint8(200)); // code for V2 Operation type
+        builder.store(uint8(201)); // code for V2 Operation type
         builder.store(op);
         builder.store(errorCode);
         builder.store(origPayload);
