@@ -248,6 +248,8 @@ library PairPayload {
 
         INextExchangeData.NextExchangeData[] nextSteps;
         for (uint32 idx : _nextStepIndices) {
+            require(idx < _steps.length);
+
             (TvmCell nextPayload, uint32 nestedNodes, uint32 leaves) = _encodeCrossPairExchangeData(_steps, _pools, idx);
             nextSteps.push(INextExchangeData.NextExchangeData(
                 _steps[idx].numerator,
@@ -273,6 +275,8 @@ library PairPayload {
         uint32 nextLevelNodes = 0;
         uint32 nextLevelLeaves = 0;
         for (uint32 idx : _steps[_currentIdx].nextStepIndices) {
+            require(idx < _steps.length);
+
             (TvmCell nextPayload, uint32 nestedNodes, uint32 leaves) = _encodeCrossPairExchangeData(_steps, _pools, idx);
             nextLevelNodes += nestedNodes;
             nextLevelLeaves += leaves;
