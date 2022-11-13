@@ -13,6 +13,8 @@ import "./libraries/DexOperationTypes.sol";
 import "./interfaces/IOrder.sol";
 import "./interfaces/IHasEmergencyMode.sol";
 import "./interfaces/IDexRoot.sol";
+import "./interfaces/IOrderOperationCallback.sol";
+
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
@@ -264,8 +266,8 @@ contract Order is
 		} else {
 			if ((msg.sender.value != 0 && msg.sender == receiveWallet) && state == OrderStatus.Active) {
 				TvmSlice payloadSlice = payload.toSlice();
-				if (payloadSlice.bits() >= 128) {
-					uint128 deployWalletValue = payloadSlice.decode(uint128);
+				if (payloadSlice.bits() >= 192) {
+					(uint128 deployWalletValue, uint64 callId) = payloadSlice.decode(uint128, uint64);
 					if (
 						msg.value >=
 						OrderGas.FILL_ORDER_MIN_VALUE + deployWalletValue
@@ -346,6 +348,20 @@ contract Order is
 									currentAmountSpentToken,
 									currentAmountReceiveToken
 								);
+
+								//TODO Callback
+								IOrderOperationCallback(msg.sender).orderPartExchangeSuccess{
+									value: OrderGas.OPERATION_CALLBACK_BASE + 2,
+                					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                					bounce: false
+            					}
+								(callId, true, PartExchangeResult(
+									spentToken,
+									transferAmount,
+									receiveToken,
+									amount,
+									currentAmountSpentToken,
+									currentAmountReceiveToken));
 							}
 
 							ITokenWallet(receiveWallet).transfer{

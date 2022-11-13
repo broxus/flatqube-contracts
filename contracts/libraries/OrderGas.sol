@@ -15,4 +15,5 @@ library OrderGas {
     uint128 constant SWAP_MIN_VALUE                  = 5 ever;
     uint128 constant MANAGE_EMERGENCY_MODE_MIN_VALUE = 0.3 ever;
     uint128 constant UPDATE_ORDER_ROOT               = 1 ever;
+    uint128 constant OPERATION_CALLBACK_BASE         = 0.1 ever;
 }
