@@ -1069,7 +1069,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                         _senderAddress,
                         _deployWalletGrams,
                         true,
-                        PairPayload.buildCancelPayload(_op, 0, _cancelPayload, nextSteps), // todo add error code,
+                        PairPayload.buildCancelPayload(_op, errorCode, _cancelPayload, nextSteps),
                         _tokenRoots()[spentTokenIndex],
                         _tokenRoots()[receiveTokenIndex],
                         _currentVersion,

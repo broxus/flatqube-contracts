@@ -526,10 +526,12 @@ library PairPayload {
         if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
             TvmBuilder data;
 
-            uint32 leaves = 0;
+            // if there are no next steps leaves = 1
+            uint32 leaves = nextSteps.length == 0 ? 1 : 0;
             for (INextExchangeData.NextExchangeData step: nextSteps) {
                 leaves += step.leaves;
             }
+
             data.store(leaves);
 
             builder.store(data.toCell());

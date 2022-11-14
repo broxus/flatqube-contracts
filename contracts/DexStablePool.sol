@@ -912,7 +912,7 @@ contract DexStablePool is
     function expectedOneCoinWithdrawalSpendAmount(
         uint128 receive_amount,
         address receive_token_root
-    ) external view responsible returns (uint128 lp_amount) {
+    ) external view responsible returns (uint128 lp) {
         require(tokenIndex.exists(receive_token_root), DexErrors.NOT_TOKEN_ROOT);
         uint8 i = tokenIndex[receive_token_root];
 
