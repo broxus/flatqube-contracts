@@ -26,6 +26,7 @@ import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
 import "./libraries/DexOperationTypes.sol";
 import "./libraries/PairPayload.sol";
+import "./libraries/DirectOperationErrors.sol";
 
 contract DexVault is
     DexContractBase,
@@ -541,7 +542,7 @@ contract DexVault is
             cancelPayload = payloadSlice.loadRef();
         }
 
-        bool needCancel = false;
+        uint16 errorCode = 0;
 
         uint256 denominator = 0;
         address prevPool = _expectedPairAddress(roots);
@@ -554,7 +555,7 @@ contract DexVault is
             if (nextStep.poolRoot.value == 0 || nextStep.poolRoot == prevPool ||
                 nextStep.numerator == 0 || nextStep.leaves == 0) {
 
-                needCancel = true;
+                errorCode = DirectOperationErrors.INVALID_NEXT_STEPS;
                 break;
             }
             if (nextStep.nestedNodes > maxNestedNodes) {
@@ -566,7 +567,11 @@ contract DexVault is
             allLeaves += nextStep.leaves;
         }
 
-        if (!needCancel && nextSteps.length > 0 && msg.value >= DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * allNestedNodes + 0.1 ton) {
+        if (errorCode == 0 && msg.value < DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * allNestedNodes + 0.1 ton) {
+            errorCode = DirectOperationErrors.VALUE_TOO_LOW;
+        }
+
+        if (errorCode == 0 && nextSteps.length > 0) {
             uint128 extraValue = msg.value - DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * allNestedNodes - 0.1 ton;
 
             for (uint32 i = 0; i < nextSteps.length; i++) {
@@ -637,7 +642,7 @@ contract DexVault is
                     true,
                     nextSteps.length == 0
                         ? PairPayload.buildSuccessPayload(op, successPayload, senderAddress)
-                        : PairPayload.buildCancelPayload(op, 0, cancelPayload, nextSteps) // todo add error code
+                        : PairPayload.buildCancelPayload(op, errorCode, cancelPayload, nextSteps)
                 );
         }
     }

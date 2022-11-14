@@ -19,6 +19,7 @@ import "./libraries/DexOperationTypes.sol";
 import "./libraries/PairPayload.sol";
 import "./libraries/DexAddressType.sol";
 import "./libraries/DexReserveType.sol";
+import "./libraries/DirectOperationErrors.sol";
 
 import "./interfaces/IUpgradableByRequest.sol";
 import "./interfaces/IDexRoot.sol";
@@ -333,7 +334,7 @@ contract DexStablePair is
 
         // Decode base data from payload
         (
-            bool is_valid,
+            bool is_payload_valid,
             uint8 op,
             uint64 id,
             uint128 deploy_wallet_grams,
@@ -363,29 +364,16 @@ contract DexStablePair is
 
         TvmCell empty;
 
-        bool need_cancel = !active ||
-        !is_valid ||
-        lp_supply == 0 ||
-        msg.sender.value == 0 ||
-        msg.value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + deploy_wallet_grams;
+        uint16 errorCode = _checkOperationData(msg.sender, msg.value, is_payload_valid, deploy_wallet_grams, op, token_root);
 
-        if (token_root == lp_root) {
-            need_cancel = need_cancel || msg.sender != lp_wallet;
-        } else {
-            need_cancel = need_cancel ||
-            !tokenIndex.exists(token_root) ||
-            msg.sender != tokenData[tokenIndex.at(token_root)].wallet;
-        }
-
-        if (!need_cancel) {
+        if (errorCode == 0) {
             if (msg.sender == lp_wallet) {
-                if ((op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) &&
-                    msg.value >= DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + N_COINS * deploy_wallet_grams) {
+                if (op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
 
                     optional(TokenOperation[]) operationsOpt = _withdrawLiquidityBase(tokens_amount, expected_amounts, sender_address, recipient);
 
                     if (!operationsOpt.hasValue()) {
-                        need_cancel = true;
+                        errorCode = DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
                     } else {
                         TokenOperation[] operations = operationsOpt.get();
 
@@ -432,7 +420,7 @@ contract DexStablePair is
                         );
                     }
                 } else {
-                    need_cancel = true;
+                    errorCode = DirectOperationErrors.WRONG_OPERATION_TYPE;
                 }
             } else {
                 uint8 i = tokenIndex[token_root];
@@ -441,8 +429,10 @@ contract DexStablePair is
                 if (op == DexOperationTypes.EXCHANGE || op == DexOperationTypes.EXCHANGE_V2) {
                     optional(ExpectedExchangeResult) dy_result_opt = _get_dy(i, j, tokens_amount);
 
-                    if (!dy_result_opt.hasValue() || dy_result_opt.get().amount < expected_amount) {
-                        need_cancel = true;
+                    if (!dy_result_opt.hasValue()){
+                        errorCode = DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
+                    } else if (dy_result_opt.get().amount < expected_amount) {
+                        errorCode = DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
                     } else {
                         ExpectedExchangeResult dy_result = dy_result_opt.get();
 
@@ -525,12 +515,11 @@ contract DexStablePair is
                             original_gas_to
                         );
                     }
-                } else if (
-                   (op == DexOperationTypes.CROSS_PAIR_EXCHANGE ||
-                   op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) &&
-                   next_steps.length > 0
-                ) {
-                    if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE) {
+                } else if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE || op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
+
+                    if (next_steps.length == 0) errorCode = DirectOperationErrors.INVALID_NEXT_STEPS;
+
+                    if (errorCode == 0 && op == DexOperationTypes.CROSS_PAIR_EXCHANGE) {
                         // actually poolRoot is a tokenRoot here, so
                         next_steps[0].poolRoot = _expectedPairAddress([tokenData[j].root, next_steps[0].poolRoot]);
                     }
@@ -547,7 +536,7 @@ contract DexStablePair is
                         if (next_step.poolRoot.value == 0 || next_step.poolRoot == address(this) ||
                             next_step.numerator == 0 || next_step.leaves == 0) {
 
-                            need_cancel = true;
+                            errorCode = DirectOperationErrors.INVALID_NEXT_STEPS;
                             break;
                         }
                         if (next_step.nestedNodes > max_nested_nodes) {
@@ -559,14 +548,17 @@ contract DexStablePair is
                         all_leaves += next_step.leaves;
                     }
 
-                    if (
-                        !dy_result_opt.hasValue() ||
-                        dy_result_opt.get().amount < expected_amount ||
-                        msg.value < DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * (1 + all_nested_nodes) ||
-                        need_cancel
-                    ) {
-                        need_cancel = true;
-                    } else {
+                    if (errorCode == 0) {
+                        if (msg.value < DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * (1 + all_nested_nodes)) {
+                            errorCode = DirectOperationErrors.VALUE_TOO_LOW;
+                        } else if (!dy_result_opt.hasValue()) {
+                            errorCode = DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
+                        } else if (dy_result_opt.get().amount < expected_amount) {
+                            errorCode = DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
+                        }
+                    }
+
+                    if (errorCode == 0) {
                         ExpectedExchangeResult dy_result = dy_result_opt.get();
 
                         tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee;
@@ -646,8 +638,10 @@ contract DexStablePair is
                     amounts[j] = 0;
                     optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
 
-                    if (!resultOpt.hasValue() || resultOpt.get().lp_reward < expected_amount) {
-                        need_cancel = true;
+                    if (!resultOpt.hasValue()) {
+                        errorCode = DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
+                    } else if (resultOpt.get().lp_reward < expected_amount) {
+                        errorCode = DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
                     } else {
                         DepositLiquidityResultV2 result = resultOpt.get();
                         _applyAddLiquidity(result, id, false, sender_address, recipient);
@@ -677,12 +671,12 @@ contract DexStablePair is
                         );
                     }
                 } else {
-                    need_cancel = true;
+                    errorCode = DirectOperationErrors.WRONG_OPERATION_TYPE;
                 }
             }
         }
 
-        if (need_cancel) {
+        if (errorCode != 0) {
             IDexPairOperationCallback(sender_address).dexPairOperationCancelled{
                 value: DexGas.OPERATION_CALLBACK_BASE + 44,
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -694,11 +688,46 @@ contract DexStablePair is
                 sender_wallet,
                 original_gas_to,
                 notify_cancel,
-                PairPayload.buildCancelPayload(op, 0, success_payload, next_steps) // todo add error code
+                PairPayload.buildCancelPayload(op, errorCode, success_payload, next_steps)
             );
         } else {
             _sync();
         }
+    }
+
+    function _checkOperationData(
+        address msg_sender,
+        uint128 msg_value,
+        bool is_payload_valid,
+        uint128 deploy_wallet_grams,
+        uint8 op,
+        address token_root
+    ) private view returns (uint16) {
+
+        if (!active) return DirectOperationErrors.NOT_ACTIVE;
+        if (!is_payload_valid) return DirectOperationErrors.INVALID_PAYLOAD;
+        if (lp_supply == 0) return DirectOperationErrors.NON_POSITIVE_LP_SUPPLY;
+        if (msg_value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + deploy_wallet_grams) return DirectOperationErrors.VALUE_TOO_LOW;
+
+        if (token_root == lp_root && msg_sender != lp_wallet) return DirectOperationErrors.NOT_LP_TOKEN_WALLET;
+        if (token_root != lp_root) {
+            if (!tokenIndex.exists(token_root)) return DirectOperationErrors.NOT_TOKEN_ROOT;
+            if (msg_sender.value == 0 || msg_sender != tokenData[tokenIndex.at(token_root)].wallet) return DirectOperationErrors.NOT_TOKEN_WALLET;
+        }
+
+        if (!(msg_sender == lp_wallet && (op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) ||
+            msg_sender != lp_wallet && (
+                op == DexOperationTypes.DEPOSIT_LIQUIDITY || op == DexOperationTypes.DEPOSIT_LIQUIDITY_V2 ||
+                op == DexOperationTypes.EXCHANGE || op == DexOperationTypes.EXCHANGE_V2 ||
+                op == DexOperationTypes.CROSS_PAIR_EXCHANGE || op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2
+            )
+        )) return DirectOperationErrors.WRONG_OPERATION_TYPE;
+
+        if ((op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) && msg_value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + N_COINS * deploy_wallet_grams) {
+            return DirectOperationErrors.VALUE_TOO_LOW;
+        }
+
+        return 0;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1036,27 +1065,31 @@ contract DexStablePair is
             NextExchangeData[] next_steps
         ) = PairPayload.decodeCrossPoolExchangePayload(payload, op);
 
+        uint16 errorCode = !active ? DirectOperationErrors.NOT_ACTIVE
+            : msg.sender == address(this) ? DirectOperationErrors.WRONG_PREVIOUS_POOL
+            : 0;
+
         uint8 i = tokenIndex.at(spent_token_root);
         uint8 j = i == 0 ? 1 : 0;
+
+        optional(ExpectedExchangeResult) dy_result_opt;
+
+        if (errorCode == 0) {
+            dy_result_opt = _get_dy(i, j, spent_amount);
+            errorCode = dy_result_opt.hasValue() ? 0 : DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
+        }
 
         if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE && next_steps.length > 0) {
             // actually poolRoot is a tokenRoot here, so
             next_steps[0].poolRoot = _expectedPairAddress([_tokenRoots()[j], next_steps[0].poolRoot]);
         }
 
-        bool need_cancel = !active || msg.sender == address(this);
-
-        optional(ExpectedExchangeResult) dy_result_opt;
-
-        if(!need_cancel) {
-            dy_result_opt = _get_dy(i, j, spent_amount);
-            need_cancel = !dy_result_opt.hasValue();
-        }
-
-        if (!need_cancel) {
+        if (errorCode == 0) {
             ExpectedExchangeResult dy_result = dy_result_opt.get();
 
-            if (dy_result.amount >= expected_amount) {
+            if (dy_result.amount < expected_amount) {
+                errorCode = DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
+            } {
                 tokenData[i].balance += spent_amount - dy_result.beneficiary_fee;
                 tokenData[j].balance -= dy_result.amount;
 
@@ -1104,8 +1137,9 @@ contract DexStablePair is
                     ));
                 }
 
+                uint16 post_swap_error_code = 0;
+
                 uint256 denominator = 0;
-                bool is_steps_array_valid = true;
                 uint32 all_nested_nodes = uint32(next_steps.length);
                 uint32 all_leaves = 0;
                 uint32 max_nested_nodes = 0;
@@ -1115,7 +1149,7 @@ contract DexStablePair is
                     if (next_step.poolRoot.value == 0 || next_step.poolRoot == address(this) ||
                         next_step.numerator == 0 || next_step.leaves == 0) {
 
-                        is_steps_array_valid = false;
+                        post_swap_error_code = DirectOperationErrors.INVALID_NEXT_STEPS;
                         break;
                     }
                     if (next_step.nestedNodes > max_nested_nodes) {
@@ -1127,7 +1161,11 @@ contract DexStablePair is
                     all_leaves += next_step.leaves;
                 }
 
-                if (is_steps_array_valid && next_steps.length > 0 && msg.value >= DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * (1 + all_nested_nodes)) {
+                if (post_swap_error_code == 0 && msg.value < DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * (1 + all_nested_nodes)) {
+                    post_swap_error_code = DirectOperationErrors.VALUE_TOO_LOW;
+                }
+
+                if (post_swap_error_code == 0 && next_steps.length > 0) {
                     uint128 extraValue = msg.value - DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * (1 + all_nested_nodes);
 
                     for (uint32 idx = 0; idx < next_steps.length; idx++) {
@@ -1167,16 +1205,16 @@ contract DexStablePair is
                 } else {
                     if (next_steps.length != 0) {
                         IDexPairOperationCallback(sender_address).dexPairOperationCancelled{
-                        value: DexGas.OPERATION_CALLBACK_BASE + 44,
-                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                        bounce: false
+                            value: DexGas.OPERATION_CALLBACK_BASE + 44,
+                            flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                            bounce: false
                         }(id);
 
                         if (recipient != sender_address) {
                             IDexPairOperationCallback(recipient).dexPairOperationCancelled{
-                            value: DexGas.OPERATION_CALLBACK_BASE,
-                            flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                            bounce: false
+                                value: DexGas.OPERATION_CALLBACK_BASE,
+                                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                                bounce: false
                             }(id);
                         }
                     }
@@ -1193,19 +1231,17 @@ contract DexStablePair is
                         true,
                         next_steps.length == 0
                             ? PairPayload.buildSuccessPayload(op, success_payload, sender_address)
-                            : PairPayload.buildCancelPayload(op, 0, cancel_payload, next_steps), // todo add error code
+                            : PairPayload.buildCancelPayload(op, post_swap_error_code, cancel_payload, next_steps),
                         tokenData[0].root,
                         tokenData[1].root,
                         current_version,
                         original_gas_to
                     );
                 }
-           } else {
-                need_cancel = true;
            }
         }
 
-        if (need_cancel) {
+        if (errorCode != 0) {
             IDexPairOperationCallback(sender_address).dexPairOperationCancelled{
                 value: DexGas.OPERATION_CALLBACK_BASE + 44,
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -1230,7 +1266,7 @@ contract DexStablePair is
                 sender_address,
                 deploy_wallet_grams,
                 true,
-                PairPayload.buildCancelPayload(op, 0, cancel_payload, next_steps), // todo add error code,
+                PairPayload.buildCancelPayload(op, errorCode, cancel_payload, next_steps),
                 tokenData[0].root,
                 tokenData[1].root,
                 current_version,

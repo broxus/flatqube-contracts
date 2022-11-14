@@ -775,7 +775,7 @@ contract DexStablePool is
         if (lp_supply == 0) return DirectOperationErrors.NON_POSITIVE_LP_SUPPLY;
         if (msg_value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + deploy_wallet_grams) return DirectOperationErrors.VALUE_TOO_LOW;
 
-        if (token_root == lp_root && (msg_sender.value == 0 || msg_sender != lp_wallet)) return DirectOperationErrors.NOT_LP_TOKEN_WALLET;
+        if (token_root == lp_root && msg_sender != lp_wallet) return DirectOperationErrors.NOT_LP_TOKEN_WALLET;
         if (token_root != lp_root) {
             if (!tokenIndex.exists(token_root)) return DirectOperationErrors.NOT_TOKEN_ROOT;
             if (msg_sender.value == 0 || msg_sender != tokenData[tokenIndex.at(token_root)].wallet) return DirectOperationErrors.NOT_TOKEN_WALLET;
@@ -799,28 +799,28 @@ contract DexStablePool is
     }
 
     function _checkExchangeReceivedAmount(optional(ExpectedExchangeResult) dy_result_opt, uint128 expected_amount) private pure returns (uint16) {
-        if (!dy_result_opt.hasValue()) return DirectOperationErrors.CAN_NOT_CALCULATE_RECEIVED_AMOUNT;
+        if (!dy_result_opt.hasValue()) return DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
         if (dy_result_opt.get().amount < expected_amount) return DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
 
         return 0;
     }
 
     function _checkDepositReceivedAmount(optional(DepositLiquidityResultV2) result_opt, uint128 expected_amount) private pure returns (uint16) {
-        if (!result_opt.hasValue()) return DirectOperationErrors.CAN_NOT_CALCULATE_RECEIVED_AMOUNT;
+        if (!result_opt.hasValue()) return DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
         if (result_opt.get().lp_reward < expected_amount) return DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
 
         return 0;
     }
 
     function _checkOneCoinWithdrawalReceivedAmount(optional(WithdrawResultV2) result_opt, uint8 i, uint128 expected_amount) private pure returns (uint16) {
-        if (!result_opt.hasValue()) return DirectOperationErrors.CAN_NOT_CALCULATE_RECEIVED_AMOUNT;
+        if (!result_opt.hasValue()) return DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
         if (result_opt.get().amounts[i] < expected_amount) return DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
 
         return 0;
     }
 
     function _checkWithdrawalReceivedAmounts(optional(WithdrawResultV2) result_opt, uint128[] expected_amounts) private view returns (uint16) {
-        if (!result_opt.hasValue()) return DirectOperationErrors.CAN_NOT_CALCULATE_RECEIVED_AMOUNT;
+        if (!result_opt.hasValue()) return DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
 
         WithdrawResultV2 result = result_opt.get();
         for (uint8 ii = 0; ii < N_COINS; ii++) {
@@ -907,6 +907,25 @@ contract DexStablePool is
         require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
 
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} resultOpt.get();
+    }
+
+    function expectedOneCoinWithdrawalSpendAmount(
+        uint128 receive_amount,
+        address receive_token_root
+    ) external view responsible returns (uint128 lp_amount) {
+        require(tokenIndex.exists(receive_token_root), DexErrors.NOT_TOKEN_ROOT);
+        uint8 i = tokenIndex[receive_token_root];
+
+        optional(uint128) lp_amount_opt = _getExpectedLpAmount(i, receive_amount);
+        require(lp_amount_opt.hasValue(), DexErrors.WRONG_AMOUNT);
+
+        uint128 lp_amount = lp_amount_opt.get();
+
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } (lp_amount);
     }
 
     function expectedWithdrawLiquidityOneCoin(
@@ -1280,6 +1299,8 @@ contract DexStablePool is
 
                 if (outcoming != lp_root) { // withdraw or exchange
 
+                    uint16 post_swap_error_code = 0;
+
                     uint256 denominator = 0;
                     uint32 all_nested_nodes = uint32(next_steps.length);
                     uint32 all_leaves = 0;
@@ -1290,7 +1311,7 @@ contract DexStablePool is
                         if (next_step.poolRoot.value == 0 || next_step.poolRoot == address(this) ||
                             next_step.numerator == 0 || next_step.leaves == 0) {
 
-                            errorCode = DirectOperationErrors.INVALID_NEXT_STEPS;
+                            post_swap_error_code = DirectOperationErrors.INVALID_NEXT_STEPS;
                             break;
                         }
                         if (next_step.nestedNodes > max_nested_nodes) {
@@ -1302,11 +1323,11 @@ contract DexStablePool is
                         all_leaves += next_step.leaves;
                     }
 
-                    if (errorCode == 0 && msg.value < DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * (1 + all_nested_nodes)) {
-                        errorCode = DirectOperationErrors.VALUE_TOO_LOW;
+                    if (post_swap_error_code == 0 && msg.value < DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * (1 + all_nested_nodes)) {
+                        post_swap_error_code = DirectOperationErrors.VALUE_TOO_LOW;
                     }
 
-                    if (errorCode == 0 && next_steps.length > 0) {
+                    if (post_swap_error_code == 0 && next_steps.length > 0) {
                         uint128 extraValue = msg.value - DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * (1 + all_nested_nodes);
 
                         for (uint32 i = 0; i < next_steps.length; i++) {
@@ -1374,7 +1395,7 @@ contract DexStablePool is
                             true,
                             next_steps.length == 0
                                 ? PairPayload.buildSuccessPayload(op, success_payload, sender_address)
-                                : PairPayload.buildCancelPayload(op, errorCode, cancel_payload, next_steps),
+                                : PairPayload.buildCancelPayload(op, post_swap_error_code, cancel_payload, next_steps),
                             _tokenRoots(),
                             current_version,
                             original_gas_to
@@ -2029,6 +2050,37 @@ contract DexStablePool is
         return result;
     }
 
+    function _getExpectedLpAmount(uint8 i, uint128 _dy) private view returns (optional(uint128)){
+        optional(uint128) result;
+
+        if (_dy >= tokenData[i].balance || _dy == 0) {
+            return result;
+        }
+
+        uint256[] xp = new uint256[](0);
+
+        for (PoolTokenData t: tokenData) {
+            xp.push(math.muldiv(t.rate, t.balance, PRECISION));
+        }
+
+        optional(uint256) D0_opt = _get_D(xp);
+
+        uint256 dy_raw = math.muldivc(_dy, tokenData[i].rate, PRECISION);
+        uint128 dy = uint128(math.muldiv(dy_raw, 5 * fee.denominator, 5 * fee.denominator - 3 * (fee.pool_numerator + fee.beneficiary_numerator)));
+
+        xp[i] -= dy;
+        optional(uint256) D1_opt = _get_D(xp);
+
+        if (D1_opt.hasValue() && D0_opt.hasValue()) {
+            uint256 D0 = D0_opt.get();
+            uint256 D1 = D1_opt.get();
+
+            result.set(uint128(math.muldiv(lp_supply, (D0 - D1), D0)));
+        }
+
+        return result;
+    }
+
     function _tokenRoots() internal view returns(address[]) {
         address[] r = new address[](0);
         for (PoolTokenData t: tokenData) {
@@ -2283,14 +2335,13 @@ contract DexStablePool is
 
         optional(uint128) new_y_opt = _get_y_D(amp, i, xp_mem, D1);
 
-        uint256 dy_0 = 0;
         uint256 dy = 0;
         if (!new_y_opt.hasValue()) {
             return result;
         }
 
         uint128 new_y = new_y_opt.get();
-        dy_0 = (xp_mem[i] - new_y) / tokenData[i].precisionMul; // w/o fees
+        // uint256 dy_0 = (xp_mem[i] - new_y) / tokenData[i].precisionMul; // w/o fees
 
         for (uint8 j = 0; j < N_COINS; j++) {
             uint256 dx_expected = 0;
