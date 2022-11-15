@@ -65,7 +65,7 @@ contract Order is
 		address _dexRoot,
 		TvmCell _codeClosed
 	) public {
-		changeState(OrderStatus.Initialize);
+		changeState(OrderStatus.Initialize, 0);
 		optional(TvmCell) optSalt = tvm.codeSalt(tvm.code());
 		require(optSalt.hasValue(), OrderErrors.EMPTY_SALT_IN_ORDER);
 		(address rootSalt, address tokenRootSalt) = optSalt
@@ -178,9 +178,9 @@ contract Order is
 
 		if (state != OrderStatus.Active) {
 			if (_balance >= expectedAmount) {
-				changeState(OrderStatus.Active);
+				changeState(OrderStatus.Active, 0);
 			} else {
-				changeState(OrderStatus.AwaitTokens);
+				changeState(OrderStatus.AwaitTokens, 0);
 			}
 		}
 	}
@@ -437,7 +437,7 @@ contract Order is
 						(msg.sender.value != 0 && msg.sender == spentWallet && tokenRoot == spentToken) &&
 						operationStatus == OrderOperationStatus.CANCEL
 					) {
-						changeState(OrderStatus.Active);
+						changeState(OrderStatus.Active, 0);
 					}
 				}
 			} else {
@@ -446,7 +446,7 @@ contract Order is
 		}
 
 		if (currentAmountReceiveToken == 0 && currentAmountSpentToken == 0) {
-			changeState(OrderStatus.Filled);
+			changeState(OrderStatus.Filled, 0);
 			close();
 		} else if (makeReserve) {
 			tvm.rawReserve(
@@ -490,7 +490,7 @@ contract Order is
 			state == OrderStatus.Active,
 			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
 		);
-		changeState(OrderStatus.Cancelled);
+		changeState(OrderStatus.Cancelled, 0);
 
 		tvm.accept();
 		close();
@@ -519,7 +519,7 @@ contract Order is
 
 		tvm.accept();
 		swapAttempt++;
-		changeState(OrderStatus.SwapInProgress);
+		changeState(OrderStatus.SwapInProgress, 0);
 
 		TvmBuilder successBuilder;
 		successBuilder.store(OrderOperationStatus.SUCCESS);
@@ -578,7 +578,7 @@ contract Order is
 			0
 		);
 		swapAttempt++;
-		changeState(OrderStatus.SwapInProgress);
+		changeState(OrderStatus.SwapInProgress, 0);
 
 		TvmBuilder successBuilder;
 		successBuilder.store(OrderOperationStatus.SUCCESS);
@@ -626,7 +626,7 @@ contract Order is
 				flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
 				bounce: false
 			}
-			(uint64(callId), true, IStateChangedResult.StateChangedResult(
+			(callId, true, IStateChangedResult.StateChangedResult(
 				prevStateN, newState, buildDetails()));
 		}
 
