@@ -442,13 +442,14 @@ abstract contract DexPairBase is
     function onVaultTokenWallet(address _wallet) external onlyTokenRoot {
         // Set vault wallets addresses
         if (
-            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0] &&
-            _typeToWalletAddresses[DexAddressType.VAULT].length == 0
-        ) {
-            _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
-        } else if (
-            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1] &&
-            _typeToWalletAddresses[DexAddressType.VAULT].length == 1
+            (
+                msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0] ||
+                msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1]
+            ) && (
+                _typeToWalletAddresses[DexAddressType.VAULT].length == 0 ||
+                _typeToWalletAddresses[DexAddressType.VAULT].length == 1 &&
+                _typeToWalletAddresses[DexAddressType.VAULT][0] != _wallet
+            )
         ) {
             _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
         }
