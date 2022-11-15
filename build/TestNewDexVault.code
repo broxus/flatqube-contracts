@@ -1,4 +1,4 @@
-.version sol 0.61.2
+.version sol 0.57.1
 
 .macro constructor
 DROP
@@ -72,7 +72,8 @@ LDREF
 POP S2
 SETGLOB 11
 .loc ../contracts/tests/TestNewDexVault.sol, 34
-PLDREF
+LDREF
+DROP
 SETGLOB 12
 .loc ../contracts/tests/TestNewDexVault.sol, 36
 PUSHREF {
@@ -87,7 +88,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHPOW2 7
+PUSHINT 128
 SENDRAWMSG
 .loc ../contracts/tests/TestNewDexVault.sol, 0
 CALLREF {
@@ -122,8 +123,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHINT 2437043266
-	STUR 130
+	PUSHSLICE x00000000000000000000000024509510a_
+	STSLICER
 	STREF
 	ENDC
 	PUSHINT 0
@@ -197,11 +198,13 @@ PUSHCONT {
 	OVER
 	PUSHINT 64
 	DICTUGET
-	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 32
 	}
-	IF
+	PUSHCONT {
+		PUSHINT 0
+	}
+	IFELSE
 	PUSHREF {
 	}
 	DUP
@@ -327,7 +330,7 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHPOW2 9
+	PUSHINT 512
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice

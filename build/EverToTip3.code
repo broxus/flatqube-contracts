@@ -1,4 +1,4 @@
-.version sol 0.61.2
+.version sol 0.57.1
 
 .macro constructor
 DROP
@@ -23,8 +23,8 @@ GETGLOB 11
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHINT 2868722788230934574387753789225109188247553
-STUR 143
+PUSHSLICE x41dcd6500000000000000000000000000003_
+STSLICER
 ROTREV
 PUSHSLICE x31edd4c7282c61f5
 NEWC
@@ -43,7 +43,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHPOW2 7
+PUSHINT 128
 ADDCONST 2
 UFITS 8
 SENDRAWMSG
@@ -142,8 +142,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHINT 4232648442
-	STUR 130
+	PUSHSLICE x0000000000000000000000003f1245bea_
+	STSLICER
 	STREF
 	ENDC
 	PUSHINT 0
@@ -203,8 +203,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHINT 3243886143
-	STUR 130
+	PUSHSLICE x0000000000000000000000003056718fe_
+	STSLICER
 	STREF
 	ENDC
 	PUSHINT 0
@@ -279,7 +279,7 @@ PUSHCONT {
 		.loc ../contracts/EverToTip3.sol, 100
 		PUSH S2
 		SBITS
-		PUSHPOW2 8
+		PUSHINT 256
 		EQUAL
 		PUSH S3
 		SREFS
@@ -436,7 +436,8 @@ FALSE
 NEWC
 STSLICECONST x6_
 STI 1
-STSLICECONST x1_
+PUSHINT 3
+STZEROES
 STSLICE
 PUSHINT 1
 STUR 111
@@ -454,7 +455,7 @@ STREF
 STBREFR
 STBREFR
 ENDC
-PUSHPOW2 7
+PUSHINT 128
 SENDRAWMSG
 .loc ../contracts/EverToTip3.sol, 0
 BLKDROP 4
@@ -587,7 +588,8 @@ PUSHCONT {
 		NEWC
 		STSLICECONST x6_
 		STI 1
-		STSLICECONST x1_
+		PUSHINT 3
+		STZEROES
 		STSLICE
 		PUSHINT 1
 		STUR 111
@@ -617,9 +619,13 @@ PUSHCONT {
 			TRUE
 			PUSH3 S6, S8, S6
 			SDEQ
-			PUSHINT 0
-			PUSHINT 100000000
-			CONDSEL
+			PUSHCONT {
+				PUSHINT 0
+			}
+			PUSHCONT {
+				PUSHINT 100000000
+			}
+			IFELSE
 			PUSH2 S8, S11
 		}
 		PUSHCONT {
@@ -630,7 +636,8 @@ PUSHCONT {
 			NEWC
 			STSLICECONST x6_
 			STI 1
-			STSLICECONST x1_
+			PUSHINT 3
+			STZEROES
 			STSLICE
 			PUSHINT 1
 			STUR 111
@@ -681,7 +688,8 @@ FALSE
 NEWC
 STSLICECONST x6_
 STI 1
-STSLICECONST x1_
+PUSHINT 3
+STZEROES
 STSLICE
 PUSHINT 1
 STUR 111
@@ -699,7 +707,7 @@ STREF
 STBREFR
 STBREFR
 ENDC
-PUSHPOW2 7
+PUSHINT 128
 SENDRAWMSG
 .loc ../contracts/EverToTip3.sol, 0
 BLKDROP 9
@@ -794,14 +802,15 @@ FALSE
 NEWC
 STSLICECONST x6_
 STI 1
-STSLICECONST x1_
+PUSHINT 3
+STZEROES
 STSLICE
-PUSHINT 931714932
-STUR 143
+PUSHSLICE x00000000000000000000000000006f11aee9_
+STSLICER
 STU 64
 STU 128
 ENDC
-PUSHPOW2 7
+PUSHINT 128
 SENDRAWMSG
 .loc ../contracts/EverToTip3.sol, 0
 DROP2
@@ -854,11 +863,13 @@ PUSHCONT {
 	OVER
 	PUSHINT 64
 	DICTUGET
-	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 32
 	}
-	IF
+	PUSHCONT {
+		PUSHINT 0
+	}
+	IFELSE
 	PUSHINT 2
 	PUSH S2
 	PUSHINT 64
@@ -1000,12 +1011,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHPOW2 9
+	PUSHINT 512
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -1021,7 +1032,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; hasPubkey msgSlice
+	LDU 1 ; havePubkey msgSlice
 	SWAP
 	THROWIF 58
 }
@@ -1115,32 +1126,35 @@ DUP
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 21
 STSLICECONST x01
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 22
-PUSH S5
-STUR 64
+PUXC S5, S-1
+STU 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 23
-PUSH S4
-STUR 128
+PUXC S4, S-1
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 24
 ROLL 3
-STUR 128
+SWAP
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 27
 NEWC
 STSLICECONST x00
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 28
-PUSH S5
-STUR 64
+PUXC S5, S-1
+STU 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 29
-PUSH S4
-STUR 128
+PUXC S4, S-1
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 32
 NEWC
 STSLICECONST x01
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 33
 ROLL 6
-STUR 64
+SWAP
+STU 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 34
 ROLL 5
-STUR 128
+SWAP
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 36
 PUSH S2
 ROT
@@ -1180,32 +1194,35 @@ DUP
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 21
 STSLICECONST x01
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 22
-PUSH S5
-STUR 64
+PUXC S5, S-1
+STU 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 23
-PUSH S4
-STUR 128
+PUXC S4, S-1
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 24
 ROLL 3
-STUR 128
+SWAP
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 27
 NEWC
 STSLICECONST x00
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 28
-PUSH S5
-STUR 64
+PUXC S5, S-1
+STU 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 29
-PUSH S4
-STUR 128
+PUXC S4, S-1
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 32
 NEWC
 STSLICECONST x01
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 33
 ROLL 6
-STUR 64
+SWAP
+STU 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 34
 ROLL 5
-STUR 128
+SWAP
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 36
 PUSH S2
 ROT
@@ -1216,7 +1233,8 @@ STBREFR
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 39
 OVER
 ROLL 4
-STSLICER
+SWAP
+STSLICE
 POP S2
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 40
 PUSH S2
@@ -1251,14 +1269,15 @@ DUP
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 62
 STSLICECONST x04
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 63
-PUSH S6
-STUR 64
+PUXC S6, S-1
+STU 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 64
-PUSH S5
-STUR 128
+PUXC S5, S-1
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 65
 ROLL 4
-STUR 128
+SWAP
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 66
 PUSHINT 0
 PUSH S4
@@ -1273,7 +1292,8 @@ CALLREF {
 	PAIR
 }
 SECOND
-STSLICER
+SWAP
+STSLICE
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 69
 PUSH S3
 FIRST
@@ -1352,20 +1372,22 @@ DROP
 NEWC
 STSLICECONST x00
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 80
-PUSH S7
-STUR 64
+PUXC S7, S-1
+STU 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 81
-PUSH S6
-STUR 128
+PUXC S6, S-1
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 84
 NEWC
 STSLICECONST x01
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 85
 ROLL 8
-STUR 64
+SWAP
+STU 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 86
 ROLL 7
-STUR 128
+SWAP
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 88
 PUSH S3
 ROLL 3
@@ -1415,14 +1437,15 @@ DUP
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 62
 STSLICECONST x04
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 63
-PUSH S6
-STUR 64
+PUXC S6, S-1
+STU 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 64
-PUSH S5
-STUR 128
+PUXC S5, S-1
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 65
 ROLL 4
-STUR 128
+SWAP
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 66
 PUSHINT 0
 PUSH S4
@@ -1437,7 +1460,8 @@ CALLREF {
 	PAIR
 }
 SECOND
-STSLICER
+SWAP
+STSLICE
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 69
 PUSH S3
 FIRST
@@ -1516,20 +1540,22 @@ DROP
 NEWC
 STSLICECONST x00
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 80
-PUSH S7
-STUR 64
+PUXC S7, S-1
+STU 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 81
-PUSH S6
-STUR 128
+PUXC S6, S-1
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 84
 NEWC
 STSLICECONST x01
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 85
 ROLL 8
-STUR 64
+SWAP
+STU 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 86
 ROLL 7
-STUR 128
+SWAP
+STU 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 88
 PUSH S3
 ROLL 3
@@ -1545,7 +1571,8 @@ STBREFR
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 92
 OVER
 ROLL 5
-STSLICER
+SWAP
+STSLICE
 POP S2
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 93
 PUSH S2

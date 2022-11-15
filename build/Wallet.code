@@ -1,4 +1,4 @@
-.version sol 0.61.2
+.version sol 0.57.1
 
 .macro constructor
 DROP
@@ -99,7 +99,8 @@ BLKSWAP 2, 3
 NEWC
 STSLICECONST x6_
 STI 1
-STSLICECONST x1_
+PUSHINT 3
+STZEROES
 STSLICE
 SWAP
 STGRAMS
@@ -208,11 +209,13 @@ PUSHCONT {
 	PUSH S2
 	PUSHINT 64
 	DICTUGET
-	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 256
 	}
-	IF
+	PUSHCONT {
+		PUSHINT 0
+	}
+	IFELSE
 	SETGLOB 11
 	SETGLOB 10
 	PUSHINT 64
@@ -302,7 +305,7 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHPOW2 9
+	PUSHINT 512
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
