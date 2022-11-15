@@ -196,7 +196,11 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         salt.store(_root);
         salt.store(_receiveToken);
 
-       return address(tvm.hash(
+       return {
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED,
+                bounce: false
+            } address(tvm.hash(
            tvm.buildStateInit({
                contr: Order,
                varInit: {

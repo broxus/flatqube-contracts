@@ -1,4 +1,4 @@
-.version sol 0.57.1
+.version sol 0.61.2
 
 .macro constructor
 DROP
@@ -45,8 +45,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x00000000000000000000000029451bbca_
-	STSLICER
+	PUSHINT 2769579762
+	STUR 130
 	STU 8
 	ENDC
 	PUSHINT 0
@@ -61,11 +61,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -170,11 +168,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -315,11 +311,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -458,8 +452,7 @@ FALSE
 NEWC
 STSLICECONST x6_
 STI 1
-PUSHINT 3
-STZEROES
+STSLICECONST x1_
 STSLICE
 PUSHINT 1
 STUR 111
@@ -477,7 +470,7 @@ STREF
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/OrderClosed.sol, 0
 DROP2
@@ -924,36 +917,29 @@ NEWC
 STU 8
 .loc ../contracts/OrderClosed.sol, 184
 GETGLOB 12
-SWAP
-STSLICE
+STSLICER
 .loc ../contracts/OrderClosed.sol, 185
 GETGLOB 10
-SWAP
-STSLICE
+STSLICER
 .loc ../contracts/OrderClosed.sol, 186
 GETGLOB 11
-SWAP
-STSLICE
+STSLICER
 .loc ../contracts/OrderClosed.sol, 187
 GETGLOB 21
-SWAP
-STU 64
+STUR 64
 .loc ../contracts/OrderClosed.sol, 190
 GETGLOB 18
 NEWC
 STSLICE
 .loc ../contracts/OrderClosed.sol, 191
 GETGLOB 17
-SWAP
-STU 128
+STUR 128
 .loc ../contracts/OrderClosed.sol, 192
 GETGLOB 13
-SWAP
-STSLICE
+STSLICER
 .loc ../contracts/OrderClosed.sol, 193
 GETGLOB 14
-SWAP
-STSLICE
+STSLICER
 .loc ../contracts/OrderClosed.sol, 194
 STBREFR
 .loc ../contracts/OrderClosed.sol, 197
@@ -962,12 +948,10 @@ NEWC
 STU 128
 .loc ../contracts/OrderClosed.sol, 198
 GETGLOB 16
-SWAP
-STU 128
+STUR 128
 .loc ../contracts/OrderClosed.sol, 199
 GETGLOB 19
-SWAP
-STSLICE
+STSLICER
 .loc ../contracts/OrderClosed.sol, 200
 STBREFR
 .loc ../contracts/OrderClosed.sol, 202
@@ -1099,8 +1083,7 @@ PUSHCONT {
 	NEWC
 	STSLICECONST x6_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	PUSHINT 1
 	STUR 111
@@ -1118,7 +1101,7 @@ PUSHCONT {
 	STBREFR
 	STBREFR
 	ENDC
-	PUSHINT 128
+	PUSHPOW2 7
 }
 PUSHCONT {
 	.loc ../contracts/OrderClosed.sol, 263
@@ -1129,7 +1112,7 @@ PUSHCONT {
 	PUSHINT 111
 	STZEROES
 	ENDC
-	PUSHINT 128
+	PUSHPOW2 7
 	ADDCONST 2
 	UFITS 8
 }
@@ -1427,12 +1410,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -1450,7 +1433,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; havePubkey msgSlice
+	LDU 1 ; hasPubkey msgSlice
 	SWAP
 	THROWIF 58
 }

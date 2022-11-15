@@ -254,18 +254,20 @@ contract Order is
 		TvmCell emptyPayload;
 		bool needCancel = false;
 		bool makeReserve = false;
-		
+		TvmSlice payloadSlice = payload.toSlice();
+		uint64 callId;
 		if (
 			sender == root &&
 			tokenRoot == spentToken &&
 			(state == OrderStatus.Initialize || state == OrderStatus.AwaitTokens) &&
 			amount >= initialAmount &&
-			msg.sender.value != 0 && msg.sender == spentWallet
+			msg.sender.value != 0 && msg.sender == spentWallet &&
+			payloadSlice.bits() >= 64
 		) {
-			changeState(OrderStatus.Active);
+			callId = payloadSlice.decode(uint64);
+			changeState(OrderStatus.Active, callId);
 		} else {
 			if ((msg.sender.value != 0 && msg.sender == receiveWallet) && state == OrderStatus.Active) {
-				TvmSlice payloadSlice = payload.toSlice();
 				if (payloadSlice.bits() >= 192) {
 					(uint128 deployWalletValue, uint64 callId) = payloadSlice.decode(uint128, uint64);
 					if (
@@ -355,7 +357,7 @@ contract Order is
                 					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 					bounce: false
             					}
-								(callId, true, PartExchangeResult(
+								(callId, true, IPartExchangeResult.PartExchangeResult(
 									spentToken,
 									transferAmount,
 									receiveToken,
@@ -610,10 +612,24 @@ contract Order is
 		);
 	}
 
-	function changeState(uint8 newState) private {
+	function changeState(
+	uint8 newState,
+	optional(uint64) callId
+	)
+	private {
 		uint8 prevStateN = state;
 		state = newState;
 		emit StateChanged(prevStateN, newState, buildDetails());
+		if (callId.hasValue()){
+			IOrderOperationCallback(msg.sender).orderStateChangedSuccess{
+				value: OrderGas.OPERATION_CALLBACK_BASE + 2,
+				flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+				bounce: false
+			}
+			(uint64(callId), true, IStateChangedResult.StateChangedResult(
+				prevStateN, newState, buildDetails()));
+		}
+
 	}
 
 	function buildDetails() private view returns (Details) {

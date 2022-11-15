@@ -1,4 +1,4 @@
-.version sol 0.57.1
+.version sol 0.61.2
 
 .macro constructor
 DROP
@@ -97,8 +97,8 @@ SECOND
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHSLICE x43b9aca00000000000000000000000000003_
-STSLICER
+PUSHINT 2949852426645541256083542794369173188247553
+STUR 143
 ROTREV
 PUSHSLICE x31edd4c750bfca9f
 NEWC
@@ -189,6 +189,16 @@ CALL $drain_internal_macro$
 GETGLOB 9
 GETGLOB 11
 SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
 THROWIFNOT 1101
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 99
 GETGLOB 14
@@ -253,6 +263,16 @@ THROW 0
 GETGLOB 9
 GETGLOB 11
 SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
 THROWIFNOT 1101
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 112
 GETGLOB 12
@@ -264,14 +284,9 @@ SETGLOB 12
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 116
 SECOND
 SDEQ
-PUSHCONT {
-	.loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 117
-	CALLREF {
-		CALL $setUpTokenWallet_internal_macro$
-	}
-	.loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
+IFNOTREF {
+	CALL $setUpTokenWallet_internal_macro$
 }
-IFNOT
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 
 .macro withdraw
@@ -308,6 +323,16 @@ THROW 0
 GETGLOB 9
 GETGLOB 11
 SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
 THROWIFNOT 1101
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 130
 NEGATE
@@ -330,7 +355,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 
@@ -394,7 +419,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 
@@ -466,7 +491,7 @@ STREF
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 CALLREF {
@@ -573,7 +598,7 @@ STREF
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 
@@ -668,7 +693,7 @@ STREF
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 DROP
@@ -735,6 +760,16 @@ THROW 0
 GETGLOB 9
 GETGLOB 11
 SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
 THROWIFNOT 1101
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 37
 DUP
@@ -775,6 +810,16 @@ THROW 0
 GETGLOB 9
 GETGLOB 11
 SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
 THROWIFNOT 1101
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 46
 PUSHREFSLICE {
@@ -840,13 +885,11 @@ PUSHCONT {
 	OVER
 	PUSHINT 64
 	DICTUGET
+	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 256
 	}
-	PUSHCONT {
-		PUSHINT 0
-	}
-	IFELSE
+	IF
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
@@ -988,12 +1031,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -1011,7 +1054,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; havePubkey msgSlice
+	LDU 1 ; hasPubkey msgSlice
 	SWAP
 	THROWIF 58
 }

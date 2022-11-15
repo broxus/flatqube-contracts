@@ -1,4 +1,4 @@
-.version sol 0.57.1
+.version sol 0.61.2
 
 .macro constructor
 DROP
@@ -124,7 +124,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 
@@ -209,7 +209,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 
@@ -264,11 +264,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -357,11 +355,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -472,7 +468,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 
@@ -523,7 +519,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 
@@ -573,7 +569,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 
@@ -662,8 +658,8 @@ STU 256
 NEWC
 STSLICECONST x62_
 STB
-PUSHSLICE x0000000000000000000000000007_
-STSLICER
+PUSHINT 3
+STUR 111
 OVER
 CALLREF {
 	CTOS
@@ -700,7 +696,7 @@ STSLICE
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 
@@ -805,7 +801,7 @@ STSLICE
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 
@@ -910,7 +906,7 @@ STSLICE
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 
@@ -1057,11 +1053,11 @@ GETGLOB 9
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHSLICE x000000000000000000000000000022264c0d_
-STSLICER
+PUSHINT 286467590
+STUR 143
 STU 64
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 
@@ -1195,7 +1191,7 @@ STREF
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 DROP2
@@ -1309,8 +1305,7 @@ NEWC
 STSLICE
 .loc ../contracts/DexVault.sol, 232
 GETGLOB 15
-SWAP
-STSLICE
+STSLICER
 .loc ../contracts/DexVault.sol, 234
 GETGLOB 13
 PUSH S2
@@ -1411,7 +1406,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 
@@ -1478,7 +1473,7 @@ STSLICECONST x06e29f2e
 STSLICE
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 
@@ -1557,20 +1552,20 @@ PLDU 256
 LESS
 PUSHCONT {
 	.loc ../contracts/abstract/DexContractBase.sol, 54
-	PUXC S2, S-1
-	STSLICE
+	PUSH S2
+	STSLICER
 	.loc ../contracts/abstract/DexContractBase.sol, 55
-	PUXC S1, S-1
+	OVER
 }
 PUSHCONT {
 	.loc ../contracts/abstract/DexContractBase.sol, 57
-	PUXC S1, S-1
-	STSLICE
+	OVER
+	STSLICER
 	.loc ../contracts/abstract/DexContractBase.sol, 58
-	PUXC S2, S-1
+	PUSH S2
 }
 IFELSE
-STSLICE
+STSLICER
 .loc ../contracts/abstract/DexContractBase.sol, 60
 ENDC
 BLKDROP2 2, 1
@@ -1670,13 +1665,11 @@ PUSHCONT {
 	PUSH S2
 	PUSHINT 64
 	DICTUGET
+	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 32
 	}
-	PUSHCONT {
-		PUSHINT 0
-	}
-	IFELSE
+	IF
 	PUSHREF {
 	}
 	PUSHREFSLICE {
@@ -1813,12 +1806,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -1834,7 +1827,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; havePubkey msgSlice
+	LDU 1 ; hasPubkey msgSlice
 	SWAP
 	THROWIF 58
 }
