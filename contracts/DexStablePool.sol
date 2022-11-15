@@ -2341,7 +2341,7 @@ contract DexStablePool is
         }
 
         uint128 new_y = new_y_opt.get();
-        // uint256 dy_0 = (xp_mem[i] - new_y) / tokenData[i].precisionMul; // w/o fees
+        uint256 dy_0 = (xp_mem[i] - new_y) / tokenData[i].precisionMul; // w/o fees
 
         for (uint8 j = 0; j < N_COINS; j++) {
             uint256 dx_expected = 0;
@@ -2359,6 +2359,10 @@ contract DexStablePool is
         optional(uint128) new_y_reduced_opt = _get_y_D(amp, i, xp_reduced, D1);
         dy = xp_reduced[i] - new_y_reduced_opt.get();
         dy = (dy - 1) / tokenData[i].precisionMul;  // Withdraw less to account for rounding errors
+
+        uint128 dy_fee = uint128(dy_0 - dy);
+        beneficiary_fees[i] = math.muldiv(dy_fee, fee.beneficiary_numerator, fee.pool_numerator + fee.beneficiary_numerator);
+        pool_fees[i] = dy_fee - beneficiary_fees[i];
 
         amounts[i] = uint128(dy);
         result_balances[i] = uint128(old_balances[i] - dy);

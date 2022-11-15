@@ -4,6 +4,7 @@ import "../structures/IExchangeStepStructure.sol";
 import "../structures/ITokenOperationStructure.sol";
 import "../structures/INextExchangeData.sol";
 
+import "./DexOperationStatusV2.sol";
 import "./DexOperationTypes.sol";
 
 /**
@@ -518,7 +519,7 @@ library PairPayload {
 
         TvmBuilder builder;
 
-        builder.store(uint8(201)); // code for V2 Operation type
+        builder.store(DexOperationStatusV2.CANCEL);
         builder.store(op);
         builder.store(errorCode);
         builder.store(origPayload);
@@ -556,7 +557,7 @@ library PairPayload {
 
         TvmBuilder builder;
 
-        builder.store(uint8(200)); // code for V2 Operation type
+        builder.store(DexOperationStatusV2.SUCCESS);
         builder.store(op);
         builder.store(origPayload);
 
