@@ -9,6 +9,7 @@ import "./libraries/EverToTip3Errors.sol";
 import "./libraries/EverToTip3Payloads.sol";
 import "./libraries/DexOperationTypes.sol";
 import "./libraries/EverToTip3OperationStatus.sol";
+import "./libraries/DexOperationStatusV2.sol";
 
 import "./structures/INextExchangeData.sol";
 
@@ -57,7 +58,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
     }
 
     // Payload constructor swap Ever -> Tip-3
-    function buildExchangePayloadV2(
+    function buildExchangePayload(
         address pair,
         uint64 id,
         uint128 deployWalletValue,
@@ -75,7 +76,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
     }
 
     // Payload constructor swap Ever -> Tip-3 via split-cross-pool
-    function buildCrossPairExchangePayloadV2(
+    function buildCrossPairExchangePayload(
         address pool,
         uint64 id,
         uint128 deployWalletValue,
@@ -85,7 +86,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         EverToTip3Payloads.EverToTip3ExchangeStep[] steps,
         address recipient
     ) external pure returns (TvmCell) {
-        return EverToTip3Payloads.buildCrossPairExchangePayloadV2(
+        return EverToTip3Payloads.buildCrossPairExchangePayload(
             pool,
             id,
             deployWalletValue,
@@ -120,13 +121,13 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
 
                 if (
                     (
-                        ref1Slice.bits() == (328 - 72) &&
+                        (ref1Slice.bits() == (595 - 72) || (ref1Slice.bits() == (862 - 72))) && // 862 for pool (with outcoming)
                         ref1Slice.refs() == 2 &&
-                        operationType == DexOperationTypes.EXCHANGE
+                        operationType == DexOperationTypes.EXCHANGE_V2
                     ) || (
-                        ref1Slice.bits() == (595 - 72) &&
+                        ref1Slice.bits() == (862 - 72) &&
                         ref1Slice.refs() == 3 &&
-                        operationType == DexOperationTypes.CROSS_PAIR_EXCHANGE
+                        operationType == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2
                     )
                 ) {
                     result.set(DecodedMintPayload(
@@ -199,8 +200,21 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         uint128 deployWalletValue = 0.1 ever;
 
         TvmSlice payloadSlice = payload.toSlice();
-        if (payloadSlice.bits() == 200) {
-            (operationStatus, id, deployWalletValue) = payloadSlice.decode(uint8, uint64, uint128);
+
+        if (payloadSlice.bits() >= 16) {
+            (uint8 payloadOperationType, uint8 op) = payloadSlice.decode(uint8, uint8);
+
+            if (
+                (op == DexOperationTypes.EXCHANGE_V2 || op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) &&
+                payloadSlice.refs() >= 1 &&
+                (payloadOperationType == DexOperationStatusV2.SUCCESS || payloadOperationType == DexOperationStatusV2.CANCEL)
+            ) {
+                TvmSlice everToTip3PayloadSlice = payloadSlice.loadRefAsSlice();
+
+                if (everToTip3PayloadSlice.bits() == 200) {
+                    (operationStatus, id, deployWalletValue) = everToTip3PayloadSlice.decode(uint8, uint64, uint128);
+                }
+            }
         }
 
         TvmBuilder payloadID_;

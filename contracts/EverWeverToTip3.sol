@@ -58,7 +58,7 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         uint128 deployWalletValue,
         uint128 expectedAmount,
         uint128 amount,
-        optional(address) recipient
+        address recipient
     ) external pure returns (TvmCell) {
         return EverToTip3Payloads.buildExchangePayload(
             pair,
@@ -66,12 +66,12 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
             deployWalletValue,
             expectedAmount,
             amount,
-            recipient.hasValue() ? recipient.get() : address(0)
+            recipient
         );
     }
 
     // Payload constructor swap Ever -> Tip-3 via split-cross-pool
-    function buildCrossPairExchangePayloadV2(
+    function buildCrossPairExchangePayload(
         address pool,
         uint64 id,
         uint128 deployWalletValue,
@@ -80,9 +80,9 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         uint32[] nextStepIndices,
         EverToTip3Payloads.EverToTip3ExchangeStep[] steps,
         uint128 amount,
-        optional(address) recipient
+        address recipient
     ) external pure returns (TvmCell) {
-        return EverToTip3Payloads.buildCrossPairExchangePayloadV2(
+        return EverToTip3Payloads.buildCrossPairExchangePayload(
             pool,
             id,
             deployWalletValue,
@@ -91,7 +91,7 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
             nextStepIndices,
             steps,
             amount,
-            recipient.hasValue() ? recipient.get() : address(0)
+            recipient
         );
     }
 

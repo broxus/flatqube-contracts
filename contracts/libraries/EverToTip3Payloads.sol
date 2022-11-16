@@ -55,7 +55,7 @@ library EverToTip3Payloads {
     }
 
     // Payload constructor swap Ever -> Tip-3 via split-cross-pool
-    function buildCrossPairExchangePayloadV2(
+    function buildCrossPairExchangePayload(
         address pool,
         uint64 id,
         uint128 deployWalletValue,
