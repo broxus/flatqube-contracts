@@ -2311,7 +2311,6 @@ contract DexStablePool is
 
     function _expectedWithdrawLiquidityOneCoin(uint128 token_amount, uint8 i, uint128[] old_balances, uint128 old_lp_supply) internal view returns(optional(WithdrawResultV2)) {
         AmplificationCoefficient amp = A;
-        uint128 fee_numerator = math.muldiv(fee.pool_numerator + fee.beneficiary_numerator, N_COINS, (4 * (N_COINS - 1)));
 
         optional(WithdrawResultV2) result;
 
@@ -2331,17 +2330,24 @@ contract DexStablePool is
         optional(uint256) D1_opt = D0 - math.muldiv(token_amount, D0, old_lp_supply);
         uint256 D1 = D1_opt.get();
 
+        uint128 lp_fee = math.muldiv(token_amount, fee.beneficiary_numerator + fee.pool_numerator, fee.denominator);
+
+        optional(uint256) D1_fee_opt = D0 - math.muldiv(token_amount - lp_fee, D0, old_lp_supply);
+        uint256 D1_fee = D1_fee_opt.get();
+
         uint256[] xp_reduced = xp_mem;
 
-        optional(uint128) new_y_opt = _get_y_D(amp, i, xp_mem, D1);
+        optional(uint128) new_y0_opt = _get_y_D(amp, i, xp_mem, D1);
+        optional(uint128) new_y_opt = _get_y_D(amp, i, xp_mem, D1_fee);
 
-        uint256 dy = 0;
-        if (!new_y_opt.hasValue()) {
+        if (!new_y_opt.hasValue() || !new_y0_opt.hasValue()) {
             return result;
         }
 
+        uint256 dy_0 = (xp_mem[i] - new_y0_opt.get()) / tokenData[i].precisionMul; // without fee
+
         uint128 new_y = new_y_opt.get();
-        uint256 dy_0 = (xp_mem[i] - new_y) / tokenData[i].precisionMul; // w/o fees
+        uint256 dy = (xp_mem[i] - new_y) / tokenData[i].precisionMul;
 
         for (uint8 j = 0; j < N_COINS; j++) {
             uint256 dx_expected = 0;
@@ -2353,12 +2359,7 @@ contract DexStablePool is
                 dx_expected = xp_mem[j] - math.muldiv(xp_mem[j], D1, D0);
             }
             differences[j] = uint128(dx_expected);
-            xp_reduced[j] -= math.muldiv(fee_numerator, dx_expected, fee.denominator);
         }
-
-        optional(uint128) new_y_reduced_opt = _get_y_D(amp, i, xp_reduced, D1);
-        dy = xp_reduced[i] - new_y_reduced_opt.get();
-        dy = (dy - 1) / tokenData[i].precisionMul;  // Withdraw less to account for rounding errors
 
         uint128 dy_fee = uint128(dy_0 - dy);
         beneficiary_fees[i] = math.muldiv(dy_fee, fee.beneficiary_numerator, fee.pool_numerator + fee.beneficiary_numerator);

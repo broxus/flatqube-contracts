@@ -897,6 +897,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 }
             });
 
+            logger.log('Lp amount: ', new BigNumber(1000).shiftedBy(-Constants.LP_DECIMALS).toString());
             logger.log(`Expected amount: ${new BigNumber(expected.amounts[i]).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
 
             const payload = await DexPool.call({
@@ -962,6 +963,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     }
                 });
 
+                logger.log('Lp amount: ', new BigNumber(LP_AMOUNT).shiftedBy(-Constants.LP_DECIMALS).toString());
                 logger.log(`Expected amount: ${new BigNumber(expected.amounts[i]).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
 
                 const payload = await DexPool.call({
