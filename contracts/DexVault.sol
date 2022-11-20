@@ -609,7 +609,8 @@ contract DexVault is
                 );
             }
         } else {
-            if (nextSteps.length == 0) {
+            bool isLastStep = nextSteps.length == 0;
+            if (isLastStep) {
                 emit PairTransferTokensV2(
                     lpVaultWallet,
                     amount,
@@ -636,11 +637,11 @@ contract DexVault is
                 .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                 (
                     amount,
-                    nextSteps.length == 0 ? recipient : senderAddress,
+                    isLastStep ? recipient : senderAddress,
                     deployWalletGrams,
                     remainingGasTo,
-                    true,
-                    nextSteps.length == 0
+                    isLastStep ? notifySuccess : notifyCancel,
+                    isLastStep
                         ? PairPayload.buildSuccessPayload(op, successPayload, senderAddress)
                         : PairPayload.buildCancelPayload(op, errorCode, cancelPayload, nextSteps)
                 );

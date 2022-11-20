@@ -46,8 +46,12 @@ library PairPayload {
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
         address _recipient,
-        address _outcoming
+        address _outcoming,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
+        require(!_cancelPayload.hasValue() || _successPayload.hasValue());
+
         TvmBuilder builder;
 
         builder.store(DexOperationTypes.EXCHANGE_V2);
@@ -56,6 +60,13 @@ library PairPayload {
         builder.store(_expectedAmount);
         builder.store(_recipient);
         builder.store(_outcoming);
+
+        if (_successPayload.hasValue()) {
+            builder.store(_successPayload.get());
+        }
+        if (_cancelPayload.hasValue()) {
+            builder.store(_cancelPayload.get());
+        }
 
         return builder.toCell();
     }
@@ -91,8 +102,12 @@ library PairPayload {
         uint64 _id,
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
-        address _recipient
+        address _recipient,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
+        require(!_cancelPayload.hasValue() || _successPayload.hasValue());
+
         TvmBuilder builder;
 
         builder.store(DexOperationTypes.DEPOSIT_LIQUIDITY_V2);
@@ -100,6 +115,13 @@ library PairPayload {
         builder.store(_deployWalletGrams);
         builder.store(_expectedAmount);
         builder.store(_recipient);
+
+        if (_successPayload.hasValue()) {
+            builder.store(_successPayload.get());
+        }
+        if (_cancelPayload.hasValue()) {
+            builder.store(_cancelPayload.get());
+        }
 
         return builder.toCell();
     }
@@ -135,8 +157,12 @@ library PairPayload {
         uint64 _id,
         uint128 _deployWalletGrams,
         uint128[] _expectedAmounts,
-        address _recipient
+        address _recipient,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
+        require(!_cancelPayload.hasValue() || _successPayload.hasValue());
+
         TvmBuilder builder;
 
         builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY_V2);
@@ -144,6 +170,13 @@ library PairPayload {
         builder.store(_deployWalletGrams);
         builder.store(_recipient);
         builder.store(abi.encode(_expectedAmounts));
+
+        if (_successPayload.hasValue()) {
+            builder.store(_successPayload.get());
+        }
+        if (_cancelPayload.hasValue()) {
+            builder.store(_cancelPayload.get());
+        }
 
         return builder.toCell();
     }
@@ -158,8 +191,12 @@ library PairPayload {
         uint128 _deployWalletGrams,
         address _recipient,
         uint128 _expectedAmount,
-        address _outcoming
+        address _outcoming,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
+        require(!_cancelPayload.hasValue() || _successPayload.hasValue());
+
         TvmBuilder builder;
 
         builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN);
@@ -168,6 +205,13 @@ library PairPayload {
         builder.store(_expectedAmount);
         builder.store(_recipient);
         builder.store(_outcoming);
+
+        if (_successPayload.hasValue()) {
+            builder.store(_successPayload.get());
+        }
+        if (_cancelPayload.hasValue()) {
+            builder.store(_cancelPayload.get());
+        }
 
         return builder.toCell();
     }
@@ -233,9 +277,12 @@ library PairPayload {
         address _outcoming,
         uint32[] _nextStepIndices,
         IExchangeStepStructure.ExchangeStep[] _steps,
-        address[] _pools
+        address[] _pools,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
         require(_steps.length > 0);
+        require(!_cancelPayload.hasValue() || _successPayload.hasValue());
 
         TvmBuilder builder;
 
@@ -263,6 +310,13 @@ library PairPayload {
 
         TvmCell nextStepsCell = abi.encode(nextSteps);
         builder.store(nextStepsCell);
+
+        if (_successPayload.hasValue()) {
+            builder.store(_successPayload.get());
+        }
+        if (_cancelPayload.hasValue()) {
+            builder.store(_cancelPayload.get());
+        }
 
         return builder.toCell();
     }

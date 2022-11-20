@@ -219,22 +219,36 @@ contract DexStablePool is
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         address outcoming,
-        address recipient
+        address recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     )  external pure returns (TvmCell) {
-        return PairPayload.buildExchangePayloadV2(id, deploy_wallet_grams, expected_amount, recipient, outcoming);
+        return PairPayload.buildExchangePayloadV2(
+            id,
+            deploy_wallet_grams,
+            expected_amount,
+            recipient,
+            outcoming,
+            success_payload,
+            cancel_payload
+        );
     }
 
     function buildDepositLiquidityPayload(
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        address recipient
+        address recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     ) external pure returns (TvmCell) {
         return PairPayload.buildDepositLiquidityPayloadV2(
             id,
             deploy_wallet_grams,
             expected_amount,
-            recipient
+            recipient,
+            success_payload,
+            cancel_payload
         );
     }
 
@@ -242,7 +256,9 @@ contract DexStablePool is
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128[] expected_amounts,
-        address recipient
+        address recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     ) external view returns (TvmCell) {
         require(expected_amounts.length == 0 || expected_amounts.length == N_COINS);
 
@@ -250,7 +266,9 @@ contract DexStablePool is
             id,
             deploy_wallet_grams,
             expected_amounts,
-            recipient
+            recipient,
+            success_payload,
+            cancel_payload
         );
     }
 
@@ -259,14 +277,18 @@ contract DexStablePool is
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         address outcoming,
-        address recipient
+        address recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     ) external pure returns (TvmCell) {
         return PairPayload.buildWithdrawLiquidityOneCoinPayload(
             id,
             deploy_wallet_grams,
             recipient,
             expected_amount,
-            outcoming
+            outcoming,
+            success_payload,
+            cancel_payload
         );
     }
 
@@ -277,7 +299,9 @@ contract DexStablePool is
         address outcoming,
         uint32[] nextStepIndices,
         ExchangeStep[] steps,
-        address recipient
+        address recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     ) external view returns (TvmCell) {
         address[] pools;
 
@@ -294,7 +318,9 @@ contract DexStablePool is
             outcoming,
             nextStepIndices,
             steps,
-            pools
+            pools,
+            success_payload,
+            cancel_payload
         );
     }
 
@@ -1385,8 +1411,9 @@ contract DexStablePool is
                         }
                     } else {
                         uint8 j = tokenIndex[operation.root];
+                        bool is_last_step = next_steps.length == 0;
 
-                        if (next_steps.length != 0) {
+                        if (!is_last_step) {
                             IDexPairOperationCallback(sender_address).dexPairOperationCancelled{
                                 value: DexGas.OPERATION_CALLBACK_BASE + 44,
                                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -1409,10 +1436,10 @@ contract DexStablePool is
                             operation.amount,
                             tokenData[j].root,
                             tokenData[j].vaultWallet,
-                            next_steps.length == 0 ? recipient : sender_address,
+                            is_last_step ? recipient : sender_address,
                             deploy_wallet_grams,
-                            true,
-                            next_steps.length == 0
+                            is_last_step ? notify_success : notify_cancel,
+                            is_last_step
                                 ? PairPayload.buildSuccessPayload(op, success_payload, sender_address)
                                 : PairPayload.buildCancelPayload(op, post_swap_error_code, cancel_payload, next_steps),
                             _tokenRoots(),
@@ -1448,7 +1475,7 @@ contract DexStablePool is
                 spent_token_root == lp_root ? lp_vault_wallet : tokenData[tokenIndex[spent_token_root]].vaultWallet,
                 sender_address,
                 deploy_wallet_grams,
-                true,
+                notify_cancel,
                 PairPayload.buildCancelPayload(op, errorCode, cancel_payload, next_steps),
                 _tokenRoots(),
                 current_version,

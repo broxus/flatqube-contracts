@@ -220,14 +220,18 @@ contract DexStablePair is
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        address recipient
+        address recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     ) external pure returns (TvmCell) {
         return PairPayload.buildExchangePayloadV2(
             id,
             deploy_wallet_grams,
             expected_amount,
             recipient,
-            address(0)
+            address(0),
+            success_payload,
+            cancel_payload
         );
     }
 
@@ -245,13 +249,17 @@ contract DexStablePair is
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        address recipient
+        address recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     ) external pure returns (TvmCell) {
         return PairPayload.buildDepositLiquidityPayloadV2(
             id,
             deploy_wallet_grams,
             expected_amount,
-            recipient
+            recipient,
+            success_payload,
+            cancel_payload
         );
     }
 
@@ -270,13 +278,17 @@ contract DexStablePair is
         uint128 deploy_wallet_grams,
         uint128 expected_left_amount,
         uint128 expected_right_amount,
-        address recipient
+        address recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     ) external pure returns (TvmCell) {
         return PairPayload.buildWithdrawLiquidityPayloadV2(
             id,
             deploy_wallet_grams,
             [expected_left_amount, expected_right_amount],
-            recipient
+            recipient,
+            success_payload,
+            cancel_payload
         );
     }
 
@@ -301,7 +313,9 @@ contract DexStablePair is
         address _outcoming,
         uint32[] _nextStepIndices,
         ExchangeStep[] _steps,
-        address _recipient
+        address _recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     ) external view returns (TvmCell) {
         address[] pools;
 
@@ -318,7 +332,9 @@ contract DexStablePair is
             _outcoming,
             _nextStepIndices,
             _steps,
-            pools
+            pools,
+            success_payload,
+            cancel_payload
         );
     }
 
@@ -1203,7 +1219,9 @@ contract DexStablePair is
                         );
                     }
                 } else {
-                    if (next_steps.length != 0) {
+                    bool is_last_step = next_steps.length == 0;
+
+                    if (!is_last_step) {
                         IDexPairOperationCallback(sender_address).dexPairOperationCancelled{
                             value: DexGas.OPERATION_CALLBACK_BASE + 44,
                             flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -1226,10 +1244,10 @@ contract DexStablePair is
                         dy_result.amount,
                         tokenData[j].root,
                         tokenData[j].vaultWallet,
-                        next_steps.length == 0 ? recipient : sender_address,
+                        is_last_step ? recipient : sender_address,
                         deploy_wallet_grams,
-                        true,
-                        next_steps.length == 0
+                        is_last_step ? notify_success : notify_cancel,
+                        is_last_step
                             ? PairPayload.buildSuccessPayload(op, success_payload, sender_address)
                             : PairPayload.buildCancelPayload(op, post_swap_error_code, cancel_payload, next_steps),
                         tokenData[0].root,
@@ -1265,7 +1283,7 @@ contract DexStablePair is
                 tokenData[i].vaultWallet,
                 sender_address,
                 deploy_wallet_grams,
-                true,
+                notify_cancel,
                 PairPayload.buildCancelPayload(op, errorCode, cancel_payload, next_steps),
                 tokenData[0].root,
                 tokenData[1].root,

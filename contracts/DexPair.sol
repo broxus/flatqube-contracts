@@ -57,14 +57,18 @@ contract DexPair is DexPairBase, INextExchangeData {
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        address recipient
+        address recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     ) external pure override returns (TvmCell) {
         return PairPayload.buildExchangePayloadV2(
             id,
             deploy_wallet_grams,
             expected_amount,
             recipient,
-            address(0)
+            address(0),
+            success_payload,
+            cancel_payload
         );
     }
 
@@ -82,13 +86,17 @@ contract DexPair is DexPairBase, INextExchangeData {
         uint64 id,
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
-        address recipient
+        address recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     ) external pure override returns (TvmCell) {
         return PairPayload.buildDepositLiquidityPayloadV2(
             id,
             deploy_wallet_grams,
             expected_amount,
-            recipient
+            recipient,
+            success_payload,
+            cancel_payload
         );
     }
 
@@ -107,13 +115,17 @@ contract DexPair is DexPairBase, INextExchangeData {
         uint128 deploy_wallet_grams,
         uint128 expected_left_amount,
         uint128 expected_right_amount,
-        address recipient
+        address recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     ) external pure override returns (TvmCell) {
         return PairPayload.buildWithdrawLiquidityPayloadV2(
             id,
             deploy_wallet_grams,
             [expected_left_amount, expected_right_amount],
-            recipient
+            recipient,
+            success_payload,
+            cancel_payload
         );
     }
 
@@ -138,7 +150,9 @@ contract DexPair is DexPairBase, INextExchangeData {
         address _outcoming,
         uint32[] _nextStepIndices,
         ExchangeStep[] _steps,
-        address _recipient
+        address _recipient,
+        optional(TvmCell) success_payload,
+        optional(TvmCell) cancel_payload
     ) external view returns (TvmCell) {
         address[] pools;
 
@@ -155,7 +169,9 @@ contract DexPair is DexPairBase, INextExchangeData {
             _outcoming,
             _nextStepIndices,
             _steps,
-            pools
+            pools,
+            success_payload,
+            cancel_payload
         );
     }
 
@@ -1004,7 +1020,9 @@ contract DexPair is DexPairBase, INextExchangeData {
                             );
                         }
                     } else {
-                        if (nextSteps.length != 0) {
+                        bool isLastStep = nextSteps.length == 0;
+
+                        if (!isLastStep) {
                             IDexPairOperationCallback(_senderAddress).dexPairOperationCancelled{
                                 value: DexGas.OPERATION_CALLBACK_BASE + 44,
                                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -1026,10 +1044,10 @@ contract DexPair is DexPairBase, INextExchangeData {
                                 amount,
                                 _tokenRoots()[receiveTokenIndex],
                                 _typeToWalletAddresses[DexAddressType.VAULT][receiveTokenIndex],
-                                nextSteps.length == 0 ? _recipient : _senderAddress,
+                                isLastStep ? _recipient : _senderAddress,
                                 _deployWalletGrams,
-                                true,
-                                nextSteps.length == 0
+                                isLastStep ? _notifySuccess : _notifyCancel,
+                                isLastStep
                                     ? PairPayload.buildSuccessPayload(_op, _successPayload, _senderAddress)
                                     : PairPayload.buildCancelPayload(_op, postSwapErrorCode, _cancelPayload, nextSteps),
                                 _tokenRoots()[spentTokenIndex],
@@ -1068,7 +1086,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                         _typeToWalletAddresses[DexAddressType.VAULT][spentTokenIndex],
                         _senderAddress,
                         _deployWalletGrams,
-                        true,
+                        _notifyCancel,
                         PairPayload.buildCancelPayload(_op, errorCode, _cancelPayload, nextSteps),
                         _tokenRoots()[spentTokenIndex],
                         _tokenRoots()[receiveTokenIndex],
