@@ -13832,6 +13832,101 @@ PUSHCONT {
 IF
 THROW 0
 
+.globl	FixedPoint128_with_obj_encodeFromNumeratorAndDenominator
+.type	FixedPoint128_with_obj_encodeFromNumeratorAndDenominator, @function
+CALL $FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_macro$
+
+.macro FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 25
+OVER
+CALLREF {
+	CALL $FixedPoint128_no_obj_encode_macro$
+}
+SWAP
+CALLREF {
+	CALL $FixedPoint128_no_obj_div_macro$
+}
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_no_obj_encodeFromNumeratorAndDenominator
+.type	FixedPoint128_no_obj_encodeFromNumeratorAndDenominator, @function
+CALL $FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_macro$
+
+.macro FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 25
+SWAP
+CALLREF {
+	CALL $FixedPoint128_no_obj_encode_macro$
+}
+SWAP
+CALLREF {
+	CALL $FixedPoint128_no_obj_div_macro$
+}
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_with_obj_encode
+.type	FixedPoint128_with_obj_encode, @function
+CALL $FixedPoint128_with_obj_encode_macro$
+
+.macro FixedPoint128_with_obj_encode_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 13
+DUP
+PUSHINT 340282366920938463463374607431768211456
+MUL
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_no_obj_encode
+.type	FixedPoint128_no_obj_encode, @function
+CALL $FixedPoint128_no_obj_encode_macro$
+
+.macro FixedPoint128_no_obj_encode_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 13
+PUSHINT 340282366920938463463374607431768211456
+MUL
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_with_obj_calculateExpectedAmountByRate
+.type	FixedPoint128_with_obj_calculateExpectedAmountByRate, @function
+CALL $FixedPoint128_with_obj_calculateExpectedAmountByRate_macro$
+
+.macro FixedPoint128_with_obj_calculateExpectedAmountByRate_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 45
+PUXC S1, S-1
+PUSHINT 340282366920938463463374607431768211456
+MULDIV
+UFITS 128
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_no_obj_calculateExpectedAmountByRate
+.type	FixedPoint128_no_obj_calculateExpectedAmountByRate, @function
+CALL $FixedPoint128_no_obj_calculateExpectedAmountByRate_macro$
+
+.macro FixedPoint128_no_obj_calculateExpectedAmountByRate_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 45
+PUSHINT 340282366920938463463374607431768211456
+MULDIV
+UFITS 128
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_with_obj_div
+.type	FixedPoint128_with_obj_div, @function
+CALL $FixedPoint128_with_obj_div_macro$
+
+.macro FixedPoint128_with_obj_div_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 33
+PUXC S1, S-1
+DIV
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_no_obj_div
+.type	FixedPoint128_no_obj_div, @function
+CALL $FixedPoint128_no_obj_div_macro$
+
+.macro FixedPoint128_no_obj_div_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 33
+DIV
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
 .globl	Math_with_obj_calculateExpectedExchange
 .type	Math_with_obj_calculateExpectedExchange, @function
 CALL $Math_with_obj_calculateExpectedExchange_macro$
@@ -17423,101 +17518,6 @@ STREF
 .loc ../contracts/libraries/PairPayload.sol, 569
 ENDC
 .loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	FixedPoint128_with_obj_encodeFromNumeratorAndDenominator
-.type	FixedPoint128_with_obj_encodeFromNumeratorAndDenominator, @function
-CALL $FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_macro$
-
-.macro FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 25
-OVER
-CALLREF {
-	CALL $FixedPoint128_no_obj_encode_macro$
-}
-SWAP
-CALLREF {
-	CALL $FixedPoint128_no_obj_div_macro$
-}
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_no_obj_encodeFromNumeratorAndDenominator
-.type	FixedPoint128_no_obj_encodeFromNumeratorAndDenominator, @function
-CALL $FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_macro$
-
-.macro FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 25
-SWAP
-CALLREF {
-	CALL $FixedPoint128_no_obj_encode_macro$
-}
-SWAP
-CALLREF {
-	CALL $FixedPoint128_no_obj_div_macro$
-}
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_with_obj_encode
-.type	FixedPoint128_with_obj_encode, @function
-CALL $FixedPoint128_with_obj_encode_macro$
-
-.macro FixedPoint128_with_obj_encode_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 13
-DUP
-PUSHINT 340282366920938463463374607431768211456
-MUL
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_no_obj_encode
-.type	FixedPoint128_no_obj_encode, @function
-CALL $FixedPoint128_no_obj_encode_macro$
-
-.macro FixedPoint128_no_obj_encode_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 13
-PUSHINT 340282366920938463463374607431768211456
-MUL
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_with_obj_calculateExpectedAmountByRate
-.type	FixedPoint128_with_obj_calculateExpectedAmountByRate, @function
-CALL $FixedPoint128_with_obj_calculateExpectedAmountByRate_macro$
-
-.macro FixedPoint128_with_obj_calculateExpectedAmountByRate_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 45
-PUXC S1, S-1
-PUSHINT 340282366920938463463374607431768211456
-MULDIV
-UFITS 128
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_no_obj_calculateExpectedAmountByRate
-.type	FixedPoint128_no_obj_calculateExpectedAmountByRate, @function
-CALL $FixedPoint128_no_obj_calculateExpectedAmountByRate_macro$
-
-.macro FixedPoint128_no_obj_calculateExpectedAmountByRate_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 45
-PUSHINT 340282366920938463463374607431768211456
-MULDIV
-UFITS 128
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_with_obj_div
-.type	FixedPoint128_with_obj_div, @function
-CALL $FixedPoint128_with_obj_div_macro$
-
-.macro FixedPoint128_with_obj_div_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 33
-PUXC S1, S-1
-DIV
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_no_obj_div
-.type	FixedPoint128_no_obj_div, @function
-CALL $FixedPoint128_no_obj_div_macro$
-
-.macro FixedPoint128_no_obj_div_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 33
-DIV
-.loc ../contracts/libraries/FixedPoint128.sol, 0
 
 .macro new_array_line_1110_column_30_ast_id_2704
 PUSHINT 0
