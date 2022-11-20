@@ -59,7 +59,8 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         address pair,
         uint64 id,
         uint128 expectedAmount,
-        address recipient
+        address recipient,
+        optional(address) outcoming
     ) public pure returns (TvmCell) {
         TvmBuilder builder;
         TvmBuilder pairPayload;
@@ -70,6 +71,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         pairPayload.store(uint128(0));
         pairPayload.store(expectedAmount);
         pairPayload.store(recipient);
+        pairPayload.store(outcoming.hasValue() ? outcoming.get() : address(0));
 
         TvmBuilder successPayload;
         successPayload.store(EverToTip3OperationStatus.SUCCESS);

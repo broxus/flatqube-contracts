@@ -13,7 +13,8 @@ library EverToTip3Payloads {
         uint128 deployWalletValue,
         uint128 expectedAmount,
         uint128 amount,
-        address recipient
+        address recipient,
+        address outcoming
     ) public returns (TvmCell) {
         TvmBuilder builder;
         TvmBuilder pairPayload;
@@ -24,6 +25,7 @@ library EverToTip3Payloads {
         pairPayload.store(deployWalletValue);
         pairPayload.store(expectedAmount);
         pairPayload.store(recipient);
+        pairPayload.store(outcoming);
 
         TvmBuilder successPayload;
         successPayload.store(EverToTip3OperationStatus.SUCCESS);

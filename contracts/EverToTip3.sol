@@ -63,7 +63,8 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         uint64 id,
         uint128 deployWalletValue,
         uint128 expectedAmount,
-        address recipient
+        address recipient,
+        optional(address) outcoming
     ) external pure returns (TvmCell) {
         return EverToTip3Payloads.buildExchangePayload(
             pair,
@@ -71,7 +72,8 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
             deployWalletValue,
             expectedAmount,
             0,
-            recipient
+            recipient,
+            outcoming.hasValue() ? outcoming.get() : address(0)
         );
     }
 
