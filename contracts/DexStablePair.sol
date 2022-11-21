@@ -598,6 +598,18 @@ contract DexStablePair is
                             _processBeneficiaryFees(false, original_gas_to);
                         }
 
+                        IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
+                            value: DexGas.OPERATION_CALLBACK_BASE + 40,
+                            flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                            bounce: false
+                        }(id, false, IExchangeResult.ExchangeResult(
+                            i == 0 && j == 1,
+                            tokens_amount,
+                            dy_result.pool_fee + dy_result.beneficiary_fee,
+                            dy_result.amount
+                        ));
+
+
                         ITokenWallet(msg.sender).transfer{
                             value: DexGas.TRANSFER_TOKENS_VALUE,
                             flag: MsgFlag.SENDER_PAYS_FEES

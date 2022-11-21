@@ -985,6 +985,7 @@ contract DexAccount is
         if (
             functionId == tvm.functionId(IDexBasePool.exchange) ||
             functionId == tvm.functionId(IDexBasePool.depositLiquidity) ||
+            functionId == tvm.functionId(IDexBasePool.withdrawLiquidity) ||
             functionId == tvm.functionId(IDexAccount.internalAccountTransfer) ||
             functionId == tvm.functionId(IDexVault.withdraw)
         ) {
