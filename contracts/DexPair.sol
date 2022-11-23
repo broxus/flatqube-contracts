@@ -222,13 +222,15 @@ contract DexPair is DexPairBase, INextExchangeData {
         address[] tokenRoots = _tokenRoots();
         uint128[] tokenReserves = _reserves();
 
+        TokenOperation[] operations = _operations[0].root == tokenRoots[1] ? [_operations[1], _operations[0]] : _operations;
+
         (
             DepositLiquidityResult result,
             ,
             uint128 step2BeneficiaryFee
         ) = Math.calculateExpectedDepositLiquidity(
-            _operations[0].amount,
-            _operations[1].amount,
+            operations[0].amount,
+            operations[1].amount,
             _autoChange,
             tokenReserves[0],
             tokenReserves[1],
@@ -239,13 +241,13 @@ contract DexPair is DexPairBase, INextExchangeData {
         require(result.step_1_lp_reward + result.step_3_lp_reward >= _expected.amount, DexErrors.WRONG_LIQUIDITY);
 
         if (_lpReserve() == 0) {
-            for (uint i = 0; i < _operations.length; i++) {
-                _typeToReserves[DexReserveType.POOL][i] = _operations[i].amount;
+            for (uint i = 0; i < operations.length; i++) {
+                _typeToReserves[DexReserveType.POOL][i] = operations[i].amount;
             }
         } else {
             if (_autoChange) {
-                for (uint i = 0; i < _operations.length; i++) {
-                    _typeToReserves[DexReserveType.POOL][i] += _operations[i].amount;
+                for (uint i = 0; i < operations.length; i++) {
+                    _typeToReserves[DexReserveType.POOL][i] += operations[i].amount;
                 }
 
                 if (result.step_2_right_to_left) {
@@ -277,22 +279,22 @@ contract DexPair is DexPairBase, INextExchangeData {
                 _typeToReserves[DexReserveType.POOL][0] += result.step_1_left_deposit;
                 _typeToReserves[DexReserveType.POOL][1] += result.step_1_right_deposit;
 
-                if (result.step_1_left_deposit < _operations[0].amount) {
+                if (result.step_1_left_deposit < operations[0].amount) {
                     IDexAccount(msg.sender)
                         .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                         (
-                            _operations[0].amount - result.step_1_left_deposit,
+                            operations[0].amount - result.step_1_left_deposit,
                             tokenRoots[0],
                             _typeToRootAddresses[DexAddressType.RESERVE],
                             _remainingGasTo
                         );
                 }
 
-                if (result.step_1_right_deposit < _operations[1].amount) {
+                if (result.step_1_right_deposit < operations[1].amount) {
                     IDexAccount(msg.sender)
                         .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                         (
-                            _operations[1].amount - result.step_1_right_deposit,
+                            operations[1].amount - result.step_1_right_deposit,
                             tokenRoots[1],
                             _typeToRootAddresses[DexAddressType.RESERVE],
                             _remainingGasTo

@@ -420,16 +420,34 @@ abstract contract DexPairBase is
             _typeToWalletAddresses[DexAddressType.LP].push(_wallet);
             _typeToReserves[DexReserveType.LP].push(0);
         } else if (
-            (
-                msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0] ||
-                msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1]
-            ) && (
-                _typeToWalletAddresses[DexAddressType.RESERVE].length == 0 ||
+            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0]
+        ) {
+            if (
+                _typeToWalletAddresses[DexAddressType.RESERVE].length == 0
+            ) {
+                _typeToWalletAddresses[DexAddressType.RESERVE].push(_wallet);
+            } else if (
+                _typeToWalletAddresses[DexAddressType.RESERVE].length == 2 &&
+                _typeToWalletAddresses[DexAddressType.RESERVE][0].value == 0
+            ) {
+                _typeToWalletAddresses[DexAddressType.RESERVE][0] = _wallet;
+            }
+            _typeToReserves[DexReserveType.POOL].push(0);
+            _typeToReserves[DexReserveType.FEE].push(0);
+        } else if (
+            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1]
+        ) {
+            if (
                 _typeToWalletAddresses[DexAddressType.RESERVE].length == 1 &&
                 _typeToWalletAddresses[DexAddressType.RESERVE][0] != _wallet
-            )
-        ) {
-            _typeToWalletAddresses[DexAddressType.RESERVE].push(_wallet);
+            ) {
+                _typeToWalletAddresses[DexAddressType.RESERVE].push(_wallet);
+            } else if (
+                _typeToWalletAddresses[DexAddressType.RESERVE].length == 0
+            ) {
+                _typeToWalletAddresses[DexAddressType.RESERVE].push(address(0));
+                _typeToWalletAddresses[DexAddressType.RESERVE].push(_wallet);
+            }
             _typeToReserves[DexReserveType.POOL].push(0);
             _typeToReserves[DexReserveType.FEE].push(0);
         }
@@ -442,16 +460,32 @@ abstract contract DexPairBase is
     function onVaultTokenWallet(address _wallet) external onlyTokenRoot {
         // Set vault wallets addresses
         if (
-            (
-                msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0] ||
-                msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1]
-            ) && (
-                _typeToWalletAddresses[DexAddressType.VAULT].length == 0 ||
+            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0]
+        ) {
+            if (
+                _typeToWalletAddresses[DexAddressType.VAULT].length == 0
+            ) {
+                _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
+            } else if (
+                _typeToWalletAddresses[DexAddressType.VAULT].length == 2 &&
+                _typeToWalletAddresses[DexAddressType.VAULT][0].value == 0
+            ) {
+                _typeToWalletAddresses[DexAddressType.VAULT][0] = _wallet;
+            }
+        } else if (
+            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1]
+        ) {
+            if (
                 _typeToWalletAddresses[DexAddressType.VAULT].length == 1 &&
                 _typeToWalletAddresses[DexAddressType.VAULT][0] != _wallet
-            )
-        ) {
-            _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
+            ) {
+                _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
+            } else if (
+                _typeToWalletAddresses[DexAddressType.VAULT].length == 0
+            ) {
+                _typeToWalletAddresses[DexAddressType.VAULT].push(address(0));
+                _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
+            }
         }
 
         _tryToActivate();

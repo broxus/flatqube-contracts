@@ -351,12 +351,11 @@ describe('Check direct operations', async function () {
                         });
                         expected_amount = expected.amounts[outcomingIndex];
                     } else if (isLpToken(elem.outcoming, elem.roots)) { // receive token is lp token of the current pool
-                        const amounts = poolRoots.map(token_root =>
-                            elem.roots.find(token => token_root === tokenRoots[token].address) === spent_token ? partial_spent_amount : '0');
 
                         expected = await poolsContracts[poolName].call({
-                            method: 'expectedDepositLiquidityV2', params: {
-                                amounts: amounts,
+                            method: 'expectedDepositLiquidityOneCoin', params: {
+                                spent_token_root: tokenRoots[spent_token].address,
+                                amount: partial_spent_amount
                             }
                         });
                         expected_amount = expected.lp_reward;

@@ -1,6 +1,6 @@
 const {expect} = require('chai');
 const {
-    Migration, afterRun, Constants, TOKEN_CONTRACTS_PATH, displayTx, expectedDepositLiquidity
+    Migration, afterRun, Constants, TOKEN_CONTRACTS_PATH, displayTx, expectedDepositLiquidityOneCoin
 } = require(process.cwd() + '/scripts/utils');
 const BigNumber = require('bignumber.js');
 const {Command} = require('commander');
@@ -576,17 +576,13 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
             const poolStart = await dexPoolInfo();
             logBalances('start', dexStart, accountStart, poolStart);
 
-            const deposits = new Array(N_COINS);
-            for (let idx = 0; idx < N_COINS; idx++) {
-                deposits[idx] = idx === i ? 2000 : 0;
-            }
+            let amount = 2000;
 
-            const LP_REWARD = await expectedDepositLiquidity(
+            const LP_REWARD = await expectedDepositLiquidityOneCoin(
                 DexPool.address,
-                options.contract_name,
                 tokens,
-                deposits,
-                true
+                amount,
+                tokenRoots[i].address
             );
 
             const payload = await DexPool.call({
@@ -602,7 +598,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 contract: tokenWallets3[i],
                 method: 'transfer',
                 params: {
-                    amount: deposits[i],
+                    amount: amount,
                     recipient: DexPool.address,
                     deployWalletValue: 0,
                     remainingGasTo: Account3.address,
@@ -630,8 +626,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
             logBalances('end', dexEnd, accountEnd, poolEnd);
             await logGas();
 
-            const expectedDexCoin = new BigNumber(dexStart.token_balances[i]).plus(new BigNumber(deposits[i]).shiftedBy(-tokens[i].decimals)).toString();
-            const expectedAccountCoin = new BigNumber(accountStart.token_balances[i]).minus(new BigNumber(deposits[i]).shiftedBy(-tokens[i].decimals)).toString();
+            const expectedDexCoin = new BigNumber(dexStart.token_balances[i]).plus(new BigNumber(amount).shiftedBy(-tokens[i].decimals)).toString();
+            const expectedAccountCoin = new BigNumber(accountStart.token_balances[i]).minus(new BigNumber(amount).shiftedBy(-tokens[i].decimals)).toString();
             const expectedAccountLp = new BigNumber(accountStart.lp || 0).plus(LP_REWARD).toString();
 
             expect(poolEnd.lp_supply_actual).to.equal(poolEnd.lp_supply, 'Wrong LP supply');
@@ -650,18 +646,13 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 logBalances('start', dexStart, accountStart, poolStart);
 
                 const TOKENS_TO_DEPOSIT = 300;
+                let amount = new BigNumber(TOKENS_TO_DEPOSIT).shiftedBy(tokens[i].decimals).toString();
 
-                const deposits = new Array(N_COINS);
-                for (let idx = 0; idx < N_COINS; idx++) {
-                    deposits[idx] = idx === i ? new BigNumber(TOKENS_TO_DEPOSIT).shiftedBy(tokens[i].decimals).toString() : 0;
-                }
-
-                const LP_REWARD = await expectedDepositLiquidity(
+                const LP_REWARD = await expectedDepositLiquidityOneCoin(
                     DexPool.address,
-                    options.contract_name,
                     tokens,
-                    deposits,
-                    true
+                    amount,
+                    tokenRoots[i].address
                 );
 
                 const payload = await DexPool.call({
@@ -677,7 +668,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     contract: tokenWallets3[i],
                     method: 'transfer',
                     params: {
-                        amount: deposits[i],
+                        amount: amount,
                         recipient: DexPool.address,
                         deployWalletValue: 0,
                         remainingGasTo: Account3.address,

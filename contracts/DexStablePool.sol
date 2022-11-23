@@ -564,9 +564,8 @@ contract DexStablePool is
 
                 if (errorCode == 0) {
                     if (outcoming == lp_root && token_root != lp_root) { // deposit liquidity
-                        uint128[] amounts = new uint128[](N_COINS);
-                        amounts[tokenIndex[token_root]] = tokens_amount;
-                        optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts, _reserves(), lp_supply);
+
+                        optional(DepositLiquidityResultV2) resultOpt = _expectedOneCoinDepositLiquidity(tokens_amount, tokenIndex[token_root], _reserves(), lp_supply);
 
                         errorCode = _checkDepositReceivedAmount(resultOpt, expected_amount);
                         if (errorCode == 0) {
@@ -721,9 +720,8 @@ contract DexStablePool is
                     }
                 }
             } else if (op == DexOperationTypes.DEPOSIT_LIQUIDITY_V2) {
-                uint128[] amounts = new uint128[](N_COINS);
-                amounts[tokenIndex[token_root]] = tokens_amount;
-                optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts, _reserves(), lp_supply);
+
+                optional(DepositLiquidityResultV2) resultOpt = _expectedOneCoinDepositLiquidity(tokens_amount, tokenIndex[token_root], _reserves(), lp_supply);
 
                 errorCode = _checkDepositReceivedAmount(resultOpt, expected_amount);
                 if (errorCode == 0) {
@@ -863,6 +861,18 @@ contract DexStablePool is
         uint128[] amounts
     ) override external view responsible returns (DepositLiquidityResultV2) {
         optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts, _reserves(), lp_supply);
+        require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } resultOpt.get();
+    }
+
+    function expectedDepositLiquidityOneCoin(
+        address spent_token_root,
+        uint128 amount
+    ) external view responsible returns (DepositLiquidityResultV2) {
+        require(tokenIndex.exists(spent_token_root), DexErrors.NOT_TOKEN_ROOT);
+        uint8 i = tokenIndex[spent_token_root];
+
+        optional(DepositLiquidityResultV2) resultOpt = _expectedOneCoinDepositLiquidity(amount, i, _reserves(), lp_supply);
         require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } resultOpt.get();
     }
@@ -1236,9 +1246,8 @@ contract DexStablePool is
             TokenOperation operation;
 
             if (outcoming == lp_root && spent_token_root != lp_root) { // deposit liquidity
-                uint128[] amounts = new uint128[](N_COINS);
-                amounts[tokenIndex[spent_token_root]] = spent_amount;
-                optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts, _reserves(), lp_supply);
+
+                optional(DepositLiquidityResultV2) resultOpt = _expectedOneCoinDepositLiquidity(spent_amount, tokenIndex[spent_token_root], _reserves(), lp_supply);
 
                 errorCode = _checkDepositReceivedAmount(resultOpt, expected_amount);
                 if (errorCode == 0) {
@@ -2227,23 +2236,19 @@ contract DexStablePool is
         optional(uint256) D2_opt;
 
         if (old_lp_supply > 0) {
+            uint128 fee_numerator = math.muldiv(fee.pool_numerator + fee.beneficiary_numerator, N_COINS, (4 * (N_COINS - 1)));
 
             for (uint8 i = 0; i < N_COINS; i++) {
                 uint128 ideal_balance = uint128(math.muldiv(D1, old_balances[i], D0));
                 uint128 new_balance = new_balances[i];
                 uint128 difference = ideal_balance > new_balance ? ideal_balance - new_balance : new_balance - ideal_balance;
-                differences[i] = difference;
                 sell[i] = ideal_balance < new_balance;
-
-                uint128 fees = 0;
-                // or math.muldivc(fee.beneficiary_numerator + fee.pool_numerator, difference, fee.denominator) > 0 && sell[i]
-                if (difference > 0 && sell[i]) {
-                    fees = math.muldiv(fee.beneficiary_numerator + fee.pool_numerator, _amounts[i], fee.denominator);
-                }
+                uint128 fees = math.muldivc(fee_numerator, difference, fee.denominator);
                 beneficiary_fees[i] = math.muldiv(fees, fee.beneficiary_numerator, fee.pool_numerator + fee.beneficiary_numerator);
                 pool_fees[i] = fees - beneficiary_fees[i];
                 result_balances[i] = new_balance - beneficiary_fees[i];
                 new_balances[i] = new_balances[i] - pool_fees[i] - beneficiary_fees[i];
+                differences[i] = difference;
             }
             D2_opt = _get_D(_xp_mem(new_balances));
             if (D2_opt.hasValue()) {
@@ -2260,16 +2265,89 @@ contract DexStablePool is
         }
 
         result.set(DepositLiquidityResultV2(
-            old_balances,
-            _amounts,
-            lp_reward,
-            result_balances,
-            uint128(D1),
-            differences,
-            sell,
-            pool_fees,
-            beneficiary_fees
-        ));
+                old_balances,
+                _amounts,
+                lp_reward,
+                result_balances,
+                uint128(D1),
+                differences,
+                sell,
+                pool_fees,
+                beneficiary_fees
+            ));
+
+        return result;
+
+    }
+
+
+    function _expectedOneCoinDepositLiquidity(uint128 _amount, uint8 i, uint128[] old_balances, uint128 old_lp_supply) private view returns(optional(DepositLiquidityResultV2)) {
+        optional(DepositLiquidityResultV2) result;
+
+        optional(uint256) D0_opt = _get_D(_xp_mem(old_balances));
+
+        uint128[] new_balances = old_balances;
+        uint128[] pool_fees = new uint128[](N_COINS);
+        uint128[] beneficiary_fees = new uint128[](N_COINS);
+        uint128[] result_balances = old_balances;
+        uint128[] differences = new uint128[](N_COINS);
+        uint128[] amounts = new uint128[](N_COINS);
+        uint128 lp_reward;
+        bool[] sell = new bool[](N_COINS);
+
+        new_balances[i] += _amount;
+        amounts[i] = _amount;
+
+        optional(uint256) D1_opt = _get_D(_xp_mem(new_balances));
+
+        //  # dev: initial deposit requires all coins
+        if (old_lp_supply == 0 || _amount == 0 || !D0_opt.hasValue() || !D1_opt.hasValue()) {
+            return result;
+        }
+
+        uint256 D0 = D0_opt.get();
+        uint256 D1 = D1_opt.get();
+
+        if (D0 >= D1) {
+            return result;
+        }
+
+        optional(uint256) D2_opt;
+
+        for (uint8 j = 0; j < N_COINS; j++) {
+            uint128 ideal_balance = uint128(math.muldiv(D1, old_balances[j], D0));
+            uint128 new_balance = new_balances[j];
+            uint128 difference = ideal_balance > new_balance ? ideal_balance - new_balance : new_balance - ideal_balance;
+            differences[i] = difference;
+            sell[i] = ideal_balance < new_balance;
+        }
+
+        uint128 fees = math.muldiv(fee.beneficiary_numerator + fee.pool_numerator, _amount, fee.denominator);
+        beneficiary_fees[i] = math.muldiv(fees, fee.beneficiary_numerator, fee.pool_numerator + fee.beneficiary_numerator);
+        pool_fees[i] = fees - beneficiary_fees[i];
+        result_balances[i] = new_balances[i] - beneficiary_fees[i];
+        new_balances[i] = new_balances[i] - pool_fees[i] - beneficiary_fees[i];
+
+        D2_opt = _get_D(_xp_mem(new_balances));
+        if (D2_opt.hasValue()) {
+            lp_reward = uint128(math.muldiv(old_lp_supply, (D2_opt.get() - D0), D0));
+        }
+
+        if (!D2_opt.hasValue() || lp_reward == 0) {
+            return result;
+        }
+
+        result.set(DepositLiquidityResultV2(
+                old_balances,
+                amounts,
+                lp_reward,
+                result_balances,
+                uint128(D1),
+                differences,
+                sell,
+                pool_fees,
+                beneficiary_fees
+            ));
 
         return result;
 

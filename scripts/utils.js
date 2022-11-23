@@ -72,7 +72,7 @@ const Constants = {
     coin: {
       name: 'Coin',
       symbol: 'Coin',
-      decimals: 18,
+      decimals: 9,
       upgradeable: true
     },
     wever: {
@@ -283,6 +283,28 @@ async function expectedDepositLiquidity(pairAddress, contractName, tokens, amoun
   return LP_REWARD;
 }
 
+async function expectedDepositLiquidityOneCoin(poolAddress, tokens, amount, spent_token_root) {
+
+  const pool = await locklift.factory.getContract("DexStablePool");
+  pool.setAddress(poolAddress)
+
+  let LP_REWARD = "0";
+
+  const expected = await pool.call({
+    method: 'expectedDepositLiquidityOneCoin',
+    params: {
+      spent_token_root,
+      amount
+    }
+  });
+
+  LP_REWARD = new BigNumber(expected.lp_reward).shiftedBy(-9).toString();
+
+  logExpectedDepositV2(expected, tokens);
+
+  return LP_REWARD;
+}
+
 module.exports = {
   Migration,
   Constants,
@@ -296,6 +318,7 @@ module.exports = {
   TOKEN_CONTRACTS_PATH,
   EMPTY_TVM_CELL,
   expectedDepositLiquidity,
+  expectedDepositLiquidityOneCoin,
   logExpectedDeposit,
   logExpectedDepositV2
 }
