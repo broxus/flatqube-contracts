@@ -1,4 +1,4 @@
-.version sol 0.57.1
+.version sol 0.61.2
 
 .macro constructor
 DROP
@@ -159,7 +159,7 @@ PUSHINT 1
 STUR 111
 STBREF
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../node_modules/ton-wton/everscale/contracts/Tunnel.sol, 0
 DUP
@@ -331,6 +331,16 @@ CALL $__updateTunnel_internal_macro$
 GETGLOB 9
 GETGLOB 10
 SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
 THROWIFNOT 1101
 .loc ../node_modules/ton-wton/everscale/contracts/Tunnel.sol, 68
 SWAP
@@ -378,6 +388,16 @@ CALL $__removeTunnel_internal_macro$
 GETGLOB 9
 GETGLOB 10
 SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
 THROWIFNOT 1101
 .loc ../node_modules/ton-wton/everscale/contracts/Tunnel.sol, 74
 GETGLOB 13
@@ -417,6 +437,16 @@ CALL $pause_internal_macro$
 GETGLOB 9
 GETGLOB 10
 SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
 THROWIFNOT 1101
 .loc ../node_modules/ton-wton/everscale/contracts/utils/Pausable.sol, 16
 PUSHREF {
@@ -466,6 +496,16 @@ CALL $unpause_internal_macro$
 GETGLOB 9
 GETGLOB 10
 SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
 THROWIFNOT 1101
 .loc ../node_modules/ton-wton/everscale/contracts/utils/Pausable.sol, 24
 PUSHREF {
@@ -546,6 +586,16 @@ THROW 0
 GETGLOB 9
 GETGLOB 10
 SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
 THROWIFNOT 1101
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 37
 DUP
@@ -586,6 +636,16 @@ THROW 0
 GETGLOB 9
 GETGLOB 10
 SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
 THROWIFNOT 1101
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 46
 PUSHREFSLICE {
@@ -637,13 +697,11 @@ PUSHCONT {
 	PUSH S3
 	PUSHINT 64
 	DICTUGET
+	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 256
 	}
-	PUSHCONT {
-		PUSHINT 0
-	}
-	IFELSE
+	IF
 	NEWDICT
 	SETGLOB 13
 	SETGLOB 12
@@ -762,12 +820,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -785,7 +843,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; havePubkey msgSlice
+	LDU 1 ; hasPubkey msgSlice
 	SWAP
 	THROWIF 58
 }

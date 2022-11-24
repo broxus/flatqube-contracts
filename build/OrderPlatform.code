@@ -1,4 +1,4 @@
-.version sol 0.57.1
+.version sol 0.61.2
 
 .macro constructor
 DROP
@@ -50,7 +50,7 @@ PUSHCONT {
 	PUSHINT 111
 	STZEROES
 	ENDC
-	PUSHINT 128
+	PUSHPOW2 7
 	ADDCONST 32
 	UFITS 8
 	SENDRAWMSG
@@ -74,12 +74,9 @@ NEWC
 STSLICE
 .loc ../contracts/OrderPlatform.sol, 38
 GETGLOB 11
-SWAP
-STSLICE
+STSLICER
 .loc ../contracts/OrderPlatform.sol, 39
-PUSHINT 0
-SWAP
-STU 32
+STSLICECONST x00000000
 .loc ../contracts/OrderPlatform.sol, 40
 XCHG S1, S2
 STU 32
@@ -285,12 +282,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -306,7 +303,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; havePubkey msgSlice
+	LDU 1 ; hasPubkey msgSlice
 	SWAP
 	THROWIF 58
 }

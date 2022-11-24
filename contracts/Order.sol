@@ -233,13 +233,14 @@ contract Order is
 			} buildDetails();
 	}
 
-	function buildPayload(uint128 deployWalletValue)
+	function buildPayload(uint128 deployWalletValue, uint64 callId)
 		external
 		pure
 		returns (TvmCell)
 	{
 		TvmBuilder builder;
 		builder.store(deployWalletValue);
+		builder.store(callId);
 		return builder.toCell();
 	}
 
@@ -621,13 +622,13 @@ contract Order is
 		state = newState;
 		emit StateChanged(prevStateN, newState, buildDetails());
 		if (callId.hasValue()){
-			IOrderOperationCallback(msg.sender).orderStateChangedSuccess{
-				value: OrderGas.OPERATION_CALLBACK_BASE + 2,
-				flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-				bounce: false
-			}
-			(callId, true, IStateChangedResult.StateChangedResult(
-				prevStateN, newState, buildDetails()));
+			//IOrderOperationCallback(msg.sender).orderStateChangedSuccess{
+			//	value: OrderGas.OPERATION_CALLBACK_BASE + 2,
+			//	flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+			//	bounce: false
+			//}
+			//(callId, true, IStateChangedResult.StateChangedResult(
+			//	prevStateN, newState, buildDetails()));
 		}
 
 	}

@@ -6,6 +6,7 @@
   "scripts": {
     "migration-prod": "locklift run --config locklift.config.ts --network main --script scripts/migration-prod.js && locklift test --config locklift.config.ts --network main --test test/prod",
     "build": "npx locklift build --config locklift.config.js",
+    "test:order": "npx locklift test --disable-build -n local --tests test/60-order.spec.ts",
     "test:oracle-upgrade": "npx locklift test --config locklift.config.js --disable-build --network local --tests test/upgrade/5-oracle-upgrade-test.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
