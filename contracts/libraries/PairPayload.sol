@@ -6,6 +6,7 @@ import "../structures/INextExchangeData.sol";
 
 import "./DexOperationStatusV2.sol";
 import "./DexOperationTypes.sol";
+import "./DexErrors.sol";
 
 /**
  * @title DEX Pair Payloads Utility
@@ -50,7 +51,7 @@ library PairPayload {
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
-        require(!_cancelPayload.hasValue() || _successPayload.hasValue());
+        require(!_cancelPayload.hasValue() || _successPayload.hasValue(), DexErrors.INVALID_SUCCESS_PAYLOAD);
 
         TvmBuilder builder;
 
@@ -106,7 +107,7 @@ library PairPayload {
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
-        require(!_cancelPayload.hasValue() || _successPayload.hasValue());
+        require(!_cancelPayload.hasValue() || _successPayload.hasValue(), DexErrors.INVALID_SUCCESS_PAYLOAD);
 
         TvmBuilder builder;
 
@@ -161,7 +162,7 @@ library PairPayload {
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
-        require(!_cancelPayload.hasValue() || _successPayload.hasValue());
+        require(!_cancelPayload.hasValue() || _successPayload.hasValue(), DexErrors.INVALID_SUCCESS_PAYLOAD);
 
         TvmBuilder builder;
 
@@ -195,7 +196,7 @@ library PairPayload {
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
-        require(!_cancelPayload.hasValue() || _successPayload.hasValue());
+        require(!_cancelPayload.hasValue() || _successPayload.hasValue(), DexErrors.INVALID_SUCCESS_PAYLOAD);
 
         TvmBuilder builder;
 
@@ -231,7 +232,7 @@ library PairPayload {
         ITokenOperationStructure.TokenOperation[] _steps
     ) public returns (TvmCell) {
         // Check that at least 1 next pair is exists
-        require(_steps.length > 0);
+        require(_steps.length > 0, DexErrors.INVALID_NEXT_STEPS);
 
         // Pack data for the first pair
         TvmBuilder builder;
@@ -281,8 +282,8 @@ library PairPayload {
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
-        require(_steps.length > 0);
-        require(!_cancelPayload.hasValue() || _successPayload.hasValue());
+        require(_steps.length > 0, DexErrors.INVALID_NEXT_STEPS);
+        require(!_cancelPayload.hasValue() || _successPayload.hasValue(), DexErrors.INVALID_SUCCESS_PAYLOAD);
 
         TvmBuilder builder;
 

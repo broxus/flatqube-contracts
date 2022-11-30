@@ -69,4 +69,7 @@ library DexErrors {
 
     uint16 constant NOT_LP_VAULT_WALLET              = 145;
     uint16 constant NEITHER_PAIR_NOR_VAULT           = 146;
+
+    uint16 constant INVALID_NEXT_STEPS               = 147;
+    uint16 constant INVALID_SUCCESS_PAYLOAD          = 148;
 }

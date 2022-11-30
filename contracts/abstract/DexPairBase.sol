@@ -352,6 +352,7 @@ abstract contract DexPairBase is
             );
 
             builder.store(otherData);   // ref2
+            builder.store(_packAllOracleData());    // ref3
 
             // set code after complete this method
             tvm.setcode(_code);
@@ -648,6 +649,8 @@ abstract contract DexPairBase is
                     _typeToRootAddresses[DexAddressType.RESERVE][1],
                     remainingGasTo
                 );
+
+            _initializeTWAPOracle(now);
         } else if (oldPoolType == DexPoolTypes.CONSTANT_PRODUCT) {
             _active = true;
             TvmCell otherData = dataSlice.loadRef(); // ref 3
@@ -689,6 +692,20 @@ abstract contract DexPairBase is
             _typeToWalletAddresses[DexAddressType.RESERVE].push(rightWallet);
             _typeToWalletAddresses[DexAddressType.VAULT].push(vaultRightWallet);
             _typeToReserves[DexReserveType.POOL].push(rightBalance);
+
+            if (dataSlice.refs() > 0) {
+                TvmSlice oracleDataSlice = dataSlice.loadRefAsSlice();  // ref 4
+
+                (
+                    _points,
+                    _options,
+                    _length
+                ) = oracleDataSlice.decode(
+                    mapping(uint32 => Point),
+                    OracleOptions,
+                    uint16
+                );
+            }
         } else if (oldPoolType == DexPoolTypes.STABLESWAP) {
             _active = true;
             TvmCell otherData = dataSlice.loadRef(); // ref 3
@@ -723,9 +740,9 @@ abstract contract DexPairBase is
             _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[1].wallet);
             _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[1].vaultWallet);
             _typeToReserves[DexReserveType.POOL].push(tokensData[1].balance);
-        }
 
-        _initializeTWAPOracle(now);
+            _initializeTWAPOracle(now);
+        }
 
         // Refund remaining gas
         remainingGasTo.transfer({

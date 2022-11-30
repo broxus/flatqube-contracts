@@ -5,14 +5,12 @@ const program = new Command();
 program
     .allowUnknownOption()
     .option('-rcn, --root_contract_name <root_contract_name>', 'DexRoot contract name')
-    .option('-pcn, --pair_contract_name <pair_contract_name>', 'DexPair contract name')
     .option('-acn, --account_contract_name <account_contract_name>', 'DexAccount contract name')
 
 program.parse(process.argv);
 
 const options = program.opts();
 options.root_contract_name = options.root_contract_name || 'DexRoot';
-options.pair_contract_name = options.pair_contract_name || 'DexPair';
 options.account_contract_name = options.account_contract_name || 'DexAccount';
 
 let tx;
