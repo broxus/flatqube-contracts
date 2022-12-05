@@ -352,7 +352,6 @@ contract Order is
 									currentAmountReceiveToken
 								);
 
-								//TODO Callback
 								IOrderOperationCallback(msg.sender).orderPartExchangeSuccess{
 									value: OrderGas.OPERATION_CALLBACK_BASE + 2,
                 					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -431,7 +430,15 @@ contract Order is
 								emptyPayload
 							);
 						}
-
+						IOrderOperationCallback(msg.sender).orderSwapSuccess{
+									value: OrderGas.OPERATION_CALLBACK_BASE + 2,
+                					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                					bounce: false
+            					}
+								(callId, true, ISwapResult.SwapResult(
+									initiator,
+									deployWalletValue
+								));
 						currentAmountReceiveToken = 0;
 						currentAmountSpentToken = 0;
 					} else if (

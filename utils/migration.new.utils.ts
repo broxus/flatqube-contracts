@@ -83,7 +83,6 @@ export const dexPairMigration = async (
   }).call();
 
   const contract = await locklift.factory.getDeployedContract("DexPair", addressPair.value0);
-  console.log(addressPair.value0);
   // Log and save address
   logMigrationSuccess(
     'dexPairMigration',
@@ -91,6 +90,146 @@ export const dexPairMigration = async (
     `Deployed dexPair: ${contract.address}`,
   );
   new Migration().store(contract, 'DexPair');
+
+  return contract;
+};
+
+export const dexAccountMigration = async (
+    account: Account,
+    dexRoot: Contract<FactorySource['DexRoot']>
+): Promise<
+  Contract<FactorySource['DexAccount']>
+> => {
+  // Get signer and account
+  const signer = await locklift.keystore.getSigner('0');
+
+  logMigrationProcess(
+    'dexAccountMigration',
+    'constructor',
+    'Deploying DexAccount...',
+  );
+  await locklift.tracing.trace(dexRoot.methods.deployAccount({
+      account_owner: account.address,
+      send_gas_to: account.address,
+  }).send({
+    amount: locklift.utils.toNano(10),
+    from: account.address
+  }));
+
+  logMigrationProcess(
+    'dexAccountMigration',
+    'constructor',
+    'getExpectedAccountAddress...',
+  );
+
+  const addressAccount = await dexRoot.methods.getExpectedAccountAddress({
+      answerId: 1,
+      account_owner: account.address
+  }).call();
+
+  const contract = await locklift.factory.getDeployedContract("DexAccount", addressAccount.value0);
+
+  logMigrationSuccess(
+    'dexAccountMigration',
+    'constructor',
+    `Deployed DexAccount: ${contract.address}`,
+  );
+  new Migration().store(contract, 'DexAccount');
+
+  return contract;
+};
+
+export const dexVaultMigration = async (
+    account: Account,
+    dexRoot: Contract<FactorySource['DexRoot']>,
+    token_factory: Contract<FactorySource['TokenFactory']>
+): Promise<
+  Contract<FactorySource['DexVault']>
+> => {
+  // Get signer and account
+  const signer = await locklift.keystore.getSigner('0');
+
+  logMigrationProcess(
+    'dexVaultMigration',
+    'constructor',
+    'Deploying DexVault...',
+  );
+  const { contract } = await locklift.factory.deployContract({
+      contract: 'DexVault',
+      publicKey: signer.publicKey,
+      initParams: {
+        _nonce: locklift.utils.getRandomNonce()
+      },
+      constructorParams: {
+        owner_: account.address,
+        token_factory_: token_factory.address,
+        root_: dexRoot.address
+      },
+      value: locklift.utils.toNano(15),
+    });
+
+  logMigrationProcess('dexVaultMigration', 'setRootCode', 'installing Platform code...');
+
+
+  logMigrationSuccess(
+    'dexVaultMigration',
+    'constructor',
+    `Deployed DexVault: ${contract.address}`,
+  );
+  new Migration().store(contract, 'DexVault');
+
+  return contract;
+};
+
+export const tokenFactoryMigration = async (
+    account: Account,
+): Promise<
+  Contract<FactorySource['TokenFactory']>
+> => {
+  // Get signer and account
+  const signer = await locklift.keystore.getSigner('0');
+
+  logMigrationProcess(
+    'tokenFactoryMigration',
+    'constructor',
+    'Deploying TokenFactory...',
+  );
+  const { contract } = await locklift.factory.deployContract({
+      contract: 'TokenFactory',
+      publicKey: signer.publicKey,
+      initParams: {
+        randomNonce_: locklift.utils.getRandomNonce()
+      },
+      constructorParams: {
+        _owner: account.address,
+      },
+      value: locklift.utils.toNano(15),
+    });
+
+  logMigrationProcess('TokenFactoryMigration', 'setRootCode', 'setRootCode...');
+  const rootArtifact = await locklift.factory.getContractArtifacts("TokenRootUpgradeable")
+  await contract.methods.setRootCode({
+    _rootCode: rootArtifact.code
+  }).send({
+    amount: locklift.utils.toNano(10),
+    from: account.address
+  });
+
+  logMigrationProcess('TokenFactoryMigration', 'setWalletCode', 'setWalletCode...');
+  const walletArtifact = await locklift.factory.getContractArtifacts("TokenWalletUpgradeable")
+  await contract.methods.setWalletCode({
+    _walletCode: walletArtifact.code
+  }).send({
+    amount: locklift.utils.toNano(10),
+    from: account.address
+  });
+
+  logMigrationSuccess(
+    'TokenFactoryMigration',
+    'constructor',
+    `Deployed TokenFactory: ${contract.address}`,
+  );
+  new Migration().store(contract, 'TokenFactory');
 
   return contract;
 };
@@ -333,7 +472,7 @@ export const dexRootMigration = async (
     },
     constructorParams: {
       initial_owner: account.address,
-      initial_vault: account.address,
+      initial_vault: zeroAddress,
     },
     value: locklift.utils.toNano(15),
   });
