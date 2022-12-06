@@ -250,6 +250,7 @@ contract DexPair is DexContractBase, IDexConstantProductPair, TWAPOracle {
 //        uint64 activeStatus = !active ? 11 : 0;
 //        uint64 payloadSliceStatus = payloadSlice.bits() < 200 ? 23 : 0;
 //        uint64 lp_supplyStatus = lp_supply == 0 ? 36 : 0;
+//        revert(800+activeStatus+payloadSliceStatus+lp_supplyStatus);
 
         bool notify_success = payloadSlice.refs() >= 1;
         bool notify_cancel = payloadSlice.refs() >= 2;
