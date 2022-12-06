@@ -1848,15 +1848,9 @@ contract DexStablePool is
             uint8 i = tokenIndex[spent_token_root];
             uint128[] reserves_mem = _reserves();
 
-            uint128[] price_amounts = new uint128[](N_COINS);
-            price_amounts[i] = price_amount;
+            optional(DepositLiquidityResultV2) old_price_res = _expectedOneCoinDepositLiquidity(price_amount, i, reserves_mem, lp_supply);
 
-            uint128[] amounts = new uint128[](N_COINS);
-            amounts[i] = amount;
-
-            optional(DepositLiquidityResultV2) old_price_res = _expectedDepositLiquidity(price_amounts, reserves_mem, lp_supply);
-
-            optional(DepositLiquidityResultV2) result_opt = _expectedDepositLiquidity(amounts, reserves_mem, lp_supply);
+            optional(DepositLiquidityResultV2) result_opt = _expectedOneCoinDepositLiquidity(amount, i, reserves_mem, lp_supply);
 
             if (
                 result_opt.hasValue() &&
@@ -1865,17 +1859,15 @@ contract DexStablePool is
                 uint128 old_price = old_price_res.get().lp_reward;
                 DepositLiquidityResultV2 deposit_result = result_opt.get();
 
-                for (uint8 idx = 0; idx < N_COINS; idx++) {
-                    reserves_mem[idx] = deposit_result.result_balances[idx];
-                }
+                reserves_mem[i] = deposit_result.result_balances[i];
                 uint128 new_lp_supply = lp_supply + deposit_result.lp_reward;
 
-                optional(DepositLiquidityResultV2) new_price_res = _expectedDepositLiquidity(price_amounts, reserves_mem, new_lp_supply);
+                optional(DepositLiquidityResultV2) new_price_res = _expectedOneCoinDepositLiquidity(price_amount, i, reserves_mem, new_lp_supply);
 
                 if (new_price_res.hasValue()) {
                     result.set(
                         math.muldiv(
-                            uint256(old_price - new_price_res.get().lp_reward),
+                            old_price > new_price_res.get().lp_reward ? uint256(old_price - new_price_res.get().lp_reward) : 0,
                             10**20,
                             old_price
                         )
@@ -1894,7 +1886,7 @@ contract DexStablePool is
     ) external view returns (optional(uint256)) {
         optional(uint256) result;
 
-        if (tokenIndex.exists(receive_token_root) && price_amount != 0 && amount != 0 && amount + price_amount <= lp_supply) {
+        if (tokenIndex.exists(receive_token_root) && price_amount != 0 && amount != 0 && amount + price_amount < lp_supply) {
 
             uint8 j = tokenIndex[receive_token_root];
             uint128[] reserves_mem = _reserves();
@@ -1918,7 +1910,7 @@ contract DexStablePool is
                 if (new_price_res.hasValue()) {
                     result.set(
                         math.muldiv(
-                            uint256(old_price - new_price_res.get().amounts[j]),
+                            old_price > new_price_res.get().amounts[j] ? uint256(old_price - new_price_res.get().amounts[j]) : 0,
                             10**20,
                             old_price
                         )
