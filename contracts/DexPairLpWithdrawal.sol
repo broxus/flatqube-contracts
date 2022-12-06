@@ -6,27 +6,40 @@ pragma AbiHeader pubkey;
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
+import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IBurnableByRootTokenRoot.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IBurnableTokenWallet.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 
-import "./abstract/DexPairBase.sol";
+import "./abstract/ManagerAddress.sol";
+import "./abstract/DexContractBase.sol";
+import "./abstract/TWAPOracle.sol";
 
 import "./interfaces/IUpgradableByRequest.sol";
 import "./interfaces/IDexPair.sol";
 import "./interfaces/ISuccessCallback.sol";
 import "./interfaces/IDexPairOperationCallback.sol";
+import "./interfaces/IDexConstantProductPair.sol";
+import "./interfaces/IDexAccount.sol";
+import "./interfaces/IDexRoot.sol";
+import "./interfaces/IDexVault.sol";
 
 import "./libraries/DexPlatformTypes.sol";
 import "./libraries/DexErrors.sol";
 import "./libraries/Math.sol";
 import "./libraries/PairPayload.sol";
 import "./libraries/DirectOperationErrors.sol";
+import "./libraries/DexPoolTypes.sol";
+import "./libraries/DexGas.sol";
+import "./libraries/DexAddressType.sol";
+import "./libraries/DexReserveType.sol";
 
 import "./structures/IExchangeResult.sol";
 import "./structures/IWithdrawResult.sol";
 import "./structures/INextExchangeData.sol";
+import "./structures/IPoolTokenData.sol";
+import "./structures/IAmplificationCoefficient.sol";
 
 import "./DexPlatform.sol";
 
@@ -36,7 +49,8 @@ contract DexPairLpWithdrawal is
     DexContractBase,
     IDexConstantProductPair,
     TWAPOracle,
-    INextExchangeData
+    INextExchangeData,
+    ManagerAddress
 {
 
     /// @dev DexRoot address
@@ -1129,8 +1143,7 @@ contract DexPairLpWithdrawal is
     }
 
     modifier onlyManager() {
-        // replace zero by manager's address_value
-        require(msg.sender == address(0), DexErrors.NOT_MY_OWNER);
+        require(msg.sender == MANAGER_ADDRESS, DexErrors.NOT_MY_OWNER);
         _;
     }
 

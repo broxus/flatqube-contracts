@@ -87,7 +87,7 @@ describe(`Check lp withdrawal`, async function () {
 
         dexRoot = migration.load(await locklift.factory.getContract('DexRoot'), 'DexRoot');
         dexVault = migration.load(await locklift.factory.getContract('DexVault'), 'DexVault');
-        dexPair = migration.load(await locklift.factory.getContract('DexPairLpWithdrawal'), 'DexPair' + pairName);
+        dexPair = migration.load(await locklift.factory.getContract(options.pair_contract_name), 'DexPair' + pairName);
         pairLpRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
         pairLpVaultWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
         pairLpPoolWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);

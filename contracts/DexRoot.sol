@@ -319,7 +319,7 @@ contract DexRoot is
         });
     }
 
-    function installOrUpdateAccountCode(TvmCell code) external onlyOwner {
+    function installOrUpdateAccountCode(TvmCell code) external onlyManagerOrOwner {
         tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
 
         _accountCode = code;
@@ -336,7 +336,7 @@ contract DexRoot is
     function installOrUpdatePairCode(
         TvmCell code,
         uint8 pool_type
-    ) external onlyOwner {
+    ) external onlyManagerOrOwner {
         tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
 
         _pairCodes[pool_type] = code;
@@ -353,7 +353,7 @@ contract DexRoot is
     function installOrUpdatePoolCode(
         TvmCell code,
         uint8 pool_type
-    ) external onlyOwner {
+    ) external onlyManagerOrOwner {
         tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
 
         _poolCodes[pool_type] = code;
