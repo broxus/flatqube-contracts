@@ -653,7 +653,7 @@ contract DexRoot is
     ) override external view onlyManagerOrOwner {
         require(
             _params.denominator != 0 &&
-            (_params.pool_numerator + _params.beneficiary_numerator) < _params.denominator &&
+            (_params.pool_numerator + _params.beneficiary_numerator + _params.referral_numerator) < _params.denominator &&
             (_params.pool_numerator + _params.beneficiary_numerator) > 0 &&
             ((_params.beneficiary.value != 0 && _params.beneficiary_numerator != 0) ||
             (_params.beneficiary.value == 0 && _params.beneficiary_numerator == 0)),

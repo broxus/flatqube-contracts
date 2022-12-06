@@ -2,9 +2,9 @@ pragma ton-solidity >= 0.57.0;
 
 /// @title Fee Params Interface
 /// @notice Structure for packed pair's fee params
-interface IFeeParams {
+interface IFeeParamsPrev {
     /// @dev Structure for packed fee params
-    struct FeeParams {
+    struct FeeParamsPrev {
         /// @dev Denominator for pool and beneficiary fees numerators
         uint128 denominator;
 
@@ -13,9 +13,6 @@ interface IFeeParams {
 
         /// @dev Numerator for beneficiary's fees
         uint128 beneficiary_numerator;
-
-        /// @dev Numerator for referral's fees
-        uint128 referral_numerator;
 
         /// @dev Receiver of accumulated beneficiary fees
         address beneficiary;

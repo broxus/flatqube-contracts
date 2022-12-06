@@ -290,7 +290,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                         deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
                         expected_amount: expected.expected_amount,
                         outcoming: tokenRoots[j].address,
-                        recipient: Account3.address
+                        recipient: Account3.address,
+                        referral: locklift.utils.zeroAddress
                     }
                 });
 
@@ -372,7 +373,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                         deploy_wallet_grams: 0,
                         expected_amount: expected.expected_amount,
                         outcoming: tokenRoots[j].address,
-                        recipient: Account3.address
+                        recipient: Account3.address,
+                        referral: locklift.utils.zeroAddress
                     }
                 });
 
@@ -440,7 +442,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                         deploy_wallet_grams: 0,
                         expected_amount: 0,
                         outcoming: tokenRoots[j].address,
-                        recipient: Account3.address
+                        recipient: Account3.address,
+                        referral: locklift.utils.zeroAddress
                     }
                 });
 
@@ -525,7 +528,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     deploy_wallet_grams: 0,
                     expected_amount: 0,
                     outcoming: tokenRoots[j].address,
-                    recipient: Account3.address
+                    recipient: Account3.address,
+                    referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -590,7 +594,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     id: 0,
                     deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
                     expected_amount: new BigNumber(LP_REWARD).shiftedBy(Constants.LP_DECIMALS).toString(),
-                    recipient: Account3.address
+                    recipient: Account3.address,
+                    referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -660,7 +665,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                         id: 0,
                         deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
                         expected_amount: new BigNumber(LP_REWARD).shiftedBy(Constants.LP_DECIMALS).toString(),
-                        recipient: Account3.address
+                        recipient: Account3.address,
+                        referral: locklift.utils.zeroAddress
                     }
                 });
 
@@ -731,7 +737,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                         id: 0,
                         deploy_wallet_grams: 0,
                         expected_amount: 0,
-                        recipient: Account3.address
+                        recipient: Account3.address,
+                        referral: locklift.utils.zeroAddress
                     }
                 });
 
@@ -817,7 +824,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     id: 0,
                     deploy_wallet_grams: 0,
                     expected_amounts: expected.amounts,
-                    recipient: Account3.address
+                    recipient: Account3.address,
+                    referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -897,7 +905,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     id: 0,
                     deploy_wallet_grams: 0,
                     expected_amounts: expected.amounts,
-                    recipient: Account3.address
+                    recipient: Account3.address,
+                    referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -974,7 +983,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     deploy_wallet_grams: 0,
                     expected_amount: expected.amounts[i],
                     outcoming: tokenRoots[i].address,
-                    recipient: Account3.address
+                    recipient: Account3.address,
+                    referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -1039,7 +1049,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                         deploy_wallet_grams: 0,
                         expected_amount: expected.amounts[i],
                         outcoming: tokenRoots[i].address,
-                        recipient: Account3.address
+                        recipient: Account3.address,
+                        referral: locklift.utils.zeroAddress
                     }
                 });
 
@@ -1102,7 +1113,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                         deploy_wallet_grams: 0,
                         expected_amount: 0,
                         outcoming: tokenRoots[i].address,
-                        recipient: Account3.address
+                        recipient: Account3.address,
+                        referral: locklift.utils.zeroAddress
                     }
                 });
 
@@ -1222,7 +1234,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
                     expected_amount: expected.expected_amount,
                     outcoming: tokenRoots[j].address,
-                    recipient: Account3.address
+                    recipient: Account3.address,
+                    referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -1283,7 +1296,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
                     expected_amount: new BigNumber(expected.expected_amount).plus(1).toString(),
                     outcoming: tokenRoots[j].address,
-                    recipient: Account3.address
+                    recipient: Account3.address,
+                    referral: locklift.utils.zeroAddress
                 }
             });
 

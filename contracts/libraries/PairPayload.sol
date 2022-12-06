@@ -48,6 +48,7 @@ library PairPayload {
         uint128 _expectedAmount,
         address _recipient,
         address _outcoming,
+        address /*referral*/,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -104,6 +105,7 @@ library PairPayload {
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
         address _recipient,
+        address /*referral*/,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -159,6 +161,7 @@ library PairPayload {
         uint128 _deployWalletGrams,
         uint128[] _expectedAmounts,
         address _recipient,
+        address /*referral*/,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -193,6 +196,7 @@ library PairPayload {
         address _recipient,
         uint128 _expectedAmount,
         address _outcoming,
+        address /*referral*/,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -279,6 +283,7 @@ library PairPayload {
         uint32[] _nextStepIndices,
         IExchangeStepStructure.ExchangeStep[] _steps,
         address[] _pools,
+        address /*referral*/,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {

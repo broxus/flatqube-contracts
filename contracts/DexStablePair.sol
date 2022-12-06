@@ -28,22 +28,25 @@ import "./interfaces/IDexBasePool.sol";
 import "./interfaces/ISuccessCallback.sol";
 import "./interfaces/IDexAccount.sol";
 import "./interfaces/IDexVault.sol";
-import "./structures/IExchangeResult.sol";
-import "./structures/IWithdrawResult.sol";
-import "./structures/ITokenOperationStructure.sol";
 import "./interfaces/IDexPairOperationCallback.sol";
+
+import "./structures/IExchangeResult.sol";
 import "./structures/IDepositLiquidityResultV2.sol";
 import "./structures/INextExchangeData.sol";
+import "./structures/IWithdrawResult.sol";
+import "./structures/ITokenOperationStructure.sol";
+import "./structures/IPoolTokenData.sol";
+import "./structures/IFeeParamsPrev.sol";
 
 import "./DexPlatform.sol";
 import "./abstract/DexContractBase.sol";
-import "./structures/IPoolTokenData.sol";
 
 contract DexStablePair is
     DexContractBase,
     IDexStablePair,
     IPoolTokenData,
-    INextExchangeData
+    INextExchangeData,
+    IFeeParamsPrev
 {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,6 +224,7 @@ contract DexStablePair is
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         address recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure returns (TvmCell) {
@@ -230,6 +234,7 @@ contract DexStablePair is
             expected_amount,
             recipient,
             address(0),
+            referral,
             success_payload,
             cancel_payload
         );
@@ -250,6 +255,7 @@ contract DexStablePair is
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         address recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure returns (TvmCell) {
@@ -258,6 +264,7 @@ contract DexStablePair is
             deploy_wallet_grams,
             expected_amount,
             recipient,
+            referral,
             success_payload,
             cancel_payload
         );
@@ -279,6 +286,7 @@ contract DexStablePair is
         uint128 expected_left_amount,
         uint128 expected_right_amount,
         address recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure returns (TvmCell) {
@@ -287,6 +295,7 @@ contract DexStablePair is
             deploy_wallet_grams,
             [expected_left_amount, expected_right_amount],
             recipient,
+            referral,
             success_payload,
             cancel_payload
         );
@@ -314,6 +323,7 @@ contract DexStablePair is
         uint32[] _nextStepIndices,
         ExchangeStep[] _steps,
         address _recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external view returns (TvmCell) {
@@ -333,6 +343,7 @@ contract DexStablePair is
             _nextStepIndices,
             _steps,
             pools,
+            referral,
             success_payload,
             cancel_payload
         );
@@ -1438,7 +1449,7 @@ contract DexStablePair is
             tokenIndex[left_root] = 0;
             tokenIndex[right_root] = 1;
 
-            fee = FeeParams(1000000, 3000, 0, address(0), emptyMap);
+            fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap);
             A = AmplificationCoefficient(200, 1);
 
             tokenData = new PoolTokenData[](N_COINS);
@@ -1460,21 +1471,25 @@ contract DexStablePair is
 
             TvmCell otherData = s.loadRef(); // ref 3
 
+            FeeParamsPrev fee_prev;
+
             (
                 lp_root, lp_wallet, lp_supply,
-                fee,
+                fee_prev,
                 tokenData,
                 A, PRECISION
             ) = abi.decode(otherData, (
                 address, address, uint128,
-                FeeParams,
+                FeeParamsPrev,
                 PoolTokenData[],
                 AmplificationCoefficient,
                 uint256
             ));
 
+            fee = FeeParams(fee_prev.denominator, fee_prev.pool_numerator, fee_prev.beneficiary_numerator, 0, fee_prev.beneficiary, fee_prev.threshold);
+
             active = lp_wallet.value != 0 && tokenData[0].initialized && tokenData[1].initialized;
-        } else if(old_pool_type == DexPoolTypes.CONSTANT_PRODUCT) {
+        } else if (old_pool_type == DexPoolTypes.CONSTANT_PRODUCT) {
             active = false;
             A = AmplificationCoefficient(200, 1);
 

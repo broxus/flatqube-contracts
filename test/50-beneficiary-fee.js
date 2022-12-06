@@ -28,6 +28,7 @@ options.fee = JSON.parse(options.fee);
 options.fee.denominator = options.fee.denominator || '1000000000';
 options.fee.pool_numerator = options.fee.pool_numerator || '2000000';
 options.fee.beneficiary_numerator = options.fee.beneficiary_numerator || '3000000';
+options.fee.referral_numerator = options.fee.referral_numerator || '0';
 
 let Account1;
 let Account2;
@@ -295,6 +296,7 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
             expect(feeParamsEnd.denominator.toFixed()).to.equal(options.fee.denominator, 'WRONG fee.denominator');
             expect(feeParamsEnd.pool_numerator.toFixed()).to.equal(options.fee.pool_numerator, 'WRONG fee.pool_numerator');
             expect(feeParamsEnd.beneficiary_numerator.toFixed()).to.equal(options.fee.beneficiary_numerator, 'WRONG fee.beneficiary_numerator');
+            expect(feeParamsEnd.referral_numerator.toFixed()).to.equal(options.fee.referral_numerator, 'WRONG fee.referral_numerator');
         });
     });
 

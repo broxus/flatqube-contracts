@@ -14,6 +14,7 @@ import "../libraries/DexReserveType.sol";
 
 import "../structures/IPoolTokenData.sol";
 import "../structures/IAmplificationCoefficient.sol";
+import "../structures/IFeeParamsPrev.sol";
 
 import "./DexContractBase.sol";
 import "./TWAPOracle.sol";
@@ -24,7 +25,8 @@ import "./TWAPOracle.sol";
 abstract contract DexPairBase is
     DexContractBase,
     IDexConstantProductPair,
-    TWAPOracle
+    TWAPOracle,
+    IFeeParamsPrev
 {
     /// @dev DexRoot address
     address private _root;
@@ -255,7 +257,7 @@ abstract contract DexPairBase is
         // Check input params
         require(
             _params.denominator != 0 &&
-            (_params.pool_numerator + _params.beneficiary_numerator) < _params.denominator &&
+            (_params.pool_numerator + _params.beneficiary_numerator + _params.referral_numerator) < _params.denominator &&
             ((_params.beneficiary.value != 0 && _params.beneficiary_numerator != 0) ||
             (_params.beneficiary.value == 0 && _params.beneficiary_numerator == 0)),
             DexErrors.WRONG_FEE_PARAMS
@@ -638,7 +640,7 @@ abstract contract DexPairBase is
 
         if (oldVersion == 0) {
             // Set initial params for fees
-            _fee = FeeParams(1000000, 3000, 0, address(0), emptyMap);
+            _fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap);
 
             // Deploy LP token for pair
             IDexVault(_typeToRootAddresses[DexAddressType.VAULT][0])
@@ -665,18 +667,22 @@ abstract contract DexPairBase is
             uint128 leftBalance;
             uint128 rightBalance;
 
+            FeeParamsPrev feePrev;
+
             // Decode reserves, wallets and fee options
             (
                 lpRoot, lpWallet, lpSupply,
-                _fee,
+                feePrev,
                 leftWallet, vaultLeftWallet, leftBalance,
                 rightWallet, vaultRightWallet, rightBalance
             ) = abi.decode(otherData, (
                 address, address, uint128,
-                FeeParams,
+                FeeParamsPrev,
                 address, address, uint128,
                 address, address, uint128
             ));
+
+            _fee = FeeParams(feePrev.denominator, feePrev.pool_numerator, feePrev.beneficiary_numerator, 0, feePrev.beneficiary, feePrev.threshold);
 
             // Set lp reserve and wallet
             _typeToRootAddresses[DexAddressType.LP].push(lpRoot);

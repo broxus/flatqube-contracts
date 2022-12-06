@@ -77,6 +77,9 @@ const loadPairData = async (pair, contractName) => {
   data.fee_beneficiary = fee_params.beneficiary_numerator.div(fee_params.denominator).times(100).toString();
   data.fee_beneficiary_address = fee_params.beneficiary;
   data.threshold = fee_params.threshold;
+  if (contractName === 'DexPair' || contractName === 'DexStablePair') {
+    data.fee_referral = fee_params.referral_numerator.div(fee_params.denominator).times(100).toString();
+  }
   data.pool_type = (await pair.call({method: 'getPoolType'})).toNumber();
 
   return data;
@@ -207,6 +210,13 @@ describe('Test Dex Pair contract upgrade', async function () {
       expect(newPairData.fee_beneficiary_address)
           .to
           .equal(oldPairData.fee_beneficiary_address, 'New fee beneficiary value incorrect');
+
+      if (options.new_contract_name === 'DexPair' || options.new_contract_name === 'DexStablePair') {
+        expect(newPairData.fee_referral)
+            .to
+            .not
+            .equal(undefined, 'New fee referral value incorrect');
+      }
     });
   });
 });

@@ -220,6 +220,7 @@ contract DexStablePool is
         uint128 expected_amount,
         address outcoming,
         address recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     )  external pure returns (TvmCell) {
@@ -229,6 +230,7 @@ contract DexStablePool is
             expected_amount,
             recipient,
             outcoming,
+            referral,
             success_payload,
             cancel_payload
         );
@@ -239,6 +241,7 @@ contract DexStablePool is
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         address recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure returns (TvmCell) {
@@ -247,6 +250,7 @@ contract DexStablePool is
             deploy_wallet_grams,
             expected_amount,
             recipient,
+            referral,
             success_payload,
             cancel_payload
         );
@@ -257,6 +261,7 @@ contract DexStablePool is
         uint128 deploy_wallet_grams,
         uint128[] expected_amounts,
         address recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external view returns (TvmCell) {
@@ -267,6 +272,7 @@ contract DexStablePool is
             deploy_wallet_grams,
             expected_amounts,
             recipient,
+            referral,
             success_payload,
             cancel_payload
         );
@@ -278,6 +284,7 @@ contract DexStablePool is
         uint128 expected_amount,
         address outcoming,
         address recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure returns (TvmCell) {
@@ -287,6 +294,7 @@ contract DexStablePool is
             recipient,
             expected_amount,
             outcoming,
+            referral,
             success_payload,
             cancel_payload
         );
@@ -300,6 +308,7 @@ contract DexStablePool is
         uint32[] nextStepIndices,
         ExchangeStep[] steps,
         address recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external view returns (TvmCell) {
@@ -319,6 +328,7 @@ contract DexStablePool is
             nextStepIndices,
             steps,
             pools,
+            referral,
             success_payload,
             cancel_payload
         );
@@ -1616,7 +1626,7 @@ contract DexStablePool is
         }
 
         if (old_version == 0) {
-            fee = FeeParams(1000000, 3000, 0, address(0), emptyMap);
+            fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap);
             A = AmplificationCoefficient(100 * uint128(N_COINS) ** (N_COINS - 1), 1);
 
             tokenData = new PoolTokenData[](N_COINS);

@@ -54,21 +54,23 @@ contract DexPair is DexPairBase, INextExchangeData {
     }
 
     function buildExchangePayloadV2(
-        uint64 id,
-        uint128 deploy_wallet_grams,
-        uint128 expected_amount,
-        address recipient,
-        optional(TvmCell) success_payload,
-        optional(TvmCell) cancel_payload
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedAmount,
+        address _recipient,
+        address _referral,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) external pure override returns (TvmCell) {
         return PairPayload.buildExchangePayloadV2(
-            id,
-            deploy_wallet_grams,
-            expected_amount,
-            recipient,
+            _id,
+            _deployWalletGrams,
+            _expectedAmount,
+            _recipient,
             address(0),
-            success_payload,
-            cancel_payload
+            _referral,
+            _successPayload,
+            _cancelPayload
         );
     }
 
@@ -83,20 +85,22 @@ contract DexPair is DexPairBase, INextExchangeData {
     }
 
     function buildDepositLiquidityPayloadV2(
-        uint64 id,
-        uint128 deploy_wallet_grams,
-        uint128 expected_amount,
-        address recipient,
-        optional(TvmCell) success_payload,
-        optional(TvmCell) cancel_payload
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedAmount,
+        address _recipient,
+        address _referral,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) external pure override returns (TvmCell) {
         return PairPayload.buildDepositLiquidityPayloadV2(
-            id,
-            deploy_wallet_grams,
-            expected_amount,
-            recipient,
-            success_payload,
-            cancel_payload
+            _id,
+            _deployWalletGrams,
+            _expectedAmount,
+            _recipient,
+            _referral,
+            _successPayload,
+            _cancelPayload
         );
     }
 
@@ -111,21 +115,23 @@ contract DexPair is DexPairBase, INextExchangeData {
     }
 
     function buildWithdrawLiquidityPayloadV2(
-        uint64 id,
-        uint128 deploy_wallet_grams,
-        uint128 expected_left_amount,
-        uint128 expected_right_amount,
-        address recipient,
-        optional(TvmCell) success_payload,
-        optional(TvmCell) cancel_payload
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedLeftAmount,
+        uint128 _expectedRightAmount,
+        address _recipient,
+        address _referral,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) external pure override returns (TvmCell) {
         return PairPayload.buildWithdrawLiquidityPayloadV2(
-            id,
-            deploy_wallet_grams,
-            [expected_left_amount, expected_right_amount],
-            recipient,
-            success_payload,
-            cancel_payload
+            _id,
+            _deployWalletGrams,
+            [_expectedLeftAmount, _expectedRightAmount],
+            _recipient,
+            _referral,
+            _successPayload,
+            _cancelPayload
         );
     }
 
@@ -151,8 +157,9 @@ contract DexPair is DexPairBase, INextExchangeData {
         uint32[] _nextStepIndices,
         ExchangeStep[] _steps,
         address _recipient,
-        optional(TvmCell) success_payload,
-        optional(TvmCell) cancel_payload
+        address _referral,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) external view returns (TvmCell) {
         address[] pools;
 
@@ -170,8 +177,9 @@ contract DexPair is DexPairBase, INextExchangeData {
             _nextStepIndices,
             _steps,
             pools,
-            success_payload,
-            cancel_payload
+            _referral,
+            _successPayload,
+            _cancelPayload
         );
     }
 

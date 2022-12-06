@@ -77,6 +77,7 @@ const loadPoolData = async (pool, contractName) => {
     const fee_params = await pool.call({method: 'getFeeParams'});
     data.fee_pool = fee_params.pool_numerator.div(fee_params.denominator).times(100).toString();
     data.fee_beneficiary = fee_params.beneficiary_numerator.div(fee_params.denominator).times(100).toString();
+    data.fee_referral = fee_params.referral_numerator.div(fee_params.denominator).times(100).toString();
     data.fee_beneficiary_address = fee_params.beneficiary;
     data.threshold = fee_params.threshold;
     data.pool_type = (await pool.call({method: 'getPoolType'})).toNumber();
@@ -205,6 +206,10 @@ describe('Test Dex Pool contract upgrade', async function () {
             expect(newPoolData.fee_beneficiary_address)
                 .to
                 .equal(oldPoolData.fee_beneficiary_address, 'New fee beneficiary value incorrect');
+
+            expect(newPoolData.fee_referral)
+                .to
+                .equal(oldPoolData.fee_referral, 'New fee referral value incorrect');
         });
     });
 });

@@ -466,7 +466,8 @@ describe('Check direct operations', async function () {
                     _outcoming: steps[next_indices[0]].outcoming,
                     _nextStepIndices: steps[next_indices[0]].nextStepIndices,
                     _steps: steps,
-                    _recipient: Account3.address
+                    _recipient: Account3.address,
+                    _referral: locklift.utils.zeroAddress
                 };
 
                 logger.log(`Call buildCrossPairExchangePayloadV2(${JSON.stringify(params, null, 4)})`);
@@ -482,7 +483,8 @@ describe('Check direct operations', async function () {
                     outcoming: steps[next_indices[0]].outcoming,
                     nextStepIndices: steps[next_indices[0]].nextStepIndices,
                     steps: steps,
-                    recipient: Account3.address
+                    recipient: Account3.address,
+                    referral: locklift.utils.zeroAddress
                 };
 
                 logger.log(`Call buildCrossPairExchangePayload(${JSON.stringify(params, null, 4)})`);

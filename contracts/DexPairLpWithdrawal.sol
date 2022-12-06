@@ -40,6 +40,7 @@ import "./structures/IWithdrawResult.sol";
 import "./structures/INextExchangeData.sol";
 import "./structures/IPoolTokenData.sol";
 import "./structures/IAmplificationCoefficient.sol";
+import "./structures/IFeeParamsPrev.sol";
 
 import "./DexPlatform.sol";
 
@@ -50,7 +51,8 @@ contract DexPairLpWithdrawal is
     IDexConstantProductPair,
     TWAPOracle,
     INextExchangeData,
-    ManagerAddress
+    ManagerAddress,
+    IFeeParamsPrev
 {
 
     /// @dev DexRoot address
@@ -363,6 +365,7 @@ contract DexPairLpWithdrawal is
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         address recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure override returns (TvmCell) {
@@ -372,6 +375,7 @@ contract DexPairLpWithdrawal is
             expected_amount,
             recipient,
             address(0),
+            referral,
             success_payload,
             cancel_payload
         );
@@ -392,6 +396,7 @@ contract DexPairLpWithdrawal is
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         address recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure override returns (TvmCell) {
@@ -400,6 +405,7 @@ contract DexPairLpWithdrawal is
             deploy_wallet_grams,
             expected_amount,
             recipient,
+            referral,
             success_payload,
             cancel_payload
         );
@@ -421,6 +427,7 @@ contract DexPairLpWithdrawal is
         uint128 expected_left_amount,
         uint128 expected_right_amount,
         address recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure override returns (TvmCell) {
@@ -429,6 +436,7 @@ contract DexPairLpWithdrawal is
             deploy_wallet_grams,
             [expected_left_amount, expected_right_amount],
             recipient,
+            referral,
             success_payload,
             cancel_payload
         );
@@ -456,6 +464,7 @@ contract DexPairLpWithdrawal is
         uint32[] _nextStepIndices,
         ExchangeStep[] _steps,
         address _recipient,
+        address referral,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external view returns (TvmCell) {
@@ -475,6 +484,7 @@ contract DexPairLpWithdrawal is
             _nextStepIndices,
             _steps,
             pools,
+            referral,
             success_payload,
             cancel_payload
         );
@@ -2089,7 +2099,7 @@ contract DexPairLpWithdrawal is
                 _typeToWalletAddresses[DexAddressType.LP][0],
                 _typeToReserves[DexReserveType.LP][0],
 
-                _fee,
+                FeeParamsPrev(_fee.denominator, _fee.pool_numerator, _fee.beneficiary_numerator, _fee.beneficiary, _fee.threshold),
 
                 _typeToWalletAddresses[DexAddressType.RESERVE][0],
                 _typeToWalletAddresses[DexAddressType.VAULT][0],
@@ -2163,7 +2173,7 @@ contract DexPairLpWithdrawal is
 
         if (oldVersion == 0) {
             // Set initial params for fees
-            _fee = FeeParams(1000000, 3000, 0, address(0), emptyMap);
+            _fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap);
 
             // Deploy LP token for pair
             IDexVault(_typeToRootAddresses[DexAddressType.VAULT][0])
@@ -2190,18 +2200,22 @@ contract DexPairLpWithdrawal is
             uint128 leftBalance;
             uint128 rightBalance;
 
+            FeeParamsPrev feePrev;
+
             // Decode reserves, wallets and fee options
             (
                 lpRoot, lpWallet, lpSupply,
-                _fee,
+                feePrev,
                 leftWallet, vaultLeftWallet, leftBalance,
                 rightWallet, vaultRightWallet, rightBalance
             ) = abi.decode(otherData, (
                 address, address, uint128,
-                FeeParams,
+                FeeParamsPrev,
                 address, address, uint128,
                 address, address, uint128
                 ));
+
+            _fee = FeeParams(feePrev.denominator, feePrev.pool_numerator, feePrev.beneficiary_numerator, 0, feePrev.beneficiary, feePrev.threshold);
 
             // Set lp reserve and wallet
             _typeToRootAddresses[DexAddressType.LP].push(lpRoot);
