@@ -446,7 +446,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                 method: 'buildExchangePayloadV2', params: {
                     _id: 0,
                     _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
-                    _expectedAmount: expected.expected_amount,
+                    _expectedAmount: new BigNumber(TOKENS_TO_RECEIVE).shiftedBy(Constants.tokens.foo.decimals).toString(),
                     _recipient: Account2.address,
                     _referral: locklift.utils.zeroAddress
                 }
