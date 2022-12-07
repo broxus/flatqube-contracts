@@ -28,7 +28,7 @@ async function main() {
   }
   account.afterRun = afterRun;
 
-  const DexPlatform = await locklift.factory.getContract('DexPlatform');
+  const DexPlatform = await locklift.factory.getContract('DexPlatform', 'precompiled');
   const DexAccount = await locklift.factory.getContract(options.account_contract_name);
   const DexPair = await locklift.factory.getContract(options.pair_contract_name);
   const DexStablePair = await locklift.factory.getContract('DexStablePair');

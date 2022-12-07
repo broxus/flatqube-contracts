@@ -1,4 +1,4 @@
-pragma ton-solidity >= 0.57.0;
+pragma ton-solidity >= 0.62.0;
 
 /// @title LiquidityTokenRootDeployed-callback Interface
 /// @notice Interface for liquidityTokenRootDeployed-callback implementation

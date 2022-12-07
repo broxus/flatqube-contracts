@@ -1,4 +1,4 @@
-.version sol 0.59.0
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -43,7 +43,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 ADDCONST 2
 UFITS 8
 SENDRAWMSG
@@ -74,7 +74,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/Tip3ToEver.sol, 0
 CALLREF {
-	CALL $onWeverWallet_internal_macro$
+	CALL $onWeverWallet_b024d1df_internal_macro$
 }
 DROP
 CALLREF {
@@ -82,7 +82,7 @@ CALLREF {
 }
 THROW 0
 
-.macro onWeverWallet_internal_macro
+.macro onWeverWallet_b024d1df_internal_macro
 .loc ../contracts/Tip3ToEver.sol, 52
 GETGLOB 9
 PARSEMSGADDR
@@ -132,14 +132,11 @@ PUSHCONT {
 	CTOS
 	LDI 1
 	SWAP
+	NULLROTRIFNOT
 	PUSHCONT {
 		LDMSGADDR
 	}
-	PUSHCONT {
-		NULL
-		SWAP
-	}
-	IFELSE
+	IF
 }
 PUSHCONT {
 	LDMSGADDR
@@ -154,20 +151,17 @@ PUSHCONT {
 	CTOS
 	LDI 1
 	SWAP
+	NULLROTRIFNOT
 	PUSHCONT {
 		LDMSGADDR
 	}
-	PUSHCONT {
-		NULL
-		SWAP
-	}
-	IFELSE
+	IF
 }
 IFELSE
 ENDS
 .loc ../contracts/Tip3ToEver.sol, 0
 CALLREF {
-	CALL $buildExchangePayload_internal_macro$
+	CALL $buildExchangePayload_75ce4111_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -196,11 +190,11 @@ IFREF {
 }
 THROW 0
 
-.globl	buildExchangePayload_internal
-.type	buildExchangePayload_internal, @function
-CALL $buildExchangePayload_internal_macro$
+.globl	buildExchangePayload_75ce4111_internal
+.type	buildExchangePayload_75ce4111_internal, @function
+CALL $buildExchangePayload_75ce4111_internal_macro$
 
-.macro buildExchangePayload_internal_macro
+.macro buildExchangePayload_75ce4111_internal_macro
 .loc ../contracts/Tip3ToEver.sol, 65
 NEWC
 DUP
@@ -210,7 +204,7 @@ STSLICECONST x06
 PUSH S5
 STUR 64
 .loc ../contracts/Tip3ToEver.sol, 71
-PUSHINT 128
+PUSHPOW2 7
 STZEROES
 .loc ../contracts/Tip3ToEver.sol, 72
 ROLL 4
@@ -246,7 +240,7 @@ STSLICECONST x01
 ROLL 5
 STUR 64
 .loc ../contracts/Tip3ToEver.sol, 83
-PUSHINT 128
+PUSHPOW2 7
 STZEROES
 .loc ../contracts/Tip3ToEver.sol, 85
 PUSH S2
@@ -314,7 +308,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/Tip3ToEver.sol, 0
 CALLREF {
-	CALL $buildCrossPairExchangePayload_internal_macro$
+	CALL $buildCrossPairExchangePayload_62121768_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -344,11 +338,11 @@ CALLREF {
 }
 THROW 0
 
-.globl	buildCrossPairExchangePayload_internal
-.type	buildCrossPairExchangePayload_internal, @function
-CALL $buildCrossPairExchangePayload_internal_macro$
+.globl	buildCrossPairExchangePayload_62121768_internal
+.type	buildCrossPairExchangePayload_62121768_internal, @function
+CALL $buildCrossPairExchangePayload_62121768_internal_macro$
 
-.macro buildCrossPairExchangePayload_internal_macro
+.macro buildCrossPairExchangePayload_62121768_internal_macro
 .loc ../contracts/Tip3ToEver.sol, 113
 OVER
 FIRST
@@ -401,7 +395,7 @@ PUSHCONT {
 	.loc ../contracts/Tip3ToEver.sol, 127
 	PUSH2 S6, S0
 	CALLREF {
-		CALL $_encodeCrossPairExchangeData_internal_macro$
+		CALL $_encodeCrossPairExchangeData_c5f696cc_internal_macro$
 	}
 	.loc ../contracts/Tip3ToEver.sol, 128
 	PUSH3 S6, S3, S9
@@ -531,11 +525,11 @@ ENDC
 NIP
 .loc ../contracts/Tip3ToEver.sol, 0
 
-.globl	_encodeCrossPairExchangeData_internal
-.type	_encodeCrossPairExchangeData_internal, @function
-CALL $_encodeCrossPairExchangeData_internal_macro$
+.globl	_encodeCrossPairExchangeData_c5f696cc_internal
+.type	_encodeCrossPairExchangeData_c5f696cc_internal, @function
+CALL $_encodeCrossPairExchangeData_c5f696cc_internal_macro$
 
-.macro _encodeCrossPairExchangeData_internal_macro
+.macro _encodeCrossPairExchangeData_c5f696cc_internal_macro
 .loc ../contracts/Tip3ToEver.sol, 162
 PUSHINT 0
 NEWDICT
@@ -586,7 +580,7 @@ PUSHCONT {
 PUSHCONT {
 	.loc ../contracts/Tip3ToEver.sol, 166
 	PUSH2 S7, S0
-	CALL $_encodeCrossPairExchangeData_internal$
+	CALL $_encodeCrossPairExchangeData_c5f696cc_internal$
 	.loc ../contracts/Tip3ToEver.sol, 167
 	PUSH2 S7, S1
 	ADD
@@ -783,7 +777,7 @@ LDREF
 ENDS
 .loc ../contracts/Tip3ToEver.sol, 0
 CALLREF {
-	CALL $onAcceptTokensTransfer_internal_macro$
+	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
 }
 DROP
 CALLREF {
@@ -791,7 +785,7 @@ CALLREF {
 }
 THROW 0
 
-.macro onAcceptTokensTransfer_internal_macro
+.macro onAcceptTokensTransfer_e63f2284_internal_macro
 .loc ../contracts/Tip3ToEver.sol, 194
 GETGLOB 9
 PARSEMSGADDR
@@ -878,7 +872,7 @@ PUSHCONT {
 	STBREFR
 	STBREFR
 	ENDC
-	PUSHINT 128
+	PUSHPOW2 7
 	SENDRAWMSG
 }
 PUSHCONT {
@@ -1009,7 +1003,7 @@ PUSHCONT {
 			STBREFR
 			STBREFR
 			ENDC
-			PUSHINT 128
+			PUSHPOW2 7
 			SENDRAWMSG
 		}
 		PUSHCONT {
@@ -1071,7 +1065,7 @@ PUSHCONT {
 				STBREFR
 				STBREFR
 				ENDC
-				PUSHINT 128
+				PUSHPOW2 7
 				SENDRAWMSG
 			}
 			PUSHCONT {
@@ -1130,7 +1124,7 @@ PUSHCONT {
 	STBREFR
 	STBREFR
 	ENDC
-	PUSHINT 128
+	PUSHPOW2 7
 	SENDRAWMSG
 	.loc ../contracts/Tip3ToEver.sol, 0
 }
@@ -1169,7 +1163,7 @@ LDREF
 ENDS
 .loc ../contracts/Tip3ToEver.sol, 0
 CALLREF {
-	CALL $onAcceptTokensBurn_internal_macro$
+	CALL $onAcceptTokensBurn_07d14114_internal_macro$
 }
 DROP
 CALLREF {
@@ -1177,7 +1171,7 @@ CALLREF {
 }
 THROW 0
 
-.macro onAcceptTokensBurn_internal_macro
+.macro onAcceptTokensBurn_07d14114_internal_macro
 .loc ../contracts/Tip3ToEver.sol, 302
 GETGLOB 9
 PARSEMSGADDR
@@ -1196,8 +1190,7 @@ RAWRESERVE
 .loc ../contracts/Tip3ToEver.sol, 305
 CTOS
 .loc ../contracts/Tip3ToEver.sol, 306
-LDU 64
-DROP
+PLDU 64
 .loc ../contracts/Tip3ToEver.sol, 308
 PUSH3 S4, S0, S1
 PUSHSLICE xc00000000000000000000000007e3f6eb7
@@ -1223,7 +1216,7 @@ STUR 143
 STU 64
 STU 128
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/Tip3ToEver.sol, 0
 DROP2
@@ -1276,13 +1269,11 @@ PUSHCONT {
 	OVER
 	PUSHINT 64
 	DICTUGET
+	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 32
 	}
-	PUSHCONT {
-		PUSHINT 0
-	}
-	IFELSE
+	IF
 	PUSHINT 2
 	PUSH S2
 	PUSHINT 64
@@ -1424,12 +1415,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -1445,7 +1436,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; havePubkey msgSlice
+	LDU 1 ; hasPubkey msgSlice
 	SWAP
 	THROWIF 58
 }

@@ -13,7 +13,7 @@ async function main() {
     account.afterRun = afterRun;
 
     const content = '' +
-        `pragma ton-solidity >= 0.57.0;
+        `pragma ton-solidity >= 0.62.0;
 abstract contract ManagerAddress {
     address constant MANAGER_ADDRESS = address.makeAddrStd(0, 0x${account.address.substr(2).toLowerCase()});
 }`

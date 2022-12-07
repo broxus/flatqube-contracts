@@ -58,3 +58,5 @@ npx locklift test $NO_TRACE --tests test/50-beneficiary-fee.js --fee='{"denomina
 
 #npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPair' --new_contract_name='TestNewDexPair'
 #npx locklift test $NO_TRACE --tests test/36-upgrade-account.js --owner_n='2' --old_contract_name='DexAccount' --new_contract_name='TestNewDexAccount'
+
+npx locklift test $NO_TRACE --tests test/13-pair-withdraw-liquidity.js --left_token_id 'bar' --right_token_id 'tst'

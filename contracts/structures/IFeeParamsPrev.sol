@@ -1,4 +1,4 @@
-pragma ton-solidity >= 0.57.0;
+pragma ton-solidity >= 0.62.0;
 
 /// @title Fee Params Interface
 /// @notice Structure for packed pair's fee params

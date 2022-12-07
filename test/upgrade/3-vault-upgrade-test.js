@@ -37,7 +37,7 @@ describe('Test Dex Vault contract upgrade', async function () {
     account.afterRun = afterRun;
     DexRoot = await locklift.factory.getContract('DexRoot');
     DexVault = await locklift.factory.getContract('DexVault');
-    DexPlatform = await locklift.factory.getContract('DexPlatform');
+    DexPlatform = await locklift.factory.getContract('DexPlatform', 'precompiled');
     TokenFactory = await locklift.factory.getContract('TokenFactory');
 
     DexVaultLpTokenPending = await locklift.factory.getContract('DexVaultLpTokenPending');

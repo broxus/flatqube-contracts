@@ -1,4 +1,4 @@
-.version sol 0.59.0
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -41,7 +41,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
@@ -49,11 +49,11 @@ CALLREF {
 }
 THROW 0
 
-.globl	_dexRoot_internal
-.type	_dexRoot_internal, @function
-CALL $_dexRoot_internal_macro$
+.globl	_dexRoot_8347403b_internal
+.type	_dexRoot_8347403b_internal, @function
+CALL $_dexRoot_8347403b_internal_macro$
 
-.macro _dexRoot_internal_macro
+.macro _dexRoot_8347403b_internal_macro
 .loc ../contracts/DexRoot.sol, 94
 MYADDR
 .loc ../contracts/DexRoot.sol, 0
@@ -76,7 +76,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getAccountVersion_internal_macro$
+	CALL $getAccountVersion_3bcafeaf_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -129,7 +129,7 @@ IFREF {
 }
 THROW 0
 
-.macro getAccountVersion_internal_macro
+.macro getAccountVersion_3bcafeaf_internal_macro
 .loc ../contracts/DexRoot.sol, 105
 GETGLOB 4
 PUSHINT 0
@@ -160,7 +160,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getAccountCode_internal_macro$
+	CALL $getAccountCode_9ec0a521_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -213,7 +213,7 @@ IFREF {
 }
 THROW 0
 
-.macro getAccountCode_internal_macro
+.macro getAccountCode_9ec0a521_internal_macro
 .loc ../contracts/DexRoot.sol, 113
 GETGLOB 4
 PUSHINT 0
@@ -245,7 +245,7 @@ LDU 8
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getPairVersion_internal_macro$
+	CALL $getPairVersion_638875e0_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -298,7 +298,7 @@ IFREF {
 }
 THROW 0
 
-.macro getPairVersion_internal_macro
+.macro getPairVersion_638875e0_internal_macro
 .loc ../contracts/DexRoot.sol, 117
 DUP
 GETGLOB 15
@@ -319,13 +319,11 @@ SETGLOB 4
 GETGLOB 15
 PUSHINT 8
 DICTUGET
+ZEROSWAPIFNOT
 PUSHCONT {
 	PLDU 32
 }
-PUSHCONT {
-	PUSHINT 0
-}
-IFELSE
+IF
 .loc ../contracts/DexRoot.sol, 0
 
 .macro getPoolVersion
@@ -347,7 +345,7 @@ LDU 8
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getPoolVersion_internal_macro$
+	CALL $getPoolVersion_98c36aef_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -400,7 +398,7 @@ IFREF {
 }
 THROW 0
 
-.macro getPoolVersion_internal_macro
+.macro getPoolVersion_98c36aef_internal_macro
 .loc ../contracts/DexRoot.sol, 127
 DUP
 GETGLOB 17
@@ -421,13 +419,11 @@ SETGLOB 4
 GETGLOB 17
 PUSHINT 8
 DICTUGET
+ZEROSWAPIFNOT
 PUSHCONT {
 	PLDU 32
 }
-PUSHCONT {
-	PUSHINT 0
-}
-IFELSE
+IF
 .loc ../contracts/DexRoot.sol, 0
 
 .macro getPairCode
@@ -449,7 +445,7 @@ LDU 8
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getPairCode_internal_macro$
+	CALL $getPairCode_bbcf2a7e_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -502,7 +498,7 @@ IFREF {
 }
 THROW 0
 
-.macro getPairCode_internal_macro
+.macro getPairCode_bbcf2a7e_internal_macro
 .loc ../contracts/DexRoot.sol, 137
 DUP
 GETGLOB 14
@@ -549,7 +545,7 @@ LDU 8
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getPoolCode_internal_macro$
+	CALL $getPoolCode_8514ebc9_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -602,7 +598,7 @@ IFREF {
 }
 THROW 0
 
-.macro getPoolCode_internal_macro
+.macro getPoolCode_8514ebc9_internal_macro
 .loc ../contracts/DexRoot.sol, 147
 DUP
 GETGLOB 16
@@ -648,7 +644,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getVault_internal_macro$
+	CALL $getVault_8d928af8_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -708,7 +704,7 @@ IFREF {
 }
 THROW 0
 
-.macro getVault_internal_macro
+.macro getVault_8d928af8_internal_macro
 .loc ../contracts/DexRoot.sol, 161
 GETGLOB 4
 PUSHINT 0
@@ -739,7 +735,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $isActive_internal_macro$
+	CALL $isActive_22f3e2d4_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -792,7 +788,7 @@ IFREF {
 }
 THROW 0
 
-.macro isActive_internal_macro
+.macro isActive_22f3e2d4_internal_macro
 .loc ../contracts/DexRoot.sol, 169
 GETGLOB 4
 PUSHINT 0
@@ -823,7 +819,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getOwner_internal_macro$
+	CALL $getOwner_893d20e8_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -883,7 +879,7 @@ IFREF {
 }
 THROW 0
 
-.macro getOwner_internal_macro
+.macro getOwner_893d20e8_internal_macro
 .loc ../contracts/DexRoot.sol, 177
 GETGLOB 4
 PUSHINT 0
@@ -914,7 +910,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getPendingOwner_internal_macro$
+	CALL $getPendingOwner_93596c7b_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -974,7 +970,7 @@ IFREF {
 }
 THROW 0
 
-.macro getPendingOwner_internal_macro
+.macro getPendingOwner_93596c7b_internal_macro
 .loc ../contracts/DexRoot.sol, 185
 GETGLOB 4
 PUSHINT 0
@@ -1013,7 +1009,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getExpectedAccountAddress_internal_macro$
+	CALL $getExpectedAccountAddress_3c6dbabd_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -1073,7 +1069,7 @@ IFREF {
 }
 THROW 0
 
-.macro getExpectedAccountAddress_internal_macro
+.macro getExpectedAccountAddress_3c6dbabd_internal_macro
 .loc ../contracts/DexRoot.sol, 193
 GETGLOB 4
 PUSHINT 0
@@ -1084,7 +1080,7 @@ PUSHINT 64
 SETINDEXQ 4
 SETGLOB 4
 CALLREF {
-	CALL $_expectedAccountAddress_internal_macro$
+	CALL $_expectedAccountAddress_25e7253f_internal_macro$
 }
 .loc ../contracts/DexRoot.sol, 0
 
@@ -1118,7 +1114,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getExpectedPairAddress_internal_macro$
+	CALL $getExpectedPairAddress_14d479d9_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -1178,7 +1174,7 @@ IFREF {
 }
 THROW 0
 
-.macro getExpectedPairAddress_internal_macro
+.macro getExpectedPairAddress_14d479d9_internal_macro
 .loc ../contracts/DexRoot.sol, 204
 GETGLOB 4
 PUSHINT 0
@@ -1204,7 +1200,7 @@ PUSHCONT {
 REPEAT
 PAIR
 CALLREF {
-	CALL $_expectedPairAddress_internal_macro$
+	CALL $_expectedPairAddress_f8dce522_internal_macro$
 }
 .loc ../contracts/DexRoot.sol, 0
 
@@ -1231,7 +1227,7 @@ SWAP
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getExpectedPoolAddress_internal_macro$
+	CALL $getExpectedPoolAddress_eeacf5e2_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -1291,7 +1287,7 @@ IFREF {
 }
 THROW 0
 
-.macro getExpectedPoolAddress_internal_macro
+.macro getExpectedPoolAddress_eeacf5e2_internal_macro
 .loc ../contracts/DexRoot.sol, 212
 GETGLOB 4
 PUSHINT 0
@@ -1302,7 +1298,7 @@ PUSHINT 64
 SETINDEXQ 4
 SETGLOB 4
 CALLREF {
-	CALL $_expectedPairAddress_internal_macro$
+	CALL $_expectedPairAddress_f8dce522_internal_macro$
 }
 .loc ../contracts/DexRoot.sol, 0
 
@@ -1324,7 +1320,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $getManager_internal_macro$
+	CALL $getManager_d5009584_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -1384,7 +1380,7 @@ IFREF {
 }
 THROW 0
 
-.macro getManager_internal_macro
+.macro getManager_d5009584_internal_macro
 .loc ../contracts/DexRoot.sol, 220
 GETGLOB 4
 PUSHINT 0
@@ -1418,7 +1414,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $setVaultOnce_internal_macro$
+	CALL $setVaultOnce_45313084_internal_macro$
 }
 DROP
 CALLREF {
@@ -1426,7 +1422,7 @@ CALLREF {
 }
 THROW 0
 
-.macro setVaultOnce_internal_macro
+.macro setVaultOnce_45313084_internal_macro
 .loc ../contracts/DexRoot.sol, 71
 GETGLOB 19
 PARSEMSGADDR
@@ -1458,7 +1454,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -1476,7 +1472,7 @@ LDI 1
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $setActive_internal_macro$
+	CALL $setActive_acec338a_internal_macro$
 }
 DROP
 CALLREF {
@@ -1484,7 +1480,7 @@ CALLREF {
 }
 THROW 0
 
-.macro setActive_internal_macro
+.macro setActive_acec338a_internal_macro
 .loc ../contracts/DexRoot.sol, 71
 GETGLOB 19
 PARSEMSGADDR
@@ -1548,7 +1544,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 ADDCONST 2
 UFITS 8
 SENDRAWMSG
@@ -1575,7 +1571,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $setManager_internal_macro$
+	CALL $setManager_d0ebdbe7_internal_macro$
 }
 DROP
 CALLREF {
@@ -1583,7 +1579,7 @@ CALLREF {
 }
 THROW 0
 
-.macro setManager_internal_macro
+.macro setManager_d0ebdbe7_internal_macro
 .loc ../contracts/DexRoot.sol, 71
 GETGLOB 19
 PARSEMSGADDR
@@ -1609,7 +1605,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 ADDCONST 2
 UFITS 8
 SENDRAWMSG
@@ -1628,7 +1624,7 @@ IFREF {
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $revokeManager_internal_macro$
+	CALL $revokeManager_df2678ff_internal_macro$
 }
 DROP
 CALLREF {
@@ -1636,7 +1632,7 @@ CALLREF {
 }
 THROW 0
 
-.macro revokeManager_internal_macro
+.macro revokeManager_df2678ff_internal_macro
 .loc ../contracts/DexRoot.sol, 71
 GETGLOB 19
 PARSEMSGADDR
@@ -1665,7 +1661,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 ADDCONST 2
 UFITS 8
 SENDRAWMSG
@@ -1692,7 +1688,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $transferOwner_internal_macro$
+	CALL $transferOwner_4fb2e45d_internal_macro$
 }
 DROP
 CALLREF {
@@ -1700,7 +1696,7 @@ CALLREF {
 }
 THROW 0
 
-.macro transferOwner_internal_macro
+.macro transferOwner_4fb2e45d_internal_macro
 .loc ../contracts/DexRoot.sol, 71
 GETGLOB 19
 PARSEMSGADDR
@@ -1747,7 +1743,7 @@ IFREF {
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $acceptOwner_internal_macro$
+	CALL $acceptOwner_ebbc4965_internal_macro$
 }
 DROP
 CALLREF {
@@ -1755,7 +1751,7 @@ CALLREF {
 }
 THROW 0
 
-.macro acceptOwner_internal_macro
+.macro acceptOwner_ebbc4965_internal_macro
 .loc ../contracts/DexRoot.sol, 293
 GETGLOB 9
 GETGLOB 21
@@ -1813,7 +1809,7 @@ LDREF
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $installPlatformOnce_internal_macro$
+	CALL $installPlatformOnce_d58bd352_internal_macro$
 }
 DROP
 CALLREF {
@@ -1821,7 +1817,7 @@ CALLREF {
 }
 THROW 0
 
-.macro installPlatformOnce_internal_macro
+.macro installPlatformOnce_d58bd352_internal_macro
 .loc ../contracts/DexRoot.sol, 71
 GETGLOB 19
 PARSEMSGADDR
@@ -1852,7 +1848,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -1870,7 +1866,7 @@ LDREF
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $installOrUpdateAccountCode_internal_macro$
+	CALL $installOrUpdateAccountCode_59e89e27_internal_macro$
 }
 DROP
 CALLREF {
@@ -1878,7 +1874,7 @@ CALLREF {
 }
 THROW 0
 
-.macro installOrUpdateAccountCode_internal_macro
+.macro installOrUpdateAccountCode_59e89e27_internal_macro
 .loc ../contracts/DexRoot.sol, 57
 GETGLOB 9
 PARSEMSGADDR
@@ -1922,7 +1918,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -1941,7 +1937,7 @@ LDU 8
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $installOrUpdatePairCode_internal_macro$
+	CALL $installOrUpdatePairCode_122afc8b_internal_macro$
 }
 DROP
 CALLREF {
@@ -1949,7 +1945,7 @@ CALLREF {
 }
 THROW 0
 
-.macro installOrUpdatePairCode_internal_macro
+.macro installOrUpdatePairCode_122afc8b_internal_macro
 .loc ../contracts/DexRoot.sol, 57
 GETGLOB 9
 PARSEMSGADDR
@@ -1981,13 +1977,11 @@ GETGLOB 15
 DUP2
 PUSHINT 8
 DICTUGET
+ZEROSWAPIFNOT
 PUSHCONT {
 	PLDU 32
 }
-PUSHCONT {
-	PUSHINT 0
-}
-IFELSE
+IF
 INC
 UFITS 32
 NEWC
@@ -2001,13 +1995,11 @@ DUP
 GETGLOB 15
 PUSHINT 8
 DICTUGET
+ZEROSWAPIFNOT
 PUSHCONT {
 	PLDU 32
 }
-PUSHCONT {
-	PUSHINT 0
-}
-IFELSE
+IF
 PUSHSLICE xc0000000000000000000000000542bd58f
 NEWC
 STSLICE
@@ -2024,7 +2016,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -2043,7 +2035,7 @@ LDU 8
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $installOrUpdatePoolCode_internal_macro$
+	CALL $installOrUpdatePoolCode_f336eb06_internal_macro$
 }
 DROP
 CALLREF {
@@ -2051,7 +2043,7 @@ CALLREF {
 }
 THROW 0
 
-.macro installOrUpdatePoolCode_internal_macro
+.macro installOrUpdatePoolCode_f336eb06_internal_macro
 .loc ../contracts/DexRoot.sol, 57
 GETGLOB 9
 PARSEMSGADDR
@@ -2083,13 +2075,11 @@ GETGLOB 17
 DUP2
 PUSHINT 8
 DICTUGET
+ZEROSWAPIFNOT
 PUSHCONT {
 	PLDU 32
 }
-PUSHCONT {
-	PUSHINT 0
-}
-IFELSE
+IF
 INC
 UFITS 32
 NEWC
@@ -2103,13 +2093,11 @@ DUP
 GETGLOB 17
 PUSHINT 8
 DICTUGET
+ZEROSWAPIFNOT
 PUSHCONT {
 	PLDU 32
 }
-PUSHCONT {
-	PUSHINT 0
-}
-IFELSE
+IF
 PUSHSLICE xc0000000000000000000000000475c5966
 NEWC
 STSLICE
@@ -2126,7 +2114,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -2144,7 +2132,7 @@ LDREF
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $upgrade_internal_macro$
+	CALL $upgrade_7916ae0d_internal_macro$
 }
 DROP
 CALLREF {
@@ -2152,7 +2140,7 @@ CALLREF {
 }
 THROW 0
 
-.macro upgrade_internal_macro
+.macro upgrade_7916ae0d_internal_macro
 .loc ../contracts/DexRoot.sol, 71
 GETGLOB 19
 PARSEMSGADDR
@@ -2341,14 +2329,14 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $resetGas_internal_macro$
+	CALL $resetGas_0cada961_internal_macro$
 }
 IFREF {
 	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
-.macro resetGas_internal_macro
+.macro resetGas_0cada961_internal_macro
 .loc ../contracts/DexRoot.sol, 71
 GETGLOB 19
 PARSEMSGADDR
@@ -2371,7 +2359,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -2400,7 +2388,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $deployAccount_internal_macro$
+	CALL $deployAccount_5f2807ac_internal_macro$
 }
 DROP
 CALLREF {
@@ -2408,7 +2396,7 @@ CALLREF {
 }
 THROW 0
 
-.macro deployAccount_internal_macro
+.macro deployAccount_5f2807ac_internal_macro
 .loc ../contracts/DexRoot.sol, 66
 GETGLOB 18
 THROWIFNOT 114
@@ -2444,10 +2432,10 @@ GETGLOB 12
 PUSHINT 1
 ROLL 5
 CALLREF {
-	CALL $_buildAccountParams_internal_macro$
+	CALL $_buildAccountParams_aabfc73f_internal_macro$
 }
 CALLREF {
-	CALL $_buildInitData_internal_macro$
+	CALL $_buildInitData_65db94e9_internal_macro$
 }
 DUP
 HASHCU
@@ -2496,7 +2484,7 @@ STSLICE
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -2529,7 +2517,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $requestUpgradeAccount_internal_macro$
+	CALL $requestUpgradeAccount_b08891f1_internal_macro$
 }
 DROP
 CALLREF {
@@ -2537,12 +2525,12 @@ CALLREF {
 }
 THROW 0
 
-.macro requestUpgradeAccount_internal_macro
+.macro requestUpgradeAccount_b08891f1_internal_macro
 .loc ../contracts/abstract/DexContractBase.sol, 32
 GETGLOB 9
 SWAP
 CALLREF {
-	CALL $_expectedAccountAddress_internal_macro$
+	CALL $_expectedAccountAddress_25e7253f_internal_macro$
 }
 SDEQ
 THROWIFNOT 105
@@ -2595,7 +2583,7 @@ PUSHCONT {
 }
 IFELSE
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 DROP
@@ -2625,14 +2613,14 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $forceUpgradeAccount_internal_macro$
+	CALL $forceUpgradeAccount_de7a146c_internal_macro$
 }
 IFREF {
 	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
-.macro forceUpgradeAccount_internal_macro
+.macro forceUpgradeAccount_de7a146c_internal_macro
 .loc ../contracts/DexRoot.sol, 57
 GETGLOB 9
 PARSEMSGADDR
@@ -2681,7 +2669,7 @@ GETGLOB 13
 GETGLOB 12
 ROLL 3
 CALLREF {
-	CALL $_expectedAccountAddress_internal_macro$
+	CALL $_expectedAccountAddress_25e7253f_internal_macro$
 }
 NEWC
 STSLICECONST x62_
@@ -2696,7 +2684,7 @@ STU 32
 STSLICE
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -2730,14 +2718,14 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $upgradePair_internal_macro$
+	CALL $upgradePair_50886d12_internal_macro$
 }
 IFREF {
 	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
-.macro upgradePair_internal_macro
+.macro upgradePair_50886d12_internal_macro
 .loc ../contracts/DexRoot.sol, 57
 GETGLOB 9
 PARSEMSGADDR
@@ -2833,13 +2821,11 @@ PUSH S2
 GETGLOB 15
 PUSHINT 8
 DICTUGET
+ZEROSWAPIFNOT
 PUSHCONT {
 	PLDU 32
 }
-PUSHCONT {
-	PUSHINT 0
-}
-IFELSE
+IF
 .loc ../contracts/DexRoot.sol, 542
 SWAP2
 REVERSE 6, 0
@@ -2858,7 +2844,7 @@ PUSHCONT {
 REPEAT
 PAIR
 CALLREF {
-	CALL $_expectedPairAddress_internal_macro$
+	CALL $_expectedPairAddress_f8dce522_internal_macro$
 }
 NEWC
 STSLICECONST x62_
@@ -2874,7 +2860,7 @@ STU 8
 STSLICE
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -2913,14 +2899,14 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $upgradePool_internal_macro$
+	CALL $upgradePool_3ce1f0be_internal_macro$
 }
 IFREF {
 	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
-.macro upgradePool_internal_macro
+.macro upgradePool_3ce1f0be_internal_macro
 .loc ../contracts/DexRoot.sol, 57
 GETGLOB 9
 PARSEMSGADDR
@@ -3002,18 +2988,16 @@ PUSH S2
 GETGLOB 17
 PUSHINT 8
 DICTUGET
+ZEROSWAPIFNOT
 PUSHCONT {
 	PLDU 32
 }
-PUSHCONT {
-	PUSHINT 0
-}
-IFELSE
+IF
 .loc ../contracts/DexRoot.sol, 572
 SWAP2
 REVERSE 5, 0
 CALLREF {
-	CALL $_expectedPairAddress_internal_macro$
+	CALL $_expectedPairAddress_f8dce522_internal_macro$
 }
 NEWC
 STSLICECONST x62_
@@ -3029,7 +3013,7 @@ STU 8
 STSLICE
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -3062,7 +3046,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $deployPair_internal_macro$
+	CALL $deployPair_09c0bb93_internal_macro$
 }
 DROP
 CALLREF {
@@ -3070,7 +3054,7 @@ CALLREF {
 }
 THROW 0
 
-.macro deployPair_internal_macro
+.macro deployPair_09c0bb93_internal_macro
 .loc ../contracts/DexRoot.sol, 66
 GETGLOB 18
 THROWIFNOT 114
@@ -3122,13 +3106,11 @@ PUSHINT 1
 GETGLOB 15
 PUSHINT 8
 DICTUGET
+ZEROSWAPIFNOT
 PUSHCONT {
 	PLDU 32
 }
-PUSHCONT {
-	PUSHINT 0
-}
-IFELSE
+IF
 PUSHINT 1
 GETGLOB 14
 PUSHINT 8
@@ -3156,10 +3138,10 @@ PUSHCONT {
 REPEAT
 PAIR
 CALLREF {
-	CALL $_buildPairParams_internal_macro$
+	CALL $_buildPairParams_623f79c1_internal_macro$
 }
 CALLREF {
-	CALL $_buildInitData_internal_macro$
+	CALL $_buildInitData_65db94e9_internal_macro$
 }
 DUP
 HASHCU
@@ -3208,7 +3190,7 @@ STSLICE
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -3245,7 +3227,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $deployStablePool_internal_macro$
+	CALL $deployStablePool_50b987d0_internal_macro$
 }
 DROP
 CALLREF {
@@ -3253,7 +3235,7 @@ CALLREF {
 }
 THROW 0
 
-.macro deployStablePool_internal_macro
+.macro deployStablePool_50b987d0_internal_macro
 .loc ../contracts/DexRoot.sol, 57
 GETGLOB 9
 PARSEMSGADDR
@@ -3318,13 +3300,11 @@ PUSHCONT {
 	PUSH S2
 	PUSHINT 267
 	DICTGET
+	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDI 1
 	}
-	PUSHCONT {
-		PUSHINT 0
-	}
-	IFELSE
+	IF
 	TRUE
 	NEQ
 	THROWIFNOT 121
@@ -3366,13 +3346,11 @@ PUSHINT 2
 GETGLOB 17
 PUSHINT 8
 DICTUGET
+ZEROSWAPIFNOT
 PUSHCONT {
 	PLDU 32
 }
-PUSHCONT {
-	PUSHINT 0
-}
-IFELSE
+IF
 PUSHINT 2
 GETGLOB 16
 PUSHINT 8
@@ -3385,10 +3363,10 @@ IFNOT
 PUSHINT 2
 ROLL 5
 CALLREF {
-	CALL $_buildPairParams_internal_macro$
+	CALL $_buildPairParams_623f79c1_internal_macro$
 }
 CALLREF {
-	CALL $_buildInitData_internal_macro$
+	CALL $_buildInitData_65db94e9_internal_macro$
 }
 DUP
 HASHCU
@@ -3437,7 +3415,7 @@ STSLICE
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -3489,14 +3467,14 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $setPairFeeParams_internal_macro$
+	CALL $setPairFeeParams_02e916e3_internal_macro$
 }
 IFREF {
 	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
-.macro setPairFeeParams_internal_macro
+.macro setPairFeeParams_02e916e3_internal_macro
 .loc ../contracts/DexRoot.sol, 57
 GETGLOB 9
 PARSEMSGADDR
@@ -3592,7 +3570,7 @@ RAWRESERVE
 .loc ../contracts/DexRoot.sol, 671
 XCHG S2
 CALLREF {
-	CALL $_expectedPairAddress_internal_macro$
+	CALL $_expectedPairAddress_f8dce522_internal_macro$
 }
 NEWC
 STSLICECONST x62_
@@ -3620,7 +3598,7 @@ STBREFR
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -3662,14 +3640,14 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $setPairAmplificationCoefficient_internal_macro$
+	CALL $setPairAmplificationCoefficient_5eae4706_internal_macro$
 }
 IFREF {
 	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
-.macro setPairAmplificationCoefficient_internal_macro
+.macro setPairAmplificationCoefficient_5eae4706_internal_macro
 .loc ../contracts/DexRoot.sol, 57
 GETGLOB 9
 PARSEMSGADDR
@@ -3700,7 +3678,7 @@ RAWRESERVE
 .loc ../contracts/DexRoot.sol, 689
 XCHG S2
 CALLREF {
-	CALL $_expectedPairAddress_internal_macro$
+	CALL $_expectedPairAddress_f8dce522_internal_macro$
 }
 NEWC
 STSLICECONST x62_
@@ -3718,7 +3696,7 @@ STU 128
 STSLICE
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -3747,14 +3725,14 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $resetTargetGas_internal_macro$
+	CALL $resetTargetGas_6e68a1ca_internal_macro$
 }
 IFREF {
 	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
-.macro resetTargetGas_internal_macro
+.macro resetTargetGas_6e68a1ca_internal_macro
 .loc ../contracts/DexRoot.sol, 71
 GETGLOB 19
 PARSEMSGADDR
@@ -3791,7 +3769,7 @@ STSLICECONST x06e29f2e
 STSLICE
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -3830,7 +3808,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $onPoolCreated_internal_macro$
+	CALL $onPoolCreated_12f9a1e3_internal_macro$
 }
 DROP
 CALLREF {
@@ -3838,13 +3816,13 @@ CALLREF {
 }
 THROW 0
 
-.macro onPoolCreated_internal_macro
+.macro onPoolCreated_12f9a1e3_internal_macro
 .loc ../contracts/DexRoot.sol, 711
 GETGLOB 9
 PUSH S3
 .loc ../contracts/abstract/DexContractBase.sol, 37
 CALLREF {
-	CALL $_expectedPairAddress_internal_macro$
+	CALL $_expectedPairAddress_f8dce522_internal_macro$
 }
 SDEQ
 THROWIFNOT 106
@@ -3881,7 +3859,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 ADDCONST 2
 UFITS 8
 SENDRAWMSG
@@ -3923,14 +3901,14 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $setOracleOptions_internal_macro$
+	CALL $setOracleOptions_0ef70a57_internal_macro$
 }
 IFREF {
 	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
-.macro setOracleOptions_internal_macro
+.macro setOracleOptions_0ef70a57_internal_macro
 .loc ../contracts/DexRoot.sol, 57
 GETGLOB 9
 PARSEMSGADDR
@@ -3975,7 +3953,7 @@ PUSHCONT {
 REPEAT
 PAIR
 CALLREF {
-	CALL $_expectedPairAddress_internal_macro$
+	CALL $_expectedPairAddress_f8dce522_internal_macro$
 }
 NEWC
 STSLICECONST x62_
@@ -3995,7 +3973,7 @@ STU 16
 STSLICE
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
@@ -4029,14 +4007,14 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.sol, 0
 CALLREF {
-	CALL $removeLastNPoints_internal_macro$
+	CALL $removeLastNPoints_d441364b_internal_macro$
 }
 IFREF {
 	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
-.macro removeLastNPoints_internal_macro
+.macro removeLastNPoints_d441364b_internal_macro
 .loc ../contracts/DexRoot.sol, 57
 GETGLOB 9
 PARSEMSGADDR
@@ -4081,7 +4059,7 @@ PUSHCONT {
 REPEAT
 PAIR
 CALLREF {
-	CALL $_expectedPairAddress_internal_macro$
+	CALL $_expectedPairAddress_f8dce522_internal_macro$
 }
 NEWC
 STSLICECONST x62_
@@ -4095,23 +4073,23 @@ STU 16
 STSLICE
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexRoot.sol, 0
 
-.globl	_expectedAccountAddress_internal
-.type	_expectedAccountAddress_internal, @function
-CALL $_expectedAccountAddress_internal_macro$
+.globl	_expectedAccountAddress_25e7253f_internal
+.type	_expectedAccountAddress_25e7253f_internal, @function
+CALL $_expectedAccountAddress_25e7253f_internal_macro$
 
-.macro _expectedAccountAddress_internal_macro
+.macro _expectedAccountAddress_25e7253f_internal_macro
 .loc ../contracts/abstract/DexContractBase.sol, 44
 PUSHINT 1
 SWAP
 CALLREF {
-	CALL $_buildAccountParams_internal_macro$
+	CALL $_buildAccountParams_aabfc73f_internal_macro$
 }
 CALLREF {
-	CALL $_buildInitData_internal_macro$
+	CALL $_buildInitData_65db94e9_internal_macro$
 }
 HASHCU
 NEWC
@@ -4121,19 +4099,19 @@ ENDC
 CTOS
 .loc ../contracts/abstract/DexContractBase.sol, 0
 
-.globl	_expectedPairAddress_internal
-.type	_expectedPairAddress_internal, @function
-CALL $_expectedPairAddress_internal_macro$
+.globl	_expectedPairAddress_f8dce522_internal
+.type	_expectedPairAddress_f8dce522_internal, @function
+CALL $_expectedPairAddress_f8dce522_internal_macro$
 
-.macro _expectedPairAddress_internal_macro
+.macro _expectedPairAddress_f8dce522_internal_macro
 .loc ../contracts/abstract/DexContractBase.sol, 55
 PUSHINT 2
 SWAP
 CALLREF {
-	CALL $_buildPairParams_internal_macro$
+	CALL $_buildPairParams_623f79c1_internal_macro$
 }
 CALLREF {
-	CALL $_buildInitData_internal_macro$
+	CALL $_buildInitData_65db94e9_internal_macro$
 }
 HASHCU
 NEWC
@@ -4143,11 +4121,11 @@ ENDC
 CTOS
 .loc ../contracts/abstract/DexContractBase.sol, 0
 
-.globl	_buildAccountParams_internal
-.type	_buildAccountParams_internal, @function
-CALL $_buildAccountParams_internal_macro$
+.globl	_buildAccountParams_aabfc73f_internal
+.type	_buildAccountParams_aabfc73f_internal, @function
+CALL $_buildAccountParams_aabfc73f_internal_macro$
 
-.macro _buildAccountParams_internal_macro
+.macro _buildAccountParams_aabfc73f_internal_macro
 .loc ../contracts/abstract/DexContractBase.sol, 68
 NEWC
 STSLICE
@@ -4155,11 +4133,11 @@ STSLICE
 ENDC
 .loc ../contracts/abstract/DexContractBase.sol, 0
 
-.globl	_buildPairParams_internal
-.type	_buildPairParams_internal, @function
-CALL $_buildPairParams_internal_macro$
+.globl	_buildPairParams_623f79c1_internal
+.type	_buildPairParams_623f79c1_internal, @function
+CALL $_buildPairParams_623f79c1_internal_macro$
 
-.macro _buildPairParams_internal_macro
+.macro _buildPairParams_623f79c1_internal_macro
 .loc ../contracts/abstract/DexContractBase.sol, 74
 NEWDICT
 .loc ../contracts/abstract/DexContractBase.sol, 76
@@ -4202,8 +4180,7 @@ PUSHCONT {
 	.loc ../contracts/abstract/DexContractBase.sol, 81
 	NEWC
 	.loc ../contracts/abstract/DexContractBase.sol, 83
-	SWAP
-	DUP
+	XCPU S1, S0
 	PUSHINT 267
 	DICTMIN
 	PUSHCONT {
@@ -4254,8 +4231,7 @@ PUSHCONT {
 	NEWDICT
 	PAIR
 	.loc ../contracts/abstract/DexContractBase.sol, 90
-	SWAP
-	DUP
+	XCPU S1, S0
 	PUSHINT 267
 	DICTMIN
 	PUSHCONT {
@@ -4315,11 +4291,11 @@ PUSHCONT {
 IFELSE
 .loc ../contracts/abstract/DexContractBase.sol, 0
 
-.globl	_buildInitData_internal
-.type	_buildInitData_internal, @function
-CALL $_buildInitData_internal_macro$
+.globl	_buildInitData_65db94e9_internal
+.type	_buildInitData_65db94e9_internal, @function
+CALL $_buildInitData_65db94e9_internal_macro$
 
-.macro _buildInitData_internal_macro
+.macro _buildInitData_65db94e9_internal_macro
 .loc ../contracts/abstract/DexContractBase.sol, 101
 PUSHINT 0
 NEWC
@@ -4329,7 +4305,7 @@ NEWDICT
 PUSHINT 64
 DICTUSETB
 CALLREF {
-	CALL $_dexRoot_internal_macro$
+	CALL $_dexRoot_8347403b_internal_macro$
 }
 PUSHINT 1
 ROT
@@ -4424,13 +4400,11 @@ PUSHCONT {
 	PUSH S2
 	PUSHINT 64
 	DICTUGET
+	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 32
 	}
-	PUSHCONT {
-		PUSHINT 0
-	}
-	IFELSE
+	IF
 	PUSHREF {
 	}
 	PUSHINT 0
@@ -4592,12 +4566,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -4613,7 +4587,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; havePubkey msgSlice
+	LDU 1 ; hasPubkey msgSlice
 	SWAP
 	THROWIF 58
 }
