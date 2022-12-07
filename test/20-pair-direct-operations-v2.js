@@ -38,6 +38,10 @@ let Account3;
 let FooWallet3;
 let BarWallet3;
 let FooBarLpWallet3;
+let Account2;
+let FooWallet2;
+let BarWallet2;
+let FooBarLpWallet2;
 
 const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
 
@@ -78,6 +82,26 @@ async function account3balances() {
     return {foo, bar, lp, ton};
 }
 
+async function account2balances() {
+    let foo;
+    await FooWallet2.call({method: 'balance', params: {}}).then(n => {
+        foo = new BigNumber(n).shiftedBy(-Constants.tokens.foo.decimals).toString();
+    }).catch(e => {/*ignored*/
+    });
+    let bar;
+    await BarWallet2.call({method: 'balance', params: {}}).then(n => {
+        bar = new BigNumber(n).shiftedBy(-Constants.tokens.bar.decimals).toString();
+    }).catch(e => {/*ignored*/
+    });
+    let lp;
+    await FooBarLpWallet2.call({method: 'balance', params: {}}).then(n => {
+        lp = new BigNumber(n).shiftedBy(-Constants.LP_DECIMALS).toString();
+    }).catch(e => {/*ignored*/
+    });
+    const ton = await locklift.utils.convertCrystal((await locklift.ton.getBalance(Account2.address)), 'ton').toNumber();
+    return {foo, bar, lp, ton};
+}
+
 async function dexPairInfo() {
     const balances = await DexPairFooBar.call({method: 'getBalances', params: {}});
     const total_supply = await FooBarLpRoot.call({method: 'totalSupply', params: {}});
@@ -98,16 +122,20 @@ async function dexPairInfo() {
     };
 }
 
-function logBalances(header, dex, account, pair) {
+function logBalances(header, dex, account3, account2, pair) {
     logger.log(`DEX balance ${header}: ${dex.foo} FOO, ${dex.bar} BAR, ${dex.lp} LP`);
     logger.log(`DexPair ${header}: ` +
         `${pair.foo} FOO, ${pair.bar} BAR, ` +
         `LP SUPPLY (PLAN): ${pair.lp_supply || "0"} LP, ` +
         `LP SUPPLY (ACTUAL): ${pair.lp_supply_actual || "0"} LP`);
     logger.log(`Account#3 balance ${header}: ` +
-        `${account.foo !== undefined ? account.foo + ' FOO' : 'FOO (not deployed)'}, ` +
-        `${account.bar !== undefined ? account.bar + ' BAR' : 'BAR (not deployed)'}, ` +
-        `${account.lp !== undefined ? account.lp + ' LP' : 'LP (not deployed)'}`);
+        `${account3.foo !== undefined ? account3.foo + ' FOO' : 'FOO (not deployed)'}, ` +
+        `${account3.bar !== undefined ? account3.bar + ' BAR' : 'BAR (not deployed)'}, ` +
+        `${account3.lp !== undefined ? account3.lp + ' LP' : 'LP (not deployed)'}`);
+    logger.log(`Account#2 balance ${header}: ` +
+        `${account2.foo !== undefined ? account2.foo + ' FOO' : 'FOO (not deployed)'}, ` +
+        `${account2.bar !== undefined ? account2.bar + ' BAR' : 'BAR (not deployed)'}, ` +
+        `${account2.lp !== undefined ? account2.lp + ' LP' : 'LP (not deployed)'}`);
 }
 
 async function logGas() {
@@ -143,6 +171,11 @@ describe('Check direct DexPairFooBar operations', async function () {
         FooWallet3 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
         BarWallet3 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
         FooBarLpWallet3 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
+        Account2 = await locklift.factory.getAccount('Wallet');
+        Account2.afterRun = afterRun;
+        FooWallet2 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
+        BarWallet2 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
+        FooBarLpWallet2 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
 
         migration.load(DexRoot, 'DexRoot');
         migration.load(DexVault, 'DexVault');
@@ -158,6 +191,8 @@ describe('Check direct DexPairFooBar operations', async function () {
         migration.load(FooBarLpRoot, 'FooBarLpRoot');
         migration.load(Account3, 'Account3');
         migration.load(FooWallet3, 'FooWallet3');
+        migration.load(Account2, 'Account2');
+        migration.load(FooWallet2, 'FooWallet2');
 
         if (migration.exists('BarWallet3')) {
             migration.load(BarWallet3, 'BarWallet3');
@@ -173,7 +208,7 @@ describe('Check direct DexPairFooBar operations', async function () {
         }
         if (migration.exists('FooBarLpWallet3')) {
             migration.load(FooBarLpWallet3, 'FooBarLpWallet3');
-            logger.log(`FooBarLpWallet3#3: ${FooBarLpWallet3.address}`);
+            logger.log(`FooBarLpWallet#3: ${FooBarLpWallet3.address}`);
         } else {
             const expected = await FooBarLpRoot.call({
                 method: 'walletOf',
@@ -182,6 +217,30 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             });
             logger.log(`FooBarLpWallet#3: ${expected} (not deployed)`);
+        }
+        if (migration.exists('BarWallet2')) {
+            migration.load(BarWallet2, 'BarWallet2');
+            logger.log(`BarWallet#2: ${BarWallet2.address}`);
+        } else {
+            const expected = await BarRoot.call({
+                method: 'walletOf',
+                params: {
+                    walletOwner: Account2.address
+                }
+            });
+            logger.log(`BarWallet#2: ${expected} (not deployed)`);
+        }
+        if (migration.exists('FooBarLpWallet2')) {
+            migration.load(FooBarLpWallet2, 'FooBarLpWallet2');
+            logger.log(`FooBarLpWallet#2: ${FooBarLpWallet2.address}`);
+        } else {
+            const expected = await FooBarLpRoot.call({
+                method: 'walletOf',
+                params: {
+                    walletOwner: Account2.address
+                }
+            });
+            logger.log(`FooBarLpWallet#2: ${expected} (not deployed)`);
         }
         const pairRoots = await DexPairFooBar.call({method: 'getTokenRoots', params: {}});
         IS_FOO_LEFT = pairRoots.left === FooRoot.address;
@@ -205,6 +264,8 @@ describe('Check direct DexPairFooBar operations', async function () {
         logger.log('BarRoot: ' + BarRoot.address);
         logger.log('Account#3: ' + Account3.address);
         logger.log('FooWallet#3: ' + FooWallet3.address);
+        logger.log('Account#2: ' + Account2.address);
+        logger.log('FooWallet#2: ' + FooWallet2.address);
 
         logger.log('IS_FOO_LEFT: ' + IS_FOO_LEFT);
 
@@ -212,13 +273,14 @@ describe('Check direct DexPairFooBar operations', async function () {
     });
 
     describe('Direct exchange (positive)', async function () {
-        it('0010 # Account#3 exchange FOO to BAR (with deploy BarWallet#3)', async function () {
+        it('0010 # Account#3 exchange FOO to BAR (with deploy BarWallet#2)', async function () {
             logger.log('#################################################');
-            logger.log('# Account#3 exchange FOO to BAR (with deploy BarWallet#3)');
+            logger.log('# Account#3 exchange FOO to BAR (with deploy BarWallet#2)');
             const dexStart = await dexBalances();
-            const accountStart = await account3balances();
+            const accountStart3 = await account3balances();
+            const accountStart2 = await account2balances();
             const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
+            logBalances('start', dexStart, accountStart3, accountStart2, pairStart);
 
             const TOKENS_TO_EXCHANGE = 1000;
 
@@ -234,10 +296,12 @@ describe('Check direct DexPairFooBar operations', async function () {
             logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
 
             const payload = await DexPairFooBar.call({
-                method: 'buildExchangePayload', params: {
-                    id: 0,
-                    deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
-                    expected_amount: expected.expected_amount
+                method: 'buildExchangePayloadV2', params: {
+                    _id: 0,
+                    _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
+                    _expectedAmount: expected.expected_amount,
+                    _recipient: Account2.address,
+                    _referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -258,41 +322,43 @@ describe('Check direct DexPairFooBar operations', async function () {
 
             displayTx(tx);
 
-            BarWallet3.setAddress(await BarRoot.call({
+            BarWallet2.setAddress(await BarRoot.call({
                 method: 'walletOf',
                 params: {
-                    walletOwner: Account3.address
+                    walletOwner: Account2.address
                 }
             }));
 
-            migration.store(BarWallet3, 'BarWallet3');
+            migration.store(BarWallet2, 'BarWallet2');
 
             const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
+            const accountEnd3 = await account3balances();
+            const accountEnd2 = await account2balances();
             const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
+            logBalances('end', dexEnd, accountEnd3, accountEnd2, pairEnd);
             await logGas();
 
             const expectedDexFoo = new BigNumber(dexStart.foo).plus(TOKENS_TO_EXCHANGE).toString();
             const expectedDexBar = new BigNumber(dexStart.bar)
                 .minus(new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.bar.decimals)).toString();
-            const expectedAccountFoo = new BigNumber(accountStart.foo).minus(TOKENS_TO_EXCHANGE).toString();
-            const expectedAccountBar = new BigNumber(accountStart.bar || 0)
+            const expectedAccountFoo = new BigNumber(accountStart3.foo).minus(TOKENS_TO_EXCHANGE).toString();
+            const expectedAccountBar = new BigNumber(accountStart2.bar || 0)
                 .plus(new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.bar.decimals)).toString();
 
             expect(expectedDexFoo).to.equal(dexEnd.foo.toString(), 'Wrong DEX FOO balance');
             expect(expectedDexBar).to.equal(dexEnd.bar.toString(), 'Wrong DEX BAR balance');
-            expect(expectedAccountFoo).to.equal(accountEnd.foo.toString(), 'Wrong Account#3 FOO balance');
-            expect(expectedAccountBar).to.equal(accountEnd.bar.toString(), 'Wrong Account#3 BAR balance');
+            expect(expectedAccountFoo).to.equal(accountEnd3.foo.toString(), 'Wrong Account#3 FOO balance');
+            expect(expectedAccountBar).to.equal(accountEnd2.bar.toString(), 'Wrong Account#2 BAR balance');
         });
 
         it('0020 # Account#3 exchange BAR to FOO', async function () {
             logger.log('#################################################');
             logger.log('# Account#3 exchange BAR to FOO');
             const dexStart = await dexBalances();
-            const accountStart = await account3balances();
+            const accountStart3 = await account3balances();
+            const accountStart2 = await account2balances();
             const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
+            logBalances('start', dexStart, accountStart3, accountStart2, pairStart);
 
             const TOKENS_TO_EXCHANGE = 100;
 
@@ -308,10 +374,12 @@ describe('Check direct DexPairFooBar operations', async function () {
             logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.foo.decimals).toString()} FOO`);
 
             const payload = await DexPairFooBar.call({
-                method: 'buildExchangePayload', params: {
-                    id: 0,
-                    deploy_wallet_grams: 0,
-                    expected_amount: expected.expected_amount
+                method: 'buildExchangePayloadV2', params: {
+                    _id: 0,
+                    _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
+                    _expectedAmount: expected.expected_amount,
+                    _recipient: Account2.address,
+                    _referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -333,31 +401,33 @@ describe('Check direct DexPairFooBar operations', async function () {
             displayTx(tx);
 
             const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
+            const accountEnd3 = await account3balances();
+            const accountEnd2 = await account2balances();
             const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
+            logBalances('end', dexEnd, accountEnd3, accountEnd2, pairEnd);
             await logGas();
 
             const expectedDexFoo = new BigNumber(dexStart.foo)
                 .minus(new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.foo.decimals)).toString();
             const expectedDexBar = new BigNumber(dexStart.bar).plus(TOKENS_TO_EXCHANGE).toString();
-            const expectedAccountFoo = new BigNumber(accountStart.foo)
+            const expectedAccountFoo = new BigNumber(accountStart2.foo)
                 .plus(new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.foo.decimals)).toString();
-            const expectedAccountBar = new BigNumber(accountStart.bar).minus(TOKENS_TO_EXCHANGE).toString();
+            const expectedAccountBar = new BigNumber(accountStart3.bar).minus(TOKENS_TO_EXCHANGE).toString();
 
             expect(expectedDexFoo).to.equal(dexEnd.foo.toString(), 'Wrong DEX FOO balance');
             expect(expectedDexBar).to.equal(dexEnd.bar.toString(), 'Wrong DEX BAR balance');
-            expect(expectedAccountFoo).to.equal(accountEnd.foo.toString(), 'Wrong Account#3 FOO balance');
-            expect(expectedAccountBar).to.equal(accountEnd.bar.toString(), 'Wrong Account#3 BAR balance');
+            expect(expectedAccountFoo).to.equal(accountEnd2.foo.toString(), 'Wrong Account#2 FOO balance');
+            expect(expectedAccountBar).to.equal(accountEnd3.bar.toString(), 'Wrong Account#3 BAR balance');
         });
 
         it('0030 # Account#3 exchange BAR to FOO (expectedSpendAmount)', async function () {
             logger.log('#################################################');
             logger.log('# Account#3 exchange BAR to FOO');
             const dexStart = await dexBalances();
-            const accountStart = await account3balances();
+            const accountStart3 = await account3balances();
+            const accountStart2 = await account2balances();
             const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
+            logBalances('start', dexStart, accountStart3, accountStart2, pairStart);
 
             const TOKENS_TO_RECEIVE = 1;
 
@@ -373,10 +443,12 @@ describe('Check direct DexPairFooBar operations', async function () {
             logger.log(`Expected receive amount: ${TOKENS_TO_RECEIVE} FOO`);
 
             const payload = await DexPairFooBar.call({
-                method: 'buildExchangePayload', params: {
-                    id: 0,
-                    deploy_wallet_grams: 0,
-                    expected_amount: 0
+                method: 'buildExchangePayloadV2', params: {
+                    _id: 0,
+                    _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
+                    _expectedAmount: expected.expected_amount,
+                    _recipient: Account2.address,
+                    _referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -398,33 +470,35 @@ describe('Check direct DexPairFooBar operations', async function () {
             displayTx(tx);
 
             const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
+            const accountEnd3 = await account3balances();
+            const accountEnd2 = await account2balances();
             const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
+            logBalances('end', dexEnd, accountEnd3, accountEnd2, pairEnd);
             await logGas();
 
             const expectedDexFoo = new BigNumber(dexStart.foo)
                 .minus(TOKENS_TO_RECEIVE).toString();
             const expectedDexBar = new BigNumber(dexStart.bar)
                 .plus(new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.bar.decimals)).toString();
-            const expectedAccountFoo = new BigNumber(accountStart.foo)
+            const expectedAccountFoo = new BigNumber(accountStart2.foo)
                 .plus(TOKENS_TO_RECEIVE).toString();
-            const expectedAccountBar = new BigNumber(accountStart.bar)
+            const expectedAccountBar = new BigNumber(accountStart3.bar)
                 .minus(new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.bar.decimals)).toString();
 
             // expect(expectedDexFoo).to.equal(dexEnd.foo.toString(), 'Wrong DEX FOO balance');
             expect(expectedDexBar).to.equal(dexEnd.bar.toString(), 'Wrong DEX BAR balance');
-            expect(expectedAccountFoo).to.equal(accountEnd.foo.toString(), 'Wrong Account#3 FOO balance');
-            expect(expectedAccountBar).to.equal(accountEnd.bar.toString(), 'Wrong Account#3 BAR balance');
+            expect(expectedAccountFoo).to.equal(accountEnd2.foo.toString(), 'Wrong Account#2 FOO balance');
+            expect(expectedAccountBar).to.equal(accountEnd3.bar.toString(), 'Wrong Account#3 BAR balance');
         });
 
         it('0040 # Account#3 exchange FOO to BAR (small amount)', async function () {
             logger.log('#################################################');
             logger.log('# Account#3 exchange FOO to BAR (small amount)');
             const dexStart = await dexBalances();
-            const accountStart = await account3balances();
+            const accountStart3 = await account3balances();
+            const accountStart2 = await account2balances();
             const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
+            logBalances('start', dexStart, accountStart3, accountStart2, pairStart);
 
             const AMOUNT = 100;
 
@@ -439,10 +513,12 @@ describe('Check direct DexPairFooBar operations', async function () {
             logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
 
             const payload = await DexPairFooBar.call({
-                method: 'buildExchangePayload', params: {
-                    id: 0,
-                    deploy_wallet_grams: 0,
-                    expected_amount: 0
+                method: 'buildExchangePayloadV2', params: {
+                    _id: 0,
+                    _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
+                    _expectedAmount: 0,
+                    _recipient: Account2.address,
+                    _referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -464,22 +540,23 @@ describe('Check direct DexPairFooBar operations', async function () {
             displayTx(tx);
 
             const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
+            const accountEnd3 = await account3balances();
+            const accountEnd2 = await account2balances();
             const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
+            logBalances('end', dexEnd, accountEnd3, accountEnd2, pairEnd);
             await logGas();
 
             const expectedDexBar = new BigNumber(dexStart.bar)
                 .minus(new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.bar.decimals)).toString();
             const expectedDexFoo = new BigNumber(dexStart.foo).plus(new BigNumber(AMOUNT).shiftedBy(-Constants.tokens.foo.decimals)).toString();
-            const expectedAccountBar = new BigNumber(accountStart.bar)
+            const expectedAccountBar = new BigNumber(accountStart2.bar)
                 .plus(new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.bar.decimals)).toString();
-            const expectedAccountFoo = new BigNumber(accountStart.foo).minus(new BigNumber(AMOUNT).shiftedBy(-Constants.tokens.foo.decimals)).toString();
+            const expectedAccountFoo = new BigNumber(accountStart3.foo).minus(new BigNumber(AMOUNT).shiftedBy(-Constants.tokens.foo.decimals)).toString();
 
             expect(expectedDexFoo).to.equal(dexEnd.foo.toString(), 'Wrong DEX FOO balance');
             expect(expectedDexBar).to.equal(dexEnd.bar.toString(), 'Wrong DEX BAR balance');
-            expect(expectedAccountFoo).to.equal(accountEnd.foo.toString(), 'Wrong Account#3 FOO balance');
-            expect(expectedAccountBar).to.equal(accountEnd.bar.toString(), 'Wrong Account#3 BAR balance');
+            expect(expectedAccountFoo).to.equal(accountEnd3.foo.toString(), 'Wrong Account#3 FOO balance');
+            expect(expectedAccountBar).to.equal(accountEnd2.bar.toString(), 'Wrong Account#2 BAR balance');
         });
     });
 
@@ -489,9 +566,10 @@ describe('Check direct DexPairFooBar operations', async function () {
             logger.log('#################################################');
             logger.log('# Account#3 deposit FOO liquidity (small amount)');
             const dexStart = await dexBalances();
-            const accountStart = await account3balances();
+            const accountStart3 = await account3balances();
+            const accountStart2 = await account2balances();
             const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
+            logBalances('start', dexStart, accountStart3, accountStart2, pairStart);
 
             const LP_REWARD = await expectedDepositLiquidity(
                 DexPairFooBar.address,
@@ -502,9 +580,12 @@ describe('Check direct DexPairFooBar operations', async function () {
             );
 
             const payload = await DexPairFooBar.call({
-                method: 'buildDepositLiquidityPayload', params: {
-                    id: 0,
-                    deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano')
+                method: 'buildDepositLiquidityPayloadV2', params: {
+                    _id: 0,
+                    _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
+                    _expectedAmount: new BigNumber(LP_REWARD).shiftedBy(Constants.LP_DECIMALS),
+                    _recipient: Account2.address,
+                    _referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -525,38 +606,40 @@ describe('Check direct DexPairFooBar operations', async function () {
 
             displayTx(tx);
 
-            FooBarLpWallet3.setAddress(await FooBarLpRoot.call({
+            FooBarLpWallet2.setAddress(await FooBarLpRoot.call({
                 method: 'walletOf',
                 params: {
-                    walletOwner: Account3.address
+                    walletOwner: Account2.address
                 }
             }));
 
-            migration.store(FooBarLpWallet3, 'FooBarLpWallet3');
+            migration.store(FooBarLpWallet2, 'FooBarLpWallet3');
 
             const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
+            const accountEnd3 = await account3balances();
+            const accountEnd2 = await account2balances();
             const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
+            logBalances('end', dexEnd, accountEnd3, accountEnd2, pairEnd);
             await logGas();
 
             const expectedDexFoo = new BigNumber(dexStart.foo).plus(new BigNumber(1000).shiftedBy(-Constants.tokens.foo.decimals)).toString();
-            const expectedAccountFoo = new BigNumber(accountStart.foo).minus(new BigNumber(1000).shiftedBy(-Constants.tokens.foo.decimals)).toString();
-            const expectedAccountLp = new BigNumber(accountStart.lp || 0).plus(LP_REWARD).toString();
+            const expectedAccountFoo = new BigNumber(accountStart3.foo).minus(new BigNumber(1000).shiftedBy(-Constants.tokens.foo.decimals)).toString();
+            const expectedAccountLp = new BigNumber(accountStart2.lp || 0).plus(LP_REWARD).toString();
 
             expect(pairEnd.lp_supply_actual).to.equal(pairEnd.lp_supply, 'Wrong LP supply');
             expect(expectedDexFoo).to.equal(dexEnd.foo.toString(), 'Wrong DEX FOO balance');
-            expect(expectedAccountFoo).to.equal(accountEnd.foo.toString(), 'Wrong Account#3 FOO balance');
-            expect(expectedAccountLp).to.equal(accountEnd.lp.toString(), 'Wrong Account#3 LP balance');
+            expect(expectedAccountFoo).to.equal(accountEnd3.foo.toString(), 'Wrong Account#3 FOO balance');
+            expect(expectedAccountLp).to.equal(accountEnd2.lp.toString(), 'Wrong Account#2 LP balance');
         });
 
         it('0060 # Account#3 deposit FOO liquidity', async function () {
             logger.log('#################################################');
             logger.log('# Account#3 deposit FOO liquidity');
             const dexStart = await dexBalances();
-            const accountStart = await account3balances();
+            const accountStart3 = await account3balances();
+            const accountStart2 = await account2balances();
             const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
+            logBalances('start', dexStart, accountStart3, accountStart2, pairStart);
 
             const TOKENS_TO_DEPOSIT = 100;
 
@@ -571,9 +654,12 @@ describe('Check direct DexPairFooBar operations', async function () {
             );
 
             const payload = await DexPairFooBar.call({
-                method: 'buildDepositLiquidityPayload', params: {
-                    id: 0,
-                    deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano')
+                method: 'buildDepositLiquidityPayloadV2', params: {
+                    _id: 0,
+                    _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
+                    _expectedAmount: new BigNumber(LP_REWARD).shiftedBy(Constants.LP_DECIMALS),
+                    _recipient: Account2.address,
+                    _referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -594,38 +680,40 @@ describe('Check direct DexPairFooBar operations', async function () {
 
             displayTx(tx);
 
-            FooBarLpWallet3.setAddress(await FooBarLpRoot.call({
+            FooBarLpWallet2.setAddress(await FooBarLpRoot.call({
                 method: 'walletOf',
                 params: {
-                    walletOwner: Account3.address
+                    walletOwner: Account2.address
                 }
             }));
 
-            migration.store(FooBarLpWallet3, 'FooBarLpWallet3');
+            migration.store(FooBarLpWallet2, 'FooBarLpWallet2');
 
             const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
+            const accountEnd3 = await account3balances();
+            const accountEnd2 = await account2balances();
             const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
+            logBalances('end', dexEnd, accountEnd3, accountEnd2, pairEnd);
             await logGas();
 
             const expectedDexFoo = new BigNumber(dexStart.foo).plus(TOKENS_TO_DEPOSIT).toString();
-            const expectedAccountFoo = new BigNumber(accountStart.foo).minus(TOKENS_TO_DEPOSIT).toString();
-            const expectedAccountLp = new BigNumber(accountStart.lp || 0).plus(LP_REWARD).toString();
+            const expectedAccountFoo = new BigNumber(accountStart3.foo).minus(TOKENS_TO_DEPOSIT).toString();
+            const expectedAccountLp = new BigNumber(accountStart2.lp || 0).plus(LP_REWARD).toString();
 
             expect(pairEnd.lp_supply_actual).to.equal(pairEnd.lp_supply, 'Wrong LP supply');
             expect(expectedDexFoo).to.equal(dexEnd.foo.toString(), 'Wrong DEX FOO balance');
-            expect(expectedAccountFoo).to.equal(accountEnd.foo.toString(), 'Wrong Account#3 FOO balance');
-            expect(expectedAccountLp).to.equal(accountEnd.lp.toString(), 'Wrong Account#3 LP balance');
+            expect(expectedAccountFoo).to.equal(accountEnd3.foo.toString(), 'Wrong Account#3 FOO balance');
+            expect(expectedAccountLp).to.equal(accountEnd2.lp.toString(), 'Wrong Account#2 LP balance');
         });
 
         it('0070 # Account#3 deposit BAR liquidity', async function () {
             logger.log('#################################################');
             logger.log('# Account#3 deposit BAR liquidity');
             const dexStart = await dexBalances();
-            const accountStart = await account3balances();
+            const accountStart3 = await account3balances();
+            const accountStart2 = await account2balances();
             const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
+            logBalances('start', dexStart, accountStart3, accountStart2, pairStart);
 
             const TOKENS_TO_DEPOSIT = 100;
 
@@ -640,9 +728,12 @@ describe('Check direct DexPairFooBar operations', async function () {
             );
 
             const payload = await DexPairFooBar.call({
-                method: 'buildDepositLiquidityPayload', params: {
-                    id: 0,
-                    deploy_wallet_grams: 0
+                method: 'buildDepositLiquidityPayloadV2', params: {
+                    _id: 0,
+                    _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
+                    _expectedAmount: new BigNumber(LP_REWARD).shiftedBy(Constants.LP_DECIMALS),
+                    _recipient: Account2.address,
+                    _referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -664,21 +755,21 @@ describe('Check direct DexPairFooBar operations', async function () {
             displayTx(tx);
 
             const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
+            const accountEnd3 = await account3balances();
+            const accountEnd2 = await account2balances();
             const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
+            logBalances('end', dexEnd, accountEnd3, accountEnd2, pairEnd);
             await logGas();
 
             const expectedDexBar = new BigNumber(dexStart.bar).plus(TOKENS_TO_DEPOSIT).toString();
-            const expectedAccountBar = new BigNumber(accountStart.bar).minus(TOKENS_TO_DEPOSIT).toString();
-            const expectedAccountLp = new BigNumber(accountStart.lp).plus(LP_REWARD).toString();
+            const expectedAccountBar = new BigNumber(accountStart3.bar).minus(TOKENS_TO_DEPOSIT).toString();
+            const expectedAccountLp = new BigNumber(accountStart2.lp).plus(LP_REWARD).toString();
 
             expect(pairEnd.lp_supply_actual).to.equal(pairEnd.lp_supply, 'Wrong LP supply');
             expect(expectedDexBar).to.equal(dexEnd.bar.toString(), 'Wrong DEX BAR balance');
-            expect(expectedAccountBar).to.equal(accountEnd.bar.toString(), 'Wrong Account#3 BAR balance');
-            expect(expectedAccountLp).to.equal(accountEnd.lp.toString(), 'Wrong Account#3 LP balance');
+            expect(expectedAccountBar).to.equal(accountEnd3.bar.toString(), 'Wrong Account#3 BAR balance');
+            expect(expectedAccountLp).to.equal(accountEnd2.lp.toString(), 'Wrong Account#2 LP balance');
         });
-
     });
 
     describe('Direct withdraw liquidity (positive)', async function () {
@@ -686,9 +777,10 @@ describe('Check direct DexPairFooBar operations', async function () {
             logger.log('#################################################');
             logger.log('# Account#3 direct withdraw liquidity (small amount)');
             const dexStart = await dexBalances();
-            const accountStart = await account3balances();
+            const accountStart3 = await account3balances();
+            const accountStart2 = await account2balances();
             const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
+            logBalances('start', dexStart, accountStart3, accountStart2, pairStart);
 
             const expected = await DexPairFooBar.call({
                 method: 'expectedWithdrawLiquidity', params: {
@@ -697,9 +789,13 @@ describe('Check direct DexPairFooBar operations', async function () {
             });
 
             const payload = await DexPairFooBar.call({
-                method: 'buildWithdrawLiquidityPayload', params: {
-                    id: 0,
-                    deploy_wallet_grams: 0
+                method: 'buildWithdrawLiquidityPayloadV2', params: {
+                    _id: 0,
+                    _deployWalletGrams: 0,
+                    _expectedLeftAmount: expected.expected_left_amount,
+                    _expectedRightAmount: expected.expected_right_amount,
+                    _recipient: Account2.address,
+                    _referral: locklift.utils.zeroAddress,
                 }
             });
 
@@ -739,9 +835,10 @@ describe('Check direct DexPairFooBar operations', async function () {
             displayTx(tx);
 
             const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
+            const accountEnd3 = await account3balances();
+            const accountEnd2 = await account2balances();
             const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
+            logBalances('end', dexEnd, accountEnd3, accountEnd2, pairEnd);
             await logGas();
 
             const expectedDexFoo = new BigNumber(dexStart.foo)
@@ -750,40 +847,43 @@ describe('Check direct DexPairFooBar operations', async function () {
             const expectedDexBar = new BigNumber(dexStart.bar)
                 .minus(expectedBar)
                 .toString();
-            const expectedAccountFoo = new BigNumber(accountStart.foo)
+            const expectedAccountFoo = new BigNumber(accountStart2.foo)
                 .plus(expectedFoo)
                 .toString();
-            const expectedAccountBar = new BigNumber(accountStart.bar)
+            const expectedAccountBar = new BigNumber(accountStart2.bar)
                 .plus(expectedBar)
                 .toString();
 
             expect(pairEnd.lp_supply_actual).to.equal(pairEnd.lp_supply, 'Wrong LP supply');
             expect(expectedDexFoo).to.equal(dexEnd.foo.toString(), 'Wrong DEX FOO balance');
             expect(expectedDexBar).to.equal(dexEnd.bar.toString(), 'Wrong DEX BAR balance');
-            expect(expectedAccountFoo).to.equal(accountEnd.foo.toString(), 'Wrong Account#3 FOO balance');
-            expect(expectedAccountBar).to.equal(accountEnd.bar.toString(), 'Wrong Account#3 BAR balance');
+            expect(expectedAccountFoo).to.equal(accountEnd2.foo.toString(), 'Wrong Account#2 FOO balance');
+            expect(expectedAccountBar).to.equal(accountEnd2.bar.toString(), 'Wrong Account#2 BAR balance');
         });
 
         it('0090 # Account#3 direct withdraw liquidity', async function () {
             logger.log('#################################################');
             logger.log('# Account#3 direct withdraw liquidity');
             const dexStart = await dexBalances();
-            const accountStart = await account3balances();
+            const accountStart3 = await account3balances();
+            const accountStart2 = await account2balances();
             const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
-
-            let LP_AMOUNT = accountStart.lp / 2;
+            logBalances('start', dexStart, accountStart3, accountStart2, pairStart);
 
             const expected = await DexPairFooBar.call({
                 method: 'expectedWithdrawLiquidity', params: {
-                    lp_amount: new BigNumber(LP_AMOUNT).shiftedBy(Constants.LP_DECIMALS).toString()
+                    lp_amount: new BigNumber(accountStart3.lp).shiftedBy(Constants.LP_DECIMALS).toString()
                 }
             });
 
             const payload = await DexPairFooBar.call({
-                method: 'buildWithdrawLiquidityPayload', params: {
-                    id: 0,
-                    deploy_wallet_grams: 0
+                method: 'buildWithdrawLiquidityPayloadV2', params: {
+                    _id: 0,
+                    _deployWalletGrams: 0,
+                    _expectedLeftAmount: expected.expected_left_amount,
+                    _expectedRightAmount: expected.expected_right_amount,
+                    _recipient: Account2.address,
+                    _referral: locklift.utils.zeroAddress,
                 }
             });
 
@@ -809,7 +909,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                 contract: FooBarLpWallet3,
                 method: 'transfer',
                 params: {
-                    amount: new BigNumber(LP_AMOUNT).shiftedBy(Constants.LP_DECIMALS).toString(),
+                    amount: new BigNumber(accountStart3.lp).shiftedBy(Constants.LP_DECIMALS).toString(),
                     recipient: DexPairFooBar.address,
                     deployWalletValue: 0,
                     remainingGasTo: Account3.address,
@@ -823,9 +923,10 @@ describe('Check direct DexPairFooBar operations', async function () {
             displayTx(tx);
 
             const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
+            const accountEnd3 = await account3balances();
+            const accountEnd2 = await account2balances();
             const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
+            logBalances('end', dexEnd, accountEnd3, accountEnd2, pairEnd);
             await logGas();
 
             const expectedDexFoo = new BigNumber(dexStart.foo)
@@ -834,20 +935,20 @@ describe('Check direct DexPairFooBar operations', async function () {
             const expectedDexBar = new BigNumber(dexStart.bar)
                 .minus(expectedBar)
                 .toString();
-            const expectedAccountFoo = new BigNumber(accountStart.foo)
+            const expectedAccountFoo = new BigNumber(accountStart2.foo)
                 .plus(expectedFoo)
                 .toString();
-            const expectedAccountBar = new BigNumber(accountStart.bar)
+            const expectedAccountBar = new BigNumber(accountStart2.bar)
                 .plus(expectedBar)
                 .toString();
-            const expectedAccountLp = new BigNumber(accountStart.lp).minus(LP_AMOUNT).toString();
+            const expectedAccountLp = '0';
 
             expect(pairEnd.lp_supply_actual).to.equal(pairEnd.lp_supply, 'Wrong LP supply');
             expect(expectedDexFoo).to.equal(dexEnd.foo.toString(), 'Wrong DEX FOO balance');
             expect(expectedDexBar).to.equal(dexEnd.bar.toString(), 'Wrong DEX BAR balance');
-            expect(expectedAccountFoo).to.equal(accountEnd.foo.toString(), 'Wrong Account#3 FOO balance');
-            expect(expectedAccountBar).to.equal(accountEnd.bar.toString(), 'Wrong Account#3 BAR balance');
-            expect(expectedAccountLp).to.equal(accountEnd.lp.toString(), 'Wrong Account#3 LP balance');
+            expect(expectedAccountFoo).to.equal(accountEnd2.foo.toString(), 'Wrong Account#2 FOO balance');
+            expect(expectedAccountBar).to.equal(accountEnd2.bar.toString(), 'Wrong Account#2 BAR balance');
+            expect(expectedAccountLp).to.equal(accountEnd3.lp.toString(), 'Wrong Account#3 LP balance');
         });
     });
 
@@ -857,9 +958,10 @@ describe('Check direct DexPairFooBar operations', async function () {
             logger.log('#################################################');
             logger.log('# Account#3 exchange FOO to BAR (empty payload)');
             const dexStart = await dexBalances();
-            const accountStart = await account3balances();
+            const accountStart3 = await account3balances();
+            const accountStart2 = await account2balances();
             const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
+            logBalances('start', dexStart, accountStart3, accountStart2, pairStart);
 
             const TOKENS_TO_EXCHANGE = 100;
 
@@ -888,24 +990,26 @@ describe('Check direct DexPairFooBar operations', async function () {
             displayTx(tx);
 
             const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
+            const accountEnd3 = await account3balances();
+            const accountEnd2 = await account2balances();
             const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
+            logBalances('end', dexEnd, accountEnd3, accountEnd2, pairEnd);
             await logGas();
 
             expect(dexStart.foo).to.equal(dexEnd.foo, 'Wrong DEX FOO balance');
             expect(dexStart.bar).to.equal(dexEnd.bar, 'Wrong DEX BAR balance');
-            expect(accountStart.foo).to.equal(accountEnd.foo, 'Wrong Account#3 FOO balance');
-            expect(accountStart.bar).to.equal(accountEnd.bar, 'Wrong Account#3 BAR balance');
+            expect(accountStart3.foo).to.equal(accountEnd3.foo, 'Wrong Account#3 FOO balance');
+            expect(accountStart2.bar).to.equal(accountEnd2.bar, 'Wrong Account#2 BAR balance');
         });
 
         it('0110 # Account#3 exchange FOO to BAR (low gas)', async function () {
             logger.log('#################################################');
             logger.log('# Account#3 exchange FOO to BAR (low gas)');
             const dexStart = await dexBalances();
-            const accountStart = await account3balances();
+            const accountStart3 = await account3balances();
+            const accountStart2 = await account2balances();
             const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
+            logBalances('start', dexStart, accountStart3, accountStart2, pairStart);
 
             const TOKENS_TO_EXCHANGE = 100;
 
@@ -917,10 +1021,12 @@ describe('Check direct DexPairFooBar operations', async function () {
             });
 
             const payload = await DexPairFooBar.call({
-                method: 'buildExchangePayload', params: {
-                    id: 0,
-                    deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
-                    expected_amount: expected.expected_amount
+                method: 'buildExchangePayloadV2', params: {
+                    _id: 0,
+                    _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
+                    _expectedAmount: expected.expected_amount,
+                    _recipient: Account2.address,
+                    _referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -942,24 +1048,26 @@ describe('Check direct DexPairFooBar operations', async function () {
             displayTx(tx);
 
             const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
+            const accountEnd3 = await account3balances();
+            const accountEnd2 = await account2balances();
             const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
+            logBalances('end', dexEnd, accountEnd3, accountEnd2, pairEnd);
             await logGas();
 
             expect(dexStart.foo).to.equal(dexEnd.foo, 'Wrong DEX FOO balance');
             expect(dexStart.bar).to.equal(dexEnd.bar, 'Wrong DEX BAR balance');
-            expect(accountStart.foo).to.equal(accountEnd.foo, 'Wrong Account#3 FOO balance');
-            expect(accountStart.bar).to.equal(accountEnd.bar, 'Wrong Account#3 BAR balance');
+            expect(accountStart3.foo).to.equal(accountEnd3.foo, 'Wrong Account#3 FOO balance');
+            expect(accountStart2.bar).to.equal(accountEnd2.bar, 'Wrong Account#2 BAR balance');
         });
 
         it('0120 # Account#3 exchange FOO to BAR (wrong rate)', async function () {
             logger.log('#################################################');
             logger.log('# Account#3 exchange FOO to BAR (wrong rate)');
             const dexStart = await dexBalances();
-            const accountStart = await account3balances();
+            const accountStart3 = await account3balances();
+            const accountStart2 = await account2balances();
             const pairStart = await dexPairInfo();
-            logBalances('start', dexStart, accountStart, pairStart);
+            logBalances('start', dexStart, accountStart3, accountStart2, pairStart);
 
             const TOKENS_TO_EXCHANGE = 100;
 
@@ -975,10 +1083,12 @@ describe('Check direct DexPairFooBar operations', async function () {
             logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
 
             const payload = await DexPairFooBar.call({
-                method: 'buildExchangePayload', params: {
-                    id: 0,
-                    deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
-                    expected_amount: new BigNumber(expected.expected_amount).plus(1).toString()
+                method: 'buildExchangePayloadV2', params: {
+                    _id: 0,
+                    _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
+                    _expectedAmount: new BigNumber(expected.expected_amount).plus(1).toString(),
+                    _recipient: Account2.address,
+                    _referral: locklift.utils.zeroAddress
                 }
             });
 
@@ -1000,15 +1110,16 @@ describe('Check direct DexPairFooBar operations', async function () {
             displayTx(tx);
 
             const dexEnd = await dexBalances();
-            const accountEnd = await account3balances();
+            const accountEnd3 = await account3balances();
+            const accountEnd2 = await account2balances();
             const pairEnd = await dexPairInfo();
-            logBalances('end', dexEnd, accountEnd, pairEnd);
+            logBalances('end', dexEnd, accountEnd3, accountEnd2, pairEnd);
             await logGas();
 
             expect(dexStart.foo).to.equal(dexEnd.foo, 'Wrong DEX FOO balance');
             expect(dexStart.bar).to.equal(dexEnd.bar, 'Wrong DEX BAR balance');
-            expect(accountStart.foo).to.equal(accountEnd.foo, 'Wrong Account#3 FOO balance');
-            expect(accountStart.bar).to.equal(accountEnd.bar, 'Wrong Account#3 BAR balance');
+            expect(accountStart3.foo).to.equal(accountEnd3.foo, 'Wrong Account#3 FOO balance');
+            expect(accountStart2.bar).to.equal(accountEnd2.bar, 'Wrong Account#2 BAR balance');
         });
     });
 });

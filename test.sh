@@ -38,6 +38,7 @@ npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_tok
 #old tests
 npx locklift test $NO_TRACE --tests test/15-dex-account-pair-operations.js --pair_contract_name='DexPair' --account_contract_name='DexAccount'
 npx locklift test $NO_TRACE --tests test/20-pair-direct-operations.js --contract_name='DexPair'
+npx locklift test $NO_TRACE --tests test/20-pair-direct-operations-v2.js --contract_name='DexPair'
 npx locklift test $NO_TRACE --tests test/25-dex-accounts-interaction.js --pair_contract_name='DexPair' --account_contract_name='DexAccount'
 
 # test cross-pair exchange

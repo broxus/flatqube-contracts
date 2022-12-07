@@ -220,23 +220,23 @@ contract DexStablePair is
     }
 
     function buildExchangePayloadV2(
-        uint64 id,
-        uint128 deploy_wallet_grams,
-        uint128 expected_amount,
-        address recipient,
-        address referral,
-        optional(TvmCell) success_payload,
-        optional(TvmCell) cancel_payload
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedAmount,
+        address _recipient,
+        address _referral,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) external pure returns (TvmCell) {
         return PairPayload.buildExchangePayloadV2(
-            id,
-            deploy_wallet_grams,
-            expected_amount,
-            recipient,
+            _id,
+            _deployWalletGrams,
+            _expectedAmount,
+            _recipient,
             address(0),
-            referral,
-            success_payload,
-            cancel_payload
+            _referral,
+            _successPayload,
+            _cancelPayload
         );
     }
 
@@ -251,22 +251,22 @@ contract DexStablePair is
     }
 
     function buildDepositLiquidityPayloadV2(
-        uint64 id,
-        uint128 deploy_wallet_grams,
-        uint128 expected_amount,
-        address recipient,
-        address referral,
-        optional(TvmCell) success_payload,
-        optional(TvmCell) cancel_payload
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedAmount,
+        address _recipient,
+        address _referral,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) external pure returns (TvmCell) {
         return PairPayload.buildDepositLiquidityPayloadV2(
-            id,
-            deploy_wallet_grams,
-            expected_amount,
-            recipient,
-            referral,
-            success_payload,
-            cancel_payload
+            _id,
+            _deployWalletGrams,
+            _expectedAmount,
+            _recipient,
+            _referral,
+            _successPayload,
+            _cancelPayload
         );
     }
 
@@ -281,23 +281,23 @@ contract DexStablePair is
     }
 
     function buildWithdrawLiquidityPayloadV2(
-        uint64 id,
-        uint128 deploy_wallet_grams,
-        uint128 expected_left_amount,
-        uint128 expected_right_amount,
-        address recipient,
-        address referral,
-        optional(TvmCell) success_payload,
-        optional(TvmCell) cancel_payload
+        uint64 _id,
+        uint128 _deployWalletGrams,
+        uint128 _expectedLeftAmount,
+        uint128 _expectedRightAmount,
+        address _recipient,
+        address _referral,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) external pure returns (TvmCell) {
         return PairPayload.buildWithdrawLiquidityPayloadV2(
-            id,
-            deploy_wallet_grams,
-            [expected_left_amount, expected_right_amount],
-            recipient,
-            referral,
-            success_payload,
-            cancel_payload
+            _id,
+            _deployWalletGrams,
+            [_expectedLeftAmount, _expectedRightAmount],
+            _recipient,
+            _referral,
+            _successPayload,
+            _cancelPayload
         );
     }
 
@@ -323,9 +323,9 @@ contract DexStablePair is
         uint32[] _nextStepIndices,
         ExchangeStep[] _steps,
         address _recipient,
-        address referral,
-        optional(TvmCell) success_payload,
-        optional(TvmCell) cancel_payload
+        address _referral,
+        optional(TvmCell) _successPayload,
+        optional(TvmCell) _cancelPayload
     ) external view returns (TvmCell) {
         address[] pools;
 
@@ -343,9 +343,9 @@ contract DexStablePair is
             _nextStepIndices,
             _steps,
             pools,
-            referral,
-            success_payload,
-            cancel_payload
+            _referral,
+            _successPayload,
+            _cancelPayload
         );
     }
 
