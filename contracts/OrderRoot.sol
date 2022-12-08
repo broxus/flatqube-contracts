@@ -91,14 +91,14 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         uint128 expectedTokenAmount,
         uint128 deployWalletValue,
         uint256 backPK,
-        uint64 callId
+        uint64 callbackId
     ) external pure returns (TvmCell) {
         TvmBuilder builder;
         builder.store(tokenReceive);
         builder.store(expectedTokenAmount);
         builder.store(deployWalletValue);
         builder.store(backPK);
-        builder.store(callId);
+        builder.store(callbackId);
         return builder.toCell();
     }
 
@@ -122,7 +122,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 uint128 expectedAmount,
                 uint128 deployWalletValue,
                 uint256 backPubKey,
-                uint64 callId
+                uint64 callbackId
             ) = payloadSlice.decode(address, uint128, uint128, uint256, uint64);
 
             TvmCell indexCode = buildCode(
@@ -150,11 +150,11 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 expectedAmount);
 
             IOrderOperationCallback(msg.sender).orderCreateOrderSuccess{
-                value: OrderGas.OPERATION_CALLBACK_BASE + 2,
+                value: OrderGas.OPERATION_CALLBACK_BASE,
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 bounce: false
             }
-            (callId, true, ICreateOrderResult.CreateOrderResult(
+            (callbackId, ICreateOrderResult.CreateOrderResult(
                 orderAddress,
                 tokenRoot,
                 amount,
@@ -184,6 +184,29 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 payload
             );
         } else {
+
+            if (payloadSlice.bits() == 843){
+            (
+                address receiveToken,
+                uint128 expectedAmount,
+                ,
+                ,
+                uint64 callbackId
+            ) = payloadSlice.decode(address, uint128, uint128, uint256, uint64);
+
+            IOrderOperationCallback(msg.sender).orderCreateOrderReject{
+                value: OrderGas.OPERATION_CALLBACK_BASE,
+                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                bounce: false
+            }
+            (callbackId, ICreateOrderRejectResult.CreateOrderRejectResult(
+                tokenRoot,
+                amount,
+                receiveToken,
+                expectedAmount
+            ));
+
+            }
             TvmCell emptyPayload;
             ITokenWallet(msg.sender).transfer{
                 value: 0,
@@ -268,7 +291,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     function upgrade(
         TvmCell _code, 
         uint32 _newVersion, 
-        address _sendGasTo
+        address _sendGasTo,
+        uint64 callbackId
     ) external override onlyFactory {
         if (version == _newVersion) {
             tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
@@ -292,11 +316,11 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             tvm.setcode(_code);
             tvm.setCurrentCode(_code);
 
-            onCodeUpgrade(builder.toCell());
+            onCodeUpgrade(builder.toCell(), callbackId);
         }
     }
 
-    function onCodeUpgrade(TvmCell _data) private {
+    function onCodeUpgrade(TvmCell _data, uint64 callbackId) private {
         TvmSlice sl = _data.toSlice();
 
         (
@@ -330,6 +354,13 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             address(this), 
             OrderGas.DEPLOY_EMPTY_WALLET_GRAMS
         );
+
+        IOrderOperationCallback(msg.sender).onCodeUpgradeSuccess{
+				value: OrderGas.OPERATION_CALLBACK_BASE,
+				flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+				bounce: false
+			}
+			(callbackId, IOnCodeUpgradeResult.OnCodeUpgradeResult(_factory, _spentToken, oldVersion, newVersion, _deployer));
 
         deployer.transfer({
             value: 0,

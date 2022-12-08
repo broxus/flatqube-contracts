@@ -148,14 +148,14 @@ contract OrderFactory is IOrderFactory {
 		}	
 	}
 
-	function upgradeOrderRoot(address orderAddress) external view onlyOwner {
+	function upgradeOrderRoot(address orderAddress, uint64 callbackId) external view onlyOwner {
 		require(msg.value >= OrderGas.UPDATE_ORDER_ROOT, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 		IOrderRoot(orderAddress).upgrade{
 			value: 0,
 			flag: MsgFlag.ALL_NOT_RESERVED,
 			bounce: false
-		}(orderRootCode, versionOrderRoot, address(this));
+		}(orderRootCode, versionOrderRoot, address(this), callbackId);
 	}
 
 	function setPlatformCodeOnce(TvmCell _orderPlatform) public onlyOwner {

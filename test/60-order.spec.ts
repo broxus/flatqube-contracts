@@ -301,7 +301,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.1),
             backPK: 0,
-            callId: 0
+            callbackId: 0
         }
       console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
       const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -338,7 +338,7 @@ describe('OrderTest', () => {
       Order = await locklift.factory.getDeployedContract("Order", orderAddress)
       const payloadLO = await Order.methods.buildPayload({
                 deployWalletValue: locklift.utils.toNano(0.1),
-                callId: "1"
+                callbackId: "1"
             }).call();
 
           await tstWallet4.methods.transfer({
@@ -438,7 +438,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.1),
             backPK: 0,
-            callId: 0
+            callbackId: 0
         }
         console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
         const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -467,7 +467,7 @@ describe('OrderTest', () => {
       Order = await locklift.factory.getDeployedContract("Order", orderAddress)
       const payloadLO = await Order.methods.buildPayload({
                 deployWalletValue: locklift.utils.toNano(0.1),
-                callId: "1"
+                callbackId: "1"
             }).call();
 
       await tstWallet4.methods.transfer({
@@ -571,7 +571,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.1),
             backPK: 0,
-            callId: 0
+            callbackId: 0
         }
         console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
         const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -600,7 +600,7 @@ describe('OrderTest', () => {
       Order = await locklift.factory.getDeployedContract("Order", orderAddress)
       const payloadLO = await Order.methods.buildPayload({
                 deployWalletValue: locklift.utils.toNano(0.1),
-                callId: "1"
+                callbackId: "1"
             }).call();
 
       await tstWallet4.methods.transfer({
@@ -686,7 +686,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.1),
             backPK: 0,
-            callId: 0
+            callbackId: 0
         }
         console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
         const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -751,7 +751,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.1),
             backPK: 0,
-            callId: 0
+            callbackId: 0
         }
         console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
         const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -781,7 +781,7 @@ describe('OrderTest', () => {
 
       const payloadLO = await Order.methods.buildPayload({
             deployWalletValue: locklift.utils.toNano(0.1),
-            callId: "1"
+            callbackId: "1"
         }).call();
 
       await tstWallet4.methods.transfer({
@@ -843,7 +843,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.1),
             backPK: 0,
-            callId: 0
+            callbackId: 0
         }
         console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
         const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -875,7 +875,7 @@ describe('OrderTest', () => {
 
       const payloadLO = await Order.methods.buildPayload({
             deployWalletValue: locklift.utils.toNano(0.1),
-            callId: "1"
+            callbackId: "1"
         }).call();
 
       await Order.methods.cancel({}).send({
@@ -936,7 +936,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.1),
             backPK: 0,
-            callId: 0
+            callbackId: 0
         }
         console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
         const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -966,7 +966,7 @@ describe('OrderTest', () => {
 
       const payloadLO = await Order.methods.buildPayload({
             deployWalletValue: locklift.utils.toNano(0.1),
-            callId: "1"
+            callbackId: "1"
         }).call();
 
       await tstWallet4.methods.transfer({
@@ -1028,7 +1028,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.1),
             backPK: 0,
-            callId: 0
+            callbackId: 0
         }
         console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
         const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -1060,7 +1060,7 @@ describe('OrderTest', () => {
 
       const payloadLO = await Order.methods.buildPayload({
             deployWalletValue: locklift.utils.toNano(0.1),
-            callId: "1"
+            callbackId: "1"
         }).call();
 
       await Order.methods.cancel({}).send({
@@ -1119,7 +1119,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.1),
             backPK: new BigNumber(signer.publicKey, 16).toString(10),
-            callId: 0
+            callbackId: 0
         }
         console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
         const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -1189,7 +1189,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.1),
             backPK: new BigNumber(signer.publicKey, 16).toString(10),
-            callId: 0
+            callbackId: 0
         }
         console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
         const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -1261,7 +1261,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.1),
             backPK: 0,
-            callId: 0
+            callbackId: 0
         }
         console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
         const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -1300,12 +1300,12 @@ describe('OrderTest', () => {
       console.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
       console.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
-      await locklift.tracing.trace(Order.methods.swap({
+      await Order.methods.swap({
           deployWalletValue: locklift.utils.toNano(1)
       }).send({
           amount: locklift.utils.toNano(10), from: account3.address
       })
-      )
+
       await sleep(10000)
       const stateLO2 = await Order.methods.currentStatus({answerId: 1}).call()
 
@@ -1348,7 +1348,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.2),
             backPK: 0,
-            callId: 0
+            callbackId: 0
         }
         console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
         const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -1432,7 +1432,7 @@ describe('OrderTest', () => {
             expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
             deployWalletValue: locklift.utils.toNano(0.2),
             backPK: 0,
-            callId: 0
+            callbackId: 0
         }
         console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
         const payload = await RootOrderBar.methods.buildPayload(params).call();
