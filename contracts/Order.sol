@@ -225,12 +225,7 @@ contract Order is
 		override
 		returns (Details)
 	{
-		return
-			{
-				value: 0,
-				bounce: false,
-				flag: MsgFlag.REMAINING_GAS
-			} buildDetails();
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } buildDetails();
 	}
 
 	function buildPayload(uint128 deployWalletValue, uint64 callbackId)
@@ -241,6 +236,7 @@ contract Order is
 		TvmBuilder builder;
 		builder.store(deployWalletValue);
 		builder.store(callbackId);
+
 		return builder.toCell();
 	}
 
@@ -352,31 +348,37 @@ contract Order is
 									currentAmountReceiveToken
 								);
 
-								IOrderOperationCallback(msg.sender).orderPartExchangeSuccess{
+								IOrderOperationCallback(msg.sender).onOrderPartExchangeSuccess{
 									value: OrderGas.OPERATION_CALLBACK_BASE,
                 					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 					bounce: false
-            					}
-								(callbackId, IPartExchangeResult.PartExchangeResult(
-									spentToken,
-									transferAmount,
-									receiveToken,
-									amount,
-									currentAmountSpentToken,
-									currentAmountReceiveToken));
+            					}(
+									callbackId,
+									IPartExchangeResult.PartExchangeResult(
+										spentToken,
+										transferAmount,
+										receiveToken,
+										amount,
+										currentAmountSpentToken,
+										currentAmountReceiveToken
+									)
+								);
 
-								IOrderOperationCallback(owner).orderPartExchangeSuccess{
+								IOrderOperationCallback(owner).onOrderPartExchangeSuccess{
 									value: OrderGas.OPERATION_CALLBACK_BASE,
                 					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 					bounce: false
-            					}
-								(callbackId, IPartExchangeResult.PartExchangeResult(
-									spentToken,
-									transferAmount,
-									receiveToken,
-									amount,
-									currentAmountSpentToken,
-									currentAmountReceiveToken));
+            					}(
+									callbackId,
+									IPartExchangeResult.PartExchangeResult(
+										spentToken,
+										transferAmount,
+										receiveToken,
+										amount,
+										currentAmountSpentToken,
+										currentAmountReceiveToken
+									)
+								);
 							}
 
 							ITokenWallet(receiveWallet).transfer{
@@ -443,27 +445,30 @@ contract Order is
 								emptyPayload
 							);
 						}
-						IOrderOperationCallback(msg.sender).orderSwapSuccess{
-									value: OrderGas.OPERATION_CALLBACK_BASE,
-                					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                					bounce: false
-            					}
-								(callbackId, ISwapResult.SwapResult(
-									initiator,
-									deployWalletValue
-								));
+
+						IOrderOperationCallback(msg.sender).onOrderSwapSuccess{
+							value: OrderGas.OPERATION_CALLBACK_BASE,
+							flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+							bounce: false
+						}(
+							callbackId,
+							ISwapResult.SwapResult(
+								initiator,
+								deployWalletValue
+							)
+						);
+
 						currentAmountReceiveToken = 0;
 						currentAmountSpentToken = 0;
 					} else if (
 						(msg.sender.value != 0 && msg.sender == spentWallet && tokenRoot == spentToken) &&
 						operationStatus == OrderOperationStatus.CANCEL
 					) {
-						IOrderOperationCallback(msg.sender).orderSwapCancel{
-									value: OrderGas.OPERATION_CALLBACK_BASE,
-                					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                					bounce: false
-            					}
-								(callbackId);
+						IOrderOperationCallback(msg.sender).onOrderSwapCancel{
+							value: OrderGas.OPERATION_CALLBACK_BASE,
+							flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+							bounce: false
+						}(callbackId);
 						changeState(OrderStatus.Active, 0);
 					}
 				}
@@ -648,15 +653,19 @@ contract Order is
 		state = newState;
 		emit StateChanged(prevStateN, newState, buildDetails());
 		if (callbackId.hasValue()){
-			IOrderOperationCallback(msg.sender).orderStateChangedSuccess{
+			IOrderOperationCallback(msg.sender).onOrderStateChangedSuccess{
 				value: OrderGas.OPERATION_CALLBACK_BASE,
 				flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
 				bounce: false
-			}
-			(callbackId, IStateChangedResult.StateChangedResult(
-				prevStateN, newState, buildDetails()));
+			}(
+				callbackId,
+				IStateChangedResult.StateChangedResult(
+					prevStateN,
+					newState,
+					buildDetails()
+				)
+			);
 		}
-
 	}
 
 	function buildDetails() private view returns (Details) {

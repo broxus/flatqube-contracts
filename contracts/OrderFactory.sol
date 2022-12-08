@@ -63,7 +63,6 @@ contract OrderFactory is IOrderFactory {
 			OrderErrors.NOT_LIMIT_ORDER_ROOT
 		);
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-		
 		emit CreateOrderRoot(_orderRoot, token);
 		
 		sendGasTo.transfer({
@@ -241,12 +240,7 @@ contract OrderFactory is IOrderFactory {
 		responsible
 		returns (address)
 	{
-		return 
-		{
-			value: 0, 
-			bounce: false, 
-			flag: MsgFlag.REMAINING_GAS 
-		} expectedAddressOrderRoot(token);
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } expectedAddressOrderRoot(token);
 	}
 
 
@@ -260,6 +254,7 @@ contract OrderFactory is IOrderFactory {
 		TvmBuilder salt;
 		salt.store(owner);
 		salt.store(token);
+
 		return tvm.setCodeSalt(orderPlatformCode, salt.toCell());
 	}
 
