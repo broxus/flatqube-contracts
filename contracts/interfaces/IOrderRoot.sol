@@ -1,6 +1,8 @@
 pragma ton-solidity >=0.57.0;
 
-interface IOrderRoot {
+import "../structures/IOrderFeeParams.sol";
+
+interface IOrderRoot is IOrderFeeParams {
 	event CreateOrder(
 		address order,
 		address spentToken,
@@ -13,6 +15,9 @@ interface IOrderRoot {
 	function getVersion() external view responsible returns(uint32);
 	function getSpentToken() external view responsible returns (address);
 	function getFactory() external view responsible returns (address);
+	function getFeeParams() external view responsible returns (OrderFeeParams, address);
+	function setFeeParams(OrderFeeParams params) external;
+
 	function expectedAddressOrder(
 		address root,
 		address factory,

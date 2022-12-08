@@ -1,6 +1,8 @@
 pragma ton-solidity >=0.57.0;
 
-interface IOrderFactory {
+import "../structures/IOrderFeeParams.sol";
+
+interface IOrderFactory is IOrderFeeParams {
     
     event RequestedOwnerTransfer(
         address oldOwner, 
@@ -11,7 +13,7 @@ interface IOrderFactory {
         address oldOwner,
         address newOwner
     );
-   
+    event OrderFeesParamsUpdated(OrderFeeParams params);
     event OrderRootCodeUpgraded(uint32 oldVersion, uint32 newVersion);
     event OrderCodeUpgraded(uint32 oldVersion, uint32 newVersion);
     event OrderClosedCodeUpgraded(uint32 oldVersion, uint32 newVersion);
@@ -24,7 +26,11 @@ interface IOrderFactory {
 
     function createOrderRoot(
         address token
-    ) external view;
+    ) external;
+
+    function setFeeParams(OrderFeeParams params) external;
+
+    function getFeeParams() external view responsible returns (OrderFeeParams, address);
 
     function getExpectedAddressOrderRoot(address token)
 		external
