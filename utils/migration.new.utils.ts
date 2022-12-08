@@ -261,7 +261,9 @@ export const tokenFactoryMigration = async (
 export const orderFactoryMigration = async (
     account: Account,
     version: number,
-    dexRoot: Contract<FactorySource['DexRoot']>
+    dexRoot: Contract<FactorySource['DexRoot']>,
+    feeNumerator : number = 1,
+    feeDenominator : number = 100
 ): Promise<
   Contract<FactorySource['OrderFactory']>
 > => {
@@ -340,11 +342,29 @@ export const orderFactoryMigration = async (
     amount: locklift.utils.toNano(15),
     from: account.address
   }))
+
+  logMigrationProcess(
+    'OrderFactoryMigration',
+    'setFeeParams',
+    'setFeeParams...',
+  );
+  await locklift.tracing.trace(contract.methods.setFeeParams({
+    params:
+    {
+    denominator: feeDenominator,
+    numerator: feeNumerator
+    }
+  }).send({
+    amount: locklift.utils.toNano(15),
+    from: account.address
+  }))
+
+  const feeParams = await contract.methods.getFeeParams({answerId:1}).call()
   // Log and save address
   logMigrationSuccess(
     'OrderFactoryMigration',
     'constructor',
-    `Deployed OrderFactory: ${contract.address}`,
+    `Deployed OrderFactory: ${contract.address}\nFee params:\nnumerator - ${feeParams.params.numerator}\ndenominator - ${feeParams.params.denominator}`,
   );
   new Migration().store(contract, 'OrderFactory');
 

@@ -18,6 +18,7 @@ import {
     orderRootMigration, tokenFactoryMigration
 } from "../utils/migration.new.utils";
 import BigNumber from "bignumber.js";
+import {logSuccess} from "../utils/log.utils";
 
 describe('OrderTest', () => {
   const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
@@ -76,6 +77,7 @@ describe('OrderTest', () => {
 
     tokenFactory = await tokenFactoryMigration(account1);
     const dexRoot = await dexRootMigration(account1);
+    factoryOrder = await orderFactoryMigration(account1, 1, dexRoot);
     dexVault = await dexVaultMigration(account1, dexRoot, tokenFactory);
     dexAccount = await dexAccountMigration(account1, dexRoot);
 
@@ -104,7 +106,6 @@ describe('OrderTest', () => {
     );
 
 
-     factoryOrder = await orderFactoryMigration(account1, 1, dexRoot);
      dexPair = await dexPairMigration(
         account1,
         dexRoot,
@@ -144,6 +145,8 @@ describe('OrderTest', () => {
         'getTokenRoots',
         `LP root for BAR/TST : ${lproot.lp}`,
       );
+
+
       // await locklift.tracing.trace(dexAccount.methods.depositLiquidity({
       //     call_id: getRandomNonce(),
       //     left_root: rootTokenBar.address,
@@ -184,6 +187,12 @@ describe('OrderTest', () => {
     );
 
     const tstWallet2Address = await deployWallet(account2, rootTokenRecieve, account1)
+    const beneficiary = await factoryOrder.methods.getFeeParams({answerId: 1}).call();
+    logSuccess(
+        'OrderFactory',
+        'getFeeParams',
+        `beneficiary : ${beneficiary.beneficiary}`,
+      );
     tstWallet2 = locklift.factory.getDeployedContract(
       'TokenWalletUpgradeable',
       tstWallet2Address,
@@ -267,6 +276,9 @@ describe('OrderTest', () => {
     console.log(`BarWallet6: ${barWallet6.address}`);
     console.log(`TstWallet6: ${tstWallet6.address}`);
     console.log('')
+    // await factoryOrder.methods.setFeeParams({
+    //
+    // })
 
   });
 
