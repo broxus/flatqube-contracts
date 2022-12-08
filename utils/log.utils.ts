@@ -43,6 +43,19 @@ export const logMigrationSuccess = (
     '\n',
   );
 
+export const logSuccess = (
+  contract: string,
+  method: string,
+  message: string,
+): void =>
+  console.log(
+    new Date().toLocaleTimeString(undefined, { hour12: false }),
+    '--',
+    `${chalk.bold.blue(`[${contract}][${method}]`)}`,
+    chalk.green(message),
+    '\n',
+  );
+
 export const logMigrationParams = (params: Record<string, unknown>): void =>
   console.log(
     new Date().toLocaleTimeString(undefined, { hour12: false }),
