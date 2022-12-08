@@ -16,9 +16,11 @@ library OrderErrors {
     uint16 constant NOT_FACTORY_LIMIT_ORDER_ROOT            = 312;
     uint16 constant NOT_LIMIT_ORDER_ROOT                    = 313;
     uint16 constant NOT_EMERGENCY_MANAGER                   = 314;
-    uint16 constant EMERGENCY_MANAGER_NOT_EMPTY              = 315;
+    uint16 constant EMERGENCY_MANAGER_NOT_EMPTY             = 315;
     uint16 constant EMERGENCY_STATUS_NOW                    = 316;
     uint16 constant NOT_EMERGENCY_STATUS_NOW                = 317;
     uint16 constant NOT_AUTO_EXCHANGE                       = 318;
     uint16 constant PLATFORM_CODE_NON_EMPTY                 = 319;
+    uint16 constant WRONG_FEE_PARAMS                        = 320;
+    uint16 constant WRONG_WALLET_DEPLOYER                   = 321;
 }

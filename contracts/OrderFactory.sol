@@ -25,7 +25,12 @@ contract OrderFactory is IOrderFactory {
 
 	address owner;
 	address pendingOwner;
-	
+	address beneficiary;
+	OrderFeeParams fee;
+
+	// token_root -> send_gas_to
+    mapping(address => address) _tmp_deploying_wallets;
+
 	TvmCell orderRootCode;
 	TvmCell orderPlatformCode;
 	TvmCell orderCode;
@@ -170,6 +175,24 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
+	function setFeeParams(OrderFeeParams params) override external onlyOwner {
+        require(params.denominator != 0 && params.numerator != 0,
+            OrderErrors.WRONG_FEE_PARAMS);
+		fee = params;
+
+		emit OrderFeesParamsUpdated(fee);
+		owner.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
+	}
+
+    function getFeeParams() override external view responsible returns (OrderFeeParams params, address beneficiary) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee, beneficiary);
+	}
+
+
 	function setOrderRootCode(TvmCell _orderRootCode) public onlyOwner {
 		tvm.rawReserve(OrderGas.SET_CODE, 0);
 		uint32 prevVersion = versionOrderRoot;
@@ -215,12 +238,16 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
-	function createOrderRoot(address token, uint64 callbackId) override external view {
+	function createOrderRoot(address token, uint64 callbackId) override external {
 		require(
 			msg.value >= OrderGas.DEPLOY_ORDERS_ROOT,
 			OrderErrors.VALUE_TOO_LOW
 		);
-		tvm.rawReserve(OrderGas.DEPLOY_ORDERS_ROOT, 0);
+		tvm.rawReserve(OrderGas.DEPLOY_ORDERS_ROOT + OrderGas.DEPLOY_EMPTY_WALLET_GRAMS, 0);
+		if (beneficiary.value == 0){
+			_deployWallet(token, msg.sender);
+		}
+
 
 		new OrderPlatform {
 			stateInit: buildState(token, buildCode(token), buildParams()),
@@ -233,6 +260,31 @@ contract OrderFactory is IOrderFactory {
 			callbackId
 		);
 	}
+
+	function _deployWallet(address token_root, address send_gas_to) private {
+		_tmp_deploying_wallets[token_root] = send_gas_to;
+		ITokenRoot(token_root).deployWallet {
+            value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
+            flag: MsgFlag.SENDER_PAYS_FEES,
+            callback: OrderFactory.onTokenWallet
+        }(address(this), OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
+
+	}
+
+
+    function onTokenWallet(address wallet) external {
+
+        require(_tmp_deploying_wallets.exists(msg.sender), OrderErrors.WRONG_WALLET_DEPLOYER);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE, 2);
+        address send_gas_to = _tmp_deploying_wallets[msg.sender];
+		beneficiary = wallet;
+		if (beneficiary.value == 0){
+			revert(1234);
+		}
+        delete _tmp_deploying_wallets[msg.sender];
+        send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
+
+    }
 
 	function getExpectedAddressOrderRoot(address token)
 		override

@@ -30,6 +30,9 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     address spentTokenWallet;
     address deployer;
     address dexRoot;
+
+    OrderFeeParams fee;
+	address beneficiary;
     
     constructor() public { revert(); }
 
@@ -74,6 +77,10 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         }
     }
 
+    function getFeeParams() override external view responsible returns (OrderFeeParams params, address beneficiary) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee, beneficiary);
+	}
+
     function getVersion() override external view responsible returns (uint32) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } version;
     }
@@ -85,6 +92,17 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     function getFactory() override external view responsible returns(address) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } factory;
     }
+
+    function setFeeParams(OrderFeeParams params) override external onlyFactory {
+        require(params.denominator != 0 && params.numerator != 0,
+            OrderErrors.WRONG_FEE_PARAMS);
+		fee = params;
+		factory.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
+	}
 
     function buildPayload(
         address tokenReceive,
@@ -138,7 +156,9 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 expectedAmount,
                 amount, 
                 backPubKey, 
-                dexRoot, 
+                dexRoot,
+                fee,
+                beneficiary,
                 orderClosedCode
             );
 

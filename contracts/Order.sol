@@ -11,6 +11,8 @@ import "./libraries/OrderOperationStatus.sol";
 import "./libraries/DexOperationTypes.sol";
 
 import "./interfaces/IOrder.sol";
+import "./interfaces/IOrderFactory.sol";
+
 import "./interfaces/IHasEmergencyMode.sol";
 import "./interfaces/IDexRoot.sol";
 import "./interfaces/IOrderOperationCallback.sol";
@@ -58,11 +60,16 @@ contract Order is
 
 	bool autoExchange;
 
+	OrderFeeParams fee;
+	address beneficiary;
+
 	constructor(
 		uint128 _expectedAmount,
 		uint128 _initialAmount,
 		uint256 _backPK,
 		address _dexRoot,
+		OrderFeeParams _fee,
+		address _beneficiary,
 		TvmCell _codeClosed
 	) public {
 		changeState(OrderStatus.Initialize, 0);
@@ -86,6 +93,8 @@ contract Order is
 			backPK = _backPK;
 			dexRoot = _dexRoot;
 			codeClosed = _codeClosed;
+			fee = _fee;
+			beneficiary = _beneficiary;
 
 			IDexRoot(dexRoot).getExpectedPairAddress{
 				value: OrderGas.GET_DEX_PAIR,
@@ -138,6 +147,21 @@ contract Order is
 			OrderErrors.NOT_EMERGENCY_MANAGER
 		);
 		_;
+	}
+
+	function getFeeParams() override external view responsible returns (OrderFeeParams params, address beneficiary) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee, beneficiary);
+	}
+
+    function setFeeParams(OrderFeeParams params) override external onlyFactory {
+        require(params.denominator != 0 && params.numerator != 0,
+            OrderErrors.WRONG_FEE_PARAMS);
+		fee = params;
+		factory.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
 	}
 
 	function onBeginData(address inAddress) external {
