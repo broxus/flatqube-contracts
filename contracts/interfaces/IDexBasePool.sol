@@ -1,6 +1,6 @@
 pragma ton-solidity >= 0.62.0;
 
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
+import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 
 import "../structures/ITokenOperationStructure.sol";
 import "../structures/IExchangeStepStructure.sol";

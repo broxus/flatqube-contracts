@@ -3,7 +3,7 @@ const fs = require('fs');
 const logger = require('mocha-logger');
 
 const N_COINS = 2;
-const TOKEN_CONTRACTS_PATH = 'node_modules/ton-eth-bridge-token-contracts/build'
+const TOKEN_CONTRACTS_PATH = 'node_modules/tip3/build'
 const WEVER_CONTRACTS_PATH = 'node_modules/ton-wton/everscale/build'
 const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
 const BigNumber = require('bignumber.js');

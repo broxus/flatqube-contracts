@@ -6,9 +6,9 @@ pragma AbiHeader pubkey;
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
-import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IBurnableTokenWallet.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensMintCallback.sol";
+import "tip3/contracts/interfaces/ITokenWallet.sol";
+import "tip3/contracts/interfaces/IBurnableTokenWallet.sol";
+import "tip3/contracts/interfaces/IAcceptTokensMintCallback.sol";
 
 import "./abstract/DexContractBase.sol";
 
@@ -45,6 +45,8 @@ contract DexVault is
     address private _pendingOwner;
 
     address private _tokenFactory;
+
+    mapping(address => bool) private _lpVaultWallets;
 
     modifier onlyOwner() {
         require(msg.sender == _owner, DexErrors.NOT_MY_OWNER);
@@ -445,6 +447,7 @@ contract DexVault is
 
         builder.store(platform_code);
         builder.store(_lpTokenPendingCode);
+        builder.store(abi.encode(_lpVaultWallets));
 
         tvm.setcode(code);
         tvm.setCurrentCode(code);
@@ -465,6 +468,10 @@ contract DexVault is
 
         platform_code = slice.loadRef();
         _lpTokenPendingCode = slice.loadRef();
+
+        if (slice.refs() >= 1) {
+            _lpVaultWallets = abi.decode(slice.loadRef(), mapping(address => bool));
+        }
 
         // Refund remaining gas
         _owner.transfer({
@@ -514,7 +521,7 @@ contract DexVault is
         TvmSlice payloadSlice = payload.toSlice();
 
         address lpVaultWallet = payloadSlice.decode(address);
-        require(msg.sender.value != 0 && msg.sender == lpVaultWallet, DexErrors.NOT_LP_VAULT_WALLET);
+        require(msg.sender.value != 0 && msg.sender == lpVaultWallet && _lpVaultWallets[lpVaultWallet], DexErrors.NOT_LP_VAULT_WALLET);
 
         uint8 op = DexOperationTypes.CROSS_PAIR_EXCHANGE_V2;
 
@@ -661,7 +668,8 @@ contract DexVault is
                 DexGas.VAULT_INITIAL_BALANCE,
                 address(this).balance - msg.value
             ),
-            2);
+            2
+        );
 
         IBurnableTokenWallet(_lpVaultWallet).burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
             _amount,
@@ -669,5 +677,14 @@ contract DexVault is
             _callbackTo,
             _payload
         );
+    }
+
+    function addLpWallet(
+        address[] _roots,
+        address _lpVaultWallet
+    ) external override onlyPair(_roots) {
+        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
+
+        _lpVaultWallets[_lpVaultWallet] = true;
     }
 }

@@ -1,5 +1,5 @@
 #export DEFAULT_PARAMS="--config locklift.config.js --disable-build --network local"
-export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --external-build node_modules/ton-eth-bridge-token-contracts/build --network local"
+export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --external-build node_modules/tip3/build --network local"
 export NO_TRACE="--config locklift.config.js --disable-build --network local"
 
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'foo' --right_token_id 'bar' --left_amount '4844540' --right_amount '4813807' --contract_name='DexStablePair'

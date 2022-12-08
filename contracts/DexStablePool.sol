@@ -4,11 +4,11 @@ pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
-import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IBurnableByRootTokenRoot.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IBurnableTokenWallet.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
+import "tip3/contracts/interfaces/ITokenRoot.sol";
+import "tip3/contracts/interfaces/ITokenWallet.sol";
+import "tip3/contracts/interfaces/IBurnableByRootTokenRoot.sol";
+import "tip3/contracts/interfaces/IBurnableTokenWallet.sol";
+import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 
 import "./libraries/DexPlatformTypes.sol";
 import "./libraries/DexPoolTypes.sol";
@@ -1747,8 +1747,18 @@ contract DexStablePool is
     function onVaultTokenWallet(address wallet) external {
         require(tokenIndex.exists(msg.sender) || msg.sender == lp_root, DexErrors.NOT_ROOT);
 
+        tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
+
         if (msg.sender == lp_root && lp_vault_wallet.value == 0) {
             lp_vault_wallet = wallet;
+
+            IDexVault(vault).addLpWallet{
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED
+            }(
+                _tokenRoots(),
+                lp_vault_wallet
+            );
         } else {
             tokenData[tokenIndex[msg.sender]].vaultWallet = wallet;
         }

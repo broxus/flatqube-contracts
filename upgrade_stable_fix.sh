@@ -1,7 +1,7 @@
 echo "upgrade_stable_fix.sh START";
 
 #export DEFAULT_PARAMS="--config locklift.config.js --disable-build --network local"
-export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --external-build node_modules/ton-eth-bridge-token-contracts/build --network local"
+export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --external-build node_modules/tip3/build --network local"
 export NO_TRACE="--config locklift.config.js --disable-build --network local"
 
 npx locklift run $NO_TRACE --script scripts/0-reset-migration.js

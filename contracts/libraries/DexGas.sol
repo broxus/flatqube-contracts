@@ -57,5 +57,5 @@ library DexGas {
 
     uint128 constant OPERATION_CALLBACK_BASE        = 0.01 ton;
     uint128 constant SET_FEE_PARAMS_MIN_VALUE       = 1 ton;
-
+    // uint128 constant ADD_LP_WALLET                  = 0.05 ton;
 }

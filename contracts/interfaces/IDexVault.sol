@@ -99,6 +99,11 @@ interface IDexVault {
         TvmCell _payload
     ) external;
 
+    function addLpWallet(
+        address[] _roots,
+        address _lpVaultWallet
+    ) external;
+
     function transferOwner(address new_owner) external;
     function acceptOwner() external;
 

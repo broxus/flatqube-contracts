@@ -8,10 +8,10 @@ import "./interfaces/ITokenFactory.sol";
 import "./interfaces/IDexVault.sol";
 import "./interfaces/ITokenRootDeployedCallback.sol";
 
-import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/ITransferableOwnership.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/ITransferTokenRootOwnershipCallback.sol";
-import "ton-eth-bridge-token-contracts/contracts/structures/ICallbackParamsStructure.sol";
+import "tip3/contracts/interfaces/ITokenRoot.sol";
+import "tip3/contracts/interfaces/ITransferableOwnership.sol";
+import "tip3/contracts/interfaces/ITransferTokenRootOwnershipCallback.sol";
+import "tip3/contracts/structures/ICallbackParamsStructure.sol";
 
 
 contract DexVaultLpTokenPendingV2 is ITokenRootDeployedCallback, ITransferTokenRootOwnershipCallback {
