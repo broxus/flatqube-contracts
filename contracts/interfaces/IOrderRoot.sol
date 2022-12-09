@@ -23,5 +23,5 @@ interface IOrderRoot {
 		uint64 timeTx,
 		uint64 nowTx
 	) external view responsible returns (address);
-	function upgrade(TvmCell _code, uint32 _newVersion, address _sendGasTo, uint64 callbackId) external;
+	function upgrade(TvmCell _code, uint32 _newVersion, address _sendGasTo) external;
 }

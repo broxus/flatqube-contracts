@@ -1,7 +1,7 @@
 pragma ton-solidity >= 0.57.0;
 
-interface IOnCodeUpgradeResult {
-    struct OnCodeUpgradeResult {
+interface IOnOrderRootCreateResult {
+    struct OnOrderRootCreateResult {
         address _factory;
         address _spentToken;
         uint32 oldVersion;

@@ -5,7 +5,7 @@ import "../structures/IStateChangedResult.sol";
 import "../structures/ISwapResult.sol";
 import "../structures/ICreateOrderResult.sol";
 import "../structures/ICreateOrderRejectResult.sol";
-import "../structures/IOnCodeUpgradeResult.sol";
+import "../structures/IOnOrderRootCreateResult.sol";
 
 interface IOrderOperationCallback {
     function onOrderPartExchangeSuccess(uint64 id, IPartExchangeResult.PartExchangeResult result) external;
@@ -14,5 +14,5 @@ interface IOrderOperationCallback {
     function onOrderSwapCancel(uint64 id) external;
     function onOrderCreateOrderSuccess(uint64 id, ICreateOrderResult.CreateOrderResult result) external;
     function onOrderCreateOrderReject(uint64 id, ICreateOrderRejectResult.CreateOrderRejectResult result) external;
-    function onCodeUpgradeSuccess(uint64 id, IOnCodeUpgradeResult.OnCodeUpgradeResult result) external;
+    function onOrderRootCreateSuccess(uint64 id, IOnOrderRootCreateResult.OnOrderRootCreateResult result) external;
 }

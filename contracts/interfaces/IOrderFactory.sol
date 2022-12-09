@@ -23,7 +23,8 @@ interface IOrderFactory {
     event OrderFactoryUpgrade(uint32 oldVersion, uint32 newVersion);
 
     function createOrderRoot(
-        address token
+        address token,
+        uint64 callbackId
     ) external view;
 
     function getExpectedAddressOrderRoot(address token)

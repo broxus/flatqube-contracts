@@ -169,8 +169,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             );
 
             ITokenWallet(msg.sender).transfer{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED,
+                value: 0, flag: MsgFlag.ALL_NOT_RESERVED,
                 bounce: false
             }(
                 amount,
@@ -289,8 +288,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     function upgrade(
         TvmCell _code, 
         uint32 _newVersion, 
-        address _sendGasTo,
-        uint64 callbackId
+        address _sendGasTo
     ) external override onlyFactory {
         if (version == _newVersion) {
             tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
@@ -314,20 +312,38 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             tvm.setcode(_code);
             tvm.setCurrentCode(_code);
 
-            onCodeUpgrade(builder.toCell(), callbackId);
+            onCodeUpgrade(builder.toCell());
         }
     }
 
-    function onCodeUpgrade(TvmCell _data, uint64 callbackId) private {
+    function onCodeUpgrade(TvmCell _data) private {
         TvmSlice sl = _data.toSlice();
+        uint64 callbackId;
+        address _factory;
+        address _spentToken;
+        uint32 oldVersion;
+        uint32 newVersion;
+        address _deployer;
+//267 - 929
+        if (sl.bits() >= 929){
+            (
+                _factory,
+                _spentToken,
+                oldVersion,
+                newVersion,
+                _deployer,
+                callbackId
+            ) = sl.decode(address, address, uint32, uint32, address, uint64);
+        } else {
+            (
+                _factory,
+                _spentToken,
+                oldVersion,
+                newVersion,
+                _deployer
+            ) = sl.decode(address, address, uint32, uint32, address);
+        }
 
-        (
-            address _factory, 
-            address _spentToken, 
-            uint32 oldVersion, 
-            uint32 newVersion, 
-            address _deployer
-        ) = sl.decode(address, address, uint32, uint32, address);     
 
         if (oldVersion == 0) {
             tvm.resetStorage();
@@ -353,13 +369,13 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             OrderGas.DEPLOY_EMPTY_WALLET_GRAMS
         );
 
-        IOrderOperationCallback(msg.sender).onCodeUpgradeSuccess{
+        IOrderOperationCallback(msg.sender).onOrderRootCreateSuccess{
 				value: OrderGas.OPERATION_CALLBACK_BASE,
 				flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
 				bounce: false
         }(
             callbackId,
-            IOnCodeUpgradeResult.OnCodeUpgradeResult(
+            IOnOrderRootCreateResult.OnOrderRootCreateResult(
                 _factory,
                 _spentToken,
                 oldVersion,

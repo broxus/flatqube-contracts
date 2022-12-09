@@ -14,10 +14,11 @@ contract OrderPlatform {
 	constructor(
 		TvmCell code,
 		uint32 version,
-		address sendGasTo
+		address sendGasTo,
+		uint64 callbackId
 	) public {
 		if (msg.sender.value != 0 && msg.sender == factory) {
-			initialize(code, version, sendGasTo);
+			initialize(code, version, sendGasTo, callbackId);
 		} else {
 			sendGasTo.transfer({
 				value: 0,
@@ -30,7 +31,8 @@ contract OrderPlatform {
 	function initialize(
 		TvmCell code,
 		uint32 version,
-		address sendGasTo
+		address sendGasTo,
+		uint64  callbackId
 	) private {
 
 		TvmBuilder builder;
@@ -40,6 +42,8 @@ contract OrderPlatform {
 		builder.store(version);
 		builder.store(sendGasTo);
 		builder.store(params);
+		builder.store(callbackId);
+
 		
 		tvm.setcode(code);
 		tvm.setCurrentCode(code);

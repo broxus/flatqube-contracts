@@ -354,7 +354,8 @@ export const orderFactoryMigration = async (
 export const orderRootMigration = async (
     account: Account,
     orderFactory: Contract<FactorySource['OrderFactory']>,
-    token: Contract<FactorySource['TokenRootUpgradeable']>
+    token: Contract<FactorySource['TokenRootUpgradeable']>,
+    callbackId: number = 1
 ): Promise<
   Contract<FactorySource['OrderRoot']>
 > => {
@@ -367,13 +368,13 @@ export const orderRootMigration = async (
     'Deploying OrderRoot...',
   );
 
-  await locklift.tracing.trace(
+  await
       orderFactory.methods.createOrderRoot(
-          {token: token.address}
+          {token: token.address, callbackId: callbackId}
       ).send({
         amount: locklift.utils.toNano(20),
         from: account.address
-      })
+      }
   )
 
 
