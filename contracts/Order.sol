@@ -401,7 +401,6 @@ contract Order is
 					needCancel = true;
 				}
 			} else if (state == OrderStatus.SwapInProgress) {
-				TvmSlice payloadSlice = payload.toSlice();
 				if (payloadSlice.bits() >= 8) {
 					uint8 operationStatus = payloadSlice.decode(uint8);
 					if (
