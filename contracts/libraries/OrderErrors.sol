@@ -23,4 +23,6 @@ library OrderErrors {
     uint16 constant PLATFORM_CODE_NON_EMPTY                 = 319;
     uint16 constant WRONG_FEE_PARAMS                        = 320;
     uint16 constant WRONG_WALLET_DEPLOYER                   = 321;
+    uint16 constant AMOUNT_TOO_LOW                          = 322;
+
 }

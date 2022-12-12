@@ -154,9 +154,8 @@ contract Order is
 	}
 
     function _expectedSpendAmount(uint128 b_amount) private view returns (uint128, uint128) {
-        uint128 fee_d_minus_n = uint128(fee.denominator - fee.numerator);
-        uint128 expected_a_amount = math.muldivc(b_amount, fee.denominator, fee_d_minus_n);
-        uint128 a_fee = math.muldivc(expected_a_amount, fee.numerator, fee.denominator);
+        uint128 a_fee = math.muldivc(b_amount, fee.numerator, fee.denominator);
+        uint128 expected_a_amount = math.muldivc(b_amount, fee.denominator-fee.numerator, fee.denominator);
         return (expected_a_amount, a_fee);
     }
 
@@ -279,6 +278,7 @@ contract Order is
 		address originalGasTo,
 		TvmCell payload
 	) external override {
+		revert(1234);
 		TvmCell emptyPayload;
 		bool needCancel = false;
 		bool makeReserve = false;
@@ -297,17 +297,18 @@ contract Order is
 			if ((msg.sender.value != 0 && msg.sender == receiveWallet) && state == OrderStatus.Active) {
 				if (payloadSlice.bits() >= 192) {
 					(uint128 deployWalletValue, uint64 callbackId) = payloadSlice.decode(uint128, uint64);
+					(uint128 expectedSenderAmount, uint128 senderFee) = _expectedSpendAmount(amount);
 					if (
 						msg.value >=
 						OrderGas.FILL_ORDER_MIN_VALUE + deployWalletValue
 					) {
-						if (amount > currentAmountReceiveToken) {
+						if (expectedSenderAmount > currentAmountReceiveToken) {
 							ITokenWallet(msg.sender).transfer{
 								value: OrderGas.TRANSFER_MIN_VALUE,
 								flag: MsgFlag.SENDER_PAYS_FEES,
 								bounce: false
 							}(
-								amount - currentAmountReceiveToken,
+								expectedSenderAmount - currentAmountReceiveToken,
 								sender,
 								uint128(0),
 								originalGasTo,
@@ -341,12 +342,24 @@ contract Order is
 								emptyPayload
 							);
 
+							ITokenWallet(receiveWallet).transfer{
+								value: OrderGas.TRANSFER_MIN_VALUE,
+								flag: MsgFlag.SENDER_PAYS_FEES,
+								bounce: false
+							}(
+								senderFee,
+								beneficiary,
+								uint128(0),
+								originalGasTo,
+								true,
+								emptyPayload
+							);
 							currentAmountReceiveToken = 0;
 							currentAmountSpentToken = 0;
 						} else {
 							makeReserve = true;
 							uint128 transferAmount = math.muldiv(
-								amount,
+								expectedSenderAmount,
 								initialAmount,
 								expectedAmount
 							);
@@ -366,14 +379,14 @@ contract Order is
 							}
 
 							currentAmountSpentToken -= transferAmount;
-							currentAmountReceiveToken -= amount;
+							currentAmountReceiveToken -= expectedSenderAmount;
 
 							if (currentAmountSpentToken > 0) {
 								emit PartExchange(
 									spentToken,
 									transferAmount,
 									receiveToken,
-									amount,
+									expectedSenderAmount,
 									currentAmountSpentToken,
 									currentAmountReceiveToken
 								);
@@ -388,7 +401,7 @@ contract Order is
 										spentToken,
 										transferAmount,
 										receiveToken,
-										amount,
+										expectedSenderAmount,
 										currentAmountSpentToken,
 										currentAmountReceiveToken
 									)
@@ -404,7 +417,7 @@ contract Order is
 										spentToken,
 										transferAmount,
 										receiveToken,
-										amount,
+										expectedSenderAmount,
 										currentAmountSpentToken,
 										currentAmountReceiveToken
 									)
@@ -416,8 +429,20 @@ contract Order is
 								flag: MsgFlag.SENDER_PAYS_FEES,
 								bounce: false
 							}(
-								amount,
+								expectedSenderAmount,
 								owner,
+								uint128(0),
+								originalGasTo,
+								true,
+								emptyPayload
+							);
+							ITokenWallet(receiveWallet).transfer{
+								value: OrderGas.TRANSFER_MIN_VALUE,
+								flag: MsgFlag.SENDER_PAYS_FEES,
+								bounce: false
+							}(
+								senderFee,
+								beneficiary,
 								uint128(0),
 								originalGasTo,
 								true,
