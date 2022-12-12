@@ -1157,7 +1157,7 @@ describe('OrderTest', () => {
       console.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
       console.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
-      await Order.methods.backendSwap({}).send({
+      await Order.methods.backendSwap({callbackId: 1}).send({
           amount: locklift.utils.toNano(10), from: account3.address
       })
 
@@ -1227,7 +1227,7 @@ describe('OrderTest', () => {
       console.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
       console.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
-      await Order.methods.backendSwap({}).send({
+      await Order.methods.backendSwap({callbackId: 1}).send({
           amount: locklift.utils.toNano(10), from: account3.address
       })
 
@@ -1301,7 +1301,8 @@ describe('OrderTest', () => {
       console.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
       await Order.methods.swap({
-          deployWalletValue: locklift.utils.toNano(1)
+          deployWalletValue: locklift.utils.toNano(1),
+          callbackId: 1
       }).send({
           amount: locklift.utils.toNano(10), from: account3.address
       })
@@ -1387,7 +1388,8 @@ describe('OrderTest', () => {
       console.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
       await Order.methods.swap({
-          deployWalletValue: locklift.utils.toNano(0.1)
+          deployWalletValue: locklift.utils.toNano(0.1),
+          callbackId: 1
       }).send({
           amount: locklift.utils.toNano(10), from: account3.address
       })

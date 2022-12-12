@@ -252,7 +252,6 @@ contract Order is
 		bool needCancel = false;
 		bool makeReserve = false;
 		TvmSlice payloadSlice = payload.toSlice();
-		uint64 callbackId;
 		if (
 			sender == root &&
 			tokenRoot == spentToken &&
@@ -261,7 +260,7 @@ contract Order is
 			msg.sender.value != 0 && msg.sender == spentWallet &&
 			payloadSlice.bits() >= 64
 		) {
-			callbackId = payloadSlice.decode(uint64);
+			uint64 callbackId = payloadSlice.decode(uint64);
 			changeState(OrderStatus.Active, callbackId);
 		} else {
 			if ((msg.sender.value != 0 && msg.sender == receiveWallet) && state == OrderStatus.Active) {
@@ -401,7 +400,6 @@ contract Order is
 					needCancel = true;
 				}
 			} else if (state == OrderStatus.SwapInProgress) {
-				TvmSlice payloadSlice = payload.toSlice();
 				if (payloadSlice.bits() >= 8) {
 					uint8 operationStatus = payloadSlice.decode(uint8);
 					if (
@@ -413,8 +411,9 @@ contract Order is
 						(
 							,
 							address initiator,
-							uint128 deployWalletValue
-						) = payloadSlice.decode(uint64, address, uint128);
+							uint128 deployWalletValue,
+							uint64 callbackId
+						) = payloadSlice.decode(uint64, address, uint128, uint64);
 
 						// send owner
 						ITokenWallet(receiveWallet).transfer{
@@ -464,6 +463,11 @@ contract Order is
 						(msg.sender.value != 0 && msg.sender == spentWallet && tokenRoot == spentToken) &&
 						operationStatus == OrderOperationStatus.CANCEL
 					) {
+						(
+							,
+							,
+							uint64 callbackId
+						) = payloadSlice.decode(uint8, uint64, uint64);
 						IOrderOperationCallback(msg.sender).onOrderSwapCancel{
 							value: OrderGas.OPERATION_CALLBACK_BASE,
 							flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -528,7 +532,7 @@ contract Order is
 		close();
 	}
 
-	function backendSwap() external {
+	function backendSwap(uint64 callbackId) external {
 		require(
 			msg.pubkey() == backPK,
 			OrderErrors.NOT_BACKEND_PUB_KEY
@@ -558,10 +562,12 @@ contract Order is
 		successBuilder.store(swapAttempt);
 		successBuilder.store(owner);
 		successBuilder.store(uint128(0));
+		successBuilder.store(callbackId);
 
 		TvmBuilder cancelBuilder;
 		cancelBuilder.store(OrderOperationStatus.CANCEL);
 		cancelBuilder.store(swapAttempt);
+		cancelBuilder.store(callbackId);
 
 		TvmBuilder builder;
 		builder.store(DexOperationTypes.EXCHANGE);
@@ -585,7 +591,7 @@ contract Order is
 		);
 	}
 
-	function swap(uint128 deployWalletValue) external {
+	function swap(uint128 deployWalletValue, uint64 callbackId) external {
 		require(
 			state == OrderStatus.Active,
 			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
@@ -617,17 +623,18 @@ contract Order is
 		successBuilder.store(swapAttempt);
 		successBuilder.store(msg.sender);
 		successBuilder.store(deployWalletValue);
+		successBuilder.store(callbackId);
 
 		TvmBuilder cancelBuilder;
 		cancelBuilder.store(OrderOperationStatus.CANCEL);
 		cancelBuilder.store(swapAttempt);
+		cancelBuilder.store(callbackId);
 
 		TvmBuilder builder;
 		builder.store(DexOperationTypes.EXCHANGE);
 		builder.store(swapAttempt);
 		builder.store(uint128(0));
 		builder.store(currentAmountReceiveToken);
-
 		builder.storeRef(successBuilder);
 		builder.storeRef(cancelBuilder);
 
