@@ -153,6 +153,13 @@ contract Order is
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee, beneficiary);
 	}
 
+    function _expectedSpendAmount(uint128 b_amount) private view returns (uint128, uint128) {
+        uint128 fee_d_minus_n = uint128(fee.denominator - fee.numerator);
+        uint128 expected_a_amount = math.muldivc(b_amount, fee.denominator, fee_d_minus_n);
+        uint128 a_fee = math.muldivc(expected_a_amount, fee.numerator, fee.denominator);
+        return (expected_a_amount, a_fee);
+    }
+
     function setFeeParams(OrderFeeParams params) override external onlyFactory {
         require(params.denominator != 0 && params.numerator != 0,
             OrderErrors.WRONG_FEE_PARAMS);
