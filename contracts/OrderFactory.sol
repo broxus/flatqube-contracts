@@ -129,7 +129,7 @@ contract OrderFactory is IOrderFactory {
 		bool enabled, 
 		address orderAddress,
 		uint256 manager
-	) external view onlyOwner {
+	) external pure onlyOwner {
 		require(msg.value >= OrderGas.MANAGE_EMERGENCY_MODE_MIN_VALUE, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 		if (enabled) {
