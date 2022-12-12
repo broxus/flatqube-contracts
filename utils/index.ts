@@ -1,8 +1,6 @@
 export {
   accountMigration,
-  tokenRootMigration,
-  mockPriceAggregatorMigration,
-  lendingRootMigration,
+  tokenRootMigration
 } from './migration.new.utils';
 
 export {
