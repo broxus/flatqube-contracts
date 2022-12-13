@@ -2,8 +2,8 @@ echo "test_only_upgrade.sh START";
 
 npx locklift build --config locklift.config.js
 
-export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --external-build node_modules/tip3/build --network local"
-export NO_TRACE="--config locklift.config.js --disable-build --network local"
+export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --external-build node_modules/tip3/build --network dev3"
+export NO_TRACE="--config locklift.config.js --disable-build --network dev3"
 
 echo "____________________________________________________________________";
 echo "prepare dex";
@@ -15,7 +15,7 @@ npx locklift run $NO_TRACE --script scripts/1-deploy-vault-and-root.js --pair_co
 npx locklift run $NO_TRACE --script scripts/2-deploy-test-tokens.js --tokens='["foo","bar","qwe"]'
 npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"account":2,"amount":200000000,"token":"bar"},{"account":2,"amount":200000000,"token":"foo"},{"account":2,"amount":200000000,"token":"qwe"}]'
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2 --contract_name='DexAccountPrev'
-npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["foo", "bar"]]' --contract_name='DexPairPrev'
+npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["foo", "bar"], ["bar", "qwe"]]' --contract_name='DexPairPrev'
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexStablePair' --pool_type=2
 
 
@@ -45,6 +45,7 @@ echo "____________________________________________________________________";
 echo "prev pair -> pair";
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPair' --pool_type=1
 npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPairPrev' --new_contract_name='DexPair' --pool_type=1
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='bar' --right='qwe' --old_contract_name='DexPairPrev' --new_contract_name='DexPair' --pool_type=1
 
 echo "____________________________________________________________________";
 echo "prepare pools";
@@ -52,12 +53,13 @@ echo "prepare pools";
 echo "____________________________________________________________________";
 echo "pair -> stablepair";
 npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPair' --new_contract_name='DexStablePair' --pool_type=2
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='bar' --right='qwe' --old_contract_name='DexPair' --new_contract_name='DexStablePair' --pool_type=2
 
 echo "____________________________________________________________________";
 echo "stablepair -> next stablepair";
 # is working
-#npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='TestNewDexStablePair' --pool_type=2
-#npx locklift test $DEFAULT_PARAMS --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexStablePair' --new_contract_name='TestNewDexStablePair' --pool_type=2
+npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='TestNewDexStablePair' --pool_type=2
+npx locklift test $DEFAULT_PARAMS --tests test/35-upgrade-pair.js --left='bar' --right='qwe' --old_contract_name='DexStablePair' --new_contract_name='TestNewDexStablePair' --pool_type=2
 
 echo "____________________________________________________________________";
 echo "stablepair -> pair";
@@ -99,8 +101,8 @@ npx locklift run $NO_TRACE --script scripts/update-dexVault.js --old_contract='D
 
 echo "____________________________________________________________________";
 echo "root ->  next root";
-npx locklift run $DEFAULT_PARAMS --script scripts/update-dexRoot.js --old_contract='DexRoot' --new_contract='TestNewDexRoot'
-npx locklift test $NO_TRACE --tests test/upgrade/4-root-upgrade-test.js
+#npx locklift run $DEFAULT_PARAMS --script scripts/update-dexRoot.js --old_contract='DexRoot' --new_contract='TestNewDexRoot'
+npx locklift test $DEFAULT_PARAMS --tests test/upgrade/4-root-upgrade-test.js
 
 
 echo "test_only_upgrade.sh END";
