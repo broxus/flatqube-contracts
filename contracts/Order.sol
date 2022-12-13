@@ -653,26 +653,25 @@ contract Order is
 
 	function changeState(
 	uint8 newState,
-	optional(uint64) callbackId
+	uint64 callbackId
 	)
 	private {
 		uint8 prevStateN = state;
 		state = newState;
 		emit StateChanged(prevStateN, newState, buildDetails());
-		if (callbackId.hasValue()){
-			IOrderOperationCallback(msg.sender).onOrderStateChangedSuccess{
-				value: OrderGas.OPERATION_CALLBACK_BASE,
-				flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-				bounce: false
-			}(
-				callbackId,
-				IStateChangedResult.StateChangedResult(
-					prevStateN,
-					newState,
-					buildDetails()
-				)
-			);
-		}
+
+		IOrderOperationCallback(msg.sender).onOrderStateChangedSuccess{
+			value: OrderGas.OPERATION_CALLBACK_BASE,
+			flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+			bounce: false
+		}(
+			callbackId,
+			IStateChangedResult.StateChangedResult(
+				prevStateN,
+				newState,
+				buildDetails()
+			)
+		);
 	}
 
 	function buildDetails() private view returns (Details) {

@@ -9,7 +9,7 @@ import "../structures/IOnOrderRootCreateResult.sol";
 
 interface IOrderOperationCallback {
     function onOrderPartExchangeSuccess(uint64 id, IPartExchangeResult.PartExchangeResult result) external;
-    function onOrderStateChangedSuccess(optional(uint64) id, IStateChangedResult.StateChangedResult result) external;
+    function onOrderStateChangedSuccess(uint64 id, IStateChangedResult.StateChangedResult result) external;
     function onOrderSwapSuccess(uint64 id, ISwapResult.SwapResult result) external;
     function onOrderSwapCancel(uint64 id) external;
     function onOrderCreateOrderSuccess(uint64 id, ICreateOrderResult.CreateOrderResult result) external;
