@@ -807,6 +807,7 @@ contract Order is
 			_notify,
 			_payload
 		);
+		//TODO:добавить обновление currentSpentToken and currentReceiveToken, после отправки закрывать ордер.
 	}
 
 	function sendGas(

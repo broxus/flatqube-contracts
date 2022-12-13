@@ -1241,20 +1241,16 @@ describe('OrderTest', () => {
                 walletOwner: Order.address,
                 answerId: 1
             }).call()
-
             await Order.methods.proxyTokensTransfer({
-                _tokenWallet: tokenWalletBarToken.value0,
-                _gasValue: locklift.utils.toNano(0.4),
-                _amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                _recipient: account3.address,
-                _deployWalletValue: 0,
-                _remainingGasTo: account1.address,
-                _notify: true,
-                _payload: EMPTY_TVM_CELL
-            }).send({
-                amount: locklift.utils.toNano(6),
-                from: account1.address
-            })
+                    _tokenWallet: tokenWalletBarToken.value0,
+                    _gasValue: locklift.utils.toNano(0.4),
+                    _amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                    _recipient: account3.address,
+                    _deployWalletValue: 0,
+                    _remainingGasTo: account1.address,
+                    _notify: true,
+                    _payload: EMPTY_TVM_CELL
+            }).sendExternal({publicKey: signer1.publicKey});
 
             await factoryOrder.methods.setEmergency({
                 enabled: false,
@@ -1272,7 +1268,6 @@ describe('OrderTest', () => {
             displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
 
             expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
-            expect(stateLO2.toString()).to.equal(new BigNumber(2).toString(), 'Wrong status Limit order');
         });
     });
 });
