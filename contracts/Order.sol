@@ -409,11 +409,10 @@ contract Order is
 					) {
 						makeReserve = true;
 						(
-							,
+							uint64 callbackId,
 							address initiator,
-							uint128 deployWalletValue,
-							uint64 callbackId
-						) = payloadSlice.decode(uint64, address, uint128, uint64);
+							uint128 deployWalletValue
+						) = payloadSlice.decode(uint64, address, uint128);
 
 						// send owner
 						ITokenWallet(receiveWallet).transfer{
@@ -463,11 +462,7 @@ contract Order is
 						(msg.sender.value != 0 && msg.sender == spentWallet && tokenRoot == spentToken) &&
 						operationStatus == OrderOperationStatus.CANCEL
 					) {
-						(
-							,
-							,
-							uint64 callbackId
-						) = payloadSlice.decode(uint8, uint64, uint64);
+						(uint64 callbackId) = payloadSlice.decode(uint64);
 						IOrderOperationCallback(msg.sender).onOrderSwapCancel{
 							value: OrderGas.OPERATION_CALLBACK_BASE,
 							flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -559,19 +554,17 @@ contract Order is
 
 		TvmBuilder successBuilder;
 		successBuilder.store(OrderOperationStatus.SUCCESS);
-		successBuilder.store(swapAttempt);
+		successBuilder.store(callbackId);
 		successBuilder.store(owner);
 		successBuilder.store(uint128(0));
-		successBuilder.store(callbackId);
 
 		TvmBuilder cancelBuilder;
 		cancelBuilder.store(OrderOperationStatus.CANCEL);
-		cancelBuilder.store(swapAttempt);
 		cancelBuilder.store(callbackId);
 
 		TvmBuilder builder;
 		builder.store(DexOperationTypes.EXCHANGE);
-		builder.store(uint64(swapAttempt));
+		builder.store(callbackId);
 		builder.store(uint128(0));
 		builder.store(currentAmountReceiveToken);
 
@@ -602,7 +595,6 @@ contract Order is
 			OrderErrors.NOT_AUTO_EXCHANGE
 		);
 
-
 		require(
 			msg.value >= OrderGas.SWAP_MIN_VALUE,
 			OrderErrors.VALUE_TOO_LOW
@@ -620,19 +612,17 @@ contract Order is
 
 		TvmBuilder successBuilder;
 		successBuilder.store(OrderOperationStatus.SUCCESS);
-		successBuilder.store(swapAttempt);
+		successBuilder.store(callbackId);
 		successBuilder.store(msg.sender);
 		successBuilder.store(deployWalletValue);
-		successBuilder.store(callbackId);
 
 		TvmBuilder cancelBuilder;
 		cancelBuilder.store(OrderOperationStatus.CANCEL);
-		cancelBuilder.store(swapAttempt);
 		cancelBuilder.store(callbackId);
 
 		TvmBuilder builder;
 		builder.store(DexOperationTypes.EXCHANGE);
-		builder.store(swapAttempt);
+		builder.store(callbackId);
 		builder.store(uint128(0));
 		builder.store(currentAmountReceiveToken);
 		builder.storeRef(successBuilder);
