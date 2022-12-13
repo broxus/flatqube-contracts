@@ -9,7 +9,7 @@ library DexErrors {
     uint16 constant VALUE_TOO_LOW                    = 103;
     uint16 constant NOT_PLATFORM                     = 104;
     uint16 constant NOT_ACCOUNT                      = 105;
-    uint16 constant NOT_PAIR                         = 106;
+    uint16 constant NOT_POOL                         = 106;
     uint16 constant PLATFORM_CODE_EMPTY              = 107;
     uint16 constant PLATFORM_CODE_NON_EMPTY          = 108;
     uint16 constant ACCOUNT_CODE_EMPTY               = 109;
@@ -68,7 +68,7 @@ library DexErrors {
     uint16 constant CAN_NOT_CALCULATE_TWAP           = 144;
 
     uint16 constant NOT_LP_VAULT_WALLET              = 145;
-    uint16 constant NEITHER_PAIR_NOR_VAULT           = 146;
+    uint16 constant NEITHER_POOL_NOR_VAULT           = 146;
 
     uint16 constant INVALID_NEXT_STEPS               = 147;
     uint16 constant INVALID_SUCCESS_PAYLOAD          = 148;

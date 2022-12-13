@@ -106,10 +106,10 @@ abstract contract DexPairBase is
     }
 
     /// @dev Only DEX pair or the DEX vault can call a function with this modifier
-    modifier onlyPairOrVault(address[] _roots) {
-        require(msg.sender == _expectedPairAddress(_roots) ||
+    modifier onlyPoolOrVault(address[] _roots) {
+        require(msg.sender == _expectedPoolAddress(_roots) ||
             _typeToRootAddresses[DexAddressType.VAULT][0].value != 0 &&
-            msg.sender == _typeToRootAddresses[DexAddressType.VAULT][0], DexErrors.NEITHER_PAIR_NOR_VAULT);
+            msg.sender == _typeToRootAddresses[DexAddressType.VAULT][0], DexErrors.NEITHER_POOL_NOR_VAULT);
         _;
     }
 
@@ -257,7 +257,7 @@ abstract contract DexPairBase is
         // Check input params
         require(
             _params.denominator != 0 &&
-            (_params.pool_numerator + _params.beneficiary_numerator + _params.referral_numerator) < _params.denominator &&
+            (_params.pool_numerator + _params.beneficiary_numerator + _params.referrer_numerator) < _params.denominator &&
             ((_params.beneficiary.value != 0 && _params.beneficiary_numerator != 0) ||
             (_params.beneficiary.value == 0 && _params.beneficiary_numerator == 0)),
             DexErrors.WRONG_FEE_PARAMS
@@ -629,12 +629,20 @@ abstract contract DexPairBase is
         address rightRoot;
 
         // Load tokens' roots addresses
-        TvmSlice tokensDataSlice = dataSlice.loadRefAsSlice(); // ref 2
-        (leftRoot, rightRoot) = tokensDataSlice.decode(address, address);
+        TvmCell tokenDataCell = dataSlice.loadRef(); // ref 2
+        if (oldPoolType == DexPoolTypes.STABLE_POOL) {
+            // Set token roots
+            _typeToRootAddresses[DexAddressType.RESERVE] = abi.decode(tokenDataCell, address[]);
+        } else {
+            TvmSlice tokensDataSlice = tokenDataCell.toSlice();
+            (leftRoot, rightRoot) = tokensDataSlice.decode(address, address);
 
-        // Set token roots and fee reserves
-        _typeToRootAddresses[DexAddressType.RESERVE].push(leftRoot);
-        _typeToRootAddresses[DexAddressType.RESERVE].push(rightRoot);
+            // Set token roots
+            _typeToRootAddresses[DexAddressType.RESERVE].push(leftRoot);
+            _typeToRootAddresses[DexAddressType.RESERVE].push(rightRoot);
+        }
+
+        // Set fee reserves
         _typeToReserves[DexReserveType.FEE].push(0);
         _typeToReserves[DexReserveType.FEE].push(0);
 
@@ -735,6 +743,47 @@ abstract contract DexPairBase is
             ));
 
             // Set lp reserve
+            _typeToRootAddresses[DexAddressType.LP].push(lpRoot);
+            _typeToWalletAddresses[DexAddressType.LP].push(lpWallet);
+            _typeToReserves[DexReserveType.LP].push(lpSupply);
+
+            // Set left reserve and wallet
+            _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[0].wallet);
+            _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[0].vaultWallet);
+            _typeToReserves[DexReserveType.POOL].push(tokensData[0].balance);
+
+            // Set right reserve and wallet
+            _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[1].wallet);
+            _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[1].vaultWallet);
+            _typeToReserves[DexReserveType.POOL].push(tokensData[1].balance);
+
+            _initializeTWAPOracle(now);
+        } else if (oldPoolType == DexPoolTypes.STABLE_POOL) {
+            _active = true;
+            TvmCell otherData = dataSlice.loadRef(); // ref 3
+            IPoolTokenData.PoolTokenData[] tokensData = new IPoolTokenData.PoolTokenData[](2);
+
+            address lpRoot;
+            address lpWallet;
+            address lpVaultWallet;
+            uint128 lpSupply;
+
+            // Set lp reserve and fee options
+            (
+                lpRoot, lpWallet, lpVaultWallet, lpSupply,
+                _fee,
+                tokensData,,
+            ) = abi.decode(otherData, (
+                address, address, address, uint128,
+                FeeParams,
+                IPoolTokenData.PoolTokenData[],
+                IAmplificationCoefficient.AmplificationCoefficient,
+                uint256
+            ));
+
+            // Set lp reserve
+            _typeToRootAddresses[DexAddressType.LP].push(lpRoot);
+            _typeToWalletAddresses[DexAddressType.LP].push(lpWallet);
             _typeToReserves[DexReserveType.LP].push(lpSupply);
 
             // Set left reserve and wallet

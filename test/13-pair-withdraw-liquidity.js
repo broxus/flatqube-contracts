@@ -157,17 +157,6 @@ function logBalances(header, dex, account, dexAccount, pair) {
         `${dexAccount.foo} FOO, ${dexAccount.bar} BAR, ${dexAccount.lp} LP`);
 }
 
-async function logGas() {
-    await migration.balancesCheckpoint();
-    const diff = await migration.balancesLastDiff();
-    if (diff) {
-        logger.log(`### GAS STATS ###`);
-        for (let alias in diff) {
-            logger.log(`${alias}: ${diff[alias].gt(0) ? '+' : ''}${diff[alias].toFixed(9)} TON`);
-        }
-    }
-}
-
 describe('DexAccount interact with DexPair', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
     before('Load contracts', async function () {
@@ -335,7 +324,7 @@ describe('DexAccount interact with DexPair', async function () {
 
             logBalances('end', dexEnd, account2End, dexAccount2End, dexPairInfoEnd);
 
-            await logGas();
+            await migration.logGas();
 
             const expectedDexFoo = new BigNumber(dexStart.foo)
                 .minus(expectedFoo)

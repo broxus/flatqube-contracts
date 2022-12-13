@@ -13,7 +13,7 @@ npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"ac
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=3
 
-npx locklift test $DEFAULT_PARAMS --tests test/30-install-pool-code.js --contract_name='DexStablePool' --pool_type=2
+npx locklift test $DEFAULT_PARAMS --tests test/30-install-pool-code.js --contract_name='DexStablePool' --pool_type=3
 
 npx locklift run $NO_TRACE --script scripts/5-deploy-test-pool.js --pools='[["foo", "bar", "qwe"],["qwe","tst","coin"]]' --contract_name='DexStablePool'
 
@@ -24,10 +24,10 @@ npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits
 
 npx locklift test $NO_TRACE --tests test/12-pool-deposit-liquidity.js --roots='["foo", "bar", "qwe"]' --amounts='[100000, 100000, 100000]' --contract_name='DexStablePool'
 npx locklift test $NO_TRACE --tests test/12-pool-deposit-liquidity.js --roots='["qwe", "tst", "coin"]' --amounts='[100000, 100000, 100000]' --contract_name='DexStablePool'
-#
-#npx locklift test $NO_TRACE --tests test/15-dex-account-pool-operations.js --roots='["foo", "bar", "qwe"]' --pool_contract_name='DexStablePool' --account_contract_name='DexAccount'
-#
-#npx locklift test $NO_TRACE --tests test/20-pool-direct-operations.js --roots='["foo", "bar", "qwe"]' --contract_name='DexStablePool'
+
+npx locklift test $NO_TRACE --tests test/15-dex-account-pool-operations.js --roots='["foo", "bar", "qwe"]' --pool_contract_name='DexStablePool' --account_contract_name='DexAccount'
+
+npx locklift test $NO_TRACE --tests test/20-pool-direct-operations.js --roots='["foo", "bar", "qwe"]' --contract_name='DexStablePool'
 
 # cross-pool-exchange test (prepare)
 npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["tst", "FooBarQweLp"],["tst","coin"],["tst","foo"],["coin","foo"]]' --contract_name='DexPair'

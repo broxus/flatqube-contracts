@@ -201,7 +201,7 @@ contract DexRoot is
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } _expectedPairAddress([left_root, right_root]);
+        } _expectedPoolAddress([left_root, right_root]);
     }
 
     function getExpectedPoolAddress(address[] _roots) override external view responsible returns (address) {
@@ -209,7 +209,7 @@ contract DexRoot is
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } _expectedPairAddress(_roots);
+        } _expectedPoolAddress(_roots);
     }
 
     function getManager() external view responsible returns (address) {
@@ -539,7 +539,7 @@ contract DexRoot is
         TvmCell code = _pairCodes[pool_type];
         uint32 version = _pairVersions[pool_type];
 
-        IDexBasePool(_expectedPairAddress([left_root, right_root]))
+        IDexBasePool(_expectedPoolAddress([left_root, right_root]))
             .upgrade{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (code, version, pool_type, send_gas_to);
     }
@@ -569,7 +569,7 @@ contract DexRoot is
         TvmCell code = _poolCodes[pool_type];
         uint32 version = _poolVersions[pool_type];
 
-        IDexBasePool(_expectedPairAddress(roots))
+        IDexBasePool(_expectedPoolAddress(roots))
             .upgrade{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (code, version, pool_type, send_gas_to);
     }
@@ -612,8 +612,7 @@ contract DexRoot is
         address send_gas_to
     ) override external onlyManagerOrOwner {
         require(msg.value >= DexGas.DEPLOY_PAIR_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
-        require(roots.length > 2, DexErrors.WRONG_PAIR);
-        require(_poolCodes.exists(DexPoolTypes.STABLESWAP), DexErrors.PAIR_CODE_EMPTY);
+        require(_poolCodes.exists(DexPoolTypes.STABLE_POOL), DexErrors.PAIR_CODE_EMPTY);
 
         mapping(address => bool) _roots;
         for (uint i = 0; i < roots.length; i++) {
@@ -639,8 +638,8 @@ contract DexRoot is
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED
         }(
-            _poolCodes[DexPoolTypes.STABLESWAP],
-            _poolVersions[DexPoolTypes.STABLESWAP],
+            _poolCodes[DexPoolTypes.STABLE_POOL],
+            _poolVersions[DexPoolTypes.STABLE_POOL],
             _vault,
             send_gas_to
         );
@@ -653,7 +652,7 @@ contract DexRoot is
     ) override external view onlyManagerOrOwner {
         require(
             _params.denominator != 0 &&
-            (_params.pool_numerator + _params.beneficiary_numerator + _params.referral_numerator) < _params.denominator &&
+            (_params.pool_numerator + _params.beneficiary_numerator + _params.referrer_numerator) < _params.denominator &&
             (_params.pool_numerator + _params.beneficiary_numerator) > 0 &&
             ((_params.beneficiary.value != 0 && _params.beneficiary_numerator != 0) ||
             (_params.beneficiary.value == 0 && _params.beneficiary_numerator == 0)),
@@ -668,7 +667,7 @@ contract DexRoot is
             2
         );
 
-        IDexBasePool(_expectedPairAddress(_roots))
+        IDexBasePool(_expectedPoolAddress(_roots))
             .setFeeParams{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_params, _remainingGasTo);
     }
@@ -686,7 +685,7 @@ contract DexRoot is
             2
         );
 
-        IDexStablePair(_expectedPairAddress(_roots))
+        IDexStablePair(_expectedPoolAddress(_roots))
             .setAmplificationCoefficient{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_A, send_gas_to);
     }
@@ -712,7 +711,7 @@ contract DexRoot is
         address[] _roots,
         uint8 _poolType,
         address _remainingGasTo
-    ) override external onlyPair(_roots) {
+    ) override external onlyPool(_roots) {
         tvm.rawReserve(
             math.max(
                 DexGas.ROOT_INITIAL_BALANCE,
@@ -737,7 +736,7 @@ contract DexRoot is
     ) override external view onlyManagerOrOwner {
         tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
 
-        IDexConstantProductPair(_expectedPairAddress([_leftRoot, _rightRoot]))
+        IDexConstantProductPair(_expectedPoolAddress([_leftRoot, _rightRoot]))
             .setOracleOptions{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_options, _remainingGasTo);
     }
@@ -750,7 +749,7 @@ contract DexRoot is
     ) override external view onlyManagerOrOwner {
         tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
 
-        IDexConstantProductPair(_expectedPairAddress([_leftRoot, _rightRoot]))
+        IDexConstantProductPair(_expectedPoolAddress([_leftRoot, _rightRoot]))
             .removeLastNPoints{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_count, _remainingGasTo);
     }

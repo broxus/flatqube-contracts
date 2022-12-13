@@ -37,9 +37,9 @@ const afterRun = async (tx) => {
 
 const displayTx = (_tx) => {
   if(locklift.tracing) {
-    console.log(`txId: ${_tx.id}`);
+    console.log(`txId: ${_tx.id.hash ? _tx.id.hash : _tx.id}`);
   } else {
-    console.log(`txId: ${_tx.transaction.id}`);
+    console.log(`txId: ${_tx.transaction.id.hash ? _tx.transaction.id.hash : _tx.transaction.id}`);
   }
 };
 
@@ -125,6 +125,16 @@ class Migration {
     return contract;
   }
 
+  getAddress(alias) {
+    if (this.migration_log[alias] !== undefined) {
+      return this.migration_log[alias].address;
+    } else {
+      throw new Error(`Contract ${alias} not found in the migration`);
+    }
+
+    return undefined;
+  }
+
   store(contract, alias) {
     this.migration_log = {
       ...this.migration_log,
@@ -157,6 +167,17 @@ class Migration {
       }
     }
     return d;
+  }
+
+  async logGas() {
+    await this.balancesCheckpoint();
+    const diff = await this.balancesLastDiff();
+    if (diff) {
+      logger.log(`### GAS STATS ###`);
+      for (let alias in diff) {
+        logger.log(`${alias}: ${diff[alias].gt(0) ? '+' : ''}${diff[alias].toFixed(9)} EVER`);
+      }
+    }
   }
 }
 
@@ -197,7 +218,7 @@ function logExpectedDepositV2(expected, tokens) {
         `${expected.old_balances[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
     logger.log(`     change: ` +
         `${expected.result_balances[i].minus(expected.old_balances[i]).shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
-   logger.log(`     differences: ` +
+    logger.log(`     differences: ` +
         `${expected.differences[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
     logger.log(`     pool_fees: ` +
         `${expected.pool_fees[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);

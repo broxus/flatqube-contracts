@@ -72,12 +72,16 @@ const loadPoolData = async (pool, contractName) => {
 
     const balances = await pool.call({method: 'getBalances'});
     data.lp_supply = balances.lp_supply.toString();
-    data.balances = balances.balances.map((bal) => bal.toString());
+    if (contractName === 'DexPair') {
+        data.balances = [balances.left_balance.toString(), balances.right_balance.toString()];
+    } else {
+        data.balances = balances.balances.map((bal) => bal.toString());
+    }
 
     const fee_params = await pool.call({method: 'getFeeParams'});
     data.fee_pool = fee_params.pool_numerator.div(fee_params.denominator).times(100).toString();
     data.fee_beneficiary = fee_params.beneficiary_numerator.div(fee_params.denominator).times(100).toString();
-    data.fee_referral = fee_params.referral_numerator.div(fee_params.denominator).times(100).toString();
+    data.fee_referrer = fee_params.referrer_numerator.div(fee_params.denominator).times(100).toString();
     data.fee_beneficiary_address = fee_params.beneficiary;
     data.threshold = fee_params.threshold;
     data.pool_type = (await pool.call({method: 'getPoolType'})).toNumber();
@@ -97,7 +101,11 @@ describe('Test Dex Pool contract upgrade', async function () {
         account = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
         account.afterRun = afterRun;
         dexRoot = migration.load(await locklift.factory.getContract('DexRoot'), 'DexRoot');
-        dexPool = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPool' + poolName);
+        if (migration.exists('DexPool' + poolName)) {
+            dexPool = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPool' + poolName);
+        } else {
+            dexPool = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPair' + poolName);
+        }
         NewVersionContract = await locklift.factory.getContract(options.new_contract_name);
 
         targetVersion = new BigNumber(await dexRoot.call({method: 'getPoolVersion', params: {pool_type: options.pool_type}})).toNumber();
@@ -207,9 +215,9 @@ describe('Test Dex Pool contract upgrade', async function () {
                 .to
                 .equal(oldPoolData.fee_beneficiary_address, 'New fee beneficiary value incorrect');
 
-            expect(newPoolData.fee_referral)
+            expect(newPoolData.fee_referrer)
                 .to
-                .equal(oldPoolData.fee_referral, 'New fee referral value incorrect');
+                .equal(oldPoolData.fee_referrer, 'New fee referrer value incorrect');
         });
     });
 });

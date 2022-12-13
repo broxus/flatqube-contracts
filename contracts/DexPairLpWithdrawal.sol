@@ -138,10 +138,10 @@ contract DexPairLpWithdrawal is
     }
 
     /// @dev Only DEX pair or the DEX vault can call a function with this modifier
-    modifier onlyPairOrVault(address[] _roots) {
-        require(msg.sender == _expectedPairAddress(_roots) ||
+    modifier onlyPoolOrVault(address[] _roots) {
+        require(msg.sender == _expectedPoolAddress(_roots) ||
             _typeToRootAddresses[DexAddressType.VAULT][0].value != 0 &&
-            msg.sender == _typeToRootAddresses[DexAddressType.VAULT][0], DexErrors.NEITHER_PAIR_NOR_VAULT);
+            msg.sender == _typeToRootAddresses[DexAddressType.VAULT][0], DexErrors.NEITHER_POOL_NOR_VAULT);
         _;
     }
 
@@ -365,7 +365,7 @@ contract DexPairLpWithdrawal is
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         address recipient,
-        address referral,
+        address referrer,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure override returns (TvmCell) {
@@ -375,7 +375,7 @@ contract DexPairLpWithdrawal is
             expected_amount,
             recipient,
             address(0),
-            referral,
+            referrer,
             success_payload,
             cancel_payload
         );
@@ -396,7 +396,7 @@ contract DexPairLpWithdrawal is
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         address recipient,
-        address referral,
+        address referrer,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure override returns (TvmCell) {
@@ -405,7 +405,7 @@ contract DexPairLpWithdrawal is
             deploy_wallet_grams,
             expected_amount,
             recipient,
-            referral,
+            referrer,
             success_payload,
             cancel_payload
         );
@@ -427,7 +427,7 @@ contract DexPairLpWithdrawal is
         uint128 expected_left_amount,
         uint128 expected_right_amount,
         address recipient,
-        address referral,
+        address referrer,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure override returns (TvmCell) {
@@ -436,7 +436,7 @@ contract DexPairLpWithdrawal is
             deploy_wallet_grams,
             [expected_left_amount, expected_right_amount],
             recipient,
-            referral,
+            referrer,
             success_payload,
             cancel_payload
         );
@@ -464,7 +464,7 @@ contract DexPairLpWithdrawal is
         uint32[] _nextStepIndices,
         ExchangeStep[] _steps,
         address _recipient,
-        address referral,
+        address referrer,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external view returns (TvmCell) {
@@ -472,7 +472,7 @@ contract DexPairLpWithdrawal is
 
         // Calculate pools' addresses by token roots
         for (uint32 i = 0; i < _steps.length; i++) {
-            pools.push(_expectedPairAddress(_steps[i].roots));
+            pools.push(_expectedPoolAddress(_steps[i].roots));
         }
 
         return PairPayload.buildCrossPairExchangePayloadV2(
@@ -484,7 +484,7 @@ contract DexPairLpWithdrawal is
             _nextStepIndices,
             _steps,
             pools,
-            referral,
+            referrer,
             success_payload,
             cancel_payload
         );
@@ -1425,7 +1425,7 @@ contract DexPairLpWithdrawal is
         TvmCell _successPayload,
         bool _notifyCancel,
         TvmCell _cancelPayload
-    ) override external onlyPairOrVault(_prevPoolTokenRoots) onlyActive notSelfCall {
+    ) override external onlyPoolOrVault(_prevPoolTokenRoots) onlyActive notSelfCall {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         // Decode data from payload
@@ -1440,7 +1440,7 @@ contract DexPairLpWithdrawal is
 
         if (_op == DexOperationTypes.CROSS_PAIR_EXCHANGE && nextSteps.length > 0) {
             // actually poolRoot is a tokenRoot here, so
-            nextSteps[0].poolRoot = _expectedPairAddress([_tokenRoots()[receiveTokenIndex], nextSteps[0].poolRoot]);
+            nextSteps[0].poolRoot = _expectedPoolAddress([_tokenRoots()[receiveTokenIndex], nextSteps[0].poolRoot]);
         }
 
         if (
@@ -1526,7 +1526,7 @@ contract DexPairLpWithdrawal is
                             NextExchangeData nextStep = nextSteps[i];
 
                             uint128 nextPoolAmount = uint128(math.muldiv(amount, nextStep.numerator, denominator));
-                            uint128 currentExtraValue = math.muldiv(nextStep.leaves, extraValue, allLeaves);
+                            uint128 currentExtraValue = math.muldiv(uint128(nextStep.leaves), extraValue, uint128(allLeaves));
 
                             IDexBasePool(nextStep.poolRoot).crossPoolExchange{
                                 value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + currentExtraValue,
@@ -1835,7 +1835,7 @@ contract DexPairLpWithdrawal is
 
                     if (errorCode == 0 && op == DexOperationTypes.CROSS_PAIR_EXCHANGE) {
                         // actually poolRoot is a tokenRoot here, so
-                        nextSteps[0].poolRoot = _expectedPairAddress([_tokenRoots()[receiveTokenIndex], nextSteps[0].poolRoot]);
+                        nextSteps[0].poolRoot = _expectedPoolAddress([_tokenRoots()[receiveTokenIndex], nextSteps[0].poolRoot]);
                     }
 
                     // Calculate exchange result
@@ -1921,7 +1921,7 @@ contract DexPairLpWithdrawal is
                             NextExchangeData nextStep = nextSteps[i];
 
                             uint128 nextPoolAmount = uint128(math.muldiv(amount, nextStep.numerator, denominator));
-                            uint128 currentExtraValue = math.muldiv(nextStep.leaves, extraValue, allLeaves);
+                            uint128 currentExtraValue = math.muldiv(uint128(nextStep.leaves), extraValue, uint128(allLeaves));
 
                             IDexBasePool(nextStep.poolRoot).crossPoolExchange{
                                 value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + currentExtraValue,

@@ -191,7 +191,7 @@ contract DexVault is
         address left_root,
         address right_root,
         address send_gas_to
-    ) public override onlyPair([left_root, right_root]) {
+    ) public override onlyPool([left_root, right_root]) {
         tvm.rawReserve(
             math.max(
                 DexGas.VAULT_INITIAL_BALANCE,
@@ -218,7 +218,7 @@ contract DexVault is
         address pool,
         address[] roots,
         address send_gas_to
-    ) public override onlyPair(roots) {
+    ) public override onlyPool(roots) {
         tvm.rawReserve(math.max(DexGas.VAULT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
         new DexVaultLpTokenPendingV2{
             stateInit: _buildLpTokenPendingInitData(
@@ -341,7 +341,7 @@ contract DexVault is
         address right_root,
         uint32  /* pair_version */,
         address send_gas_to
-    ) external override onlyPair([left_root, right_root]) {
+    ) external override onlyPool([left_root, right_root]) {
         tvm.rawReserve(
             math.max(
                 DexGas.VAULT_INITIAL_BALANCE,
@@ -381,7 +381,7 @@ contract DexVault is
         address[] _roots,
         uint32,
         address _remainingGasTo
-    ) external override onlyPair(_roots) {
+    ) external override onlyPool(_roots) {
         tvm.rawReserve(
             math.max(
                 DexGas.VAULT_INITIAL_BALANCE,
@@ -552,7 +552,7 @@ contract DexVault is
         uint16 errorCode = 0;
 
         uint256 denominator = 0;
-        address prevPool = _expectedPairAddress(roots);
+        address prevPool = _expectedPoolAddress(roots);
         uint32 allNestedNodes = uint32(nextSteps.length);
         uint32 allLeaves = 0;
         uint32 maxNestedNodes = 0;
@@ -585,7 +585,7 @@ contract DexVault is
                 NextExchangeData nextStep = nextSteps[i];
 
                 uint128 nextPoolAmount = uint128(math.muldiv(amount, nextStep.numerator, denominator));
-                uint128 currentExtraValue = math.muldiv(nextStep.leaves, extraValue, allLeaves);
+                uint128 currentExtraValue = math.muldiv(uint128(nextStep.leaves), extraValue, uint128(allLeaves));
 
                 IDexBasePool(nextStep.poolRoot).crossPoolExchange{
                     value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + currentExtraValue,
@@ -662,7 +662,7 @@ contract DexVault is
         address _remainingGasTo,
         address _callbackTo,
         TvmCell _payload
-    ) external override onlyPair(_roots) {
+    ) external override onlyPool(_roots) {
         tvm.rawReserve(
             math.max(
                 DexGas.VAULT_INITIAL_BALANCE,
@@ -682,9 +682,25 @@ contract DexVault is
     function addLpWallet(
         address[] _roots,
         address _lpVaultWallet
-    ) external override onlyPair(_roots) {
+    ) external override onlyPool(_roots) {
         tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
 
         _lpVaultWallets[_lpVaultWallet] = true;
+    }
+
+    function addLpWalletByOwner(
+        address _lpVaultWallet
+    ) external override onlyOwner {
+        tvm.rawReserve(
+            math.max(
+                DexGas.VAULT_INITIAL_BALANCE,
+                address(this).balance - msg.value
+            ),
+            2
+        );
+
+        _lpVaultWallets[_lpVaultWallet] = true;
+
+        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
     }
 }

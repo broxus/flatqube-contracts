@@ -33,8 +33,8 @@ abstract contract DexContractBase  {
         _;
     }
 
-    modifier onlyPair(address[] _roots) {
-        require(msg.sender == _expectedPairAddress(_roots), DexErrors.NOT_PAIR);
+    modifier onlyPool(address[] _roots) {
+        require(msg.sender == _expectedPoolAddress(_roots), DexErrors.NOT_POOL);
         _;
     }
 
@@ -51,7 +51,7 @@ abstract contract DexContractBase  {
         );
     }
 
-    function _expectedPairAddress(address[] _roots) internal view returns (address) {
+    function _expectedPoolAddress(address[] _roots) internal view returns (address) {
         return address(
             tvm.hash(
                 _buildInitData(

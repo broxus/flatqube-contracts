@@ -28,7 +28,8 @@ npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_n
 npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPairPrev' --new_contract_name='DexStablePairPrev' --pool_type=2
 
 npx locklift run $NO_TRACE --script scripts/update-dexRoot.js --old_contract='DexRootPrev' --new_contract='DexRoot'
-npx locklift run $NO_TRACE --script scripts/update-dexVault.js
+npx locklift run $NO_TRACE --script scripts/update-dexVault.js --old_contract='DexVaultPrev' --new_contract='DexVault'
+npx locklift run $NO_TRACE --script scripts/update-dexVault.js --old_contract='DexVault' --new_contract='DexVault'
 
 npx locklift run $NO_TRACE --script scripts/hardcode-manager-address.js
 npx locklift build
@@ -51,7 +52,7 @@ npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["ts
 npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='tst' --right='coin' --account=2 --contract_name='DexPair' --account_contract_name='DexAccount' --ignore_already_added='true'
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'tst' --right_token_id 'coin' --left_amount '10000' --right_amount '10000' --auto_change 'false' --contract_name='DexPair' --account_contract_name='DexAccount'
 
-npx locklift test $DEFAULT_PARAMS --tests test/30-install-pool-code.js --contract_name='DexStablePool' --pool_type=2
+npx locklift test $DEFAULT_PARAMS --tests test/30-install-pool-code.js --contract_name='DexStablePool' --pool_type=3
 
 # test stable pool
 npx locklift run $NO_TRACE --script scripts/5-deploy-test-pool.js --pools='[["foo", "bar", "qwe"],["qwe","tst","coin"]]' --contract_name='DexStablePool'
@@ -108,3 +109,4 @@ npx locklift test $NO_TRACE --tests test/40-split-cross-pool-exchange.js --amoun
 # split-cross-pool-exchange test
 npx locklift test $NO_TRACE --tests test/40-split-cross-pool-exchange.js --amount=1000 --start_token='qwe' --route='[{"outcoming": "bar", "roots": ["foo","bar","qwe"], "numerator": 1, "nextSteps": [{"outcoming": "foo", "roots": ["foo","bar"], "numerator": 1, "nextSteps": [{"outcoming": "tst", "roots": ["tst","foo"], "numerator": 2, "nextSteps": []},{"outcoming": "coin", "roots": ["foo","coin"], "numerator": 3, "nextSteps": [{"outcoming": "tst", "roots": ["qwe", "tst", "coin"], "numerator": 1, "nextSteps": []}]}]}]}]'
 npx locklift test $NO_TRACE --tests test/40-split-cross-pool-exchange.js --amount=1000 --start_token='qwe' --route='[{"outcoming": "tst", "roots": ["qwe", "tst", "coin"], "numerator": 1, "nextSteps": [{"outcoming": "FooBarQweLp", "roots": ["tst","FooBarQweLp"], "numerator": 1, "nextSteps": []},{"outcoming": "coin", "roots": ["tst","coin"], "numerator": 1, "nextSteps": [{"outcoming": "foo", "roots": ["coin","foo"], "numerator": 1, "nextSteps": [{"outcoming": "FooBarQweLp", "roots": ["foo","bar","qwe"], "numerator": 1, "nextSteps": []}]}]}]}]'
+

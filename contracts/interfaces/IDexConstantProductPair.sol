@@ -53,7 +53,7 @@ interface IDexConstantProductPair is
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
         address _recipient,
-        address _referral,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) external pure returns (TvmCell);
@@ -82,7 +82,7 @@ interface IDexConstantProductPair is
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
         address _recipient,
-        address _referral,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) external pure returns (TvmCell);
@@ -113,7 +113,7 @@ interface IDexConstantProductPair is
         uint128 _expectedLeftAmount,
         uint128 _expectedRightAmount,
         address _recipient,
-        address _referral,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) external pure returns (TvmCell);

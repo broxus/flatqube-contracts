@@ -905,7 +905,7 @@ PAIR
 GETGLOB 9
 SWAP
 CALLREF {
-	CALL $_expectedPairAddress_f8dce522_internal_macro$
+	CALL $_expectedPoolAddress_95044983_internal_macro$
 }
 SDEQ
 THROWIFNOT 106
@@ -1044,7 +1044,7 @@ GETGLOB 9
 PUSH S2
 .loc ../contracts/abstract/DexContractBase.sol, 37
 CALLREF {
-	CALL $_expectedPairAddress_f8dce522_internal_macro$
+	CALL $_expectedPoolAddress_95044983_internal_macro$
 }
 SDEQ
 THROWIFNOT 106
@@ -1550,7 +1550,7 @@ PAIR
 GETGLOB 9
 SWAP
 CALLREF {
-	CALL $_expectedPairAddress_f8dce522_internal_macro$
+	CALL $_expectedPoolAddress_95044983_internal_macro$
 }
 SDEQ
 THROWIFNOT 106
@@ -1682,7 +1682,7 @@ GETGLOB 9
 PUSH S3
 .loc ../contracts/abstract/DexContractBase.sol, 37
 CALLREF {
-	CALL $_expectedPairAddress_f8dce522_internal_macro$
+	CALL $_expectedPoolAddress_95044983_internal_macro$
 }
 SDEQ
 THROWIFNOT 106
@@ -2276,7 +2276,7 @@ PUSHINT 0
 PUSH2 S0, S9
 .loc ../contracts/DexVault.sol, 555
 CALLREF {
-	CALL $_expectedPairAddress_f8dce522_internal_macro$
+	CALL $_expectedPoolAddress_95044983_internal_macro$
 }
 .loc ../contracts/DexVault.sol, 556
 PUSH S7
@@ -2763,7 +2763,7 @@ GETGLOB 9
 ROLL 6
 .loc ../contracts/abstract/DexContractBase.sol, 37
 CALLREF {
-	CALL $_expectedPairAddress_f8dce522_internal_macro$
+	CALL $_expectedPoolAddress_95044983_internal_macro$
 }
 SDEQ
 THROWIFNOT 106
@@ -2849,7 +2849,7 @@ GETGLOB 9
 ROT
 .loc ../contracts/abstract/DexContractBase.sol, 37
 CALLREF {
-	CALL $_expectedPairAddress_f8dce522_internal_macro$
+	CALL $_expectedPoolAddress_95044983_internal_macro$
 }
 SDEQ
 THROWIFNOT 106
@@ -2865,6 +2865,73 @@ ROTREV
 PUSHINT 267
 DICTSETB
 SETGLOB 17
+.loc ../contracts/DexVault.sol, 0
+
+.macro addLpWalletByOwner
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexVault.sol, 691
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+ENDS
+.loc ../contracts/DexVault.sol, 0
+CALLREF {
+	CALL $addLpWalletByOwner_a0a5396e_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro addLpWalletByOwner_a0a5396e_internal_macro
+.loc ../contracts/DexVault.sol, 52
+GETGLOB 9
+GETGLOB 14
+SDEQ
+THROWIFNOT 100
+.loc ../contracts/DexVault.sol, 694
+PUSHINT 1000000000
+GETPARAM 7
+FIRST
+DEPTH
+ADDCONST -2
+PICK
+SUB
+UFITS 128
+MAX
+PUSHINT 2
+RAWRESERVE
+.loc ../contracts/DexVault.sol, 702
+GETGLOB 17
+NEWC
+STONE
+ROTREV
+PUSHINT 267
+DICTSETB
+SETGLOB 17
+.loc ../contracts/DexVault.sol, 704
+GETGLOB 14
+NEWC
+STSLICECONST x62_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+SENDRAWMSG
 .loc ../contracts/DexVault.sol, 0
 
 .globl	_expectedAccountAddress_25e7253f_internal
@@ -2889,11 +2956,11 @@ ENDC
 CTOS
 .loc ../contracts/abstract/DexContractBase.sol, 0
 
-.globl	_expectedPairAddress_f8dce522_internal
-.type	_expectedPairAddress_f8dce522_internal, @function
-CALL $_expectedPairAddress_f8dce522_internal_macro$
+.globl	_expectedPoolAddress_95044983_internal
+.type	_expectedPoolAddress_95044983_internal, @function
+CALL $_expectedPoolAddress_95044983_internal_macro$
 
-.macro _expectedPairAddress_f8dce522_internal_macro
+.macro _expectedPoolAddress_95044983_internal_macro
 .loc ../contracts/abstract/DexContractBase.sol, 55
 PUSHINT 2
 SWAP
@@ -3694,7 +3761,7 @@ ENDC
 
 .macro public_function_selector
 DUP
-PUSHINT 1725189621
+PUSHINT 1707282005
 LEQ
 IFJMPREF {
 	DUP
@@ -3756,9 +3823,15 @@ IFJMPREF {
 		}
 	}
 	DUP
-	PUSHINT 1230190815
+	PUSHINT 1202340658
 	LEQ
 	IFJMPREF {
+		DUP
+		PUSHINT 810659459
+		EQUAL
+		IFJMPREF {
+			CALL $addLpWalletByOwner$
+		}
 		DUP
 		PUSHINT 1012617794
 		EQUAL
@@ -3777,17 +3850,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $addLiquidityToken$
 		}
+	}
+	DUP
+	PUSHINT 1707282005
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1230190815
 		EQUAL
 		IFJMPREF {
 			CALL $setTokenFactory$
 		}
-	}
-	DUP
-	PUSHINT 1725189621
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1235162033
 		EQUAL
@@ -3806,12 +3879,6 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $resetTargetGas$
 		}
-		DUP
-		PUSHINT 1725189621
-		EQUAL
-		IFJMPREF {
-			CALL $platform_code$
-		}
 	}
 }
 DUP
@@ -3819,9 +3886,15 @@ PUSHINT 2144984146
 LEQ
 IFJMPREF {
 	DUP
-	PUSHINT 1950458398
+	PUSHINT 1824563769
 	LEQ
 	IFJMPREF {
+		DUP
+		PUSHINT 1725189621
+		EQUAL
+		IFJMPREF {
+			CALL $platform_code$
+		}
 		DUP
 		PUSHINT 1809145905
 		EQUAL
@@ -3840,17 +3913,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $constructor$
 		}
+	}
+	DUP
+	PUSHINT 2057231915
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1950458398
 		EQUAL
 		IFJMPREF {
 			CALL $getRoot$
 		}
-	}
-	DUP
-	PUSHINT 2134851044
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1950465962
 		EQUAL
@@ -3869,18 +3942,23 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $onAcceptTokensMint$
 		}
+	}
+	DUP
+	PUSHINT 2144984146
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 2134851044
 		EQUAL
 		IFJMPREF {
 			CALL $addLiquidityTokenV2$
 		}
-	}
-	DUP
-	PUSHINT 2144984146
-	EQUAL
-	IFJMPREF {
-		CALL $installPlatformOnce$
+		DUP
+		PUSHINT 2144984146
+		EQUAL
+		IFJMPREF {
+			CALL $installPlatformOnce$
+		}
 	}
 }
 

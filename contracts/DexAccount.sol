@@ -224,7 +224,7 @@ contract DexAccount is
     function checkPoolCallback(
         address[] _roots,
         address _lpRoot
-    ) override external onlyPair(_roots) {
+    ) override external onlyPool(_roots) {
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
 
         for (address tokenRoot : _roots) {
@@ -488,7 +488,7 @@ contract DexAccount is
         address _tokenRoot,
         address[] _roots,
         address _remainingGasTo
-    ) override external onlyPair(_roots) {
+    ) override external onlyPool(_roots) {
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
 
         if(_balances.exists(_tokenRoot)) {

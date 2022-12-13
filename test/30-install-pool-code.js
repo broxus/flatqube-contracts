@@ -23,7 +23,7 @@ program.parse(process.argv);
 const options = program.opts();
 
 options.contract_name = options.contract_name || 'DexStablePool';
-options.pool_type = options.pool_type || 2;
+options.pool_type = options.pool_type || 3;
 
 console.log(``);
 console.log(`##############################################################################################`);

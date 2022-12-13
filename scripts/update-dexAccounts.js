@@ -17,7 +17,12 @@ async function main() {
     keyPair
   });
 
-  const accounts_to_force_update = [ migration.load(await locklift.factory.getAccount('Wallet'), 'Account2') ];
+  const accounts_to_force_update = [];
+  await Promise.all([1, 2, 3].filter((key) => migration.exists('DexAccount' + key)).map(async (key) => {
+    console.log(`Add DexAccount ${key} to upgrade`);
+
+    accounts_to_force_update.push(migration.load(await locklift.factory.getAccount('Wallet'), 'Account' + key));
+  }));
 
   await Promise.all(accounts_to_force_update.map(async (account) => {
     console.log(`Upgrading DexAccount contract: owner=${account.address}`);

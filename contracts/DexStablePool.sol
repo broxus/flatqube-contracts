@@ -119,7 +119,7 @@ contract DexStablePool is
     }
 
     function getPoolType() override external view responsible returns (uint8) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } DexPoolTypes.STABLESWAP;
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } DexPoolTypes.STABLE_POOL;
     }
 
     function getVault() override external view responsible returns (address dex_vault) {
@@ -220,7 +220,7 @@ contract DexStablePool is
         uint128 expected_amount,
         address outcoming,
         address recipient,
-        address referral,
+        address referrer,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     )  external pure returns (TvmCell) {
@@ -230,7 +230,7 @@ contract DexStablePool is
             expected_amount,
             recipient,
             outcoming,
-            referral,
+            referrer,
             success_payload,
             cancel_payload
         );
@@ -241,7 +241,7 @@ contract DexStablePool is
         uint128 deploy_wallet_grams,
         uint128 expected_amount,
         address recipient,
-        address referral,
+        address referrer,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure returns (TvmCell) {
@@ -250,7 +250,7 @@ contract DexStablePool is
             deploy_wallet_grams,
             expected_amount,
             recipient,
-            referral,
+            referrer,
             success_payload,
             cancel_payload
         );
@@ -261,7 +261,7 @@ contract DexStablePool is
         uint128 deploy_wallet_grams,
         uint128[] expected_amounts,
         address recipient,
-        address referral,
+        address referrer,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external view returns (TvmCell) {
@@ -272,7 +272,7 @@ contract DexStablePool is
             deploy_wallet_grams,
             expected_amounts,
             recipient,
-            referral,
+            referrer,
             success_payload,
             cancel_payload
         );
@@ -284,7 +284,7 @@ contract DexStablePool is
         uint128 expected_amount,
         address outcoming,
         address recipient,
-        address referral,
+        address referrer,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external pure returns (TvmCell) {
@@ -294,7 +294,7 @@ contract DexStablePool is
             recipient,
             expected_amount,
             outcoming,
-            referral,
+            referrer,
             success_payload,
             cancel_payload
         );
@@ -308,7 +308,7 @@ contract DexStablePool is
         uint32[] nextStepIndices,
         ExchangeStep[] steps,
         address recipient,
-        address referral,
+        address referrer,
         optional(TvmCell) success_payload,
         optional(TvmCell) cancel_payload
     ) external view returns (TvmCell) {
@@ -316,7 +316,7 @@ contract DexStablePool is
 
         // Calculate pools' addresses by token roots
         for (uint32 i = 0; i < steps.length; i++) {
-            pools.push(_expectedPairAddress(steps[i].roots));
+            pools.push(_expectedPoolAddress(steps[i].roots));
         }
 
         return PairPayload.buildCrossPairExchangePayloadV2(
@@ -328,7 +328,7 @@ contract DexStablePool is
             nextStepIndices,
             steps,
             pools,
-            referral,
+            referrer,
             success_payload,
             cancel_payload
         );
@@ -588,7 +588,7 @@ contract DexStablePool is
                             TvmCell exchange_data = abi.encode(
                                 id,
                                 current_version,
-                                DexPoolTypes.STABLESWAP,
+                                DexPoolTypes.STABLE_POOL,
                                 _tokenRoots(),
                                 sender_address,
                                 recipient,
@@ -697,7 +697,7 @@ contract DexStablePool is
                             NextExchangeData next_step = next_steps[i];
 
                             uint128 next_pool_amount = uint128(math.muldiv(operation.amount, next_step.numerator, denominator));
-                            uint128 current_extra_value = math.muldiv(next_step.leaves, extraValue, all_leaves);
+                            uint128 current_extra_value = math.muldiv(uint128(next_step.leaves), extraValue, uint128(all_leaves));
 
                             IDexBasePool(next_step.poolRoot).crossPoolExchange{
                                 value: i == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + current_extra_value,
@@ -706,7 +706,7 @@ contract DexStablePool is
                                 id,
 
                                 current_version,
-                                DexPoolTypes.STABLESWAP,
+                                DexPoolTypes.STABLE_POOL,
 
                                 _tokenRoots(),
 
@@ -1234,7 +1234,7 @@ contract DexStablePool is
         TvmCell success_payload,
         bool notify_cancel,
         TvmCell cancel_payload
-    ) override external onlyPairOrVault(prev_pool_token_roots) {
+    ) override external onlyPoolOrVault(prev_pool_token_roots) {
         require(tokenIndex.exists(spent_token_root) || spent_token_root == lp_root, DexErrors.NOT_TOKEN_ROOT);
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
@@ -1270,7 +1270,7 @@ contract DexStablePool is
                     TvmCell exchange_data = abi.encode(
                         id,
                         current_version,
-                        DexPoolTypes.STABLESWAP,
+                        DexPoolTypes.STABLE_POOL,
                         _tokenRoots(),
                         sender_address,
                         recipient,
@@ -1398,7 +1398,7 @@ contract DexStablePool is
                             NextExchangeData next_step = next_steps[i];
 
                             uint128 next_pool_amount = uint128(math.muldiv(operation.amount, next_step.numerator, denominator));
-                            uint128 current_extra_value = math.muldiv(next_step.leaves, extraValue, all_leaves);
+                            uint128 current_extra_value = math.muldiv(uint128(next_step.leaves), extraValue, uint128(all_leaves));
 
                             IDexBasePool(next_step.poolRoot).crossPoolExchange{
                                 value: i == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + current_extra_value,
@@ -1407,7 +1407,7 @@ contract DexStablePool is
                                 id,
 
                                 current_version,
-                                DexPoolTypes.STABLESWAP,
+                                DexPoolTypes.STABLE_POOL,
 
                                 _tokenRoots(),
 
@@ -1549,8 +1549,8 @@ contract DexStablePool is
         _;
     }
 
-    modifier onlyPairOrVault(address[] _roots) {
-        require(msg.sender == _expectedPairAddress(_roots) || msg.sender == vault, DexErrors.NEITHER_PAIR_NOR_VAULT);
+    modifier onlyPoolOrVault(address[] _roots) {
+        require(msg.sender == _expectedPoolAddress(_roots) || msg.sender == vault, DexErrors.NEITHER_POOL_NOR_VAULT);
         _;
     }
 
@@ -1558,7 +1558,7 @@ contract DexStablePool is
     // Code upgrade
 
     function upgrade(TvmCell code, uint32 new_version, uint8 new_type, address send_gas_to) override external onlyRoot {
-        if (current_version == new_version && new_type == DexPoolTypes.STABLESWAP) {
+        if (current_version == new_version && new_type == DexPoolTypes.STABLE_POOL) {
             tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
             send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS, bounce: false });
         } else {
@@ -1574,7 +1574,7 @@ contract DexStablePool is
             builder.store(current_version);
             builder.store(new_version);
             builder.store(send_gas_to);
-            builder.store(DexPoolTypes.STABLESWAP);
+            builder.store(DexPoolTypes.STABLE_POOL);
 
             builder.store(platform_code);  // ref1 = platform_code
 
@@ -1612,13 +1612,25 @@ contract DexStablePool is
 
         address send_gas_to;
         uint32 old_version;
+        uint8 old_pool_type;
 
         (root, vault, old_version, current_version, send_gas_to) = s.decode(address, address, uint32, uint32, address);
+
+        if (s.bits() >= 8) {
+            old_pool_type = s.decode(uint8);
+        }
 
         platform_code = s.loadRef(); // ref 1
         TvmCell tokens_data_cell = s.loadRef(); // ref 2
 
-        address[] roots = abi.decode(tokens_data_cell, address[]);
+        address[] roots;
+        TvmSlice tokens_data_slice = tokens_data_cell.toSlice();
+        if (tokens_data_slice.bits() == 33) {
+            roots = abi.decode(tokens_data_cell, address[]);
+        } else {
+            (address left_root, address right_root) = tokens_data_slice.decode(address, address);
+            roots = [left_root, right_root];
+        }
         N_COINS = uint8(roots.length);
 
         for (uint8 i = 0; i < N_COINS; i++) {
@@ -1639,30 +1651,8 @@ contract DexStablePool is
                 roots,
                 send_gas_to
             );
-        } else {
-            TvmCell otherData = s.loadRef(); // ref 3
-
-            (
-                lp_root, lp_wallet, lp_vault_wallet, lp_supply,
-                fee,
-                tokenData,
-                A, PRECISION
-            ) = abi.decode(otherData, (
-                    address, address, address, uint128,
-                    FeeParams,
-                    PoolTokenData[],
-                    AmplificationCoefficient,
-                    uint256
-                ));
-
-            bool allTokensIsInit = true;
-            for (uint8 i = 0; i < N_COINS; i++) {
-                if (!tokenData[i].initialized) {
-                    allTokensIsInit = false;
-                    break;
-                }
-            }
-            active = lp_wallet.value != 0 && lp_vault_wallet.value != 0 && allTokensIsInit;
+        } else if (old_pool_type == DexPoolTypes.CONSTANT_PRODUCT) {
+            // todo
         }
 
         send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS, bounce: false });
@@ -1777,7 +1767,7 @@ contract DexStablePool is
             r.push(t.root);
         }
 
-        IDexRoot(root).onPoolCreated{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(r, DexPoolTypes.STABLESWAP, send_gas_to);
+        IDexRoot(root).onPoolCreated{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(r, DexPoolTypes.STABLE_POOL, send_gas_to);
     }
 
     function liquidityTokenRootNotDeployed(address /*lp_root_*/, address send_gas_to) override external onlyVault {

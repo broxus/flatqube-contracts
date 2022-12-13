@@ -104,6 +104,10 @@ interface IDexVault {
         address _lpVaultWallet
     ) external;
 
+    function addLpWalletByOwner(
+        address _lpVaultWallet
+    ) external;
+
     function transferOwner(address new_owner) external;
     function acceptOwner() external;
 

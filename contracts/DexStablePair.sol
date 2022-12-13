@@ -224,7 +224,7 @@ contract DexStablePair is
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
         address _recipient,
-        address _referral,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) external pure returns (TvmCell) {
@@ -234,7 +234,7 @@ contract DexStablePair is
             _expectedAmount,
             _recipient,
             address(0),
-            _referral,
+            _referrer,
             _successPayload,
             _cancelPayload
         );
@@ -255,7 +255,7 @@ contract DexStablePair is
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
         address _recipient,
-        address _referral,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) external pure returns (TvmCell) {
@@ -264,7 +264,7 @@ contract DexStablePair is
             _deployWalletGrams,
             _expectedAmount,
             _recipient,
-            _referral,
+            _referrer,
             _successPayload,
             _cancelPayload
         );
@@ -286,7 +286,7 @@ contract DexStablePair is
         uint128 _expectedLeftAmount,
         uint128 _expectedRightAmount,
         address _recipient,
-        address _referral,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) external pure returns (TvmCell) {
@@ -295,7 +295,7 @@ contract DexStablePair is
             _deployWalletGrams,
             [_expectedLeftAmount, _expectedRightAmount],
             _recipient,
-            _referral,
+            _referrer,
             _successPayload,
             _cancelPayload
         );
@@ -323,7 +323,7 @@ contract DexStablePair is
         uint32[] _nextStepIndices,
         ExchangeStep[] _steps,
         address _recipient,
-        address _referral,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) external view returns (TvmCell) {
@@ -331,7 +331,7 @@ contract DexStablePair is
 
         // Calculate pools' addresses by token roots
         for (uint32 i = 0; i < _steps.length; i++) {
-            pools.push(_expectedPairAddress(_steps[i].roots));
+            pools.push(_expectedPoolAddress(_steps[i].roots));
         }
 
         return PairPayload.buildCrossPairExchangePayloadV2(
@@ -343,7 +343,7 @@ contract DexStablePair is
             _nextStepIndices,
             _steps,
             pools,
-            _referral,
+            _referrer,
             _successPayload,
             _cancelPayload
         );
@@ -548,7 +548,7 @@ contract DexStablePair is
 
                     if (errorCode == 0 && op == DexOperationTypes.CROSS_PAIR_EXCHANGE) {
                         // actually poolRoot is a tokenRoot here, so
-                        next_steps[0].poolRoot = _expectedPairAddress([tokenData[j].root, next_steps[0].poolRoot]);
+                        next_steps[0].poolRoot = _expectedPoolAddress([tokenData[j].root, next_steps[0].poolRoot]);
                     }
 
                     optional(ExpectedExchangeResult) dy_result_opt = _get_dy(i, j, tokens_amount);
@@ -639,7 +639,7 @@ contract DexStablePair is
                             NextExchangeData next_step = next_steps[idx];
 
                             uint128 next_pool_amount = uint128(math.muldiv(dy_result.amount, next_step.numerator, denominator));
-                            uint128 current_extra_value = math.muldiv(next_step.leaves, extraValue, all_leaves);
+                            uint128 current_extra_value = math.muldiv(uint128(next_step.leaves), extraValue, uint128(all_leaves));
 
                             IDexBasePool(next_step.poolRoot).crossPoolExchange{
                                 value: idx == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + current_extra_value,
@@ -1093,7 +1093,7 @@ contract DexStablePair is
         TvmCell success_payload,
         bool notify_cancel,
         TvmCell cancel_payload
-    ) override external onlyPairOrVault(prev_pool_token_roots) {
+    ) override external onlyPoolOrVault(prev_pool_token_roots) {
         require(tokenIndex.exists(spent_token_root), DexErrors.NOT_TOKEN_ROOT);
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
@@ -1120,7 +1120,7 @@ contract DexStablePair is
 
         if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE && next_steps.length > 0) {
             // actually poolRoot is a tokenRoot here, so
-            next_steps[0].poolRoot = _expectedPairAddress([_tokenRoots()[j], next_steps[0].poolRoot]);
+            next_steps[0].poolRoot = _expectedPoolAddress([_tokenRoots()[j], next_steps[0].poolRoot]);
         }
 
         if (errorCode == 0) {
@@ -1211,7 +1211,7 @@ contract DexStablePair is
                         NextExchangeData next_step = next_steps[idx];
 
                         uint128 next_pool_amount = uint128(math.muldiv(dy_result.amount, next_step.numerator, denominator));
-                        uint128 current_extra_value = math.muldiv(next_step.leaves, extraValue, all_leaves);
+                        uint128 current_extra_value = math.muldiv(uint128(next_step.leaves), extraValue, uint128(all_leaves));
 
                         IDexBasePool(next_step.poolRoot).crossPoolExchange{
                             value: idx == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + current_extra_value,
@@ -1368,8 +1368,8 @@ contract DexStablePair is
         _;
     }
 
-    modifier onlyPairOrVault(address[] _roots) {
-        require(msg.sender == _expectedPairAddress(_roots) || msg.sender == vault, DexErrors.NEITHER_PAIR_NOR_VAULT);
+    modifier onlyPoolOrVault(address[] _roots) {
+        require(msg.sender == _expectedPoolAddress(_roots) || msg.sender == vault, DexErrors.NEITHER_POOL_NOR_VAULT);
         _;
     }
 

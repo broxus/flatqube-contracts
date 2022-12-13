@@ -14,8 +14,8 @@ interface IFeeParams {
         /// @dev Numerator for beneficiary's fees
         uint128 beneficiary_numerator;
 
-        /// @dev Numerator for referral's fees
-        uint128 referral_numerator;
+        /// @dev Numerator for referrer's fees
+        uint128 referrer_numerator;
 
         /// @dev Receiver of accumulated beneficiary fees
         address beneficiary;
