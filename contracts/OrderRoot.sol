@@ -354,6 +354,11 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 _deployer,
                 callbackId
             ) = sl.decode(address, address, uint32, uint32, address, uint64);
+            TvmCell fee_payload = sl.loadRef();
+            TvmSlice feeSlice = fee_payload.toSlice();
+            (uint128 numerator_, uint128 denominator_) = feeSlice.decode(uint128, uint128);
+            fee.numerator = numerator_;
+            fee.denominator = denominator_;
         } else {
             (
                 _factory,

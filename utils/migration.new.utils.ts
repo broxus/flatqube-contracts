@@ -388,13 +388,14 @@ export const orderRootMigration = async (
     'Deploying OrderRoot...',
   );
 
-  await
+  await locklift.tracing.trace(
       orderFactory.methods.createOrderRoot(
           {token: token.address, callbackId: callbackId}
       ).send({
         amount: locklift.utils.toNano(20),
         from: account.address
       }
+  )
   )
 
 

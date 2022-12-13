@@ -257,7 +257,8 @@ contract OrderFactory is IOrderFactory {
 			orderRootCode,
 			versionOrderRoot,
 			msg.sender,
-			callbackId
+			callbackId,
+			fee
 		);
 	}
 

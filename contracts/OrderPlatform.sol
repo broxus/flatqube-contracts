@@ -5,20 +5,25 @@ pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
+import "./structures/IOrderFeeParams.sol";
 
-contract OrderPlatform {
+contract OrderPlatform is IOrderFeeParams{
 	address static factory;
 	address static spentToken;
 	TvmCell static params;
+
+
 
 	constructor(
 		TvmCell code,
 		uint32 version,
 		address sendGasTo,
-		uint64 callbackId
+		uint64 callbackId,
+		OrderFeeParams fee_
+
 	) public {
 		if (msg.sender.value != 0 && msg.sender == factory) {
-			initialize(code, version, sendGasTo, callbackId);
+			initialize(code, version, sendGasTo, callbackId, fee_);
 		} else {
 			sendGasTo.transfer({
 				value: 0,
@@ -32,7 +37,8 @@ contract OrderPlatform {
 		TvmCell code,
 		uint32 version,
 		address sendGasTo,
-		uint64  callbackId
+		uint64  callbackId,
+		OrderFeeParams fee_
 	) private {
 
 		TvmBuilder builder;
@@ -43,6 +49,11 @@ contract OrderPlatform {
 		builder.store(sendGasTo);
 		builder.store(params);
 		builder.store(callbackId);
+		TvmBuilder feeBuilder;
+		feeBuilder.store(fee_.numerator);
+		feeBuilder.store(fee_.denominator);
+		builder.storeRef(feeBuilder);
+
 
 		
 		tvm.setcode(code);

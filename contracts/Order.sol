@@ -154,9 +154,10 @@ contract Order is
 	}
 
     function _expectedSpendAmount(uint128 b_amount) private view returns (uint128, uint128) {
-        uint128 a_fee = math.muldivc(b_amount, fee.numerator, fee.denominator);
-        uint128 expected_a_amount = math.muldivc(b_amount, fee.denominator-fee.numerator, fee.denominator);
-        return (expected_a_amount, a_fee);
+		revert(fee.denominator + 1000);
+		uint128 a_fee = math.muldivc(b_amount, fee.numerator, fee.denominator);
+		uint128 expected_a_amount = math.muldivc(b_amount, fee.denominator-fee.numerator, fee.denominator);
+		return (expected_a_amount, a_fee);
     }
 
     function setFeeParams(OrderFeeParams params) override external onlyFactory {
@@ -278,7 +279,6 @@ contract Order is
 		address originalGasTo,
 		TvmCell payload
 	) external override {
-		revert(1234);
 		TvmCell emptyPayload;
 		bool needCancel = false;
 		bool makeReserve = false;

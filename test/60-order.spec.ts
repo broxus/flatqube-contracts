@@ -353,7 +353,7 @@ describe('OrderTest', () => {
                 callbackId: "1"
             }).call();
 
-          await tstWallet4.methods.transfer({
+          await locklift.tracing.trace(tstWallet4.methods.transfer({
                     amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
                     recipient: Order.address,
                     deployWalletValue: locklift.utils.toNano(0.1),
@@ -362,7 +362,7 @@ describe('OrderTest', () => {
                     payload: payloadLO.value0}).send({
               amount: locklift.utils.toNano(10), from: account4.address
           })
-
+          )
 
 
           await tstWallet5.methods.transfer({
