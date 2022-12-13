@@ -9,15 +9,18 @@ declare global {
   const locklift: import('locklift').Locklift<FactorySource>;
 }
 
-const LOCAL_NETWORK_ENDPOINT = 'http://0.0.0.0/graphql';
+const LOCAL_NETWORK_ENDPOINT = 'http://localhost/graphql';
 
 // const LOCAL_NETWORK_ENDPOINT =
 //   'https://evernode-no-limits.fairyfromalfeya.com/graphql';
 
 const config: LockliftConfig = {
   compiler: {
-    version: '0.61.2',
+    version: "0.62.0",
     externalContracts: {
+      'precompiled': [
+          'DexPlatform'
+      ],
       'node_modules/tip3/build': [
         'TokenRootUpgradeable',
         'TokenWalletUpgradeable',
