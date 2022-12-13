@@ -20,4 +20,4 @@ npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits
 npx locklift test $NO_TRACE --tests test/12-pool-deposit-liquidity.js --roots='["foo", "bar"]' --amounts='[100000, 100000]' --contract_name='DexStablePool'
 
 # upgrade to pair
-npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --roots='["foo", "bar"]' --old_contract_name='DexStablePool' --new_contract_name='DexPair' --pool_type=1
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexStablePool' --new_contract_name='DexPair' --pool_type=1

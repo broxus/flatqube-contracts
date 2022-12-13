@@ -126,7 +126,7 @@ async function main() {
 
   console.log(`DexRoot: installing DexStablePool code...`);
   //@ts-ignore
-  tx = await dexRoot.methods.installOrUpdatePoolCode({code: DexStablePool.code, pool_type: 2}).send({
+  tx = await dexRoot.methods.installOrUpdatePoolCode({code: DexStablePool.code, pool_type: 3}).send({
     from: account.address,
     amount: toNano(2)
   });
