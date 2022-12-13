@@ -17,6 +17,8 @@ contract NewDexRoot {
     uint32 account_version;
     mapping(uint8 => TvmCell) pair_codes;
     mapping(uint8 => uint32) pair_versions;
+    mapping(uint8 => TvmCell) pool_codes;
+    mapping(uint8 => uint32) pool_versions;
 
 
     bool active;
@@ -87,6 +89,8 @@ contract NewDexRoot {
             account_version,
             pair_codes,
             pair_versions,
+            pool_codes,
+            pool_versions,
             owner,
             vault,
             pending_owner
@@ -96,6 +100,8 @@ contract NewDexRoot {
             uint32,
             mapping(uint8 => TvmCell),
             mapping(uint8 => uint32),
+    mapping(uint8 => TvmCell),
+        mapping(uint8 => uint32),
             address,
             address,
             address

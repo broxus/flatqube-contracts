@@ -29,7 +29,6 @@ npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right
 
 npx locklift run $NO_TRACE --script scripts/update-dexRoot.js --old_contract='DexRootPrev' --new_contract='DexRoot'
 npx locklift run $NO_TRACE --script scripts/update-dexVault.js --old_contract='DexVaultPrev' --new_contract='DexVault'
-npx locklift run $NO_TRACE --script scripts/update-dexVault.js --old_contract='DexVault' --new_contract='DexVault'
 
 npx locklift run $NO_TRACE --script scripts/hardcode-manager-address.js
 npx locklift build
