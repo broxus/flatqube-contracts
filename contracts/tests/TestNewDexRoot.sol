@@ -100,8 +100,8 @@ contract NewDexRoot {
             uint32,
             mapping(uint8 => TvmCell),
             mapping(uint8 => uint32),
-    mapping(uint8 => TvmCell),
-        mapping(uint8 => uint32),
+            mapping(uint8 => TvmCell),
+            mapping(uint8 => uint32),
             address,
             address,
             address

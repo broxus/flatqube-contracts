@@ -9,8 +9,12 @@ import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "../libraries/DexErrors.sol";
 import "../libraries/DexGas.sol";
 import "../libraries/FixedPoint128.sol";
+import "../libraries/DexAddressType.sol";
+import "../libraries/DexReserveType.sol";
+import "../libraries/DexPoolTypes.sol";
 
 import "../interfaces/IDexPair.sol";
+
 import "../structures/ITokenOperationStructure.sol";
 import "../structures/IDexPairBalances.sol";
 import "../structures/IPoint.sol";
@@ -82,6 +86,10 @@ contract TestNewDexPair is
 
     function getVersion() external view responsible returns (uint32 version) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } current_version;
+    }
+
+    function getPoolType() external pure responsible returns (uint8) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } DexPoolTypes.CONSTANT_PRODUCT;
     }
 
     function getVault() external view responsible returns (address dex_vault) {
@@ -173,31 +181,39 @@ contract TestNewDexPair is
 
         platform_code = s.loadRef(); // ref 1
 
-        TvmSlice tokens_data_slice =  s.loadRefAsSlice(); // ref 2
+        TvmCell otherDataCell = s.loadRef();    // ref 2
 
-        (left_root, right_root) = tokens_data_slice.decode(address, address);
-
-        TvmCell otherDataCell = s.loadRef();    // ref 3
+        mapping(uint8 => uint128[]) type_to_reserves;
+        mapping(uint8 => address[]) type_to_root_addresses;
+        mapping(uint8 => address[]) type_to_wallet_addresses;
 
         (
-            lp_root,
-            lp_wallet,
-            lp_supply,
-
             fee,
-            left_wallet,
-            vault_left_wallet,
-            left_balance,
-
-            right_wallet,
-            vault_right_wallet,
-            right_balance
+            type_to_reserves,
+            type_to_root_addresses,
+            type_to_wallet_addresses
         ) = abi.decode(otherDataCell, (
-            address, address, uint128,
             FeeParams,
-            address, address, uint128,
-            address, address, uint128
+            mapping(uint8 => uint128[]),
+            mapping(uint8 => address[]),
+            mapping(uint8 => address[])
         ));
+
+        lp_root = type_to_root_addresses[DexAddressType.LP][0];
+        lp_wallet = type_to_wallet_addresses[DexAddressType.LP][0];
+        lp_supply = type_to_reserves[DexReserveType.LP][0];
+
+        left_root = type_to_root_addresses[DexAddressType.RESERVE][0];
+        right_root = type_to_root_addresses[DexAddressType.RESERVE][1];
+
+        left_wallet = type_to_wallet_addresses[DexAddressType.RESERVE][0];
+        right_wallet = type_to_wallet_addresses[DexAddressType.RESERVE][1];
+
+        vault_left_wallet = type_to_wallet_addresses[DexAddressType.VAULT][0];
+        vault_right_wallet = type_to_wallet_addresses[DexAddressType.VAULT][1];
+
+        left_balance = type_to_reserves[DexReserveType.POOL][0];
+        right_balance = type_to_reserves[DexReserveType.POOL][1];
 
         TvmSlice oracleDataSlice = s.loadRefAsSlice();  // ref 4
 
