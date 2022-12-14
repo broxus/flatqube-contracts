@@ -63,7 +63,6 @@ contract OrderFactory is IOrderFactory {
 			OrderErrors.NOT_LIMIT_ORDER_ROOT
 		);
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-		
 		emit CreateOrderRoot(_orderRoot, token);
 		
 		sendGasTo.transfer({
@@ -216,7 +215,7 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
-	function createOrderRoot(address token) override external view {
+	function createOrderRoot(address token, uint64 callbackId) override external view {
 		require(
 			msg.value >= OrderGas.DEPLOY_ORDERS_ROOT,
 			OrderErrors.VALUE_TOO_LOW
@@ -230,7 +229,8 @@ contract OrderFactory is IOrderFactory {
 		}(
 			orderRootCode,
 			versionOrderRoot,
-			msg.sender
+			msg.sender,
+			callbackId
 		);
 	}
 
@@ -241,12 +241,7 @@ contract OrderFactory is IOrderFactory {
 		responsible
 		returns (address)
 	{
-		return 
-		{
-			value: 0, 
-			bounce: false, 
-			flag: MsgFlag.REMAINING_GAS 
-		} expectedAddressOrderRoot(token);
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } expectedAddressOrderRoot(token);
 	}
 
 
@@ -260,6 +255,7 @@ contract OrderFactory is IOrderFactory {
 		TvmBuilder salt;
 		salt.store(owner);
 		salt.store(token);
+
 		return tvm.setCodeSalt(orderPlatformCode, salt.toCell());
 	}
 

@@ -1,4 +1,4 @@
-.version sol 0.57.1
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -40,8 +40,8 @@ GETGLOB 16
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHSLICE x41dcd65000000000000000000000000000002f05093af21cb55f_
-STSLICER
+PUSHINT 52918595092914533405583360223618677092838172419119016450087599
+STUR 207
 ENDC
 PUSHINT 1
 SENDRAWMSG
@@ -50,8 +50,8 @@ GETGLOB 17
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHSLICE x41dcd65000000000000000000000000000002f05093af21cb55f_
-STSLICER
+PUSHINT 52918595092914533405583360223618677092838172419119016450087599
+STUR 207
 ENDC
 PUSHINT 1
 SENDRAWMSG
@@ -79,18 +79,18 @@ IFREF {
 ENDS
 .loc ../contracts/DexVaultLpTokenPending.sol, 0
 CALLREF {
-	CALL $terminate_internal_macro$
+	CALL $terminate_0c08bf88_internal_macro$
 }
 IFREF {
 	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
-.globl	terminate_internal
-.type	terminate_internal, @function
-CALL $terminate_internal_macro$
+.globl	terminate_0c08bf88_internal
+.type	terminate_0c08bf88_internal, @function
+CALL $terminate_0c08bf88_internal_macro$
 
-.macro terminate_internal_macro
+.macro terminate_0c08bf88_internal_macro
 .loc ../contracts/DexVaultLpTokenPending.sol, 80
 GETGLOB 9
 GETGLOB 21
@@ -134,7 +134,7 @@ STBREFR
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 ADDCONST 32
 UFITS 8
 SENDRAWMSG
@@ -154,7 +154,7 @@ LDREF
 ENDS
 .loc ../contracts/DexVaultLpTokenPending.sol, 0
 CALLREF {
-	CALL $onSymbol_internal_macro$
+	CALL $onSymbol_718b01eb_internal_macro$
 }
 DROP
 CALLREF {
@@ -162,14 +162,14 @@ CALLREF {
 }
 THROW 0
 
-.globl	onSymbol_internal
-.type	onSymbol_internal, @function
-CALL $onSymbol_internal_macro$
+.globl	onSymbol_718b01eb_internal
+.type	onSymbol_718b01eb_internal, @function
+CALL $onSymbol_718b01eb_internal_macro$
 
-.macro onSymbol_internal_macro
+.macro onSymbol_718b01eb_internal_macro
 .loc ../contracts/DexVaultLpTokenPending.sol, 57
 CALLREF {
-	CALL $isSenderExpectedToken_internal_macro$
+	CALL $isSenderExpectedToken_2fda6d0c_internal_macro$
 }
 THROWIFNOT 126
 .loc ../contracts/DexVaultLpTokenPending.sol, 86
@@ -190,14 +190,9 @@ PUSHCONT {
 	SETGLOB 25
 	.loc ../contracts/DexVaultLpTokenPending.sol, 90
 	GETGLOB 27
-	PUSHCONT {
-		.loc ../contracts/DexVaultLpTokenPending.sol, 91
-		CALLREF {
-			CALL $createLpTokenAndWallets_internal_macro$
-		}
-		.loc ../contracts/DexVaultLpTokenPending.sol, 0
+	IFREF {
+		CALL $createLpTokenAndWallets_67630af4_internal_macro$
 	}
-	IF
 }
 PUSHCONT {
 	GETGLOB 9
@@ -212,14 +207,9 @@ PUSHCONT {
 		SETGLOB 27
 		.loc ../contracts/DexVaultLpTokenPending.sol, 96
 		GETGLOB 25
-		PUSHCONT {
-			.loc ../contracts/DexVaultLpTokenPending.sol, 97
-			CALLREF {
-				CALL $createLpTokenAndWallets_internal_macro$
-			}
-			.loc ../contracts/DexVaultLpTokenPending.sol, 0
+		IFREF {
+			CALL $createLpTokenAndWallets_67630af4_internal_macro$
 		}
-		IF
 		.loc ../contracts/DexVaultLpTokenPending.sol, 0
 	}
 	IF
@@ -265,7 +255,7 @@ PUSHCONT {
 	STBREFR
 	STBREFR
 	ENDC
-	PUSHINT 128
+	PUSHPOW2 7
 	ADDCONST 32
 	UFITS 8
 	SENDRAWMSG
@@ -299,7 +289,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexVaultLpTokenPending.sol, 0
 CALLREF {
-	CALL $onTokenRootDeployed_internal_macro$
+	CALL $onTokenRootDeployed_82e1526b_internal_macro$
 }
 DROP
 CALLREF {
@@ -307,11 +297,11 @@ CALLREF {
 }
 THROW 0
 
-.globl	onTokenRootDeployed_internal
-.type	onTokenRootDeployed_internal, @function
-CALL $onTokenRootDeployed_internal_macro$
+.globl	onTokenRootDeployed_82e1526b_internal
+.type	onTokenRootDeployed_82e1526b_internal, @function
+CALL $onTokenRootDeployed_82e1526b_internal_macro$
 
-.macro onTokenRootDeployed_internal_macro
+.macro onTokenRootDeployed_82e1526b_internal_macro
 .loc ../contracts/DexVaultLpTokenPending.sol, 52
 GETGLOB 9
 GETGLOB 18
@@ -324,7 +314,7 @@ SETGLOB 19
 DUP
 GETGLOB 14
 CALLREF {
-	CALL $deployEmptyWallet_internal_macro$
+	CALL $deployEmptyWallet_9afd2adf_internal_macro$
 }
 .loc ../contracts/DexVaultLpTokenPending.sol, 112
 PUSHINT 0
@@ -351,8 +341,8 @@ ROLL 3
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHSLICE x41dcd6500000000000000000000000000003_
-STSLICER
+PUSHINT 2868722788230934574387753789225109188247553
+STUR 143
 ROLLREV 3
 NEWC
 STSLICECONST x1df385c6
@@ -399,7 +389,7 @@ LDREF
 ENDS
 .loc ../contracts/DexVaultLpTokenPending.sol, 0
 CALLREF {
-	CALL $onTransferTokenRootOwnership_internal_macro$
+	CALL $onTransferTokenRootOwnership_4fb0aa5d_internal_macro$
 }
 DROP
 CALLREF {
@@ -407,7 +397,7 @@ CALLREF {
 }
 THROW 0
 
-.macro onTransferTokenRootOwnership_internal_macro
+.macro onTransferTokenRootOwnership_4fb0aa5d_internal_macro
 .loc ../contracts/DexVaultLpTokenPending.sol, 125
 DROP2
 GETGLOB 9
@@ -490,47 +480,47 @@ STBREFR
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 ADDCONST 32
 UFITS 8
 SENDRAWMSG
 .loc ../contracts/DexVaultLpTokenPending.sol, 0
 
-.globl	createLpTokenAndWallets_internal
-.type	createLpTokenAndWallets_internal, @function
-CALL $createLpTokenAndWallets_internal_macro$
+.globl	createLpTokenAndWallets_67630af4_internal
+.type	createLpTokenAndWallets_67630af4_internal, @function
+CALL $createLpTokenAndWallets_67630af4_internal_macro$
 
-.macro createLpTokenAndWallets_internal_macro
+.macro createLpTokenAndWallets_67630af4_internal_macro
 .loc ../contracts/DexVaultLpTokenPending.sol, 147
 GETGLOB 24
 GETGLOB 26
 CALLREF {
-	CALL $lpTokenSymbol_internal_macro$
+	CALL $lpTokenSymbol_83613dc8_internal_macro$
 }
 .loc ../contracts/DexVaultLpTokenPending.sol, 148
 GETGLOB 12
 CALLREF {
-	CALL $deployLpToken_internal_macro$
+	CALL $deployLpToken_7356b9ee_internal_macro$
 }
 .loc ../contracts/DexVaultLpTokenPending.sol, 149
 GETGLOB 16
 GETGLOB 14
 CALLREF {
-	CALL $deployEmptyWallet_internal_macro$
+	CALL $deployEmptyWallet_9afd2adf_internal_macro$
 }
 .loc ../contracts/DexVaultLpTokenPending.sol, 150
 GETGLOB 17
 GETGLOB 14
 CALLREF {
-	CALL $deployEmptyWallet_internal_macro$
+	CALL $deployEmptyWallet_9afd2adf_internal_macro$
 }
 .loc ../contracts/DexVaultLpTokenPending.sol, 0
 
-.globl	deployLpToken_internal
-.type	deployLpToken_internal, @function
-CALL $deployLpToken_internal_macro$
+.globl	deployLpToken_7356b9ee_internal
+.type	deployLpToken_7356b9ee_internal, @function
+CALL $deployLpToken_7356b9ee_internal_macro$
 
-.macro deployLpToken_internal_macro
+.macro deployLpToken_7356b9ee_internal_macro
 .loc ../contracts/DexVaultLpTokenPending.sol, 154
 GETGLOB 23
 INC
@@ -553,8 +543,8 @@ GETGLOB 18
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHSLICE x4b2d05e00000000000000000000000000003_
-STSLICER
+PUSHINT 3274370980303967982866698814945429188247553
+STUR 143
 ROLLREV 11
 NEWC
 STSLICECONST x10c81a7d
@@ -578,11 +568,11 @@ PUSHINT 1
 SENDRAWMSG
 .loc ../contracts/DexVaultLpTokenPending.sol, 0
 
-.globl	deployEmptyWallet_internal
-.type	deployEmptyWallet_internal, @function
-CALL $deployEmptyWallet_internal_macro$
+.globl	deployEmptyWallet_9afd2adf_internal
+.type	deployEmptyWallet_9afd2adf_internal, @function
+CALL $deployEmptyWallet_9afd2adf_internal_macro$
 
-.macro deployEmptyWallet_internal_macro
+.macro deployEmptyWallet_9afd2adf_internal_macro
 .loc ../contracts/DexVaultLpTokenPending.sol, 174
 GETGLOB 23
 INC
@@ -594,8 +584,8 @@ XCHG S2
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHSLICE x41dcd6500000000000000000000000000003_
-STSLICER
+PUSHINT 2868722788230934574387753789225109188247553
+STUR 143
 ROTREV
 PUSHSLICE x31edd4c74575558e
 NEWC
@@ -629,7 +619,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexVaultLpTokenPending.sol, 0
 CALLREF {
-	CALL $onDeployWallet_internal_macro$
+	CALL $onDeployWallet_65bf83eb_internal_macro$
 }
 DROP
 CALLREF {
@@ -637,11 +627,11 @@ CALLREF {
 }
 THROW 0
 
-.macro onDeployWallet_internal_macro
+.macro onDeployWallet_65bf83eb_internal_macro
 .loc ../contracts/DexVaultLpTokenPending.sol, 186
 DROP
 CALLREF {
-	CALL $isSenderExpectedToken_internal_macro$
+	CALL $isSenderExpectedToken_2fda6d0c_internal_macro$
 }
 GETGLOB 9
 GETGLOB 19
@@ -655,11 +645,11 @@ UFITS 8
 SETGLOB 23
 .loc ../contracts/DexVaultLpTokenPending.sol, 0
 
-.globl	lpTokenSymbol_internal
-.type	lpTokenSymbol_internal, @function
-CALL $lpTokenSymbol_internal_macro$
+.globl	lpTokenSymbol_83613dc8_internal
+.type	lpTokenSymbol_83613dc8_internal, @function
+CALL $lpTokenSymbol_83613dc8_internal_macro$
 
-.macro lpTokenSymbol_internal_macro
+.macro lpTokenSymbol_83613dc8_internal_macro
 .loc ../contracts/DexVaultLpTokenPending.sol, 191
 GETGLOB 10
 .loc ../contracts/DexVaultLpTokenPending.sol, 192
@@ -679,11 +669,11 @@ CALLREF {
 }
 .loc ../contracts/DexVaultLpTokenPending.sol, 0
 
-.globl	isSenderExpectedToken_internal
-.type	isSenderExpectedToken_internal, @function
-CALL $isSenderExpectedToken_internal_macro$
+.globl	isSenderExpectedToken_2fda6d0c_internal
+.type	isSenderExpectedToken_2fda6d0c_internal, @function
+CALL $isSenderExpectedToken_2fda6d0c_internal_macro$
 
-.macro isSenderExpectedToken_internal_macro
+.macro isSenderExpectedToken_2fda6d0c_internal_macro
 .loc ../contracts/DexVaultLpTokenPending.sol, 199
 GETGLOB 9
 GETGLOB 16
@@ -705,7 +695,7 @@ IFREF {
 }
 .loc ../contracts/DexVaultLpTokenPending.sol, 209
 CALLREF {
-	CALL $isSenderExpectedToken_internal_macro$
+	CALL $isSenderExpectedToken_2fda6d0c_internal_macro$
 }
 GETGLOB 9
 GETGLOB 18
@@ -760,7 +750,7 @@ PUSHCONT {
 		STBREFR
 		STBREFR
 		ENDC
-		PUSHINT 128
+		PUSHPOW2 7
 		ADDCONST 32
 		UFITS 8
 		SENDRAWMSG
@@ -877,13 +867,11 @@ PUSHCONT {
 	PUSH S14
 	PUSHINT 64
 	DICTUGET
+	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 32
 	}
-	PUSHCONT {
-		PUSHINT 0
-	}
-	IFELSE
+	IF
 	PUSHINT 2
 	PUSH S15
 	PUSHINT 64
@@ -1095,7 +1083,7 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice

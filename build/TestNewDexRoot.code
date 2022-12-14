@@ -1,4 +1,4 @@
-.version sol 0.57.1
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -32,7 +32,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
-	CALL $getVault_internal_macro$
+	CALL $getVault_8d928af8_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -65,11 +65,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -94,7 +92,7 @@ IFREF {
 }
 THROW 0
 
-.macro getVault_internal_macro
+.macro getVault_8d928af8_internal_macro
 .loc ../contracts/tests/TestNewDexRoot.sol, 33
 GETGLOB 4
 PUSHINT 0
@@ -125,7 +123,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
-	CALL $getOwner_internal_macro$
+	CALL $getOwner_893d20e8_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -158,11 +156,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -187,7 +183,7 @@ IFREF {
 }
 THROW 0
 
-.macro getOwner_internal_macro
+.macro getOwner_893d20e8_internal_macro
 .loc ../contracts/tests/TestNewDexRoot.sol, 37
 GETGLOB 4
 PUSHINT 0
@@ -218,7 +214,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
-	CALL $getPendingOwner_internal_macro$
+	CALL $getPendingOwner_93596c7b_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -251,11 +247,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -280,7 +274,7 @@ IFREF {
 }
 THROW 0
 
-.macro getPendingOwner_internal_macro
+.macro getPendingOwner_93596c7b_internal_macro
 .loc ../contracts/tests/TestNewDexRoot.sol, 41
 GETGLOB 4
 PUSHINT 0
@@ -311,7 +305,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
-	CALL $getAccountVersion_internal_macro$
+	CALL $getAccountVersion_3bcafeaf_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -324,8 +318,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x0000000000000000000000002eca59912_
-	STSLICER
+	PUSHINT 3140052548
+	STUR 130
 	STU 32
 	ENDC
 	PUSHINT 0
@@ -340,11 +334,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -366,7 +358,7 @@ IFREF {
 }
 THROW 0
 
-.macro getAccountVersion_internal_macro
+.macro getAccountVersion_3bcafeaf_internal_macro
 .loc ../contracts/tests/TestNewDexRoot.sol, 45
 GETGLOB 4
 PUSHINT 0
@@ -398,7 +390,7 @@ LDU 8
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
-	CALL $getPairVersion_internal_macro$
+	CALL $getPairVersion_638875e0_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -411,8 +403,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x0000000000000000000000003d5ff00aa_
-	STSLICER
+	PUSHINT 4118790186
+	STUR 130
 	STU 32
 	ENDC
 	PUSHINT 0
@@ -427,11 +419,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -453,7 +443,7 @@ IFREF {
 }
 THROW 0
 
-.macro getPairVersion_internal_macro
+.macro getPairVersion_638875e0_internal_macro
 .loc ../contracts/tests/TestNewDexRoot.sol, 48
 DUP
 GETGLOB 15
@@ -474,13 +464,11 @@ SETGLOB 4
 GETGLOB 15
 PUSHINT 8
 DICTUGET
+ZEROSWAPIFNOT
 PUSHCONT {
 	PLDU 32
 }
-PUSHCONT {
-	PUSHINT 0
-}
-IFELSE
+IF
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 
 .macro getPairCode
@@ -502,7 +490,7 @@ LDU 8
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
-	CALL $getPairCode_internal_macro$
+	CALL $getPairCode_bbcf2a7e_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -515,8 +503,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x00000000000000000000000034010d63a_
-	STSLICER
+	PUSHINT 3489936782
+	STUR 130
 	STREF
 	ENDC
 	PUSHINT 0
@@ -531,11 +519,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -557,7 +543,7 @@ IFREF {
 }
 THROW 0
 
-.macro getPairCode_internal_macro
+.macro getPairCode_bbcf2a7e_internal_macro
 .loc ../contracts/tests/TestNewDexRoot.sol, 53
 DUP
 GETGLOB 14
@@ -603,7 +589,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
-	CALL $getAccountCode_internal_macro$
+	CALL $getAccountCode_9ec0a521_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -616,8 +602,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x0000000000000000000000003d8a43ade_
-	STSLICER
+	PUSHINT 4129885879
+	STUR 130
 	STREF
 	ENDC
 	PUSHINT 0
@@ -632,11 +618,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -658,7 +642,7 @@ IFREF {
 }
 THROW 0
 
-.macro getAccountCode_internal_macro
+.macro getAccountCode_9ec0a521_internal_macro
 .loc ../contracts/tests/TestNewDexRoot.sol, 58
 GETGLOB 4
 PUSHINT 0
@@ -685,7 +669,7 @@ LDI 1
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
-	CALL $setActive_internal_macro$
+	CALL $setActive_acec338a_internal_macro$
 }
 DROP
 CALLREF {
@@ -693,7 +677,7 @@ CALLREF {
 }
 THROW 0
 
-.macro setActive_internal_macro
+.macro setActive_acec338a_internal_macro
 .loc ../contracts/tests/TestNewDexRoot.sol, 62
 PUSHINT 1000000000
 PUSHINT 2
@@ -725,15 +709,9 @@ PUSHCONT {
 	IF
 }
 IF
-PUSHCONT {
-	.loc ../contracts/tests/TestNewDexRoot.sol, 70
-	TRUE
-}
-PUSHCONT {
-	.loc ../contracts/tests/TestNewDexRoot.sol, 72
-	FALSE
-}
-IFELSE
+TRUE
+FALSE
+CONDSEL
 SETGLOB 16
 .loc ../contracts/tests/TestNewDexRoot.sol, 74
 GETGLOB 17
@@ -743,7 +721,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 
@@ -765,7 +743,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
-	CALL $isActive_internal_macro$
+	CALL $isActive_22f3e2d4_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -778,8 +756,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x000000000000000000000000286b7f7aa_
-	STSLICER
+	PUSHINT 2712534506
+	STUR 130
 	STI 1
 	ENDC
 	PUSHINT 0
@@ -794,11 +772,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -820,7 +796,7 @@ IFREF {
 }
 THROW 0
 
-.macro isActive_internal_macro
+.macro isActive_22f3e2d4_internal_macro
 .loc ../contracts/tests/TestNewDexRoot.sol, 78
 GETGLOB 4
 PUSHINT 0
@@ -912,7 +888,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
@@ -934,7 +910,7 @@ IFREF {
 ENDS
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
 CALLREF {
-	CALL $newFunc_internal_macro$
+	CALL $newFunc_572bedd5_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -947,8 +923,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x00000000000000000000000024509510a_
-	STSLICER
+	PUSHINT 2437043266
+	STUR 130
 	STREF
 	ENDC
 	PUSHINT 0
@@ -963,11 +939,11 @@ IFREF {
 }
 THROW 0
 
-.globl	newFunc_internal
-.type	newFunc_internal, @function
-CALL $newFunc_internal_macro$
+.globl	newFunc_572bedd5_internal
+.type	newFunc_572bedd5_internal, @function
+CALL $newFunc_572bedd5_internal_macro$
 
-.macro newFunc_internal_macro
+.macro newFunc_572bedd5_internal_macro
 .loc ../contracts/tests/TestNewDexRoot.sol, 112
 GETGLOB 20
 .loc ../contracts/tests/TestNewDexRoot.sol, 0
@@ -1028,13 +1004,11 @@ PUSHCONT {
 	OVER
 	PUSHINT 64
 	DICTUGET
+	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 32
 	}
-	PUSHCONT {
-		PUSHINT 0
-	}
-	IFELSE
+	IF
 	PUSHREF {
 	}
 	DUP
@@ -1186,12 +1160,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -1207,7 +1181,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; havePubkey msgSlice
+	LDU 1 ; hasPubkey msgSlice
 	SWAP
 	THROWIF 58
 }

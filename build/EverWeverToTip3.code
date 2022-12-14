@@ -1,4 +1,4 @@
-.version sol 0.57.1
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -23,8 +23,8 @@ GETGLOB 11
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHSLICE x41dcd6500000000000000000000000000003_
-STSLICER
+PUSHINT 2868722788230934574387753789225109188247553
+STUR 143
 ROTREV
 PUSHSLICE x31edd4c7282c61f5
 NEWC
@@ -43,7 +43,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 ADDCONST 2
 UFITS 8
 SENDRAWMSG
@@ -74,7 +74,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/EverWeverToTip3.sol, 0
 CALLREF {
-	CALL $onWeverWallet_internal_macro$
+	CALL $onWeverWallet_b024d1df_internal_macro$
 }
 DROP
 CALLREF {
@@ -82,7 +82,7 @@ CALLREF {
 }
 THROW 0
 
-.macro onWeverWallet_internal_macro
+.macro onWeverWallet_b024d1df_internal_macro
 .loc ../contracts/EverWeverToTip3.sol, 49
 GETGLOB 9
 PARSEMSGADDR
@@ -133,7 +133,7 @@ LDU 128
 ENDS
 .loc ../contracts/EverWeverToTip3.sol, 0
 CALLREF {
-	CALL $buildExchangePayload_internal_macro$
+	CALL $buildExchangePayload_e7aa0b53_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -146,8 +146,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x00000000000000000000000028f21454a_
-	STSLICER
+	PUSHINT 2747814226
+	STUR 130
 	STREF
 	ENDC
 	PUSHINT 0
@@ -162,10 +162,10 @@ IFREF {
 }
 THROW 0
 
-.macro buildExchangePayload_internal_macro
+.macro buildExchangePayload_e7aa0b53_internal_macro
 .loc ../contracts/EverWeverToTip3.sol, 62
 CALLREF {
-	CALL $EverToTip3Payloads_no_obj_buildExchangePayload_macro$
+	CALL $EverToTip3Payloads_no_obj_buildExchangePayload_e7aa0b53_macro$
 }
 .loc ../contracts/EverWeverToTip3.sol, 0
 
@@ -197,7 +197,7 @@ LDU 128
 ENDS
 .loc ../contracts/EverWeverToTip3.sol, 0
 CALLREF {
-	CALL $buildCrossPairExchangePayload_internal_macro$
+	CALL $buildCrossPairExchangePayload_c079dab5_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -210,8 +210,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x0000000000000000000000002b95e163a_
-	STSLICER
+	PUSHINT 2924971406
+	STUR 130
 	STREF
 	ENDC
 	PUSHINT 0
@@ -226,10 +226,10 @@ IFREF {
 }
 THROW 0
 
-.macro buildCrossPairExchangePayload_internal_macro
+.macro buildCrossPairExchangePayload_c079dab5_internal_macro
 .loc ../contracts/EverWeverToTip3.sol, 74
 CALLREF {
-	CALL $EverToTip3Payloads_no_obj_buildCrossPairExchangePayload_macro$
+	CALL $EverToTip3Payloads_no_obj_buildCrossPairExchangePayload_c079dab5_macro$
 }
 .loc ../contracts/EverWeverToTip3.sol, 0
 
@@ -268,7 +268,7 @@ LDREF
 ENDS
 .loc ../contracts/EverWeverToTip3.sol, 0
 CALLREF {
-	CALL $onAcceptTokensTransfer_internal_macro$
+	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
 }
 DROP
 CALLREF {
@@ -276,7 +276,7 @@ CALLREF {
 }
 THROW 0
 
-.macro onAcceptTokensTransfer_internal_macro
+.macro onAcceptTokensTransfer_e63f2284_internal_macro
 .loc ../contracts/EverWeverToTip3.sol, 89
 GETGLOB 9
 PARSEMSGADDR
@@ -333,8 +333,7 @@ PUSHCONT {
 		NEWC
 		STSLICECONST x6_
 		STI 1
-		PUSHINT 3
-		STZEROES
+		STSLICECONST x1_
 		STSLICE
 		PUSHINT 1
 		STUR 111
@@ -352,7 +351,7 @@ PUSHCONT {
 		STBREFR
 		STBREFR
 		ENDC
-		PUSHINT 128
+		PUSHPOW2 7
 		SENDRAWMSG
 	}
 	PUSHCONT {
@@ -379,21 +378,16 @@ PUSHCONT {
 	TRUE
 	PUSH3 S3, S5, S3
 	SDEQ
-	PUSHCONT {
-		PUSHINT 0
-	}
-	PUSHCONT {
-		PUSHINT 100000000
-	}
-	IFELSE
+	PUSHINT 0
+	PUSHINT 100000000
+	CONDSEL
 	PUSH2 S5, S8
 	GETGLOB 9
 	FALSE
 	NEWC
 	STSLICECONST x6_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	PUSHINT 1
 	STUR 111
@@ -411,7 +405,7 @@ PUSHCONT {
 	STBREFR
 	STBREFR
 	ENDC
-	PUSHINT 128
+	PUSHPOW2 7
 	SENDRAWMSG
 	.loc ../contracts/EverWeverToTip3.sol, 0
 }
@@ -450,7 +444,7 @@ LDREF
 ENDS
 .loc ../contracts/EverWeverToTip3.sol, 0
 CALLREF {
-	CALL $onAcceptTokensBurn_internal_macro$
+	CALL $onAcceptTokensBurn_07d14114_internal_macro$
 }
 DROP
 CALLREF {
@@ -458,7 +452,7 @@ CALLREF {
 }
 THROW 0
 
-.macro onAcceptTokensBurn_internal_macro
+.macro onAcceptTokensBurn_07d14114_internal_macro
 .loc ../contracts/EverWeverToTip3.sol, 136
 GETGLOB 9
 PARSEMSGADDR
@@ -479,8 +473,7 @@ DUP
 CTOS
 .loc ../contracts/EverWeverToTip3.sol, 140
 LDMSGADDR
-LDU 128
-DROP
+PLDU 128
 NIP
 .loc ../contracts/EverWeverToTip3.sol, 142
 XCHG S2
@@ -491,8 +484,7 @@ FALSE
 NEWC
 STSLICECONST x6_
 STI 1
-PUSHINT 3
-STZEROES
+STSLICECONST x1_
 STSLICE
 PUSHINT 1
 STUR 111
@@ -508,7 +500,7 @@ STREF
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/EverWeverToTip3.sol, 0
 BLKDROP 3
@@ -557,13 +549,11 @@ PUSHCONT {
 	OVER
 	PUSHINT 64
 	DICTUGET
+	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 32
 	}
-	PUSHCONT {
-		PUSHINT 0
-	}
-	IFELSE
+	IF
 	PUSHINT 2
 	PUSH S2
 	PUSHINT 64
@@ -711,12 +701,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -732,7 +722,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; havePubkey msgSlice
+	LDU 1 ; hasPubkey msgSlice
 	SWAP
 	THROWIF 58
 }
@@ -832,11 +822,142 @@ PUSHCONT {
 IF
 THROW 0
 
-.globl	EverToTip3Payloads_with_obj_buildCrossPairExchangePayload
-.type	EverToTip3Payloads_with_obj_buildCrossPairExchangePayload, @function
-CALL $EverToTip3Payloads_with_obj_buildCrossPairExchangePayload_macro$
+.globl	EverToTip3Payloads_with_obj_buildExchangePayload_e7aa0b53
+.type	EverToTip3Payloads_with_obj_buildExchangePayload_e7aa0b53, @function
+CALL $EverToTip3Payloads_with_obj_buildExchangePayload_e7aa0b53_macro$
 
-.macro EverToTip3Payloads_with_obj_buildCrossPairExchangePayload_macro
+.macro EverToTip3Payloads_with_obj_buildExchangePayload_e7aa0b53_macro
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 17
+NEWC
+DUP
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 21
+STSLICECONST x01
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 22
+PUSH S5
+STUR 64
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 23
+PUSH S4
+STUR 128
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 24
+ROLL 3
+STUR 128
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 27
+NEWC
+STSLICECONST x00
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 28
+PUSH S5
+STUR 64
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 29
+PUSH S4
+STUR 128
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 32
+NEWC
+STSLICECONST x01
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 33
+ROLL 6
+STUR 64
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 34
+ROLL 5
+STUR 128
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 36
+PUSH S2
+ROT
+STBREFR
+POP S2
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 37
+STBREFR
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 39
+PUSH2 S3, S1
+STSLICE
+POP S2
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 40
+PUSH S2
+PUSHCONT {
+	.loc ../contracts/libraries/EverToTip3Payloads.sol, 41
+	BLKPUSH 2, 2
+	STU 128
+	POP S2
+	.loc ../contracts/libraries/EverToTip3Payloads.sol, 0
+}
+IF
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 43
+STBREFR
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 44
+ENDC
+NIP
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 0
+
+.globl	EverToTip3Payloads_no_obj_buildExchangePayload_e7aa0b53
+.type	EverToTip3Payloads_no_obj_buildExchangePayload_e7aa0b53, @function
+CALL $EverToTip3Payloads_no_obj_buildExchangePayload_e7aa0b53_macro$
+
+.macro EverToTip3Payloads_no_obj_buildExchangePayload_e7aa0b53_macro
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 17
+NEWC
+DUP
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 21
+STSLICECONST x01
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 22
+PUSH S5
+STUR 64
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 23
+PUSH S4
+STUR 128
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 24
+ROLL 3
+STUR 128
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 27
+NEWC
+STSLICECONST x00
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 28
+PUSH S5
+STUR 64
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 29
+PUSH S4
+STUR 128
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 32
+NEWC
+STSLICECONST x01
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 33
+ROLL 6
+STUR 64
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 34
+ROLL 5
+STUR 128
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 36
+PUSH S2
+ROT
+STBREFR
+POP S2
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 37
+STBREFR
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 39
+OVER
+ROLL 4
+STSLICER
+POP S2
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 40
+PUSH S2
+PUSHCONT {
+	.loc ../contracts/libraries/EverToTip3Payloads.sol, 41
+	BLKPUSH 2, 2
+	STU 128
+	POP S2
+	.loc ../contracts/libraries/EverToTip3Payloads.sol, 0
+}
+IF
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 43
+STBREFR
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 44
+ENDC
+NIP
+.loc ../contracts/libraries/EverToTip3Payloads.sol, 0
+
+.globl	EverToTip3Payloads_with_obj_buildCrossPairExchangePayload_c079dab5
+.type	EverToTip3Payloads_with_obj_buildCrossPairExchangePayload_c079dab5, @function
+CALL $EverToTip3Payloads_with_obj_buildCrossPairExchangePayload_c079dab5_macro$
+
+.macro EverToTip3Payloads_with_obj_buildCrossPairExchangePayload_c079dab5_macro
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 56
 OVER
 FIRST
@@ -848,15 +969,14 @@ DUP
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 62
 STSLICECONST x04
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 63
-PUXC S6, S-1
-STU 64
+PUSH S6
+STUR 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 64
-PUXC S5, S-1
-STU 128
+PUSH S5
+STUR 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 65
 ROLL 4
-SWAP
-STU 128
+STUR 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 66
 PUSHINT 0
 PUSH S4
@@ -871,8 +991,7 @@ CALLREF {
 	PAIR
 }
 SECOND
-SWAP
-STSLICE
+STSLICER
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 69
 PUSH S3
 FIRST
@@ -951,22 +1070,20 @@ DROP
 NEWC
 STSLICECONST x00
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 80
-PUXC S7, S-1
-STU 64
+PUSH S7
+STUR 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 81
-PUXC S6, S-1
-STU 128
+PUSH S6
+STUR 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 84
 NEWC
 STSLICECONST x01
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 85
 ROLL 8
-SWAP
-STU 64
+STUR 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 86
 ROLL 7
-SWAP
-STU 128
+STUR 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 88
 PUSH S3
 ROLL 3
@@ -1000,11 +1117,11 @@ ENDC
 BLKDROP2 2, 1
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 0
 
-.globl	EverToTip3Payloads_no_obj_buildCrossPairExchangePayload
-.type	EverToTip3Payloads_no_obj_buildCrossPairExchangePayload, @function
-CALL $EverToTip3Payloads_no_obj_buildCrossPairExchangePayload_macro$
+.globl	EverToTip3Payloads_no_obj_buildCrossPairExchangePayload_c079dab5
+.type	EverToTip3Payloads_no_obj_buildCrossPairExchangePayload_c079dab5, @function
+CALL $EverToTip3Payloads_no_obj_buildCrossPairExchangePayload_c079dab5_macro$
 
-.macro EverToTip3Payloads_no_obj_buildCrossPairExchangePayload_macro
+.macro EverToTip3Payloads_no_obj_buildCrossPairExchangePayload_c079dab5_macro
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 56
 OVER
 FIRST
@@ -1016,15 +1133,14 @@ DUP
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 62
 STSLICECONST x04
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 63
-PUXC S6, S-1
-STU 64
+PUSH S6
+STUR 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 64
-PUXC S5, S-1
-STU 128
+PUSH S5
+STUR 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 65
 ROLL 4
-SWAP
-STU 128
+STUR 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 66
 PUSHINT 0
 PUSH S4
@@ -1039,8 +1155,7 @@ CALLREF {
 	PAIR
 }
 SECOND
-SWAP
-STSLICE
+STSLICER
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 69
 PUSH S3
 FIRST
@@ -1119,22 +1234,20 @@ DROP
 NEWC
 STSLICECONST x00
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 80
-PUXC S7, S-1
-STU 64
+PUSH S7
+STUR 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 81
-PUXC S6, S-1
-STU 128
+PUSH S6
+STUR 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 84
 NEWC
 STSLICECONST x01
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 85
 ROLL 8
-SWAP
-STU 64
+STUR 64
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 86
 ROLL 7
-SWAP
-STU 128
+STUR 128
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 88
 PUSH S3
 ROLL 3
@@ -1150,8 +1263,7 @@ STBREFR
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 92
 OVER
 ROLL 5
-SWAP
-STSLICE
+STSLICER
 POP S2
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 93
 PUSH S2
@@ -1168,144 +1280,6 @@ STBREFR
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 98
 ENDC
 BLKDROP2 2, 1
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 0
-
-.globl	EverToTip3Payloads_with_obj_buildExchangePayload
-.type	EverToTip3Payloads_with_obj_buildExchangePayload, @function
-CALL $EverToTip3Payloads_with_obj_buildExchangePayload_macro$
-
-.macro EverToTip3Payloads_with_obj_buildExchangePayload_macro
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 17
-NEWC
-DUP
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 21
-STSLICECONST x01
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 22
-PUXC S5, S-1
-STU 64
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 23
-PUXC S4, S-1
-STU 128
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 24
-ROLL 3
-SWAP
-STU 128
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 27
-NEWC
-STSLICECONST x00
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 28
-PUXC S5, S-1
-STU 64
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 29
-PUXC S4, S-1
-STU 128
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 32
-NEWC
-STSLICECONST x01
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 33
-ROLL 6
-SWAP
-STU 64
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 34
-ROLL 5
-SWAP
-STU 128
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 36
-PUSH S2
-ROT
-STBREFR
-POP S2
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 37
-STBREFR
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 39
-PUSH2 S3, S1
-STSLICE
-POP S2
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 40
-PUSH S2
-PUSHCONT {
-	.loc ../contracts/libraries/EverToTip3Payloads.sol, 41
-	BLKPUSH 2, 2
-	STU 128
-	POP S2
-	.loc ../contracts/libraries/EverToTip3Payloads.sol, 0
-}
-IF
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 43
-STBREFR
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 44
-ENDC
-NIP
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 0
-
-.globl	EverToTip3Payloads_no_obj_buildExchangePayload
-.type	EverToTip3Payloads_no_obj_buildExchangePayload, @function
-CALL $EverToTip3Payloads_no_obj_buildExchangePayload_macro$
-
-.macro EverToTip3Payloads_no_obj_buildExchangePayload_macro
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 17
-NEWC
-DUP
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 21
-STSLICECONST x01
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 22
-PUXC S5, S-1
-STU 64
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 23
-PUXC S4, S-1
-STU 128
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 24
-ROLL 3
-SWAP
-STU 128
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 27
-NEWC
-STSLICECONST x00
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 28
-PUXC S5, S-1
-STU 64
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 29
-PUXC S4, S-1
-STU 128
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 32
-NEWC
-STSLICECONST x01
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 33
-ROLL 6
-SWAP
-STU 64
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 34
-ROLL 5
-SWAP
-STU 128
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 36
-PUSH S2
-ROT
-STBREFR
-POP S2
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 37
-STBREFR
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 39
-OVER
-ROLL 4
-SWAP
-STSLICE
-POP S2
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 40
-PUSH S2
-PUSHCONT {
-	.loc ../contracts/libraries/EverToTip3Payloads.sol, 41
-	BLKPUSH 2, 2
-	STU 128
-	POP S2
-	.loc ../contracts/libraries/EverToTip3Payloads.sol, 0
-}
-IF
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 43
-STBREFR
-.loc ../contracts/libraries/EverToTip3Payloads.sol, 44
-ENDC
-NIP
 .loc ../contracts/libraries/EverToTip3Payloads.sol, 0
 
 .macro public_function_selector

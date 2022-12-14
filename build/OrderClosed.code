@@ -1,4 +1,4 @@
-.version sol 0.57.1
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -32,7 +32,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/OrderClosed.sol, 0
 CALLREF {
-	CALL $currentStatus_internal_macro$
+	CALL $currentStatus_ef8a9235_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -45,8 +45,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x00000000000000000000000029451bbca_
-	STSLICER
+	PUSHINT 2769579762
+	STUR 130
 	STU 8
 	ENDC
 	PUSHINT 0
@@ -61,11 +61,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -87,7 +85,7 @@ IFREF {
 }
 THROW 0
 
-.macro currentStatus_internal_macro
+.macro currentStatus_ef8a9235_internal_macro
 .loc ../contracts/OrderClosed.sol, 62
 GETGLOB 4
 PUSHINT 0
@@ -118,7 +116,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/OrderClosed.sol, 0
 CALLREF {
-	CALL $initParams_internal_macro$
+	CALL $initParams_fb0c8628_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -170,11 +168,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -218,7 +214,7 @@ IFREF {
 }
 THROW 0
 
-.macro initParams_internal_macro
+.macro initParams_fb0c8628_internal_macro
 .loc ../contracts/OrderClosed.sol, 66
 GETGLOB 4
 PUSHINT 0
@@ -254,7 +250,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/OrderClosed.sol, 0
 CALLREF {
-	CALL $getDetails_internal_macro$
+	CALL $getDetails_fbbf93a0_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -315,11 +311,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -372,7 +366,7 @@ IFREF {
 }
 THROW 0
 
-.macro getDetails_internal_macro
+.macro getDetails_fbbf93a0_internal_macro
 .loc ../contracts/OrderClosed.sol, 76
 GETGLOB 4
 PUSHINT 0
@@ -383,7 +377,7 @@ PUSHINT 64
 SETINDEXQ 4
 SETGLOB 4
 CALLREF {
-	CALL $buildDetails_internal_macro$
+	CALL $buildDetails_03265ec2_internal_macro$
 }
 .loc ../contracts/OrderClosed.sol, 0
 
@@ -422,7 +416,7 @@ LDREF
 ENDS
 .loc ../contracts/OrderClosed.sol, 0
 CALLREF {
-	CALL $onAcceptTokensTransfer_internal_macro$
+	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
 }
 DROP
 CALLREF {
@@ -430,7 +424,7 @@ CALLREF {
 }
 THROW 0
 
-.macro onAcceptTokensTransfer_internal_macro
+.macro onAcceptTokensTransfer_e63f2284_internal_macro
 .loc ../contracts/OrderClosed.sol, 87
 DROP
 PUSHINT 1000000000
@@ -458,8 +452,7 @@ FALSE
 NEWC
 STSLICECONST x6_
 STI 1
-PUSHINT 3
-STZEROES
+STSLICECONST x1_
 STSLICE
 PUSHINT 1
 STUR 111
@@ -477,7 +470,7 @@ STREF
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/OrderClosed.sol, 0
 DROP2
@@ -503,7 +496,7 @@ LDU 256
 ENDS
 .loc ../contracts/OrderClosed.sol, 0
 CALLREF {
-	CALL $enableEmergency_internal_macro$
+	CALL $enableEmergency_df0128f6_internal_macro$
 }
 DROP
 CALLREF {
@@ -511,7 +504,7 @@ CALLREF {
 }
 THROW 0
 
-.macro enableEmergency_internal_macro
+.macro enableEmergency_df0128f6_internal_macro
 .loc ../contracts/OrderClosed.sol, 46
 GETGLOB 9
 PARSEMSGADDR
@@ -537,7 +530,7 @@ SETGLOB 20
 SETGLOB 23
 .loc ../contracts/OrderClosed.sol, 109
 CALLREF {
-	CALL $buildDetails_internal_macro$
+	CALL $buildDetails_03265ec2_internal_macro$
 }
 GETGLOB 20
 GETGLOB 22
@@ -597,7 +590,7 @@ IFREF {
 ENDS
 .loc ../contracts/OrderClosed.sol, 0
 CALLREF {
-	CALL $disableEmergency_internal_macro$
+	CALL $disableEmergency_d59b7807_internal_macro$
 }
 DROP
 CALLREF {
@@ -605,7 +598,7 @@ CALLREF {
 }
 THROW 0
 
-.macro disableEmergency_internal_macro
+.macro disableEmergency_d59b7807_internal_macro
 .loc ../contracts/OrderClosed.sol, 46
 GETGLOB 9
 PARSEMSGADDR
@@ -632,7 +625,7 @@ PUSHINT 0
 SETGLOB 23
 .loc ../contracts/OrderClosed.sol, 118
 CALLREF {
-	CALL $buildDetails_internal_macro$
+	CALL $buildDetails_03265ec2_internal_macro$
 }
 GETGLOB 20
 PUSHINT 6
@@ -713,18 +706,18 @@ LDREF
 ENDS
 .loc ../contracts/OrderClosed.sol, 0
 CALLREF {
-	CALL $proxyTokensTransfer_internal_macro$
+	CALL $proxyTokensTransfer_00745f71_internal_macro$
 }
 IFREF {
 	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
-.globl	proxyTokensTransfer_internal
-.type	proxyTokensTransfer_internal, @function
-CALL $proxyTokensTransfer_internal_macro$
+.globl	proxyTokensTransfer_00745f71_internal
+.type	proxyTokensTransfer_00745f71_internal, @function
+CALL $proxyTokensTransfer_00745f71_internal_macro$
 
-.macro proxyTokensTransfer_internal_macro
+.macro proxyTokensTransfer_00745f71_internal_macro
 .loc ../contracts/OrderClosed.sol, 54
 GETGLOB 23
 NEQINT 0
@@ -807,18 +800,18 @@ LDU 16
 ENDS
 .loc ../contracts/OrderClosed.sol, 0
 CALLREF {
-	CALL $sendGas_internal_macro$
+	CALL $sendGas_344a5ee6_internal_macro$
 }
 IFREF {
 	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
-.globl	sendGas_internal
-.type	sendGas_internal, @function
-CALL $sendGas_internal_macro$
+.globl	sendGas_344a5ee6_internal
+.type	sendGas_344a5ee6_internal, @function
+CALL $sendGas_344a5ee6_internal_macro$
 
-.macro sendGas_internal_macro
+.macro sendGas_344a5ee6_internal_macro
 .loc ../contracts/OrderClosed.sol, 54
 GETGLOB 23
 NEQINT 0
@@ -865,11 +858,11 @@ SWAP
 SENDRAWMSG
 .loc ../contracts/OrderClosed.sol, 0
 
-.globl	buildDetails_internal
-.type	buildDetails_internal, @function
-CALL $buildDetails_internal_macro$
+.globl	buildDetails_03265ec2_internal
+.type	buildDetails_03265ec2_internal, @function
+CALL $buildDetails_03265ec2_internal_macro$
 
-.macro buildDetails_internal_macro
+.macro buildDetails_03265ec2_internal_macro
 .loc ../contracts/OrderClosed.sol, 158
 GETGLOB 11
 GETGLOB 12
@@ -885,11 +878,11 @@ GETGLOB 17
 TUPLE 11
 .loc ../contracts/OrderClosed.sol, 0
 
-.globl	upgrade_internal
-.type	upgrade_internal, @function
-CALL $upgrade_internal_macro$
+.globl	upgrade_7916ae0d_internal
+.type	upgrade_7916ae0d_internal, @function
+CALL $upgrade_7916ae0d_internal_macro$
 
-.macro upgrade_internal_macro
+.macro upgrade_7916ae0d_internal_macro
 .loc ../contracts/OrderClosed.sol, 46
 GETGLOB 9
 PARSEMSGADDR
@@ -901,10 +894,10 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 312
-.loc ../contracts/OrderClosed.sol, 179
+.loc ../contracts/OrderClosed.sol, 174
 DUP
 SETCODE
-.loc ../contracts/OrderClosed.sol, 180
+.loc ../contracts/OrderClosed.sol, 175
 CTOS
 DUP
 PUSHSLICE x8adb35
@@ -918,59 +911,50 @@ PLDREF
 CTOS
 BLESS
 POP C3
-.loc ../contracts/OrderClosed.sol, 183
+.loc ../contracts/OrderClosed.sol, 178
 GETGLOB 20
 NEWC
 STU 8
-.loc ../contracts/OrderClosed.sol, 184
+.loc ../contracts/OrderClosed.sol, 179
 GETGLOB 12
-SWAP
-STSLICE
-.loc ../contracts/OrderClosed.sol, 185
+STSLICER
+.loc ../contracts/OrderClosed.sol, 180
 GETGLOB 10
-SWAP
-STSLICE
-.loc ../contracts/OrderClosed.sol, 186
+STSLICER
+.loc ../contracts/OrderClosed.sol, 181
 GETGLOB 11
-SWAP
-STSLICE
-.loc ../contracts/OrderClosed.sol, 187
+STSLICER
+.loc ../contracts/OrderClosed.sol, 182
 GETGLOB 21
-SWAP
-STU 64
-.loc ../contracts/OrderClosed.sol, 190
+STUR 64
+.loc ../contracts/OrderClosed.sol, 185
 GETGLOB 18
 NEWC
 STSLICE
-.loc ../contracts/OrderClosed.sol, 191
+.loc ../contracts/OrderClosed.sol, 186
 GETGLOB 17
-SWAP
-STU 128
-.loc ../contracts/OrderClosed.sol, 192
+STUR 128
+.loc ../contracts/OrderClosed.sol, 187
 GETGLOB 13
-SWAP
-STSLICE
-.loc ../contracts/OrderClosed.sol, 193
+STSLICER
+.loc ../contracts/OrderClosed.sol, 188
 GETGLOB 14
-SWAP
-STSLICE
-.loc ../contracts/OrderClosed.sol, 194
+STSLICER
+.loc ../contracts/OrderClosed.sol, 189
 STBREFR
-.loc ../contracts/OrderClosed.sol, 197
+.loc ../contracts/OrderClosed.sol, 192
 GETGLOB 15
 NEWC
 STU 128
-.loc ../contracts/OrderClosed.sol, 198
+.loc ../contracts/OrderClosed.sol, 193
 GETGLOB 16
-SWAP
-STU 128
-.loc ../contracts/OrderClosed.sol, 199
+STUR 128
+.loc ../contracts/OrderClosed.sol, 194
 GETGLOB 19
-SWAP
-STSLICE
-.loc ../contracts/OrderClosed.sol, 200
+STSLICER
+.loc ../contracts/OrderClosed.sol, 195
 STBREFR
-.loc ../contracts/OrderClosed.sol, 202
+.loc ../contracts/OrderClosed.sol, 197
 ENDC
 CALLREF {
 	CALL $:onCodeUpgrade$
@@ -979,7 +963,7 @@ CALLREF {
 
 .internal-alias :onCodeUpgrade, 2
 .internal :onCodeUpgrade
-.loc ../contracts/OrderClosed.sol, 207
+.loc ../contracts/OrderClosed.sol, 202
 PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
@@ -1022,9 +1006,9 @@ PUSHINT 0
 SETGLOB 22
 PUSHINT 0
 SETGLOB 23
-.loc ../contracts/OrderClosed.sol, 208
+.loc ../contracts/OrderClosed.sol, 203
 CTOS
-.loc ../contracts/OrderClosed.sol, 210
+.loc ../contracts/OrderClosed.sol, 205
 DUP
 LDU 8
 LDMSGADDR
@@ -1032,63 +1016,63 @@ LDMSGADDR
 LDMSGADDR
 LDU 64
 POP S6
-.loc ../contracts/OrderClosed.sol, 218
+.loc ../contracts/OrderClosed.sol, 213
 ROLL 4
 SETGLOB 20
-.loc ../contracts/OrderClosed.sol, 219
+.loc ../contracts/OrderClosed.sol, 214
 ROLL 3
 SETGLOB 12
-.loc ../contracts/OrderClosed.sol, 220
+.loc ../contracts/OrderClosed.sol, 215
 ROT
 SETGLOB 10
-.loc ../contracts/OrderClosed.sol, 221
+.loc ../contracts/OrderClosed.sol, 216
 SWAP
 SETGLOB 11
-.loc ../contracts/OrderClosed.sol, 222
+.loc ../contracts/OrderClosed.sol, 217
 SETGLOB 21
-.loc ../contracts/OrderClosed.sol, 224
+.loc ../contracts/OrderClosed.sol, 219
 LDREFRTOS
-.loc ../contracts/OrderClosed.sol, 225
+.loc ../contracts/OrderClosed.sol, 220
 LDMSGADDR
 LDU 128
 LDMSGADDR
 LDMSGADDR
 DROP
-.loc ../contracts/OrderClosed.sol, 232
+.loc ../contracts/OrderClosed.sol, 227
 ROLL 3
 SETGLOB 18
-.loc ../contracts/OrderClosed.sol, 233
+.loc ../contracts/OrderClosed.sol, 228
 ROT
 SETGLOB 17
-.loc ../contracts/OrderClosed.sol, 234
+.loc ../contracts/OrderClosed.sol, 229
 SWAP
 SETGLOB 13
-.loc ../contracts/OrderClosed.sol, 235
+.loc ../contracts/OrderClosed.sol, 230
 SETGLOB 14
-.loc ../contracts/OrderClosed.sol, 237
+.loc ../contracts/OrderClosed.sol, 232
 LDREFRTOS
 NIP
-.loc ../contracts/OrderClosed.sol, 238
+.loc ../contracts/OrderClosed.sol, 233
 LDU 128
 LDU 128
 LDMSGADDR
 DROP
-.loc ../contracts/OrderClosed.sol, 244
+.loc ../contracts/OrderClosed.sol, 239
 ROT
 SETGLOB 15
-.loc ../contracts/OrderClosed.sol, 245
+.loc ../contracts/OrderClosed.sol, 240
 SWAP
 SETGLOB 16
-.loc ../contracts/OrderClosed.sol, 246
+.loc ../contracts/OrderClosed.sol, 241
 SETGLOB 19
-.loc ../contracts/OrderClosed.sol, 248
+.loc ../contracts/OrderClosed.sol, 243
 GETGLOB 20
 EQINT 5
 PUSHCONT {
-	.loc ../contracts/OrderClosed.sol, 249
+	.loc ../contracts/OrderClosed.sol, 244
 	PUSHREF {
 	}
-	.loc ../contracts/OrderClosed.sol, 250
+	.loc ../contracts/OrderClosed.sol, 245
 	TRUE
 	GETGLOB 12
 	PUSHINT 0
@@ -1099,8 +1083,7 @@ PUSHCONT {
 	NEWC
 	STSLICECONST x6_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	PUSHINT 1
 	STUR 111
@@ -1118,10 +1101,10 @@ PUSHCONT {
 	STBREFR
 	STBREFR
 	ENDC
-	PUSHINT 128
+	PUSHPOW2 7
 }
 PUSHCONT {
-	.loc ../contracts/OrderClosed.sol, 263
+	.loc ../contracts/OrderClosed.sol, 258
 	GETGLOB 12
 	NEWC
 	STSLICECONST x42_
@@ -1129,7 +1112,7 @@ PUSHCONT {
 	PUSHINT 111
 	STZEROES
 	ENDC
-	PUSHINT 128
+	PUSHPOW2 7
 	ADDCONST 2
 	UFITS 8
 }
@@ -1427,12 +1410,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -1450,7 +1433,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; havePubkey msgSlice
+	LDU 1 ; hasPubkey msgSlice
 	SWAP
 	THROWIF 58
 }

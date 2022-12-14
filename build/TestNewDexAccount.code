@@ -1,4 +1,4 @@
-.version sol 0.57.1
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -32,7 +32,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
 CALLREF {
-	CALL $getRoot_internal_macro$
+	CALL $getRoot_5ca1e165_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -65,11 +65,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -94,7 +92,7 @@ IFREF {
 }
 THROW 0
 
-.macro getRoot_internal_macro
+.macro getRoot_5ca1e165_internal_macro
 .loc ../contracts/tests/TestNewDexAccount.sol, 52
 GETGLOB 4
 PUSHINT 0
@@ -125,7 +123,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
 CALLREF {
-	CALL $getOwner_internal_macro$
+	CALL $getOwner_893d20e8_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -158,11 +156,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -187,7 +183,7 @@ IFREF {
 }
 THROW 0
 
-.macro getOwner_internal_macro
+.macro getOwner_893d20e8_internal_macro
 .loc ../contracts/tests/TestNewDexAccount.sol, 56
 GETGLOB 4
 PUSHINT 0
@@ -218,7 +214,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
 CALLREF {
-	CALL $getVersion_internal_macro$
+	CALL $getVersion_0d8e6e2c_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -231,8 +227,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x0000000000000000000000002b6a534be_
-	STSLICER
+	PUSHINT 2913553711
+	STUR 130
 	STU 32
 	ENDC
 	PUSHINT 0
@@ -247,11 +243,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -273,7 +267,7 @@ IFREF {
 }
 THROW 0
 
-.macro getVersion_internal_macro
+.macro getVersion_0d8e6e2c_internal_macro
 .loc ../contracts/tests/TestNewDexAccount.sol, 60
 GETGLOB 4
 PUSHINT 0
@@ -304,7 +298,7 @@ SETGLOB 4
 ENDS
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
 CALLREF {
-	CALL $getVault_internal_macro$
+	CALL $getVault_8d928af8_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -337,11 +331,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -366,7 +358,7 @@ IFREF {
 }
 THROW 0
 
-.macro getVault_internal_macro
+.macro getVault_8d928af8_internal_macro
 .loc ../contracts/tests/TestNewDexAccount.sol, 64
 GETGLOB 4
 PUSHINT 0
@@ -405,7 +397,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
 CALLREF {
-	CALL $getWalletData_internal_macro$
+	CALL $getWalletData_857923c4_internal_macro$
 }
 PUSH S2
 PUSHCONT {
@@ -439,11 +431,9 @@ PUSHCONT {
 	ROLL 3
 	SECOND
 	NEWC
-	PUSHINT 2
-	STZEROES
+	STSLICECONST x2_
 	STI 1
-	PUSHINT 3
-	STZEROES
+	STSLICECONST x1_
 	STSLICE
 	SWAP
 	STGRAMS
@@ -469,7 +459,7 @@ IFREF {
 }
 THROW 0
 
-.macro getWalletData_internal_macro
+.macro getWalletData_857923c4_internal_macro
 .loc ../contracts/tests/TestNewDexAccount.sol, 68
 GETGLOB 4
 PUSHINT 0
@@ -504,6 +494,7 @@ PUSHINT 267
 DICTGET
 NULLSWAPIFNOT
 NIP
+ZEROSWAPIFNOT
 PUSHCONT {
 	OVER
 	GETGLOB 16
@@ -512,10 +503,7 @@ PUSHCONT {
 	THROWIFNOT 50
 	PLDU 128
 }
-PUSHCONT {
-	PUSHINT 0
-}
-IFELSE
+IF
 BLKDROP2 1, 2
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
 
@@ -532,7 +520,7 @@ IFREF {
 ENDS
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
 CALLREF {
-	CALL $getWallets_internal_macro$
+	CALL $getWallets_db7a4605_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -545,8 +533,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x0000000000000000000000003779a1fc6_
-	STSLICER
+	PUSHINT 3722872817
+	STUR 130
 	STDICT
 	ENDC
 	PUSHINT 0
@@ -561,7 +549,7 @@ IFREF {
 }
 THROW 0
 
-.macro getWallets_internal_macro
+.macro getWallets_db7a4605_internal_macro
 .loc ../contracts/tests/TestNewDexAccount.sol, 75
 GETGLOB 15
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
@@ -579,7 +567,7 @@ IFREF {
 ENDS
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
 CALLREF {
-	CALL $getBalances_internal_macro$
+	CALL $getBalances_00113e08_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -592,8 +580,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x00000000000000000000000021478310e_
-	STSLICER
+	PUSHINT 2233338947
+	STUR 130
 	STDICT
 	ENDC
 	PUSHINT 0
@@ -608,7 +596,7 @@ IFREF {
 }
 THROW 0
 
-.macro getBalances_internal_macro
+.macro getBalances_00113e08_internal_macro
 .loc ../contracts/tests/TestNewDexAccount.sol, 79
 GETGLOB 16
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
@@ -686,8 +674,7 @@ LDDICT
 POP S2
 SETGLOB 15
 .loc ../contracts/tests/TestNewDexAccount.sol, 95
-LDDICT
-DROP
+PLDDICT
 SETGLOB 16
 .loc ../contracts/tests/TestNewDexAccount.sol, 97
 SWAP
@@ -704,8 +691,7 @@ LDDICT
 POP S2
 SETGLOB 18
 .loc ../contracts/tests/TestNewDexAccount.sol, 100
-LDDICT
-DROP
+PLDDICT
 SETGLOB 19
 .loc ../contracts/tests/TestNewDexAccount.sol, 102
 PUSHREF {
@@ -719,7 +705,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
 CALLREF {
@@ -741,7 +727,7 @@ IFREF {
 ENDS
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
 CALLREF {
-	CALL $newFunc_internal_macro$
+	CALL $newFunc_572bedd5_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -754,8 +740,8 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHSLICE x00000000000000000000000024509510a_
-	STSLICER
+	PUSHINT 2437043266
+	STUR 130
 	STREF
 	ENDC
 	PUSHINT 0
@@ -770,11 +756,11 @@ IFREF {
 }
 THROW 0
 
-.globl	newFunc_internal
-.type	newFunc_internal, @function
-CALL $newFunc_internal_macro$
+.globl	newFunc_572bedd5_internal
+.type	newFunc_572bedd5_internal, @function
+CALL $newFunc_572bedd5_internal_macro$
 
-.macro newFunc_internal_macro
+.macro newFunc_572bedd5_internal_macro
 .loc ../contracts/tests/TestNewDexAccount.sol, 108
 GETGLOB 20
 .loc ../contracts/tests/TestNewDexAccount.sol, 0
@@ -983,12 +969,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -1004,7 +990,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; havePubkey msgSlice
+	LDU 1 ; hasPubkey msgSlice
 	SWAP
 	THROWIF 58
 }
