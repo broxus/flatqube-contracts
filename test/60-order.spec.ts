@@ -42,6 +42,7 @@ describe('OrderTest', () => {
     let dexPair: Contract<FactorySource['DexPair']>;
 
     let account1: Account;
+
     let account2: Account;
     let barWallet2: Contract<FactorySource['TokenWalletUpgradeable']>;
     let tstWallet2: Contract<FactorySource['TokenWalletUpgradeable']>;
@@ -78,6 +79,7 @@ describe('OrderTest', () => {
         account6 = await accountMigration('10000', "Account6", "6");
 
         tokenFactory = await tokenFactoryMigration(account1);
+
         const dexRoot = await dexRootMigration(account1);
         dexVault = await dexVaultMigration(account1, dexRoot, tokenFactory);
         dexAccount = await dexAccountMigration(account1, dexRoot);
@@ -96,16 +98,16 @@ describe('OrderTest', () => {
         );
 
         const wallet1Address = await deployWallet(account1, rootTokenReceive, account1, 3000)
-        const wallet2Address = await deployWallet(account1, rootTokenBar, account1, 3000)
         const wallet1 = locklift.factory.getDeployedContract(
             'TokenWalletUpgradeable',
             wallet1Address,
         );
+
+        const wallet2Address = await deployWallet(account1, rootTokenBar, account1, 3000)
         const wallet2 = locklift.factory.getDeployedContract(
             'TokenWalletUpgradeable',
             wallet2Address,
         );
-
 
         factoryOrder = await orderFactoryMigration(account1, 1, dexRoot);
         dexPair = await dexPairMigration(
@@ -116,6 +118,7 @@ describe('OrderTest', () => {
             'TST',
             rootTokenReceive
         )
+
         const isActive = await dexPair.methods.isActive({answerId: 0}).call()
         console.log(`IS ACTIVE - ${isActive.value0}`)
         const lproot = await dexPair.methods.getTokenRoots({
@@ -123,12 +126,12 @@ describe('OrderTest', () => {
         }).call()
         FooBarLpRoot = await locklift.factory.getDeployedContract("TokenRootUpgradeable", lproot.lp)
 
-
         const BarPairWalletAddress = (await rootTokenBar.methods.walletOf({walletOwner: dexPair.address, answerId: 0}).call()).value0
         BarPairWallet = locklift.factory.getDeployedContract(
             'TokenWalletUpgradeable',
             BarPairWalletAddress,
         );
+
         const FooPairWalletAddress = (await rootTokenReceive.methods.walletOf({walletOwner: dexPair.address, answerId: 0}).call()).value0
         FooPairWallet = locklift.factory.getDeployedContract(
             'TokenWalletUpgradeable',
