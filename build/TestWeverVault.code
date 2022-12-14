@@ -1,4 +1,4 @@
-.version sol 0.57.1
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -46,7 +46,7 @@ ACCEPT
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 53
 ROLL 5
 CALLREF {
-	CALL $setOwnership_internal_macro$
+	CALL $setOwnership_a7016023_internal_macro$
 }
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 55
 GETGLOB 12
@@ -75,7 +75,7 @@ SETINDEX 4
 SETGLOB 12
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 61
 CALLREF {
-	CALL $setUpTokenWallet_internal_macro$
+	CALL $setUpTokenWallet_aa46637f_internal_macro$
 }
 .loc ../contracts/tests/TestWeverVault.sol, 0
 CALLREF {
@@ -83,11 +83,11 @@ CALLREF {
 }
 THROW 0
 
-.globl	setUpTokenWallet_internal
-.type	setUpTokenWallet_internal, @function
-CALL $setUpTokenWallet_internal_macro$
+.globl	setUpTokenWallet_aa46637f_internal
+.type	setUpTokenWallet_aa46637f_internal, @function
+CALL $setUpTokenWallet_aa46637f_internal_macro$
 
-.macro setUpTokenWallet_internal_macro
+.macro setUpTokenWallet_aa46637f_internal_macro
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 69
 GETGLOB 12
 INDEX 3
@@ -97,8 +97,8 @@ SECOND
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHSLICE x43b9aca00000000000000000000000000003_
-STSLICER
+PUSHINT 2949852426645541256083542794369173188247553
+STUR 143
 ROTREV
 PUSHSLICE x31edd4c750bfca9f
 NEWC
@@ -132,7 +132,7 @@ LDMSGADDR
 ENDS
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 CALLREF {
-	CALL $receiveTokenWalletAddress_internal_macro$
+	CALL $receiveTokenWalletAddress_9b3a57ad_internal_macro$
 }
 DROP
 CALLREF {
@@ -140,7 +140,7 @@ CALLREF {
 }
 THROW 0
 
-.macro receiveTokenWalletAddress_internal_macro
+.macro receiveTokenWalletAddress_9b3a57ad_internal_macro
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 86
 GETGLOB 9
 GETGLOB 12
@@ -172,7 +172,7 @@ LDMSGADDR
 ENDS
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 CALLREF {
-	CALL $drain_internal_macro$
+	CALL $drain_ece53132_internal_macro$
 }
 DROP
 CALLREF {
@@ -180,11 +180,11 @@ CALLREF {
 }
 THROW 0
 
-.globl	drain_internal
-.type	drain_internal, @function
-CALL $drain_internal_macro$
+.globl	drain_ece53132_internal
+.type	drain_ece53132_internal, @function
+CALL $drain_ece53132_internal_macro$
 
-.macro drain_internal_macro
+.macro drain_ece53132_internal_macro
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 15
 GETGLOB 9
 GETGLOB 11
@@ -250,7 +250,7 @@ SWAP
 ENDS
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 CALLREF {
-	CALL $setConfiguration_internal_macro$
+	CALL $setConfiguration_c60c0015_internal_macro$
 }
 DROP
 CALLREF {
@@ -258,7 +258,7 @@ CALLREF {
 }
 THROW 0
 
-.macro setConfiguration_internal_macro
+.macro setConfiguration_c60c0015_internal_macro
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 15
 GETGLOB 9
 GETGLOB 11
@@ -278,20 +278,14 @@ THROWIFNOT 1101
 GETGLOB 12
 SECOND
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 114
-SWAP
-DUP
+XCPU S1, S0
 SETGLOB 12
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 116
 SECOND
 SDEQ
-PUSHCONT {
-	.loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 117
-	CALLREF {
-		CALL $setUpTokenWallet_internal_macro$
-	}
-	.loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
+IFNOTREF {
+	CALL $setUpTokenWallet_aa46637f_internal_macro$
 }
-IFNOT
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 
 .macro withdraw
@@ -315,7 +309,7 @@ LDU 128
 ENDS
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 CALLREF {
-	CALL $withdraw_internal_macro$
+	CALL $withdraw_02387a7b_internal_macro$
 }
 DROP
 CALLREF {
@@ -323,7 +317,7 @@ CALLREF {
 }
 THROW 0
 
-.macro withdraw_internal_macro
+.macro withdraw_02387a7b_internal_macro
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 15
 GETGLOB 9
 GETGLOB 11
@@ -342,7 +336,7 @@ THROWIFNOT 1101
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 130
 NEGATE
 CALLREF {
-	CALL $updateTotalWrapped_internal_macro$
+	CALL $updateTotalWrapped_81959021_internal_macro$
 }
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 132
 GETGLOB 14
@@ -360,7 +354,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 
@@ -385,7 +379,7 @@ LDU 128
 ENDS
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 CALLREF {
-	CALL $grant_internal_macro$
+	CALL $grant_db9ef357_internal_macro$
 }
 DROP
 CALLREF {
@@ -393,7 +387,7 @@ CALLREF {
 }
 THROW 0
 
-.macro grant_internal_macro
+.macro grant_db9ef357_internal_macro
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 146
 DUP
 DEPTH
@@ -406,7 +400,7 @@ LEQ
 THROWIFNOT 101
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 148
 CALLREF {
-	CALL $updateTotalWrapped_internal_macro$
+	CALL $updateTotalWrapped_81959021_internal_macro$
 }
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 150
 GETGLOB 14
@@ -424,7 +418,7 @@ STSLICE
 PUSHINT 111
 STZEROES
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 
@@ -455,7 +449,7 @@ UFITS 128
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 168
 DUP
 CALLREF {
-	CALL $updateTotalWrapped_internal_macro$
+	CALL $updateTotalWrapped_81959021_internal_macro$
 }
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 170
 GETGLOB 14
@@ -496,18 +490,18 @@ STREF
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 CALLREF {
 	CALL $c7_to_c4$
 }
 
-.globl	updateTotalWrapped_internal
-.type	updateTotalWrapped_internal, @function
-CALL $updateTotalWrapped_internal_macro$
+.globl	updateTotalWrapped_81959021_internal
+.type	updateTotalWrapped_81959021_internal, @function
+CALL $updateTotalWrapped_81959021_internal_macro$
 
-.macro updateTotalWrapped_internal_macro
+.macro updateTotalWrapped_81959021_internal_macro
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 189
 GETGLOB 14
 ADD
@@ -542,7 +536,7 @@ LDREF
 ENDS
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 CALLREF {
-	CALL $wrap_internal_macro$
+	CALL $wrap_5cfc8dfa_internal_macro$
 }
 DROP
 CALLREF {
@@ -550,7 +544,7 @@ CALLREF {
 }
 THROW 0
 
-.macro wrap_internal_macro
+.macro wrap_5cfc8dfa_internal_macro
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 206
 DEPTH
 ADDCONST -2
@@ -565,7 +559,7 @@ THROWIFNOT 101
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 211
 PUSH S3
 CALLREF {
-	CALL $updateTotalWrapped_internal_macro$
+	CALL $updateTotalWrapped_81959021_internal_macro$
 }
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 213
 GETGLOB 14
@@ -603,7 +597,7 @@ STREF
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 
@@ -642,7 +636,7 @@ LDREF
 ENDS
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 CALLREF {
-	CALL $onAcceptTokensTransfer_internal_macro$
+	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
 }
 DROP
 CALLREF {
@@ -650,7 +644,7 @@ CALLREF {
 }
 THROW 0
 
-.macro onAcceptTokensTransfer_internal_macro
+.macro onAcceptTokensTransfer_e63f2284_internal_macro
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 238
 ROLL 5
 GETGLOB 12
@@ -666,7 +660,7 @@ THROWIFNOT 105
 PUSH S4
 NEGATE
 CALLREF {
-	CALL $updateTotalWrapped_internal_macro$
+	CALL $updateTotalWrapped_81959021_internal_macro$
 }
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 243
 GETGLOB 14
@@ -698,16 +692,16 @@ STREF
 STBREFR
 STBREFR
 ENDC
-PUSHINT 128
+PUSHPOW2 7
 SENDRAWMSG
 .loc ../node_modules/ton-wton/everscale/contracts/Vault.sol, 0
 DROP
 
-.globl	setOwnership_internal
-.type	setOwnership_internal, @function
-CALL $setOwnership_internal_macro$
+.globl	setOwnership_a7016023_internal
+.type	setOwnership_a7016023_internal, @function
+CALL $setOwnership_a7016023_internal_macro$
 
-.macro setOwnership_internal_macro
+.macro setOwnership_a7016023_internal_macro
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 24
 GETGLOB 11
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 26
@@ -752,7 +746,7 @@ LDMSGADDR
 ENDS
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 0
 CALLREF {
-	CALL $transferOwnership_internal_macro$
+	CALL $transferOwnership_f2fde38b_internal_macro$
 }
 DROP
 CALLREF {
@@ -760,7 +754,7 @@ CALLREF {
 }
 THROW 0
 
-.macro transferOwnership_internal_macro
+.macro transferOwnership_f2fde38b_internal_macro
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 15
 GETGLOB 9
 GETGLOB 11
@@ -785,7 +779,7 @@ SDEQ
 THROWIF 1102
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 39
 CALLREF {
-	CALL $setOwnership_internal_macro$
+	CALL $setOwnership_a7016023_internal_macro$
 }
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 0
 
@@ -802,7 +796,7 @@ IFREF {
 ENDS
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 0
 CALLREF {
-	CALL $renounceOwnership_internal_macro$
+	CALL $renounceOwnership_715018a6_internal_macro$
 }
 DROP
 CALLREF {
@@ -810,7 +804,7 @@ CALLREF {
 }
 THROW 0
 
-.macro renounceOwnership_internal_macro
+.macro renounceOwnership_715018a6_internal_macro
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 15
 GETGLOB 9
 GETGLOB 11
@@ -832,7 +826,7 @@ PUSHREFSLICE {
 }
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 48
 CALLREF {
-	CALL $setOwnership_internal_macro$
+	CALL $setOwnership_a7016023_internal_macro$
 }
 .loc ../node_modules/@broxus/contracts/contracts/access/InternalOwner.sol, 0
 
@@ -890,13 +884,11 @@ PUSHCONT {
 	OVER
 	PUSHINT 64
 	DICTUGET
+	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 256
 	}
-	PUSHCONT {
-		PUSHINT 0
-	}
-	IFELSE
+	IF
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
@@ -1038,12 +1030,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHINT 512
+	PUSHPOW2 9
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -1061,7 +1053,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; havePubkey msgSlice
+	LDU 1 ; hasPubkey msgSlice
 	SWAP
 	THROWIF 58
 }

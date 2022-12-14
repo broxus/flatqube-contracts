@@ -3,7 +3,7 @@ const fs = require('fs');
 const logger = require('mocha-logger');
 
 const N_COINS = 2;
-const TOKEN_CONTRACTS_PATH = 'node_modules/ton-eth-bridge-token-contracts/build'
+const TOKEN_CONTRACTS_PATH = 'node_modules/tip3/build'
 const WEVER_CONTRACTS_PATH = 'node_modules/ton-wton/everscale/build'
 const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
 const BigNumber = require('bignumber.js');
@@ -37,9 +37,9 @@ const afterRun = async (tx) => {
 
 const displayTx = (_tx) => {
   if(locklift.tracing) {
-    console.log(`txId: ${_tx.id}`);
+    console.log(`txId: ${_tx.id.hash ? _tx.id.hash : _tx.id}`);
   } else {
-    console.log(`txId: ${_tx.transaction.id}`);
+    console.log(`txId: ${_tx.transaction.id.hash ? _tx.transaction.id.hash : _tx.transaction.id}`);
   }
 };
 
@@ -72,7 +72,7 @@ const Constants = {
     coin: {
       name: 'Coin',
       symbol: 'Coin',
-      decimals: 18,
+      decimals: 9,
       upgradeable: true
     },
     wever: {
@@ -125,6 +125,16 @@ class Migration {
     return contract;
   }
 
+  getAddress(alias) {
+    if (this.migration_log[alias] !== undefined) {
+      return this.migration_log[alias].address;
+    } else {
+      throw new Error(`Contract ${alias} not found in the migration`);
+    }
+
+    return undefined;
+  }
+
   store(contract, alias) {
     this.migration_log = {
       ...this.migration_log,
@@ -158,9 +168,21 @@ class Migration {
     }
     return d;
   }
+
+  async logGas() {
+    await this.balancesCheckpoint();
+    const diff = await this.balancesLastDiff();
+    if (diff) {
+      logger.log(`### GAS STATS ###`);
+      for (let alias in diff) {
+        logger.log(`${alias}: ${diff[alias].gt(0) ? '+' : ''}${diff[alias].toFixed(9)} EVER`);
+      }
+    }
+  }
 }
 
 function logExpectedDepositV2(expected, tokens) {
+  let N_COINS = tokens.length;
   logger.log(`Deposit: `);
   for (var i = 0; i < N_COINS; i++) {
     if (new BigNumber(expected.amounts[i]).gt(0)) {
@@ -196,7 +218,7 @@ function logExpectedDepositV2(expected, tokens) {
         `${expected.old_balances[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
     logger.log(`     change: ` +
         `${expected.result_balances[i].minus(expected.old_balances[i]).shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
-   logger.log(`     differences: ` +
+    logger.log(`     differences: ` +
         `${expected.differences[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
     logger.log(`     pool_fees: ` +
         `${expected.pool_fees[i].shiftedBy(-tokens[i].decimals).toFixed(tokens[i].decimals)}`);
@@ -251,7 +273,7 @@ async function expectedDepositLiquidity(pairAddress, contractName, tokens, amoun
 
   let LP_REWARD = "0";
 
-  if (contractName === "DexStablePair") {
+  if (contractName === "DexStablePair" || contractName === "DexStablePool") {
     const expected = await pair.call({
       method: 'expectedDepositLiquidityV2',
       params: {
@@ -282,6 +304,28 @@ async function expectedDepositLiquidity(pairAddress, contractName, tokens, amoun
   return LP_REWARD;
 }
 
+async function expectedDepositLiquidityOneCoin(poolAddress, tokens, amount, spent_token_root) {
+
+  const pool = await locklift.factory.getContract("DexStablePool");
+  pool.setAddress(poolAddress)
+
+  let LP_REWARD = "0";
+
+  const expected = await pool.call({
+    method: 'expectedDepositLiquidityOneCoin',
+    params: {
+      spent_token_root,
+      amount
+    }
+  });
+
+  LP_REWARD = new BigNumber(expected.lp_reward).shiftedBy(-9).toString();
+
+  logExpectedDepositV2(expected, tokens);
+
+  return LP_REWARD;
+}
+
 module.exports = {
   Migration,
   Constants,
@@ -295,6 +339,7 @@ module.exports = {
   TOKEN_CONTRACTS_PATH,
   EMPTY_TVM_CELL,
   expectedDepositLiquidity,
+  expectedDepositLiquidityOneCoin,
   logExpectedDeposit,
   logExpectedDepositV2
 }

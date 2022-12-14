@@ -150,7 +150,7 @@ const dexRootMigration = async (account, prev = false) => {
   // Load contracts' codes
   const DexRoot = await locklift.factory.getContract(prev ? 'DexRootPrev' : 'DexRoot');
   const DexPair = await locklift.factory.getContract(prev ? 'DexPairPrev' : 'DexPair');
-  const DexPlatform = await locklift.factory.getContract('DexPlatform');
+  const DexPlatform = await locklift.factory.getContract('DexPlatform', 'precompiled');
   const DexAccount = await locklift.factory.getContract('DexAccount');
 
   logger.log('Deploying DexRoot...');
@@ -214,7 +214,7 @@ const dexVaultMigration = async (
   dexRoot,
 ) => {
   // Load contracts' codes
-  const DexPlatform = await locklift.factory.getContract('DexPlatform');
+  const DexPlatform = await locklift.factory.getContract('DexPlatform', 'precompiled');
   const DexVault = await locklift.factory.getContract('DexVault');
   const DexVaultLpTokenPending = await locklift.factory.getContract('DexVaultLpTokenPending');
 

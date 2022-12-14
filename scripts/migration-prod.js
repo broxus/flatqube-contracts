@@ -71,7 +71,7 @@ async function main() {
 
   // ============ ROOT AND VAULT ============
   account.afterRun = afterRun;
-  const DexPlatform = await locklift.factory.getContract('DexPlatform');
+  const DexPlatform = await locklift.factory.getContract('DexPlatform', 'precompiled');
   const DexAccount = await locklift.factory.getContract('DexAccount');
   const DexPair = await locklift.factory.getContract('DexPair');
   const DexStablePair = await locklift.factory.getContract('DexStablePair');

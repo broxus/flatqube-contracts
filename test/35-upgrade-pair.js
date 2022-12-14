@@ -53,30 +53,54 @@ const loadPairData = async (pair, contractName) => {
 
   const token_roots = await pair.call({method: 'getTokenRoots'});
   data.lp_root = token_roots.lp;
-  data.left_root = token_roots.left;
-  data.right_root = token_roots.right;
+  console.log(token_roots);
+  if (contractName === 'DexStablePool') {
+    data.left_root = token_roots.roots[0];
+    data.right_root = token_roots.roots[1];
+  } else {
+    data.left_root = token_roots.left;
+    data.right_root = token_roots.right;
+  }
 
   data.active = await pair.call({method: 'isActive'});
 
   const token_wallets = await pair.call({method: 'getTokenWallets'});
   data.lp_wallet = token_wallets.lp;
-  data.left_wallet = token_wallets.left;
-  data.right_wallet = token_wallets.right;
+  if (contractName === 'DexStablePool') {
+    data.left_wallet = token_wallets.token_wallets[0];
+    data.right_wallet = token_wallets.token_wallets[1];
+  } else {
+    data.left_wallet = token_wallets.left;
+    data.right_wallet = token_wallets.right;
+  }
 
   const vault_token_wallets = await pair.call({method: 'getVaultWallets'});
-  data.vault_left_wallet = vault_token_wallets.left;
-  data.vault_right_wallet = vault_token_wallets.right;
+  if (contractName === 'DexStablePool') {
+    data.vault_left_wallet = vault_token_wallets.token_vault_wallets[0];
+    data.vault_right_wallet = vault_token_wallets.token_vault_wallets[1];
+  } else {
+    data.vault_left_wallet = vault_token_wallets.left;
+    data.vault_right_wallet = vault_token_wallets.right;
+  }
 
   const balances = await pair.call({method: 'getBalances'});
   data.lp_supply = balances.lp_supply.toString();
-  data.left_balance = balances.left_balance.toString();
-  data.right_balance = balances.right_balance.toString();
+  if (contractName=== 'DexStablePool') {
+    data.left_balance = balances.balances[0].toString();
+    data.right_balance = balances.balances[1].toString();
+  } else {
+    data.left_balance = balances.left_balance.toString();
+    data.right_balance = balances.right_balance.toString();
+  }
 
   const fee_params = await pair.call({method: 'getFeeParams'});
   data.fee_pool = fee_params.pool_numerator.div(fee_params.denominator).times(100).toString();
   data.fee_beneficiary = fee_params.beneficiary_numerator.div(fee_params.denominator).times(100).toString();
   data.fee_beneficiary_address = fee_params.beneficiary;
   data.threshold = fee_params.threshold;
+  if (contractName === 'DexPair' || contractName === 'DexStablePair') {
+    data.fee_referrer = fee_params.referrer_numerator.div(fee_params.denominator).times(100).toString();
+  }
   data.pool_type = (await pair.call({method: 'getPoolType'})).toNumber();
 
   return data;
@@ -94,7 +118,12 @@ describe('Test Dex Pair contract upgrade', async function () {
     account = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
     account.afterRun = afterRun;
     dexRoot = migration.load(await locklift.factory.getContract('DexRoot'), 'DexRoot');
-    dexPairFooBar = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPair' + tokenLeft.symbol + tokenRight.symbol);
+    if (migration.exists('DexPair' + tokenLeft.symbol + tokenRight.symbol)) {
+      dexPairFooBar = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPair' + tokenLeft.symbol + tokenRight.symbol);
+    } else {
+      dexPairFooBar = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPool' + tokenLeft.symbol + tokenRight.symbol);
+    }
+
     NewVersionContract = await locklift.factory.getContract(options.new_contract_name);
 
     targetVersion = new BigNumber(await dexRoot.call({method: 'getPairVersion', params: {pool_type: options.pool_type}})).toNumber();
@@ -207,6 +236,13 @@ describe('Test Dex Pair contract upgrade', async function () {
       expect(newPairData.fee_beneficiary_address)
           .to
           .equal(oldPairData.fee_beneficiary_address, 'New fee beneficiary value incorrect');
+
+      if (options.new_contract_name === 'DexPair' || options.new_contract_name === 'DexStablePair') {
+        expect(newPairData.fee_referrer)
+            .to
+            .not
+            .equal(undefined, 'New fee referrer value incorrect');
+      }
     });
   });
 });

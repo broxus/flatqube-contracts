@@ -32,8 +32,8 @@ async function main() {
 
   for (const p of pairs) {
 
-    const tokenLeft = Constants.tokens[p[0]];
-    const tokenRight = Constants.tokens[p[1]];
+    const tokenLeft = p[0].slice(-2) === 'Lp' ? {name: p[0], symbol: p[0], decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[p[0]];
+    const tokenRight = p[1].slice(-2) === 'Lp' ? {name: [p[1]], symbol: p[1], decimals: Constants.LP_DECIMALS, upgradeable: true} : Constants.tokens[p[1]];
 
     const pair = {left: tokenLeft.symbol, right: tokenRight.symbol};
 
