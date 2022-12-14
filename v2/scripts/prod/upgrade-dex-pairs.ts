@@ -20,22 +20,36 @@ async function main() {
     for(let indx in dexPairs) {
         const pairData = dexPairs[indx];
         console.log(`${1 + (+indx)}/${dexPairs.length}: Upgrading DexPair(${pairData.dexPair}). left = ${pairData.left}, right = ${pairData.right}`);
-
-        const tx = await locklift.transactions.waitFinalized(
-            // @ts-ignore
-            dexRoot.methods.upgradePair(
-                {
-                    left_root: pairData.left,
-                    right_root: pairData.right,
-                    pool_type: NewPoolType,
-                    send_gas_to: dexOwner.address
-                }
-            ).send({
-                from: dexOwner.address,
-                amount: toNano(6)
-            }));
-        displayTx(tx);
         console.log('');
+
+        // const tx = await locklift.transactions.waitFinalized(
+        //     // @ts-ignore
+        //     dexRoot.methods.upgradePair(
+        //         {
+        //             left_root: pairData.left,
+        //             right_root: pairData.right,
+        //             pool_type: NewPoolType,
+        //             send_gas_to: dexOwner.address
+        //         }
+        //     ).send({
+        //         from: dexOwner.address,
+        //         amount: toNano(6)
+        //     }));
+        // displayTx(tx);
+
+        dexRoot.methods.upgradePair(
+            {
+                left_root: pairData.left,
+                right_root: pairData.right,
+                pool_type: NewPoolType,
+                send_gas_to: dexOwner.address
+            }
+        ).send({
+            from: dexOwner.address,
+            amount: toNano(6)
+        }).catch(e => { /* ignored */ });
+
+        await new Promise(resolve => setTimeout(resolve, 3000));
     }
 }
 

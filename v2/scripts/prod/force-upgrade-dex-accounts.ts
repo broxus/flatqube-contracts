@@ -19,21 +19,33 @@ async function main() {
   for(let indx in dexAccounts) {
       const accountData = dexAccounts[indx];
       console.log(`${1 + (+indx)}/${dexAccounts.length}: Upgrading DexAccount(${accountData.dexAccount}). owner = ${accountData.owner}`);
-
-      const tx = await locklift.transactions.waitFinalized(
-          // @ts-ignore
-          dexRoot.methods.forceUpgradeAccount(
-              {
-                  account_owner: accountData.owner,
-                  send_gas_to: dexOwner.address
-              }
-          ).send({
-              from: dexOwner.address,
-              amount: toNano(6)
-          }));
-
-      displayTx(tx);
       console.log(``);
+      // const tx = await locklift.transactions.waitFinalized(
+      //     // @ts-ignore
+      //     dexRoot.methods.forceUpgradeAccount(
+      //         {
+      //             account_owner: accountData.owner,
+      //             send_gas_to: dexOwner.address
+      //         }
+      //     ).send({
+      //         from: dexOwner.address,
+      //         amount: toNano(6)
+      //     }));
+      //
+      // displayTx(tx);
+      // console.log(``);
+
+      dexRoot.methods.forceUpgradeAccount(
+          {
+              account_owner: accountData.owner,
+              send_gas_to: dexOwner.address
+          }
+      ).send({
+          from: dexOwner.address,
+          amount: toNano(6)
+      }).catch(e => { /* ignored */ });
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
   }
 }
 
