@@ -47,12 +47,12 @@ contract OrderPlatform is IOrderFeeParams{
 		builder.store(uint32(0));
 		builder.store(version);
 		builder.store(sendGasTo);
-		builder.store(params);
 		builder.store(callbackId);
 		TvmBuilder feeBuilder;
 		feeBuilder.store(fee_.numerator);
 		feeBuilder.store(fee_.denominator);
-		builder.storeRef(feeBuilder);
+		builder.store(feeBuilder.toCell());
+		builder.store(params);
 
 
 		
