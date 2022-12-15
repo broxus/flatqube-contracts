@@ -1,7 +1,7 @@
 pragma ton-solidity >= 0.57.0;
 
-interface IOnOrderRootCreateResult {
-    struct OnOrderRootCreateResult {
+interface IOrderRootCreateResult {
+    struct OrderRootCreateResult {
         address factory;
         address spentToken;
         uint32 oldVersion;

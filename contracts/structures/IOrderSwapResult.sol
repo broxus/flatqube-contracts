@@ -1,0 +1,9 @@
+pragma ton-solidity >= 0.57.0;
+
+interface IOrderSwapResult {
+    struct OrderSwapResult {
+        address owner;
+		address initiator;
+        uint128 reward;
+    }
+}

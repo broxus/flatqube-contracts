@@ -7,12 +7,12 @@ pragma AbiHeader pubkey;
 import "./libraries/OrderGas.sol";
 import "./libraries/OrderErrors.sol";
 import "./interfaces/IOrderRoot.sol";
-
-import "./Order.sol";
-
 import "./interfaces/IOrderFactory.sol";
 import "./interfaces/IOrderOperationCallback.sol";
 
+import "./structures/IOrderRootCreateResult.sol";
+
+import "./Order.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
@@ -87,18 +87,19 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     }
 
     function buildPayload(
+        uint64 callbackId,
         address tokenReceive,
         uint128 expectedTokenAmount,
         uint128 deployWalletValue,
-        uint256 backPK,
-        uint64 callbackId
+        uint256 backPK
     ) external pure returns (TvmCell) {
         TvmBuilder builder;
+        builder.store(callbackId);
         builder.store(tokenReceive);
         builder.store(expectedTokenAmount);
         builder.store(deployWalletValue);
         builder.store(backPK);
-        builder.store(callbackId);
+
         return builder.toCell();
     }
 
@@ -118,12 +119,12 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             msg.sender == spentTokenWallet) 
         {
             (
+                uint64 callbackId,
                 address receiveToken,
                 uint128 expectedAmount,
                 uint128 deployWalletValue,
-                uint256 backPubKey,
-                uint64 callbackId
-            ) = payloadSlice.decode(address, uint128, uint128, uint256, uint64);
+                uint256 backPubKey
+            ) = payloadSlice.decode(uint64, address, uint128, uint128, uint256);
 
             TvmCell indexCode = buildCode(
                 receiveToken,
@@ -148,25 +149,14 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 value: OrderGas.OPERATION_CALLBACK_BASE,
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 bounce: false
-            }(
-                callbackId,
-                ICreateOrderResult.CreateOrderResult(
-                    orderAddress,
-                    tokenRoot,
-                    amount,
-                    receiveToken,
-                    expectedAmount
-                )
-            );
+            }(callbackId);
 
             ITokenRoot(receiveToken).deployWallet { 
                 value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: OrderRoot.onTokenWalletReceive
             }(
-                sender,
-                OrderGas.DEPLOY_EMPTY_WALLET_GRAMS
-            );
+                sender, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
             ITokenWallet(msg.sender).transfer{
                 value: 0, flag: MsgFlag.ALL_NOT_RESERVED,
@@ -181,27 +171,12 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             );
         } else {
             if (payloadSlice.bits() == 843){
-                (
-                    address receiveToken,
-                    uint128 expectedAmount,
-                    ,
-                    ,
-                    uint64 callbackId
-                ) = payloadSlice.decode(address, uint128, uint128, uint256, uint64);
-
+                uint64 callbackId = payloadSlice.decode(uint64);
                 IOrderOperationCallback(msg.sender).onOrderCreateOrderReject{
                     value: OrderGas.OPERATION_CALLBACK_BASE,
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
-                }(
-                    callbackId,
-                    ICreateOrderRejectResult.CreateOrderRejectResult(
-                        tokenRoot,
-                        amount,
-                        receiveToken,
-                        expectedAmount
-                    )
-                );
+                }(callbackId);
             }
 
             TvmCell emptyPayload;
@@ -324,7 +299,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         uint32 oldVersion;
         uint32 newVersion;
         address _deployer;
-//267 - 929
+
         if (sl.bits() >= 929){
             (
                 _factory,
@@ -375,7 +350,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
 				bounce: false
         }(
             callbackId,
-            IOnOrderRootCreateResult.OnOrderRootCreateResult(
+            IOrderRootCreateResult.OrderRootCreateResult(
                 _factory,
                 _spentToken,
                 oldVersion,
