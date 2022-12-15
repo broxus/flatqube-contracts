@@ -1,4 +1,4 @@
-.version sol 0.61.2
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -23,8 +23,9 @@ PUSHCONT {
 }
 IFELSE
 LDMSGADDR
+LDU 64
 ENDS
-.loc ../contracts/OrderPlatform.sol, 19
+.loc ../contracts/OrderPlatform.sol, 20
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -35,15 +36,15 @@ GETGLOB 10
 SDEQ
 AND
 PUSHCONT {
-	.loc ../contracts/OrderPlatform.sol, 20
-	BLKPUSH 3, 2
+	.loc ../contracts/OrderPlatform.sol, 21
+	BLKPUSH 4, 3
 	CALLREF {
-		CALL $initialize_internal_macro$
+		CALL $initialize_134125f4_internal_macro$
 	}
 }
 PUSHCONT {
-	.loc ../contracts/OrderPlatform.sol, 22
-	DUP
+	.loc ../contracts/OrderPlatform.sol, 23
+	OVER
 	NEWC
 	STSLICECONST x42_
 	STSLICE
@@ -57,39 +58,42 @@ PUSHCONT {
 }
 IFELSE
 .loc ../contracts/OrderPlatform.sol, 0
-BLKDROP 3
+BLKDROP 4
 CALLREF {
 	CALL $c7_to_c4$
 }
 THROW 0
 
-.globl	initialize_internal
-.type	initialize_internal, @function
-CALL $initialize_internal_macro$
+.globl	initialize_134125f4_internal
+.type	initialize_134125f4_internal, @function
+CALL $initialize_134125f4_internal_macro$
 
-.macro initialize_internal_macro
-.loc ../contracts/OrderPlatform.sol, 37
+.macro initialize_134125f4_internal_macro
+.loc ../contracts/OrderPlatform.sol, 39
 GETGLOB 10
 NEWC
 STSLICE
-.loc ../contracts/OrderPlatform.sol, 38
+.loc ../contracts/OrderPlatform.sol, 40
 GETGLOB 11
 STSLICER
-.loc ../contracts/OrderPlatform.sol, 39
-STSLICECONST x00000000
-.loc ../contracts/OrderPlatform.sol, 40
-XCHG S1, S2
-STU 32
 .loc ../contracts/OrderPlatform.sol, 41
-STSLICE
+STSLICECONST x00000000
 .loc ../contracts/OrderPlatform.sol, 42
+ROLL 3
+STUR 32
+.loc ../contracts/OrderPlatform.sol, 43
+XCHG S1, S2
+STSLICE
+.loc ../contracts/OrderPlatform.sol, 44
 GETGLOB 12
 SWAP
 STREF
-.loc ../contracts/OrderPlatform.sol, 44
+.loc ../contracts/OrderPlatform.sol, 45
+STU 64
+.loc ../contracts/OrderPlatform.sol, 48
 OVER
 SETCODE
-.loc ../contracts/OrderPlatform.sol, 45
+.loc ../contracts/OrderPlatform.sol, 49
 SWAP
 CTOS
 DUP
@@ -104,7 +108,7 @@ PLDREF
 CTOS
 BLESS
 POP C3
-.loc ../contracts/OrderPlatform.sol, 47
+.loc ../contracts/OrderPlatform.sol, 51
 ENDC
 CALLREF {
 	CALL $:onCodeUpgrade$
@@ -325,7 +329,7 @@ THROW 60
 
 .macro public_function_selector
 DUP
-PUSHINT 1094808157
+PUSHINT 1662095883
 EQUAL
 IFJMPREF {
 	CALL $constructor$

@@ -1,22 +1,17 @@
 import { LockliftConfig } from 'locklift';
-import {GiverWallet} from "./giverSettings";
-// import { FactorySource } from './build/factorySource';
-// import { SimpleGiver } from './giver';
+import { FactorySource } from './build/factorySource';
+import { SimpleGiver } from './giverSettings';
+// import {GiverWallet} from "./giverSettings";
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   const locklift: import('locklift').Locklift<FactorySource>;
 }
 
 const LOCAL_NETWORK_ENDPOINT = 'http://0.0.0.0/graphql';
 
-// const LOCAL_NETWORK_ENDPOINT =
-//   'https://evernode-no-limits.fairyfromalfeya.com/graphql';
-
 const config: LockliftConfig = {
   compiler: {
-    version: '0.61.2',
+    version: '0.62.0',
     externalContracts: {
       'node_modules/ton-eth-bridge-token-contracts/build': [
         'TokenRootUpgradeable',
@@ -41,7 +36,7 @@ const config: LockliftConfig = {
       },
       giver: {
         giverFactory: (ever, keyPair, address) =>
-          new GiverWallet(ever, keyPair, address),
+          new SimpleGiver(ever, keyPair, address),
         address:
           '0:ece57bcc6c530283becbbd8a3b24d3c5987cdddc3c8b7b33be6e4a6312490415',
         key: '172af540e43a524763dd53b26a066d472a97c4de37d5498170564510608250c3',
