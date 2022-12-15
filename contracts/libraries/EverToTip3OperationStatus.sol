@@ -1,4 +1,4 @@
-pragma ton-solidity >= 0.57.0;
+pragma ton-solidity >= 0.62.0;
 
 library EverToTip3OperationStatus {
     uint8 constant SUCCESS = 0;

@@ -1,78 +1,112 @@
-pragma ton-solidity >= 0.57.0;
+pragma ton-solidity >= 0.62.0;
 
 pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
 import "../libraries/DexPlatformTypes.sol";
+
 import "../DexPlatform.sol";
 
-
 abstract contract DexContractBase  {
-
     TvmCell public platform_code;
 
-    modifier onlyPlatform(uint8 type_id, TvmCell params) {
-        address expected = address(tvm.hash(_buildInitData(type_id, params)));
+    modifier onlyPlatform(
+        uint8 _typeId,
+        TvmCell _params
+    ) {
+        address expected = address(
+            tvm.hash(
+                _buildInitData(
+                    _typeId,
+                    _params
+                )
+            )
+        );
+
         require(msg.sender == expected, DexErrors.NOT_PLATFORM);
         _;
     }
 
-    modifier onlyAccount(address account_owner) {
-        require(msg.sender == _expectedAccountAddress(account_owner), DexErrors.NOT_ACCOUNT);
+    modifier onlyAccount(address _accountOwner) {
+        require(msg.sender == _expectedAccountAddress(_accountOwner), DexErrors.NOT_ACCOUNT);
         _;
     }
 
-    modifier onlyPair(address left_root, address right_root) {
-        require(msg.sender == _expectedPairAddress(left_root, right_root), DexErrors.NOT_PAIR);
+    modifier onlyPool(address[] _roots) {
+        require(msg.sender == _expectedPoolAddress(_roots), DexErrors.NOT_POOL);
         _;
     }
 
-    function _expectedAccountAddress(address account_owner) internal view returns (address) {
-        return address(tvm.hash(_buildInitData(
-            DexPlatformTypes.Account,
-            _buildAccountParams(account_owner)
-        )));
+    function _dexRoot() virtual internal view returns (address);
+
+    function _expectedAccountAddress(address _accountOwner) internal view returns (address) {
+        return address(
+            tvm.hash(
+                _buildInitData(
+                    DexPlatformTypes.Account,
+                    _buildAccountParams(_accountOwner)
+                )
+            )
+        );
     }
 
-    function _expectedPairAddress(address left_root, address right_root) internal view returns (address) {
-        return address(tvm.hash(_buildInitData(
-            DexPlatformTypes.Pool,
-            _buildPairParams(left_root, right_root)
-        )));
+    function _expectedPoolAddress(address[] _roots) internal view returns (address) {
+        return address(
+            tvm.hash(
+                _buildInitData(
+                    DexPlatformTypes.Pool,
+                    _buildPairParams(_roots)
+                )
+            )
+        );
     }
 
-    function _buildAccountParams(address account_owner) internal pure returns (TvmCell) {
+    function _buildAccountParams(address _accountOwner) internal pure returns (TvmCell) {
         TvmBuilder builder;
-        builder.store(account_owner);
+
+        builder.store(_accountOwner);
+
         return builder.toCell();
     }
 
-    function _buildPairParams(address left_root, address right_root) internal pure returns (TvmCell) {
-        TvmBuilder builder;
-        if (left_root.value < right_root.value) {
-            builder.store(left_root);
-            builder.store(right_root);
-        } else {
-            builder.store(right_root);
-            builder.store(left_root);
+    function _buildPairParams(address[] _roots) internal pure returns (TvmCell) {
+        mapping(address => uint8) sorted;
+
+        for (address root : _roots) {
+            sorted[root] = 0;
         }
-        return builder.toCell();
+
+        if (_roots.length < 3) {
+            TvmBuilder builder;
+
+            for ((address key,) : sorted) {
+                builder.store(key);
+            }
+
+            return builder.toCell();
+        } else {
+            address[] r = new address[](0);
+            for ((address key,) : sorted) {
+                r.push(key);
+            }
+            return abi.encode(r);
+        }
     }
 
-    function _buildInitData(uint8 type_id, TvmCell params) internal view returns (TvmCell) {
+    function _buildInitData(
+        uint8 _typeId,
+        TvmCell _params
+    ) internal view returns (TvmCell) {
         return tvm.buildStateInit({
             contr: DexPlatform,
             varInit: {
                 root: _dexRoot(),
-                type_id: type_id,
-                params: params
+                type_id: _typeId,
+                params: _params
             },
             pubkey: 0,
             code: platform_code
         });
     }
-
-    function _dexRoot() virtual internal view returns (address);
-
 }

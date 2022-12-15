@@ -1,4 +1,4 @@
-pragma ton-solidity >= 0.57.0;
+pragma ton-solidity >= 0.62.0;
 
 import "./IDexPair.sol";
 import "../structures/IAmplificationCoefficient.sol";
