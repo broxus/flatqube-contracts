@@ -4,7 +4,7 @@ const program = new Command();
 
 program
     .allowUnknownOption()
-    .option('-rcn, --root_contract_name <root_contract_name>', 'DexPair contract name')
+    .option('-rcn, --root_contract_name <root_contract_name>', 'DexRoot contract name')
     .option('-pcn, --pair_contract_name <pair_contract_name>', 'DexPair contract name')
     .option('-acn, --account_contract_name <account_contract_name>', 'DexAccount contract name')
     .option('-o, --new_owner <new_owner>', 'DexAccount contract name');

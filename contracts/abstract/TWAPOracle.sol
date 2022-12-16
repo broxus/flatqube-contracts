@@ -89,13 +89,21 @@ abstract contract TWAPOracle is ITWAPOracle {
 
     function observation(
         uint32 _timestamp,
+        address _callbackTo,
         TvmCell _payload
     ) external view override {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        IOnObservationCallback(msg.sender)
-            .onObservationCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (_tryGetObservationByTimestamp(_timestamp), _payload);
+        IOnObservationCallback(_callbackTo)
+            .onObservationCallback{
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED,
+                bounce: false
+            }(
+                _tryGetObservationByTimestamp(_timestamp),
+                msg.sender,
+                _payload
+            );
     }
 
     function getRate(
@@ -121,8 +129,16 @@ abstract contract TWAPOracle is ITWAPOracle {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         IOnRateCallback(_callbackTo)
-            .onRateCallback{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (_calculateRate(_fromTimestamp, _toTimestamp), _reserves(), _payload);
+            .onRateCallback{
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED,
+                bounce: false
+            }(
+                _calculateRate(_fromTimestamp, _toTimestamp),
+                _reserves(),
+                msg.sender,
+                _payload
+            );
     }
 
     function getExpectedAmountByTWAP(
@@ -217,6 +233,11 @@ abstract contract TWAPOracle is ITWAPOracle {
         // Calculate the interval between points and get current reserves
         uint32 timeElapsed = _timestamp - lastTimestamp;
         uint128[] reserves = _reserves();
+
+        // Check that pair has reserves
+        if (reserves[0] == 0 || reserves[1] == 0) {
+            return Observation(0, 0, 0);
+        }
 
         // Checking can oracle write this point or return an empty point
         if (timeElapsed < _options.minInterval) {

@@ -1,4 +1,4 @@
-pragma ton-solidity >= 0.57.0;
+pragma ton-solidity >= 0.62.0;
 
 pragma AbiHeader time;
 pragma AbiHeader expire;
@@ -8,17 +8,18 @@ import "./libraries/EverToTip3Gas.sol";
 import "./libraries/EverToTip3Errors.sol";
 import "./libraries/DexOperationTypes.sol";
 import "./libraries/EverToTip3OperationStatus.sol";
+import "./libraries/DexOperationStatusV2.sol";
 
 import "./interfaces/IEverTip3SwapEvents.sol";
 import "./interfaces/IEverTip3SwapCallbacks.sol";
 
-import "./structures/ITokenOperationStructure.sol";
+import "./structures/INextExchangeData.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensBurnCallback.sol";
+import "tip3/contracts/interfaces/ITokenRoot.sol";
+import "tip3/contracts/interfaces/ITokenWallet.sol";
+import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.sol";
+import "tip3/contracts/interfaces/IAcceptTokensBurnCallback.sol";
 
 contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTip3SwapEvents {
 
@@ -57,16 +58,20 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
     function buildExchangePayload(
         address pair,
         uint64 id,
-        uint128 expectedAmount
+        uint128 expectedAmount,
+        address recipient,
+        optional(address) outcoming
     ) public pure returns (TvmCell) {
         TvmBuilder builder;
         TvmBuilder pairPayload;
 
-        //328
-        pairPayload.store(DexOperationTypes.EXCHANGE);
+        //595
+        pairPayload.store(DexOperationTypes.EXCHANGE_V2);
         pairPayload.store(id);
         pairPayload.store(uint128(0));
         pairPayload.store(expectedAmount);
+        pairPayload.store(recipient);
+        pairPayload.store(outcoming.hasValue() ? outcoming.get() : address(0));
 
         TvmBuilder successPayload;
         successPayload.store(EverToTip3OperationStatus.SUCCESS);
@@ -86,34 +91,49 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         return builder.toCell();
     }
 
+    struct Tip3ToEverExchangeStep {
+        uint128 amount;
+        address pool;
+        address outcoming;
+        uint128 numerator;
+        uint32[] nextStepIndices;
+    }
+
+    // Payload constructor swap TIP-3 -> Ever via split-cross-pool
     function buildCrossPairExchangePayload(
-        address pair,
+        address pool,
         uint64 id,
         uint128 deployWalletValue,
         uint128 expectedAmount,
-        ITokenOperationStructure.TokenOperation[] steps
-    ) public pure returns (TvmCell) {
+        address outcoming,
+        uint32[] nextStepIndices,
+        Tip3ToEverExchangeStep[] steps,
+        address recipient
+    ) public returns (TvmCell) {
         require(steps.length > 0);
 
         TvmBuilder builder;
         TvmBuilder pairPayload;
 
-        // 595
-        pairPayload.store(DexOperationTypes.CROSS_PAIR_EXCHANGE);
+        pairPayload.store(DexOperationTypes.CROSS_PAIR_EXCHANGE_V2);
         pairPayload.store(id);
         pairPayload.store(deployWalletValue);
         pairPayload.store(expectedAmount);
-        pairPayload.store(steps[0].root);
+        pairPayload.store(recipient);
+        pairPayload.store(outcoming);
 
-        TvmBuilder nextStepBuilder;
-        nextStepBuilder.store(steps[steps.length - 1].amount);
-
-        for (uint i = steps.length - 1; i > 0; i--) {
-            TvmBuilder currentStepBuilder;
-            currentStepBuilder.store(steps[i - 1].amount, steps[i].root);
-            currentStepBuilder.store(nextStepBuilder.toCell());
-            nextStepBuilder = currentStepBuilder;
+        INextExchangeData.NextExchangeData[] nextSteps;
+        for (uint32 idx : nextStepIndices) {
+            (TvmCell nextPayload, uint32 nestedNodes, uint32 leaves) = _encodeCrossPairExchangeData(steps, idx);
+            nextSteps.push(INextExchangeData.NextExchangeData(
+                steps[idx].numerator,
+                steps[idx].pool,
+                nextPayload,
+                nestedNodes,
+                leaves
+            ));
         }
+        TvmCell nextStepsCell = abi.encode(nextSteps);
 
         TvmBuilder successPayload;
         successPayload.store(EverToTip3OperationStatus.SUCCESS);
@@ -124,15 +144,42 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         cancelPayload.store(id);
         cancelPayload.store(deployWalletValue);
 
-        pairPayload.storeRef(nextStepBuilder);
+        pairPayload.store(nextStepsCell);
         pairPayload.storeRef(successPayload);
         pairPayload.storeRef(cancelPayload);
 
         builder.store(EverToTip3OperationStatus.SWAP);
-        builder.store(pair);
+        builder.store(pool);
         builder.storeRef(pairPayload);
 
         return builder.toCell();
+    }
+
+    function _encodeCrossPairExchangeData(
+        Tip3ToEverExchangeStep[] _steps,
+        uint32 _currentIdx
+    ) private returns (TvmCell, uint32, uint32) {
+        INextExchangeData.NextExchangeData[] nextSteps;
+        uint32 nextLevelNodes = 0;
+        uint32 nextLevelLeaves = 0;
+        for (uint32 idx : _steps[_currentIdx].nextStepIndices) {
+            (TvmCell nextPayload, uint32 nestedNodes, uint32 leaves) = _encodeCrossPairExchangeData(_steps, idx);
+            nextLevelNodes += nestedNodes;
+            nextLevelLeaves += leaves;
+            nextSteps.push(INextExchangeData.NextExchangeData(
+                _steps[idx].numerator,
+                _steps[idx].pool,
+                nextPayload,
+                nestedNodes,
+                leaves
+            ));
+        }
+
+        return (
+            abi.encode(_steps[_currentIdx].amount, _steps[_currentIdx].outcoming, nextSteps),
+            nextLevelNodes + uint32(nextSteps.length),
+            nextSteps.length > 0 ? nextLevelLeaves : 1
+        );
     }
 
     // Callback result swap
@@ -147,6 +194,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         require(msg.sender.value != 0);
         tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
 
+        bool needCancel = false;
         TvmSlice payloadSlice = payload.toSlice();
 
         uint8 operationStatus = EverToTip3OperationStatus.UNKNOWN;
@@ -171,47 +219,66 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
                 true,
                 ref1
             );
-        } else if (
-            payloadSlice.bits() == 192 &&
-            operationStatus == EverToTip3OperationStatus.CANCEL
-        ) {
-            (uint64 id_, uint128 deployWalletValue_) = payloadSlice.decode(uint64, uint128);
-            TvmBuilder payloadID;
-            payloadID.store(id_);
+        } else if (operationStatus == DexOperationStatusV2.SUCCESS || operationStatus == DexOperationStatusV2.CANCEL) {
 
-            emit SwapTip3EverCancelTransfer(user, id_, amount, tokenRoot);
-            IEverTip3SwapCallbacks(user).onSwapTip3ToEverCancel{
-                value: 0,
-                flag: MsgFlag.SENDER_PAYS_FEES,
-                bounce: false
-            }(id_, amount, tokenRoot);
+            TvmSlice everToTip3PayloadSlice;
+            if (payloadSlice.refs() >= 1) {
+                everToTip3PayloadSlice = payloadSlice.loadRefAsSlice();
+            }
 
-            ITokenWallet(msg.sender).transfer{value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false}(
-                amount,
-                user,
-                deployWalletValue_,
-                user,
-                true,
-                payloadID.toCell()
-            );
-        } else if(
-            payloadSlice.bits() == 64 &&
-            operationStatus == EverToTip3OperationStatus.SUCCESS &&
-            (msg.sender.value != 0 && msg.sender == weverWallet)
-        ) {
-            uint64 id_ = payloadSlice.decode(uint64);
-            TvmBuilder payloadID;
-            payloadID.store(id_);
+            uint8 everToTip3OperationStatus;
+            if (everToTip3PayloadSlice.bits() >= 8) {
+                everToTip3OperationStatus = everToTip3PayloadSlice.decode(uint8);
+            }
 
-            ITokenWallet(weverWallet).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
-                amount,
-                weverVault,
-                uint128(0),
-                user,
-                true,
-                payloadID.toCell()
-            );
+            if (
+                everToTip3PayloadSlice.bits() == 192 &&
+                everToTip3OperationStatus == EverToTip3OperationStatus.CANCEL
+            ) {
+                (uint64 id_, uint128 deployWalletValue_) = everToTip3PayloadSlice.decode(uint64, uint128);
+                TvmBuilder payloadID;
+                payloadID.store(id_);
+
+                emit SwapTip3EverCancelTransfer(user, id_, amount, tokenRoot);
+                IEverTip3SwapCallbacks(user).onSwapTip3ToEverCancel{
+                    value: 0,
+                    flag: MsgFlag.SENDER_PAYS_FEES,
+                    bounce: false
+                }(id_, amount, tokenRoot);
+
+                ITokenWallet(msg.sender).transfer{value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false}(
+                    amount,
+                    user,
+                    deployWalletValue_,
+                    user,
+                    true,
+                    payloadID.toCell()
+                );
+            } else if (
+                everToTip3PayloadSlice.bits() == 64 &&
+                everToTip3OperationStatus == EverToTip3OperationStatus.SUCCESS &&
+                (msg.sender.value != 0 && msg.sender == weverWallet)
+            ) {
+                uint64 id_ = everToTip3PayloadSlice.decode(uint64);
+                TvmBuilder payloadID;
+                payloadID.store(id_);
+
+                ITokenWallet(weverWallet).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
+                    amount,
+                    weverVault,
+                    uint128(0),
+                    user,
+                    true,
+                    payloadID.toCell()
+                );
+            } else {
+                needCancel = true;
+            }
         } else {
+            needCancel = true;
+        }
+
+        if (needCancel) {
             TvmCell emptyPayload;
             ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
                 amount,

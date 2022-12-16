@@ -88,17 +88,6 @@ async function dexAccountBalances(account) {
     return {foo, bar, lp};
 }
 
-async function logGas() {
-    await migration.balancesCheckpoint();
-    const diff = await migration.balancesLastDiff();
-    if (diff) {
-        logger.log(`### GAS STATS ###`);
-        for (let alias in diff) {
-            logger.log(`${alias}: ${diff[alias].gt(0) ? '+' : ''}${diff[alias].toFixed(9)} TON`);
-        }
-    }
-}
-
 describe('Check DEX accounts interaction', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
     before('Load contracts', async function () {
@@ -220,7 +209,7 @@ describe('Check DEX accounts interaction', async function () {
             });
 
             displayTx(tx);
-            
+
             const dexAccount3 = await DexRoot.call({
                 method: 'getExpectedAccountAddress',
                 params: {
@@ -234,7 +223,7 @@ describe('Check DEX accounts interaction', async function () {
             const accountEnd = await account3balances();
             logger.log(`Account balance end: ${accountEnd.foo} FOO, ${accountEnd.bar} BAR, ` +
                 `${accountEnd.lp} LP, ${accountEnd.ton} TON`);
-            await logGas();
+            await migration.logGas();
 
             expect((await locklift.ton.getAccountType(DexAccount3.address)).acc_type)
                 .to
@@ -282,7 +271,7 @@ describe('Check DEX accounts interaction', async function () {
                 `${dexAccount2End.foo} FOO, ${dexAccount2End.bar} BAR, ${dexAccount2End.lp} LP`);
             logger.log(`DexAccount#3 balance end: ` +
                 `${dexAccount3End.foo} FOO, ${dexAccount3End.bar} BAR, ${dexAccount3End.lp} LP`);
-            await logGas();
+            await migration.logGas();
 
             expect(dexAccount2Start.foo).to.equal(dexAccount2End.foo, 'Wrong DexAccount#2 FOO balance');
             expect(dexAccount3Start.foo).to.equal(dexAccount3End.foo, 'Wrong DexAccount#3 FOO balance');
@@ -325,7 +314,7 @@ describe('Check DEX accounts interaction', async function () {
                 `${dexAccount2End.foo} FOO, ${dexAccount2End.bar} BAR, ${dexAccount2End.lp} LP`);
             logger.log(`DexAccount#3 balance end: ` +
                 `${dexAccount3End.foo} FOO, ${dexAccount3End.bar} BAR, ${dexAccount3End.lp} LP`);
-            await logGas();
+            await migration.logGas();
 
             const expectedDexAccount2Bar = new BigNumber(dexAccount2Start.bar)
                 .minus(AMOUNT_TO_TRANSFER).toString();
@@ -373,7 +362,7 @@ describe('Check DEX accounts interaction', async function () {
                 `${dexAccount2End.foo} FOO, ${dexAccount2End.bar} BAR, ${dexAccount2End.lp} LP`);
             logger.log(`DexAccount#3 balance end: ` +
                 `${dexAccount3End.foo} FOO, ${dexAccount3End.bar} BAR, ${dexAccount3End.lp} LP`);
-            await logGas();
+            await migration.logGas();
 
             const expectedDexAccount2Bar = new BigNumber(dexAccount2Start.bar)
                 .minus(AMOUNT_TO_TRANSFER).toString();
@@ -431,7 +420,7 @@ describe('Check DEX accounts interaction', async function () {
                 `${accountEnd.ton} TON`);
             logger.log(`DexAccount#3 balance end: ` +
                 `${dexAccount3End.foo} FOO, ${dexAccount3End.bar} BAR, ${dexAccount3End.lp} LP`);
-            await logGas();
+            await migration.logGas();
 
             expect(new BigNumber(dexAccount3Start.bar).plus(TOKENS_TO_DEPOSIT).toString())
                 .to.equal(dexAccount3End.bar, 'Wrong DexAccount#3 BAR balance');
@@ -477,7 +466,7 @@ describe('Check DEX accounts interaction', async function () {
             });
 
             displayTx(tx);
-            
+
             const dexAccount3end = await dexAccountBalances(DexAccount3);
             logger.log(`DexAccount#3 balance end: ` +
                 `${dexAccount3end.foo} FOO, ${dexAccount3end.bar} BAR, ${dexAccount3end.lp} LP`);

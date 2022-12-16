@@ -1,4 +1,4 @@
-pragma ton-solidity >= 0.57.0;
+pragma ton-solidity >= 0.62.0;
 
 pragma AbiHeader time;
 pragma AbiHeader expire;
@@ -9,13 +9,13 @@ import "./libraries/EverToTip3Errors.sol";
 import "./libraries/EverToTip3Payloads.sol";
 
 import "./interfaces/IEverVault.sol";
-import "./structures/ITokenOperationStructure.sol";
+import "./structures/INextExchangeData.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensBurnCallback.sol";
+import "tip3/contracts/interfaces/ITokenRoot.sol";
+import "tip3/contracts/interfaces/ITokenWallet.sol";
+import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.sol";
+import "tip3/contracts/interfaces/IAcceptTokensBurnCallback.sol";
 
 contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback {
 
@@ -57,21 +57,44 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         uint64 id,
         uint128 deployWalletValue,
         uint128 expectedAmount,
-        uint128 amount
+        uint128 amount,
+        address recipient,
+        optional(address) outcoming
     ) external pure returns (TvmCell) {
-        return EverToTip3Payloads.buildExchangePayload(pair, id, deployWalletValue, expectedAmount, amount);
+        return EverToTip3Payloads.buildExchangePayload(
+            pair,
+            id,
+            deployWalletValue,
+            expectedAmount,
+            amount,
+            recipient,
+            outcoming.hasValue() ? outcoming.get() : address(0)
+        );
     }
 
-    // Payload constructor swap Ever -> Tip-3 via cross-pair
+    // Payload constructor swap Ever -> Tip-3 via split-cross-pool
     function buildCrossPairExchangePayload(
-        address pair,
+        address pool,
         uint64 id,
         uint128 deployWalletValue,
         uint128 expectedAmount,
-        ITokenOperationStructure.TokenOperation[] steps,
-        uint128 amount
+        address outcoming,
+        uint32[] nextStepIndices,
+        EverToTip3Payloads.EverToTip3ExchangeStep[] steps,
+        uint128 amount,
+        address recipient
     ) external pure returns (TvmCell) {
-        return EverToTip3Payloads.buildCrossPairExchangePayload(pair, id, deployWalletValue, expectedAmount, steps, amount);
+        return EverToTip3Payloads.buildCrossPairExchangePayload(
+            pool,
+            id,
+            deployWalletValue,
+            expectedAmount,
+            outcoming,
+            nextStepIndices,
+            steps,
+            amount,
+            recipient
+        );
     }
 
      //Callback
