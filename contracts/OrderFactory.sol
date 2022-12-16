@@ -178,9 +178,30 @@ contract OrderFactory is IOrderFactory {
 	function setFeeParams(OrderFeeParams params) override external onlyOwner {
         require(params.denominator != 0 && params.numerator != 0,
             OrderErrors.WRONG_FEE_PARAMS);
+		tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
+
 		fee = params;
 
 		emit OrderFeesParamsUpdated(fee);
+		owner.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
+	}
+
+	function setRootFeeParams(OrderFeeParams params, address root) override external onlyOwner {
+        require(params.denominator != 0 && params.numerator != 0,
+            OrderErrors.WRONG_FEE_PARAMS);
+		tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
+
+		IOrderRoot(root).setFeeParams{
+			value: OrderGas.SET_FEE_PARAMS_VALUE,
+			flag: MsgFlag.SENDER_PAYS_FEES,
+			bounce: false
+		}(
+			params
+		);
 		owner.transfer(
 			0,
 			false,

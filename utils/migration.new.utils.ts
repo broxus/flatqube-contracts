@@ -395,7 +395,7 @@ export const orderRootMigration = async (
         amount: locklift.utils.toNano(20),
         from: account.address
       }
-  )
+  ), {allowedCodes: {compute: [60]}}
   )
 
 

@@ -287,7 +287,8 @@ describe('OrderTest', () => {
         console.log(`BarWallet6: ${barWallet6.address}`);
         console.log(`TstWallet6: ${tstWallet6.address}`);
         console.log('')
-
+        const fees = await RootOrderBar.methods.getFeeParams({answerId: 0}).call()
+        console.log(`Fees = ${fees.params}`)
     });
 
     describe('Direct execution Order', async () => {
@@ -337,7 +338,7 @@ describe('OrderTest', () => {
                 payload: ${JSON.stringify(params)}
             )`);
 
-            await barWallet3.methods.transfer({
+            await locklift.tracing.trace(barWallet3.methods.transfer({
                     amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
                     recipient: RootOrderBar.address,
                     deployWalletValue: locklift.utils.toNano(0.1),
@@ -346,9 +347,10 @@ describe('OrderTest', () => {
                     payload: payload.value0
             }).send({
                     amount: locklift.utils.toNano(10), from: account3.address
-            })
+            }), {allowedCodes: {compute: [60]}})
 
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
             Order = await locklift.factory.getDeployedContract("Order", orderAddress)
@@ -357,7 +359,7 @@ describe('OrderTest', () => {
                 callbackId: "1"
             }).call();
 
-            await tstWallet4.methods.transfer({
+            await locklift.tracing.trace( tstWallet4.methods.transfer({
                 amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 recipient: Order.address,
                 deployWalletValue: locklift.utils.toNano(0.1),
@@ -366,7 +368,7 @@ describe('OrderTest', () => {
                 payload: payloadLO.value0
             }).send({
                 amount: locklift.utils.toNano(10), from: account4.address
-            })
+            }),  {allowedCodes: {compute: [60]}})
 
 
             await tstWallet5.methods.transfer({
