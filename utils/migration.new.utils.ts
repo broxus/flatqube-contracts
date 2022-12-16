@@ -61,14 +61,14 @@ export const dexPairMigration = async (
     'constructor',
     'Deploying DexPair...',
   );
-  await dexRoot.methods.deployPair({
+  await locklift.tracing.trace(dexRoot.methods.deployPair({
       left_root: leftTokenRoot.address,
       right_root: rightTokenRoot.address,
       send_gas_to: account.address,
   }).send({
     amount: locklift.utils.toNano(10),
     from: account.address
-  });
+  }), {allowedCodes: {compute: [60, 100]}});
 
   logMigrationProcess(
     'dexPairMigration',
@@ -187,7 +187,7 @@ export const dexVaultMigration = async (
     amount: locklift.utils.toNano(15),
     from: account.address
   })
-  const LpTokenPending = await locklift.factory.getContractArtifacts("DexVaultLpTokenPending")
+  const LpTokenPending = await locklift.factory.getContractArtifacts("DexVaultLpTokenPendingV2")
   logMigrationProcess('dexVaultMigration', 'installOrUpdateLpTokenPendingCode', 'installOrUpdateLpTokenPendingCode...');
   await contract.methods.installOrUpdateLpTokenPendingCode({code: LpTokenPending.code}).send({
     amount: locklift.utils.toNano(15),
