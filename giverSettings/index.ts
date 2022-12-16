@@ -12,12 +12,12 @@ export class SimpleGiver implements Giver {
 
   public async sendTo(sendTo: Address, value: string): Promise<{ transaction: Transaction; output?: {} }> {
     return this.giverContract.methods
-      .sendTransaction({
-        value: value,
-        dest: sendTo,
-        bounce: false,
-      })
-      .sendExternal({ publicKey: this.keyPair.publicKey });
+        .sendTransaction({
+          value: value,
+          dest: sendTo,
+          bounce: false,
+        })
+        .sendExternal({ publicKey: this.keyPair.publicKey });
   }
 }
 
@@ -72,11 +72,14 @@ export class GiverWallet implements Giver {
 
   public async sendTo(sendTo: Address, value: string): Promise<{ transaction: Transaction; output?: {} }> {
     return this.giverContract.methods
-      .sendGrams({
-        amount: value,
-        dest: sendTo
-      })
-      .sendExternal({ publicKey: this.keyPair.publicKey });
+        .sendTransaction({
+          value: value,
+          dest: sendTo,
+          bounce: false,
+          flags: 3,
+          payload: "",
+        })
+        .sendExternal({ publicKey: this.keyPair.publicKey });
   }
 }
 
@@ -85,26 +88,16 @@ const giverWallet = {
   header: ["pubkey", "time", "expire"],
   functions: [
     {
-      name: "constructor",
-      inputs: [],
-      outputs: []
-    },
-    {
-      name: "sendGrams",
+      name: "sendTransaction",
       inputs: [
         { name: "dest", type: "address" },
-        { name: "amount", type: "uint64" }
+        { name: "value", type: "uint128" },
+        { name: "bounce", type: "bool" },
+        { name: "flags", type: "uint8" },
+        { name: "payload", type: "cell" },
       ],
-      outputs: []
+      outputs: [],
     },
-    {
-      name: "owner",
-      inputs: [],
-      outputs: [
-          { name: "owner", type: "uint256" }
-      ]
-    }
   ],
-  data: [{ key: 1, name: "owner", type: "uint256"}],
   events: [],
 } as const;

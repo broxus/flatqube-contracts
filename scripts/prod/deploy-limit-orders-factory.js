@@ -13,6 +13,7 @@ const promptsData = [];
     program
         .allowUnknownOption()
         .option('-owneraddress', '--owneraddress <OwnerAddress>', 'owner');
+        .option('-dexroot', '--dexroot <DexRoot>', 'dexRoot');
 
     program.parse(process.argv);  
     
@@ -37,10 +38,11 @@ const promptsData = [];
          contract: LimitOrdersFactory,
         constructorParams: {
             owner: ownerAddress,
+            currentVersion: 1
         },
         initParams: {
             randomNonce_: Math.random() * 6400 | 0,
-            limitOrdersRootCode: LimitOrdersRoot.code,   
+            dexRoot: dexRoot
         },
         keyPair,
     }, locklift.utils.convertCrystal('2', 'nano'));
