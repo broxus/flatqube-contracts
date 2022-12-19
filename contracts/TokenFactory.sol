@@ -1,4 +1,4 @@
-pragma ton-solidity >= 0.57.0;
+pragma ton-solidity >= 0.62.0;
 
 import "./libraries/DexGas.sol";
 import "./libraries/TokenFactoryErrors.sol";
@@ -8,7 +8,7 @@ import "./interfaces/IUpgradable.sol";
 import "./interfaces/ITokenFactory.sol";
 import "./interfaces/ITokenRootDeployedCallback.sol";
 
-import "ton-eth-bridge-token-contracts/contracts/TokenRootUpgradeable.sol";
+import "tip3/contracts/TokenRootUpgradeable.sol";
 
 
 contract TokenFactory is ITokenFactory, IUpgradable {

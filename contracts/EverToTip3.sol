@@ -1,4 +1,4 @@
-pragma ton-solidity >= 0.57.0;
+pragma ton-solidity >= 0.62.0;
 
 pragma AbiHeader time;
 pragma AbiHeader expire;
@@ -9,19 +9,20 @@ import "./libraries/EverToTip3Errors.sol";
 import "./libraries/EverToTip3Payloads.sol";
 import "./libraries/DexOperationTypes.sol";
 import "./libraries/EverToTip3OperationStatus.sol";
+import "./libraries/DexOperationStatusV2.sol";
 
-import "./structures/ITokenOperationStructure.sol";
+import "./structures/INextExchangeData.sol";
 
 import "./interfaces/IEverVault.sol";
 import "./interfaces/IEverTip3SwapEvents.sol";
 import "./interfaces/IEverTip3SwapCallbacks.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensMintCallback.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
-import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensBurnCallback.sol";
+import "tip3/contracts/interfaces/ITokenRoot.sol";
+import "tip3/contracts/interfaces/ITokenWallet.sol";
+import "tip3/contracts/interfaces/IAcceptTokensMintCallback.sol";
+import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.sol";
+import "tip3/contracts/interfaces/IAcceptTokensBurnCallback.sol";
 
 contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTip3SwapEvents {
 
@@ -61,20 +62,43 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         address pair,
         uint64 id,
         uint128 deployWalletValue,
-        uint128 expectedAmount
+        uint128 expectedAmount,
+        address recipient,
+        optional(address) outcoming
     ) external pure returns (TvmCell) {
-        return EverToTip3Payloads.buildExchangePayload(pair, id, deployWalletValue, expectedAmount, 0);
+        return EverToTip3Payloads.buildExchangePayload(
+            pair,
+            id,
+            deployWalletValue,
+            expectedAmount,
+            0,
+            recipient,
+            outcoming.hasValue() ? outcoming.get() : address(0)
+        );
     }
 
-    // Payload constructor swap Ever -> Tip-3 via cross-pair
+    // Payload constructor swap Ever -> Tip-3 via split-cross-pool
     function buildCrossPairExchangePayload(
-        address pair,
+        address pool,
         uint64 id,
         uint128 deployWalletValue,
         uint128 expectedAmount,
-        ITokenOperationStructure.TokenOperation[] steps
+        address outcoming,
+        uint32[] nextStepIndices,
+        EverToTip3Payloads.EverToTip3ExchangeStep[] steps,
+        address recipient
     ) external pure returns (TvmCell) {
-        return EverToTip3Payloads.buildCrossPairExchangePayload(pair, id, deployWalletValue, expectedAmount, steps, 0);
+        return EverToTip3Payloads.buildCrossPairExchangePayload(
+            pool,
+            id,
+            deployWalletValue,
+            expectedAmount,
+            outcoming,
+            nextStepIndices,
+            steps,
+            0,
+            recipient
+        );
     }
 
     struct DecodedMintPayload {
@@ -99,13 +123,13 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
 
                 if (
                     (
-                        ref1Slice.bits() == (328 - 72) &&
+                        (ref1Slice.bits() == (595 - 72) || (ref1Slice.bits() == (862 - 72))) && // 862 for pool (with outcoming)
                         ref1Slice.refs() == 2 &&
-                        operationType == DexOperationTypes.EXCHANGE
+                        operationType == DexOperationTypes.EXCHANGE_V2
                     ) || (
-                        ref1Slice.bits() == (595 - 72) &&
+                        ref1Slice.bits() == (862 - 72) &&
                         ref1Slice.refs() == 3 &&
-                        operationType == DexOperationTypes.CROSS_PAIR_EXCHANGE
+                        operationType == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2
                     )
                 ) {
                     result.set(DecodedMintPayload(
@@ -178,8 +202,21 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         uint128 deployWalletValue = 0.1 ever;
 
         TvmSlice payloadSlice = payload.toSlice();
-        if (payloadSlice.bits() == 200) {
-            (operationStatus, id, deployWalletValue) = payloadSlice.decode(uint8, uint64, uint128);
+
+        if (payloadSlice.bits() >= 16) {
+            (uint8 payloadOperationType, uint8 op) = payloadSlice.decode(uint8, uint8);
+
+            if (
+                (op == DexOperationTypes.EXCHANGE_V2 || op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) &&
+                payloadSlice.refs() >= 1 &&
+                (payloadOperationType == DexOperationStatusV2.SUCCESS || payloadOperationType == DexOperationStatusV2.CANCEL)
+            ) {
+                TvmSlice everToTip3PayloadSlice = payloadSlice.loadRefAsSlice();
+
+                if (everToTip3PayloadSlice.bits() == 200) {
+                    (operationStatus, id, deployWalletValue) = everToTip3PayloadSlice.decode(uint8, uint64, uint128);
+                }
+            }
         }
 
         TvmBuilder payloadID_;

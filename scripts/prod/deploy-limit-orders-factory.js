@@ -13,7 +13,7 @@ const promptsData = [];
     program
         .allowUnknownOption()
         .option('-owneraddress', '--owneraddress <OwnerAddress>', 'owner');
-//         .option('-ewvault', '--wevervault <weverVault>', 'WEVER Vault');
+        .option('-dexroot', '--dexroot <DexRoot>', 'dexRoot');
 
     program.parse(process.argv);  
     
@@ -28,21 +28,9 @@ const promptsData = [];
         })
     }
 
-//     if (!isValidTonAddress(options.wevervault)) {
-//         promptsData.push({
-//             type: 'text',
-//             name: 'weverVault',
-//             message: 'WEVER Vault',
-//             validate: value => isValidTonAddress(value) ? true : 'Invalid Ever address'
-//         })
-//     }
-
     const response = await prompts(promptsData);
     ownerAddress = options.owneraddress || response.ownerAddress;
-//     const weverRoot_ = options.weverroot || response.weverRoot;
-//     const weverVault_ = options.wevervault || response.weverRoot;
 
-//     const EverToTip3 = await locklift.factory.getContract('EverToTip3');
        const LimitOrdersFactory =  await locklift.factory.getContract('LimitOrdersFactory');
        const LimitOrdersRoot =  await locklift.factory.getContract('LimitOrdersRoot');
 
@@ -50,15 +38,14 @@ const promptsData = [];
          contract: LimitOrdersFactory,
         constructorParams: {
             owner: ownerAddress,
+            currentVersion: 1
         },
         initParams: {
             randomNonce_: Math.random() * 6400 | 0,
-            limitOrdersRootCode: LimitOrdersRoot.code,   
+            dexRoot: dexRoot
         },
         keyPair,
     }, locklift.utils.convertCrystal('2', 'nano'));
-
-    logger.log(`'Ever to Tip3': ${everTip3.address}`);
 }
 
 main()

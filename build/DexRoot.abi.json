@@ -13,31 +13,6 @@
 			]
 		},
 		{
-			"name": "installPlatformOnce",
-			"inputs": [
-				{"name":"code","type":"cell"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "installOrUpdateAccountCode",
-			"inputs": [
-				{"name":"code","type":"cell"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "installOrUpdatePairCode",
-			"inputs": [
-				{"name":"code","type":"cell"},
-				{"name":"pool_type","type":"uint8"}
-			],
-			"outputs": [
-			]
-		},
-		{
 			"name": "getAccountVersion",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
@@ -66,6 +41,16 @@
 			]
 		},
 		{
+			"name": "getPoolVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"pool_type","type":"uint8"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
 			"name": "getPairCode",
 			"inputs": [
 				{"name":"answerId","type":"uint32"},
@@ -76,11 +61,13 @@
 			]
 		},
 		{
-			"name": "setVaultOnce",
+			"name": "getPoolCode",
 			"inputs": [
-				{"name":"new_vault","type":"address"}
+				{"name":"answerId","type":"uint32"},
+				{"name":"pool_type","type":"uint8"}
 			],
 			"outputs": [
+				{"name":"value0","type":"cell"}
 			]
 		},
 		{
@@ -93,108 +80,12 @@
 			]
 		},
 		{
-			"name": "setActive",
-			"inputs": [
-				{"name":"new_active","type":"bool"}
-			],
-			"outputs": [
-			]
-		},
-		{
 			"name": "isActive",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
 				{"name":"value0","type":"bool"}
-			]
-		},
-		{
-			"name": "upgrade",
-			"inputs": [
-				{"name":"code","type":"cell"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "requestUpgradeAccount",
-			"inputs": [
-				{"name":"current_version","type":"uint32"},
-				{"name":"send_gas_to","type":"address"},
-				{"name":"account_owner","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "forceUpgradeAccount",
-			"inputs": [
-				{"name":"account_owner","type":"address"},
-				{"name":"send_gas_to","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "upgradeLegacyPair",
-			"inputs": [
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"},
-				{"name":"pool_type","type":"uint8"},
-				{"name":"send_gas_to","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "upgradePair",
-			"inputs": [
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"},
-				{"name":"pool_type","type":"uint8"},
-				{"name":"send_gas_to","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "setPairFeeParams",
-			"inputs": [
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"},
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"params","type":"tuple"},
-				{"name":"send_gas_to","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "setPairAmplificationCoefficient",
-			"inputs": [
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"},
-				{"components":[{"name":"value","type":"uint128"},{"name":"precision","type":"uint128"}],"name":"_A","type":"tuple"},
-				{"name":"send_gas_to","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "resetGas",
-			"inputs": [
-				{"name":"receiver","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "resetTargetGas",
-			"inputs": [
-				{"name":"target","type":"address"},
-				{"name":"receiver","type":"address"}
-			],
-			"outputs": [
 			]
 		},
 		{
@@ -213,21 +104,6 @@
 			],
 			"outputs": [
 				{"name":"dex_pending_owner","type":"address"}
-			]
-		},
-		{
-			"name": "transferOwner",
-			"inputs": [
-				{"name":"new_owner","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "acceptOwner",
-			"inputs": [
-			],
-			"outputs": [
 			]
 		},
 		{
@@ -252,9 +128,164 @@
 			]
 		},
 		{
+			"name": "getExpectedPoolAddress",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"_roots","type":"address[]"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getManager",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "setVaultOnce",
+			"inputs": [
+				{"name":"new_vault","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setActive",
+			"inputs": [
+				{"name":"new_active","type":"bool"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setManager",
+			"inputs": [
+				{"name":"_newManager","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "revokeManager",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "transferOwner",
+			"inputs": [
+				{"name":"new_owner","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "acceptOwner",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "installPlatformOnce",
+			"inputs": [
+				{"name":"code","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "installOrUpdateAccountCode",
+			"inputs": [
+				{"name":"code","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "installOrUpdatePairCode",
+			"inputs": [
+				{"name":"code","type":"cell"},
+				{"name":"pool_type","type":"uint8"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "installOrUpdatePoolCode",
+			"inputs": [
+				{"name":"code","type":"cell"},
+				{"name":"pool_type","type":"uint8"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "upgrade",
+			"inputs": [
+				{"name":"code","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "resetGas",
+			"inputs": [
+				{"name":"receiver","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "deployAccount",
 			"inputs": [
 				{"name":"account_owner","type":"address"},
+				{"name":"send_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "requestUpgradeAccount",
+			"inputs": [
+				{"name":"current_version","type":"uint32"},
+				{"name":"send_gas_to","type":"address"},
+				{"name":"account_owner","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "forceUpgradeAccount",
+			"inputs": [
+				{"name":"account_owner","type":"address"},
+				{"name":"send_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "upgradePair",
+			"inputs": [
+				{"name":"left_root","type":"address"},
+				{"name":"right_root","type":"address"},
+				{"name":"pool_type","type":"uint8"},
+				{"name":"send_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "upgradePool",
+			"inputs": [
+				{"name":"roots","type":"address[]"},
+				{"name":"pool_type","type":"uint8"},
 				{"name":"send_gas_to","type":"address"}
 			],
 			"outputs": [
@@ -271,34 +302,49 @@
 			]
 		},
 		{
-			"name": "onPairCreated",
+			"name": "deployStablePool",
 			"inputs": [
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"},
+				{"name":"roots","type":"address[]"},
 				{"name":"send_gas_to","type":"address"}
 			],
 			"outputs": [
 			]
 		},
 		{
-			"name": "setManager",
+			"name": "setPairFeeParams",
 			"inputs": [
-				{"name":"_manager","type":"address"}
+				{"name":"_roots","type":"address[]"},
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"_params","type":"tuple"},
+				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
 		},
 		{
-			"name": "getManager",
+			"name": "setPairAmplificationCoefficient",
 			"inputs": [
+				{"name":"_roots","type":"address[]"},
+				{"components":[{"name":"value","type":"uint128"},{"name":"precision","type":"uint128"}],"name":"_A","type":"tuple"},
+				{"name":"send_gas_to","type":"address"}
 			],
 			"outputs": [
-				{"name":"value0","type":"address"}
 			]
 		},
 		{
-			"name": "revokeManager",
+			"name": "resetTargetGas",
 			"inputs": [
+				{"name":"target","type":"address"},
+				{"name":"receiver","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onPoolCreated",
+			"inputs": [
+				{"name":"_roots","type":"address[]"},
+				{"name":"_poolType","type":"uint8"},
+				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -350,7 +396,16 @@
 			"name": "PairCodeUpgraded",
 			"inputs": [
 				{"name":"version","type":"uint32"},
-				{"name":"pool_type","type":"uint8"}
+				{"name":"poolType","type":"uint8"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "PoolCodeUpgraded",
+			"inputs": [
+				{"name":"version","type":"uint32"},
+				{"name":"poolType","type":"uint8"}
 			],
 			"outputs": [
 			]
@@ -365,16 +420,15 @@
 		{
 			"name": "ActiveUpdated",
 			"inputs": [
-				{"name":"new_active","type":"bool"}
+				{"name":"newActive","type":"bool"}
 			],
 			"outputs": [
 			]
 		},
 		{
-			"name": "RequestedPairUpgrade",
+			"name": "RequestedPoolUpgrade",
 			"inputs": [
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"}
+				{"name":"roots","type":"address[]"}
 			],
 			"outputs": [
 			]
@@ -382,7 +436,7 @@
 		{
 			"name": "RequestedForceAccountUpgrade",
 			"inputs": [
-				{"name":"account_owner","type":"address"}
+				{"name":"accountOwner","type":"address"}
 			],
 			"outputs": [
 			]
@@ -390,8 +444,8 @@
 		{
 			"name": "RequestedOwnerTransfer",
 			"inputs": [
-				{"name":"old_owner","type":"address"},
-				{"name":"new_owner","type":"address"}
+				{"name":"oldOwner","type":"address"},
+				{"name":"newOwner","type":"address"}
 			],
 			"outputs": [
 			]
@@ -399,17 +453,17 @@
 		{
 			"name": "OwnerTransferAccepted",
 			"inputs": [
-				{"name":"old_owner","type":"address"},
-				{"name":"new_owner","type":"address"}
+				{"name":"oldOwner","type":"address"},
+				{"name":"newOwner","type":"address"}
 			],
 			"outputs": [
 			]
 		},
 		{
-			"name": "NewPairCreated",
+			"name": "NewPoolCreated",
 			"inputs": [
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"}
+				{"name":"roots","type":"address[]"},
+				{"name":"poolType","type":"uint8"}
 			],
 			"outputs": [
 			]
@@ -421,14 +475,16 @@
 		{"name":"_constructorFlag","type":"bool"},
 		{"name":"platform_code","type":"cell"},
 		{"name":"_nonce","type":"uint32"},
-		{"name":"account_code","type":"cell"},
-		{"name":"account_version","type":"uint32"},
-		{"name":"pair_codes","type":"map(uint8,cell)"},
-		{"name":"pair_versions","type":"map(uint8,uint32)"},
-		{"name":"active","type":"bool"},
-		{"name":"owner","type":"address"},
-		{"name":"vault","type":"address"},
-		{"name":"pending_owner","type":"address"},
-		{"name":"manager","type":"address"}
+		{"name":"_accountCode","type":"cell"},
+		{"name":"_accountVersion","type":"uint32"},
+		{"name":"_pairCodes","type":"map(uint8,cell)"},
+		{"name":"_pairVersions","type":"map(uint8,uint32)"},
+		{"name":"_poolCodes","type":"map(uint8,cell)"},
+		{"name":"_poolVersions","type":"map(uint8,uint32)"},
+		{"name":"_active","type":"bool"},
+		{"name":"_owner","type":"address"},
+		{"name":"_vault","type":"address"},
+		{"name":"_pendingOwner","type":"address"},
+		{"name":"_manager","type":"address"}
 	]
 }
