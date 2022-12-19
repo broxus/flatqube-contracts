@@ -187,23 +187,11 @@ contract Order is
 		}
 	}
 
-	function currentStatus()
-		external
-		view
-		responsible
-		override
-		returns (uint8)
-	{
+	function currentStatus() external view responsible override returns (uint8){
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } state;
 	}
 
-	function initParams()
-		external
-		view
-		responsible
-		override
-		returns (InitParams)
-	{
+	function initParams() external view responsible override returns (InitParams){
 		return
 			{
 				value: 0,
@@ -450,6 +438,7 @@ contract Order is
 								emptyPayload
 							);
 
+							//TODO callbackId == 0 not send callback???
 							IOrderOperationCallback(initiator).onOrderSwapSuccess{
 									value: OrderGas.OPERATION_CALLBACK_BASE,
 									flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -464,6 +453,7 @@ contract Order is
 							);
 						}
 
+						//TODO callbackId == 0 not send callback???
 						IOrderOperationCallback(owner).onOrderSwapSuccess{
 								value: OrderGas.OPERATION_CALLBACK_BASE,
 								flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -484,6 +474,7 @@ contract Order is
 						operationStatus == OrderOperationStatus.CANCEL
 					) {
 						(callbackId, initiator) = payloadSlice.decode(uint64, address );
+						//TODO callbackId == 0 not send callback
 						IOrderOperationCallback(initiator).onOrderSwapCancel{
 							value: OrderGas.OPERATION_CALLBACK_BASE,
 							flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -592,7 +583,7 @@ contract Order is
 		close();
 	}
 
-	function backendSwap(uint64 callbackId) external {
+	function backendSwap(optional(uint64) callbackId) external {
 		require(
 			msg.pubkey() == backPK,
 			OrderErrors.NOT_BACKEND_PUB_KEY
@@ -614,6 +605,9 @@ contract Order is
 		);
 
 		tvm.accept();
+		if (!callbackId.hasValue()) {
+			callbackId = 0;
+		}
 		swapAttempt++;
 		changeState(OrderStatus.SwapInProgress);
 
@@ -650,7 +644,7 @@ contract Order is
 		);
 	}
 
-	function swap(uint128 deployWalletValue, uint64 callbackId) external {
+	function swap(uint128 deployWalletValue, optional(uint64) callbackId) external {
 		require(
 			state == OrderStatus.Active,
 			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
@@ -673,6 +667,10 @@ contract Order is
 			),
 			0
 		);
+
+		if (!callbackId.hasValue()) {
+			callbackId = 0;
+		}
 		swapAttempt++;
 		changeState(OrderStatus.SwapInProgress);
 
@@ -708,10 +706,7 @@ contract Order is
 		);
 	}
 
-	function changeState(
-	uint8 newState
-	)
-	private {
+	function changeState(uint8 newState) private {
 		uint8 prevStateN = state;
 		state = newState;
 		emit StateChanged(prevStateN, newState, buildDetails());
@@ -786,11 +781,7 @@ contract Order is
 		onCodeUpgrade(builderUpg.toCell());
 	}
 
-	function enableEmergency(uint256 _emergencyManager)
-		external
-		override
-		onlyFactory
-	{
+	function enableEmergency(uint256 _emergencyManager) external override onlyFactory {
 		require(msg.sender.value != 0 && msg.sender == factory);
 		require(
 			state != OrderStatus.Emergency,
