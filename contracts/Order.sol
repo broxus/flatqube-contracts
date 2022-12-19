@@ -346,10 +346,10 @@ contract Order is
 									callbackId,
 									owner,
 									IOrderExchangeResult.OrderExchangeResult(
-										spentToken,
-										transferAmount,
 										receiveToken,
 										amount,
+										spentToken,
+										transferAmount,
 										currentAmountSpentToken,
 										currentAmountReceiveToken
 									)
@@ -543,7 +543,13 @@ contract Order is
 					OrderGas.FILL_ORDER_MIN_VALUE
 				), 0
 			);
-			
+
+			IOrderOperationCallback(msg.sender).onOrderReject{
+					value: OrderGas.OPERATION_CALLBACK_BASE,
+					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+					bounce: false
+			}(callbackId);
+
 			ITokenWallet(msg.sender).transfer{
 				value: 0,
 				flag: MsgFlag.ALL_NOT_RESERVED,
