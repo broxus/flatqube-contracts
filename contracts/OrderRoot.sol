@@ -46,7 +46,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             msg.sender.value != 0 && msg.sender == spentToken,
             OrderErrors.NOT_TOKEN1_ROOT
         );
-        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+        tvm.rawReserve(address(this).balance - msg.value, 0);
         spentTokenWallet = _wallet;
 
         IOrderFactory(factory).onOrderRootDeployed{
@@ -58,7 +58,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     function onTokenWalletReceive(address _wallet) external {}
 
     onBounce(TvmSlice body) external view {
-        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+        tvm.rawReserve(address(this).balance - msg.value, 0);
 
         uint32 functionId = body.decode(uint32);
 
@@ -266,7 +266,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         address _sendGasTo
     ) external override onlyFactory {
         if (version == _newVersion) {
-            tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+            tvm.rawReserve(address(this).balance - msg.value, 0);
             _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
         } else {
             emit OrderRootCodeUpgraded(_newVersion);
@@ -319,7 +319,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             ) = sl.decode(address, address, uint32, uint32, address);
         }
 
-
         if (oldVersion == 0) {
             tvm.resetStorage();
         }
@@ -351,11 +350,11 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         }(
             callbackId,
             IOrderRootCreateResult.OrderRootCreateResult(
-                _factory,
-                _spentToken,
+                factory,
+                spentToken,
                 oldVersion,
                 newVersion,
-                _deployer
+                deployer
             )
         );
 

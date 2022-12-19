@@ -62,7 +62,7 @@ contract OrderFactory is IOrderFactory {
 			msg.sender.value != 0 && msg.sender == expectedAddressOrderRoot(token), 
 			OrderErrors.NOT_LIMIT_ORDER_ROOT
 		);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 		emit CreateOrderRoot(_orderRoot, token);
 		
 		sendGasTo.transfer({
@@ -159,7 +159,7 @@ contract OrderFactory is IOrderFactory {
 
 	function setPlatformCodeOnce(TvmCell _orderPlatform) public onlyOwner {
 		require(orderPlatformCode.toSlice().empty(), OrderErrors.PLATFORM_CODE_NON_EMPTY);
-		tvm.rawReserve(OrderGas.SET_CODE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 		orderPlatformCode = _orderPlatform;
 
 		emit PlatformCodeUpgraded();
@@ -171,14 +171,14 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function setOrderRootCode(TvmCell _orderRootCode) public onlyOwner {
-		tvm.rawReserve(OrderGas.SET_CODE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 		uint32 prevVersion = versionOrderRoot;
 		versionOrderRoot++;
 		orderRootCode = _orderRootCode;
 
 		emit OrderRootCodeUpgraded(prevVersion, versionOrderRoot);
 
-		msg.sender.transfer(
+		owner.transfer(
 			0,
 			false,
 			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
@@ -186,14 +186,14 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function setOrderCode(TvmCell _orderCode) public onlyOwner {
-		tvm.rawReserve(OrderGas.SET_CODE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 		uint32 prevVersion = versionOrder;
 		versionOrder++;
 		orderCode = _orderCode;
 
 		emit OrderCodeUpgraded(prevVersion, versionOrder);
 
-		msg.sender.transfer(
+		owner.transfer(
 			0,
 			false,
 			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
@@ -201,14 +201,14 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function setOrderClosedCode(TvmCell _orderClosedCode) public onlyOwner {
-		tvm.rawReserve(OrderGas.SET_CODE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 		uint32 prevVersion = versionOrderClosed;
 		versionOrderClosed++;
 		orderClosedCode = _orderClosedCode;
 
 		emit OrderClosedCodeUpgraded(prevVersion, versionOrderClosed);
 
-		msg.sender.transfer(
+		owner.transfer(
 			0,
 			false,
 			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
@@ -216,22 +216,26 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function createOrderRoot(address token, uint64 callbackId) override external view {
-		require(
-			msg.value >= OrderGas.DEPLOY_ORDERS_ROOT,
-			OrderErrors.VALUE_TOO_LOW
-		);
-		tvm.rawReserve(OrderGas.DEPLOY_ORDERS_ROOT, 0);
-
-		new OrderPlatform {
-			stateInit: buildState(token, buildCode(token), buildParams()),
-			value: 0,
-			flag: MsgFlag.ALL_NOT_RESERVED 
-		}(
-			orderRootCode,
-			versionOrderRoot,
-			msg.sender,
-			callbackId
-		);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
+		if (msg.value >= OrderGas.DEPLOY_ORDERS_ROOT) {
+			new OrderPlatform {
+					stateInit: buildState(token, buildCode(token), buildParams()),
+					value: 0,
+					flag: MsgFlag.ALL_NOT_RESERVED
+			}(
+				orderRootCode,
+				versionOrderRoot,
+				msg.sender,
+				callbackId
+			);
+		} else {
+			emit CreateOrderRootReject(token);
+			IOrderOperationCallback(msg.sender).onOrderRootCreateReject{
+					value: 0,
+					flag: MsgFlag.ALL_NOT_RESERVED,
+					bounce: false
+			}(callbackId);
+		}
 	}
 
 	function getExpectedAddressOrderRoot(address token)
@@ -243,7 +247,6 @@ contract OrderFactory is IOrderFactory {
 	{
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } expectedAddressOrderRoot(token);
 	}
-
 
 	function expectedAddressOrderRoot(address token) internal view returns(address) {
 		return address(tvm.hash(buildState(token, buildCode(token), buildParams())));
@@ -282,7 +285,7 @@ contract OrderFactory is IOrderFactory {
 		address sendGasTo
 	) external override onlyOwner {
 		if (currentVersion == newVersion) {
-			tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+			tvm.rawReserve(address(this).balance - msg.value, 0);
 			sendGasTo.transfer({
 				value: 0,
 				flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,

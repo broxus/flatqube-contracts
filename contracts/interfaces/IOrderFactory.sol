@@ -20,6 +20,7 @@ interface IOrderFactory {
         address order,
         address token
     );
+    event CreateOrderRootReject(address token);
     event OrderFactoryUpgrade(uint32 oldVersion, uint32 newVersion);
 
     function createOrderRoot(
