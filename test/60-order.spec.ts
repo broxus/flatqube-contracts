@@ -288,7 +288,7 @@ describe('OrderTest', () => {
         console.log(`TstWallet6: ${tstWallet6.address}`);
         console.log('')
         const fees = await RootOrderBar.methods.getFeeParams({answerId: 0}).call()
-        console.log(`Fees = ${fees.params}`)
+        console.log(`Fees = ${JSON..sfees.params}`)
     });
 
     describe('Direct execution Order', async () => {
