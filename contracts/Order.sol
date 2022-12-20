@@ -589,7 +589,7 @@ contract Order is
 		close();
 	}
 
-	function backendSwap(optional(uint64) callbackId) external {
+	function backendSwap(uint64 callbackId) external {
 		require(
 			msg.pubkey() == backPK,
 			OrderErrors.NOT_BACKEND_PUB_KEY
@@ -611,9 +611,6 @@ contract Order is
 		);
 
 		tvm.accept();
-		if (!callbackId.hasValue()) {
-			callbackId = 0;
-		}
 		swapAttempt++;
 		changeState(OrderStatus.SwapInProgress);
 
@@ -650,7 +647,7 @@ contract Order is
 		);
 	}
 
-	function swap(optional(uint64) callbackId, uint128 deployWalletValue) external {
+	function swap(uint64 callbackId, uint128 deployWalletValue) external {
 		require(
 			state == OrderStatus.Active,
 			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
@@ -674,9 +671,6 @@ contract Order is
 			0
 		);
 
-		if (!callbackId.hasValue()) {
-			callbackId = 0;
-		}
 		swapAttempt++;
 		changeState(OrderStatus.SwapInProgress);
 

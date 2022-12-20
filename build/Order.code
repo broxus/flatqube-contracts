@@ -1938,30 +1938,11 @@ IFREF {
 	CALL $c4_to_c7$
 }
 .loc ../contracts/Order.sol, 592
-OVER
-PUSHCONT {
-	LDI 1
-	SWAP
-	NULLROTRIFNOT
-	PUSHCONT {
-		LDU 64
-	}
-	IF
-}
-PUSHCONT {
-	LDI 1
-	SWAP
-	NULLROTRIFNOT
-	PUSHCONT {
-		LDU 64
-	}
-	IF
-}
-IFELSE
+LDU 64
 ENDS
 .loc ../contracts/Order.sol, 0
 CALLREF {
-	CALL $backendSwap_0b065796_internal_macro$
+	CALL $backendSwap_beb18340_internal_macro$
 }
 DROP
 CALLREF {
@@ -1969,7 +1950,7 @@ CALLREF {
 }
 THROW 0
 
-.macro backendSwap_0b065796_internal_macro
+.macro backendSwap_beb18340_internal_macro
 .loc ../contracts/Order.sol, 593
 GETGLOB 5
 DUP
@@ -2002,16 +1983,6 @@ GREATER
 THROWIFNOT 302
 .loc ../contracts/Order.sol, 613
 ACCEPT
-.loc ../contracts/Order.sol, 614
-DUP
-ISNULL
-PUSHCONT {
-	.loc ../contracts/Order.sol, 615
-	DROP
-	PUSHINT 0
-	.loc ../contracts/Order.sol, 0
-}
-IF
 .loc ../contracts/Order.sol, 617
 GETGLOB 28
 INC
@@ -2026,19 +1997,8 @@ CALLREF {
 NEWC
 STSLICECONST x00
 .loc ../contracts/Order.sol, 622
-PUXC S1, S-1
-XCPU S1, S0
-ISNULL
-PUSHCONT {
-	DROP
-	STSLICECONST 0
-}
-PUSHCONT {
-	SWAP
-	STSLICECONST 1
-	STU 64
-}
-IFELSE
+OVER
+STUR 64
 .loc ../contracts/Order.sol, 623
 GETGLOB 12
 STSLICER
@@ -2049,19 +2009,8 @@ STZEROES
 NEWC
 STSLICECONST x01
 .loc ../contracts/Order.sol, 628
-PUXC S2, S-1
-XCPU S1, S0
-ISNULL
-PUSHCONT {
-	DROP
-	STSLICECONST 0
-}
-PUSHCONT {
-	SWAP
-	STSLICECONST 1
-	STU 64
-}
-IFELSE
+PUSH S2
+STUR 64
 .loc ../contracts/Order.sol, 629
 GETGLOB 9
 STSLICER
@@ -2070,18 +2019,7 @@ NEWC
 STSLICECONST x01
 .loc ../contracts/Order.sol, 633
 ROLL 3
-DUP
-ISNULL
-PUSHCONT {
-	DROP
-	STSLICECONST 0
-}
-PUSHCONT {
-	SWAP
-	STSLICECONST 1
-	STU 64
-}
-IFELSE
+STUR 64
 .loc ../contracts/Order.sol, 634
 PUSHPOW2 7
 STZEROES
@@ -2136,32 +2074,20 @@ IFREF {
 .loc ../contracts/Order.sol, 653
 OVER
 PUSHCONT {
-	LDI 1
-	SWAP
-	NULLROTRIFNOT
-	PUSHCONT {
-		LDU 64
-	}
-	IF
+	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
 PUSHCONT {
-	LDI 1
-	SWAP
-	NULLROTRIFNOT
-	PUSHCONT {
-		LDU 64
-	}
-	IF
+	LDU 64
 }
 IFELSE
 LDU 128
 ENDS
 .loc ../contracts/Order.sol, 0
 CALLREF {
-	CALL $swap_5471601b_internal_macro$
+	CALL $swap_95c939ac_internal_macro$
 }
 DROP
 CALLREF {
@@ -2169,7 +2095,7 @@ CALLREF {
 }
 THROW 0
 
-.macro swap_5471601b_internal_macro
+.macro swap_95c939ac_internal_macro
 .loc ../contracts/Order.sol, 654
 GETGLOB 27
 EQINT 2
@@ -2198,16 +2124,6 @@ PUSHINT 5000000000
 MAX
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/Order.sol, 677
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/Order.sol, 678
-	PUSHINT 0
-	POP S2
-	.loc ../contracts/Order.sol, 0
-}
-IF
 .loc ../contracts/Order.sol, 680
 GETGLOB 28
 INC
@@ -2222,19 +2138,8 @@ CALLREF {
 NEWC
 STSLICECONST x00
 .loc ../contracts/Order.sol, 685
-PUXC S2, S-1
-XCPU S1, S0
-ISNULL
-PUSHCONT {
-	DROP
-	STSLICECONST 0
-}
-PUSHCONT {
-	SWAP
-	STSLICECONST 1
-	STU 64
-}
-IFELSE
+PUSH S2
+STUR 64
 .loc ../contracts/Order.sol, 686
 GETGLOB 9
 STSLICER
@@ -2244,19 +2149,8 @@ STU 128
 NEWC
 STSLICECONST x01
 .loc ../contracts/Order.sol, 691
-PUXC S2, S-1
-XCPU S1, S0
-ISNULL
-PUSHCONT {
-	DROP
-	STSLICECONST 0
-}
-PUSHCONT {
-	SWAP
-	STSLICECONST 1
-	STU 64
-}
-IFELSE
+PUSH S2
+STUR 64
 .loc ../contracts/Order.sol, 692
 GETGLOB 9
 STSLICER
@@ -2265,18 +2159,7 @@ NEWC
 STSLICECONST x01
 .loc ../contracts/Order.sol, 696
 ROLL 3
-DUP
-ISNULL
-PUSHCONT {
-	DROP
-	STSLICECONST 0
-}
-PUSHCONT {
-	SWAP
-	STSLICECONST 1
-	STU 64
-}
-IFELSE
+STUR 64
 .loc ../contracts/Order.sol, 697
 PUSHPOW2 7
 STZEROES
@@ -3491,7 +3374,7 @@ THROW 60
 
 .macro public_function_selector
 DUP
-PUSHINT 709194461
+PUSHINT 622096114
 LEQ
 IFJMPREF {
 	DUP
@@ -3499,6 +3382,12 @@ IFJMPREF {
 	EQUAL
 	IFJMPREF {
 		CALL $initParams$
+	}
+	DUP
+	PUSHINT 159128878
+	EQUAL
+	IFJMPREF {
+		CALL $swap$
 	}
 	DUP
 	PUSHINT 438289210
@@ -3512,17 +3401,17 @@ IFJMPREF {
 	IFJMPREF {
 		CALL $currentStatus$
 	}
+}
+DUP
+PUSHINT 957183865
+LEQ
+IFJMPREF {
 	DUP
 	PUSHINT 709194461
 	EQUAL
 	IFJMPREF {
 		CALL $onBalanceReceiveWallet$
 	}
-}
-DUP
-PUSHINT 1082600119
-LEQ
-IFJMPREF {
 	DUP
 	PUSHINT 739445888
 	EQUAL
@@ -3536,16 +3425,10 @@ IFJMPREF {
 		CALL $proxyTokensTransfer$
 	}
 	DUP
-	PUSHINT 1051056502
+	PUSHINT 957183865
 	EQUAL
 	IFJMPREF {
-		CALL $swap$
-	}
-	DUP
-	PUSHINT 1082600119
-	EQUAL
-	IFJMPREF {
-		CALL $getDetails$
+		CALL $backendSwap$
 	}
 }
 DUP
@@ -3553,10 +3436,10 @@ PUSHINT 1689523898
 LEQ
 IFJMPREF {
 	DUP
-	PUSHINT 1134956124
+	PUSHINT 1082600119
 	EQUAL
 	IFJMPREF {
-		CALL $backendSwap$
+		CALL $getDetails$
 	}
 	DUP
 	PUSHINT 1147733178
