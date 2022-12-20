@@ -284,7 +284,7 @@ export const orderFactoryMigration = async (
       _owner: account.address,
       _version: version.toString(),
     },
-    value: locklift.utils.toNano(7),
+    value: locklift.utils.toNano(1.5),
   });
 
   logMigrationProcess(
@@ -298,7 +298,7 @@ export const orderFactoryMigration = async (
   await locklift.tracing.trace( contract.methods.setOrderRootCode({
     _orderRootCode: orderRootArtifacts.code
   }).send({
-    amount: locklift.utils.toNano(2),
+    amount: locklift.utils.toNano(0.1),
     from: account.address
   }))
 
@@ -307,7 +307,7 @@ export const orderFactoryMigration = async (
   await locklift.tracing.trace( contract.methods.setPlatformCodeOnce({
     _orderPlatform: orderPlatformArtifacts.code
   }).send({
-    amount: locklift.utils.toNano(2),
+    amount: locklift.utils.toNano(0.1),
     from: account.address
   }))
 
@@ -322,7 +322,7 @@ export const orderFactoryMigration = async (
   await locklift.tracing.trace(contract.methods.setOrderCode({
     _orderCode: orderArtifacts.code
   }).send({
-    amount: locklift.utils.toNano(2),
+    amount: locklift.utils.toNano(0.1),
     from: account.address
   }))
 
@@ -337,7 +337,7 @@ export const orderFactoryMigration = async (
   await locklift.tracing.trace(contract.methods.setOrderClosedCode({
     _orderClosedCode: orderClosedArtifacts.code
   }).send({
-    amount: locklift.utils.toNano(2),
+    amount: locklift.utils.toNano(0.1),
     from: account.address
   }))
   // Log and save address
@@ -372,11 +372,10 @@ export const orderRootMigration = async (
       orderFactory.methods.createOrderRoot(
           {token: token.address, callbackId: callbackId}
       ).send({
-        amount: locklift.utils.toNano(5),
+        amount: locklift.utils.toNano(4),
         from: account.address
       }
   )
-
 
   const orderRootAddress = await orderFactory.methods.getExpectedAddressOrderRoot({
     answerId: 1,
