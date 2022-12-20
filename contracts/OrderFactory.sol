@@ -62,7 +62,7 @@ contract OrderFactory is IOrderFactory {
 			msg.sender.value != 0 && msg.sender == expectedAddressOrderRoot(token), 
 			OrderErrors.NOT_LIMIT_ORDER_ROOT
 		);
-		tvm.rawReserve(address(this).balance - msg.value, 0);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		emit CreateOrderRoot(_orderRoot, token);
 		
 		sendGasTo.transfer({
@@ -159,7 +159,7 @@ contract OrderFactory is IOrderFactory {
 
 	function setPlatformCodeOnce(TvmCell _orderPlatform) public onlyOwner {
 		require(orderPlatformCode.toSlice().empty(), OrderErrors.PLATFORM_CODE_NON_EMPTY);
-		tvm.rawReserve(address(this).balance - msg.value, 0);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		orderPlatformCode = _orderPlatform;
 
 		emit PlatformCodeUpgraded();
@@ -171,7 +171,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function setOrderRootCode(TvmCell _orderRootCode) public onlyOwner {
-		tvm.rawReserve(address(this).balance - msg.value, 0);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		uint32 prevVersion = versionOrderRoot;
 		versionOrderRoot++;
 		orderRootCode = _orderRootCode;
@@ -186,7 +186,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function setOrderCode(TvmCell _orderCode) public onlyOwner {
-		tvm.rawReserve(address(this).balance - msg.value, 0);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		uint32 prevVersion = versionOrder;
 		versionOrder++;
 		orderCode = _orderCode;
@@ -201,7 +201,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function setOrderClosedCode(TvmCell _orderClosedCode) public onlyOwner {
-		tvm.rawReserve(address(this).balance - msg.value, 0);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		uint32 prevVersion = versionOrderClosed;
 		versionOrderClosed++;
 		orderClosedCode = _orderClosedCode;
@@ -216,7 +216,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function createOrderRoot(address token, uint64 callbackId) override external view {
-		tvm.rawReserve(address(this).balance - msg.value, 0);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		if (msg.value >= OrderGas.DEPLOY_ORDERS_ROOT) {
 			new OrderPlatform {
 					stateInit: buildState(token, buildCode(token), buildParams()),

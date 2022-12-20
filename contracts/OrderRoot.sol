@@ -46,20 +46,19 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             msg.sender.value != 0 && msg.sender == spentToken,
             OrderErrors.NOT_TOKEN1_ROOT
         );
-        tvm.rawReserve(address(this).balance - msg.value, 0);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
         spentTokenWallet = _wallet;
 
         IOrderFactory(factory).onOrderRootDeployed{
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED
-        }(address(this), spentToken, deployer);
+        }(address(this), spentToken, deployer); //????address(this)
     }
 
     function onTokenWalletReceive(address _wallet) external {}
 
     onBounce(TvmSlice body) external view {
-        tvm.rawReserve(address(this).balance - msg.value, 0);
-
+        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
         uint32 functionId = body.decode(uint32);
 
         if (
@@ -111,11 +110,13 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         address originalGasTo,
         TvmCell payload
     ) external override {
-        tvm.rawReserve(OrderGas.DEPLOY_ORDER_MIN_VALUE, 0);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
+        //TODO change condition
         TvmSlice payloadSlice = payload.toSlice();
         if (payloadSlice.bits() == 843 &&
             msg.sender.value != 0 &&
+            msg.sender.value >= OrderGas.DEPLOY_ORDER_MIN_VALUE &&
             msg.sender == spentTokenWallet) 
         {
             (

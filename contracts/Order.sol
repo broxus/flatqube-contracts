@@ -650,7 +650,7 @@ contract Order is
 		);
 	}
 
-	function swap(uint128 deployWalletValue, optional(uint64) callbackId) external {
+	function swap(optional(uint64) callbackId, uint128 deployWalletValue) external {
 		require(
 			state == OrderStatus.Active,
 			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
