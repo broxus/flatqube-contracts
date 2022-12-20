@@ -384,9 +384,7 @@ contract DexStablePair is
             bool notify_success,
             TvmCell success_payload,
             bool notify_cancel,
-            TvmCell cancel_payload,
-            /*bool hasRef3*/,
-            /*TvmCell ref3*/
+            TvmCell cancel_payload
         ) = PairPayload.decodeOnAcceptTokensTransferPayloads(payload, op);
 
         TvmCell empty;

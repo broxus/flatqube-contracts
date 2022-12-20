@@ -491,7 +491,8 @@ describe('Check direct operations', async function () {
                 steps: steps,
                 outcoming: steps[next_indices[0]].outcoming,
                 nextStepIndices: steps[next_indices[0]].nextStepIndices,
-                recipient: locklift.ton.zero_address
+                recipient: locklift.ton.zero_address,
+                referrer: locklift.ton.zero_address
             };
 
             logger.log(`Call buildCrossPairExchangePayload(${JSON.stringify(params, null, 4)})`);

@@ -60,6 +60,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         uint64 id,
         uint128 expectedAmount,
         address recipient,
+        address referrer,
         optional(address) outcoming
     ) public pure returns (TvmCell) {
         TvmBuilder builder;
@@ -85,6 +86,10 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         pairPayload.storeRef(successPayload);
         pairPayload.storeRef(cancelPayload);
 
+        TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(referrer);
+        pairPayload.store(otherDataBuilder.toCell());
+
         builder.store(EverToTip3OperationStatus.SWAP);
         builder.store(pair);
         builder.storeRef(pairPayload);
@@ -108,7 +113,8 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         address outcoming,
         uint32[] nextStepIndices,
         Tip3ToEverExchangeStep[] steps,
-        address recipient
+        address recipient,
+        address referrer
     ) public returns (TvmCell) {
         require(steps.length > 0);
 
@@ -147,6 +153,10 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         pairPayload.store(nextStepsCell);
         pairPayload.storeRef(successPayload);
         pairPayload.storeRef(cancelPayload);
+
+        TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(referrer);
+        pairPayload.store(otherDataBuilder.toCell());
 
         builder.store(EverToTip3OperationStatus.SWAP);
         builder.store(pool);

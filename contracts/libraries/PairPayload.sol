@@ -48,7 +48,7 @@ library PairPayload {
         uint128 _expectedAmount,
         address _recipient,
         address _outcoming,
-        address /*referrer*/,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -69,6 +69,10 @@ library PairPayload {
         if (_cancelPayload.hasValue()) {
             builder.store(_cancelPayload.get());
         }
+
+        TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(_referrer);
+        builder.store(otherDataBuilder.toCell());
 
         return builder.toCell();
     }
@@ -105,7 +109,7 @@ library PairPayload {
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
         address _recipient,
-        address /*referrer*/,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -125,6 +129,10 @@ library PairPayload {
         if (_cancelPayload.hasValue()) {
             builder.store(_cancelPayload.get());
         }
+
+        TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(_referrer);
+        builder.store(otherDataBuilder.toCell());
 
         return builder.toCell();
     }
@@ -161,7 +169,7 @@ library PairPayload {
         uint128 _deployWalletGrams,
         uint128[] _expectedAmounts,
         address _recipient,
-        address /*referrer*/,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -182,6 +190,10 @@ library PairPayload {
             builder.store(_cancelPayload.get());
         }
 
+        TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(_referrer);
+        builder.store(otherDataBuilder.toCell());
+
         return builder.toCell();
     }
 
@@ -196,7 +208,7 @@ library PairPayload {
         address _recipient,
         uint128 _expectedAmount,
         address _outcoming,
-        address /*referrer*/,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -217,6 +229,10 @@ library PairPayload {
         if (_cancelPayload.hasValue()) {
             builder.store(_cancelPayload.get());
         }
+
+        TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(_referrer);
+        builder.store(otherDataBuilder.toCell());
 
         return builder.toCell();
     }
@@ -283,7 +299,7 @@ library PairPayload {
         uint32[] _nextStepIndices,
         IExchangeStepStructure.ExchangeStep[] _steps,
         address[] _pools,
-        address /*referrer*/,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -323,6 +339,10 @@ library PairPayload {
         if (_cancelPayload.hasValue()) {
             builder.store(_cancelPayload.get());
         }
+
+        TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(_referrer);
+        builder.store(otherDataBuilder.toCell());
 
         return builder.toCell();
     }
@@ -394,6 +414,7 @@ library PairPayload {
         address outcoming;
         uint128[] expectedAmounts;
         INextExchangeData.NextExchangeData[] nextSteps;
+        address referrer;
 
         if (isValid) {
             (
@@ -443,6 +464,16 @@ library PairPayload {
                             1
                         ));
                 }
+
+                if (slice.refs() >= 2) {
+                  // success and cancel payloads
+                  slice.decode(TvmCell, TvmCell);
+                }
+                if (slice.refs() >= 1) {
+                    dataCell = slice.loadRef();
+                }
+
+                referrer = dataCell.toSlice().decode(address);
             }
         }
 
@@ -465,12 +496,8 @@ library PairPayload {
      * @return TvmCell Payload for success
      * @return bool Whether or not cancel payload exists
      * @return TvmCell Payload for cancel
-     * @return bool Whether or not other data exists
-     * @return TvmCell Other data
      */
     function decodeOnAcceptTokensTransferPayloads(TvmCell _payload, uint8 op) public returns (
-        bool,
-        TvmCell,
         bool,
         TvmCell,
         bool,
@@ -482,11 +509,9 @@ library PairPayload {
         // Check size
         bool notifySuccess;
         bool notifyCancel;
-        bool hasRef3;
 
         TvmCell successPayload;
         TvmCell cancelPayload;
-        TvmCell ref3;
 
         if (op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2 ||
             op == DexOperationTypes.CROSS_PAIR_EXCHANGE ||
@@ -494,28 +519,22 @@ library PairPayload {
 
             notifySuccess = refs >= 2;
             notifyCancel = refs >= 3;
-            hasRef3 = refs == 4;
 
             slice.loadRef();
         } else {
             notifySuccess = refs >= 1;
             notifyCancel = refs >= 2;
-            hasRef3 = refs >= 3;
         }
 
         if (notifySuccess) { successPayload = slice.loadRef(); }
 
         if (notifyCancel) { cancelPayload = slice.loadRef(); }
 
-        if (hasRef3) { ref3 = slice.loadRef(); }
-
         return (
             notifySuccess,
             successPayload,
             notifyCancel,
-            cancelPayload,
-            hasRef3,
-            ref3
+            cancelPayload
         );
     }
 

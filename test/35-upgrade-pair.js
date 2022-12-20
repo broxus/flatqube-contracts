@@ -53,7 +53,6 @@ const loadPairData = async (pair, contractName) => {
 
   const token_roots = await pair.call({method: 'getTokenRoots'});
   data.lp_root = token_roots.lp;
-  console.log(token_roots);
   if (contractName === 'DexStablePool') {
     data.left_root = token_roots.roots[0];
     data.right_root = token_roots.roots[1];

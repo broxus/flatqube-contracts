@@ -20,12 +20,9 @@ program.parse(process.argv);
 const options = program.opts();
 
 options.roots = options.roots ? JSON.parse(options.roots) : ['foo', 'bar', 'qwe'];
-options.old_contract_name = options.old_contract_name || 'DexPairPrev';
-options.new_contract_name = options.new_contract_name || 'DexPair';
+options.old_contract_name = options.old_contract_name || 'DexStablePool';
+options.new_contract_name = options.new_contract_name || 'DexStablePool';
 options.pool_type = options.pool_type || '1';
-
-const tokenLeft = Constants.tokens[options.left];
-const tokenRight = Constants.tokens[options.right];
 
 const tokens = {};
 let poolName = '';
@@ -58,24 +55,36 @@ const loadPoolData = async (pool, contractName) => {
 
     const token_roots = await pool.call({method: 'getTokenRoots'});
     data.lp_root = token_roots.lp;
-    data.roots = token_roots.roots;
+    if (contractName === 'DexStablePool') {
+        data.roots = token_roots.roots;
+    } else {
+        data.roots = [token_roots.left, token_roots.right];
+    }
 
     data.active = await pool.call({method: 'isActive'});
 
     const token_wallets = await pool.call({method: 'getTokenWallets'});
     data.lp_wallet = token_wallets.lp;
-    data.token_wallets = token_wallets.token_wallets;
+    if (contractName === 'DexStablePool') {
+        data.token_wallets = token_wallets.token_wallets;
+    } else {
+        data.token_wallets = [token_wallets.left, token_wallets.right];
+    }
 
     const vault_token_wallets = await pool.call({method: 'getVaultWallets'});
-    data.lp_vault_wallet = token_wallets.lp;
-    data.vault_wallets = vault_token_wallets.token_vault_wallets;
+    if (contractName === 'DexStablePool') {
+        data.lp_vault_wallet = vault_token_wallets.lp;
+        data.vault_wallets = vault_token_wallets.token_vault_wallets;
+    } else {
+        data.vault_wallets = [vault_token_wallets.left, vault_token_wallets.right];
+    }
 
     const balances = await pool.call({method: 'getBalances'});
     data.lp_supply = balances.lp_supply.toString();
-    if (contractName === 'DexPair') {
-        data.balances = [balances.left_balance.toString(), balances.right_balance.toString()];
-    } else {
+    if (contractName === 'DexStablePool') {
         data.balances = balances.balances.map((bal) => bal.toString());
+    } else {
+        data.balances = [balances.left_balance.toString(), balances.right_balance.toString()];
     }
 
     const fee_params = await pool.call({method: 'getFeeParams'});
@@ -188,6 +197,11 @@ describe('Test Dex Pool contract upgrade', async function () {
                 expect(newPoolData.token_wallets[i])
                     .to
                     .equal(oldPoolData.token_wallets[i], `New ${tokens[options.roots[i]].symbol} wallet value incorrect`);
+            }
+            if (options.old_contract_name === 'DexStablePool' && options.new_contract_name === 'DexStablePool') {
+                expect(newPoolData.lp_vault_wallet)
+                    .to
+                    .equal(oldPoolData.lp_vault_wallet, 'New lp_vault_wallet value incorrect');
             }
             for (let i = 0; i < N_COINS; i++) {
                 expect(newPoolData.vault_wallets[i])

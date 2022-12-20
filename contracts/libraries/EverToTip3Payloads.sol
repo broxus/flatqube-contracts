@@ -14,6 +14,7 @@ library EverToTip3Payloads {
         uint128 expectedAmount,
         uint128 amount,
         address recipient,
+        address referrer,
         address outcoming
     ) public returns (TvmCell) {
         TvmBuilder builder;
@@ -39,6 +40,10 @@ library EverToTip3Payloads {
 
         pairPayload.storeRef(successPayload);
         pairPayload.storeRef(cancelPayload);
+
+        TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(referrer);
+        pairPayload.store(otherDataBuilder.toCell());
 
         builder.store(pair);
         if (amount != 0) {
@@ -66,7 +71,8 @@ library EverToTip3Payloads {
         uint32[] nextStepIndices,
         EverToTip3ExchangeStep[] steps,
         uint128 amount,
-        address recipient
+        address recipient,
+        address referrer
     ) public returns (TvmCell) {
         require(steps.length > 0);
 
@@ -106,6 +112,10 @@ library EverToTip3Payloads {
         pairPayload.store(nextStepsCell);
         pairPayload.storeRef(successPayload);
         pairPayload.storeRef(cancelPayload);
+
+        TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(referrer);
+        pairPayload.store(otherDataBuilder.toCell());
 
         builder.store(pool);
         if (amount != 0) {

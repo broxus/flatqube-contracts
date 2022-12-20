@@ -2,8 +2,8 @@ echo "test_only_upgrade.sh START";
 
 npx locklift build --config locklift.config.js
 
-export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --external-build node_modules/tip3/build --network dev3"
-export NO_TRACE="--config locklift.config.js --disable-build --network dev3"
+export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --external-build node_modules/tip3/build --network local"
+export NO_TRACE="--config locklift.config.js --disable-build --network local"
 
 echo "____________________________________________________________________";
 echo "prepare dex";
@@ -49,6 +49,13 @@ npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='bar' --right
 
 echo "____________________________________________________________________";
 echo "prepare pools";
+npx locklift test $NO_TRACE --tests test/30-install-pool-code.js --contract_name='DexStablePool' --pool_type=3
+npx locklift run $NO_TRACE --script scripts/5-deploy-test-pool.js --pools='[["foo", "bar", "qwe"],["foo","qwe"]]' --contract_name='DexStablePool'
+npx locklift test $NO_TRACE --tests test/09-add-pool-test.js --roots='["foo", "bar", "qwe"]' --account=2 --contract_name='DexStablePool' --ignore_already_added='true'
+npx locklift test $NO_TRACE --tests test/09-add-pool-test.js --roots='["foo", "qwe"]' --account=2 --contract_name='DexStablePool' --ignore_already_added='true'
+npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits='[{ "tokenId": "foo", "amount": 100000000 },{ "tokenId": "qwe", "amount": 100000000 }]'
+npx locklift test $NO_TRACE --tests test/12-pool-deposit-liquidity.js --roots='["foo", "bar", "qwe"]' --amounts='[100000, 100000, 100000]' --contract_name='DexStablePool'
+npx locklift test $NO_TRACE --tests test/12-pool-deposit-liquidity.js --roots='["foo", "qwe"]' --amounts='[100000, 100000]' --contract_name='DexStablePool'
 
 echo "____________________________________________________________________";
 echo "pair -> stablepair";
@@ -57,7 +64,6 @@ npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='bar' --right
 
 echo "____________________________________________________________________";
 echo "stablepair -> next stablepair";
-# is working
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='TestNewDexStablePair' --pool_type=2
 npx locklift test $DEFAULT_PARAMS --tests test/35-upgrade-pair.js --left='bar' --right='qwe' --old_contract_name='DexStablePair' --new_contract_name='TestNewDexStablePair' --pool_type=2
 
@@ -72,13 +78,6 @@ npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right
 
 echo "____________________________________________________________________";
 echo "prepare pools";
-npx locklift test $NO_TRACE --tests test/30-install-pool-code.js --contract_name='DexStablePool' --pool_type=3
-npx locklift run $NO_TRACE --script scripts/5-deploy-test-pool.js --pools='[["foo", "bar", "qwe"],["foo","qwe"]]' --contract_name='DexStablePool'
-npx locklift test $NO_TRACE --tests test/09-add-pool-test.js --roots='["foo", "bar", "qwe"]' --account=2 --contract_name='DexStablePool' --ignore_already_added='true'
-npx locklift test $NO_TRACE --tests test/09-add-pool-test.js --roots='["foo", "qwe"]' --account=2 --contract_name='DexStablePool' --ignore_already_added='true'
-npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits='[{ "tokenId": "foo", "amount": 100000000 },{ "tokenId": "qwe", "amount": 100000000 }]'
-npx locklift test $NO_TRACE --tests test/12-pool-deposit-liquidity.js --roots='["foo", "bar", "qwe"]' --amounts='[100000, 100000, 100000]' --contract_name='DexStablePool'
-npx locklift test $NO_TRACE --tests test/12-pool-deposit-liquidity.js --roots='["foo", "qwe"]' --amounts='[100000, 100000]' --contract_name='DexStablePool'
 
 echo "____________________________________________________________________";
 echo "pool -> pair";
@@ -87,14 +86,12 @@ npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right
 
 echo "____________________________________________________________________";
 echo "pair -> pool";
-# TODO
-#npx locklift test $DEFAULT_PARAMS --tests test/35-upgrade-pool.js --roots='["foo", "qwe"]' --old_contract_name='DexPair' --new_contract_name='DexStablePool' --pool_type=1
+npx locklift test $NO_TRACE --tests test/35-upgrade-pool.js --roots='["foo", "qwe"]' --old_contract_name='DexPair' --new_contract_name='DexStablePool' --pool_type=3
 
 echo "____________________________________________________________________";
 echo "pool -> next pool";
-# TODO
-#npx locklift test $NO_TRACE --tests test/30-install-pool-code.js --contract_name='DexStablePool' --pool_type=3
-#npx locklift test $NO_TRACE --tests test/35-upgrade-pool.js --roots='["foo", "bar", "qwe"]' --old_contract_name='DexStablePool' --new_contract_name='DexStablePool' --pool_type=3
+npx locklift test $NO_TRACE --tests test/30-install-pool-code.js --contract_name='DexStablePool' --pool_type=3
+npx locklift test $NO_TRACE --tests test/35-upgrade-pool.js --roots='["foo", "bar", "qwe"]' --old_contract_name='DexStablePool' --new_contract_name='DexStablePool' --pool_type=3
 echo "____________________________________________________________________";
 echo "vault ->  next vault";
 npx locklift run $NO_TRACE --script scripts/update-dexVault.js --old_contract='DexVault' --new_contract='DexVault'

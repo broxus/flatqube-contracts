@@ -234,7 +234,7 @@ contract DexPair is DexPairBase, INextExchangeData {
 
         (
             DepositLiquidityResult result,
-            ,
+            uint128 step2PoolFee,
             uint128 step2BeneficiaryFee
         ) = Math.calculateExpectedDepositLiquidity(
             operations[0].amount,
@@ -275,13 +275,14 @@ contract DexPair is DexPairBase, INextExchangeData {
                     true,
                     result.step_2_left_to_right ? 0 : 1,
                     result.step_2_left_to_right ? 1 : 0,
-                    0,
-                    0,
-                    0,
-                    0,
+                    result.step_2_spent,
+                    step2BeneficiaryFee,
+                    step2PoolFee,
+                    result.step_2_received,
                     _accountOwner,
                     _remainingGasTo,
-                    _accountOwner
+                    _accountOwner,
+                    true
                 );
             } else {
                 _typeToReserves[DexReserveType.POOL][0] += result.step_1_left_deposit;
@@ -768,7 +769,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                 amount,
                 _accountOwner,
                 _remainingGasTo,
-                _accountOwner
+                _accountOwner,
+                false
             );
 
             IDexAccount(msg.sender)
@@ -808,19 +810,22 @@ contract DexPair is DexPairBase, INextExchangeData {
         uint128 _amount,
         address _senderAddress,
         address _remainingGasTo,
-        address _recipient
+        address _recipient,
+        bool _isNominal
     ) private {
         uint128[] oldReserves = _reserves();
 
         // Update reserves
-        _typeToReserves[DexReserveType.POOL][spentTokenIndex] += _spentAmount - _beneficiaryFee;
-        _typeToReserves[DexReserveType.POOL][receiveTokenIndex] -= _amount;
+        if (!_isNominal || !_isViaAccount) {
+            _typeToReserves[DexReserveType.POOL][spentTokenIndex] += _isNominal ? 0 : _spentAmount - _beneficiaryFee;
+            _typeToReserves[DexReserveType.POOL][receiveTokenIndex] -= _isNominal ? 0 : _amount;
 
-        // Update accumulated fees
-        if (_beneficiaryFee > 0) {
-            _typeToReserves[DexReserveType.FEE][spentTokenIndex] += _beneficiaryFee;
+            // Update accumulated fees
+            if (_beneficiaryFee > 0) {
+                _typeToReserves[DexReserveType.FEE][spentTokenIndex] += _beneficiaryFee;
 
-            _processBeneficiaryFees(false, _remainingGasTo);
+                _processBeneficiaryFees(false, _remainingGasTo);
+            }
         }
 
         ExchangeFee[] fees;
@@ -966,7 +971,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                         amount,
                         _senderAddress,
                         _remainingGasTo,
-                        _recipient
+                        _recipient,
+                        false
                     );
 
                     uint16 postSwapErrorCode = 0;
@@ -1147,9 +1153,7 @@ contract DexPair is DexPairBase, INextExchangeData {
             bool notifySuccess,
             TvmCell successPayload,
             bool notifyCancel,
-            TvmCell cancelPayload,
-            /*bool hasRef3*/,
-            /*TvmCell Ref3*/
+            TvmCell cancelPayload
         ) = PairPayload.decodeOnAcceptTokensTransferPayloads(_payload, op);
 
         TvmCell empty;
@@ -1197,7 +1201,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                             amount,
                             _senderAddress,
                             _remainingGasTo,
-                            recipient
+                            recipient,
+                            false
                         );
 
                         // Transfer incoming token to vault
@@ -1246,14 +1251,6 @@ contract DexPair is DexPairBase, INextExchangeData {
 
                     // Check reserves, fees and expected amount
                     if (
-                        r.step_3_lp_reward > 0 &&
-                        r.step_3_lp_reward >= expectedAmount &&
-                        r.step_2_received <= _reserves()[receiveTokenIndex] &&
-                        r.step_2_received > 0 &&
-                        (step2PoolFee > 0 || _fee.pool_numerator == 0) &&
-                        (step2BeneficiaryFee > 0 || _fee.beneficiary_numerator == 0)
-                    )
-                    if (
                         r.step_3_lp_reward == 0 ||
                         r.step_2_received > _reserves()[receiveTokenIndex] ||
                         r.step_2_received == 0 ||
@@ -1264,18 +1261,21 @@ contract DexPair is DexPairBase, INextExchangeData {
                     } else if (r.step_3_lp_reward < expectedAmount) {
                         errorCode = DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
                     } else {
+                        _typeToReserves[DexReserveType.POOL][spentTokenIndex] += _tokensAmount - step2BeneficiaryFee;
+
                         _exchangeBase(
                             id,
                             false,
                             spentTokenIndex,
                             receiveTokenIndex,
-                            _tokensAmount,
+                            r.step_2_spent,
                             step2BeneficiaryFee,
                             step2PoolFee,
-                            0,
+                            r.step_2_received,
                             _senderAddress,
                             _remainingGasTo,
-                            recipient
+                            recipient,
+                            true
                         );
 
                         _depositLiquidityBase(
@@ -1378,7 +1378,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                             amount,
                             _senderAddress,
                             _remainingGasTo,
-                            recipient
+                            recipient,
+                            false
                         );
 
                         // Transfer incoming token to vault

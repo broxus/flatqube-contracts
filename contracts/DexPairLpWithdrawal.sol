@@ -1668,9 +1668,7 @@ contract DexPairLpWithdrawal is
         bool notifySuccess,
         TvmCell successPayload,
         bool notifyCancel,
-        TvmCell cancelPayload,
-        /*bool hasRef3*/,
-        /*TvmCell Ref3*/
+        TvmCell cancelPayload
         ) = PairPayload.decodeOnAcceptTokensTransferPayloads(_payload, op);
 
         TvmCell empty;

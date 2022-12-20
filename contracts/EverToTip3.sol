@@ -64,6 +64,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         uint128 deployWalletValue,
         uint128 expectedAmount,
         address recipient,
+        address referrer,
         optional(address) outcoming
     ) external pure returns (TvmCell) {
         return EverToTip3Payloads.buildExchangePayload(
@@ -73,6 +74,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
             expectedAmount,
             0,
             recipient,
+            referrer,
             outcoming.hasValue() ? outcoming.get() : address(0)
         );
     }
@@ -86,7 +88,8 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         address outcoming,
         uint32[] nextStepIndices,
         EverToTip3Payloads.EverToTip3ExchangeStep[] steps,
-        address recipient
+        address recipient,
+        address referrer
     ) external pure returns (TvmCell) {
         return EverToTip3Payloads.buildCrossPairExchangePayload(
             pool,
@@ -97,7 +100,8 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
             nextStepIndices,
             steps,
             0,
-            recipient
+            recipient,
+            referrer
         );
     }
 
@@ -124,11 +128,11 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
                 if (
                     (
                         (ref1Slice.bits() == (595 - 72) || (ref1Slice.bits() == (862 - 72))) && // 862 for pool (with outcoming)
-                        ref1Slice.refs() == 2 &&
+                        ref1Slice.refs() == 3 &&
                         operationType == DexOperationTypes.EXCHANGE_V2
                     ) || (
                         ref1Slice.bits() == (862 - 72) &&
-                        ref1Slice.refs() == 3 &&
+                        ref1Slice.refs() == 4 &&
                         operationType == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2
                     )
                 ) {

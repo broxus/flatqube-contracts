@@ -127,7 +127,8 @@ describe('Tests Swap Evers', async function () {
                 pair: dexPair.address,
                 expectedAmount: expected.expected_amount,
                 deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
-                recipient: locklift.ton.zero_address
+                recipient: locklift.ton.zero_address,
+                referrer: locklift.ton.zero_address
             }
 
             logger.log(`EverToTip3.buildExchangePayload(${JSON.stringify(params)})`);
@@ -194,7 +195,8 @@ describe('Tests Swap Evers', async function () {
                     pair: dexPair.address,
                     expectedAmount: new BigNumber(expected.expected_amount).times(2).toString(),
                     deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
-                    recipient: locklift.ton.zero_address
+                    recipient: locklift.ton.zero_address,
+                    referrer: locklift.ton.zero_address
                 }
 
                 logger.log(`EverToTip3.buildExchangePayload(${JSON.stringify(params)})`);
@@ -267,7 +269,8 @@ describe('Tests Swap Evers', async function () {
                 id: 66,
                 pair: dexPair.address,
                 expectedAmount: new BigNumber(expected.expected_amount).times(2).toString(),
-                recipient: locklift.ton.zero_address
+                recipient: locklift.ton.zero_address,
+                referrer: locklift.ton.zero_address
             }
 
             logger.log(`Tip3ToEver.buildExchangePayload(${JSON.stringify(params)})`);
@@ -335,7 +338,8 @@ describe('Tests Swap Evers', async function () {
                 id: 66,
                 pair: dexPair.address,
                 expectedAmount: expected.expected_amount,
-                recipient: locklift.ton.zero_address
+                recipient: locklift.ton.zero_address,
+                referrer: locklift.ton.zero_address
             }
 
             logger.log(`Tip3ToEver.buildExchangePayload(${JSON.stringify(params)})`);
@@ -409,7 +413,8 @@ describe('Tests Swap Evers', async function () {
                 pair: dexPair.address,
                 expectedAmount: new BigNumber(expected.expected_amount).times(2).toString(),
                 deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
-                recipient: locklift.ton.zero_address
+                recipient: locklift.ton.zero_address,
+                referrer: locklift.ton.zero_address
             }
 
             logger.log(`everWeverToTip3.buildExchangePayload(${JSON.stringify(params)})`);
@@ -485,7 +490,8 @@ describe('Tests Swap Evers', async function () {
                 pair: dexPair.address,
                 expectedAmount: expected.expected_amount,
                 deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
-                recipient: locklift.ton.zero_address
+                recipient: locklift.ton.zero_address,
+                referrer: locklift.ton.zero_address
             }
 
             logger.log(`everWeverToTip3.buildExchangePayload(${JSON.stringify(params)})`);
