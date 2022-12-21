@@ -2368,7 +2368,12 @@ contract DexStablePool is
         } else {
             D2_opt.set(D1);
             result_balances = new_balances;
-            lp_reward = uint128(D1);
+            uint256 lp_precision = uint256(10) ** 9;
+            if (PRECISION > lp_precision) {
+                lp_reward = uint128(math.muldiv(D1, lp_precision, PRECISION));
+            } else {
+                lp_reward = uint128(D1);
+            }
         }
 
         if (!D2_opt.hasValue() || lp_reward == 0) {
