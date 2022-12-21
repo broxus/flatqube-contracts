@@ -1529,6 +1529,31 @@ contract DexStablePair is
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexStablePair.onTokenDecimals
             }();
+        } else if (old_pool_type == DexPoolTypes.STABLE_POOL) {
+            TvmCell tokens_data_cell = s.loadRef(); // ref 2
+            address[] roots = abi.decode(tokens_data_cell, address[]);
+
+            tokenIndex[roots[0]] = 0;
+            tokenIndex[roots[1]] = 1;
+
+            TvmCell otherData = s.loadRef(); // ref 3
+
+            address lp_vault_wallet;
+
+            (
+                lp_root, lp_wallet, lp_vault_wallet, lp_supply,
+                fee,
+                tokenData,
+                A, PRECISION
+            ) = abi.decode(otherData, (
+                address, address, address, uint128,
+                FeeParams,
+                PoolTokenData[],
+                AmplificationCoefficient,
+                uint256
+            ));
+
+            active = lp_wallet.value != 0 && tokenData[0].initialized && tokenData[1].initialized;
         }
 
         send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS, bounce: false });

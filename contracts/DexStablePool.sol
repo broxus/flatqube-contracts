@@ -1702,8 +1702,31 @@ contract DexStablePool is
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexStablePool.onTokenDecimals
             }();
+        } else if (old_pool_type == DexPoolTypes.STABLESWAP) {
+            active = false;
+            TvmCell otherData = s.loadRef(); // ref 3
+
+            (
+                lp_root, lp_wallet, lp_supply,
+                fee,
+                tokenData,
+                A, PRECISION
+            ) = abi.decode(otherData, (
+                address, address, uint128,
+                FeeParams,
+                PoolTokenData[],
+                AmplificationCoefficient,
+                uint256
+            ));
+
+            ITokenRoot(lp_root).walletOf{
+                value: DexGas.SEND_EXPECTED_WALLET_VALUE,
+                flag: MsgFlag.SENDER_PAYS_FEES,
+                callback: DexStablePool.onVaultTokenWallet
+            }(vault);
+
         } else if (old_pool_type == DexPoolTypes.STABLE_POOL) {
-            active = true;
+            active = false;
             TvmCell other_data = s.loadRef(); // ref 3
 
             // Set lp reserve and fee options
@@ -1721,6 +1744,15 @@ contract DexStablePool is
                 IAmplificationCoefficient.AmplificationCoefficient,
                 uint256
             ));
+
+            bool allTokensIsInit = true;
+            for (uint i = 0; i < N_COINS; i++) {
+                if (!tokenData[i].initialized) {
+                    allTokensIsInit = false;
+                    break;
+                }
+            }
+            active = lp_wallet.value != 0 && lp_vault_wallet.value != 0 && allTokensIsInit;
         }
 
         send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS, bounce: false });
@@ -1753,18 +1785,18 @@ contract DexStablePool is
 
         if (msg.sender == lp_root && lp_wallet.value == 0) {
             lp_wallet = wallet;
+
+            bool allTokensIsInit = true;
+            for (uint i = 0; i < N_COINS; i++) {
+                if (!tokenData[i].initialized) {
+                    allTokensIsInit = false;
+                    break;
+                }
+            }
+            active = lp_vault_wallet.value != 0 && allTokensIsInit;
         } else {
             tokenData[tokenIndex[msg.sender]].wallet = wallet;
         }
-
-        bool allTokensIsInit = true;
-        for (uint i = 0; i < N_COINS; i++) {
-            if (!tokenData[i].initialized) {
-                allTokensIsInit = false;
-                break;
-            }
-        }
-        active = allTokensIsInit;
     }
 
     function onTokenDecimals(uint8 _decimals) external {
@@ -1817,6 +1849,15 @@ contract DexStablePool is
                 _tokenRoots(),
                 lp_vault_wallet
             );
+
+            bool allTokensIsInit = true;
+            for (uint i = 0; i < N_COINS; i++) {
+                if (!tokenData[i].initialized) {
+                    allTokensIsInit = false;
+                    break;
+                }
+            }
+            active = lp_wallet.value != 0 && allTokensIsInit;
         } else {
             tokenData[tokenIndex[msg.sender]].vaultWallet = wallet;
         }

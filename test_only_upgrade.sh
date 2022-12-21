@@ -68,6 +68,15 @@ npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_n
 npx locklift test $DEFAULT_PARAMS --tests test/35-upgrade-pair.js --left='bar' --right='qwe' --old_contract_name='DexStablePair' --new_contract_name='TestNewDexStablePair' --pool_type=2
 
 echo "____________________________________________________________________";
+echo "stablepair -> pool";
+npx locklift test $NO_TRACE --tests test/35-upgrade-pool.js --roots='["foo", "bar"]' --old_contract_name='DexStablePair' --new_contract_name='DexStablePool' --pool_type=3
+
+echo "____________________________________________________________________";
+echo "pool -> stablepair";
+npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexStablePair' --pool_type=2
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexStablePool' --new_contract_name='DexStablePair' --pool_type=2
+
+echo "____________________________________________________________________";
 echo "stablepair -> pair";
 npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexStablePair' --new_contract_name='DexPair' --pool_type=1
 
