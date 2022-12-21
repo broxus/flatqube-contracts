@@ -628,27 +628,20 @@ abstract contract DexPairBase is
         address leftRoot;
         address rightRoot;
 
-        // Load tokens' roots addresses
-        TvmCell tokenDataCell = dataSlice.loadRef(); // ref 2
-        if (oldPoolType == DexPoolTypes.STABLE_POOL) {
-            // Set token roots
-            _typeToRootAddresses[DexAddressType.RESERVE] = abi.decode(tokenDataCell, address[]);
-        } else {
-            TvmSlice tokensDataSlice = tokenDataCell.toSlice();
-            (leftRoot, rightRoot) = tokensDataSlice.decode(address, address);
-
-            // Set token roots
-            _typeToRootAddresses[DexAddressType.RESERVE].push(leftRoot);
-            _typeToRootAddresses[DexAddressType.RESERVE].push(rightRoot);
-        }
-
         // Set fee reserves
         _typeToReserves[DexReserveType.FEE].push(0);
         _typeToReserves[DexReserveType.FEE].push(0);
 
         if (oldVersion == 0) {
+            TvmSlice tokensDataSlice = dataSlice.loadRefAsSlice(); // ref 2
+            (leftRoot, rightRoot) = tokensDataSlice.decode(address, address);
+
+            // Set token roots
+            _typeToRootAddresses[DexAddressType.RESERVE].push(leftRoot);
+            _typeToRootAddresses[DexAddressType.RESERVE].push(rightRoot);
+
             // Set initial params for fees
-            _fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap);
+            _fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap, emptyMap);
 
             // Deploy LP token for pair
             IDexVault(_typeToRootAddresses[DexAddressType.VAULT][0])
@@ -663,49 +656,24 @@ abstract contract DexPairBase is
             _initializeTWAPOracle(now);
         } else if (oldPoolType == DexPoolTypes.CONSTANT_PRODUCT) {
             _active = true;
-            TvmCell otherData = dataSlice.loadRef(); // ref 3
-
-            address lpRoot;
-            address lpWallet;
-            address leftWallet;
-            address vaultLeftWallet;
-            address rightWallet;
-            address vaultRightWallet;
-            uint128 lpSupply;
-            uint128 leftBalance;
-            uint128 rightBalance;
+            TvmCell otherData = dataSlice.loadRef(); // ref 2
 
             FeeParamsPrev feePrev;
 
             // Decode reserves, wallets and fee options
             (
-                lpRoot, lpWallet, lpSupply,
                 feePrev,
-                leftWallet, vaultLeftWallet, leftBalance,
-                rightWallet, vaultRightWallet, rightBalance
+                _typeToReserves,
+                _typeToRootAddresses,
+                _typeToWalletAddresses
             ) = abi.decode(otherData, (
-                address, address, uint128,
                 FeeParamsPrev,
-                address, address, uint128,
-                address, address, uint128
+                mapping(uint8 => uint128[]),
+                mapping(uint8 => address[]),
+                mapping(uint8 => address[])
             ));
 
-            _fee = FeeParams(feePrev.denominator, feePrev.pool_numerator, feePrev.beneficiary_numerator, 0, feePrev.beneficiary, feePrev.threshold);
-
-            // Set lp reserve and wallet
-            _typeToRootAddresses[DexAddressType.LP].push(lpRoot);
-            _typeToWalletAddresses[DexAddressType.LP].push(lpWallet);
-            _typeToReserves[DexReserveType.LP].push(lpSupply);
-
-            // Set left reserve and wallet
-            _typeToWalletAddresses[DexAddressType.RESERVE].push(leftWallet);
-            _typeToWalletAddresses[DexAddressType.VAULT].push(vaultLeftWallet);
-            _typeToReserves[DexReserveType.POOL].push(leftBalance);
-
-            // Set right reserve and wallet
-            _typeToWalletAddresses[DexAddressType.RESERVE].push(rightWallet);
-            _typeToWalletAddresses[DexAddressType.VAULT].push(vaultRightWallet);
-            _typeToReserves[DexReserveType.POOL].push(rightBalance);
+            _fee = FeeParams(feePrev.denominator, feePrev.pool_numerator, feePrev.beneficiary_numerator, feePrev.referrer_numerator, feePrev.beneficiary, feePrev.threshold, emptyMap);
 
             if (dataSlice.refs() > 0) {
                 TvmSlice oracleDataSlice = dataSlice.loadRefAsSlice();  // ref 4
@@ -721,9 +689,17 @@ abstract contract DexPairBase is
                 );
             }
         } else if (oldPoolType == DexPoolTypes.STABLESWAP) {
-            _active = true;
+            TvmSlice tokensDataSlice = dataSlice.loadRefAsSlice(); // ref 2
+            (leftRoot, rightRoot) = tokensDataSlice.decode(address, address);
+
+            // Set token roots
+            _typeToRootAddresses[DexAddressType.RESERVE].push(leftRoot);
+            _typeToRootAddresses[DexAddressType.RESERVE].push(rightRoot);
+
             TvmCell otherData = dataSlice.loadRef(); // ref 3
             IPoolTokenData.PoolTokenData[] tokensData = new IPoolTokenData.PoolTokenData[](2);
+
+            _active = true;
 
             address lpRoot;
             address lpWallet;
@@ -759,9 +735,13 @@ abstract contract DexPairBase is
 
             _initializeTWAPOracle(now);
         } else if (oldPoolType == DexPoolTypes.STABLE_POOL) {
-            _active = true;
+            TvmCell tokenDataCell = dataSlice.loadRef(); // ref 2
+            _typeToRootAddresses[DexAddressType.RESERVE] = abi.decode(tokenDataCell, address[]);
+
             TvmCell otherData = dataSlice.loadRef(); // ref 3
             IPoolTokenData.PoolTokenData[] tokensData = new IPoolTokenData.PoolTokenData[](2);
+
+            _active = true;
 
             address lpRoot;
             address lpWallet;

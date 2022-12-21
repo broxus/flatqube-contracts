@@ -1641,7 +1641,7 @@ contract DexStablePool is
         }
 
         if (old_version == 0) {
-            fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap);
+            fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap, emptyMap);
             A = AmplificationCoefficient(100 * uint128(N_COINS) ** (N_COINS - 1), 1);
 
             tokenData = new PoolTokenData[](N_COINS);

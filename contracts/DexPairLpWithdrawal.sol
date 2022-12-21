@@ -2097,7 +2097,7 @@ contract DexPairLpWithdrawal is
                 _typeToWalletAddresses[DexAddressType.LP][0],
                 _typeToReserves[DexReserveType.LP][0],
 
-                FeeParamsPrev(_fee.denominator, _fee.pool_numerator, _fee.beneficiary_numerator, _fee.beneficiary, _fee.threshold),
+                FeeParamsPrev(_fee.denominator, _fee.pool_numerator, _fee.beneficiary_numerator, 0, _fee.beneficiary, _fee.threshold),
 
                 _typeToWalletAddresses[DexAddressType.RESERVE][0],
                 _typeToWalletAddresses[DexAddressType.VAULT][0],
@@ -2171,7 +2171,7 @@ contract DexPairLpWithdrawal is
 
         if (oldVersion == 0) {
             // Set initial params for fees
-            _fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap);
+            _fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap, emptyMap);
 
             // Deploy LP token for pair
             IDexVault(_typeToRootAddresses[DexAddressType.VAULT][0])
@@ -2213,7 +2213,7 @@ contract DexPairLpWithdrawal is
                 address, address, uint128
                 ));
 
-            _fee = FeeParams(feePrev.denominator, feePrev.pool_numerator, feePrev.beneficiary_numerator, 0, feePrev.beneficiary, feePrev.threshold);
+            _fee = FeeParams(feePrev.denominator, feePrev.pool_numerator, feePrev.beneficiary_numerator, 0, feePrev.beneficiary, feePrev.threshold, emptyMap);
 
             // Set lp reserve and wallet
             _typeToRootAddresses[DexAddressType.LP].push(lpRoot);

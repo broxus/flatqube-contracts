@@ -13,7 +13,6 @@ library EverToTip3Payloads {
         uint128 deployWalletValue,
         uint128 expectedAmount,
         uint128 amount,
-        address recipient,
         address referrer,
         address outcoming
     ) public returns (TvmCell) {
@@ -25,7 +24,7 @@ library EverToTip3Payloads {
         pairPayload.store(id);
         pairPayload.store(deployWalletValue);
         pairPayload.store(expectedAmount);
-        pairPayload.store(recipient);
+        pairPayload.store(address(0));
         pairPayload.store(outcoming);
 
         TvmBuilder successPayload;
@@ -71,7 +70,6 @@ library EverToTip3Payloads {
         uint32[] nextStepIndices,
         EverToTip3ExchangeStep[] steps,
         uint128 amount,
-        address recipient,
         address referrer
     ) public returns (TvmCell) {
         require(steps.length > 0);
@@ -83,7 +81,7 @@ library EverToTip3Payloads {
         pairPayload.store(id);
         pairPayload.store(deployWalletValue);
         pairPayload.store(expectedAmount);
-        pairPayload.store(recipient);
+        pairPayload.store(address(0));
         pairPayload.store(outcoming);
 
         INextExchangeData.NextExchangeData[] nextSteps;

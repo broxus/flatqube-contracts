@@ -59,7 +59,6 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         address pair,
         uint64 id,
         uint128 expectedAmount,
-        address recipient,
         address referrer,
         optional(address) outcoming
     ) public pure returns (TvmCell) {
@@ -71,7 +70,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         pairPayload.store(id);
         pairPayload.store(uint128(0));
         pairPayload.store(expectedAmount);
-        pairPayload.store(recipient);
+        pairPayload.store(address(0));
         pairPayload.store(outcoming.hasValue() ? outcoming.get() : address(0));
 
         TvmBuilder successPayload;
@@ -113,7 +112,6 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         address outcoming,
         uint32[] nextStepIndices,
         Tip3ToEverExchangeStep[] steps,
-        address recipient,
         address referrer
     ) public returns (TvmCell) {
         require(steps.length > 0);
@@ -125,7 +123,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         pairPayload.store(id);
         pairPayload.store(deployWalletValue);
         pairPayload.store(expectedAmount);
-        pairPayload.store(recipient);
+        pairPayload.store(address(0));
         pairPayload.store(outcoming);
 
         INextExchangeData.NextExchangeData[] nextSteps;
@@ -251,7 +249,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
 
                 emit SwapTip3EverCancelTransfer(user, id_, amount, tokenRoot);
                 IEverTip3SwapCallbacks(user).onSwapTip3ToEverCancel{
-                    value: 0,
+                    value: EverToTip3Gas.OPERATION_CALLBACK_BASE,
                     flag: MsgFlag.SENDER_PAYS_FEES,
                     bounce: false
                 }(id_, amount, tokenRoot);
@@ -316,7 +314,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         uint64 id = payloadSlice.decode(uint64);
 
         emit SwapTip3EverSuccessTransfer(user, id, amount);
-        IEverTip3SwapCallbacks(user).onSwapTip3ToEverSuccess{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(id, amount);
+        IEverTip3SwapCallbacks(user).onSwapTip3ToEverSuccess{ value: EverToTip3Gas.OPERATION_CALLBACK_BASE, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(id, amount);
     }
 
     fallback() external pure {  }

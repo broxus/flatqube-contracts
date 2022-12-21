@@ -405,6 +405,8 @@ contract DexRoot is
             _accountVersion,
             _pairCodes,
             _pairVersions,
+            _poolCodes,
+            _poolVersions,
             _owner,
             _vault,
             _pendingOwner
@@ -412,6 +414,8 @@ contract DexRoot is
             TvmCell,
             TvmCell,
             uint32,
+            mapping(uint8 => TvmCell),
+            mapping(uint8 => uint32),
             mapping(uint8 => TvmCell),
             mapping(uint8 => uint32),
             address,

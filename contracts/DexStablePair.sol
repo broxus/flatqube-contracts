@@ -1447,7 +1447,7 @@ contract DexStablePair is
             tokenIndex[left_root] = 0;
             tokenIndex[right_root] = 1;
 
-            fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap);
+            fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap, emptyMap);
             A = AmplificationCoefficient(200, 1);
 
             tokenData = new PoolTokenData[](N_COINS);
@@ -1484,7 +1484,7 @@ contract DexStablePair is
                 uint256
             ));
 
-            fee = FeeParams(fee_prev.denominator, fee_prev.pool_numerator, fee_prev.beneficiary_numerator, 0, fee_prev.beneficiary, fee_prev.threshold);
+            fee = FeeParams(fee_prev.denominator, fee_prev.pool_numerator, fee_prev.beneficiary_numerator, 0, fee_prev.beneficiary, fee_prev.threshold, emptyMap);
 
             active = lp_wallet.value != 0 && tokenData[0].initialized && tokenData[1].initialized;
         } else if (old_pool_type == DexPoolTypes.CONSTANT_PRODUCT) {

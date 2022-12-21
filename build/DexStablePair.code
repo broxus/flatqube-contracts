@@ -1072,17 +1072,18 @@ PUSHCONT {
 	STUR 98
 	SWAP
 	NEWC
-	STSLICECONST xbd79d196
+	STSLICECONST x8765eada
 	SWAP
-	UNTUPLE 6
-	REVERSE 7, 0
+	UNTUPLE 7
+	REVERSE 8, 0
 	STU 128
 	STU 128
 	STU 128
 	STU 128
-	ROTREV
+	ROLLREV 3
 	NEWC
 	STSLICE
+	STDICT
 	STDICT
 	STBREFR
 	STBREFR
@@ -1114,15 +1115,16 @@ PUSHCONT {
 	INDEX 5
 	STUR 32
 	SWAP
-	UNTUPLE 6
-	REVERSE 7, 0
+	UNTUPLE 7
+	REVERSE 8, 0
 	STU 128
 	STU 128
 	STU 128
 	STU 128
-	ROTREV
+	ROLLREV 3
 	NEWC
 	STSLICE
+	STDICT
 	STDICT
 	STBREFR
 	STBREFR
@@ -1596,8 +1598,9 @@ ENDS
 CTOS
 LDMSGADDR
 LDDICT
-ROLLREV 6
-TUPLE 6
+LDDICT
+ROLLREV 7
+TUPLE 7
 SWAP
 LDREF
 ENDS
@@ -1707,17 +1710,18 @@ NEWC
 STSLICE
 GETGLOB 21
 NEWC
-STSLICECONST x553738b9
+STSLICECONST x26dfeaaf
 SWAP
-UNTUPLE 6
-REVERSE 7, 0
+UNTUPLE 7
+REVERSE 8, 0
 STU 128
 STU 128
 STU 128
 STU 128
-ROTREV
+ROLLREV 3
 NEWC
 STSLICE
+STDICT
 STDICT
 STBREFR
 STBREFR
@@ -9862,15 +9866,16 @@ PUSHCONT {
 	STSLICE
 	STU 128
 	SWAP
-	UNTUPLE 6
-	REVERSE 7, 0
+	UNTUPLE 7
+	REVERSE 8, 0
 	STU 128
 	STU 128
-	ROLLREV 7
+	ROLLREV 8
 	NEWC
 	STU 128
 	STU 128
 	STSLICE
+	STDICT
 	STDICT
 	SWAP
 	UNPAIR
@@ -9966,7 +9971,8 @@ PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
 NEWDICT
-TUPLE 6
+DUP
+TUPLE 7
 SETGLOB 21
 PUSHINT 0
 DUP
@@ -10052,12 +10058,12 @@ PUSHCONT {
 		POP S4
 		.loc ../contracts/DexStablePair.sol, 1472
 		PUSHINT 0
-		BLKPUSH 2, 0
+		BLKPUSH 3, 0
 		PUSHREFSLICE {
 			.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 		}
 		NEWDICT
-		TUPLE 5
+		TUPLE 6
 		.loc ../contracts/DexStablePair.sol, 1474
 		SWAP
 		CTOS
@@ -10073,10 +10079,11 @@ PUSHCONT {
 		ENDS
 		CTOS
 		LDU 128
+		LDU 128
 		LDMSGADDR
 		LDDICT
-		ROLLREV 5
-		TUPLE 5
+		ROLLREV 6
+		TUPLE 6
 		SWAP
 		LDU 32
 		LDDICT
@@ -10084,13 +10091,13 @@ PUSHCONT {
 		PAIR
 		SWAP
 		LDU 128
+		LDREF
+		ENDS
+		CTOS
 		LDU 128
 		ROTREV
 		PAIR
 		SWAP
-		LDREF
-		ENDS
-		CTOS
 		LDU 256
 		ENDS
 		REVERSE 7, 0
@@ -10110,10 +10117,11 @@ PUSHCONT {
 		THIRD
 		PUSHINT 0
 		PUSH S4
-		INDEX 3
-		ROLL 5
 		INDEX 4
-		TUPLE 6
+		ROLL 5
+		INDEX 5
+		NEWDICT
+		TUPLE 7
 		SETGLOB 21
 		.loc ../contracts/DexStablePair.sol, 1489
 		GETGLOB 19
@@ -10224,10 +10232,14 @@ PUSHCONT {
 			CTOS
 			LDMSGADDR
 			LDDICT
-			ROLLREV 6
-			TUPLE 6
+			LDDICT
+			ROLLREV 7
+			TUPLE 7
 			SWAP
 			LDDICT
+			LDREF
+			ENDS
+			CTOS
 			LDDICT
 			LDDICT
 			ENDS
@@ -10357,7 +10369,7 @@ PUSHCONT {
 			.loc ../contracts/DexStablePair.sol, 1518
 			PUSHINT 2
 			PUSHREF
-			.compute $new_array_line_1517_column_24_ast_id_4845$
+			.compute $new_array_line_1517_column_24_ast_id_4847$
 			PAIR
 			SETGLOB 15
 			.loc ../contracts/DexStablePair.sol, 1519
@@ -10724,8 +10736,9 @@ PUSHCONT {
 				LDU 128
 				LDMSGADDR
 				LDDICT
-				ROLLREV 6
-				TUPLE 6
+				LDDICT
+				ROLLREV 7
+				TUPLE 7
 				SWAP
 				LDU 32
 				LDDICT
@@ -10875,7 +10888,8 @@ PUSHCONT {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
 	NEWDICT
-	TUPLE 6
+	DUP
+	TUPLE 7
 	SETGLOB 21
 	.loc ../contracts/DexStablePair.sol, 1451
 	PUSHINT 200
@@ -10885,7 +10899,7 @@ PUSHCONT {
 	.loc ../contracts/DexStablePair.sol, 1453
 	PUSHINT 2
 	PUSHREF
-	.compute $new_array_line_1452_column_24_ast_id_4553$
+	.compute $new_array_line_1452_column_24_ast_id_4554$
 	PAIR
 	SETGLOB 15
 	.loc ../contracts/DexStablePair.sol, 1454
@@ -13982,26 +13996,26 @@ OVER
 .loc ../contracts/DexStablePair.sol, 1932
 PUSHINT 2
 PUSHREF
-.compute $new_array_line_1931_column_30_ast_id_6721$
+.compute $new_array_line_1931_column_30_ast_id_6723$
 PAIR
 .loc ../contracts/DexStablePair.sol, 1933
 PUSHINT 2
 PUSHREF
-.compute $new_array_line_1932_column_37_ast_id_6732$
+.compute $new_array_line_1932_column_37_ast_id_6734$
 PAIR
 .loc ../contracts/DexStablePair.sol, 1934
 PUSH S4
 .loc ../contracts/DexStablePair.sol, 1935
 PUSHINT 2
 PUSHREF
-.compute $new_array_line_1934_column_32_ast_id_6750$
+.compute $new_array_line_1934_column_32_ast_id_6752$
 PAIR
 .loc ../contracts/DexStablePair.sol, 1936
 PUSHINT 0
 .loc ../contracts/DexStablePair.sol, 1937
 PUSHINT 2
 PUSHREF
-.compute $new_array_line_1936_column_22_ast_id_6764$
+.compute $new_array_line_1936_column_22_ast_id_6766$
 PAIR
 .loc ../contracts/DexStablePair.sol, 1939
 FALSE
@@ -15657,8 +15671,9 @@ LDU 128
 LDU 128
 LDMSGADDR
 LDDICT
-ROLLREV 6
-TUPLE 6
+LDDICT
+ROLLREV 7
+TUPLE 7
 SWAP
 LDU 128
 LDREF
@@ -15718,7 +15733,8 @@ PUSHCONT {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
 	NEWDICT
-	TUPLE 6
+	DUP
+	TUPLE 7
 	PUSHINT 0
 	DUP
 	PAIR
@@ -15789,15 +15805,16 @@ NEWC
 STSLICE
 STU 128
 SWAP
-UNTUPLE 6
-REVERSE 7, 0
+UNTUPLE 7
+REVERSE 8, 0
 STU 128
 STU 128
-ROLLREV 5
+ROLLREV 6
 NEWC
 STU 128
 STU 128
 STSLICE
+STDICT
 STDICT
 SWAP
 UNPAIR
@@ -18762,7 +18779,7 @@ STREF
 ENDC
 .loc ../contracts/libraries/PairPayload.sol, 0
 
-.macro new_array_line_1452_column_24_ast_id_4553
+.macro new_array_line_1452_column_24_ast_id_4554
 PUSHREF
 .compute $default_tuple_builder_t_address_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool$
 PUSHINT 0
@@ -18779,7 +18796,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_1517_column_24_ast_id_4845
+.macro new_array_line_1517_column_24_ast_id_4847
 PUSHREF
 .compute $default_tuple_builder_t_address_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool$
 PUSHINT 0
@@ -18796,7 +18813,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_1931_column_30_ast_id_6721
+.macro new_array_line_1931_column_30_ast_id_6723
 PUSHINT 0
 NEWC
 STU 128
@@ -18814,7 +18831,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_1932_column_37_ast_id_6732
+.macro new_array_line_1932_column_37_ast_id_6734
 PUSHINT 0
 NEWC
 STU 128
@@ -18832,7 +18849,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_1934_column_32_ast_id_6750
+.macro new_array_line_1934_column_32_ast_id_6752
 PUSHINT 0
 NEWC
 STU 128
@@ -18850,7 +18867,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_1936_column_22_ast_id_6764
+.macro new_array_line_1936_column_22_ast_id_6766
 PUSHINT 0
 NEWC
 STI 1
@@ -18958,11 +18975,11 @@ ENDC
 
 .macro public_function_selector
 DUP
-PUSHINT 704975487
+PUSHINT 648775871
 LEQ
 IFJMPREF {
 	DUP
-	PUSHINT 230901566
+	PUSHINT 188144388
 	LEQ
 	IFJMPREF {
 		DUP
@@ -18978,22 +18995,28 @@ IFJMPREF {
 			CALL $expectedDepositLiquidityV2$
 		}
 		DUP
+		PUSHINT 124119770
+		EQUAL
+		IFJMPREF {
+			CALL $getFeeParams$
+		}
+		DUP
 		PUSHINT 188144388
 		EQUAL
 		IFJMPREF {
 			CALL $buildExchangePayloadV2$
 		}
+	}
+	DUP
+	PUSHINT 302200776
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 230901566
 		EQUAL
 		IFJMPREF {
 			CALL $buildDepositLiquidityPayload$
 		}
-	}
-	DUP
-	PUSHINT 360538859
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 238670987
 		EQUAL
@@ -19012,17 +19035,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $expectedExchange$
 		}
+	}
+	DUP
+	PUSHINT 505305303
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 360538859
 		EQUAL
 		IFJMPREF {
 			CALL $getAccumulatedFees$
 		}
-	}
-	DUP
-	PUSHINT 579541091
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 439353572
 		EQUAL
@@ -19030,11 +19053,22 @@ IFJMPREF {
 			CALL $getTokenRoots$
 		}
 		DUP
+		PUSHINT 458635401
+		EQUAL
+		IFJMPREF {
+			CALL $setFeeParams$
+		}
+		DUP
 		PUSHINT 505305303
 		EQUAL
 		IFJMPREF {
 			CALL $exchange$
 		}
+	}
+	DUP
+	PUSHINT 648775871
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 565050858
 		EQUAL
@@ -19047,11 +19081,6 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $depositLiquidity$
 		}
-	}
-	DUP
-	PUSHINT 704975487
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 581357277
 		EQUAL
@@ -19064,6 +19093,16 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getVirtualPrice$
 		}
+	}
+}
+DUP
+PUSHINT 1592781804
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 766070063
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 654630305
 		EQUAL
@@ -19076,16 +19115,6 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $upgrade$
 		}
-	}
-}
-DUP
-PUSHINT 1592781804
-LEQ
-IFJMPREF {
-	DUP
-	PUSHINT 782424727
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 758326208
 		EQUAL
@@ -19098,6 +19127,11 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getVersion$
 		}
+	}
+	DUP
+	PUSHINT 1025233701
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 778946784
 		EQUAL
@@ -19110,11 +19144,6 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $expectedSpendAmount$
 		}
-	}
-	DUP
-	PUSHINT 1039122824
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1019518667
 		EQUAL
@@ -19126,18 +19155,6 @@ IFJMPREF {
 		EQUAL
 		IFJMPREF {
 			CALL $getVault$
-		}
-		DUP
-		PUSHINT 1031393686
-		EQUAL
-		IFJMPREF {
-			CALL $getFeeParams$
-		}
-		DUP
-		PUSHINT 1039122824
-		EQUAL
-		IFJMPREF {
-			CALL $setFeeParams$
 		}
 	}
 	DUP
