@@ -20,6 +20,13 @@ export class OrderCallbacks {
                 outputs: []
             },
             {
+                name: "onOrderRootCreateReject",
+                inputs: [
+                    { name: 'id', type: 'uint64' },
+                ],
+                outputs: []
+            },
+            {
                 name: "onOrderCreateOrderSuccess",
                 inputs: [
                     { name: 'id', type: 'uint64' },
@@ -77,6 +84,13 @@ export class OrderCallbacks {
                             { name: 'currentSpentTokenAmount', type: 'uint128'},
                         ],
                         type: 'tuple'},
+                ],
+                outputs: []
+            },
+            {
+                name: "onOrderReject",
+                inputs: [
+                    { name: 'id', type: 'uint64' },
                 ],
                 outputs: []
             },

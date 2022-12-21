@@ -1,4 +1,4 @@
-pragma ton-solidity >= 0.57.0;
+pragma ton-solidity >= 0.62.0;
 
 library OrderGas {
     uint128 constant TARGET_BALANCE                  = 1 ever;
