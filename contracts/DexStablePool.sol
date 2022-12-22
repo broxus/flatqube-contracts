@@ -998,6 +998,7 @@ contract DexStablePool is
         address outcoming
     ) override external view responsible returns (WithdrawResultV2) {
         require(tokenIndex.exists(outcoming), DexErrors.NOT_TOKEN_ROOT);
+        require(lp_amount < lp_supply, DexErrors.WRONG_LIQUIDITY);
 
         optional(WithdrawResultV2) resultOpt = _expectedWithdrawLiquidityOneCoin(lp_amount, tokenIndex[outcoming], _reserves(), lp_supply);
         require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
@@ -2619,7 +2620,7 @@ contract DexStablePool is
         optional(uint128) new_y0_opt = _get_y_D(amp, i, xp_mem, D1);
         optional(uint128) new_y_opt = _get_y_D(amp, i, xp_mem, D1_fee);
 
-        if (!new_y_opt.hasValue() || !new_y0_opt.hasValue()) {
+        if (!new_y_opt.hasValue() || !new_y0_opt.hasValue() || new_y_opt.get() > math.muldiv(xp_mem[i], D1, D0)) {
             return result;
         }
 
