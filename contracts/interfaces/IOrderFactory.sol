@@ -32,7 +32,7 @@ interface IOrderFactory is IOrderFeeParams {
 
     function setFeeParams(OrderFeeParams params) external;
     function setRootFeeParams(OrderFeeParams params, address root) external;
-    function getFeeParams() external view responsible returns (OrderFeeParams, address);
+    function getFeeParams() external view responsible returns (OrderFeeParams);
 
     function getExpectedAddressOrderRoot(address token)
 		external

@@ -47,4 +47,6 @@ interface IOrder is IOrderFeeParams {
 	function getDetails() external view responsible returns (Details);
 	function getFeeParams() external view responsible returns (OrderFeeParams, address);
 	function setFeeParams(OrderFeeParams params) external;
+	function setBeneficiary(address beneficiary_) external;
+
 }

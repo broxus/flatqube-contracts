@@ -364,7 +364,7 @@ export const orderFactoryMigration = async (
   logMigrationSuccess(
     'OrderFactoryMigration',
     'constructor',
-    `Deployed OrderFactory: ${contract.address}\nFee params:\nnumerator - ${feeParams.params.numerator}\ndenominator - ${feeParams.params.denominator}`,
+    `Deployed OrderFactory: ${contract.address}\nFee params:\nnumerator - ${feeParams.value0.numerator}\ndenominator - ${feeParams.value0.denominator}`,
   );
   new Migration().store(contract, 'OrderFactory');
 
@@ -392,7 +392,7 @@ export const orderRootMigration = async (
       orderFactory.methods.createOrderRoot(
           {token: token.address, callbackId: callbackId}
       ).send({
-        amount: locklift.utils.toNano(4),
+        amount: locklift.utils.toNano(6),
         from: account.address
       }
   ), {allowedCodes: {compute: [60]}}

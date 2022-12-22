@@ -154,21 +154,49 @@ contract Order is
 	}
 
     function _expectedSpendAmount(uint128 b_amount) private view returns (uint128, uint128) {
-		revert(fee.denominator + 1000);
 		uint128 a_fee = math.muldivc(b_amount, fee.numerator, fee.denominator);
-		uint128 expected_a_amount = math.muldivc(b_amount, fee.denominator-fee.numerator, fee.denominator);
+		uint128 expected_a_amount = math.muldivc(b_amount, fee.denominator - fee.numerator, fee.denominator);
 		return (expected_a_amount, a_fee);
+
     }
 
     function setFeeParams(OrderFeeParams params) override external onlyFactory {
         require(params.denominator != 0 && params.numerator != 0,
             OrderErrors.WRONG_FEE_PARAMS);
+		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE,
+			OrderErrors.VALUE_TOO_LOW);
+		tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
 		fee = params;
 		factory.transfer(
 			0,
 			false,
 			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
 		);
+	}
+
+	function setBeneficiary(address beneficiary_) override external onlyFactory {
+		require(beneficiary_.value != 0,
+			OrderErrors.WRONG_BENEFICIARY);
+		require(msg.value >= OrderGas.DEPLOY_EMPTY_WALLET_GRAMS + OrderGas.SET_FEE_PARAMS_VALUE,
+			OrderErrors.VALUE_TOO_LOW);
+		tvm.rawReserve(OrderGas.DEPLOY_EMPTY_WALLET_GRAMS + OrderGas.SET_FEE_PARAMS_VALUE, 0);
+		beneficiary = beneficiary_;
+
+		ITokenRoot(spentToken).deployWallet{
+			value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
+			flag: MsgFlag.SENDER_PAYS_FEES,
+			callback: Order.onBeneficiaryWallet
+		}(beneficiary_, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
+
+		factory.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
+	}
+
+	function onBeneficiaryWallet(address wallet) external {
+		//TODO callback
 	}
 
 	function onBeginData(address inAddress) external {

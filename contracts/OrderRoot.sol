@@ -95,13 +95,42 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     function setFeeParams(OrderFeeParams params) override external onlyFactory {
         require(params.denominator != 0 && params.numerator != 0,
             OrderErrors.WRONG_FEE_PARAMS);
-		fee = params;
-		factory.transfer(
-			0,
-			false,
-			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
-		);
-	}
+        require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE,
+            OrderErrors.VALUE_TOO_LOW);
+        tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
+        fee = params;
+        factory.transfer(
+            0,
+            false,
+            MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+        );
+    }
+
+    function setBeneficiary(address beneficiary_) override external onlyFactory {
+        require(beneficiary_.value != 0,
+            OrderErrors.WRONG_BENEFICIARY);
+        require(msg.value >= OrderGas.DEPLOY_EMPTY_WALLET_GRAMS + OrderGas.SET_FEE_PARAMS_VALUE,
+            OrderErrors.VALUE_TOO_LOW);
+        tvm.rawReserve(OrderGas.DEPLOY_EMPTY_WALLET_GRAMS + OrderGas.SET_FEE_PARAMS_VALUE, 0);
+        beneficiary = beneficiary_;
+
+        ITokenRoot(spentToken).deployWallet{
+        value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
+        flag: MsgFlag.SENDER_PAYS_FEES,
+        callback: OrderRoot.onBeneficiaryWallet
+        }(beneficiary_, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
+
+        factory.transfer(
+            0,
+            false,
+            MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+        );
+    }
+
+    function onBeneficiaryWallet(address wallet) external {
+        //TODO callback
+    }
+
 
     function buildPayload(
         uint64 callbackId,
@@ -330,11 +359,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 _deployer,
                 callbackId
             ) = sl.decode(address, address, uint32, uint32, address, uint64);
-            TvmCell fee_payload = sl.loadRef();
-            TvmSlice feeSlice = fee_payload.toSlice();
-            (uint128 numerator_, uint128 denominator_) = feeSlice.decode(uint128, uint128);
-
-            fee = IOrderFeeParams.OrderFeeParams(denominator_, numerator_);
 
 
         } else {
@@ -350,16 +374,18 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         if (oldVersion == 0) {
             tvm.resetStorage();
         }
+
         factory = _factory;
+        beneficiary = _factory;
         spentToken = _spentToken;
         version = newVersion;
         deployer = _deployer;
-
         TvmSlice dataSl = sl.loadRefAsSlice();
         dexRoot = dataSl.decode(address);
         orderCode = dataSl.loadRef();
         orderClosedCode = dataSl.loadRef();
-
+        (uint128 numerator_, uint128 denominator_) = dataSl.decode(uint128, uint128);
+        fee = OrderFeeParams(numerator_, denominator_);
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
         ITokenRoot(spentToken).deployWallet{

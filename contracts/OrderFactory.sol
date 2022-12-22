@@ -25,7 +25,6 @@ contract OrderFactory is IOrderFactory {
 
 	address owner;
 	address pendingOwner;
-	address beneficiary;
 	OrderFeeParams fee;
 
 	// token_root -> send_gas_to
@@ -209,8 +208,8 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
-    function getFeeParams() override external view responsible returns (OrderFeeParams params, address beneficiary) {
-		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee, beneficiary);
+    function getFeeParams() override external view responsible returns (OrderFeeParams) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
 	}
 
 
@@ -259,23 +258,22 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
-	function createOrderRoot(address token, uint64 callbackId) override external view {
+	function createOrderRoot(address token, uint64 callbackId) override external {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		if (msg.value >= OrderGas.DEPLOY_ORDERS_ROOT + OrderGas.DEPLOY_EMPTY_WALLET_GRAMS) {
-            if (beneficiary.value == 0){
-                _deployWallet(token, msg.sender);
-            }
+			_deployWallet(token, msg.sender);
+
+
 			new OrderPlatform {
-					stateInit: buildState(token, buildCode(token), buildParams()),
-					value: 0,
-					flag: MsgFlag.ALL_NOT_RESERVED
-			}(
-				orderRootCode,
-				versionOrderRoot,
-				msg.sender,
-				callbackId,
-                fee
-			);
+						stateInit: buildState(token, buildCode(token), buildParams(token)),
+						value: 0,
+						flag: MsgFlag.ALL_NOT_RESERVED
+				}(
+					orderRootCode,
+					versionOrderRoot,
+					msg.sender,
+					callbackId
+				);
 		} else {
 			emit CreateOrderRootReject(token);
 			IOrderOperationCallback(msg.sender).onOrderRootCreateReject{
@@ -298,14 +296,9 @@ contract OrderFactory is IOrderFactory {
 
 
     function onTokenWallet(address wallet) external {
-
         require(_tmp_deploying_wallets.exists(msg.sender), OrderErrors.WRONG_WALLET_DEPLOYER);
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 2);
         address send_gas_to = _tmp_deploying_wallets[msg.sender];
-		beneficiary = wallet;
-		if (beneficiary.value == 0){
-			revert(1234);
-		}
         delete _tmp_deploying_wallets[msg.sender];
         send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
 
@@ -322,7 +315,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function expectedAddressOrderRoot(address token) internal view returns(address) {
-		return address(tvm.hash(buildState(token, buildCode(token), buildParams())));
+		return address(tvm.hash(buildState(token, buildCode(token), buildParams(token))));
 	}
 
 	function buildCode(
@@ -348,8 +341,8 @@ contract OrderFactory is IOrderFactory {
         });
 	}
 
-	function buildParams() internal view returns (TvmCell) {
-		return abi.encode(dexRoot, orderCode, orderClosedCode);
+	function buildParams(address token) internal view returns (TvmCell) {
+		return abi.encode(dexRoot, orderCode, orderClosedCode, fee);
 	}
 
 	function upgrade(

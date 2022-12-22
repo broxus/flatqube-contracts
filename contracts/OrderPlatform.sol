@@ -18,12 +18,11 @@ contract OrderPlatform is IOrderFeeParams{
 		TvmCell code,
 		uint32 version,
 		address sendGasTo,
-		uint64 callbackId,
-		OrderFeeParams fee_
+		uint64 callbackId
 
 	) public {
 		if (msg.sender.value != 0 && msg.sender == factory) {
-			initialize(code, version, sendGasTo, callbackId, fee_);
+			initialize(code, version, sendGasTo, callbackId);
 		} else {
 			sendGasTo.transfer({
 				value: 0,
@@ -37,8 +36,7 @@ contract OrderPlatform is IOrderFeeParams{
 		TvmCell code,
 		uint32 version,
 		address sendGasTo,
-		uint64  callbackId,
-		OrderFeeParams fee_
+		uint64  callbackId
 	) private {
 
 		TvmBuilder builder;
@@ -48,10 +46,6 @@ contract OrderPlatform is IOrderFeeParams{
 		builder.store(version);
 		builder.store(sendGasTo);
 		builder.store(callbackId);
-		TvmBuilder feeBuilder;
-		feeBuilder.store(fee_.numerator);
-		feeBuilder.store(fee_.denominator);
-		builder.store(feeBuilder.toCell());
 		builder.store(params);
 
 
