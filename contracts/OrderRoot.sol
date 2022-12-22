@@ -1,4 +1,4 @@
-pragma ton-solidity >=0.57.0;
+pragma ton-solidity >= 0.62.0;
 
 pragma AbiHeader time;
 pragma AbiHeader expire;
@@ -55,14 +55,13 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         IOrderFactory(factory).onOrderRootDeployed{
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED
-        }(address(this), spentToken, deployer);
+        }(address(this), spentToken, deployer); //????address(this)
     }
 
     function onTokenWalletReceive(address _wallet) external {}
 
     onBounce(TvmSlice body) external view {
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-
         uint32 functionId = body.decode(uint32);
 
         if (
@@ -129,11 +128,13 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         address originalGasTo,
         TvmCell payload
     ) external override {
-        tvm.rawReserve(OrderGas.DEPLOY_ORDER_MIN_VALUE, 0);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
+        //TODO change condition
         TvmSlice payloadSlice = payload.toSlice();
         if (payloadSlice.bits() == 843 &&
             msg.sender.value != 0 &&
+            msg.sender.value >= OrderGas.DEPLOY_ORDER_MIN_VALUE &&
             msg.sender == spentTokenWallet) 
         {
             (
@@ -286,7 +287,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         address _sendGasTo
     ) external override onlyFactory {
         if (version == _newVersion) {
-            tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+            tvm.rawReserve(address(this).balance - msg.value, 0);
             _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
         } else {
             emit OrderRootCodeUpgraded(_newVersion);
@@ -346,7 +347,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             ) = sl.decode(address, address, uint32, uint32, address);
         }
 
-
         if (oldVersion == 0) {
             tvm.resetStorage();
         }
@@ -378,11 +378,11 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         }(
             callbackId,
             IOrderRootCreateResult.OrderRootCreateResult(
-                _factory,
-                _spentToken,
+                factory,
+                spentToken,
                 oldVersion,
                 newVersion,
-                _deployer
+                deployer
             )
         );
 

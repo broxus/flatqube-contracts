@@ -1,4 +1,4 @@
-pragma ton-solidity >=0.57.0;
+pragma ton-solidity >= 0.62.0;
 
 pragma AbiHeader time;
 pragma AbiHeader expire;
@@ -388,10 +388,10 @@ contract Order is
 									callbackId,
 									owner,
 									IOrderExchangeResult.OrderExchangeResult(
-										spentToken,
-										transferAmount,
 										receiveToken,
 										expectedSenderAmount,
+										spentToken,
+										transferAmount,
 										currentAmountSpentToken,
 										currentAmountReceiveToken
 									)
@@ -597,7 +597,13 @@ contract Order is
 					OrderGas.FILL_ORDER_MIN_VALUE
 				), 0
 			);
-			
+
+			IOrderOperationCallback(msg.sender).onOrderReject{
+					value: OrderGas.OPERATION_CALLBACK_BASE,
+					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+					bounce: false
+			}(callbackId);
+
 			ITokenWallet(msg.sender).transfer{
 				value: 0,
 				flag: MsgFlag.ALL_NOT_RESERVED,
@@ -637,7 +643,7 @@ contract Order is
 		close();
 	}
 
-	function backendSwap(optional(uint64) callbackId) external {
+	function backendSwap(uint64 callbackId) external {
 		require(
 			msg.pubkey() == backPK,
 			OrderErrors.NOT_BACKEND_PUB_KEY
@@ -659,9 +665,6 @@ contract Order is
 		);
 
 		tvm.accept();
-		if (!callbackId.hasValue()) {
-			callbackId = 0;
-		}
 		swapAttempt++;
 		changeState(OrderStatus.SwapInProgress);
 
@@ -698,7 +701,7 @@ contract Order is
 		);
 	}
 
-	function swap(uint128 deployWalletValue, optional(uint64) callbackId) external {
+	function swap(uint64 callbackId, uint128 deployWalletValue) external {
 		require(
 			state == OrderStatus.Active,
 			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
@@ -722,9 +725,6 @@ contract Order is
 			0
 		);
 
-		if (!callbackId.hasValue()) {
-			callbackId = 0;
-		}
 		swapAttempt++;
 		changeState(OrderStatus.SwapInProgress);
 

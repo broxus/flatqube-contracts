@@ -147,7 +147,7 @@ describe('OrderTest', () => {
                 left_root: lproot.left,
                 right_root: lproot.right
             }).send({
-                    amount: locklift.utils.toNano(10), from: account1.address
+                    amount: locklift.utils.toNano(9), from: account1.address
                 }), {allowedCodes: {compute: [100]}}
         )
         await
@@ -159,7 +159,7 @@ describe('OrderTest', () => {
                     notify: true,
                     payload: EMPTY_TVM_CELL
                 }).send({
-                    amount: locklift.utils.toNano(10), from: account1.address
+                    amount: locklift.utils.toNano(3), from: account1.address
                 })
             )
         await
@@ -171,10 +171,9 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: EMPTY_TVM_CELL
             }).send({
-                amount: locklift.utils.toNano(10), from: account1.address
+                amount: locklift.utils.toNano(3), from: account1.address
             })
         RootOrderBar = await orderRootMigration(account1, factoryOrder, rootTokenBar)
-
 
         await locklift.tracing.trace(rootTokenBar.methods
             .deployWallet({
@@ -182,7 +181,7 @@ describe('OrderTest', () => {
                 walletOwner: dexPair.address,
                 deployWalletValue: locklift.utils.toNano(7),
             })
-            .send({amount: locklift.utils.toNano(10), from: account1.address}));
+            .send({amount: locklift.utils.toNano(9), from: account1.address}));
 
         await locklift.tracing.trace(rootTokenReceive.methods
             .deployWallet({
@@ -190,18 +189,19 @@ describe('OrderTest', () => {
                 walletOwner: dexPair.address,
                 deployWalletValue: locklift.utils.toNano(7),
             })
-            .send({amount: locklift.utils.toNano(10), from: account1.address}));
+            .send({amount: locklift.utils.toNano(9), from: account1.address}));
+
         await locklift.tracing.trace(
             dexAccount.methods.depositLiquidity({
                 call_id: getRandomNonce(),
                 left_root: rootTokenBar.address,
                 left_amount: new BigNumber(200).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 right_root: rootTokenReceive.address,
-                right_amount: new BigNumber(2000).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                right_amount: new BigNumber(2000).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 expected_lp_root: lproot.lp,
                 auto_change: true,
                 send_gas_to: account1.address
-            }).send({amount: locklift.utils.toNano(10), from: account1.address})
+            }).send({amount: locklift.utils.toNano(4), from: account1.address})
         )
         const barWallet2Address = await deployWallet(account2, rootTokenBar, account1)
         barWallet2 = locklift.factory.getDeployedContract(
@@ -346,7 +346,7 @@ describe('OrderTest', () => {
                     notify: true,
                     payload: payload.value0
             }).send({
-                    amount: locklift.utils.toNano(10), from: account3.address
+                    amount: locklift.utils.toNano(5), from: account3.address
             }), {allowedCodes: {compute: [60]}})
 
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
@@ -355,7 +355,7 @@ describe('OrderTest', () => {
             console.log(`Order - ${orderAddress}`)
             Order = await locklift.factory.getDeployedContract("Order", orderAddress)
             const payloadLO = await Order.methods.buildPayload({
-                callbackId: "1",
+                callbackId: 1,
                 deployWalletValue: locklift.utils.toNano(0.1),
             }).call();
 
@@ -367,9 +367,8 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(10), from: account4.address
+                amount: locklift.utils.toNano(3), from: account4.address
             }),  {allowedCodes: {compute: [60]}})
-
 
             await tstWallet5.methods.transfer({
                 amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC4).shiftedBy(Constants.tokens.tst.decimals).toString(),
@@ -379,7 +378,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(10), from: account5.address
+                amount: locklift.utils.toNano(3), from: account5.address
             })
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -464,7 +463,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payload.value0
             }).send({
-                amount: locklift.utils.toNano(6), from: account3.address
+                amount: locklift.utils.toNano(5), from: account3.address
             })
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
             const orderAddress = pastEvents.events[0].data.order
@@ -483,7 +482,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(10), from: account4.address
+                amount: locklift.utils.toNano(3), from: account4.address
             })
 
             await tstWallet5.methods.transfer({
@@ -494,7 +493,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(10), from: account5.address
+                amount: locklift.utils.toNano(3), from: account5.address
             })
 
             await tstWallet6.methods.transfer({
@@ -505,7 +504,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(10), from: account6.address
+                amount: locklift.utils.toNano(3), from: account6.address
             })
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -593,7 +592,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payload.value0
             }).send({
-                amount: locklift.utils.toNano(6), from: account3.address
+                amount: locklift.utils.toNano(5), from: account3.address
             })
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
             const orderAddress = pastEvents.events[0].data.order
@@ -612,7 +611,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(10), from: account4.address
+                amount: locklift.utils.toNano(3), from: account4.address
             })
 
             await tstWallet5.methods.transfer({
@@ -623,7 +622,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(10), from: account5.address
+                amount: locklift.utils.toNano(3), from: account5.address
             })
 
             await tstWallet6.methods.transfer({
@@ -634,7 +633,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(10), from: account6.address
+                amount: locklift.utils.toNano(3), from: account6.address
             })
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -707,14 +706,14 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payload.value0
             }).send({
-                amount: locklift.utils.toNano(6), from: account3.address
+                amount: locklift.utils.toNano(5), from: account3.address
             })
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
             Order = await locklift.factory.getDeployedContract("Order", orderAddress)
             await Order.methods.cancel({callbackId: 0}).send({
-                amount: locklift.utils.toNano(10), from: account3.address
+                amount: locklift.utils.toNano(1), from: account3.address
             })
 
             const stateL0 = await Order.methods.currentStatus({answerId: 1}).call()
@@ -771,7 +770,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payload.value0
             }).send({
-                amount: locklift.utils.toNano(6), from: account3.address
+                amount: locklift.utils.toNano(5), from: account3.address
             })
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
             const orderAddress = pastEvents.events[0].data.order
@@ -791,11 +790,11 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(10), from: account4.address
+                amount: locklift.utils.toNano(3), from: account4.address
             })
 
             await Order.methods.cancel({callbackId: 0}).send({
-                amount: locklift.utils.toNano(10), from: account3.address
+                amount: locklift.utils.toNano(3), from: account3.address
             })
 
             const stateL0 = await Order.methods.currentStatus({answerId: 1}).call()
@@ -862,7 +861,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payload.value0
             }).send({
-                amount: locklift.utils.toNano(6), from: account3.address
+                amount: locklift.utils.toNano(5), from: account3.address
             })
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
             const orderAddress = pastEvents.events[0].data.order
@@ -878,7 +877,7 @@ describe('OrderTest', () => {
             }).call();
 
             await Order.methods.cancel({callbackId: 0}).send({
-                amount: locklift.utils.toNano(10), from: account3.address
+                amount: locklift.utils.toNano(1), from: account3.address
             })
 
             await tstWallet4.methods.transfer({
@@ -889,7 +888,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(10), from: account4.address
+                amount: locklift.utils.toNano(3), from: account4.address
             })
             const stateL0 = await Order.methods.currentStatus({answerId: 1}).call()
 
@@ -969,7 +968,6 @@ describe('OrderTest', () => {
         const signer3 = await locklift.keystore.getSigner("3");
         await Order.methods.backendSwap({callbackId: 1}).sendExternal({publicKey: signer3.publicKey})
 
-
         const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
         const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
         await displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
@@ -1019,7 +1017,7 @@ describe('OrderTest', () => {
           remainingGasTo: account3.address,
           notify: true,
           payload: payload.value0}).send({
-          amount: locklift.utils.toNano(6), from: account3.address
+          amount: locklift.utils.toNano(5), from: account3.address
            })
         const pastEvents = await RootOrderBar.getPastEvents({ filter: event => event.event === "CreateOrder" });
         const orderAddress = pastEvents.events[0].data.order
@@ -1037,7 +1035,7 @@ describe('OrderTest', () => {
         console.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
         await Order.methods.backendSwap({callbackId: 1}).send({
-            amount: locklift.utils.toNano(10), from: account3.address
+            amount: locklift.utils.toNano(2), from: account3.address
         })
 
         const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -1088,7 +1086,7 @@ describe('OrderTest', () => {
           remainingGasTo: account3.address,
           notify: true,
           payload: payload.value0}).send({
-          amount: locklift.utils.toNano(6), from: account3.address
+          amount: locklift.utils.toNano(5), from: account3.address
            })
         const pastEvents = await RootOrderBar.getPastEvents({ filter: event => event.event === "CreateOrder" });
         const orderAddress = pastEvents.events[0].data.order
@@ -1110,7 +1108,7 @@ describe('OrderTest', () => {
             callbackId: 1,
             deployWalletValue: locklift.utils.toNano(0.1)
         }).send({
-            amount: locklift.utils.toNano(6), from: account4.address
+            amount: locklift.utils.toNano(5), from: account4.address
         }), {allowedCodes: {compute: [60]}}
 
         await sleep(10000)
@@ -1174,7 +1172,7 @@ describe('OrderTest', () => {
           remainingGasTo: account3.address,
           notify: true,
           payload: payload.value0}).send({
-          amount: locklift.utils.toNano(6), from: account3.address
+          amount: locklift.utils.toNano(5), from: account3.address
            })
         const pastEvents = await RootOrderBar.getPastEvents({ filter: event => event.event === "CreateOrder" });
         const orderAddress = pastEvents.events[0].data.order
@@ -1230,7 +1228,7 @@ describe('OrderTest', () => {
                 callbackId: 0,
                 tokenReceive: rootTokenReceive.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.2),
+                deployWalletValue: locklift.utils.toNano(0.1),
                 backPK: 0
             }
             console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
@@ -1253,7 +1251,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payload.value0
             }).send({
-                amount: locklift.utils.toNano(6),
+                amount: locklift.utils.toNano(5),
                 from: account3.address,
             });
 
@@ -1267,7 +1265,7 @@ describe('OrderTest', () => {
                 orderAddress: Order.address,
                 manager: `0x${signer1.publicKey}`
             }).send({
-                amount: locklift.utils.toNano(3),
+                amount: locklift.utils.toNano(1),
                 from: account1.address
             });
 
@@ -1294,7 +1292,7 @@ describe('OrderTest', () => {
                 orderAddress: Order.address,
                 manager: `0x${signer1.publicKey}`
             }).send({
-                amount: locklift.utils.toNano(6), from: account1.address
+                amount: locklift.utils.toNano(1), from: account1.address
             })
 
             const stateLO2 = await Order.methods.currentStatus({answerId: 1}).call()
@@ -1334,7 +1332,7 @@ async function deployWallet(owner: Account, tokenRoot: Contract<FactorySource['T
             walletOwner: owner.address,
             deployWalletValue: locklift.utils.toNano(7),
         })
-        .send({amount: locklift.utils.toNano(10), from: owner.address}));
+        .send({amount: locklift.utils.toNano(9), from: owner.address}));
 
     const address = await tokenRoot.methods
         .walletOf({answerId: 1, walletOwner: owner.address})
@@ -1348,7 +1346,7 @@ async function deployWallet(owner: Account, tokenRoot: Contract<FactorySource['T
             remainingGasTo: owner.address,
             notify: false,
             payload: ''
-        }).send({amount: locklift.utils.toNano(10), from: rootOwner.address})
+        }).send({amount: locklift.utils.toNano(2), from: rootOwner.address})
     )
     return address.value0;
 }

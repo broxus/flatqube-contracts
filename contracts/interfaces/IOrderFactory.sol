@@ -1,4 +1,4 @@
-pragma ton-solidity >=0.57.0;
+pragma ton-solidity >=0.62.0;
 
 import "../structures/IOrderFeeParams.sol";
 
@@ -22,6 +22,7 @@ interface IOrderFactory is IOrderFeeParams {
         address order,
         address token
     );
+    event CreateOrderRootReject(address token);
     event OrderFactoryUpgrade(uint32 oldVersion, uint32 newVersion);
 
     function createOrderRoot(

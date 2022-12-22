@@ -66,7 +66,7 @@ export const dexPairMigration = async (
       right_root: rightTokenRoot.address,
       send_gas_to: account.address,
   }).send({
-    amount: locklift.utils.toNano(10),
+    amount: locklift.utils.toNano(8),
     from: account.address
   }), {allowedCodes: {compute: [60, 100]}});
 
@@ -112,7 +112,7 @@ export const dexAccountMigration = async (
       account_owner: account.address,
       send_gas_to: account.address,
   }).send({
-    amount: locklift.utils.toNano(10),
+    amount: locklift.utils.toNano(5),
     from: account.address
   }));
 
@@ -165,32 +165,32 @@ export const dexVaultMigration = async (
         token_factory_: token_factory.address,
         root_: dexRoot.address
       },
-      value: locklift.utils.toNano(15),
+      value: locklift.utils.toNano(7),
     });
 
   const platfromArtifacts = await locklift.factory.getContractArtifacts("DexPlatform")
 
   logMigrationProcess('dexVaultMigration', 'installPlatformOnce', 'installPlatformOnce...');
   await contract.methods.installPlatformOnce({code: platfromArtifacts.code}).send({
-    amount: locklift.utils.toNano(15),
+    amount: locklift.utils.toNano(2),
     from: account.address
   })
 
   logMigrationProcess('dexVaultMigration', 'setVaultOnce', 'setVaultOnce on DexRoot...');
   await dexRoot.methods.setVaultOnce({new_vault: contract.address}).send({
-    amount: locklift.utils.toNano(15),
+    amount: locklift.utils.toNano(2),
     from: account.address
   })
 
   logMigrationProcess('dexVaultMigration', 'setActive', 'setActive on DexRoot...');
   await dexRoot.methods.setActive({new_active: true}).send({
-    amount: locklift.utils.toNano(15),
+    amount: locklift.utils.toNano(2),
     from: account.address
   })
   const LpTokenPending = await locklift.factory.getContractArtifacts("DexVaultLpTokenPendingV2")
   logMigrationProcess('dexVaultMigration', 'installOrUpdateLpTokenPendingCode', 'installOrUpdateLpTokenPendingCode...');
   await contract.methods.installOrUpdateLpTokenPendingCode({code: LpTokenPending.code}).send({
-    amount: locklift.utils.toNano(15),
+    amount: locklift.utils.toNano(2),
     from: account.address
   })
 
@@ -227,7 +227,7 @@ export const tokenFactoryMigration = async (
       constructorParams: {
         _owner: account.address,
       },
-      value: locklift.utils.toNano(15),
+      value: locklift.utils.toNano(7),
     });
 
   logMigrationProcess('TokenFactoryMigration', 'setRootCode', 'setRootCode...');
@@ -235,7 +235,7 @@ export const tokenFactoryMigration = async (
   await contract.methods.setRootCode({
     _rootCode: rootArtifact.code
   }).send({
-    amount: locklift.utils.toNano(10),
+    amount: locklift.utils.toNano(2),
     from: account.address
   });
 
@@ -244,7 +244,7 @@ export const tokenFactoryMigration = async (
   await contract.methods.setWalletCode({
     _walletCode: walletArtifact.code
   }).send({
-    amount: locklift.utils.toNano(10),
+    amount: locklift.utils.toNano(2),
     from: account.address
   });
 
@@ -286,7 +286,7 @@ export const orderFactoryMigration = async (
       _owner: account.address,
       _version: version.toString(),
     },
-    value: locklift.utils.toNano(15),
+    value: locklift.utils.toNano(1.5),
   });
 
   logMigrationProcess(
@@ -300,7 +300,7 @@ export const orderFactoryMigration = async (
   await locklift.tracing.trace( contract.methods.setOrderRootCode({
     _orderRootCode: orderRootArtifacts.code
   }).send({
-    amount: locklift.utils.toNano(15),
+    amount: locklift.utils.toNano(0.1),
     from: account.address
   }))
 
@@ -309,7 +309,7 @@ export const orderFactoryMigration = async (
   await locklift.tracing.trace( contract.methods.setPlatformCodeOnce({
     _orderPlatform: orderPlatformArtifacts.code
   }).send({
-    amount: locklift.utils.toNano(15),
+    amount: locklift.utils.toNano(0.1),
     from: account.address
   }))
 
@@ -324,7 +324,7 @@ export const orderFactoryMigration = async (
   await locklift.tracing.trace(contract.methods.setOrderCode({
     _orderCode: orderArtifacts.code
   }).send({
-    amount: locklift.utils.toNano(15),
+    amount: locklift.utils.toNano(0.1),
     from: account.address
   }))
 
@@ -339,7 +339,7 @@ export const orderFactoryMigration = async (
   await locklift.tracing.trace(contract.methods.setOrderClosedCode({
     _orderClosedCode: orderClosedArtifacts.code
   }).send({
-    amount: locklift.utils.toNano(15),
+    amount: locklift.utils.toNano(0.1),
     from: account.address
   }))
 
@@ -392,12 +392,11 @@ export const orderRootMigration = async (
       orderFactory.methods.createOrderRoot(
           {token: token.address, callbackId: callbackId}
       ).send({
-        amount: locklift.utils.toNano(20),
+        amount: locklift.utils.toNano(4),
         from: account.address
       }
   ), {allowedCodes: {compute: [60]}}
   )
-
 
   const orderRootAddress = await orderFactory.methods.getExpectedAddressOrderRoot({
     answerId: 1,
@@ -485,7 +484,7 @@ export const tokenRootMigration = async (
       burnPaused: true,
       remainingGasTo: rootOwner.address,
     },
-    value: locklift.utils.toNano(10),
+    value: locklift.utils.toNano(7),
   });
 
   // Log and save address
@@ -520,13 +519,13 @@ export const dexRootMigration = async (
       initial_owner: account.address,
       initial_vault: zeroAddress,
     },
-    value: locklift.utils.toNano(15),
+    value: locklift.utils.toNano(7),
   });
   logMigrationProcess('DexRoot', 'installPlatformOnce', 'installPlatformOnce...');
   await contract.methods.installPlatformOnce({
     code: DexPlatform.code
   }).send({
-    amount: locklift.utils.toNano(10),
+    amount: locklift.utils.toNano(2),
     from: account.address
   });
 
@@ -534,7 +533,7 @@ export const dexRootMigration = async (
   await contract.methods.installOrUpdateAccountCode({
     code: DexAccount.code
   }).send({
-    amount: locklift.utils.toNano(10),
+    amount: locklift.utils.toNano(2),
     from: account.address
   });
 
@@ -543,7 +542,7 @@ export const dexRootMigration = async (
     code: DexPair.code,
     pool_type: 1,
   }).send({
-    amount: locklift.utils.toNano(10),
+    amount: locklift.utils.toNano(2),
     from: account.address
   });
 
@@ -551,7 +550,7 @@ export const dexRootMigration = async (
   await locklift.tracing.trace(contract.methods.setActive({
     new_active: true
   }).send({
-    amount: locklift.utils.toNano(10),
+    amount: locklift.utils.toNano(2),
     from: account.address
   }));
   // Log and save address
