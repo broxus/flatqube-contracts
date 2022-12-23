@@ -1,0 +1,162 @@
+pragma ton-solidity >= 0.62.0;
+
+import "./libraries/DexGas.tsol";
+import "./libraries/TokenFactoryErrors.tsol";
+import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
+
+import "./interfaces/IUpgradable.tsol";
+import "./interfaces/ITokenFactory.tsol";
+import "./interfaces/ITokenRootDeployedCallback.tsol";
+
+import "tip3/contracts/TokenRootUpgradeable.tsol";
+
+
+contract TokenFactory is ITokenFactory, IUpgradable {
+
+    uint32 static randomNonce_;
+
+    address owner_;
+    address pendingOwner_;
+
+    TvmCell rootCode_;
+    TvmCell walletCode_;
+    TvmCell walletPlatformCode_;
+
+    constructor(address _owner) public {
+        require(_owner.value != 0);
+
+        tvm.accept();
+        owner_ = _owner;
+
+        tvm.rawReserve(DexGas.TOKEN_FACTORY_INITIAL_BALANCE, 0);
+        owner_.transfer({value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
+    }
+
+    modifier onlyOwner {
+        require(msg.sender.value != 0 && msg.sender == owner_, TokenFactoryErrors.NOT_MY_OWNER);
+        _;
+    }
+
+    function owner() external view responsible returns (address) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner_;
+    }
+
+    function pendingOwner() external view responsible returns (address) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pendingOwner_;
+    }
+
+    function rootCode() external view responsible returns (TvmCell) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } rootCode_;
+    }
+
+    function walletCode() external view responsible returns (TvmCell) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } walletCode_;
+    }
+
+    function walletPlatformCode() external view responsible returns (TvmCell) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } walletPlatformCode_;
+    }
+
+    function createToken(
+        uint32 callId,
+        string name,
+        string symbol,
+        uint8 decimals,
+        address initialSupplyTo,
+        uint128 initialSupply,
+        uint128 deployWalletValue,
+        bool mintDisabled,
+        bool burnByRootDisabled,
+        bool burnPaused,
+        address remainingGasTo
+    ) public override {
+        tvm.rawReserve(DexGas.TOKEN_FACTORY_INITIAL_BALANCE, 0);
+
+        TvmCell initData = tvm.buildStateInit({
+            contr: TokenRootUpgradeable,
+            varInit: {
+                randomNonce_: now,
+                deployer_: address(this),
+                rootOwner_: msg.sender,
+                name_: name,
+                symbol_: symbol,
+                decimals_: decimals,
+                walletCode_: walletCode_,
+                platformCode_: walletPlatformCode_
+            },
+            pubkey: 0,
+            code: rootCode_
+        });
+
+        address tokenRoot = new TokenRootUpgradeable {
+            stateInit: initData,
+            value: DexGas.DEPLOY_TOKEN_ROOT_VALUE,
+            flag: MsgFlag.SENDER_PAYS_FEES
+        }(
+            initialSupplyTo,
+            initialSupply,
+            deployWalletValue,
+            mintDisabled,
+            burnByRootDisabled,
+            burnPaused,
+            remainingGasTo
+        );
+
+        emit TokenCreated(tokenRoot);
+
+        ITokenRootDeployedCallback(msg.sender).onTokenRootDeployed{
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED,
+            bounce: false
+        }(callId, tokenRoot);
+    }
+
+    function transferOwner(address newOwner) external responsible onlyOwner returns(address) {
+        pendingOwner_ = newOwner;
+
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pendingOwner_;
+    }
+
+    function acceptOwner() external responsible returns(address) {
+        require(msg.sender.value != 0 && msg.sender == pendingOwner_, TokenFactoryErrors.NOT_PENDING_OWNER);
+
+        owner_ = pendingOwner_;
+        pendingOwner_ = address(0);
+
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner_;
+    }
+
+    function setRootCode(TvmCell _rootCode) public onlyOwner {
+        rootCode_ = _rootCode;
+        msg.sender.transfer({value: 0, flag: MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS });
+    }
+
+    function setWalletCode(TvmCell _walletCode) public onlyOwner {
+        walletCode_ = _walletCode;
+        msg.sender.transfer({value: 0, flag: MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS });
+    }
+
+    function setWalletPlatformCode(TvmCell _walletPlatformCode) public onlyOwner {
+        walletPlatformCode_ = _walletPlatformCode;
+        msg.sender.transfer({value: 0, flag: MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS });
+    }
+
+    function upgrade(TvmCell code) public override onlyOwner {
+        tvm.rawReserve(address(this).balance - msg.value, 2);
+
+        TvmBuilder builder;
+
+        builder.store(rootCode_);
+        builder.store(walletCode_);
+        builder.store(walletPlatformCode_);
+        builder.store(owner_);
+        builder.store(pendingOwner_);
+
+        tvm.setcode(code);
+        tvm.setCurrentCode(code);
+
+        onCodeUpgrade(builder.toCell());
+    }
+
+    function onCodeUpgrade(TvmCell upgrade_data) private {}
+}
