@@ -175,8 +175,6 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function setFeeParams(OrderFeeParams params) override external onlyOwner {
-        require(params.denominator != 0 && params.numerator != 0,
-            OrderErrors.WRONG_FEE_PARAMS);
 		tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
 
 		fee = params;
@@ -189,15 +187,52 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
+	function withdrawFee(address orderRoot, uint128 amount, address recipient, address rm_gas_to) override external onlyOwner {
+		require(orderRoot.value != 0 && amount != 0 && recipient.value != 0 && rm_gas_to.value != 0,
+			OrderErrors.WRONG_WITHDRAW_FEE_PARAMS);
+		tvm.rawReserve(OrderGas.WITHDRAW_FEE_VALUE, 0);
+
+		IOrderRoot(orderRoot).withdrawFee{
+			value: OrderGas.WITHDRAW_FEE_VALUE,
+			flag: MsgFlag.SENDER_PAYS_FEES,
+			bounce: false
+		}(
+			amount,
+			recipient,
+			rm_gas_to
+		);
+
+		owner.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
+	}
+
 	function setRootFeeParams(OrderFeeParams params, address root) override external onlyOwner {
-        require(params.denominator != 0 && params.numerator != 0,
-            OrderErrors.WRONG_FEE_PARAMS);
 		tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
 
 		IOrderRoot(root).setFeeParams{
 			value: OrderGas.SET_FEE_PARAMS_VALUE,
 			flag: MsgFlag.SENDER_PAYS_FEES,
 			bounce: false
+		}(
+			params
+		);
+		owner.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
+	}
+
+	function setOrderFeeParams(OrderFeeParams params, address order) override external onlyOwner {
+		tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
+
+		IOrder(order).setFeeParams{
+		value: OrderGas.SET_FEE_PARAMS_VALUE,
+		flag: MsgFlag.SENDER_PAYS_FEES,
+		bounce: false
 		}(
 			params
 		);

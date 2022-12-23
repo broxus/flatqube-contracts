@@ -154,6 +154,9 @@ contract Order is
 	}
 
     function _expectedSpendAmount(uint128 b_amount) private view returns (uint128, uint128) {
+		if (fee.numerator == 0 || fee.denominator == 0){
+			return (b_amount, 0);
+		}
 		uint128 a_fee = math.muldivc(b_amount, fee.numerator, fee.denominator);
 		uint128 expected_a_amount = math.muldivc(b_amount, fee.denominator - fee.numerator, fee.denominator);
 		return (expected_a_amount, a_fee);
@@ -161,8 +164,6 @@ contract Order is
     }
 
     function setFeeParams(OrderFeeParams params) override external onlyFactory {
-        require(params.denominator != 0 && params.numerator != 0,
-            OrderErrors.WRONG_FEE_PARAMS);
 		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE,
 			OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
@@ -358,11 +359,12 @@ contract Order is
 								true,
 								emptyPayload
 							);
-
-							ITokenWallet(receiveWallet).transfer{
-								value: OrderGas.TRANSFER_MIN_VALUE,
-								flag: MsgFlag.SENDER_PAYS_FEES,
-								bounce: false
+							if (senderFee != 0)
+							{
+								ITokenWallet(receiveWallet).transfer{
+							value : OrderGas.TRANSFER_MIN_VALUE,
+							flag : MsgFlag.SENDER_PAYS_FEES,
+							bounce : false
 							}(
 								senderFee,
 								beneficiary,
@@ -371,9 +373,11 @@ contract Order is
 								true,
 								emptyPayload
 							);
+							}
 							currentAmountReceiveToken = 0;
 							currentAmountSpentToken = 0;
 						} else {
+
 							makeReserve = true;
 							uint128 transferAmount = math.muldiv(
 								expectedSenderAmount,
@@ -381,6 +385,7 @@ contract Order is
 								expectedAmount
 							);
 							if (transferAmount > 0) {
+
 								ITokenWallet(spentWallet).transfer{
 									value: OrderGas.TRANSFER_MIN_VALUE,
 									flag: MsgFlag.SENDER_PAYS_FEES,
@@ -455,18 +460,21 @@ contract Order is
 								true,
 								emptyPayload
 							);
-							ITokenWallet(receiveWallet).transfer{
+							if (senderFee != 0){
+								ITokenWallet(receiveWallet).transfer{
 								value: OrderGas.TRANSFER_MIN_VALUE,
 								flag: MsgFlag.SENDER_PAYS_FEES,
 								bounce: false
-							}(
-								senderFee,
-								beneficiary,
-								uint128(0),
-								originalGasTo,
-								true,
-								emptyPayload
-							);
+								}(
+									senderFee,
+									beneficiary,
+									uint128(0),
+									originalGasTo,
+									true,
+									emptyPayload
+								);
+							}
+
 						}
 					} else {
 						needCancel = true;

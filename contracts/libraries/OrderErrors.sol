@@ -24,6 +24,8 @@ library OrderErrors {
     uint16 constant WRONG_FEE_PARAMS                        = 320;
     uint16 constant WRONG_WALLET_DEPLOYER                   = 321;
     uint16 constant AMOUNT_TOO_LOW                          = 322;
-    uint16 constant WRONG_BENEFICIARY                       = 322;
+    uint16 constant WRONG_BENEFICIARY                       = 323;
+    uint16 constant WRONG_WITHDRAW_FEE_PARAMS               = 324;
+
 
 }

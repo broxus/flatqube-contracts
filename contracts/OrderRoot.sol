@@ -93,8 +93,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     }
 
     function setFeeParams(OrderFeeParams params) override external onlyFactory {
-        require(params.denominator != 0 && params.numerator != 0,
-            OrderErrors.WRONG_FEE_PARAMS);
         require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE,
             OrderErrors.VALUE_TOO_LOW);
         tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
@@ -131,6 +129,21 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         //TODO callback
     }
 
+    function withdrawFee(uint128 amount, address recipient, address rm_gas_to) override external onlyFactory {
+        tvm.rawReserve(OrderGas.WITHDRAW_FEE_VALUE, 0);
+        TvmCell empty;
+        ITokenWallet(beneficiary).transfer{
+        value: OrderGas.WITHDRAW_FEE_VALUE,
+        flag: MsgFlag.SENDER_PAYS_FEES
+        }(
+            amount,
+            recipient,
+            0,
+            rm_gas_to,
+            false,
+            empty
+        );
+    }
 
     function buildPayload(
         uint64 callbackId,
