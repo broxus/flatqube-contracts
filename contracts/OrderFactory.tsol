@@ -178,7 +178,6 @@ contract OrderFactory is IOrderFactory {
 		orderRootCode = _orderRootCode;
 
 		emit OrderRootCodeUpgraded(prevVersion, versionOrderRoot);
-
 		owner.transfer(
 			0,
 			false,
@@ -193,7 +192,6 @@ contract OrderFactory is IOrderFactory {
 		orderCode = _orderCode;
 
 		emit OrderCodeUpgraded(prevVersion, versionOrder);
-
 		owner.transfer(
 			0,
 			false,
@@ -208,7 +206,6 @@ contract OrderFactory is IOrderFactory {
 		orderClosedCode = _orderClosedCode;
 
 		emit OrderClosedCodeUpgraded(prevVersion, versionOrderClosed);
-
 		owner.transfer(
 			0,
 			false,
@@ -221,21 +218,38 @@ contract OrderFactory is IOrderFactory {
 		if (msg.value >= OrderGas.DEPLOY_ORDERS_ROOT) {
 			new OrderPlatform {
 					stateInit: buildState(token, buildCode(token), buildParams()),
-					value: 0,
-					flag: MsgFlag.ALL_NOT_RESERVED
+					value: OrderGas.DEPLOY_ORDERS_ROOT,
+					flag: MsgFlag.SENDER_PAYS_FEES
 			}(
 				orderRootCode,
 				versionOrderRoot,
-				msg.sender,
-				callbackId
+				msg.sender
 			);
+			if (callbackId > 0) {
+				IOrderOperationCallback(msg.sender).onOrderRootCreateSuccess{
+						value: 0, //OrderGas.OPERATION_CALLBACK_BASE
+						flag: MsgFlag.ALL_NOT_RESERVED,
+						bounce: false
+				}(
+					callbackId,
+					IOrderRootCreateResult.OrderRootCreateResult(
+						address(this),
+						token,
+						uint32(0),
+						versionOrderRoot,
+						msg.sender
+				)
+				);
+			}
 		} else {
 			emit CreateOrderRootReject(token);
-			IOrderOperationCallback(msg.sender).onOrderRootCreateReject{
-					value: 0,
-					flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
-					bounce: false
-			}(callbackId);
+			if (callbackId > 0) {
+				IOrderOperationCallback(msg.sender).onOrderRootCreateReject{
+						value: 0,
+						flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+						bounce: false
+				}(callbackId);
+			}
 		}
 	}
 

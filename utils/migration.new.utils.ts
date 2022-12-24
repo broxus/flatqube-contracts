@@ -284,7 +284,7 @@ export const orderFactoryMigration = async (
       _owner: account.address,
       _version: version.toString(),
     },
-    value: locklift.utils.toNano(1.5),
+    value: locklift.utils.toNano(2),
   });
 
   logMigrationProcess(
@@ -372,7 +372,7 @@ export const orderRootMigration = async (
       orderFactory.methods.createOrderRoot(
           {token: token.address, callbackId: callbackId}
       ).send({
-        amount: locklift.utils.toNano(4),
+        amount: locklift.utils.toNano(5),
         from: account.address
       }
   )
