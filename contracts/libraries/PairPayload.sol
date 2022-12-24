@@ -397,7 +397,8 @@ library PairPayload {
         address,
         uint128[],
         address,
-        INextExchangeData.NextExchangeData[]
+        INextExchangeData.NextExchangeData[],
+        address
     ) {
         TvmSlice slice = _payload.toSlice();
 
@@ -485,7 +486,8 @@ library PairPayload {
             recipient,
             expectedAmount.hasValue() ? [expectedAmount.get()] : expectedAmounts,
             outcoming,
-            nextSteps
+            nextSteps,
+            referrer
         );
     }
 

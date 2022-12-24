@@ -368,7 +368,8 @@ contract DexStablePair is
             address recipient,
             uint128[] expected_amounts,
             /*address outcoming*/,
-            NextExchangeData[] next_steps
+            NextExchangeData[] next_steps,
+            address referrer
         ) = PairPayload.decodeOnAcceptTokensTransferData(payload);
 
         uint128 expected_amount = expected_amounts.length == 1 ? expected_amounts[0] : 0;

@@ -31,6 +31,14 @@ interface IDexVault {
         address recipientAddress
     );
 
+    event ReferralFeeTransfer(
+        address vaultWallet,
+        uint128 amount,
+        address[] roots,
+        address referrer,
+        address referral
+    );
+
     function addLiquidityToken(address pair, address left_root, address right_root, address send_gas_to) external;
 
     function addLiquidityTokenV2(address pool, address[] roots, address send_gas_to) external;
@@ -88,6 +96,15 @@ interface IDexVault {
         address[] _roots,
         uint32 _pairVersion,
         address _remainingGasTo
+    ) external;
+
+    function referralFeeTransfer(
+        uint128 _amount,
+        address _vaultWallet,
+        address _referrer,
+        address _referral,
+        uint128 _deployWalletGrams,
+        address[] _roots
     ) external;
 
     function burn(

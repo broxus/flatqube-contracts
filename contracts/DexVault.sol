@@ -48,6 +48,9 @@ contract DexVault is
 
     mapping(address => bool) private _lpVaultWallets;
 
+    uint256 constant PROJECT_ID = 22222;
+    address constant PROJECT_ADDRESS = address(0);
+
     modifier onlyOwner() {
         require(msg.sender == _owner, DexErrors.NOT_MY_OWNER);
         _;
@@ -703,4 +706,42 @@ contract DexVault is
 
         _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
     }
+
+    function referralFeeTransfer(
+        uint128 _amount,
+        address _vaultWallet,
+        address _referrer,
+        address _referral,
+        uint128 _deployWalletGrams,
+        address[] _roots
+    ) external override onlyPool(_roots) {
+        tvm.rawReserve(
+            math.max(
+                DexGas.VAULT_INITIAL_BALANCE,
+                address(this).balance - msg.value
+            ),
+            2
+        );
+
+        emit ReferralFeeTransfer(
+            _vaultWallet,
+            _amount,
+            _roots,
+            _referrer,
+            _referral
+        );
+
+        TvmCell payload = abi.encode(PROJECT_ID, _referrer, _referral);
+
+        ITokenWallet(_vaultWallet)
+            .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            (
+                _amount,
+                _referral, // TODO replace with PROJECT_ADDRESS
+                _deployWalletGrams,
+                _referral,
+                true,
+                payload
+            );
+        }
 }
