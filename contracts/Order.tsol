@@ -10,13 +10,13 @@ import "./libraries/OrderStatus.tsol";
 import "./libraries/OrderOperationStatus.tsol";
 import "./libraries/DexOperationTypes.tsol";
 
+import "./structures/IOrderExchangeResult.tsol";
+import "./structures/IOrderSwapResult.tsol";
+
 import "./interfaces/IOrder.tsol";
 import "./interfaces/IHasEmergencyMode.tsol";
 import "./interfaces/IDexRoot.tsol";
 import "./interfaces/IOrderOperationCallback.tsol";
-
-import "./structures/IOrderExchangeResult.tsol";
-import "./structures/IOrderSwapResult.tsol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "tip3/contracts/interfaces/ITokenRoot.tsol";
@@ -24,11 +24,7 @@ import "tip3/contracts/interfaces/ITokenWallet.tsol";
 import "tip3/contracts/interfaces/TIP3TokenWallet.tsol";
 import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
 
-contract Order is
-	IAcceptTokensTransferCallback,
-	IOrder,
-	IHasEmergencyMode
-{
+contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 	address static factory;
 	address static root;
 	address static owner;
@@ -338,7 +334,7 @@ contract Order is
 									currentAmountReceiveToken
 								);
 
-								IOrderOperationCallback(msg.sender).onOrderPartExchangeSuccess{
+								IOrderOperationCallback(sender).onOrderPartExchangeSuccess{
 									value: OrderGas.OPERATION_CALLBACK_BASE,
                 					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 					bounce: false
@@ -491,7 +487,7 @@ contract Order is
 		if (currentAmountReceiveToken == 0 && currentAmountSpentToken == 0) {
 			changeState(OrderStatus.Filled);
 
-			IOrderOperationCallback(msg.sender).onOrderStateFilled{
+			IOrderOperationCallback(sender).onOrderStateFilled{
 					value: OrderGas.OPERATION_CALLBACK_BASE,
 					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
 					bounce: false
@@ -544,7 +540,7 @@ contract Order is
 				), 0
 			);
 
-			IOrderOperationCallback(msg.sender).onOrderReject{
+			IOrderOperationCallback(sender).onOrderReject{
 					value: OrderGas.OPERATION_CALLBACK_BASE,
 					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
 					bounce: false
