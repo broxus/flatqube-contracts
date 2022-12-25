@@ -54,6 +54,11 @@ interface IDexBasePool is
         ExchangeFee[] fees
     );
 
+    /// @dev Emits when any operation was processed
+    event ReferrerFees(
+        TokenOperation[] fees
+    );
+
     /// @dev Emits when pool's reserves was changed
     event Sync(
         uint128[] reserves,
