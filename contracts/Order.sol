@@ -164,9 +164,8 @@ contract Order is
     }
 
     function setFeeParams(OrderFeeParams params) override external onlyFactory {
-		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE,
-			OrderErrors.VALUE_TOO_LOW);
-		tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+
 		fee = params;
 		factory.transfer(
 			0,
@@ -178,26 +177,15 @@ contract Order is
 	function setBeneficiary(address beneficiary_) override external onlyFactory {
 		require(beneficiary_.value != 0,
 			OrderErrors.WRONG_BENEFICIARY);
-		require(msg.value >= OrderGas.DEPLOY_EMPTY_WALLET_GRAMS + OrderGas.SET_FEE_PARAMS_VALUE,
-			OrderErrors.VALUE_TOO_LOW);
-		tvm.rawReserve(OrderGas.DEPLOY_EMPTY_WALLET_GRAMS + OrderGas.SET_FEE_PARAMS_VALUE, 0);
-		beneficiary = beneficiary_;
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
-		ITokenRoot(spentToken).deployWallet{
-			value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
-			flag: MsgFlag.SENDER_PAYS_FEES,
-			callback: Order.onBeneficiaryWallet
-		}(beneficiary_, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
+		beneficiary = beneficiary_;
 
 		factory.transfer(
 			0,
 			false,
 			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
 		);
-	}
-
-	function onBeneficiaryWallet(address wallet) external {
-		//TODO callback
 	}
 
 	function onBeginData(address inAddress) external {

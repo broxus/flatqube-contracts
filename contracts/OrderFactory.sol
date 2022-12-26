@@ -175,7 +175,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function setFeeParams(OrderFeeParams params) override external onlyOwner {
-		tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
 		fee = params;
 
@@ -187,10 +187,10 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
-	function withdrawFee(address orderRoot, uint128 amount, address recipient, address rm_gas_to) override external onlyOwner {
-		require(orderRoot.value != 0 && amount != 0 && recipient.value != 0 && rm_gas_to.value != 0,
+	function withdrawFee(address orderRoot, uint128 amount, address recipient, address tokenRoot, address rm_gas_to) override external onlyOwner {
+		require(orderRoot.value != 0 && amount != 0 && recipient.value != 0 && rm_gas_to.value != 0 && tokenRoot.value != 0 && msg.value >= OrderGas.WITHDRAW_FEE_VALUE,
 			OrderErrors.WRONG_WITHDRAW_FEE_PARAMS);
-		tvm.rawReserve(OrderGas.WITHDRAW_FEE_VALUE, 0);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
 		IOrderRoot(orderRoot).withdrawFee{
 			value: OrderGas.WITHDRAW_FEE_VALUE,
@@ -199,6 +199,7 @@ contract OrderFactory is IOrderFactory {
 		}(
 			amount,
 			recipient,
+			tokenRoot,
 			rm_gas_to
 		);
 
@@ -210,7 +211,8 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function setRootFeeParams(OrderFeeParams params, address root) override external onlyOwner {
-		tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
+		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
 		IOrderRoot(root).setFeeParams{
 			value: OrderGas.SET_FEE_PARAMS_VALUE,
@@ -227,7 +229,9 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function setOrderFeeParams(OrderFeeParams params, address order) override external onlyOwner {
-		tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
+
+		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
 		IOrder(order).setFeeParams{
 		value: OrderGas.SET_FEE_PARAMS_VALUE,

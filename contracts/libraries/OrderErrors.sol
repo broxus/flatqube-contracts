@@ -26,6 +26,7 @@ library OrderErrors {
     uint16 constant AMOUNT_TOO_LOW                          = 322;
     uint16 constant WRONG_BENEFICIARY                       = 323;
     uint16 constant WRONG_WITHDRAW_FEE_PARAMS               = 324;
+    uint16 constant WRONG_WITHDRAW_TOKEN_ROOT               = 325;
 
 
 }

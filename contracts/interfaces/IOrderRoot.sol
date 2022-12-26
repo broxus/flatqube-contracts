@@ -1,8 +1,10 @@
 pragma ton-solidity >=0.62.0;
 
 import "../structures/IOrderFeeParams.sol";
+import "../structures/IOrderWithdrawalFeeParams.sol";
 
-interface IOrderRoot is IOrderFeeParams {
+
+interface IOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams {
 	event CreateOrder(
 		address order,
 		address spentToken,
@@ -18,7 +20,7 @@ interface IOrderRoot is IOrderFeeParams {
 	function getFeeParams() external view responsible returns (OrderFeeParams, address);
 	function setFeeParams(OrderFeeParams params) external;
 	function setBeneficiary(address beneficiary_) external;
-	function withdrawFee(uint128 amount, address recipient, address rm_gas_to) external;
+	function withdrawFee(uint128 amount, address recipient, address tokenRoot, address rm_gas_to) external;
 
 
 	function expectedAddressOrder(

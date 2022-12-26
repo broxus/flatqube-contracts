@@ -17,6 +17,7 @@ library OrderGas {
     uint128 constant OPERATION_CALLBACK_BASE         = 0.1 ever;
     uint128 constant SET_FEE_PARAMS_VALUE            = 0.1 ever;
     uint128 constant WITHDRAW_FEE_VALUE              = 0.1 ever;
+    uint128 constant SEND_EXPECTED_WALLET_VALUE      = 0.1 ever;
 
 
 }

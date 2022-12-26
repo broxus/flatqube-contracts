@@ -33,6 +33,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
 
     OrderFeeParams fee;
 	address beneficiary;
+    mapping(address => OrderWithdrawalFeeParams) withdrawalFeeParams;
     
     constructor() public { revert(); }
 
@@ -93,9 +94,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     }
 
     function setFeeParams(OrderFeeParams params) override external onlyFactory {
-        require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE,
-            OrderErrors.VALUE_TOO_LOW);
-        tvm.rawReserve(OrderGas.SET_FEE_PARAMS_VALUE, 0);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
         fee = params;
         factory.transfer(
             0,
@@ -107,16 +106,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     function setBeneficiary(address beneficiary_) override external onlyFactory {
         require(beneficiary_.value != 0,
             OrderErrors.WRONG_BENEFICIARY);
-        require(msg.value >= OrderGas.DEPLOY_EMPTY_WALLET_GRAMS + OrderGas.SET_FEE_PARAMS_VALUE,
-            OrderErrors.VALUE_TOO_LOW);
-        tvm.rawReserve(OrderGas.DEPLOY_EMPTY_WALLET_GRAMS + OrderGas.SET_FEE_PARAMS_VALUE, 0);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
         beneficiary = beneficiary_;
-
-        ITokenRoot(spentToken).deployWallet{
-        value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
-        flag: MsgFlag.SENDER_PAYS_FEES,
-        callback: OrderRoot.onBeneficiaryWallet
-        }(beneficiary_, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
         factory.transfer(
             0,
@@ -125,24 +116,36 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         );
     }
 
-    function onBeneficiaryWallet(address wallet) external {
-        //TODO callback
+    function withdrawFee(uint128 amount, address recipient, address tokenRoot, address rm_gas_to) override external onlyFactory {
+        require(msg.value >= OrderGas.WITHDRAW_FEE_VALUE,
+            OrderErrors.VALUE_TOO_LOW);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+        withdrawalFeeParams[tokenRoot] = OrderWithdrawalFeeParams(0, recipient, amount, rm_gas_to);
+        ITokenRoot(tokenRoot).walletOf{
+            value: OrderGas.WITHDRAW_FEE_VALUE,
+            flag: MsgFlag.SENDER_PAYS_FEES,
+            callback: OrderRoot.onBeneficiaryWallet
+        }(beneficiary);
+
     }
 
-    function withdrawFee(uint128 amount, address recipient, address rm_gas_to) override external onlyFactory {
-        tvm.rawReserve(OrderGas.WITHDRAW_FEE_VALUE, 0);
+    function onBeneficiaryWallet(address wallet) external {
+        require(withdrawalFeeParams.exists(msg.sender), OrderErrors.WRONG_WITHDRAW_TOKEN_ROOT);
+        OrderWithdrawalFeeParams params = withdrawalFeeParams[msg.sender];
+
         TvmCell empty;
-        ITokenWallet(beneficiary).transfer{
+        ITokenWallet(wallet).transfer{
         value: OrderGas.WITHDRAW_FEE_VALUE,
         flag: MsgFlag.SENDER_PAYS_FEES
         }(
-            amount,
-            recipient,
+            params.amount,
+            params.recipient,
             0,
-            rm_gas_to,
+            params.rm_gas_to,
             false,
             empty
         );
+        delete withdrawalFeeParams[msg.sender];
     }
 
     function buildPayload(
