@@ -286,7 +286,7 @@ export const orderFactoryMigration = async (
       _owner: account.address,
       _version: version.toString(),
     },
-    value: locklift.utils.toNano(1.5),
+    value: locklift.utils.toNano(2),
   });
 
   logMigrationProcess(

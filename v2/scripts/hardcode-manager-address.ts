@@ -18,9 +18,9 @@ abstract contract ManagerAddress {
     address constant MANAGER_ADDRESS = address.makeAddrStd(0, 0x${account.address.toString().substr(2).toLowerCase()});
 }`
 
-    console.log('Replace ManagerAddress.sol with');
+    console.log('Replace ManagerAddress.tsol with');
     console.log(content);
-    fs.writeFileSync(process.cwd() + '/contracts/abstract/ManagerAddress.sol', content);
+    fs.writeFileSync(process.cwd() + '/contracts/abstract/ManagerAddress.tsol', content);
 }
 
 main()
