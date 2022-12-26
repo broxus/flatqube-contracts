@@ -429,14 +429,18 @@ abstract contract DexPairBase is
                 _typeToWalletAddresses[DexAddressType.RESERVE].length == 0
             ) {
                 _typeToWalletAddresses[DexAddressType.RESERVE].push(_wallet);
+
+                _typeToReserves[DexReserveType.POOL].push(0);
+                _typeToReserves[DexReserveType.FEE].push(0);
             } else if (
                 _typeToWalletAddresses[DexAddressType.RESERVE].length == 2 &&
                 _typeToWalletAddresses[DexAddressType.RESERVE][0].value == 0
             ) {
                 _typeToWalletAddresses[DexAddressType.RESERVE][0] = _wallet;
+
+                _typeToReserves[DexReserveType.POOL].push(0);
+                _typeToReserves[DexReserveType.FEE].push(0);
             }
-            _typeToReserves[DexReserveType.POOL].push(0);
-            _typeToReserves[DexReserveType.FEE].push(0);
         } else if (
             msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1]
         ) {
@@ -445,14 +449,18 @@ abstract contract DexPairBase is
                 _typeToWalletAddresses[DexAddressType.RESERVE][0] != _wallet
             ) {
                 _typeToWalletAddresses[DexAddressType.RESERVE].push(_wallet);
+
+                _typeToReserves[DexReserveType.POOL].push(0);
+                _typeToReserves[DexReserveType.FEE].push(0);
             } else if (
                 _typeToWalletAddresses[DexAddressType.RESERVE].length == 0
             ) {
                 _typeToWalletAddresses[DexAddressType.RESERVE].push(address(0));
                 _typeToWalletAddresses[DexAddressType.RESERVE].push(_wallet);
+
+                _typeToReserves[DexReserveType.POOL].push(0);
+                _typeToReserves[DexReserveType.FEE].push(0);
             }
-            _typeToReserves[DexReserveType.POOL].push(0);
-            _typeToReserves[DexReserveType.FEE].push(0);
         }
 
         _tryToActivate();
@@ -628,10 +636,6 @@ abstract contract DexPairBase is
         address leftRoot;
         address rightRoot;
 
-        // Set fee reserves
-        _typeToReserves[DexReserveType.FEE].push(0);
-        _typeToReserves[DexReserveType.FEE].push(0);
-
         if (oldVersion == 0) {
             TvmSlice tokensDataSlice = dataSlice.loadRefAsSlice(); // ref 2
             (leftRoot, rightRoot) = tokensDataSlice.decode(address, address);
@@ -672,6 +676,8 @@ abstract contract DexPairBase is
                 mapping(uint8 => address[]),
                 mapping(uint8 => address[])
             ));
+
+            _typeToReserves[DexReserveType.FEE] = [_typeToReserves[DexReserveType.FEE][0], _typeToReserves[DexReserveType.FEE][1]];
 
             _fee = FeeParams(feePrev.denominator, feePrev.pool_numerator, feePrev.beneficiary_numerator, feePrev.referrer_numerator, feePrev.beneficiary, feePrev.threshold, emptyMap);
 
@@ -733,6 +739,10 @@ abstract contract DexPairBase is
             _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[1].vaultWallet);
             _typeToReserves[DexReserveType.POOL].push(tokensData[1].balance);
 
+            // Set fee reserves
+            _typeToReserves[DexReserveType.FEE].push(tokensData[0].accumulatedFee);
+            _typeToReserves[DexReserveType.FEE].push(tokensData[1].accumulatedFee);
+
             _initializeTWAPOracle(now);
         } else if (oldPoolType == DexPoolTypes.STABLE_POOL) {
             TvmCell tokenDataCell = dataSlice.loadRef(); // ref 2
@@ -775,6 +785,10 @@ abstract contract DexPairBase is
             _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[1].wallet);
             _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[1].vaultWallet);
             _typeToReserves[DexReserveType.POOL].push(tokensData[1].balance);
+
+            // Set fee reserves
+            _typeToReserves[DexReserveType.FEE].push(tokensData[0].accumulatedFee);
+            _typeToReserves[DexReserveType.FEE].push(tokensData[1].accumulatedFee);
 
             _initializeTWAPOracle(now);
         }
