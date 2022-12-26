@@ -474,7 +474,9 @@ library PairPayload {
                     dataCell = slice.loadRef();
                 }
 
-                referrer = dataCell.toSlice().decode(address);
+                if (op != DexOperationTypes.CROSS_PAIR_EXCHANGE) {
+                    referrer = dataCell.toSlice().decode(address);
+                }
             }
         }
 
