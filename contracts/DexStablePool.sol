@@ -2380,7 +2380,7 @@ contract DexStablePool is
         optional(uint128) result;
         uint128 dy_fee = 0;
 
-        if (lp > lp_supply || lp == 0) {
+        if (lp == 0) {
             return (result, dy_fee);
         }
 
