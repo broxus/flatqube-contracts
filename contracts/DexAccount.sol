@@ -619,7 +619,8 @@ contract DexAccount is
             [TokenOperation(left_amount, left_root), TokenOperation(right_amount, right_root)],
             TokenOperation(0, expected_lp_root),
             auto_change,
-            send_gas_to
+            send_gas_to,
+            address(0)
         );
     }
 
@@ -628,14 +629,16 @@ contract DexAccount is
         TokenOperation[] _operations,
         TokenOperation _expected,
         bool _autoChange,
-        address _remainingGasTo
+        address _remainingGasTo,
+        address _referrer
     ) override external onlyOwner {
         _depositLiquidityInternal(
             _callId,
             _operations,
             _expected,
             _autoChange,
-            _remainingGasTo
+            _remainingGasTo,
+            _referrer
         );
     }
 
@@ -644,7 +647,8 @@ contract DexAccount is
         TokenOperation[] _operations,
         TokenOperation _expected,
         bool _autoChange,
-        address _remainingGasTo
+        address _remainingGasTo,
+        address _referrer
     ) private {
         require(!_tmpOperations.exists(_callId), DexErrors.OPERATION_ALREADY_IN_PROGRESS);
         require(_operations.length > 1, DexErrors.WRONG_PAIR);
@@ -692,7 +696,8 @@ contract DexAccount is
                 _autoChange,
                 _owner,
                 _currentVersion,
-                remainingGasTo
+                remainingGasTo,
+                _referrer
             );
     }
 

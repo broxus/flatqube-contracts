@@ -536,8 +536,9 @@ contract DexVault is
         address[] roots,
         address senderAddress,
         address recipient,
+        address referrer,
         uint128 deployWalletGrams,
-        NextExchangeData[] nextSteps) = abi.decode(exchangeData, (uint64, uint32, uint8, address[], address, address, uint128, NextExchangeData[]));
+        NextExchangeData[] nextSteps) = abi.decode(exchangeData, (uint64, uint32, uint8, address[], address, address, address, uint128, NextExchangeData[]));
 
         TvmCell successPayload;
         TvmCell cancelPayload;
@@ -607,6 +608,7 @@ contract DexVault is
 
                     senderAddress,
                     recipient,
+                    referrer,
 
                     remainingGasTo,
                     deployWalletGrams,

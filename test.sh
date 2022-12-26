@@ -46,9 +46,9 @@ npx locklift test $NO_TRACE --tests test/40-cross-pair-exchange.js --amount=1000
 npx locklift test $NO_TRACE --tests test/40-cross-pair-exchange.js --amount=1000 --route='["bar","foo","qwe"]' --contract_name='DexPair'
 npx locklift test $NO_TRACE --tests test/40-cross-pair-exchange.js --amount=1000 --route='["foo","qwe","bar","tst"]' --contract_name='DexPair'
 
-npx locklift test $NO_TRACE --tests test/50-beneficiary-fee.js --fee='{"denominator": "1000000000", "pool_numerator": "2000000", "beneficiary_numerator": "3000000", "referrer_numerator": "100000"}'
+npx locklift test $NO_TRACE --tests test/50-beneficiary-fee.js --fee='{"denominator": "1000000000", "pool_numerator": "2000000", "beneficiary_numerator": "3000000", "referrer_numerator": "0"}'
 
-npx locklift test $NO_TRACE --tests test/50-beneficiary-fee.js --fee='{"denominator": "1000000000", "pool_numerator": "0", "beneficiary_numerator": "1000000", "referrer_numerator": "10000"}'
+npx locklift test $NO_TRACE --tests test/50-beneficiary-fee.js --fee='{"denominator": "1000000000", "pool_numerator": "0", "beneficiary_numerator": "1000000", "referrer_numerator": "0"}'
 
 #npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPair'
 #npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPair' --new_contract_name='DexPair'

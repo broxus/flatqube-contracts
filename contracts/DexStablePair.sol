@@ -453,7 +453,7 @@ contract DexStablePair is
                 uint8 j = i == 0 ? 1 : 0;
 
                 if (op == DexOperationTypes.EXCHANGE || op == DexOperationTypes.EXCHANGE_V2) {
-                    optional(ExpectedExchangeResult) dy_result_opt = _get_dy(i, j, tokens_amount);
+                    (optional(ExpectedExchangeResult) dy_result_opt, uint128 referrer_fee) = _get_dy(i, j, tokens_amount, referrer);
 
                     if (!dy_result_opt.hasValue()){
                         errorCode = DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
@@ -482,10 +482,25 @@ contract DexStablePair is
                             dy_result.amount,
                             fees
                         );
+                        emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
 
                         if (dy_result.beneficiary_fee > 0) {
                             tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
                             _processBeneficiaryFees(false, original_gas_to);
+                        }
+
+                        if (referrer_fee > 0) {
+                            IDexVault(vault).referralFeeTransfer{
+                                value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
+                                flag: MsgFlag.SENDER_PAYS_FEES
+                            }(
+                                referrer_fee,
+                                tokenData[i].vaultWallet,
+                                referrer,
+                                original_gas_to,
+                                deploy_wallet_grams,
+                                _tokenRoots()
+                            );
                         }
 
                         IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
@@ -550,7 +565,7 @@ contract DexStablePair is
                         next_steps[0].poolRoot = _expectedPoolAddress([tokenData[j].root, next_steps[0].poolRoot]);
                     }
 
-                    optional(ExpectedExchangeResult) dy_result_opt = _get_dy(i, j, tokens_amount);
+                    (optional(ExpectedExchangeResult) dy_result_opt, uint128 referrer_fee) = _get_dy(i, j, tokens_amount, referrer);
 
                     uint256 denominator = 0;
                     uint32 all_nested_nodes = uint32(next_steps.length);
@@ -602,10 +617,25 @@ contract DexStablePair is
                             dy_result.amount,
                             fees
                         );
+                        emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
 
                         if (dy_result.beneficiary_fee > 0) {
                             tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
                             _processBeneficiaryFees(false, original_gas_to);
+                        }
+
+                        if (referrer_fee > 0) {
+                            IDexVault(vault).referralFeeTransfer{
+                                value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
+                                flag: MsgFlag.SENDER_PAYS_FEES
+                            }(
+                                referrer_fee,
+                                tokenData[i].vaultWallet,
+                                referrer,
+                                original_gas_to,
+                                deploy_wallet_grams,
+                                _tokenRoots()
+                            );
                         }
 
                         IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
@@ -618,7 +648,6 @@ contract DexStablePair is
                             dy_result.pool_fee + dy_result.beneficiary_fee,
                             dy_result.amount
                         ));
-
 
                         ITokenWallet(msg.sender).transfer{
                             value: DexGas.TRANSFER_TOKENS_VALUE,
@@ -657,6 +686,7 @@ contract DexStablePair is
 
                                 sender_address,
                                 recipient,
+                                referrer,
 
                                 original_gas_to,
                                 deploy_wallet_grams,
@@ -674,7 +704,7 @@ contract DexStablePair is
                     uint128[] amounts = new uint128[](N_COINS);
                     amounts[i] = tokens_amount;
                     amounts[j] = 0;
-                    optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
+                    (optional(DepositLiquidityResultV2) resultOpt, uint128[] referrer_fees) = _expectedDepositLiquidity(amounts, referrer);
 
                     if (!resultOpt.hasValue()) {
                         errorCode = DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
@@ -682,7 +712,7 @@ contract DexStablePair is
                         errorCode = DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
                     } else {
                         DepositLiquidityResultV2 result = resultOpt.get();
-                        _applyAddLiquidity(result, id, false, sender_address, recipient);
+                        _applyAddLiquidity(result, referrer_fees, id, false, sender_address, recipient, referrer, deploy_wallet_grams, original_gas_to);
 
                         ITokenWallet(msg.sender).transfer{
                             value: DexGas.TRANSFER_TOKENS_VALUE,
@@ -774,7 +804,7 @@ contract DexStablePair is
     function expectedDepositLiquidityV2(
         uint128[] amounts
     ) override external view responsible returns (DepositLiquidityResultV2) {
-        optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
+        (optional(DepositLiquidityResultV2) resultOpt,) = _expectedDepositLiquidity(amounts, address(0));
         require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } resultOpt.get();
     }
@@ -786,7 +816,8 @@ contract DexStablePair is
         bool    auto_change,
         address account_owner,
         uint32 /*account_version*/,
-        address send_gas_to
+        address send_gas_to,
+        address referrer
     ) override external onlyActive onlyAccount(account_owner) {
         require(_expected.root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
         require(lp_supply != 0 || (_operations[0].amount > 0 && _operations[1].amount > 0), DexErrors.WRONG_LIQUIDITY);
@@ -799,14 +830,14 @@ contract DexStablePair is
         uint128[] amounts = new uint128[](0);
         amounts.push(_operations[0].amount);
         amounts.push(_operations[1].amount);
-        optional(DepositLiquidityResultV2) resultOpt = _expectedDepositLiquidity(amounts);
+        (optional(DepositLiquidityResultV2) resultOpt, uint128[] referrer_fees) = _expectedDepositLiquidity(amounts, referrer);
         require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
         DepositLiquidityResultV2 result = resultOpt.get();
         require(result.lp_reward >= _expected.amount, DexErrors.WRONG_LIQUIDITY);
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        _applyAddLiquidity(result, call_id, true, account_owner, account_owner);
+        _applyAddLiquidity(result, referrer_fees, call_id, true, account_owner, account_owner, referrer, DexGas.DEPLOY_EMPTY_WALLET_GRAMS, send_gas_to);
 
         _sync();
 
@@ -935,7 +966,7 @@ contract DexStablePair is
         require(tokenIndex.exists(spent_token_root), DexErrors.NOT_TOKEN_ROOT);
         uint8 i = tokenIndex[spent_token_root];
         uint8 j = i == 0 ? 1 : 0;
-        optional(ExpectedExchangeResult) dy_result_opt = _get_dy(i, j, amount);
+        (optional(ExpectedExchangeResult) dy_result_opt,) = _get_dy(i, j, amount, address(0));
         if (dy_result_opt.hasValue()) {
             ExpectedExchangeResult dy_result = dy_result_opt.get();
 
@@ -984,7 +1015,7 @@ contract DexStablePair is
         uint8 i = tokenIndex[_operation.root];
         uint8 j = tokenIndex[_expected.root];
         require(i != j && i < N_COINS && j < N_COINS, DexErrors.WRONG_TOKEN_ROOT);
-        optional(ExpectedExchangeResult) dy_result_opt = _get_dy(i, j, _operation.amount);
+        (optional(ExpectedExchangeResult) dy_result_opt,) = _get_dy(i, j, _operation.amount, address(0));
         require(dy_result_opt.hasValue(), DexErrors.WRONG_AMOUNT);
 
         ExpectedExchangeResult dy_result = dy_result_opt.get();
@@ -1083,6 +1114,7 @@ contract DexStablePair is
 
         address sender_address,
         address recipient,
+        address referrer,
 
         address original_gas_to,
         uint128 deploy_wallet_grams,
@@ -1111,9 +1143,10 @@ contract DexStablePair is
         uint8 j = i == 0 ? 1 : 0;
 
         optional(ExpectedExchangeResult) dy_result_opt;
+        uint128 referrer_fee = 0;
 
         if (errorCode == 0) {
-            dy_result_opt = _get_dy(i, j, spent_amount);
+            (dy_result_opt, referrer_fee) = _get_dy(i, j, spent_amount, referrer);
             errorCode = dy_result_opt.hasValue() ? 0 : DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
         }
 
@@ -1143,12 +1176,27 @@ contract DexStablePair is
                     dy_result.amount,
                     fees
                 );
+                emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
 
                _sync();
 
                 if (dy_result.beneficiary_fee > 0) {
                     tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
                     _processBeneficiaryFees(false, original_gas_to);
+                }
+
+                if (referrer_fee > 0) {
+                    IDexVault(vault).referralFeeTransfer{
+                        value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
+                        flag: MsgFlag.SENDER_PAYS_FEES
+                    }(
+                        referrer_fee,
+                        tokenData[i].vaultWallet,
+                        referrer,
+                        original_gas_to,
+                        deploy_wallet_grams,
+                        _tokenRoots()
+                    );
                 }
 
                 IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
@@ -1229,6 +1277,7 @@ contract DexStablePair is
 
                             sender_address,
                             recipient,
+                            referrer,
 
                             original_gas_to,
                             deploy_wallet_grams,
@@ -1692,11 +1741,11 @@ contract DexStablePair is
             uint128[] reserves_mem = _reserves();
             uint256[] xp_mem = _xp_mem(reserves_mem);
 
-            optional(ExpectedExchangeResult) old_price_res =
-                _get_dy_mem(i, j, price_amount, xp_mem);
+            (optional(ExpectedExchangeResult) old_price_res,) =
+                _get_dy_mem(i, j, price_amount, xp_mem, address(0));
 
-            optional(ExpectedExchangeResult) dy_result_opt =
-                _get_dy_mem(i, j, amount, xp_mem);
+            (optional(ExpectedExchangeResult) dy_result_opt,) =
+                _get_dy_mem(i, j, amount, xp_mem, address(0));
 
             if (
                 dy_result_opt.hasValue() &&
@@ -1708,8 +1757,8 @@ contract DexStablePair is
                 reserves_mem[i] += amount - dy_result.beneficiary_fee;
                 reserves_mem[j] -= dy_result.amount;
 
-                optional(ExpectedExchangeResult) new_price_res =
-                    _get_dy_mem(i, j, price_amount, _xp_mem(reserves_mem));
+                (optional(ExpectedExchangeResult) new_price_res,) =
+                    _get_dy_mem(i, j, price_amount, _xp_mem(reserves_mem), address(0));
 
                 if (new_price_res.hasValue()) {
                     result.set(
@@ -1822,22 +1871,36 @@ contract DexStablePair is
     }
 
 
-    function _get_dy(uint8 i, uint8 j, uint128 _dx) internal view returns (optional(ExpectedExchangeResult)) {
+    function _get_dy(uint8 i, uint8 j, uint128 _dx, address referrer) internal view returns (optional(ExpectedExchangeResult), uint128) {
         uint256[] xp = new uint256[](0);
 
         for (PoolTokenData t: tokenData) {
             xp.push(math.muldiv(t.rate, t.balance, PRECISION));
         }
 
-        return _get_dy_mem(i, j, _dx, xp);
+        return _get_dy_mem(i, j, _dx, xp, referrer);
     }
 
-    function _get_dy_mem(uint8 i, uint8 j, uint128 _dx, uint256[] xp) internal view returns (optional(ExpectedExchangeResult)) {
+    function _get_dy_mem(uint8 i, uint8 j, uint128 _dx, uint256[] xp, address referrer) internal view returns (optional(ExpectedExchangeResult), uint128) {
         optional(ExpectedExchangeResult) result;
 
-        uint128 x_fee = math.muldivc(_dx, fee.pool_numerator + fee.beneficiary_numerator, fee.denominator);
-        uint128 x_beneficiary_fee = math.muldiv(x_fee, fee.beneficiary_numerator, fee.pool_numerator + fee.beneficiary_numerator);
-        uint128 x_pool_fee = x_fee - x_beneficiary_fee;
+        uint128 fee_numerator = fee.pool_numerator + fee.beneficiary_numerator + fee.referrer_numerator;
+        uint128 x_fee = math.muldivc(_dx, fee_numerator, fee.denominator);
+        uint128 x_referrer_fee = math.muldiv(x_fee, fee.referrer_numerator, fee_numerator);
+        uint128 x_beneficiary_fee;
+        uint128 x_pool_fee;
+
+        if (referrer.value != 0 && (
+            !fee.referrer_threshold.exists(tokenData[i].root) ||
+            fee.referrer_threshold[tokenData[i].root] <= x_referrer_fee
+        )) {
+            x_beneficiary_fee = math.muldiv(x_fee, fee.beneficiary_numerator, fee_numerator);
+            x_pool_fee = x_fee - x_referrer_fee - x_beneficiary_fee;
+        } else {
+            x_referrer_fee = 0;
+            x_beneficiary_fee = math.muldiv(x_fee, fee.beneficiary_numerator, fee.beneficiary_numerator + fee.pool_numerator);
+            x_pool_fee = x_fee - x_beneficiary_fee;
+        }
 
         uint256 x = xp[i] + math.muldiv(_dx - x_fee, tokenData[i].rate, PRECISION);
         optional(uint256) y_opt = _get_y(i, j, x, xp);
@@ -1858,7 +1921,7 @@ contract DexStablePair is
             }
         }
 
-        return result;
+        return (result, result.hasValue() ? x_referrer_fee : 0);
     }
 
     function _get_dx(uint8 i, uint8 j, uint128 _dy) internal view returns (optional(ExpectedExchangeResult)) {
@@ -1922,7 +1985,7 @@ contract DexStablePair is
         emit Sync(_reserves(), lp_supply);
     }
 
-    function _expectedDepositLiquidity(uint128[] _amounts) private view returns(optional(DepositLiquidityResultV2)) {
+    function _expectedDepositLiquidity(uint128[] _amounts, address referrer) private view returns(optional(DepositLiquidityResultV2), uint128[]) {
         optional(DepositLiquidityResultV2) result;
 
         uint128[] old_balances = _reserves();
@@ -1932,6 +1995,7 @@ contract DexStablePair is
         uint128[] new_balances = old_balances;
         uint128[] pool_fees = new uint128[](N_COINS);
         uint128[] beneficiary_fees = new uint128[](N_COINS);
+        uint128[] referrer_fees = new uint128[](N_COINS);
         uint128[] result_balances = old_balances;
         uint128[] differences = new uint128[](N_COINS);
         uint128 lp_reward;
@@ -1946,6 +2010,7 @@ contract DexStablePair is
             differences[i] = 0;
             pool_fees[i] = 0;
             beneficiary_fees[i] = 0;
+            referrer_fees[i] = 0;
             sell[i] = false;
         }
 
@@ -1953,20 +2018,20 @@ contract DexStablePair is
 
     //  # dev: initial deposit requires all coins
         if (lp_supply == 0 && hasZeroBalance || !D0_opt.hasValue() || !D1_opt.hasValue()) {
-            return result;
+            return (result, referrer_fees);
         }
 
         uint256 D0 = D0_opt.get();
         uint256 D1 = D1_opt.get();
 
         if (D0 >= D1) {
-            return result;
+            return (result, referrer_fees);
         }
 
         optional(uint256) D2_opt;
 
         if (lp_supply > 0) {
-            uint128 fee_numerator = math.muldiv(fee.pool_numerator + fee.beneficiary_numerator, N_COINS, (4 * (N_COINS - 1)));
+            uint128 fee_numerator = math.muldiv(fee.pool_numerator + fee.beneficiary_numerator + fee.referrer_numerator, N_COINS, (4 * (N_COINS - 1)));
 
             for (uint8 i = 0; i < N_COINS; i++) {
                 uint128 ideal_balance = uint128(math.muldiv(D1, old_balances[i], D0));
@@ -1974,10 +2039,22 @@ contract DexStablePair is
                 uint128 difference = ideal_balance > new_balance ? ideal_balance - new_balance : new_balance - ideal_balance;
                 sell[i] = ideal_balance < new_balance;
                 uint128 fees = math.muldivc(fee_numerator, difference, fee.denominator);
-                beneficiary_fees[i] = math.muldiv(fees, fee.beneficiary_numerator, fee.pool_numerator + fee.beneficiary_numerator);
-                pool_fees[i] = fees - beneficiary_fees[i];
+                uint128 referrer_fee = math.muldiv(fees, fee.referrer_numerator, fee.beneficiary_numerator + fee.pool_numerator + fee.referrer_numerator);
+
+                if (referrer.value != 0 && (
+                    !fee.referrer_threshold.exists(tokenData[i].root) ||
+                    fee.referrer_threshold[tokenData[i].root] <= referrer_fee
+                )) {
+                    referrer_fees[i] = referrer_fee;
+                    beneficiary_fees[i] = math.muldiv(fees, fee.beneficiary_numerator, fee.beneficiary_numerator + fee.pool_numerator + fee.referrer_numerator);
+                    pool_fees[i] = fees - referrer_fee - beneficiary_fees[i];
+                } else {
+                    beneficiary_fees[i] = math.muldiv(fees, fee.beneficiary_numerator, fee.beneficiary_numerator + fee.pool_numerator);
+                    pool_fees[i] = fees - beneficiary_fees[i];
+                }
+
                 result_balances[i] = new_balance - beneficiary_fees[i];
-                new_balances[i] = new_balances[i] - pool_fees[i] - beneficiary_fees[i];
+                new_balances[i] = new_balances[i] - pool_fees[i] - beneficiary_fees[i] - referrer_fees[i];
                 differences[i] = difference;
             }
             D2_opt = _get_D(_xp_mem(new_balances));
@@ -1991,7 +2068,7 @@ contract DexStablePair is
         }
 
         if (!D2_opt.hasValue() || lp_reward == 0) {
-            return result;
+            return (result, referrer_fees);
         }
 
         result.set(DepositLiquidityResultV2(
@@ -2006,16 +2083,19 @@ contract DexStablePair is
             beneficiary_fees
         ));
 
-        return result;
-
+        return (result, referrer_fees);
     }
 
     function _applyAddLiquidity(
         DepositLiquidityResultV2 r,
+        uint128[] referrer_fees,
         uint64 call_id,
         bool via_account,
         address sender_address,
-        address recipient
+        address recipient,
+        address referrer,
+        uint128 deploy_wallet_grams,
+        address original_gas_to
     ) private {
 
         address spent_root;
@@ -2023,6 +2103,7 @@ contract DexStablePair is
         address receive_root;
         uint128 receive_amount;
         ExchangeFee[] fees;
+        TokenOperation[] referrer_fees_data;
         TokenOperation[] deposits;
 
         for (uint8 i = 0; i < N_COINS; i++) {
@@ -2030,14 +2111,15 @@ contract DexStablePair is
                 fees.push(ExchangeFee(tokenData[i].root, r.pool_fees[i], r.beneficiary_fees[i], fee.beneficiary));
                 if (r.sell[i]) {
                     deposits.push(TokenOperation(
-                        r.result_balances[i] - tokenData[i].balance - r.differences[i] - r.pool_fees[i],
+                        r.result_balances[i] - tokenData[i].balance - r.differences[i] - r.pool_fees[i] - referrer_fees[i],
                         tokenData[i].root
                     ));
                     spent_root = tokenData[i].root;
                     spent_amount = r.differences[i];
                 } else {
                     deposits.push(TokenOperation(
-                        r.result_balances[i] + r.differences[i] - tokenData[i].balance - r.pool_fees[i], tokenData[i].root
+                        r.result_balances[i] + r.differences[i] - tokenData[i].balance - r.pool_fees[i] - referrer_fees[i],
+                        tokenData[i].root
                     ));
                     receive_root = tokenData[i].root;
                     receive_amount = r.differences[i];
@@ -2048,6 +2130,22 @@ contract DexStablePair is
 
             tokenData[i].balance = r.result_balances[i];
             tokenData[i].accumulatedFee += r.beneficiary_fees[i];
+
+            referrer_fees_data.push(TokenOperation(referrer_fees[i], tokenData[i].root));
+
+            if (referrer_fees[i] > 0) {
+                IDexVault(vault).referralFeeTransfer{
+                    value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
+                    flag: MsgFlag.SENDER_PAYS_FEES
+                }(
+                    referrer_fees[i],
+                    tokenData[i].vaultWallet,
+                    referrer,
+                    original_gas_to,
+                    deploy_wallet_grams,
+                    _tokenRoots()
+                );
+            }
         }
 
         lp_supply += r.lp_reward;
@@ -2062,6 +2160,7 @@ contract DexStablePair is
                 receive_amount,
                 fees
             );
+            emit ReferrerFees(referrer_fees_data);
         }
 
         emit DepositLiquidity(sender_address, recipient, deposits, r.lp_reward);

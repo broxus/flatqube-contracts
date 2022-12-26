@@ -137,9 +137,13 @@ library Math {
         uint128 _leftReserve,
         uint128 _rightReserve,
         uint128 _lpReserve,
-        IFeeParams.FeeParams _fee
+        IFeeParams.FeeParams _fee,
+        address _referrer,
+        address _leftTokenRoot,
+        address _rightTokenRoot
     ) public returns (
         IDepositLiquidityResult.DepositLiquidityResult,
+        uint128,
         uint128,
         uint128
     ) {
@@ -151,6 +155,7 @@ library Math {
                     math.max(_leftAmount, _rightAmount),
                     false, false, 0, 0, 0, 0, 0, 0
                 ),
+                0,
                 0,
                 0
             );
@@ -189,6 +194,7 @@ library Math {
         uint128 step2Spent = 0;
         uint128 step2PoolFee = 0;
         uint128 step2BeneficiaryFee = 0;
+        uint128 step2ReferrerFee = 0;
         uint128 step2Received = 0;
 
         uint128 step3LeftDeposit = 0;
@@ -196,7 +202,7 @@ library Math {
         uint128 step3LpReward = 0;
 
         uint256 feeD = uint256(_fee.denominator);
-        uint256 feeDMinusN = feeD - uint256(_fee.pool_numerator + _fee.beneficiary_numerator);
+        uint256 feeDMinusN = feeD - uint256(_fee.pool_numerator + _fee.beneficiary_numerator + _fee.referrer_numerator);
         uint256 denominator = feeDMinusN * (feeD - uint256(_fee.beneficiary_numerator));
 
         if (_autoChange && currentRightAmount > 0) {
@@ -220,12 +226,15 @@ library Math {
             (
                 step2Received,
                 step2PoolFee,
-                step2BeneficiaryFee
+                step2BeneficiaryFee,
+                step2ReferrerFee
             ) = calculateExpectedExchange(
                 step2Spent,
                 currentRightBalance,
                 currentLeftBalance,
-                _fee
+                _fee,
+                _referrer,
+                _rightTokenRoot
             );
 
             currentRightAmount = currentRightAmount - step2Spent;
@@ -262,12 +271,15 @@ library Math {
             (
                 step2Received,
                 step2PoolFee,
-                step2BeneficiaryFee
+                step2BeneficiaryFee,
+                step2ReferrerFee
             ) = calculateExpectedExchange(
                 step2Spent,
                 currentLeftBalance,
                 currentRightBalance,
-                _fee
+                _fee,
+                _referrer,
+                _leftTokenRoot
             );
 
             currentLeftAmount = currentLeftAmount - step2Spent;
@@ -302,7 +314,8 @@ library Math {
                 step3LpReward
             ),
             step2PoolFee,
-            step2BeneficiaryFee
+            step2BeneficiaryFee,
+            step2ReferrerFee
         );
     }
 
@@ -316,25 +329,40 @@ library Math {
         uint128 _aAmount,
         uint128 _aPool,
         uint128 _bPool,
-        IFeeParams.FeeParams _fee
+        IFeeParams.FeeParams _fee,
+        address _referrer,
+        address _aTokenRoot
     ) public returns (
+        uint128,
         uint128,
         uint128,
         uint128
     ) {
         uint128 aFee = math.muldivc(
             _aAmount,
-            _fee.pool_numerator + _fee.beneficiary_numerator,
+            _fee.pool_numerator + _fee.beneficiary_numerator + _fee.referrer_numerator,
             _fee.denominator
         );
 
-        uint128 aBeneficiaryFee = math.muldiv(
+        uint128 aReferrerFee = math.muldivc(
             aFee,
-            _fee.beneficiary_numerator,
-            _fee.pool_numerator + _fee.beneficiary_numerator
+            _fee.referrer_numerator,
+            _fee.pool_numerator + _fee.beneficiary_numerator + _fee.referrer_numerator
         );
+        uint128 aBeneficiaryFee;
+        uint128 aPoolFee;
 
-        uint128 aPoolFee = aFee - aBeneficiaryFee;
+        if (_referrer.value != 0 && (
+            !_fee.referrer_threshold.exists(_aTokenRoot) ||
+            _fee.referrer_threshold[_aTokenRoot] <= aReferrerFee
+        )) {
+            aBeneficiaryFee = math.muldiv(aFee, _fee.beneficiary_numerator, _fee.pool_numerator + _fee.beneficiary_numerator + _fee.referrer_numerator);
+            aPoolFee = aFee - aReferrerFee - aBeneficiaryFee;
+        } else {
+            aReferrerFee = 0;
+            aBeneficiaryFee = math.muldiv(aFee, _fee.beneficiary_numerator, _fee.beneficiary_numerator + _fee.pool_numerator);
+            aPoolFee = aFee - aBeneficiaryFee;
+        }
 
         uint128 newAPool = _aPool + _aAmount;
         uint128 newBPool = math.muldivc(_aPool, _bPool, newAPool - aFee);
@@ -343,7 +371,8 @@ library Math {
         return (
             expectedBAmount,
             aPoolFee,
-            aBeneficiaryFee
+            aBeneficiaryFee,
+            aReferrerFee
         );
     }
 }

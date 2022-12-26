@@ -145,6 +145,7 @@ interface IDexBasePool is
 
         address _senderAddress,
         address _recipient,
+        address _referrer,
 
         address _originalGasTo,
         uint128 _deployWalletGrams,
@@ -174,7 +175,8 @@ interface IDexBasePool is
         bool _autoChange,
         address _accountOwner,
         uint32 _accountVersion,
-        address _remainingGasTo
+        address _remainingGasTo,
+        address _referrer
     ) external;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////

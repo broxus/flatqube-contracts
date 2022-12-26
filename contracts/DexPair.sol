@@ -191,14 +191,17 @@ contract DexPair is DexPairBase, INextExchangeData {
         uint128 right_amount,
         bool auto_change
     ) override external view responsible returns (DepositLiquidityResult) {
-        (DepositLiquidityResult result,,) = Math.calculateExpectedDepositLiquidity(
+        (DepositLiquidityResult result,,,) = Math.calculateExpectedDepositLiquidity(
             left_amount,
             right_amount,
             auto_change,
             _typeToReserves[DexReserveType.POOL][0],
             _typeToReserves[DexReserveType.POOL][1],
             _typeToReserves[DexReserveType.LP][0],
-            _fee
+            _fee,
+            address(0),
+            _tokenRoots()[0],
+            _tokenRoots()[1]
         );
 
         return {
@@ -215,7 +218,8 @@ contract DexPair is DexPairBase, INextExchangeData {
         bool _autoChange,
         address _accountOwner,
         uint32,
-        address _remainingGasTo
+        address _remainingGasTo,
+        address _referrer
     ) override external onlyActive onlyAccount(_accountOwner) {
         require(_expected.root == _lpRoot(), DexErrors.NOT_LP_TOKEN_ROOT);
         require(_lpReserve() != 0 || (_operations[0].amount > 0 && _operations[1].amount > 0), DexErrors.WRONG_LIQUIDITY);
@@ -235,7 +239,8 @@ contract DexPair is DexPairBase, INextExchangeData {
         (
             DepositLiquidityResult result,
             uint128 step2PoolFee,
-            uint128 step2BeneficiaryFee
+            uint128 step2BeneficiaryFee,
+            uint128 step2ReferrerFee
         ) = Math.calculateExpectedDepositLiquidity(
             operations[0].amount,
             operations[1].amount,
@@ -243,7 +248,10 @@ contract DexPair is DexPairBase, INextExchangeData {
             tokenReserves[0],
             tokenReserves[1],
             _lpReserve(),
-            _fee
+            _fee,
+            _referrer,
+            operations[0].root,
+            operations[1].root
         );
 
         require(result.step_1_lp_reward + result.step_3_lp_reward >= _expected.amount, DexErrors.WRONG_LIQUIDITY);
@@ -278,11 +286,14 @@ contract DexPair is DexPairBase, INextExchangeData {
                     result.step_2_spent,
                     step2BeneficiaryFee,
                     step2PoolFee,
+                    step2ReferrerFee,
                     result.step_2_received,
                     _accountOwner,
                     _remainingGasTo,
                     _accountOwner,
-                    true
+                    true,
+                    _referrer,
+                    DexGas.DEPLOY_EMPTY_WALLET_GRAMS
                 );
             } else {
                 _typeToReserves[DexReserveType.POOL][0] += result.step_1_left_deposit;
@@ -674,12 +685,14 @@ contract DexPair is DexPairBase, INextExchangeData {
             (
                 uint128 expectedAmount,
                 uint128 poolFee,
-                uint128 beneficiaryFee
+                uint128 beneficiaryFee,
             ) = Math.calculateExpectedExchange(
                 amount,
                 _reserves()[spentTokenIndex],
                 _reserves()[receiveTokenIndex],
-                _fee
+                _fee,
+                address(0),
+                _tokenRoots()[spentTokenIndex]
             );
 
             return {
@@ -742,12 +755,15 @@ contract DexPair is DexPairBase, INextExchangeData {
             (
                 uint128 amount,
                 uint128 poolFee,
-                uint128 beneficiaryFee
+                uint128 beneficiaryFee,
+                uint128 referrerFee
             ) = Math.calculateExpectedExchange(
                 _operation.amount,
                 _reserves()[spentTokenIndex],
                 _reserves()[receiveTokenIndex],
-                _fee
+                _fee,
+                address(0),
+                _tokenRoots()[spentTokenIndex]
             );
 
             require(amount <= _reserves()[receiveTokenIndex], DexErrors.NOT_ENOUGH_FUNDS);
@@ -766,11 +782,14 @@ contract DexPair is DexPairBase, INextExchangeData {
                 _operation.amount,
                 beneficiaryFee,
                 poolFee,
+                referrerFee,
                 amount,
                 _accountOwner,
                 _remainingGasTo,
                 _accountOwner,
-                false
+                false,
+                address(0),
+                0
             );
 
             IDexAccount(msg.sender)
@@ -807,11 +826,14 @@ contract DexPair is DexPairBase, INextExchangeData {
         uint128 _spentAmount,
         uint128 _beneficiaryFee,
         uint128 _poolFee,
+        uint128 _referrerFee,
         uint128 _amount,
         address _senderAddress,
         address _remainingGasTo,
         address _recipient,
-        bool _isNominal
+        bool _isNominal,
+        address _referrer,
+        uint128 _deployWalletGrams
     ) private {
         uint128[] oldReserves = _reserves();
 
@@ -825,6 +847,20 @@ contract DexPair is DexPairBase, INextExchangeData {
                 _typeToReserves[DexReserveType.FEE][spentTokenIndex] += _beneficiaryFee;
 
                 _processBeneficiaryFees(false, _remainingGasTo);
+            }
+
+            if (_referrerFee > 0) {
+                IDexVault(_vaultRoot()).referralFeeTransfer{
+                    value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + _deployWalletGrams,
+                    flag: MsgFlag.SENDER_PAYS_FEES
+                }(
+                    _referrerFee,
+                    _typeToWalletAddresses[DexAddressType.VAULT][spentTokenIndex],
+                    _referrer,
+                    _remainingGasTo,
+                    _deployWalletGrams,
+                    _tokenRoots()
+                );
             }
         }
 
@@ -849,6 +885,7 @@ contract DexPair is DexPairBase, INextExchangeData {
             _amount,
             fees
         );
+        emit ReferrerFees([TokenOperation(_referrerFee, _tokenRoots()[spentTokenIndex])]);
 
         _write(
             oldReserves[0],
@@ -902,6 +939,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         uint128 _spentAmount,
         address _senderAddress,
         address _recipient,
+        address _referrer,
         address _remainingGasTo,
         uint128 _deployWalletGrams,
         TvmCell _payload,
@@ -940,12 +978,15 @@ contract DexPair is DexPairBase, INextExchangeData {
                 (
                     uint128 amount,
                     uint128 poolFee,
-                    uint128 beneficiaryFee
+                    uint128 beneficiaryFee,
+                    uint128 referrerFee
                 ) = Math.calculateExpectedExchange(
                     _spentAmount,
                     _reserves()[spentTokenIndex],
                     _reserves()[receiveTokenIndex],
-                    _fee
+                    _fee,
+                    _referrer,
+                    _tokenRoots()[spentTokenIndex]
                 );
 
                 // Check reserves, fees and expected amount
@@ -968,11 +1009,14 @@ contract DexPair is DexPairBase, INextExchangeData {
                         _spentAmount,
                         beneficiaryFee,
                         poolFee,
+                        referrerFee,
                         amount,
                         _senderAddress,
                         _remainingGasTo,
                         _recipient,
-                        false
+                        false,
+                        _referrer,
+                        _deployWalletGrams
                     );
 
                     uint16 postSwapErrorCode = 0;
@@ -1026,6 +1070,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                                 nextPoolAmount,
                                 _senderAddress,
                                 _recipient,
+                                _referrer,
                                 _remainingGasTo,
                                 _deployWalletGrams,
                                 nextStep.payload,
@@ -1171,12 +1216,15 @@ contract DexPair is DexPairBase, INextExchangeData {
                     (
                         uint128 amount,
                         uint128 poolFee,
-                        uint128 beneficiaryFee
+                        uint128 beneficiaryFee,
+                        uint128 referrerFee
                     ) = Math.calculateExpectedExchange(
                         _tokensAmount,
                         _reserves()[spentTokenIndex],
                         _reserves()[receiveTokenIndex],
-                        _fee
+                        _fee,
+                        referrer,
+                        _tokenRoots()[spentTokenIndex]
                     );
 
                     // Check reserves, fees and expected amount
@@ -1199,11 +1247,14 @@ contract DexPair is DexPairBase, INextExchangeData {
                             _tokensAmount,
                             beneficiaryFee,
                             poolFee,
+                            referrerFee,
                             amount,
                             _senderAddress,
                             _remainingGasTo,
                             recipient,
-                            false
+                            false,
+                            referrer,
+                            deployWalletGrams
                         );
 
                         // Transfer incoming token to vault
@@ -1239,7 +1290,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                     (
                         DepositLiquidityResult r,
                         uint128 step2PoolFee,
-                        uint128 step2BeneficiaryFee
+                        uint128 step2BeneficiaryFee,
+                        uint128 step2ReferrerFee
                     ) = Math.calculateExpectedDepositLiquidity(
                         _tokensAmount,
                         0,
@@ -1247,7 +1299,10 @@ contract DexPair is DexPairBase, INextExchangeData {
                         _reserves()[spentTokenIndex],
                         _reserves()[receiveTokenIndex],
                         _lpReserve(),
-                        _fee
+                        _fee,
+                        referrer,
+                        _tokenRoots()[spentTokenIndex],
+                        _tokenRoots()[receiveTokenIndex]
                     );
 
                     // Check reserves, fees and expected amount
@@ -1272,11 +1327,14 @@ contract DexPair is DexPairBase, INextExchangeData {
                             r.step_2_spent,
                             step2BeneficiaryFee,
                             step2PoolFee,
+                            step2ReferrerFee,
                             r.step_2_received,
                             _senderAddress,
                             _remainingGasTo,
                             recipient,
-                            true
+                            true,
+                            referrer,
+                            deployWalletGrams
                         );
 
                         _depositLiquidityBase(
@@ -1322,12 +1380,15 @@ contract DexPair is DexPairBase, INextExchangeData {
                     (
                         uint128 amount,
                         uint128 poolFee,
-                        uint128 beneficiaryFee
+                        uint128 beneficiaryFee,
+                        uint128 referrerFee
                     ) = Math.calculateExpectedExchange(
                         _tokensAmount,
                         _reserves()[spentTokenIndex],
                         _reserves()[receiveTokenIndex],
-                        _fee
+                        _fee,
+                        referrer,
+                        _tokenRoots()[spentTokenIndex]
                     );
 
                     uint256 denominator = 0;
@@ -1376,11 +1437,14 @@ contract DexPair is DexPairBase, INextExchangeData {
                             _tokensAmount,
                             beneficiaryFee,
                             poolFee,
+                            referrerFee,
                             amount,
                             _senderAddress,
                             _remainingGasTo,
                             recipient,
-                            false
+                            false,
+                            referrer,
+                            deployWalletGrams
                         );
 
                         // Transfer incoming token to vault
@@ -1417,6 +1481,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                                 nextPoolAmount,
                                 _senderAddress,
                                 recipient,
+                                referrer,
                                 _remainingGasTo,
                                 deployWalletGrams,
                                 nextStep.payload,

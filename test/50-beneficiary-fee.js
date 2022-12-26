@@ -185,6 +185,10 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
         options.fee.threshold[FooRoot.address] = new BigNumber(2).shiftedBy(Constants.tokens.foo.decimals).toString();
         options.fee.threshold[BarRoot.address] = new BigNumber(2).shiftedBy(Constants.tokens.bar.decimals).toString();
 
+        options.fee.referrer_threshold = {};
+        // options.fee.referrer_threshold[FooRoot.address] = new BigNumber(3).shiftedBy(Constants.tokens.foo.decimals).toString();
+        // options.fee.referrer_threshold[BarRoot.address] = new BigNumber(3).shiftedBy(Constants.tokens.bar.decimals).toString();
+
         DexAccount2 = await locklift.factory.getContract(options.account_contract_name);
         DexAccount3 = await locklift.factory.getContract(options.account_contract_name);
         migration.load(DexAccount2, 'DexAccount2');

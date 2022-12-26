@@ -253,7 +253,8 @@ describe('DexAccount interact with DexPool', async function () {
                         amount: new BigNumber(LP_REWARD).shiftedBy(Constants.LP_DECIMALS).toString(),
                         root: poolLpRoot.address},
                     _autoChange: options.auto_change,
-                    _remainingGasTo: Account2.address
+                    _remainingGasTo: Account2.address,
+                    _referrer: locklift.utils.zeroAddress
                 },
                 value: locklift.utils.convertCrystal('1.1', 'nano'),
                 keyPair: keyPairs[1]
