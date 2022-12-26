@@ -78,23 +78,14 @@ async function main() {
   });
   displayTx(tx);
 
-  if (options.vault_contract_name === 'DexVaultPrev') {
-    console.log(`DexVault: installing VaultLpTokenPending code...`);
-    tx = await account.runTarget({
-      contract: dexVault,
-      method: 'installOrUpdateLpTokenPendingCode',
-      params: {code: DexVaultLpTokenPending.code},
-      keyPair
-    });
-  } else {
-    console.log(`DexVault: installing VaultLpTokenPendingV2 code...`);
-    tx = await account.runTarget({
-      contract: dexVault,
-      method: 'installOrUpdateLpTokenPendingCode',
-      params: {code: DexVaultLpTokenPendingV2.code},
-      keyPair
-    });
-  }
+  console.log(`DexVault: installing VaultLpTokenPendingV2 code...`);
+  tx = await account.runTarget({
+    contract: dexVault,
+    method: 'installOrUpdateLpTokenPendingCode',
+    params: {code: DexVaultLpTokenPendingV2.code},
+    keyPair
+  });
+
   displayTx(tx);
 
   console.log(`DexRoot: installing vault address...`);

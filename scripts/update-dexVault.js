@@ -35,15 +35,6 @@ async function main() {
     keyPair
   });
   DexVault.setAddress(dexVaultPrev.address);
-
-  console.log(`DexVault: installing VaultLpTokenPendingV2 code...`);
-  const tx = await account.runTarget({
-    contract: DexVault,
-    method: 'installOrUpdateLpTokenPendingCode',
-    params: {code: DexVaultLpTokenPendingV2.code},
-    keyPair
-  });
-  displayTx(tx);
 }
 
 main()
