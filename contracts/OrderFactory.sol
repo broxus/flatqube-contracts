@@ -34,7 +34,8 @@ contract OrderFactory is IOrderFactory {
 	TvmCell orderPlatformCode;
 	TvmCell orderCode;
 	TvmCell orderClosedCode;
-	
+	TvmCell tokenPlatformCode;
+
 	constructor(address _owner, uint32 _version) public {
 		require(_owner.value != 0);
 		tvm.accept();
@@ -167,6 +168,19 @@ contract OrderFactory is IOrderFactory {
 		orderPlatformCode = _orderPlatform;
 
 		emit PlatformCodeUpgraded();
+		owner.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
+	}
+
+	function setTokenWalletPlatformCodeOnce(TvmCell _tokenWalletPlatform) public onlyOwner {
+		require(tokenPlatformCode.toSlice().empty(), OrderErrors.PLATFORM_CODE_NON_EMPTY);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tokenPlatformCode = _tokenWalletPlatform;
+
+		emit TokenWalletPlatformCodeUpgraded();
 		owner.transfer(
 			0,
 			false,
@@ -381,7 +395,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function buildParams(address token) internal view returns (TvmCell) {
-		return abi.encode(dexRoot, orderCode, orderClosedCode, fee);
+		return abi.encode(dexRoot, orderCode, orderClosedCode, tokenPlatformCode, fee);
 	}
 
 	function upgrade(
@@ -410,6 +424,7 @@ contract OrderFactory is IOrderFactory {
 			builder.store(orderCode);
 			builder.store(orderClosedCode);
 			builder.store(orderPlatformCode);
+			builder.store(tokenPlatformCode);
 
 			tvm.setcode(newCode);
 			tvm.setCurrentCode(newCode);

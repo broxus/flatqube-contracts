@@ -18,6 +18,7 @@ import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenRoot.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/ITokenWallet.sol";
 import "ton-eth-bridge-token-contracts/contracts/interfaces/IAcceptTokensTransferCallback.sol";
+import "ton-eth-bridge-token-contracts/contracts/TokenWalletPlatform.sol";
 
 contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     address factory;
@@ -26,6 +27,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     uint32 version;
     TvmCell orderCode;
     TvmCell orderClosedCode;
+    TvmCell tokenPlatformCode;
 
     address spentTokenWallet;
     address deployer;
@@ -93,6 +95,20 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } factory;
     }
 
+    function getTokenWallet(
+        address token,
+        address tokenReceiver
+    ) internal view returns (address) {
+        return
+        address(tvm.hash(
+            tvm.buildStateInit({
+                contr: TokenWalletPlatform,
+                varInit: { root: token, owner: tokenReceiver },
+                code: tokenPlatformCode
+        })
+        ));
+    }
+
     function setFeeParams(OrderFeeParams params) override external onlyFactory {
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
         fee = params;
@@ -117,19 +133,31 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     }
 
     function withdrawFee(uint128 amount, address recipient, address tokenRoot, address rm_gas_to) override external onlyFactory {
-        require(msg.value >= OrderGas.WITHDRAW_FEE_VALUE,
-            OrderErrors.VALUE_TOO_LOW);
+        require(msg.value >= OrderGas.WITHDRAW_FEE_VALUE, OrderErrors.VALUE_TOO_LOW);
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-        withdrawalFeeParams[tokenRoot] = OrderWithdrawalFeeParams(0, recipient, amount, rm_gas_to);
-        ITokenRoot(tokenRoot).walletOf{
+        //withdrawalFeeParams[tokenRoot] = OrderWithdrawalFeeParams(0, recipient, amount, rm_gas_to);
+//        ITokenRoot(tokenRoot).walletOf{
+//            value: OrderGas.WITHDRAW_FEE_VALUE,
+//            flag: MsgFlag.SENDER_PAYS_FEES,
+//            callback: OrderRoot.onBeneficiaryWallet
+//        }(beneficiary);
+
+        address walletBeneficiary = getTokenWallet(tokenRoot, recipient);
+        ITokenWallet(walletBeneficiary).transfer{
             value: OrderGas.WITHDRAW_FEE_VALUE,
             flag: MsgFlag.SENDER_PAYS_FEES,
-            callback: OrderRoot.onBeneficiaryWallet
-        }(beneficiary);
-
+            bounce: false
+        }(
+            amount,
+            recipient,
+            0,
+            rm_gas_to,
+            false,
+            empty
+        );
     }
 
-    function onBeneficiaryWallet(address wallet) external {
+    /*function onBeneficiaryWallet(address wallet) external {
         require(withdrawalFeeParams.exists(msg.sender), OrderErrors.WRONG_WITHDRAW_TOKEN_ROOT);
         OrderWithdrawalFeeParams params = withdrawalFeeParams[msg.sender];
 
@@ -146,7 +174,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             empty
         );
         delete withdrawalFeeParams[msg.sender];
-    }
+    }*/
 
     function buildPayload(
         uint64 callbackId,
@@ -343,6 +371,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             builder.store(version);
             builder.store(orderCode);
             builder.store(orderClosedCode);
+            builder.store(tokenPlatformCode);
 
             TvmBuilder builder1;
             builder1.store(spentTokenWallet);
@@ -400,6 +429,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         dexRoot = dataSl.decode(address);
         orderCode = dataSl.loadRef();
         orderClosedCode = dataSl.loadRef();
+        tokenPlatformCode = dataSl.loadRef();
         (uint128 numerator_, uint128 denominator_) = dataSl.decode(uint128, uint128);
         fee = OrderFeeParams(numerator_, denominator_);
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);

@@ -18,6 +18,7 @@ interface IOrderFactory is IOrderFeeParams {
     event OrderCodeUpgraded(uint32 oldVersion, uint32 newVersion);
     event OrderClosedCodeUpgraded(uint32 oldVersion, uint32 newVersion);
     event PlatformCodeUpgraded();
+    event TokenWalletPlatformCodeUpgraded();
     event CreateOrderRoot(
         address order,
         address token
