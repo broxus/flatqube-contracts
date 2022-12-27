@@ -1,4 +1,6 @@
-.version sol 0.62.0
+.version sol 0.57.1
+
+.pragma selector-save-my-code
 
 .macro constructor
 DROP
@@ -23,26 +25,46 @@ PUSHCONT {
 }
 IFELSE
 LDMSGADDR
+LDREF
 ENDS
-.loc ../contracts/OrderPlatform.tsol, 22
-GETGLOB 9
-PARSEMSGADDR
-INDEX 3
-PLDU 256
-NEQINT 0
+CTOS
+LDMSGADDR
+ENDS
+.loc ../contracts/TokenWalletPlatform.sol, 13
 GETGLOB 9
 GETGLOB 10
 SDEQ
-AND
+DUP
 PUSHCONT {
-	.loc ../contracts/OrderPlatform.tsol, 23
-	BLKPUSH 3, 2
+	DROP
+	OVER
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+	DUP
+	PUSHCONT {
+		DROP
+		OVER
+		CALLREF {
+			CALL $_getExpectedAddress_internal_macro$
+		}
+		GETGLOB 9
+		SDEQ
+	}
+	IF
+}
+IFNOT
+PUSHCONT {
+	.loc ../contracts/TokenWalletPlatform.sol, 14
+	OVER2
+	PUSH S2
 	CALLREF {
-		CALL $initialize_041df5ea_internal_macro$
+		CALL $initialize_internal_macro$
 	}
 }
 PUSHCONT {
-	.loc ../contracts/OrderPlatform.tsol, 25
+	.loc ../contracts/TokenWalletPlatform.sol, 16
 	DUP
 	NEWC
 	STSLICECONST x42_
@@ -50,46 +72,117 @@ PUSHCONT {
 	PUSHINT 111
 	STZEROES
 	ENDC
-	PUSHPOW2 7
+	PUSHINT 128
 	ADDCONST 32
 	UFITS 8
 	SENDRAWMSG
 }
 IFELSE
-.loc ../contracts/OrderPlatform.tsol, 0
-BLKDROP 3
+.loc ../contracts/TokenWalletPlatform.sol, 0
+BLKDROP 4
 CALLREF {
 	CALL $c7_to_c4$
 }
 THROW 0
 
-.globl	initialize_041df5ea_internal
-.type	initialize_041df5ea_internal, @function
-CALL $initialize_041df5ea_internal_macro$
+.globl	_getExpectedAddress_internal
+.type	_getExpectedAddress_internal, @function
+CALL $_getExpectedAddress_internal_macro$
 
-.macro initialize_041df5ea_internal_macro
-.loc ../contracts/OrderPlatform.tsol, 39
+.macro _getExpectedAddress_internal_macro
+.loc ../contracts/TokenWalletPlatform.sol, 25
+PUSHINT 0
+NEWC
+STU 256
+PUSHINT 0
+NEWDICT
+PUSHINT 64
+DICTUSETB
+GETGLOB 10
+PUSHINT 1
+ROT
+PUSHINT 64
+DICTUSET
+SWAP
+PUSHINT 2
+ROT
+PUSHINT 64
+DICTUSET
+NEWC
+STDICT
+ENDC
+GETGLOB 1
+PUSHREF {
+	DUP
+	SETGLOB 1
+	BLESS
+	JMPX
+}
+NEWC
+STSLICECONST x8adb35
+STREF
+STSLICE
+ENDC
+NEWC
+STSLICECONST x2_
+STOPTREF
+STOPTREF
+STZERO
+ENDC
+.loc ../contracts/TokenWalletPlatform.sol, 35
+HASHCU
+NEWC
+STSLICECONST x801_
+STU 256
+ENDC
+CTOS
+.loc ../contracts/TokenWalletPlatform.sol, 0
+
+.globl	initialize_internal
+.type	initialize_internal, @function
+CALL $initialize_internal_macro$
+
+.macro initialize_internal_macro
+.loc ../contracts/TokenWalletPlatform.sol, 41
 GETGLOB 10
 NEWC
 STSLICE
-.loc ../contracts/OrderPlatform.tsol, 40
+.loc ../contracts/TokenWalletPlatform.sol, 42
 GETGLOB 11
-STSLICER
-.loc ../contracts/OrderPlatform.tsol, 41
-STSLICECONST x00000000
-.loc ../contracts/OrderPlatform.tsol, 42
+SWAP
+STSLICE
+.loc ../contracts/TokenWalletPlatform.sol, 43
+PUSHINT 0
+SWAP
+STU 128
+.loc ../contracts/TokenWalletPlatform.sol, 44
+PUSHINT 0
+SWAP
+STU 32
+.loc ../contracts/TokenWalletPlatform.sol, 45
 XCHG S1, S2
 STU 32
-.loc ../contracts/OrderPlatform.tsol, 43
+.loc ../contracts/TokenWalletPlatform.sol, 46
 STSLICE
-.loc ../contracts/OrderPlatform.tsol, 44
-GETGLOB 12
+.loc ../contracts/TokenWalletPlatform.sol, 48
+GETGLOB 1
+PUSHREF {
+	DUP
+	SETGLOB 1
+	BLESS
+	JMPX
+}
+NEWC
+STSLICECONST x8adb35
+STREF
+STSLICE
+ENDC
 SWAP
 STREF
-.loc ../contracts/OrderPlatform.tsol, 46
+.loc ../contracts/TokenWalletPlatform.sol, 50
 OVER
 SETCODE
-.loc ../contracts/OrderPlatform.tsol, 47
+.loc ../contracts/TokenWalletPlatform.sol, 51
 SWAP
 CTOS
 DUP
@@ -104,17 +197,17 @@ PLDREF
 CTOS
 BLESS
 POP C3
-.loc ../contracts/OrderPlatform.tsol, 49
+.loc ../contracts/TokenWalletPlatform.sol, 53
 ENDC
 CALLREF {
 	CALL $:onCodeUpgrade$
 }
-.loc ../contracts/OrderPlatform.tsol, 0
+.loc ../contracts/TokenWalletPlatform.sol, 0
 
 .internal-alias :onCodeUpgrade, 2
 .internal :onCodeUpgrade
 DROP
-.loc ../contracts/OrderPlatform.tsol, 0
+.loc ../contracts/TokenWalletPlatform.sol, 0
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -133,9 +226,7 @@ LDREF
 ENDS
 CTOS
 LDMSGADDR
-LDREF
 ENDS
-SETGLOB 12
 SETGLOB 11
 SETGLOB 10
 SETGLOB 3
@@ -171,16 +262,6 @@ PUSHCONT {
 		}
 	}
 	IFNOT
-	PUSHINT 3
-	PUSH S3
-	PUSHINT 64
-	DICTUGETREF
-	PUSHCONT {
-		PUSHREF {
-		}
-	}
-	IFNOT
-	SETGLOB 12
 	SETGLOB 11
 	SETGLOB 10
 	PUSHINT 64
@@ -196,8 +277,6 @@ IFREFELSE {
 }
 
 .macro c7_to_c4
-GETGLOB 12
-GETGLOB 11
 GETGLOB 10
 GETGLOB 3
 GETGLOB 2
@@ -206,10 +285,9 @@ STU 256
 STU 64
 STONE
 STSLICE
-ROTREV
+GETGLOB 11
 NEWC
 STSLICE
-STREF
 STBREFR
 ENDC
 POPROOT
@@ -282,40 +360,19 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHPOW2 9
+	PUSHINT 512
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
-	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
-	SWAP
-	PUSHCONT {
-		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
-		XCHG S3
-		SWAP
-	}
-	PUSHCONT {
-		XCHG S2
-		GETGLOB 2
-	}
-	IFELSE
+	ROT
+	GETGLOB 2
 	CHKSIGNU ; msgSlice isSigned
 	THROWIFNOT 40
 }
-PUSHCONT {
-	LDU 1 ; hasPubkey msgSlice
-	SWAP
-	THROWIF 58
-}
-IFELSE
+IF
 LDU 64 ; timestamp msgSlice
 SWAP
 CALL $replay_protection_macro$
-LDU 32 ; expireAt msgSlice
-SWAP
-NOW ; msgSlice expireAt now
-GREATER ; msgSlice expireAt>now
-THROWIFNOT 57
 LDU 32 ; funcId body
 SWAP
 CALLREF {
@@ -325,7 +382,7 @@ THROW 60
 
 .macro public_function_selector
 DUP
-PUSHINT 1094808157
+PUSHINT 362821883
 EQUAL
 IFJMPREF {
 	CALL $constructor$

@@ -149,6 +149,53 @@
 			]
 		},
 		{
+			"name": "setFeeParams",
+			"inputs": [
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"params","type":"tuple"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "withdrawFee",
+			"inputs": [
+				{"name":"orderRoot","type":"address"},
+				{"name":"amount","type":"uint128"},
+				{"name":"recipient","type":"address"},
+				{"name":"tokenRoot","type":"address"},
+				{"name":"rm_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setRootFeeParams",
+			"inputs": [
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"params","type":"tuple"},
+				{"name":"root","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setOrderFeeParams",
+			"inputs": [
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"params","type":"tuple"},
+				{"name":"order","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getFeeParams",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"value0","type":"tuple"}
+			]
+		},
+		{
 			"name": "setOrderRootCode",
 			"inputs": [
 				{"name":"_orderRootCode","type":"cell"}
@@ -177,6 +224,14 @@
 			"inputs": [
 				{"name":"token","type":"address"},
 				{"name":"callbackId","type":"uint64"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onTokenWallet",
+			"inputs": [
+				{"name":"wallet","type":"address"}
 			],
 			"outputs": [
 			]
@@ -221,6 +276,14 @@
 			"inputs": [
 				{"name":"oldOwner","type":"address"},
 				{"name":"newOwner","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "OrderFeesParamsUpdated",
+			"inputs": [
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"params","type":"tuple"}
 			],
 			"outputs": [
 			]
@@ -298,6 +361,8 @@
 		{"name":"versionOrderClosed","type":"uint32"},
 		{"name":"owner","type":"address"},
 		{"name":"pendingOwner","type":"address"},
+		{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"fee","type":"tuple"},
+		{"name":"_tmp_deploying_wallets","type":"map(address,address)"},
 		{"name":"orderRootCode","type":"cell"},
 		{"name":"orderPlatformCode","type":"cell"},
 		{"name":"orderCode","type":"cell"},

@@ -20,7 +20,9 @@ const config: LockliftConfig = {
   compiler: {
     version: '0.62.0',
     externalContracts: {
-      precompiled: ['DexPlatform'],
+      precompiled: ['DexPlatform',
+          'TokenWalletPlatform'
+      ],
       'node_modules/tip3/build': [
         'TokenRootUpgradeable',
         'TokenWalletUpgradeable',

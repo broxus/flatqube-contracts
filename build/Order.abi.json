@@ -10,7 +10,35 @@
 				{"name":"_initialAmount","type":"uint128"},
 				{"name":"_backPK","type":"uint256"},
 				{"name":"_dexRoot","type":"address"},
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"_fee","type":"tuple"},
+				{"name":"_beneficiary","type":"address"},
 				{"name":"_codeClosed","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getFeeParams",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"params","type":"tuple"},
+				{"name":"beneficiary","type":"address"}
+			]
+		},
+		{
+			"name": "setFeeParams",
+			"inputs": [
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"params","type":"tuple"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setBeneficiary",
+			"inputs": [
+				{"name":"beneficiary_","type":"address"}
 			],
 			"outputs": [
 			]
@@ -206,6 +234,8 @@
 		{"name":"swapAttempt","type":"uint64"},
 		{"name":"prevState","type":"uint8"},
 		{"name":"emergencyManager","type":"uint256"},
-		{"name":"autoExchange","type":"bool"}
+		{"name":"autoExchange","type":"bool"},
+		{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"fee","type":"tuple"},
+		{"name":"beneficiary","type":"address"}
 	]
 }
