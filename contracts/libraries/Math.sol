@@ -98,7 +98,7 @@ library Math {
         uint128,
         uint128
     ) {
-        uint128 feeDMinusN = uint128(_fee.denominator - _fee.pool_numerator - _fee.beneficiary_numerator);
+        uint128 feeDMinusN = uint128(_fee.denominator - _fee.pool_numerator - _fee.beneficiary_numerator - _fee.referrer_numerator);
 
         uint128 newBPool = _bPool - _bAmount;
         uint128 newAPool = math.muldivc(_aPool, _bPool, newBPool);
@@ -111,7 +111,7 @@ library Math {
 
         uint128 aFee = math.muldivc(
             expectedAAmount,
-            _fee.pool_numerator + _fee.beneficiary_numerator,
+            _fee.pool_numerator + _fee.beneficiary_numerator + _fee.referrer_numerator,
             _fee.denominator
         );
 

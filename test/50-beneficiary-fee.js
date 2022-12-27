@@ -186,8 +186,8 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
         options.fee.threshold[BarRoot.address] = new BigNumber(2).shiftedBy(Constants.tokens.bar.decimals).toString();
 
         options.fee.referrer_threshold = {};
-        // options.fee.referrer_threshold[FooRoot.address] = new BigNumber(3).shiftedBy(Constants.tokens.foo.decimals).toString();
-        // options.fee.referrer_threshold[BarRoot.address] = new BigNumber(3).shiftedBy(Constants.tokens.bar.decimals).toString();
+        options.fee.referrer_threshold[FooRoot.address] = new BigNumber(3).shiftedBy(Constants.tokens.foo.decimals).toString();
+        options.fee.referrer_threshold[BarRoot.address] = new BigNumber(3).shiftedBy(Constants.tokens.bar.decimals).toString();
 
         DexAccount2 = await locklift.factory.getContract(options.account_contract_name);
         DexAccount3 = await locklift.factory.getContract(options.account_contract_name);
@@ -380,7 +380,7 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
                 .div(options.fee.denominator)
                 .dp(Constants.tokens.foo.decimals, BigNumber.ROUND_CEIL)
                 .times(options.fee.beneficiary_numerator)
-                .div(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator).plus(options.fee.referrer_numerator))
+                .div(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator))
                 .dp(Constants.tokens.foo.decimals, BigNumber.ROUND_FLOOR);
 
             logger.log(`Beneficiary fee: ${expectedBeneficiary.toString()}`);
@@ -496,7 +496,7 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
                 .div(options.fee.denominator)
                 .dp(Constants.tokens.bar.decimals, BigNumber.ROUND_CEIL)
                 .times(options.fee.beneficiary_numerator)
-                .div(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator).plus(options.fee.referrer_numerator))
+                .div(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator))
                 .dp(Constants.tokens.bar.decimals, BigNumber.ROUND_FLOOR);
 
             logger.log(`Beneficiary fee: ${expectedBeneficiary.toString()}`);
@@ -604,7 +604,7 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
                 .div(options.fee.denominator)
                 .dp(Constants.tokens.foo.decimals, BigNumber.ROUND_CEIL)
                 .times(options.fee.beneficiary_numerator)
-                .div(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator).plus(options.fee.referrer_numerator))
+                .div(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator))
                 .dp(Constants.tokens.foo.decimals, BigNumber.ROUND_FLOOR);
 
             logger.log(`Beneficiary fee: ${expectedBeneficiary.toString()}`);
@@ -688,11 +688,11 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
 
             let expectedBeneficiary = new BigNumber(TOKENS_TO_EXCHANGE)
                 .shiftedBy(Constants.tokens.foo.decimals)
-                .times(options.fee.pool_numerator + options.fee.beneficiary_numerator + options.fee.referrer_numerator)
+                .times(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator).plus(options.fee.referrer_numerator))
                 .div(options.fee.denominator)
                 .dp(0, BigNumber.ROUND_CEIL)
                 .times(options.fee.beneficiary_numerator)
-                .div(options.fee.pool_numerator + options.fee.beneficiary_numerator + options.fee.referrer_numerator)
+                .div(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator))
                 .dp(0, BigNumber.ROUND_FLOOR)
                 .shiftedBy(-Constants.tokens.foo.decimals);
 
@@ -761,11 +761,11 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
 
             let expectedBeneficiary = new BigNumber(TOKENS_TO_EXCHANGE)
                 .shiftedBy(Constants.tokens.bar.decimals)
-                .times(options.fee.pool_numerator + options.fee.beneficiary_numerator + options.fee.referrer_numerator)
+                .times(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator).plus(options.fee.referrer_numerator))
                 .div(options.fee.denominator)
                 .dp(0, BigNumber.ROUND_CEIL)
                 .times(options.fee.beneficiary_numerator)
-                .div(options.fee.pool_numerator + options.fee.beneficiary_numerator + options.fee.referrer_numerator)
+                .div(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator))
                 .dp(0, BigNumber.ROUND_FLOOR)
                 .shiftedBy(-Constants.tokens.bar.decimals);
 
@@ -886,11 +886,11 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
 
             let expectedBeneficiary = new BigNumber(TOKENS_TO_EXCHANGE)
                 .shiftedBy(Constants.tokens.bar.decimals)
-                .times(options.fee.pool_numerator + options.fee.beneficiary_numerator + options.fee.referrer_numerator)
+                .times(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator).plus(options.fee.referrer_numerator))
                 .div(options.fee.denominator)
                 .dp(0, BigNumber.ROUND_CEIL)
                 .times(options.fee.beneficiary_numerator)
-                .div(options.fee.pool_numerator + options.fee.beneficiary_numerator + options.fee.referrer_numerator)
+                .div(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator))
                 .dp(0, BigNumber.ROUND_FLOOR)
                 .shiftedBy(-Constants.tokens.bar.decimals);
 
@@ -1001,11 +1001,11 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
             await migration.logGas();
 
             let expectedBeneficiary = new BigNumber(expected.expected_amount)
-                .times(options.fee.pool_numerator + options.fee.beneficiary_numerator + options.fee.referrer_numerator)
+                .times(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator).plus(options.fee.referrer_numerator))
                 .div(options.fee.denominator)
                 .dp(0, BigNumber.ROUND_CEIL)
                 .times(options.fee.beneficiary_numerator)
-                .div(options.fee.pool_numerator + options.fee.beneficiary_numerator + options.fee.referrer_numerator)
+                .div(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator))
                 .dp(0, BigNumber.ROUND_FLOOR)
                 .shiftedBy(-Constants.tokens.foo.decimals);
 
