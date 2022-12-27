@@ -1566,8 +1566,8 @@ contract DexStablePair is
             tokenIndex[type_to_root_addresses[DexAddressType.RESERVE][1]] = 1;
 
             tokenData = new PoolTokenData[](N_COINS);
-            tokenData[0] = PoolTokenData(type_to_root_addresses[DexAddressType.RESERVE][0], type_to_wallet_addresses[DexAddressType.RESERVE][0], type_to_wallet_addresses[DexAddressType.VAULT][0], type_to_reserves[DexReserveType.POOL][0], 0, 0, 0, 0, false, false);
-            tokenData[1] = PoolTokenData(type_to_root_addresses[DexAddressType.RESERVE][1], type_to_wallet_addresses[DexAddressType.RESERVE][1], type_to_wallet_addresses[DexAddressType.VAULT][1], type_to_reserves[DexReserveType.POOL][1], 0, 0, 0, 0, false, false);
+            tokenData[0] = PoolTokenData(type_to_root_addresses[DexAddressType.RESERVE][0], type_to_wallet_addresses[DexAddressType.RESERVE][0], type_to_wallet_addresses[DexAddressType.VAULT][0], type_to_reserves[DexReserveType.POOL][0], 0, type_to_reserves[DexReserveType.FEE][0], 0, 0, false, false);
+            tokenData[1] = PoolTokenData(type_to_root_addresses[DexAddressType.RESERVE][1], type_to_wallet_addresses[DexAddressType.RESERVE][1], type_to_wallet_addresses[DexAddressType.VAULT][1], type_to_reserves[DexReserveType.POOL][1], 0, type_to_reserves[DexReserveType.FEE][1], 0, 0, false, false);
 
             ITokenRoot(type_to_root_addresses[DexAddressType.RESERVE][0]).decimals{
                 value: DexGas.GET_TOKEN_DECIMALS_VALUE,
