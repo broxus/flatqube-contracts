@@ -468,7 +468,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 				} else {
 					needCancel = true;
 				}
-			} else if (state == OrderStatus.SwapInProgress) {
+			} if (state == OrderStatus.SwapInProgress) {
 				address initiator;
 				if (payloadSlice.bits() >= 8) {
 					uint8 operationStatus = payloadSlice.decode(uint8);
@@ -565,7 +565,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 			} else {
 				needCancel = true;
 			}
-		}
+
 
 		if (currentAmountReceiveToken == 0 && currentAmountSpentToken == 0) {
 			changeState(OrderStatus.Filled);
