@@ -44,15 +44,13 @@ export const accountMigration = async (
 };
 
 export const dexPairMigration = async (
-    account: Account,
-    dexRoot: Contract<FactorySource['DexRoot']>,
-    leftTokenSymbol: string,
-    leftTokenRoot: Contract<FactorySource['TokenRootUpgradeable']>,
-    rightTokenSymbol: string,
-    rightTokenRoot: Contract<FactorySource['TokenRootUpgradeable']>,
-): Promise<
-  Contract<FactorySource['DexPair']>
-> => {
+  account: Account,
+  dexRoot: Contract<FactorySource['DexRoot']>,
+  leftTokenSymbol: string,
+  leftTokenRoot: Contract<FactorySource['TokenRootUpgradeable']>,
+  rightTokenSymbol: string,
+  rightTokenRoot: Contract<FactorySource['TokenRootUpgradeable']>,
+): Promise<Contract<FactorySource['DexPair']>> => {
   // Get signer and account
   const signer = await locklift.keystore.getSigner('0');
 
@@ -61,14 +59,19 @@ export const dexPairMigration = async (
     'constructor',
     'Deploying DexPair...',
   );
-  await locklift.tracing.trace(dexRoot.methods.deployPair({
-      left_root: leftTokenRoot.address,
-      right_root: rightTokenRoot.address,
-      send_gas_to: account.address,
-  }).send({
-    amount: locklift.utils.toNano(8),
-    from: account.address
-  }), {allowedCodes: {compute: [60, 100]}});
+  await locklift.tracing.trace(
+    dexRoot.methods
+      .deployPair({
+        left_root: leftTokenRoot.address,
+        right_root: rightTokenRoot.address,
+        send_gas_to: account.address,
+      })
+      .send({
+        amount: locklift.utils.toNano(8),
+        from: account.address,
+      }),
+    { allowedCodes: { compute: [60, 100] } },
+  );
 
   logMigrationProcess(
     'dexPairMigration',
@@ -76,13 +79,18 @@ export const dexPairMigration = async (
     'getExpectedPairAddress...',
   );
 
-  const addressPair = await dexRoot.methods.getExpectedPairAddress({
+  const addressPair = await dexRoot.methods
+    .getExpectedPairAddress({
       answerId: 1,
       left_root: leftTokenRoot.address,
       right_root: rightTokenRoot.address,
-  }).call();
+    })
+    .call();
 
-  const contract = await locklift.factory.getDeployedContract("DexPair", addressPair.value0);
+  const contract = await locklift.factory.getDeployedContract(
+    'DexPair',
+    addressPair.value0,
+  );
   // Log and save address
   logMigrationSuccess(
     'dexPairMigration',
@@ -95,11 +103,9 @@ export const dexPairMigration = async (
 };
 
 export const dexAccountMigration = async (
-    account: Account,
-    dexRoot: Contract<FactorySource['DexRoot']>
-): Promise<
-  Contract<FactorySource['DexAccount']>
-> => {
+  account: Account,
+  dexRoot: Contract<FactorySource['DexRoot']>,
+): Promise<Contract<FactorySource['DexAccount']>> => {
   // Get signer and account
   const signer = await locklift.keystore.getSigner('0');
 
@@ -108,13 +114,17 @@ export const dexAccountMigration = async (
     'constructor',
     'Deploying DexAccount...',
   );
-  await locklift.tracing.trace(dexRoot.methods.deployAccount({
-      account_owner: account.address,
-      send_gas_to: account.address,
-  }).send({
-    amount: locklift.utils.toNano(5),
-    from: account.address
-  }));
+  await locklift.tracing.trace(
+    dexRoot.methods
+      .deployAccount({
+        account_owner: account.address,
+        send_gas_to: account.address,
+      })
+      .send({
+        amount: locklift.utils.toNano(5),
+        from: account.address,
+      }),
+  );
 
   logMigrationProcess(
     'dexAccountMigration',
@@ -122,12 +132,17 @@ export const dexAccountMigration = async (
     'getExpectedAccountAddress...',
   );
 
-  const addressAccount = await dexRoot.methods.getExpectedAccountAddress({
+  const addressAccount = await dexRoot.methods
+    .getExpectedAccountAddress({
       answerId: 1,
-      account_owner: account.address
-  }).call();
+      account_owner: account.address,
+    })
+    .call();
 
-  const contract = await locklift.factory.getDeployedContract("DexAccount", addressAccount.value0);
+  const contract = await locklift.factory.getDeployedContract(
+    'DexAccount',
+    addressAccount.value0,
+  );
 
   logMigrationSuccess(
     'dexAccountMigration',
@@ -140,12 +155,10 @@ export const dexAccountMigration = async (
 };
 
 export const dexVaultMigration = async (
-    account: Account,
-    dexRoot: Contract<FactorySource['DexRoot']>,
-    token_factory: Contract<FactorySource['TokenFactory']>
-): Promise<
-  Contract<FactorySource['DexVault']>
-> => {
+  account: Account,
+  dexRoot: Contract<FactorySource['DexRoot']>,
+  token_factory: Contract<FactorySource['TokenFactory']>,
+): Promise<Contract<FactorySource['DexVault']>> => {
   // Get signer and account
   const signer = await locklift.keystore.getSigner('0');
 
@@ -155,45 +168,68 @@ export const dexVaultMigration = async (
     'Deploying DexVault...',
   );
   const { contract } = await locklift.factory.deployContract({
-      contract: 'DexVault',
-      publicKey: signer.publicKey,
-      initParams: {
-        _nonce: locklift.utils.getRandomNonce()
-      },
-      constructorParams: {
-        owner_: account.address,
-        token_factory_: token_factory.address,
-        root_: dexRoot.address
-      },
-      value: locklift.utils.toNano(7),
+    contract: 'DexVault',
+    publicKey: signer.publicKey,
+    initParams: {
+      _nonce: locklift.utils.getRandomNonce(),
+    },
+    constructorParams: {
+      owner_: account.address,
+      token_factory_: token_factory.address,
+      root_: dexRoot.address,
+    },
+    value: locklift.utils.toNano(7),
+  });
+
+  const platfromArtifacts = await locklift.factory.getContractArtifacts(
+    'DexPlatform',
+  );
+
+  logMigrationProcess(
+    'dexVaultMigration',
+    'installPlatformOnce',
+    'installPlatformOnce...',
+  );
+  await contract.methods
+    .installPlatformOnce({ code: platfromArtifacts.code })
+    .send({
+      amount: locklift.utils.toNano(2),
+      from: account.address,
     });
 
-  const platfromArtifacts = await locklift.factory.getContractArtifacts("DexPlatform")
-
-  logMigrationProcess('dexVaultMigration', 'installPlatformOnce', 'installPlatformOnce...');
-  await contract.methods.installPlatformOnce({code: platfromArtifacts.code}).send({
+  logMigrationProcess(
+    'dexVaultMigration',
+    'setVaultOnce',
+    'setVaultOnce on DexRoot...',
+  );
+  await dexRoot.methods.setVaultOnce({ new_vault: contract.address }).send({
     amount: locklift.utils.toNano(2),
-    from: account.address
-  })
+    from: account.address,
+  });
 
-  logMigrationProcess('dexVaultMigration', 'setVaultOnce', 'setVaultOnce on DexRoot...');
-  await dexRoot.methods.setVaultOnce({new_vault: contract.address}).send({
+  logMigrationProcess(
+    'dexVaultMigration',
+    'setActive',
+    'setActive on DexRoot...',
+  );
+  await dexRoot.methods.setActive({ new_active: true }).send({
     amount: locklift.utils.toNano(2),
-    from: account.address
-  })
-
-  logMigrationProcess('dexVaultMigration', 'setActive', 'setActive on DexRoot...');
-  await dexRoot.methods.setActive({new_active: true}).send({
-    amount: locklift.utils.toNano(2),
-    from: account.address
-  })
-  const LpTokenPending = await locklift.factory.getContractArtifacts("DexVaultLpTokenPendingV2")
-  logMigrationProcess('dexVaultMigration', 'installOrUpdateLpTokenPendingCode', 'installOrUpdateLpTokenPendingCode...');
-  await contract.methods.installOrUpdateLpTokenPendingCode({code: LpTokenPending.code}).send({
-    amount: locklift.utils.toNano(2),
-    from: account.address
-  })
-
+    from: account.address,
+  });
+  const LpTokenPending = await locklift.factory.getContractArtifacts(
+    'DexVaultLpTokenPendingV2',
+  );
+  logMigrationProcess(
+    'dexVaultMigration',
+    'installOrUpdateLpTokenPendingCode',
+    'installOrUpdateLpTokenPendingCode...',
+  );
+  await contract.methods
+    .installOrUpdateLpTokenPendingCode({ code: LpTokenPending.code })
+    .send({
+      amount: locklift.utils.toNano(2),
+      from: account.address,
+    });
 
   logMigrationSuccess(
     'dexVaultMigration',
@@ -206,12 +242,10 @@ export const dexVaultMigration = async (
 };
 
 export const tokenFactoryMigration = async (
-    account: Account,
-): Promise<
-  Contract<FactorySource['TokenFactory']>
-> => {
+  account: Account,
+): Promise<Contract<FactorySource['TokenFactory']>> => {
   // Get signer and account
-  const signer = await locklift.keystore.getSigner('0');
+  const signer = (await locklift.keystore.getSigner('0'))!;
 
   logMigrationProcess(
     'tokenFactoryMigration',
@@ -219,34 +253,46 @@ export const tokenFactoryMigration = async (
     'Deploying TokenFactory...',
   );
   const { contract } = await locklift.factory.deployContract({
-      contract: 'TokenFactory',
-      publicKey: signer.publicKey,
-      initParams: {
-        randomNonce_: locklift.utils.getRandomNonce()
-      },
-      constructorParams: {
-        _owner: account.address,
-      },
-      value: locklift.utils.toNano(7),
-    });
+    contract: 'TokenFactory',
+    publicKey: signer.publicKey,
+    initParams: {
+      randomNonce_: locklift.utils.getRandomNonce(),
+    },
+    constructorParams: {
+      _owner: account.address,
+    },
+    value: locklift.utils.toNano(7),
+  });
 
   logMigrationProcess('TokenFactoryMigration', 'setRootCode', 'setRootCode...');
-  const rootArtifact = await locklift.factory.getContractArtifacts("TokenRootUpgradeable")
-  await contract.methods.setRootCode({
-    _rootCode: rootArtifact.code
-  }).send({
-    amount: locklift.utils.toNano(2),
-    from: account.address
-  });
+  const rootArtifact = await locklift.factory.getContractArtifacts(
+    'TokenRootUpgradeable',
+  );
+  await contract.methods
+    .setRootCode({
+      _rootCode: rootArtifact.code,
+    })
+    .send({
+      amount: locklift.utils.toNano(2),
+      from: account.address,
+    });
 
-  logMigrationProcess('TokenFactoryMigration', 'setWalletCode', 'setWalletCode...');
-  const walletArtifact = await locklift.factory.getContractArtifacts("TokenWalletUpgradeable")
-  await contract.methods.setWalletCode({
-    _walletCode: walletArtifact.code
-  }).send({
-    amount: locklift.utils.toNano(2),
-    from: account.address
-  });
+  logMigrationProcess(
+    'TokenFactoryMigration',
+    'setWalletCode',
+    'setWalletCode...',
+  );
+  const walletArtifact = await locklift.factory.getContractArtifacts(
+    'TokenWalletUpgradeable',
+  );
+  await contract.methods
+    .setWalletCode({
+      _walletCode: walletArtifact.code,
+    })
+    .send({
+      amount: locklift.utils.toNano(2),
+      from: account.address,
+    });
 
   logMigrationSuccess(
     'TokenFactoryMigration',
@@ -259,12 +305,10 @@ export const tokenFactoryMigration = async (
 };
 
 export const orderFactoryMigration = async (
-    account: Account,
-    version: number,
-    dexRoot: Contract<FactorySource['DexRoot']>
-): Promise<
-  Contract<FactorySource['OrderFactory']>
-> => {
+  account: Account,
+  version: number,
+  dexRoot: Contract<FactorySource['DexRoot']>,
+): Promise<Contract<FactorySource['OrderFactory']>> => {
   // Get signer and account
   const signer = await locklift.keystore.getSigner('0');
 
@@ -278,7 +322,7 @@ export const orderFactoryMigration = async (
     publicKey: signer.publicKey,
     initParams: {
       randomNonce: locklift.utils.getRandomNonce(),
-      dexRoot: dexRoot.address
+      dexRoot: dexRoot.address,
     },
     constructorParams: {
       _owner: account.address,
@@ -293,23 +337,35 @@ export const orderFactoryMigration = async (
     'setOrderRootCode...',
   );
 
-  const orderRootArtifacts = await locklift.factory.getContractArtifacts("OrderRoot")
+  const orderRootArtifacts = await locklift.factory.getContractArtifacts(
+    'OrderRoot',
+  );
 
-  await locklift.tracing.trace( contract.methods.setOrderRootCode({
-    _orderRootCode: orderRootArtifacts.code
-  }).send({
-    amount: locklift.utils.toNano(0.1),
-    from: account.address
-  }))
+  await locklift.tracing.trace(
+    contract.methods
+      .setOrderRootCode({
+        _orderRootCode: orderRootArtifacts.code,
+      })
+      .send({
+        amount: locklift.utils.toNano(0.1),
+        from: account.address,
+      }),
+  );
 
-  const orderPlatformArtifacts = await locklift.factory.getContractArtifacts("OrderPlatform")
+  const orderPlatformArtifacts = await locklift.factory.getContractArtifacts(
+    'OrderPlatform',
+  );
 
-  await locklift.tracing.trace( contract.methods.setPlatformCodeOnce({
-    _orderPlatform: orderPlatformArtifacts.code
-  }).send({
-    amount: locklift.utils.toNano(0.1),
-    from: account.address
-  }))
+  await locklift.tracing.trace(
+    contract.methods
+      .setPlatformCodeOnce({
+        _orderPlatform: orderPlatformArtifacts.code,
+      })
+      .send({
+        amount: locklift.utils.toNano(0.1),
+        from: account.address,
+      }),
+  );
 
   logMigrationProcess(
     'OrderFactoryMigration',
@@ -317,29 +373,39 @@ export const orderFactoryMigration = async (
     'setOrderCode...',
   );
 
-  const orderArtifacts = await locklift.factory.getContractArtifacts("Order")
+  const orderArtifacts = await locklift.factory.getContractArtifacts('Order');
 
-  await locklift.tracing.trace(contract.methods.setOrderCode({
-    _orderCode: orderArtifacts.code
-  }).send({
-    amount: locklift.utils.toNano(0.1),
-    from: account.address
-  }))
+  await locklift.tracing.trace(
+    contract.methods
+      .setOrderCode({
+        _orderCode: orderArtifacts.code,
+      })
+      .send({
+        amount: locklift.utils.toNano(0.1),
+        from: account.address,
+      }),
+  );
 
-    logMigrationProcess(
+  logMigrationProcess(
     'OrderFactoryMigration',
     'setOrderClosedCode',
     'setOrderClosedCode...',
   );
 
-  const orderClosedArtifacts = await locklift.factory.getContractArtifacts("OrderClosed")
+  const orderClosedArtifacts = await locklift.factory.getContractArtifacts(
+    'OrderClosed',
+  );
 
-  await locklift.tracing.trace(contract.methods.setOrderClosedCode({
-    _orderClosedCode: orderClosedArtifacts.code
-  }).send({
-    amount: locklift.utils.toNano(0.1),
-    from: account.address
-  }))
+  await locklift.tracing.trace(
+    contract.methods
+      .setOrderClosedCode({
+        _orderClosedCode: orderClosedArtifacts.code,
+      })
+      .send({
+        amount: locklift.utils.toNano(0.1),
+        from: account.address,
+      }),
+  );
   // Log and save address
   logMigrationSuccess(
     'OrderFactoryMigration',
@@ -352,13 +418,11 @@ export const orderFactoryMigration = async (
 };
 
 export const orderRootMigration = async (
-    account: Account,
-    orderFactory: Contract<FactorySource['OrderFactory']>,
-    token: Contract<FactorySource['TokenRootUpgradeable']>,
-    callbackId: number = 1
-): Promise<
-  Contract<FactorySource['OrderRoot']>
-> => {
+  account: Account,
+  orderFactory: Contract<FactorySource['OrderFactory']>,
+  token: Contract<FactorySource['TokenRootUpgradeable']>,
+  callbackId = 1,
+): Promise<Contract<FactorySource['OrderRoot']>> => {
   // Get signer and account
   const signer = await locklift.keystore.getSigner('0');
 
@@ -368,23 +432,23 @@ export const orderRootMigration = async (
     'Deploying OrderRoot...',
   );
 
-  await
-      orderFactory.methods.createOrderRoot(
-          {token: token.address, callbackId: callbackId}
-      ).send({
-        amount: locklift.utils.toNano(5),
-        from: account.address
-      }
-  )
+  await orderFactory.methods
+    .createOrderRoot({ token: token.address, callbackId: callbackId })
+    .send({
+      amount: locklift.utils.toNano(5),
+      from: account.address,
+    });
 
-  const orderRootAddress = await orderFactory.methods.getExpectedAddressOrderRoot({
-    answerId: 1,
-    token: token.address
-  }).call()
-  console.log(orderRootAddress.value0)
+  const orderRootAddress = await orderFactory.methods
+    .getExpectedAddressOrderRoot({
+      answerId: 1,
+      token: token.address,
+    })
+    .call();
+  console.log(orderRootAddress.value0);
   const contract = await locklift.factory.getDeployedContract(
-      'OrderRoot',
-      orderRootAddress.value0
+    'OrderRoot',
+    orderRootAddress.value0,
   );
 
   // Log and save address
@@ -478,12 +542,14 @@ export const tokenRootMigration = async (
 };
 
 export const dexRootMigration = async (
-  account: Account
+  account: Account,
 ): Promise<Contract<FactorySource['DexRoot']>> => {
   // Load signer and account
   const signer = await locklift.keystore.getSigner('0');
   const DexPair = await locklift.factory.getContractArtifacts('DexPair');
-  const DexPlatform = await locklift.factory.getContractArtifacts('DexPlatform');
+  const DexPlatform = await locklift.factory.getContractArtifacts(
+    'DexPlatform',
+  );
   const DexAccount = await locklift.factory.getContractArtifacts('DexAccount');
 
   logMigrationProcess('DexRoot', 'constructor', 'Deploying DexRoot...');
@@ -500,38 +566,60 @@ export const dexRootMigration = async (
     },
     value: locklift.utils.toNano(7),
   });
-  logMigrationProcess('DexRoot', 'installPlatformOnce', 'installPlatformOnce...');
-  await contract.methods.installPlatformOnce({
-    code: DexPlatform.code
-  }).send({
-    amount: locklift.utils.toNano(2),
-    from: account.address
-  });
+  logMigrationProcess(
+    'DexRoot',
+    'installPlatformOnce',
+    'installPlatformOnce...',
+  );
+  await contract.methods
+    .installPlatformOnce({
+      code: DexPlatform.code,
+    })
+    .send({
+      amount: locklift.utils.toNano(2),
+      from: account.address,
+    });
 
-  logMigrationProcess('DexRoot', 'installOrUpdateAccountCode', 'installOrUpdateAccountCode...');
-  await contract.methods.installOrUpdateAccountCode({
-    code: DexAccount.code
-  }).send({
-    amount: locklift.utils.toNano(2),
-    from: account.address
-  });
+  logMigrationProcess(
+    'DexRoot',
+    'installOrUpdateAccountCode',
+    'installOrUpdateAccountCode...',
+  );
+  await contract.methods
+    .installOrUpdateAccountCode({
+      code: DexAccount.code,
+    })
+    .send({
+      amount: locklift.utils.toNano(2),
+      from: account.address,
+    });
 
-  logMigrationProcess('DexRoot', 'installOrUpdatePairCode', 'installOrUpdatePairCode...');
-  await contract.methods.installOrUpdatePairCode({
-    code: DexPair.code,
-    pool_type: 1,
-  }).send({
-    amount: locklift.utils.toNano(2),
-    from: account.address
-  });
+  logMigrationProcess(
+    'DexRoot',
+    'installOrUpdatePairCode',
+    'installOrUpdatePairCode...',
+  );
+  await contract.methods
+    .installOrUpdatePairCode({
+      code: DexPair.code,
+      pool_type: 1,
+    })
+    .send({
+      amount: locklift.utils.toNano(2),
+      from: account.address,
+    });
 
   logMigrationProcess('DexRoot', 'setActive', 'setActive...');
-  await locklift.tracing.trace(contract.methods.setActive({
-    new_active: true
-  }).send({
-    amount: locklift.utils.toNano(2),
-    from: account.address
-  }));
+  await locklift.tracing.trace(
+    contract.methods
+      .setActive({
+        new_active: true,
+      })
+      .send({
+        amount: locklift.utils.toNano(2),
+        from: account.address,
+      }),
+  );
   // Log and save address
   logMigrationSuccess(
     'DexRoot',
