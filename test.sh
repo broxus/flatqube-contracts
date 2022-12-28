@@ -12,6 +12,7 @@ npx locklift run $NO_TRACE --script scripts/2-deploy-test-tokens.js --tokens='["
 npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"account":2,"amount":2000000,"token":"foo"},{"account":2,"amount":2000000,"token":"bar"},{"account":2,"amount":1000000,"token":"qwe"},{"account":2,"amount":1000000,"token":"tst"},{"account":3,"amount":2000000,"token":"foo"},{"account":3,"amount":2000000,"token":"bar"},{"account":3,"amount":1000000,"token":"qwe"}]'
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=3
+npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=4
 
 npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["foo", "bar"]]' --contract_name='DexPairPrev'
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPair' --pool_type=1

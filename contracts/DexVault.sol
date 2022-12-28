@@ -11,6 +11,7 @@ import "tip3/contracts/interfaces/IBurnableTokenWallet.sol";
 import "tip3/contracts/interfaces/IAcceptTokensMintCallback.sol";
 
 import "./abstract/DexContractBase.sol";
+import "./abstract/Constants.sol";
 
 import "./DexVaultLpTokenPendingV2.sol";
 import "./interfaces/IDexVault.sol";
@@ -34,7 +35,8 @@ contract DexVault is
     IResetGas,
     IUpgradable,
     IAcceptTokensMintCallback,
-    INextExchangeData
+    INextExchangeData,
+    Constants
 {
     uint32 private static _nonce;
 
@@ -47,9 +49,6 @@ contract DexVault is
     address private _tokenFactory;
 
     mapping(address => bool) private _lpVaultWallets;
-
-    uint256 constant PROJECT_ID = 22222;
-    address constant PROJECT_ADDRESS = address(0);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, DexErrors.NOT_MY_OWNER);
@@ -739,7 +738,7 @@ contract DexVault is
             .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (
                 _amount,
-                _referral, // TODO replace with PROJECT_ADDRESS
+                PROJECT_ADDRESS,
                 _deployWalletGrams,
                 _referral,
                 true,
