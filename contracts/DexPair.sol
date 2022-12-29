@@ -895,7 +895,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         _sync();
 
         IExchangeResult.ExchangeResult result =  IExchangeResult.ExchangeResult(
-            true,
+            spentTokenIndex == 0 && receiveTokenIndex == 1,
             _spentAmount,
             _poolFee + _beneficiaryFee,
             _amount

@@ -4381,8 +4381,7 @@ PUSHINT 32
 DICTUSETREF
 PAIR
 .loc ../contracts/DexPair.sol, 879
-PUSH S8
-ROLL 14
+PUSH2 S8, S13
 CALLREF {
 	CALL $_tokenRoots_475f7f72_internal_macro$
 }
@@ -4390,7 +4389,8 @@ SECOND
 PUSHINT 32
 DICTUGET
 THROWIFNOT 50
-PUSH2 S14, S15
+PUSH S14
+PUSH S17
 CALLREF {
 	CALL $_tokenRoots_475f7f72_internal_macro$
 }
@@ -4433,7 +4433,7 @@ PUSHINT 0
 SENDRAWMSG
 .loc ../contracts/DexPair.sol, 888
 ROLL 8
-ROLL 12
+PUSH S13
 CALLREF {
 	CALL $_tokenRoots_475f7f72_internal_macro$
 }
@@ -4499,7 +4499,11 @@ CALLREF {
 	CALL $_sync_ee5e2717_internal_macro$
 }
 .loc ../contracts/DexPair.sol, 897
-TRUE
+ROLL 8
+EQINT 0
+ROLL 8
+EQINT 1
+AND
 BLKSWAP 3, 5
 ADD
 UFITS 128
@@ -5707,7 +5711,7 @@ PUSHCONT {
 	.loc ../contracts/DexPair.sol, 1191
 	PUSHINT 2
 	PUSHREF
-	.compute $new_array_line_1190_column_30_ast_id_2971$
+	.compute $new_array_line_1190_column_30_ast_id_2977$
 	PAIR
 	POP S4
 	.loc ../contracts/DexPair.sol, 0
@@ -12078,7 +12082,7 @@ PUSHCONT {
 			.loc ../contracts/abstract/DexPairBase.sol, 706
 			PUSHINT 2
 			PUSHREF
-			.compute $new_array_line_705_column_56_ast_id_6297$
+			.compute $new_array_line_705_column_56_ast_id_6303$
 			PAIR
 			.loc ../contracts/abstract/DexPairBase.sol, 708
 			TRUE
@@ -12815,7 +12819,7 @@ PUSHCONT {
 				.loc ../contracts/abstract/DexPairBase.sol, 752
 				PUSHINT 2
 				PUSHREF
-				.compute $new_array_line_751_column_56_ast_id_6494$
+				.compute $new_array_line_751_column_56_ast_id_6500$
 				PAIR
 				.loc ../contracts/abstract/DexPairBase.sol, 754
 				TRUE
@@ -20201,7 +20205,7 @@ CALL $FixedPoint128_no_obj_div_39f92878_macro$
 DIV
 .loc ../contracts/libraries/FixedPoint128.sol, 0
 
-.macro new_array_line_1190_column_30_ast_id_2971
+.macro new_array_line_1190_column_30_ast_id_2977
 PUSHINT 0
 NEWC
 STU 128
@@ -20219,7 +20223,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_705_column_56_ast_id_6297
+.macro new_array_line_705_column_56_ast_id_6303
 PUSHREF
 .compute $default_tuple_builder_t_address_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool$
 PUSHINT 0
@@ -20236,7 +20240,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_751_column_56_ast_id_6494
+.macro new_array_line_751_column_56_ast_id_6500
 PUSHREF
 .compute $default_tuple_builder_t_address_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool$
 PUSHINT 0
