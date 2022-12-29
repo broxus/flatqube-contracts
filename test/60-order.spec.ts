@@ -71,6 +71,10 @@ describe('OrderTest', () => {
     let barWallet6: Contract<FactorySource['TokenWalletUpgradeable']>;
     let tstWallet6: Contract<FactorySource['TokenWalletUpgradeable']>;
 
+    let account7: Account;
+    let account8: Account;
+
+
     let tokenFactory: Contract<FactorySource['TokenFactory']>;
     let dexVault: Contract<FactorySource['DexVault']>;
     let dexAccount: Contract<FactorySource['DexAccount']>;
@@ -87,6 +91,8 @@ describe('OrderTest', () => {
         account4 = await accountMigration('10000', "Account4", "4");
         account5 = await accountMigration('10000', "Account5", "5");
         account6 = await accountMigration('10000', "Account6", "6");
+        account7 = await accountMigration('10000', "Account7", "7");
+        account8 = await accountMigration('10000', "Account8", "8");
 
         tokenFactory = await tokenFactoryMigration(account1);
 
@@ -373,6 +379,7 @@ describe('OrderTest', () => {
 
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
+            // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
             Order = await locklift.factory.getDeployedContract("Order", orderAddress)
@@ -415,18 +422,24 @@ describe('OrderTest', () => {
             const balanceBarAcc5End = await accountTokenBalances(barWallet5, Constants.tokens.bar.decimals);
             await displayLog(balanceBarAcc5End, balanceTstAcc5End, false, "Account5");
 
-            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE1)).toString();
-            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE2)).toString();
-            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).toString();
-            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
-            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).toString();
-            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toString();
+            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE1)).toString();
+            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE2)).toString();
+            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).toString();
+            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
+            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).toString();
+            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toString();
 
+            // @ts-ignore
             expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
+            // @ts-ignore
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
+            // @ts-ignore
             expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
+            // @ts-ignore
             expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
+            // @ts-ignore
             expect(expectedAccount5Bar).to.equal(balanceBarAcc5End.token.toString(), 'Wrong Account5 Bar balance');
+            // @ts-ignore
             expect(expectedAccount5Tst).to.equal(balanceTstAcc5End.token.toString(), 'Wrong Account5 Tst balance');
         });
         it('Check partial execution Order, case 2.2', async () => {
@@ -488,6 +501,7 @@ describe('OrderTest', () => {
                 amount: locklift.utils.toNano(5), from: account3.address
             })
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
             Order = await locklift.factory.getDeployedContract("Order", orderAddress)
@@ -555,18 +569,24 @@ describe('OrderTest', () => {
             const balanceTstAcc6End = await accountTokenBalances(tstWallet6, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc6End, balanceTstAcc6End, false, "Account6");
 
-            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).toString();
-            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
-            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).toString();
-            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toString();
-            const expectedAccount6Bar = new BigNumber(balanceBarAcc6Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE1_ACC5)).toString();
-            const expectedAccount6Tst = new BigNumber(balanceTstAcc6Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE2_ACC5)).toString();
+            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).toString();
+            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
+            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).toString();
+            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toString();
+            const expectedAccount6Bar = new BigNumber(balanceBarAcc6Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC5)).toString();
+            const expectedAccount6Tst = new BigNumber(balanceTstAcc6Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC5)).toString();
 
+            // @ts-ignore
             expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
+            // @ts-ignore
             expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
+            // @ts-ignore
             expect(expectedAccount5Bar).to.equal(balanceBarAcc5End.token.toString(), 'Wrong Account5 Bar balance');
+            // @ts-ignore
             expect(expectedAccount5Tst).to.equal(balanceTstAcc5End.token.toString(), 'Wrong Account5 Tst balance');
+            // @ts-ignore
             expect(expectedAccount6Bar).to.equal(balanceBarAcc6End.token.toString(), 'Wrong Account6 Bar balance');
+            // @ts-ignore
             expect(expectedAccount6Tst).to.equal(balanceTstAcc6End.token.toString(), 'Wrong Account6 Tst balance');
         });
         it('Check partial execution Order, case 2.3', async () => {
@@ -628,6 +648,7 @@ describe('OrderTest', () => {
                 amount: locklift.utils.toNano(5), from: account3.address
             })
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
             Order = await locklift.factory.getDeployedContract("Order", orderAddress)
@@ -684,22 +705,30 @@ describe('OrderTest', () => {
             const balanceTstAcc6End = await accountTokenBalances(tstWallet6, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc6End, balanceTstAcc6End, false, "Account6");
 
-            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE1)).toString();
-            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE2)).toString();
-            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).toString();
-            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
-            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).toString();
-            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toString();
-            const expectedAccount6Bar = new BigNumber(balanceBarAcc6Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE1_ACC5 - 5)).toString();
-            const expectedAccount6Tst = new BigNumber(balanceTstAcc6Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE2_ACC5 - 10)).toString();
+            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE1)).toString();
+            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE2)).toString();
+            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).toString();
+            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
+            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).toString();
+            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toString();
+            const expectedAccount6Bar = new BigNumber(balanceBarAcc6Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC5 - 5)).toString();
+            const expectedAccount6Tst = new BigNumber(balanceTstAcc6Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC5 - 10)).toString();
 
+            // @ts-ignore
             expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
+            // @ts-ignore
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
+            // @ts-ignore
             expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
+            // @ts-ignore
             expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
+            // @ts-ignore
             expect(expectedAccount5Bar).to.equal(balanceBarAcc5End.token.toString(), 'Wrong Account5 Bar balance');
+            // @ts-ignore
             expect(expectedAccount5Tst).to.equal(balanceTstAcc5End.token.toString(), 'Wrong Account5 Tst balance');
+            // @ts-ignore
             expect(expectedAccount6Bar).to.equal(balanceBarAcc6End.token.toString(), 'Wrong Account6 Bar balance');
+            // @ts-ignore
             expect(expectedAccount6Tst).to.equal(balanceTstAcc6End.token.toString(), 'Wrong Account6 Tst balance');
         });
         it('Check create order and closed, case 3.1', async () => {
@@ -742,6 +771,7 @@ describe('OrderTest', () => {
                 amount: locklift.utils.toNano(5), from: account3.address
             })
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
             Order = await locklift.factory.getDeployedContract("Order", orderAddress)
@@ -755,7 +785,9 @@ describe('OrderTest', () => {
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
 
+            // @ts-ignore
             expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
+            // @ts-ignore
             expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
             expect(stateL0.value0.toString()).to.equal(new BigNumber(5).toString(), 'Wrong status Limit order');
             const orderBalance = await locklift.provider.getBalance(Order.address);
@@ -806,6 +838,7 @@ describe('OrderTest', () => {
                 amount: locklift.utils.toNano(5), from: account3.address
             })
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
             Order = await locklift.factory.getDeployedContract("Order", orderAddress)
@@ -839,14 +872,18 @@ describe('OrderTest', () => {
             const balanceTstAcc4End = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc4Start, balanceTstAcc4Start, false, 'Account4');
 
-            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE1 / 2)).toString();
-            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
-            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE1 / 2)).toString();
-            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
+            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE1 / 2)).toString();
+            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
+            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1 / 2)).toString();
+            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
 
+            // @ts-ignore
             expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
+            // @ts-ignore
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
+            // @ts-ignore
             expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
+            // @ts-ignore
             expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
 
             expect(stateL0.value0.toString()).to.equal(new BigNumber(5).toString(), 'Wrong status Limit order');
@@ -897,6 +934,7 @@ describe('OrderTest', () => {
                 amount: locklift.utils.toNano(5), from: account3.address
             })
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
             pastEvents.events.forEach(event => {
@@ -933,9 +971,13 @@ describe('OrderTest', () => {
             const balanceTstAcc4End = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc4Start, balanceTstAcc4Start, false, 'Account4');
 
+            // @ts-ignore
             expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
+            // @ts-ignore
             expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
+            // @ts-ignore
             expect(balanceBarAcc4Start.token.toString()).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
+            // @ts-ignore
             expect(balanceTstAcc4Start.token.toString()).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
             expect(stateL0.value0.toString()).to.equal(new BigNumber(5).toString(), 'Wrong status Limit order');
         });
@@ -985,7 +1027,8 @@ describe('OrderTest', () => {
           amount: locklift.utils.toNano(6), from: account3.address
            })
         const pastEvents = await RootOrderBar.getPastEvents({ filter: event => event.event === "CreateOrder" });
-        const orderAddress = pastEvents.events[0].data.order
+        // @ts-ignore
+            const orderAddress = pastEvents.events[0].data.order
         console.log(`Order - ${orderAddress}`)
         Order = await locklift.factory.getDeployedContract("Order", orderAddress)
 
@@ -1006,7 +1049,8 @@ describe('OrderTest', () => {
         await displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
 
         const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus((new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals))).toString();
-        expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Bar balance');
+        // @ts-ignore
+            expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Bar balance');
 
       });
       it('Order from backend CANCEL', async () => {
@@ -1053,7 +1097,8 @@ describe('OrderTest', () => {
           amount: locklift.utils.toNano(5), from: account3.address
            })
         const pastEvents = await RootOrderBar.getPastEvents({ filter: event => event.event === "CreateOrder" });
-        const orderAddress = pastEvents.events[0].data.order
+        // @ts-ignore
+            const orderAddress = pastEvents.events[0].data.order
         console.log(`Order - ${orderAddress}`)
         Order = await locklift.factory.getDeployedContract("Order", orderAddress)
 
@@ -1075,7 +1120,8 @@ describe('OrderTest', () => {
         const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
         await displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
 
-        expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Bar balance');
+        // @ts-ignore
+            expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Bar balance');
         const stateL0 = await Order.methods.currentStatus({answerId: 1}).call()
         expect(stateL0.value0.toString()).to.equal(new BigNumber(2).toString(), 'Wrong status Limit order');
       });
@@ -1122,7 +1168,8 @@ describe('OrderTest', () => {
           amount: locklift.utils.toNano(5), from: account3.address
            })
         const pastEvents = await RootOrderBar.getPastEvents({ filter: event => event.event === "CreateOrder" });
-        const orderAddress = pastEvents.events[0].data.order
+        // @ts-ignore
+            const orderAddress = pastEvents.events[0].data.order
         console.log(`Order - ${orderAddress}`)
         Order = await locklift.factory.getDeployedContract("Order", orderAddress)
         const state = await Order.methods.currentStatus({answerId: 1}).call()
@@ -1155,16 +1202,20 @@ describe('OrderTest', () => {
         const balanceTstAcc4End = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
         await displayLog(balanceBarAcc4End, balanceTstAcc4End, false, "Account4");
 
-        const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE1)).toString();
-        const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE2)).toString();
+        const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE1)).toString();
+        const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE2)).toString();
         const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).plus((new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals)).minus(new BigNumber(TOKENS_TO_EXCHANGE2))).toString();
         expect(stateLO2.value0.toString()).to.equal(new BigNumber(3).toString(), 'Wrong status Limit order');
 
-        expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
-        expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
+        // @ts-ignore
+            expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
+        // @ts-ignore
+            expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
 
-        expect(balanceBarAcc4Start.token.toString()).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
-        expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
+        // @ts-ignore
+            expect(balanceBarAcc4Start.token.toString()).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
+        // @ts-ignore
+            expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
       });
       it('Order from user CANCEL', async () => {
           console.log(`#############################`);
@@ -1208,7 +1259,8 @@ describe('OrderTest', () => {
           amount: locklift.utils.toNano(5), from: account3.address
            })
         const pastEvents = await RootOrderBar.getPastEvents({ filter: event => event.event === "CreateOrder" });
-        const orderAddress = pastEvents.events[0].data.order
+        // @ts-ignore
+            const orderAddress = pastEvents.events[0].data.order
         console.log(`Order - ${orderAddress}`)
         Order = await locklift.factory.getDeployedContract("Order", orderAddress)
 
@@ -1239,10 +1291,12 @@ describe('OrderTest', () => {
         const balanceTstAcc4End = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
         await displayLog(balanceBarAcc4End, balanceTstAcc4End, false, "Account4");
 
-        const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE1)).toString();
+        const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE1)).toString();
 
-        expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
-        expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
+        // @ts-ignore
+            expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
+        // @ts-ignore
+            expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
         expect(stateLO2.value0.toString()).to.equal(new BigNumber(2).toString(), 'Wrong status Limit order');
       });
     });
@@ -1289,6 +1343,7 @@ describe('OrderTest', () => {
             });
 
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
             Order = await locklift.factory.getDeployedContract("Order", orderAddress)
@@ -1335,6 +1390,7 @@ describe('OrderTest', () => {
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
             displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
 
+            // @ts-ignore
             expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
         });
     });
@@ -1358,9 +1414,8 @@ describe('OrderTest', () => {
             const balanceTstAcc5Start = await accountTokenBalances(tstWallet5, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc5Start, balanceTstAcc5Start, true, "Account4");
 
-            const balanceBarFactoryStart = await accountTokenBalances(FactoryWalletBar, Constants.tokens.bar.decimals);
             const balanceTstFactoryStart = await accountTokenBalances(FactoryWalletTst, Constants.tokens.tst.decimals);
-            await displayLog(balanceBarFactoryStart, balanceTstFactoryStart, true, "Factory");
+            await displayLog(0, balanceTstFactoryStart, true, "Factory");
 
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
@@ -1414,6 +1469,7 @@ describe('OrderTest', () => {
 
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
+            // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
             Order = await locklift.factory.getDeployedContract("Order", orderAddress)
@@ -1456,32 +1512,465 @@ describe('OrderTest', () => {
             const balanceBarAcc5End = await accountTokenBalances(barWallet5, Constants.tokens.bar.decimals);
             await displayLog(balanceBarAcc5End, balanceTstAcc5End, false, "Account5");
 
-            const balanceBarFactoryEnd = await accountTokenBalances(FactoryWalletBar, Constants.tokens.bar.decimals);
             const balanceTstFactoryEnd = await accountTokenBalances(FactoryWalletTst, Constants.tokens.tst.decimals);
-            await displayLog(balanceBarFactoryEnd, balanceTstFactoryEnd, true, "Factory");
-
-            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE1)).toString();
-            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE2)).minus(BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))).toString();
-            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).minus(BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC3))).toString();
-            // @ts-ignore
-            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
-            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus(BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).minus(BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC4))).toString();
-            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus(BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toString();
-
+            await displayLog(0, balanceTstFactoryEnd, true, "Factory");
+            const fees =  new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))
+            console.log(`FEE - ${fees}`)
+            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE1)).toString();
+            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE2)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))).toString();
+            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC3))).toString();
+            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
+            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC4))).toString();
+            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toString();
+            const expectedTstFactory = new BigNumber(balanceTstFactoryStart.token || 0).plus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))).toString();
             expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
             expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
             expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
             expect(expectedAccount5Bar).to.equal(balanceBarAcc5End.token.toString(), 'Wrong Account5 Bar balance');
             expect(expectedAccount5Tst).to.equal(balanceTstAcc5End.token.toString(), 'Wrong Account5 Tst balance');
+            expect(expectedTstFactory).to.equal(balanceTstFactoryEnd.token.toString(), 'Wrong Beneficiary balance');
         });
+        it('Check fee execution, case 1.2 (Change Fee parameters)', async () => {
+            console.log(`#############################\n`);
+
+            let amount = await barWallet3.methods
+                .balance({answerId: 0})
+                .call();
+            console.log(`BALANCE _ ${amount.value0}`)
+            const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
+            const balanceTstAcc3Start = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc3Start, balanceTstAcc3Start, true, "Account3");
+
+            const balanceBarAcc4Start = await accountTokenBalances(barWallet4, Constants.tokens.bar.decimals);
+            const balanceTstAcc4Start = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc4Start, balanceTstAcc4Start, true, "Account4");
+
+            const balanceBarAcc5Start = await accountTokenBalances(barWallet5, Constants.tokens.bar.decimals);
+            const balanceTstAcc5Start = await accountTokenBalances(tstWallet5, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc5Start, balanceTstAcc5Start, true, "Account4");
+
+            const balanceTstFactoryStart = await accountTokenBalances(FactoryWalletTst, Constants.tokens.tst.decimals);
+            await displayLog(0, balanceTstFactoryStart, true, "Factory");
+
+            TOKENS_TO_EXCHANGE1 = 10;
+            TOKENS_TO_EXCHANGE2 = 20;
+
+            TOKENS_TO_EXCHANGE1_ACC3 = 5;
+            TOKENS_TO_EXCHANGE1_ACC4 = 5;
+
+            TOKENS_TO_EXCHANGE2_ACC3 = 10;
+            TOKENS_TO_EXCHANGE2_ACC4 = 10;
+
+            NUMERATOR = 15;
+            DENOMINATOR = 90;
+
+            await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({root: RootOrderBar.address, params: {numerator: NUMERATOR, denominator: DENOMINATOR}})
+                .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
+
+            const feeParams = await RootOrderBar.methods.getFeeParams({answerId: 1}).call()
+            expect(feeParams.params.numerator).to.equal(NUMERATOR.toString(), 'Wrong NUMERATOR');
+            expect(feeParams.params.denominator).to.equal(DENOMINATOR.toString(), 'Wrong DENOMINATOR');
+
+            const params = {
+                callbackId: 0,
+                tokenReceive: rootTokenReceive.address,
+                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                deployWalletValue: locklift.utils.toNano(0.1),
+                backPK: 0
+            }
+            console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.methods.buildPayload(params).call();
+            console.log(`Result payload = ${payload.value0}`);
+
+            console.log(`BarWallet3(${barWallet3.address}).transfer()
+                amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
+                recipient: ${RootOrderBar.address},
+                deployWalletValue: ${locklift.utils.toNano(0.1)},
+                remainingGasTo: ${account3.address},
+                notify: ${true},
+                payload: ${JSON.stringify(params)}
+            )`);
+
+            await locklift.tracing.trace(barWallet3.methods.transfer({
+                amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                recipient: RootOrderBar.address,
+                deployWalletValue: locklift.utils.toNano(0.1),
+                remainingGasTo: account3.address,
+                notify: true,
+                payload: payload.value0
+            }).send({
+                amount: locklift.utils.toNano(5), from: account3.address
+            }), {allowedCodes: {compute: [60]}})
+
+            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            // @ts-ignore
+            // @ts-ignore
+            const orderAddress = pastEvents.events[0].data.order
+            console.log(`Order - ${orderAddress}`)
+            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
+            const payloadLO = await Order.methods.buildPayload({
+                callbackId: 1,
+                deployWalletValue: locklift.utils.toNano(0.1),
+            }).call();
+
+            await locklift.tracing.trace(tstWallet4.methods.transfer({
+                amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                recipient: Order.address,
+                deployWalletValue: locklift.utils.toNano(0.1),
+                remainingGasTo: account4.address,
+                notify: true,
+                payload: payloadLO.value0
+            }).send({
+                amount: locklift.utils.toNano(6), from: account4.address
+            }), {allowedCodes: {compute: [60]}})
+
+            await locklift.tracing.trace(tstWallet5.methods.transfer({
+                amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC4).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                recipient: Order.address,
+                deployWalletValue: locklift.utils.toNano(0.1),
+                remainingGasTo: account5.address,
+                notify: true,
+                payload: payloadLO.value0
+            }).send({
+                amount: locklift.utils.toNano(6), from: account5.address
+            }), {allowedCodes: {compute: [60]}})
+
+            const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
+            const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
+
+            const balanceBarAcc4End = await accountTokenBalances(barWallet4, Constants.tokens.bar.decimals);
+            const balanceTstAcc4End = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc4End, balanceTstAcc4End, false, "Account4");
+
+            const balanceTstAcc5End = await accountTokenBalances(tstWallet5, Constants.tokens.tst.decimals);
+            const balanceBarAcc5End = await accountTokenBalances(barWallet5, Constants.tokens.bar.decimals);
+            await displayLog(balanceBarAcc5End, balanceTstAcc5End, false, "Account5");
+
+            const balanceTstFactoryEnd = await accountTokenBalances(FactoryWalletTst, Constants.tokens.tst.decimals);
+            await displayLog(0, balanceTstFactoryEnd, false, "Factory");
+            const fees =  new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))
+            console.log(`FEE - ${fees}`)
+            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE1)).toFixed(9)
+            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE2)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))).toFixed(9)
+            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC3))).toFixed(9)
+            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toFixed(9)
+            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC4))).toFixed(9)
+            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toFixed(9)
+            const expectedTstFactory = new BigNumber(balanceTstFactoryStart.token || 0).plus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))).toFixed(9)
+            expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toFixed(9), 'Wrong Account3 Bar balance');
+            expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toFixed(9), 'Wrong Account3 Tst balance');
+            expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toFixed(9), 'Wrong Account4 Bar balance');
+            expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toFixed(9), 'Wrong Account4 Tst balance');
+            expect(expectedAccount5Bar).to.equal(balanceBarAcc5End.token.toFixed(9), 'Wrong Account5 Bar balance');
+            expect(expectedAccount5Tst).to.equal(balanceTstAcc5End.token.toFixed(9), 'Wrong Account5 Tst balance');
+            expect(expectedTstFactory).to.equal(balanceTstFactoryEnd.token.toFixed(9), 'Wrong Beneficiary balance');
+        });
+        it('Check fee execution, case 1.3 (Set beneficiary)', async () => {
+            console.log(`#############################\n`);
+
+            let amount = await barWallet3.methods
+                .balance({answerId: 0})
+                .call();
+            console.log(`BALANCE _ ${amount.value0}`)
+            const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
+            const balanceTstAcc3Start = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc3Start, balanceTstAcc3Start, true, "Account3");
+
+            const balanceBarAcc4Start = await accountTokenBalances(barWallet4, Constants.tokens.bar.decimals);
+            const balanceTstAcc4Start = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc4Start, balanceTstAcc4Start, true, "Account4");
+
+            const balanceBarAcc5Start = await accountTokenBalances(barWallet5, Constants.tokens.bar.decimals);
+            const balanceTstAcc5Start = await accountTokenBalances(tstWallet5, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc5Start, balanceTstAcc5Start, true, "Account4");
+
+            const newBeneficiary = account7
+
+            const balanceTstFactoryStart = {token: new BigNumber(0)};
+            await displayLog(0, 0, true, "Factory");
+
+            TOKENS_TO_EXCHANGE1 = 10;
+            TOKENS_TO_EXCHANGE2 = 20;
+
+            TOKENS_TO_EXCHANGE1_ACC3 = 5;
+            TOKENS_TO_EXCHANGE1_ACC4 = 5;
+
+            TOKENS_TO_EXCHANGE2_ACC3 = 10;
+            TOKENS_TO_EXCHANGE2_ACC4 = 10;
+
+            NUMERATOR = 1;
+            DENOMINATOR = 100;
+
+            await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({root: RootOrderBar.address, params: {numerator: NUMERATOR, denominator: DENOMINATOR}})
+                .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
+
+            const feeParams = await RootOrderBar.methods.getFeeParams({answerId: 1}).call()
+            expect(feeParams.params.numerator).to.equal(NUMERATOR.toString(), 'Wrong NUMERATOR');
+            expect(feeParams.params.denominator).to.equal(DENOMINATOR.toString(), 'Wrong DENOMINATOR');
+
+
+            await locklift.tracing.trace(factoryOrder.methods.setRootBeneficiary({beneficiary_: newBeneficiary.address, root: RootOrderBar.address}).send({from: account1.address, amount: locklift.utils.toNano(0.2)}))
+            const params = {
+                callbackId: 0,
+                tokenReceive: rootTokenReceive.address,
+                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                deployWalletValue: locklift.utils.toNano(0.1),
+                backPK: 0
+            }
+            console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.methods.buildPayload(params).call();
+            console.log(`Result payload = ${payload.value0}`);
+
+            console.log(`BarWallet3(${barWallet3.address}).transfer()
+                amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
+                recipient: ${RootOrderBar.address},
+                deployWalletValue: ${locklift.utils.toNano(0.1)},
+                remainingGasTo: ${account3.address},
+                notify: ${true},
+                payload: ${JSON.stringify(params)}
+            )`);
+            const newBeneficiaryAddress = (await rootTokenReceive.methods.walletOf({walletOwner: newBeneficiary.address, answerId: 0}).call()).value0
+            const newBeneficiaryWalletTst = await locklift.factory.getDeployedContract("TokenWalletUpgradeable", newBeneficiaryAddress)
+            await locklift.tracing.trace(barWallet3.methods.transfer({
+                amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                recipient: RootOrderBar.address,
+                deployWalletValue: locklift.utils.toNano(0.1),
+                remainingGasTo: account3.address,
+                notify: true,
+                payload: payload.value0
+            }).send({
+                amount: locklift.utils.toNano(5), from: account3.address
+            }), {allowedCodes: {compute: [60]}})
+            await sleep(1000);
+            const balance = await newBeneficiaryWalletTst.methods.balance({answerId: 1}).call()
+
+            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            // @ts-ignore
+            // @ts-ignore
+            const orderAddress = pastEvents.events[0].data.order
+            console.log(`Order - ${orderAddress}`)
+            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
+            const payloadLO = await Order.methods.buildPayload({
+                callbackId: 1,
+                deployWalletValue: locklift.utils.toNano(0.1),
+            }).call();
+
+            await tstWallet4.methods.transfer({
+                amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                recipient: Order.address,
+                deployWalletValue: locklift.utils.toNano(0.1),
+                remainingGasTo: account4.address,
+                notify: true,
+                payload: payloadLO.value0
+            }).send({
+                amount: locklift.utils.toNano(6), from: account4.address
+            })
+
+            await tstWallet5.methods.transfer({
+                amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC4).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                recipient: Order.address,
+                deployWalletValue: locklift.utils.toNano(0.1),
+                remainingGasTo: account5.address,
+                notify: true,
+                payload: payloadLO.value0
+            }).send({
+                amount: locklift.utils.toNano(6), from: account5.address
+            })
+
+            const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
+            const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
+
+            const balanceBarAcc4End = await accountTokenBalances(barWallet4, Constants.tokens.bar.decimals);
+            const balanceTstAcc4End = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc4End, balanceTstAcc4End, false, "Account4");
+
+            const balanceTstAcc5End = await accountTokenBalances(tstWallet5, Constants.tokens.tst.decimals);
+            const balanceBarAcc5End = await accountTokenBalances(barWallet5, Constants.tokens.bar.decimals);
+            await displayLog(balanceBarAcc5End, balanceTstAcc5End, false, "Account5");
+
+            const balanceTstFactoryEnd = await accountTokenBalances(newBeneficiaryWalletTst, Constants.tokens.tst.decimals);
+            await displayLog(0, balanceTstFactoryEnd, false, "Factory");
+
+            const fees =  new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))
+            console.log(`FEE - ${fees}`)
+            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE1)).toFixed(9)
+            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE2)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))).toFixed(9)
+            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC3))).toFixed(9)
+            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toFixed(9)
+            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC4))).toFixed(9)
+            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toFixed(9)
+            const expectedTstFactory = new BigNumber(balanceTstFactoryStart.token || 0).plus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))).toFixed(9)
+            expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toFixed(9), 'Wrong Account3 Bar balance');
+            expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toFixed(9), 'Wrong Account3 Tst balance');
+            expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toFixed(9), 'Wrong Account4 Bar balance');
+            expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toFixed(9), 'Wrong Account4 Tst balance');
+            expect(expectedAccount5Bar).to.equal(balanceBarAcc5End.token.toFixed(9), 'Wrong Account5 Bar balance');
+            expect(expectedAccount5Tst).to.equal(balanceTstAcc5End.token.toFixed(9), 'Wrong Account5 Tst balance');
+            expect(expectedTstFactory).to.equal(balanceTstFactoryEnd.token.toFixed(9), 'Wrong Beneficiary balance');
+        });
+        it('Check fee execution, case 1.4 (Withdraw fee)', async () => {
+            console.log(`#############################\n`);
+
+            let amount = await barWallet3.methods
+                .balance({answerId: 0})
+                .call();
+            console.log(`BALANCE _ ${amount.value0}`)
+            const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
+            const balanceTstAcc3Start = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc3Start, balanceTstAcc3Start, true, "Account3");
+
+            const balanceBarAcc4Start = await accountTokenBalances(barWallet4, Constants.tokens.bar.decimals);
+            const balanceTstAcc4Start = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc4Start, balanceTstAcc4Start, true, "Account4");
+
+            const balanceBarAcc5Start = await accountTokenBalances(barWallet5, Constants.tokens.bar.decimals);
+            const balanceTstAcc5Start = await accountTokenBalances(tstWallet5, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc5Start, balanceTstAcc5Start, true, "Account4");
+
+            const newBeneficiary = account8
+
+            const balanceTstFactoryStart = {token: new BigNumber(0)};
+            await displayLog(0, 0, true, "Factory");
+
+            TOKENS_TO_EXCHANGE1 = 10;
+            TOKENS_TO_EXCHANGE2 = 20;
+
+            TOKENS_TO_EXCHANGE1_ACC3 = 5;
+            TOKENS_TO_EXCHANGE1_ACC4 = 5;
+
+            TOKENS_TO_EXCHANGE2_ACC3 = 10;
+            TOKENS_TO_EXCHANGE2_ACC4 = 10;
+
+            NUMERATOR = 1;
+            DENOMINATOR = 100;
+
+            await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({root: RootOrderBar.address, params: {numerator: NUMERATOR, denominator: DENOMINATOR}})
+                .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
+
+            const feeParams = await RootOrderBar.methods.getFeeParams({answerId: 1}).call()
+            expect(feeParams.params.numerator).to.equal(NUMERATOR.toString(), 'Wrong NUMERATOR');
+            expect(feeParams.params.denominator).to.equal(DENOMINATOR.toString(), 'Wrong DENOMINATOR');
+
+
+            await locklift.tracing.trace(factoryOrder.methods.setRootBeneficiary({beneficiary_: newBeneficiary.address, root: RootOrderBar.address}).send({from: account1.address, amount: locklift.utils.toNano(0.2)}))
+            const params = {
+                callbackId: 0,
+                tokenReceive: rootTokenReceive.address,
+                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                deployWalletValue: locklift.utils.toNano(0.1),
+                backPK: 0
+            }
+            console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderBar.methods.buildPayload(params).call();
+            console.log(`Result payload = ${payload.value0}`);
+
+            console.log(`BarWallet3(${barWallet3.address}).transfer()
+                amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
+                recipient: ${RootOrderBar.address},
+                deployWalletValue: ${locklift.utils.toNano(0.1)},
+                remainingGasTo: ${account3.address},
+                notify: ${true},
+                payload: ${JSON.stringify(params)}
+            )`);
+            const newBeneficiaryAddress = (await rootTokenReceive.methods.walletOf({walletOwner: newBeneficiary.address, answerId: 0}).call()).value0
+            const newBeneficiaryWalletTst = await locklift.factory.getDeployedContract("TokenWalletUpgradeable", newBeneficiaryAddress)
+            await locklift.tracing.trace(barWallet3.methods.transfer({
+                amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                recipient: RootOrderBar.address,
+                deployWalletValue: locklift.utils.toNano(0.1),
+                remainingGasTo: account3.address,
+                notify: true,
+                payload: payload.value0
+            }).send({
+                amount: locklift.utils.toNano(5), from: account3.address
+            }), {allowedCodes: {compute: [60]}})
+            await sleep(1000);
+
+            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            // @ts-ignore
+            // @ts-ignore
+            const orderAddress = pastEvents.events[0].data.order
+            console.log(`Order - ${orderAddress}`)
+            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
+            const payloadLO = await Order.methods.buildPayload({
+                callbackId: 1,
+                deployWalletValue: locklift.utils.toNano(0.1),
+            }).call();
+
+            await tstWallet4.methods.transfer({
+                amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                recipient: Order.address,
+                deployWalletValue: locklift.utils.toNano(0.1),
+                remainingGasTo: account4.address,
+                notify: true,
+                payload: payloadLO.value0
+            }).send({
+                amount: locklift.utils.toNano(6), from: account4.address
+            })
+
+            await tstWallet5.methods.transfer({
+                amount: new BigNumber(TOKENS_TO_EXCHANGE2_ACC4).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                recipient: Order.address,
+                deployWalletValue: locklift.utils.toNano(0.1),
+                remainingGasTo: account5.address,
+                notify: true,
+                payload: payloadLO.value0
+            }).send({
+                amount: locklift.utils.toNano(6), from: account5.address
+            })
+            const fees =  new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))
+            console.log(`FEE - ${fees}`)
+
+            await factoryOrder.methods.withdrawFee({
+                amount: new BigNumber(fees).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                recipient: tstWallet2.address,
+                rm_gas_to: account1.address,
+                orderRoot: RootOrderBar.address,
+                tokenRoot: rootTokenReceive.address
+            }).send({amount: locklift.utils.toNano(2), from: account1.address})
+            const balance = await tstWallet2.methods.balance({answerId: 1}).call()
+            const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
+            const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
+
+            const balanceBarAcc4End = await accountTokenBalances(barWallet4, Constants.tokens.bar.decimals);
+            const balanceTstAcc4End = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
+            await displayLog(balanceBarAcc4End, balanceTstAcc4End, false, "Account4");
+
+            const balanceTstAcc5End = await accountTokenBalances(tstWallet5, Constants.tokens.tst.decimals);
+            const balanceBarAcc5End = await accountTokenBalances(barWallet5, Constants.tokens.bar.decimals);
+            await displayLog(balanceBarAcc5End, balanceTstAcc5End, false, "Account5");
+
+            const balanceTstFactoryEnd = await accountTokenBalances(newBeneficiaryWalletTst, Constants.tokens.tst.decimals);
+            await displayLog(0, balanceTstFactoryEnd, false, "Beneficiary");
+
+
+            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE1)).toFixed(9)
+            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE2)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))).toFixed(9)
+            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC3))).toFixed(9)
+            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toFixed(9)
+            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC4))).toFixed(9)
+            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toFixed(9)
+            const expectedTstFactory = new BigNumber(balanceTstFactoryStart.token || 0).toFixed(9)
+            expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toFixed(9), 'Wrong Account3 Bar balance');
+            expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toFixed(9), 'Wrong Account3 Tst balance');
+            expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toFixed(9), 'Wrong Account4 Bar balance');
+            expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toFixed(9), 'Wrong Account4 Tst balance');
+            expect(expectedAccount5Bar).to.equal(balanceBarAcc5End.token.toFixed(9), 'Wrong Account5 Bar balance');
+            expect(expectedAccount5Tst).to.equal(balanceTstAcc5End.token.toFixed(9), 'Wrong Account5 Tst balance');
+            expect(expectedTstFactory).to.equal(balanceTstFactoryEnd.token.toFixed(9), 'Wrong Beneficiary balance');
+        });
+
 
     });
 
 });
 
-async function accountTokenBalances(contract, decimals) {
-    let token;
+async function accountTokenBalances(contract: any, decimals: any): Promise<{ token: BigNumber }> {
+    let token: BigNumber;
     await contract.methods
         .balance({answerId: 0})
         .call().then(n => {
@@ -1492,13 +1981,13 @@ async function accountTokenBalances(contract, decimals) {
     return {token}
 }
 
-async function displayLog(balanceBar, balanceTst, start, accountText) {
+async function displayLog(balanceBar: any, balanceTst: any, start: any, accountText: any) {
     console.log(`${accountText} balance ${start == true ? ' start: ' : ' end: '}` +
         `${balanceBar !== undefined ? balanceBar.token + ' BAR' : 'BAR'},` +
         `${balanceTst !== undefined ? balanceTst.token + ' TST' : 'TST'}`);
 }
 
-async function deployWallet(owner: Account, tokenRoot: Contract<FactorySource['TokenRootUpgradeable']>, rootOwner: Account, mintAmount: number = 120): Address {
+async function deployWallet(owner: Account, tokenRoot: Contract<FactorySource['TokenRootUpgradeable']>, rootOwner: Account, mintAmount: number = 190): Promise<Address> {
     await locklift.tracing.trace(tokenRoot.methods
         .deployWallet({
             answerId: 1,

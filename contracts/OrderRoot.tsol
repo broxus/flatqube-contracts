@@ -63,6 +63,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     }
 
     function onTokenWalletReceive(address _wallet) external {}
+    function onTokenWalletBeneficiary(address _wallet) external {}
 
     onBounce(TvmSlice body) external view {
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
@@ -97,14 +98,13 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     }
 
     function getTokenWallet(
-        address token,
-        address tokenReceiver
+        address token
     ) internal view returns (address) {
         return
         address(tvm.hash(
             tvm.buildStateInit({
                 contr: TokenWalletPlatform,
-                varInit: { root: token, owner: tokenReceiver },
+                varInit: { root: token, owner: beneficiary },
                 code: tokenPlatformCode
         })
         ));
@@ -125,7 +125,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             OrderErrors.WRONG_BENEFICIARY);
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
         beneficiary = beneficiary_;
-
         factory.transfer(
             0,
             false,
@@ -143,7 +142,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
 //            callback: OrderRoot.onBeneficiaryWallet
 //        }(beneficiary);
         TvmCell empty;
-        address walletBeneficiary = getTokenWallet(tokenRoot, recipient);
+
+        address walletBeneficiary = getTokenWallet(tokenRoot);
         ITokenWallet(walletBeneficiary).transfer{
             value: OrderGas.WITHDRAW_FEE_VALUE,
             flag: MsgFlag.SENDER_PAYS_FEES,
@@ -156,6 +156,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             false,
             empty
         );
+
     }
 
     /*function onBeneficiaryWallet(address wallet) external {
@@ -222,6 +223,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 orderCode
             );
 
+
             TvmCell stateInit = buildState(sender, indexCode, receiveToken);
             address orderAddress = new Order{
                 stateInit: stateInit,
@@ -255,7 +257,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             ITokenRoot(receiveToken).deployWallet {
                 value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: OrderRoot.onTokenWalletReceive
+                callback: OrderRoot.onTokenWalletBeneficiary
             }(beneficiary, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
             ITokenWallet(msg.sender).transfer{
