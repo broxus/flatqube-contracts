@@ -29,7 +29,7 @@ async function main() {
             }
         ).send({
             from: account.address,
-            amount: toNano(2)
+            amount: toNano(1)
         })
         displayTx(tx);
     }

@@ -1941,11 +1941,11 @@ contract DexStablePair is
         optional(uint256) x_opt = _get_y(j, i, y, xp);
 
         if (x_opt.hasValue()) {
-            uint128 fee_d_minus_n = uint128(fee.denominator - fee.pool_numerator - fee.beneficiary_numerator);
+            uint128 fee_d_minus_n = uint128(fee.denominator - fee.pool_numerator - fee.beneficiary_numerator - fee.referrer_numerator);
             uint128 dx_raw = uint128(math.muldivc(x_opt.get() - xp[i], PRECISION, tokenData[i].rate));
             uint128 dx = math.muldivc(dx_raw, fee.denominator, fee_d_minus_n);
 
-            uint128 x_fee = math.muldivc(dx, fee.pool_numerator + fee.beneficiary_numerator, fee.denominator);
+            uint128 x_fee = math.muldivc(dx, fee.pool_numerator + fee.beneficiary_numerator + fee.referrer_numerator, fee.denominator);
 
             uint128 x_beneficiary_fee = math.muldiv(x_fee, fee.beneficiary_numerator, fee.pool_numerator + fee.beneficiary_numerator);
             uint128 x_pool_fee = x_fee - x_beneficiary_fee;

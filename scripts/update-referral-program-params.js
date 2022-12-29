@@ -28,7 +28,7 @@ async function main() {
                 project_id: options.project_id,
                 project_address: options.project_address
             },
-            value: locklift.utils.convertCrystal(6, 'nano'),
+            value: locklift.utils.convertCrystal(1, 'nano'),
             keyPair
         });
         displayTx(tx);
