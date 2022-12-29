@@ -5,7 +5,7 @@ BigNumber.config({EXPONENTIAL_AT: 257});
 
 
 async function main() {
-    console.log(`hardcode-manager-address.js`);
+    console.log(`hardcode-constants.js`);
 
     const migration = new Migration();
 
@@ -14,13 +14,14 @@ async function main() {
 
     const content = '' +
         `pragma ton-solidity >= 0.62.0;
-abstract contract ManagerAddress {
-    address constant MANAGER_ADDRESS = address.makeAddrStd(0, 0x${account.address.substr(2).toLowerCase()});
+abstract contract Constants {
+    uint256 constant PROJECT_ID = 2222;
+    address constant PROJECT_ADDRESS = address.makeAddrStd(0, 0x${account.address.substr(2).toLowerCase()});
 }`
 
-    console.log('Replace ManagerAddress.sol with');
+    console.log('Replace Constants.sol with');
     console.log(content);
-    fs.writeFileSync(process.cwd() + '/contracts/abstract/ManagerAddress.sol', content);
+    fs.writeFileSync(process.cwd() + '/contracts/abstract/Constants.sol', content);
 }
 
 main()
