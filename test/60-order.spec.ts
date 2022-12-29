@@ -17,6 +17,7 @@ import {
 } from "../utils/migration.new.utils";
 import BigNumber from "bignumber.js";
 import lockliftConfig from "../locklift.config";
+import List = Mocha.reporters.List;
 
 describe('OrderTest', () => {
     const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
@@ -71,12 +72,12 @@ describe('OrderTest', () => {
     let BarPairWallet: Contract<FactorySource['TokenWalletUpgradeable']>;
 
     before('deploy and load new migrations', async () => {
-        account1 = await accountMigration('3', "Account1", "1");
-        account2 = await accountMigration('3', "Account2", "2");
-        account3 = await accountMigration('3', "Account3", "3");
-        account4 = await accountMigration('3', "Account4", "4");
-        account5 = await accountMigration('3', "Account5", "5");
-        account6 = await accountMigration('3', "Account6", "6");
+        account1 = await accountMigration('10000', "Account1", "1");
+        account2 = await accountMigration('10000', "Account2", "2");
+        account3 = await accountMigration('10000', "Account3", "3");
+        account4 = await accountMigration('10000', "Account4", "4");
+        account5 = await accountMigration('10000', "Account5", "5");
+        account6 = await accountMigration('10000', "Account6", "6");
 
         tokenFactory = await tokenFactoryMigration(account1);
 
@@ -364,7 +365,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(3), from: account4.address
+                amount: locklift.utils.toNano(6), from: account4.address
             })
 
             await tstWallet5.methods.transfer({
@@ -375,7 +376,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(3), from: account5.address
+                amount: locklift.utils.toNano(6), from: account5.address
             })
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -479,7 +480,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(3), from: account4.address
+                amount: locklift.utils.toNano(4), from: account4.address
             })
 
             await tstWallet5.methods.transfer({
@@ -490,7 +491,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(3), from: account5.address
+                amount: locklift.utils.toNano(4), from: account5.address
             })
 
             await tstWallet6.methods.transfer({
@@ -501,7 +502,7 @@ describe('OrderTest', () => {
                 notify: true,
                 payload: payloadLO.value0
             }).send({
-                amount: locklift.utils.toNano(3), from: account6.address
+                amount: locklift.utils.toNano(4), from: account6.address
             })
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
