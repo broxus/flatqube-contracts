@@ -17,8 +17,6 @@ options.old_contract = options.old_contract || 'DexVaultPrev';
 options.new_contract = options.new_contract || 'DexVault';
 
 async function main() {
-  const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts('DexVaultLpTokenPendingV2');
-
   const signer = await locklift.keystore.getSigner('0');
   const account = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
 
@@ -33,16 +31,6 @@ async function main() {
     from: account.address,
     amount: toNano(6)
   }));
-  const dexVault = await locklift.factory.getDeployedContract( 'DexVault', dexVaultPrev.address);
-
-  console.log(`DexVault: installing VaultLpTokenPendingV2 code...`);
-  const tx = await dexVault.methods.installOrUpdateLpTokenPendingCode(
-      {code: DexVaultLpTokenPendingV2.code}
-  ).send({
-    from: account.address,
-    amount: toNano(2)
-  });
-  displayTx(tx);
 }
 
 main()

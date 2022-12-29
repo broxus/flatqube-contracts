@@ -11,7 +11,6 @@ import "tip3/contracts/interfaces/IBurnableTokenWallet.sol";
 import "tip3/contracts/interfaces/IAcceptTokensMintCallback.sol";
 
 import "./abstract/DexContractBase.sol";
-import "./abstract/Constants.sol";
 
 import "./DexVaultLpTokenPendingV2.sol";
 import "./interfaces/IDexVault.sol";
@@ -35,8 +34,7 @@ contract DexVault is
     IResetGas,
     IUpgradable,
     IAcceptTokensMintCallback,
-    INextExchangeData,
-    Constants
+    INextExchangeData
 {
     uint32 private static _nonce;
 
@@ -49,6 +47,10 @@ contract DexVault is
     address private _tokenFactory;
 
     mapping(address => bool) private _lpVaultWallets;
+
+    // referral program
+    uint256 private _projectId = 0;
+    address private _projectAddress = address.makeAddrStd(0, 0x0);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, DexErrors.NOT_MY_OWNER);
@@ -708,6 +710,21 @@ contract DexVault is
         _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
     }
 
+    function updateReferralProgramParams(uint256 project_id, address project_address) external onlyOwner {
+        tvm.rawReserve(
+            math.max(
+                DexGas.VAULT_INITIAL_BALANCE,
+                address(this).balance - msg.value
+            ),
+            2
+        );
+
+        _projectId = project_id;
+        _projectAddress = project_address;
+
+        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
+    }
+
     function referralFeeTransfer(
         uint128 _amount,
         address _vaultWallet,
@@ -732,17 +749,17 @@ contract DexVault is
             _referral
         );
 
-        TvmCell payload = abi.encode(PROJECT_ID, _referrer, _referral);
+        TvmCell payload = abi.encode(_projectId, _referrer, _referral);
 
         ITokenWallet(_vaultWallet)
             .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (
                 _amount,
-                PROJECT_ADDRESS,
+                _projectAddress,
                 _deployWalletGrams,
                 _referral,
                 true,
                 payload
             );
-        }
+    }
 }
