@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { Address, WalletTypes } from 'locklift';
-import { FactorySource } from '../build/factorySource';
+import { FactorySource } from '../../build/factorySource';
 
 export class Migration<T extends FactorySource> {
   private migrationLog: Record<string, string>;
@@ -28,12 +28,10 @@ export class Migration<T extends FactorySource> {
     this._loadMigrationLog();
 
     if (this.migrationLog[name] !== undefined) {
-      const signer = await locklift.keystore.getSigner(account);
 
       return locklift.factory.accounts.addExistingAccount({
-        // @ts-ignore
-        publicKey: signer.publicKey,
-        type: WalletTypes.WalletV3,
+        address: new Address(this.migrationLog[name]),
+        type: WalletTypes.EverWallet,
       });
     } else {
       throw new Error(`Contract ${name} not found in the migration`);

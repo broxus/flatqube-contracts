@@ -1,6 +1,6 @@
 import {toNano, WalletTypes} from "locklift";
 
-const {Migration, afterRun} = require(process.cwd()+'/scripts/utils')
+const {Migration} = require(process.cwd()+'/scripts/utils')
 const { Command } = require('commander');
 const program = new Command();
 const migration = new Migration();
@@ -21,8 +21,10 @@ async function main() {
   console.log(`##############################################################################################`);
   console.log(`update-dexRoot.js`);
   console.log(`OPTIONS: `, options);
-  const signer = await locklift.keystore.getSigner('0');
-  const account = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
+  const account = await locklift.factory.accounts.addExistingAccount({
+    type: WalletTypes.EverWallet,
+    address: migration.getAddress('Account1')
+  });
 
   const dexRoot = await locklift.factory.getDeployedContract(options.old_contract, migration.getAddress('DexRoot'));
   const NewDexRoot = await locklift.factory.getContractArtifacts(options.new_contract);

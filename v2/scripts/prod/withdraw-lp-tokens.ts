@@ -9,8 +9,11 @@ BigNumber.config({EXPONENTIAL_AT: 257});
 const LP_RECIPIENT = '0:ea09ee65b328dc3d68df3382c1651c204a13f0ca4d8bf86e6fdd65be71d78f40';
 
 async function main() {
-    const signer = await locklift.keystore.getSigner('0');
-    const account = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
+
+    const account = await locklift.factory.accounts.addExistingAccount({
+        type: WalletTypes.EverWallet,
+        address: migration.getAddress('Account1')
+    });
 
     const dexRoot = await locklift.factory.getDeployedContract( 'DexRoot', migration.getAddress('DexRoot'));
     const DexPairLpWithdrawal = await locklift.factory.getContractArtifacts('DexPairLpWithdrawal');

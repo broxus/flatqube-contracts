@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import { Migration } from './migration';
-import { Address, Contract, WalletTypes, zeroAddress } from 'locklift';
+import {Address, Contract, toNano, WalletTypes, zeroAddress} from 'locklift';
 import { FactorySource } from '../build/factorySource';
 import { Account } from 'everscale-standalone-client/nodejs';
 import {
@@ -28,8 +28,8 @@ export const accountMigration = async (
 
   const { account } = await locklift.factory.accounts.addNewAccount({
     value: locklift.utils.toNano(amount.toString()),
-    publicKey: signer.publicKey,
-    type: WalletTypes.WalletV3,
+    publicKey: signer!.publicKey,
+    type: WalletTypes.EverWallet,
   });
 
   // Log and save address
@@ -56,7 +56,7 @@ export const mockPriceAggregatorMigration = async (): Promise<
   );
   const { contract } = await locklift.factory.deployContract({
     contract: 'MockPriceAggregator',
-    publicKey: signer.publicKey,
+    publicKey: signer!.publicKey,
     initParams: { _nonce: locklift.utils.getRandomNonce() },
     constructorParams: {},
     value: locklift.utils.toNano(10),
@@ -117,7 +117,7 @@ export const tokenRootMigration = async (
   });
   const { contract } = await locklift.factory.deployContract({
     contract: 'TokenRootUpgradeable',
-    publicKey: signer.publicKey,
+    publicKey: signer!.publicKey,
     initParams: {
       randomNonce_: nonce,
       deployer_: zeroAddress,
@@ -161,7 +161,7 @@ export const lendingRootMigration = async (
 
   const { contract } = await locklift.factory.deployContract({
     contract: 'LendingRoot',
-    publicKey: signer.publicKey,
+    publicKey: signer!.publicKey,
     initParams: {
       _nonce: locklift.utils.getRandomNonce(),
     },

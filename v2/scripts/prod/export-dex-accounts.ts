@@ -2,7 +2,7 @@
 const fs = require('fs');
 
 async function main() {
-  const OLD_DEX_ACCOUNT_CODE_HASH = '1d2a2dc123ff5e60e0280439de0e58ee28f1ba7ee9f8e94d5e68d780db66ef60';
+  const OLD_DEX_ACCOUNT_CODE_HASH = 'ed649f47322294142e5cc1ae3387cc46e208eb480b5b7e8746b306e83a66cb6b';
   const DEX_ROOT_ADDRESS = '0:5eb5713ea9b4a0f3a13bc91b282cde809636eb1e68d2fcb6427b9ad78a5a9008';
 
 

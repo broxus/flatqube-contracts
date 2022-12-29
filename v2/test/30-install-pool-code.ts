@@ -1,8 +1,12 @@
 import {toNano, WalletTypes} from "locklift";
+import {Account} from "everscale-standalone-client/nodejs";
+import {Contract} from "everscale-inpage-provider";
+import {DexRootAbi, DexStablePoolAbi} from "../../build/factorySource";
+import {ContractData} from "locklift/internal/factory";
 
 const {expect} = require('chai');
 const logger = require('mocha-logger');
-const {Migration, afterRun, Constants} = require(process.cwd() + '/scripts/utils');
+const {Migration, Constants} = require(process.cwd() + '/scripts/utils');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
 const { Command } = require('commander');
@@ -10,10 +14,9 @@ const program = new Command();
 
 const migration = new Migration();
 
-let keyPair;
-let account;
-let NextVersionContract;
-let dexRoot;
+let account: Account;
+let NextVersionContract: ContractData<DexStablePoolAbi>;
+let dexRoot: Contract<DexRootAbi>;
 
 program
     .allowUnknownOption()
@@ -36,8 +39,10 @@ describe('Test Dex Pool contract upgrade', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
 
     before('Load contracts', async function () {
-        const signer = await locklift.keystore.getSigner('0');
-        account = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
+        account = await locklift.factory.accounts.addExistingAccount({
+            type: WalletTypes.EverWallet,
+            address: migration.getAddress('Account1')
+        });
 
         dexRoot = await locklift.factory.getDeployedContract('DexRoot', migration.getAddress('DexRoot'));
 
@@ -46,7 +51,7 @@ describe('Test Dex Pool contract upgrade', async function () {
     })
     describe('Install DexPool code', async function () {
         it('Check code version', async function () {
-            let startVersion = 0;
+            let startVersion = '0';
             try {
                 startVersion = (await dexRoot.methods.getPoolVersion({ answerId: 0, pool_type: options.pool_type }).call()).value0;
             } catch (e) {}
