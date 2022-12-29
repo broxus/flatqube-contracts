@@ -145,8 +145,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		_;
 	}
 
-	function getFeeParams() override external view responsible returns (OrderFeeParams params, address beneficiary) {
-		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee, beneficiary);
+	function getFeeParams() override external view responsible returns (OrderFeeParams params, address beneficiary_) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee, beneficiary_);
 	}
 
     function _expectedSpendAmount(uint128 b_amount) private view returns (uint128, uint128) {

@@ -80,8 +80,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         }
     }
 
-    function getFeeParams() override external view responsible returns (OrderFeeParams params, address beneficiary) {
-		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee, beneficiary);
+    function getFeeParams() override external view responsible returns (OrderFeeParams params, address beneficiary_) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee, beneficiary_);
 	}
 
     function getVersion() override external view responsible returns (uint32) {
@@ -142,7 +142,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
 //            flag: MsgFlag.SENDER_PAYS_FEES,
 //            callback: OrderRoot.onBeneficiaryWallet
 //        }(beneficiary);
-
+        TvmCell empty;
         address walletBeneficiary = getTokenWallet(tokenRoot, recipient);
         ITokenWallet(walletBeneficiary).transfer{
             value: OrderGas.WITHDRAW_FEE_VALUE,
@@ -251,6 +251,12 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: OrderRoot.onTokenWalletReceive
             }(sender, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
+
+            ITokenRoot(receiveToken).deployWallet {
+                value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
+                flag: MsgFlag.SENDER_PAYS_FEES,
+                callback: OrderRoot.onTokenWalletReceive
+            }(beneficiary, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
             ITokenWallet(msg.sender).transfer{
                 value: 0, flag: MsgFlag.ALL_NOT_RESERVED,

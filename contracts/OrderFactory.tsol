@@ -312,11 +312,10 @@ contract OrderFactory is IOrderFactory {
 	function createOrderRoot(address token, uint64 callbackId) override external {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		if (msg.value >= OrderGas.DEPLOY_ORDERS_ROOT + OrderGas.DEPLOY_EMPTY_WALLET_GRAMS) {
-			_deployWallet(token, msg.sender);
 
 
 			new OrderPlatform {
-					stateInit: buildState(token, buildCode(token), buildParams(token)),
+					stateInit: buildState(token, buildCode(token), buildParams()),
 					value: OrderGas.DEPLOY_ORDERS_ROOT,
 					flag: MsgFlag.SENDER_PAYS_FEES
 			}(
@@ -352,25 +351,6 @@ contract OrderFactory is IOrderFactory {
 		}
 	}
 
-	function _deployWallet(address token_root, address send_gas_to) private {
-		_tmp_deploying_wallets[token_root] = send_gas_to;
-		ITokenRoot(token_root).deployWallet {
-            value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
-            flag: MsgFlag.SENDER_PAYS_FEES,
-            callback: OrderFactory.onTokenWallet
-        }(address(this), OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
-
-	}
-
-
-    function onTokenWallet(address wallet) external {
-        require(_tmp_deploying_wallets.exists(msg.sender), OrderErrors.WRONG_WALLET_DEPLOYER);
-        tvm.rawReserve(OrderGas.TARGET_BALANCE, 2);
-        address send_gas_to = _tmp_deploying_wallets[msg.sender];
-        delete _tmp_deploying_wallets[msg.sender];
-        send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
-
-    }
 
 	function getExpectedAddressOrderRoot(address token)
 		override
@@ -383,7 +363,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function expectedAddressOrderRoot(address token) internal view returns(address) {
-		return address(tvm.hash(buildState(token, buildCode(token), buildParams(token))));
+		return address(tvm.hash(buildState(token, buildCode(token), buildParams())));
 	}
 
 	function buildCode(
@@ -409,7 +389,7 @@ contract OrderFactory is IOrderFactory {
         });
 	}
 
-	function buildParams(address token) internal view returns (TvmCell) {
+	function buildParams() internal view returns (TvmCell) {
 		return abi.encode(dexRoot, orderCode, orderClosedCode, tokenPlatformCode, fee);
 	}
 
