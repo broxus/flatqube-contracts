@@ -408,6 +408,8 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             logs += `${dexAccount2Start.lp} LP`;
             logger.log(logs);
 
+            logger.log(`Account#2 LP start: ${dexAccount2Start.walletLp}`)
+
             logs = `DexAccount#3 balance start: `;
             for (let i = 0; i < N_COINS; i++) {
                 logs += `${dexAccount3Start.accountBalances[i]} ${tokens[i].symbol}, `;
@@ -484,7 +486,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                     _remainingGasTo: Account2.address,
                     _referrer: Account2.address
                 },
-                value: locklift.utils.convertCrystal('2.6', 'nano'),
+                value: locklift.utils.convertCrystal('4', 'nano'),
                 keyPair: keyPairs[1]
             });
 
@@ -501,6 +503,8 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             }
             logs += `${dexAccount2End.lp} LP`;
             logger.log(logs);
+
+            logger.log(`Account#2 LP end: ${dexAccount2End.walletLp}`)
 
             logs = `DexAccount#3 balance end: `;
             for (let i = 0; i < N_COINS; i++) {
@@ -563,7 +567,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
 
                     logger.log(`Referrer fee ${tokens[i].symbol}: ${expectedReferrer.toString()}`);
 
-                    expectedPoolTokenBalances.push(new BigNumber(dexPoolInfoStart.token_balances[i]).plus(deposits[i]).minus(expectedBeneficiary).toString());
+                    expectedPoolTokenBalances.push(new BigNumber(dexPoolInfoStart.token_balances[i]).plus(deposits[i]).minus(expectedBeneficiary).minus(expectedReferrer).toString());
 
                     expectedDexAccount3TokenBalances.push(expectedBeneficiary
                         .plus(dexPoolInfoStart.token_fees[i])
@@ -595,7 +599,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
 
                 logger.log(`Referrer fee: ${expectedReferrer.toString()}`);
 
-                expectedPoolTokenBalances.push(new BigNumber(dexPoolInfoStart.token_balances[0]).plus(deposits[0]).minus(expectedBeneficiary).toString());
+                expectedPoolTokenBalances.push(new BigNumber(dexPoolInfoStart.token_balances[0]).plus(deposits[0]).minus(expectedBeneficiary).minus(expectedReferrer).toString());
                 expectedPoolTokenBalances.push(new BigNumber(dexPoolInfoStart.token_balances[1]).plus(deposits[1]).toString());
 
                 expectedDexAccount3TokenBalances.push(expectedBeneficiary
@@ -802,7 +806,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                 logger.log(`Referrer fee: ${expectedReferrer.toString()}`);
 
                 expectedPoolTokenBalances.push(new BigNumber(dexPoolInfoStart.token_balances[0]).plus(deposits[0]).toString());
-                expectedPoolTokenBalances.push(new BigNumber(dexPoolInfoStart.token_balances[1]).plus(deposits[1]).minus(expectedBeneficiary).toString());
+                expectedPoolTokenBalances.push(new BigNumber(dexPoolInfoStart.token_balances[1]).plus(deposits[1]).minus(expectedBeneficiary).minus(expectedReferrer).toString());
 
                 for (let i = 0; i < N_COINS; i++) {
                     expectedDexAccount3TokenBalances[i] = new BigNumber(i === 1 ? expectedBeneficiary : 0)
@@ -841,7 +845,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
 
                     logger.log(`Referrer fee ${tokens[i].symbol}: ${expectedReferrer.toString()}`);
 
-                    expectedPoolTokenBalances.push(new BigNumber(dexPoolInfoStart.token_balances[i]).plus(deposits[i]).minus(expectedBeneficiary).toString());
+                    expectedPoolTokenBalances.push(new BigNumber(dexPoolInfoStart.token_balances[i]).plus(deposits[i]).minus(expectedBeneficiary).minus(expectedReferrer).toString());
 
                     expectedDexAccount3TokenBalances.push(expectedBeneficiary
                         .plus(dexPoolInfoStart.token_fees[i])
@@ -876,7 +880,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                 logger.log(`Referrer fee: ${expectedReferrer.toString()}`);
 
                 expectedPoolTokenBalances = dexPoolInfoStart.token_balances;
-                expectedPoolTokenBalances[1] = new BigNumber(dexPoolInfoStart.token_balances[1]).plus(deposits[1]).minus(expectedBeneficiary).toString();
+                expectedPoolTokenBalances[1] = new BigNumber(dexPoolInfoStart.token_balances[1]).plus(deposits[1]).minus(expectedBeneficiary).minus(expectedReferrer).toString();
 
                 for (let i = 0; i < N_COINS; i++) {
                     expectedDexAccount3TokenBalances[i] = new BigNumber(i === 1 ? expectedBeneficiary : 0)
@@ -964,7 +968,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                 payload = await DexPool.call({
                     method: 'buildExchangePayloadV2', params: {
                         _id: 0,
-                        _deployWalletGrams: locklift.utils.convertCrystal('0.2', 'nano'),
+                        _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
                         _expectedAmount: expected.expected_amount,
                         _recipient: Account2.address,
                         _referrer: Account2.address
@@ -1057,13 +1061,13 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                 .toString();
             const expectedDexReceived = new BigNumber(dexStart.token_balances[0])
                 .minus(new BigNumber(expected.expected_amount).shiftedBy(-tokens[0].decimals)).toString();
-            const expectedDexSpent = new BigNumber(dexStart.token_balances[1]).plus(TOKENS_TO_EXCHANGE).toString();
+            const expectedDexSpent = new BigNumber(dexStart.token_balances[1]).plus(TOKENS_TO_EXCHANGE).minus(expectedReferrer).toString();
             const expectedAccountReceived = new BigNumber(accountStart.token_balances[0])
                 .plus(new BigNumber(expected.expected_amount).shiftedBy(-tokens[0].decimals)).toString();
             const expectedAccountSpent = new BigNumber(accountStart.token_balances[1]).minus(TOKENS_TO_EXCHANGE).toString();
             const expectedPoolReceived = new BigNumber(dexPoolInfoStart.token_balances[0])
                 .minus(new BigNumber(expected.expected_amount).shiftedBy(-tokens[0].decimals)).toString();
-            const expectedPoolSpent = new BigNumber(dexPoolInfoStart.token_balances[1]).plus(TOKENS_TO_EXCHANGE).minus(expectedBeneficiary).toString();
+            const expectedPoolSpent = new BigNumber(dexPoolInfoStart.token_balances[1]).plus(TOKENS_TO_EXCHANGE).minus(expectedBeneficiary).minus(expectedReferrer).toString();
 
 
             expect(expectedDexReceived).to.equal(dexEnd.token_balances[0].toString(), `Wrong DEX ${tokens[0].symbol} balance`);
@@ -1085,7 +1089,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             const dexAccount3Start = await dexAccountBalances(DexAccount3);
             const accountStart = await account2balances();
             const dexPoolInfoStart = await dexPoolInfo();
-            const referrerStart = account4balances();
+            const referrerStart = await account4balances();
 
             logger.log(`Account#2 balance start: ` +
                 `${accountStart.token_balances[0] !== undefined ? accountStart.token_balances[0] + ` ${tokens[0].symbol}` : `${tokens[0].symbol} (not deployed)`}, ` +
@@ -1174,7 +1178,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             const dexAccount3End = await dexAccountBalances(DexAccount3);
             const accountEnd = await account2balances();
             const dexPoolInfoEnd = await dexPoolInfo();
-            const referrerEnd = account4balances();
+            const referrerEnd = await account4balances();
 
             logger.log(`Account#2 balance end: ` +
                 `${accountEnd.token_balances[0] !== undefined ? accountEnd.token_balances[0] + ` ${tokens[0].symbol}` : `${tokens[0].symbol} (not deployed)`}, ` +
@@ -1218,7 +1222,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
 
             logger.log(`Referrer fee: ${expectedReferrer.toString()}`);
 
-            const expectedReferrerBalanceSpent = expectedReferrer.plus(referrerStart.token_balances[1] || 0).toString();
+            const expectedReferrerBalanceSpent = expectedReferrer.plus(referrerStart.token_balances[0] || 0).toString();
 
             const expectedDexAccount3Spent = expectedBeneficiary
                 .plus(dexPoolInfoStart.token_fees[0])
@@ -1228,14 +1232,14 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             const expectedDexReceived = new BigNumber(dexStart.token_balances[1])
                 .minus(TOKENS_TO_RECEIVE).toString();
             const expectedDexSpent = new BigNumber(dexStart.token_balances[0])
-                .plus(new BigNumber(expected.expected_amount).shiftedBy(-tokens[0].decimals)).toString();
+                .plus(new BigNumber(expected.expected_amount).shiftedBy(-tokens[0].decimals)).minus(expectedReferrer).toString();
             const expectedAccountReceived = new BigNumber(accountStart.token_balances[1])
                 .plus(TOKENS_TO_RECEIVE).toString();
             const expectedAccountSpent = new BigNumber(accountStart.token_balances[0])
                 .minus(new BigNumber(expected.expected_amount).shiftedBy(-tokens[0].decimals)).toString();
             const expectedPoolSpent = new BigNumber(dexPoolInfoStart.token_balances[0])
                 .plus(new BigNumber(expected.expected_amount).shiftedBy(-tokens[0].decimals))
-                .minus(expectedBeneficiary).toString();
+                .minus(expectedBeneficiary).minus(expectedReferrer).toString();
             const expectedPoolReceived = new BigNumber(dexPoolInfoStart.token_balances[1]).minus(TOKENS_TO_RECEIVE).toString();
 
             expect(expectedAccountSpent).to.equal(accountEnd.token_balances[0].toString(), `Wrong Account#2 ${tokens[0].symbol} balance`);
@@ -1244,7 +1248,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             expect(expectedPoolReceived).to.equal(dexPoolInfoEnd.token_balances[1].toString(), `Wrong DEXPool ${tokens[1].symbol} balance`);
             expect(expectedDexAccount3Spent).to.equal(new BigNumber(dexAccount3End.accountBalances[0]).plus(dexPoolInfoEnd.token_fees[0]).toString(),
                 'Wrong beneficiary fee');
-            expect(expectedReferrerBalanceSpent).to.equal(referrerEnd.token_balances[1],
+            expect(expectedReferrerBalanceSpent).to.equal(referrerEnd.token_balances[0],
                 'Wrong referrer fee');
             expect(expectedDexSpent).to.equal(dexEnd.token_balances[0].toString(), `Wrong DEX ${tokens[0].symbol} balance`);
             expect(expectedDexReceived).to.equal(dexEnd.token_balances[1].toString(), `Wrong DEX ${tokens[1].symbol} balance`);

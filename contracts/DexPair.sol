@@ -269,12 +269,12 @@ contract DexPair is DexPairBase, INextExchangeData {
                 if (result.step_2_right_to_left) {
                     require(result.step_2_received <= _typeToReserves[DexReserveType.POOL][0] + result.step_1_left_deposit, DexErrors.NOT_ENOUGH_FUNDS);
 
-                    _typeToReserves[DexReserveType.POOL][1] -= step2BeneficiaryFee;
+                    _typeToReserves[DexReserveType.POOL][1] -= step2BeneficiaryFee + step2ReferrerFee;
                     _typeToReserves[DexReserveType.FEE][1] += step2BeneficiaryFee;
                 } else if (result.step_2_left_to_right) {
                     require(result.step_2_received <= _typeToReserves[DexReserveType.POOL][1] + result.step_1_right_deposit, DexErrors.NOT_ENOUGH_FUNDS);
 
-                    _typeToReserves[DexReserveType.POOL][0] -= step2BeneficiaryFee;
+                    _typeToReserves[DexReserveType.POOL][0] -= step2BeneficiaryFee + step2ReferrerFee;
                     _typeToReserves[DexReserveType.FEE][0] += step2BeneficiaryFee;
                 }
 
@@ -838,30 +838,30 @@ contract DexPair is DexPairBase, INextExchangeData {
         uint128[] oldReserves = _reserves();
 
         // Update reserves
-        if (!_isNominal || !_isViaAccount) {
-            _typeToReserves[DexReserveType.POOL][spentTokenIndex] += _isNominal ? 0 : _spentAmount - _beneficiaryFee;
-            _typeToReserves[DexReserveType.POOL][receiveTokenIndex] -= _isNominal ? 0 : _amount;
+        _typeToReserves[DexReserveType.POOL][spentTokenIndex] += _isNominal ? 0 : _spentAmount - _beneficiaryFee - _referrerFee;
+        _typeToReserves[DexReserveType.POOL][receiveTokenIndex] -= _isNominal ? 0 : _amount;
 
+        if (!_isNominal) {
             // Update accumulated fees
             if (_beneficiaryFee > 0) {
                 _typeToReserves[DexReserveType.FEE][spentTokenIndex] += _beneficiaryFee;
 
                 _processBeneficiaryFees(false, _remainingGasTo);
             }
+        }
 
-            if (_referrerFee > 0) {
-                IDexVault(_vaultRoot()).referralFeeTransfer{
-                    value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + _deployWalletGrams,
-                    flag: MsgFlag.SENDER_PAYS_FEES
-                }(
-                    _referrerFee,
-                    _typeToWalletAddresses[DexAddressType.VAULT][spentTokenIndex],
-                    _referrer,
-                    _remainingGasTo,
-                    _deployWalletGrams,
-                    _tokenRoots()
-                );
-            }
+        if (_referrerFee > 0) {
+            IDexVault(_vaultRoot()).referralFeeTransfer{
+                value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + _deployWalletGrams,
+                flag: MsgFlag.SENDER_PAYS_FEES
+            }(
+                _referrerFee,
+                _typeToWalletAddresses[DexAddressType.VAULT][spentTokenIndex],
+                _referrer,
+                _remainingGasTo,
+                _deployWalletGrams,
+                _tokenRoots()
+            );
         }
 
         ExchangeFee[] fees;
@@ -897,7 +897,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         IExchangeResult.ExchangeResult result =  IExchangeResult.ExchangeResult(
             spentTokenIndex == 0 && receiveTokenIndex == 1,
             _spentAmount,
-            _poolFee + _beneficiaryFee,
+            _poolFee + _beneficiaryFee + _referrerFee,
             _amount
         );
 
@@ -1317,7 +1317,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                     } else if (r.step_3_lp_reward < expectedAmount) {
                         errorCode = DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
                     } else {
-                        _typeToReserves[DexReserveType.POOL][spentTokenIndex] += _tokensAmount - step2BeneficiaryFee;
+                        _typeToReserves[DexReserveType.POOL][spentTokenIndex] += _tokensAmount - step2BeneficiaryFee - step2ReferrerFee;
 
                         _exchangeBase(
                             id,

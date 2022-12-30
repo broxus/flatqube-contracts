@@ -481,7 +481,7 @@ contract DexStablePool is
 
                     ExpectedExchangeResult dy_result = dy_result_opt.get();
 
-                    tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee;
+                    tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee - referrer_fee;
                     tokenData[j].balance -= dy_result.amount;
 
                     ExchangeFee[] fees = new ExchangeFee[](0);
@@ -530,7 +530,7 @@ contract DexStablePool is
                             token_root,
                             outcoming,
                             tokens_amount,
-                            dy_result.pool_fee + dy_result.beneficiary_fee,
+                            dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
                             dy_result.amount
                         ));
 
@@ -543,7 +543,7 @@ contract DexStablePool is
                             token_root,
                             outcoming,
                             tokens_amount,
-                            dy_result.pool_fee + dy_result.beneficiary_fee,
+                            dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
                             dy_result.amount
                         ));
                     }
@@ -708,7 +708,7 @@ contract DexStablePool is
                             ExpectedExchangeResult dy_result = dy_result_opt.get();
                             operation = TokenOperation(dy_result.amount, tokenData[j].root);
 
-                            tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee;
+                            tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee - referrer_fee;
                             tokenData[j].balance -= dy_result.amount;
 
                             ExchangeFee[] fees;
@@ -1013,7 +1013,7 @@ contract DexStablePool is
             true,
             account_owner,
             account_owner,
-            address(0),
+            referrer,
             DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
             send_gas_to
         );
@@ -1134,7 +1134,7 @@ contract DexStablePool is
             account_owner,
             account_owner,
             address(0),
-            DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
+            0,
             send_gas_to
         );
 
@@ -1465,7 +1465,7 @@ contract DexStablePool is
                     ExpectedExchangeResult dy_result = dy_result_opt.get();
                     operation = TokenOperation(dy_result.amount, tokenData[j].root);
 
-                    tokenData[i].balance += spent_amount - dy_result.beneficiary_fee;
+                    tokenData[i].balance += spent_amount - dy_result.beneficiary_fee - referrer_fee;
                     tokenData[j].balance -= dy_result.amount;
 
                     ExchangeFee[] fees;
@@ -2545,7 +2545,7 @@ contract DexStablePool is
                     pool_fees[i] = fees - beneficiary_fees[i];
                 }
 
-                result_balances[i] = new_balance - beneficiary_fees[i];
+                result_balances[i] = new_balance - beneficiary_fees[i] - referrer_fees[i];
                 new_balances[i] = new_balances[i] - pool_fees[i] - beneficiary_fees[i] - referrer_fees[i];
                 differences[i] = difference;
             }
@@ -2648,8 +2648,8 @@ contract DexStablePool is
             pool_fees[i] = fees - beneficiary_fees[i];
         }
 
-        result_balances[i] = new_balances[i] - beneficiary_fees[i];
-        new_balances[i] = new_balances[i] - pool_fees[i] - beneficiary_fees[i];
+        result_balances[i] = new_balances[i] - beneficiary_fees[i] - referrer_fees[i];
+        new_balances[i] = new_balances[i] - pool_fees[i] - beneficiary_fees[i] - referrer_fees[i];
 
         D2_opt = _get_D(_xp_mem(new_balances));
         if (D2_opt.hasValue()) {
@@ -2848,7 +2848,7 @@ contract DexStablePool is
         optional(uint256) D1_opt = D0 - math.muldiv(token_amount, D0, old_lp_supply);
         uint256 D1 = D1_opt.get();
 
-        uint128 lp_fee = math.muldivc(token_amount, fee.beneficiary_numerator + fee.pool_numerator, fee.denominator);
+        uint128 lp_fee = math.muldivc(token_amount, fee.beneficiary_numerator + fee.pool_numerator + fee.referrer_numerator, fee.denominator);
 
         optional(uint256) D1_fee_opt = D0 - math.muldiv(token_amount - lp_fee, D0, old_lp_supply);
         uint256 D1_fee = D1_fee_opt.get();
@@ -2894,7 +2894,7 @@ contract DexStablePool is
         }
 
         amounts[i] = uint128(dy);
-        result_balances[i] = uint128(old_balances[i] - dy);
+        result_balances[i] = uint128(old_balances[i] - dy - beneficiary_fees[i] - referrer_fees[i]);
 
         result.set(WithdrawResultV2(
             token_amount,

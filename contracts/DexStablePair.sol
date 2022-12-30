@@ -462,7 +462,7 @@ contract DexStablePair is
                     } else {
                         ExpectedExchangeResult dy_result = dy_result_opt.get();
 
-                        tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee;
+                        tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee - referrer_fee;
                         tokenData[j].balance -= dy_result.amount;
 
                         ExchangeFee[] fees = new ExchangeFee[](0);
@@ -510,7 +510,7 @@ contract DexStablePair is
                         }(id, false, IExchangeResult.ExchangeResult(
                             i == 0 && j == 1,
                             tokens_amount,
-                            dy_result.pool_fee + dy_result.beneficiary_fee,
+                            dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
                             dy_result.amount
                         ));
 
@@ -522,7 +522,7 @@ contract DexStablePair is
                             }(id, false, IExchangeResult.ExchangeResult(
                                 i == 0 && j == 1,
                                 tokens_amount,
-                                dy_result.pool_fee + dy_result.beneficiary_fee,
+                                dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
                                 dy_result.amount
                             ));
                         }
@@ -602,7 +602,7 @@ contract DexStablePair is
                     if (errorCode == 0) {
                         ExpectedExchangeResult dy_result = dy_result_opt.get();
 
-                        tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee;
+                        tokenData[i].balance += tokens_amount - dy_result.beneficiary_fee - referrer_fee;
                         tokenData[j].balance -= dy_result.amount;
 
                         ExchangeFee[] fees;
@@ -645,7 +645,7 @@ contract DexStablePair is
                         }(id, false, IExchangeResult.ExchangeResult(
                             i == 0 && j == 1,
                             tokens_amount,
-                            dy_result.pool_fee + dy_result.beneficiary_fee,
+                            dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
                             dy_result.amount
                         ));
 
@@ -1161,7 +1161,7 @@ contract DexStablePair is
             if (dy_result.amount < expected_amount) {
                 errorCode = DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
             } {
-                tokenData[i].balance += spent_amount - dy_result.beneficiary_fee;
+                tokenData[i].balance += spent_amount - dy_result.beneficiary_fee - referrer_fee;
                 tokenData[j].balance -= dy_result.amount;
 
                 ExchangeFee[] fees;
@@ -1206,7 +1206,7 @@ contract DexStablePair is
                 }(id, false, IExchangeResult.ExchangeResult(
                     true,
                     spent_amount,
-                    dy_result.pool_fee + dy_result.beneficiary_fee,
+                    dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
                     dy_result.amount
                 ));
 
@@ -1218,7 +1218,7 @@ contract DexStablePair is
                     }(id, false, IExchangeResult.ExchangeResult(
                         true,
                         spent_amount,
-                        dy_result.pool_fee + dy_result.beneficiary_fee,
+                        dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
                         dy_result.amount
                     ));
                 }
@@ -2053,7 +2053,7 @@ contract DexStablePair is
                     pool_fees[i] = fees - beneficiary_fees[i];
                 }
 
-                result_balances[i] = new_balance - beneficiary_fees[i];
+                result_balances[i] = new_balance - beneficiary_fees[i] - referrer_fees[i];
                 new_balances[i] = new_balances[i] - pool_fees[i] - beneficiary_fees[i] - referrer_fees[i];
                 differences[i] = difference;
             }
@@ -2111,14 +2111,14 @@ contract DexStablePair is
                 fees.push(ExchangeFee(tokenData[i].root, r.pool_fees[i], r.beneficiary_fees[i], fee.beneficiary));
                 if (r.sell[i]) {
                     deposits.push(TokenOperation(
-                        r.result_balances[i] - tokenData[i].balance - r.differences[i] - r.pool_fees[i] - referrer_fees[i],
+                        r.result_balances[i] - tokenData[i].balance - r.differences[i] - r.pool_fees[i],
                         tokenData[i].root
                     ));
                     spent_root = tokenData[i].root;
                     spent_amount = r.differences[i];
                 } else {
                     deposits.push(TokenOperation(
-                        r.result_balances[i] + r.differences[i] - tokenData[i].balance - r.pool_fees[i] - referrer_fees[i],
+                        r.result_balances[i] + r.differences[i] - tokenData[i].balance - r.pool_fees[i],
                         tokenData[i].root
                     ));
                     receive_root = tokenData[i].root;

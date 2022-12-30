@@ -203,7 +203,7 @@ library Math {
 
         uint256 feeD = uint256(_fee.denominator);
         uint256 feeDMinusN = feeD - uint256(_fee.pool_numerator + _fee.beneficiary_numerator + _fee.referrer_numerator);
-        uint256 denominator = feeDMinusN * (feeD - uint256(_fee.beneficiary_numerator));
+        uint256 denominator = feeDMinusN * (feeD - uint256(_fee.beneficiary_numerator + _fee.referrer_numerator));
 
         if (_autoChange && currentRightAmount > 0) {
             // step 2 (surplus RIGHT exchange)
@@ -238,7 +238,7 @@ library Math {
             );
 
             currentRightAmount = currentRightAmount - step2Spent;
-            currentRightBalance = currentRightBalance + step2Spent - step2BeneficiaryFee;
+            currentRightBalance = currentRightBalance + step2Spent - step2BeneficiaryFee - step2ReferrerFee;
 
             if (currentRightAmount > 0 && step2Received > 0) {
                 // step 3 (deposit exchanged amounts)
@@ -283,7 +283,7 @@ library Math {
             );
 
             currentLeftAmount = currentLeftAmount - step2Spent;
-            currentLeftBalance = currentLeftBalance + step2Spent - step2BeneficiaryFee;
+            currentLeftBalance = currentLeftBalance + step2Spent - step2BeneficiaryFee - step2ReferrerFee;
 
             if (currentLeftAmount > 0 && step2Received > 0) {
                 // step 3 (deposit exchanged amounts)
