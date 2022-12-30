@@ -14,11 +14,13 @@ import "./interfaces/IHasEmergencyMode.tsol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
 import "tip3/contracts/interfaces/ITokenWallet.tsol";
+import "./structures/IOrderFeeParams.tsol";
 
 contract OrderClosed is 
 	IAcceptTokensTransferCallback, 
 	IOrderClosed, 
-	IHasEmergencyMode 
+	IHasEmergencyMode,
+	IOrderFeeParams
 {
 	address static factory;
 	address static root;
@@ -39,6 +41,9 @@ contract OrderClosed is
 
 	uint8 prevState;
 	uint256 emergencyManager;
+
+	OrderFeeParams fee;
+	address beneficiary;
 
 	constructor() public { revert(); }
 
@@ -194,6 +199,12 @@ contract OrderClosed is
         builderSum.store(receiveWallet);
         builderUpg.storeRef(builderSum);
 
+		TvmBuilder builderFee;
+		builderFee.store(fee.numerator);
+		builderFee.store(fee.denominator);
+		builderFee.store(beneficiary);
+		builderUpg.storeRef(builderFee);
+
         onCodeUpgrade(builderUpg.toCell());
 	}
 
@@ -240,6 +251,17 @@ contract OrderClosed is
 		initialAmount = _initialAmount;
 		receiveWallet = _receiveWallet;
 
+//		TvmSlice dataFee = upg.loadRefAsSlice();
+//
+//		(
+//			uint128 _numerator,
+//			uint128 _denominator,
+//			address _beneficiary
+//		) = dataFee.decode(uint128, uint128, address);
+//
+//		fee = OrderFeeParams(_numerator, _denominator);
+//		beneficiary = _beneficiary;
+
 		if (state == OrderStatus.Cancelled) {
 			TvmCell emptyPayload;
 			ITokenWallet(spentWallet).transfer{
@@ -257,5 +279,6 @@ contract OrderClosed is
 		} else {
 			owner.transfer(0, false, MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS);
 		}
+
 	}
 }
