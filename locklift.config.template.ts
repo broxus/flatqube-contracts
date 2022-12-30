@@ -1,6 +1,8 @@
 import { LockliftConfig } from 'locklift';
 import { FactorySource } from './build/factorySource';
 import { MainnetGiver, SimpleGiver } from './giver';
+import {GiverWallet, TestnetGiver} from "./giverSettings";
+
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -58,56 +60,54 @@ const config: LockliftConfig = {
         amount: 20,
       },
     },
+    dev: {
+      connection: {
+        group: "testnet",
+        // @ts-ignore
+        type: "graphql",
+        data: {
+          // @ts-ignore
+          // for endpoints, example from evercloud.dev, format: https://devnet.evercloud.dev/${key}/graphql
+          endpoints: [""],
+          latencyDetectionInterval: 1000,
+          local: false,
+        },
+      },
+      giver: {
+        giverFactory: (ever, keyPair, address) => new TestnetGiver(ever, keyPair, address),
+        address: "",
+        key: "",
+      },
+      keys: {
+        phrase:"action inject penalty envelope rabbit element slim tornado dinner pizza off blood",
+        amount: 20
+      }
+    },
     mainnet: {
       connection: {
-        id: 1,
         group: 'mainnet',
+        // @ts-ignore
         type: 'graphql',
         data: {
-          endpoints: [MAINNET_NETWORK_ENDPOINT],
-          latencyDetectionInterval: 60000,
+          // @ts-ignore
+          // for endpoints, example from evercloud.dev, format: https://mainnet.evercloud.dev/${key}/graphql
+          endpoints: [''],
+          latencyDetectionInterval: 1000,
           local: false,
         },
       },
       giver: {
-        giverFactory: (ever, keyPair, address) =>
-          new MainnetGiver(ever, keyPair, address),
-        address:
-          '0:45aec00fe709bacbba429b54124e25b6e431781446faa6ee17f11d0541fd4dd8',
-        key: '131c31cff6f12e6730fb7c0631460fe0955ed05820a723cc76b7dd1399e0f514',
+        giverFactory: (ever, keyPair, address) => new GiverWallet(ever, keyPair, address),
+        address: '',
+        phrase: '',
+        accountId: 0
       },
-      tracing: { endpoint: MAINNET_NETWORK_ENDPOINT },
       keys: {
-        phrase:
-          'ancient head noise skate price battle inch cause sugar bridge junior umbrella',
+        phrase: "action inject penalty envelope rabbit element slim tornado dinner pizza off blood",
         amount: 20,
       },
-    },
-    devnet: {
-      connection: {
-        id: 3,
-        group: 'devnet',
-        type: 'graphql',
-        data: {
-          endpoints: [DEVNET_NETWORK_ENDPOINT],
-          latencyDetectionInterval: 60000,
-          local: false,
-        },
-      },
-      giver: {
-        giverFactory: (ever, keyPair, address) =>
-          new MainnetGiver(ever, keyPair, address),
-        address:
-          '0:45aec00fe709bacbba429b54124e25b6e431781446faa6ee17f11d0541fd4dd8',
-        key: '131c31cff6f12e6730fb7c0631460fe0955ed05820a723cc76b7dd1399e0f514',
-      },
-      tracing: { endpoint: DEVNET_NETWORK_ENDPOINT },
-      keys: {
-        phrase:
-          'ancient head noise skate price battle inch cause sugar bridge junior umbrella',
-        amount: 20,
-      },
-    },
+    }
+
   },
   mocha: { timeout: 2000000 },
 };
