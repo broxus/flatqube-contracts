@@ -1,8 +1,10 @@
+import * as ever from "everscale-inpage-provider";
+
 const {Migration} = require(process.cwd()+'/scripts/utils');
 const { Command } = require('commander');
 const program = new Command();
 
-import {toNano, WalletTypes} from "locklift";
+import {getRandomNonce, toNano, WalletTypes} from "locklift";
 
 const migration = new Migration();
 
@@ -21,13 +23,21 @@ async function main() {
   const balance = +(options.balance || '10');
 
   const signer = await locklift.keystore.getSigner(key_number.toString());
-  const account = (await locklift.factory.accounts.addNewAccount({
-    type: WalletTypes.WalletV3, // or WalletTypes.HighLoadWallet,
+  const { account } = (await locklift.factory.accounts.addNewAccount({
+    type: WalletTypes.EverWallet, // or WalletTypes.HighLoadWallet,
     //Value which will send to the new account from a giver
     value: toNano(balance),
     //owner publicKey
     publicKey: signer!.publicKey,
-  })).account;
+    nonce: getRandomNonce()
+  }));
+
+  await locklift.provider.sendMessage({
+    sender: account.address,
+    recipient: account.address,
+    amount: toNano(1),
+    bounce: false
+  })
 
   const name = `Account${key_number+1}`;
   migration.store(account, name);

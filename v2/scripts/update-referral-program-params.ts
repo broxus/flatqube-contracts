@@ -15,8 +15,10 @@ program.parse(process.argv);
 const options = program.opts();
 
 async function main() {
-    const signer = await locklift.keystore.getSigner('0');
-    const account = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
+    const account = await locklift.factory.accounts.addExistingAccount({
+        type: WalletTypes.EverWallet,
+        address: migration.getAddress('Account1')
+    });
 
     const dexVault = await locklift.factory.getDeployedContract('DexVault', migration.getAddress('DexVault'));
 

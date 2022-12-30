@@ -6,6 +6,7 @@ npx locklift run $NO_TRACE --script v2/scripts/0-reset-migration.ts
 npx locklift run $NO_TRACE --script v2/scripts/0-deploy-account.ts --key_number='0' --balance='50'
 npx locklift run $NO_TRACE --script v2/scripts/0-deploy-account.ts --key_number='1' --balance='50'
 npx locklift run $NO_TRACE --script v2/scripts/0-deploy-account.ts --key_number='2' --balance='75'
+npx locklift run $NO_TRACE --script v2/scripts/0-deploy-account.ts --key_number='3' --balance='75'
 npx locklift run $NO_TRACE --script v2/scripts/0-deploy-TokenFactory.ts
 npx locklift run $NO_TRACE --script v2/scripts/1-deploy-vault-and-root.ts --pair_contract_name='DexPair' --root_contract_name='DexRoot'
 npx locklift run $NO_TRACE --script v2/scripts/2-deploy-test-tokens.ts --tokens='["foo","bar","qwe","tst","coin"]'

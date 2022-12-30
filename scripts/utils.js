@@ -2,11 +2,10 @@ const fs = require('fs');
 
 const logger = require('mocha-logger');
 
-const N_COINS = 2;
 const TOKEN_CONTRACTS_PATH = 'node_modules/tip3/build'
-const WEVER_CONTRACTS_PATH = 'node_modules/ton-wton/everscale/build'
 const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
 const BigNumber = require('bignumber.js');
+import { Address } from 'locklift';
 BigNumber.config({EXPONENTIAL_AT: 257});
 
 const getRandomNonce = () => Math.random() * 64000 | 0;
@@ -127,12 +126,10 @@ class Migration {
 
   getAddress(alias) {
     if (this.migration_log[alias] !== undefined) {
-      return this.migration_log[alias].address;
+      return new Address(this.migration_log[alias].address);
     } else {
       throw new Error(`Contract ${alias} not found in the migration`);
     }
-
-    return undefined;
   }
 
   store(contract, alias) {

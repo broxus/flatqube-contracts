@@ -8,8 +8,10 @@ async function main() {
     console.log('5-deploy-test-pool.js');
     const migration = new Migration();
 
-    const signer = await locklift.keystore.getSigner('0');
-    const account = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
+    const account = await locklift.factory.accounts.addExistingAccount({
+        type: WalletTypes.EverWallet,
+        address: migration.getAddress('Account1')
+    });
 
     if (locklift.tracing) {
         locklift.tracing.setAllowedCodesForAddress(account.address, {compute: [100]});

@@ -2,7 +2,7 @@
 const fs = require('fs');
 
 async function exportDexPairs() {
-  const OLD_DEX_PAIR_CODE_HASH = 'f1753e3e6ba1a8de05dfa34fdcaaa90b4ad77df1c0a8acd2c51df74702c310d7';
+  const OLD_DEX_PAIR_CODE_HASH = 'd7f137ee2123785ed7dd56fad374ab7c0e99343eb97e918aac1bbc6bd9bb827b';
   const DEX_ROOT_ADDRESS = '0:5eb5713ea9b4a0f3a13bc91b282cde809636eb1e68d2fcb6427b9ad78a5a9008';
 
   let dexPairsToUpdate = [];
