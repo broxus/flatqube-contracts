@@ -638,6 +638,7 @@ contract DexStablePool is
                                 _tokenRoots(),
                                 sender_address,
                                 recipient,
+                                referrer,
                                 deploy_wallet_grams,
                                 next_steps
                             );
