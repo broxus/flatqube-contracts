@@ -841,7 +841,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         _typeToReserves[DexReserveType.POOL][spentTokenIndex] += _isNominal ? 0 : _spentAmount - _beneficiaryFee - _referrerFee;
         _typeToReserves[DexReserveType.POOL][receiveTokenIndex] -= _isNominal ? 0 : _amount;
 
-        if (!_isNominal) {
+        if (!_isViaAccount || !_isNominal) {
             // Update accumulated fees
             if (_beneficiaryFee > 0) {
                 _typeToReserves[DexReserveType.FEE][spentTokenIndex] += _beneficiaryFee;

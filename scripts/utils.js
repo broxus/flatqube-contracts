@@ -5,7 +5,7 @@ const logger = require('mocha-logger');
 const TOKEN_CONTRACTS_PATH = 'node_modules/tip3/build'
 const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
 const BigNumber = require('bignumber.js');
-import { Address } from 'locklift';
+// import { Address } from 'locklift';
 BigNumber.config({EXPONENTIAL_AT: 257});
 
 const getRandomNonce = () => Math.random() * 64000 | 0;
