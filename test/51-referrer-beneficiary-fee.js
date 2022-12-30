@@ -942,7 +942,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             const TOKENS_TO_EXCHANGE = 100;
 
             let expected;
-            if (options.roots === 2) {
+            if (options.roots.length === 2) {
                 expected = await DexPool.call({
                     method: 'expectedExchange', params: {
                         amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(tokens[1].decimals).toString(),
@@ -964,7 +964,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-tokens[0].decimals).toString()} ${tokens[0].symbol}`);
 
             let payload;
-            if (options.roots === 2) {
+            if (options.roots.length === 2) {
                 payload = await DexPool.call({
                     method: 'buildExchangePayloadV2', params: {
                         _id: 0,
@@ -1112,7 +1112,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             const TOKENS_TO_RECEIVE = 100;
 
             let expected;
-            if (options.roots === 2) {
+            if (options.roots.length === 2) {
                 expected = await DexPool.call({
                     method: 'expectedSpendAmount', params: {
                         receive_amount: new BigNumber(TOKENS_TO_RECEIVE).shiftedBy(tokens[1].decimals).toString(),
@@ -1134,7 +1134,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             logger.log(`Expected receive amount: ${TOKENS_TO_RECEIVE} ${tokens[1].symbol}`);
 
             let payload;
-            if (options.roots === 2) {
+            if (options.roots.length === 2) {
                 payload = await DexPool.call({
                     method: 'buildExchangePayloadV2', params: {
                         _id: 0,
