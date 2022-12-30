@@ -2,7 +2,9 @@ pragma ton-solidity >= 0.62.0;
 
 import "../libraries/EverToTip3OperationStatus.sol";
 import "../libraries/DexOperationTypes.sol";
-import "../structures/INextExchangeData.sol";
+import "../libraries/PairPayload.sol";
+
+import "../structures/IExchangeStepStructure.sol";
 
 library EverToTip3Payloads {
 
@@ -17,15 +19,6 @@ library EverToTip3Payloads {
         address outcoming
     ) public returns (TvmCell) {
         TvmBuilder builder;
-        TvmBuilder pairPayload;
-
-        //595
-        pairPayload.store(DexOperationTypes.EXCHANGE_V2);
-        pairPayload.store(id);
-        pairPayload.store(deployWalletValue);
-        pairPayload.store(expectedAmount);
-        pairPayload.store(address(0));
-        pairPayload.store(outcoming);
 
         TvmBuilder successPayload;
         successPayload.store(EverToTip3OperationStatus.SUCCESS);
@@ -37,18 +30,22 @@ library EverToTip3Payloads {
         cancelPayload.store(id);
         cancelPayload.store(deployWalletValue);
 
-        pairPayload.storeRef(successPayload);
-        pairPayload.storeRef(cancelPayload);
-
-        TvmBuilder otherDataBuilder;
-        otherDataBuilder.store(referrer);
-        pairPayload.store(otherDataBuilder.toCell());
+        TvmCell pairPayload = PairPayload.buildExchangePayloadV2(
+            id,
+            deployWalletValue,
+            expectedAmount,
+            address(0), // recipient
+            outcoming,
+            referrer,
+            successPayload.toCell(),
+            cancelPayload.toCell()
+        );
 
         builder.store(pair);
         if (amount != 0) {
             builder.store(amount);
         }
-        builder.storeRef(pairPayload);
+        builder.store(pairPayload);
         return builder.toCell();
     }
 
@@ -75,27 +72,6 @@ library EverToTip3Payloads {
         require(steps.length > 0);
 
         TvmBuilder builder;
-        TvmBuilder pairPayload;
-
-        pairPayload.store(DexOperationTypes.CROSS_PAIR_EXCHANGE_V2);
-        pairPayload.store(id);
-        pairPayload.store(deployWalletValue);
-        pairPayload.store(expectedAmount);
-        pairPayload.store(address(0));
-        pairPayload.store(outcoming);
-
-        INextExchangeData.NextExchangeData[] nextSteps;
-        for (uint32 idx : nextStepIndices) {
-            (TvmCell nextPayload, uint32 nestedNodes, uint32 leaves) = _encodeCrossPairExchangeData(steps, idx);
-            nextSteps.push(INextExchangeData.NextExchangeData(
-                steps[idx].numerator,
-                steps[idx].pool,
-                nextPayload,
-                nestedNodes,
-                leaves
-            ));
-        }
-        TvmCell nextStepsCell = abi.encode(nextSteps);
 
         TvmBuilder successPayload;
         successPayload.store(EverToTip3OperationStatus.SUCCESS);
@@ -107,47 +83,33 @@ library EverToTip3Payloads {
         cancelPayload.store(id);
         cancelPayload.store(deployWalletValue);
 
-        pairPayload.store(nextStepsCell);
-        pairPayload.storeRef(successPayload);
-        pairPayload.storeRef(cancelPayload);
+        IExchangeStepStructure.ExchangeStep[] exchangeSteps;
+        address[] pools;
+        for (uint32 i = 0; i < steps.length; i++) {
+            pools.push(steps[i].pool);
+            exchangeSteps.push(IExchangeStepStructure.ExchangeStep(steps[i].amount, new address[](0), steps[i].outcoming, steps[i].numerator, steps[i].nextStepIndices));
+        }
 
-        TvmBuilder otherDataBuilder;
-        otherDataBuilder.store(referrer);
-        pairPayload.store(otherDataBuilder.toCell());
+        TvmCell pairPayload = PairPayload.buildCrossPairExchangePayloadV2(
+            id,
+            deployWalletValue,
+            address(0), // recipient
+            expectedAmount,
+            outcoming,
+            nextStepIndices,
+            exchangeSteps,
+            pools,
+            referrer,
+            successPayload.toCell(),
+            cancelPayload.toCell()
+        );
 
         builder.store(pool);
         if (amount != 0) {
             builder.store(amount);
         }
-        builder.storeRef(pairPayload);
+        builder.store(pairPayload);
 
         return builder.toCell();
-    }
-
-    function _encodeCrossPairExchangeData(
-        EverToTip3ExchangeStep[] _steps,
-        uint32 _currentIdx
-    ) private returns (TvmCell, uint32, uint32) {
-        INextExchangeData.NextExchangeData[] nextSteps;
-        uint32 nextLevelNodes = 0;
-        uint32 nextLevelLeaves = 0;
-        for (uint32 idx : _steps[_currentIdx].nextStepIndices) {
-            (TvmCell nextPayload, uint32 nestedNodes, uint32 leaves) = _encodeCrossPairExchangeData(_steps, idx);
-            nextLevelNodes += nestedNodes;
-            nextLevelLeaves += leaves;
-            nextSteps.push(INextExchangeData.NextExchangeData(
-                _steps[idx].numerator,
-                _steps[idx].pool,
-                nextPayload,
-                nestedNodes,
-                leaves
-            ));
-        }
-
-        return (
-            abi.encode(_steps[_currentIdx].amount, _steps[_currentIdx].outcoming, nextSteps),
-            nextLevelNodes + uint32(nextSteps.length),
-            nextSteps.length > 0 ? nextLevelLeaves : 1
-        );
     }
 }

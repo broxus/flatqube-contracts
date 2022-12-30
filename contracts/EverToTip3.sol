@@ -123,13 +123,9 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
 
                 if (
                     (
-                        (ref1Slice.bits() == (595 - 72) || (ref1Slice.bits() == (862 - 72))) && // 862 for pool (with outcoming)
-                        ref1Slice.refs() == 3 &&
-                        operationType == DexOperationTypes.EXCHANGE_V2
-                    ) || (
-                        ref1Slice.bits() == (862 - 72) &&
+                        (ref1Slice.bits() == (734 - 72)) &&
                         ref1Slice.refs() == 4 &&
-                        operationType == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2
+                        (operationType == DexOperationTypes.EXCHANGE_V2 || operationType == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2)
                     )
                 ) {
                     result.set(DecodedMintPayload(

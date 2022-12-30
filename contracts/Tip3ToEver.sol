@@ -9,11 +9,12 @@ import "./libraries/EverToTip3Errors.sol";
 import "./libraries/DexOperationTypes.sol";
 import "./libraries/EverToTip3OperationStatus.sol";
 import "./libraries/DexOperationStatusV2.sol";
+import "./libraries/PairPayload.sol";
 
 import "./interfaces/IEverTip3SwapEvents.sol";
 import "./interfaces/IEverTip3SwapCallbacks.sol";
 
-import "./structures/INextExchangeData.sol";
+import "./structures/IExchangeStepStructure.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "tip3/contracts/interfaces/ITokenRoot.sol";
@@ -63,15 +64,6 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         optional(address) outcoming
     ) public pure returns (TvmCell) {
         TvmBuilder builder;
-        TvmBuilder pairPayload;
-
-        //595
-        pairPayload.store(DexOperationTypes.EXCHANGE_V2);
-        pairPayload.store(id);
-        pairPayload.store(uint128(0));
-        pairPayload.store(expectedAmount);
-        pairPayload.store(address(0));
-        pairPayload.store(outcoming.hasValue() ? outcoming.get() : address(0));
 
         TvmBuilder successPayload;
         successPayload.store(EverToTip3OperationStatus.SUCCESS);
@@ -82,16 +74,20 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         cancelPayload.store(id);
         cancelPayload.store(uint128(0));
 
-        pairPayload.storeRef(successPayload);
-        pairPayload.storeRef(cancelPayload);
-
-        TvmBuilder otherDataBuilder;
-        otherDataBuilder.store(referrer);
-        pairPayload.store(otherDataBuilder.toCell());
+        TvmCell pairPayload = PairPayload.buildExchangePayloadV2(
+            id,
+            0, // deployWalletGrams
+            expectedAmount,
+            address(0), // recipient
+            outcoming.hasValue() ? outcoming.get() : address(0),
+            referrer,
+            successPayload.toCell(),
+            cancelPayload.toCell()
+        );
 
         builder.store(EverToTip3OperationStatus.SWAP);
         builder.store(pair);
-        builder.storeRef(pairPayload);
+        builder.store(pairPayload);
         return builder.toCell();
     }
 
@@ -113,31 +109,10 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         uint32[] nextStepIndices,
         Tip3ToEverExchangeStep[] steps,
         address referrer
-    ) public returns (TvmCell) {
+    ) public pure returns (TvmCell) {
         require(steps.length > 0);
 
         TvmBuilder builder;
-        TvmBuilder pairPayload;
-
-        pairPayload.store(DexOperationTypes.CROSS_PAIR_EXCHANGE_V2);
-        pairPayload.store(id);
-        pairPayload.store(deployWalletValue);
-        pairPayload.store(expectedAmount);
-        pairPayload.store(address(0));
-        pairPayload.store(outcoming);
-
-        INextExchangeData.NextExchangeData[] nextSteps;
-        for (uint32 idx : nextStepIndices) {
-            (TvmCell nextPayload, uint32 nestedNodes, uint32 leaves) = _encodeCrossPairExchangeData(steps, idx);
-            nextSteps.push(INextExchangeData.NextExchangeData(
-                steps[idx].numerator,
-                steps[idx].pool,
-                nextPayload,
-                nestedNodes,
-                leaves
-            ));
-        }
-        TvmCell nextStepsCell = abi.encode(nextSteps);
 
         TvmBuilder successPayload;
         successPayload.store(EverToTip3OperationStatus.SUCCESS);
@@ -148,46 +123,32 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         cancelPayload.store(id);
         cancelPayload.store(deployWalletValue);
 
-        pairPayload.store(nextStepsCell);
-        pairPayload.storeRef(successPayload);
-        pairPayload.storeRef(cancelPayload);
+        IExchangeStepStructure.ExchangeStep[] exchangeSteps;
+        address[] pools;
+        for (uint32 i = 0; i < steps.length; i++) {
+            pools.push(steps[i].pool);
+            exchangeSteps.push(IExchangeStepStructure.ExchangeStep(steps[i].amount, new address[](0), steps[i].outcoming, steps[i].numerator, steps[i].nextStepIndices));
+        }
 
-        TvmBuilder otherDataBuilder;
-        otherDataBuilder.store(referrer);
-        pairPayload.store(otherDataBuilder.toCell());
+        TvmCell pairPayload = PairPayload.buildCrossPairExchangePayloadV2(
+            id,
+            deployWalletValue,
+            address(0), // recipient
+            expectedAmount,
+            outcoming,
+            nextStepIndices,
+            exchangeSteps,
+            pools,
+            referrer,
+            successPayload.toCell(),
+            cancelPayload.toCell()
+        );
 
         builder.store(EverToTip3OperationStatus.SWAP);
         builder.store(pool);
-        builder.storeRef(pairPayload);
+        builder.store(pairPayload);
 
         return builder.toCell();
-    }
-
-    function _encodeCrossPairExchangeData(
-        Tip3ToEverExchangeStep[] _steps,
-        uint32 _currentIdx
-    ) private returns (TvmCell, uint32, uint32) {
-        INextExchangeData.NextExchangeData[] nextSteps;
-        uint32 nextLevelNodes = 0;
-        uint32 nextLevelLeaves = 0;
-        for (uint32 idx : _steps[_currentIdx].nextStepIndices) {
-            (TvmCell nextPayload, uint32 nestedNodes, uint32 leaves) = _encodeCrossPairExchangeData(_steps, idx);
-            nextLevelNodes += nestedNodes;
-            nextLevelLeaves += leaves;
-            nextSteps.push(INextExchangeData.NextExchangeData(
-                _steps[idx].numerator,
-                _steps[idx].pool,
-                nextPayload,
-                nestedNodes,
-                leaves
-            ));
-        }
-
-        return (
-            abi.encode(_steps[_currentIdx].amount, _steps[_currentIdx].outcoming, nextSteps),
-            nextLevelNodes + uint32(nextSteps.length),
-            nextSteps.length > 0 ? nextLevelLeaves : 1
-        );
     }
 
     // Callback result swap
