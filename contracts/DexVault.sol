@@ -46,7 +46,7 @@ contract DexVault is
 
     address private _tokenFactory;
 
-    mapping(address => bool) private _lpVaultWallets;
+    mapping(address => bool) public _lpVaultWallets;
 
     // referral program
     uint256 private _projectId = 0;
@@ -157,6 +157,14 @@ contract DexVault is
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } _root;
+    }
+
+    function getReferralProgramParams() external view responsible returns (uint256, address) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } (_projectId, _projectAddress);
     }
 
     function setTokenFactory(address new_token_factory) public override onlyOwner {
@@ -451,7 +459,7 @@ contract DexVault is
 
         builder.store(platform_code);
         builder.store(_lpTokenPendingCode);
-        builder.store(abi.encode(_lpVaultWallets));
+        builder.store(abi.encode(_lpVaultWallets, _projectId, _projectAddress));
 
         tvm.setcode(code);
         tvm.setCurrentCode(code);

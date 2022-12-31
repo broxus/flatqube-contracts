@@ -103,7 +103,7 @@ npx locklift test $NO_TRACE --tests test/30-install-pool-code.js --contract_name
 npx locklift test $NO_TRACE --tests test/35-upgrade-pool.js --roots='["foo", "bar", "qwe"]' --old_contract_name='DexStablePool' --new_contract_name='DexStablePool' --pool_type=3
 echo "____________________________________________________________________";
 echo "vault ->  next vault";
-npx locklift run $NO_TRACE --script scripts/update-dexVault.js --old_contract='DexVault' --new_contract='DexVault'
+npx locklift test $NO_TRACE --tests test/upgrade/3-vault-upgrade-test.js
 
 echo "____________________________________________________________________";
 echo "root ->  next root";
