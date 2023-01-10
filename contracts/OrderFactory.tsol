@@ -14,6 +14,10 @@ import "./interfaces/IHasEmergencyMode.tsol";
 import "./OrderPlatform.tsol";
 import "./OrderRoot.tsol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
+import "tip3/contracts/TokenWalletPlatform.tsol";
+import "tip3/contracts/interfaces/ITokenWallet.tsol";
+
+
 
 contract OrderFactory is IOrderFactory {
 	uint32 static randomNonce;
@@ -202,27 +206,38 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
-	function withdrawFee(address orderRoot, uint128 amount, address recipient, address tokenRoot, address rm_gas_to) override external onlyOwner {
-		require(orderRoot.value != 0 && amount != 0 && recipient.value != 0 && rm_gas_to.value != 0 && tokenRoot.value != 0 && msg.value >= OrderGas.WITHDRAW_FEE_VALUE,
+	function getTokenWallet(
+        address token
+    ) internal view returns (address) {
+        return
+        address(tvm.hash(
+            tvm.buildStateInit({
+                contr: TokenWalletPlatform,
+                varInit: { root: token, owner: address(this) },
+                code: tokenPlatformCode
+        })
+        ));
+    }
+
+	function withdrawFee(uint128 amount, address recipient, uint128 deployWalletValue, uint128 gasValue, address tokenRoot, address rm_gas_to) override external onlyOwner {
+		require(amount != 0 && recipient.value != 0 && rm_gas_to.value != 0 && tokenRoot.value != 0,
 			OrderErrors.WRONG_WITHDRAW_FEE_PARAMS);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tvm.accept();
 
-		IOrderRoot(orderRoot).withdrawFee{
-			value: OrderGas.WITHDRAW_FEE_VALUE,
-			flag: MsgFlag.SENDER_PAYS_FEES,
-			bounce: false
-		}(
-			amount,
-			recipient,
-			tokenRoot,
-			rm_gas_to
-		);
+		address walletBeneficiary = getTokenWallet(tokenRoot);
+		TvmCell empty;
 
-		owner.transfer(
-			0,
-			false,
-			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
-		);
+        ITokenWallet(walletBeneficiary).transfer{
+            value: gasValue,
+            flag: MsgFlag.SENDER_PAYS_FEES
+        }(
+            amount,
+            recipient,
+            deployWalletValue,
+            rm_gas_to,
+            false,
+            empty
+        );
 	}
 
 	function setRootFeeParams(OrderFeeParams params, address root) override external onlyOwner {
@@ -430,7 +445,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function buildParams() internal view returns (TvmCell) {
-		return abi.encode(dexRoot, orderCode, orderClosedCode, tokenPlatformCode, fee);
+		return abi.encode(dexRoot, orderCode, orderClosedCode, fee);
 	}
 
 	function upgrade(

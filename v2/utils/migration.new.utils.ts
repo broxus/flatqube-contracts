@@ -355,17 +355,31 @@ export const orderFactoryMigration = async (
     numerator: feeNumerator
     }
   }).send({
-    amount: locklift.utils.toNano(15),
+    amount: locklift.utils.toNano(5),
     from: account.address
   }))
 
   const feeParams = await contract.methods.getFeeParams({answerId:1}).call()
   // Log and save address
+
+  logMigrationProcess(
+    'OrderFactoryMigration',
+    'setTokenWalletPlatformCodeOnce',
+    'setTokenWalletPlatformCodeOnce...',
+  );
+  const walletPlatform = await locklift.factory.getContractArtifacts("TokenWalletPlatform")
+  await contract.methods.setTokenWalletPlatformCodeOnce({_tokenWalletPlatform: walletPlatform.code}).send({
+    amount: locklift.utils.toNano(5),
+    from: account.address
+  })
+
   logMigrationSuccess(
     'OrderFactoryMigration',
     'constructor',
     `Deployed OrderFactory: ${contract.address}\nFee params:\nnumerator - ${feeParams.value0.numerator}\ndenominator - ${feeParams.value0.denominator}`,
   );
+
+
   new Migration().store(contract, 'OrderFactory');
 
   return contract;

@@ -36,7 +36,7 @@ interface IOrderFactory is IOrderFeeParams {
     function setOrderFeeParams(OrderFeeParams params, address order) external;
     function setRootBeneficiary(address beneficiary_, address root) external;
     function setOrderBeneficiary(address beneficiary_, address order) external;
-    function withdrawFee(address orderRoot, uint128 amount, address tokenRoot, address recipient, address rm_gas_to) external;
+    function withdrawFee(uint128 amount, address recipient, uint128 deployWalletValue, uint128 gasValue, address tokenRoot, address rm_gas_to) external;
     function getFeeParams() external view responsible returns (OrderFeeParams);
 
     function getExpectedAddressOrderRoot(address token)
