@@ -368,10 +368,10 @@ export const orderFactoryMigration = async (
     'setTokenWalletPlatformCodeOnce...',
   );
   const walletPlatform = await locklift.factory.getContractArtifacts("TokenWalletPlatform")
-  await contract.methods.setTokenWalletPlatformCodeOnce({_tokenWalletPlatform: walletPlatform.code}).send({
+  await locklift.tracing.trace(contract.methods.setTokenWalletPlatformCodeOnce({_tokenWalletPlatform: walletPlatform.code}).send({
     amount: locklift.utils.toNano(5),
     from: account.address
-  })
+  }))
 
   logMigrationSuccess(
     'OrderFactoryMigration',

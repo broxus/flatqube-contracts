@@ -4,22 +4,22 @@ pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
-import "./libraries/OrderGas.tsol";
-import "./libraries/OrderErrors.tsol";
+import "../libraries/OrderGas.tsol";
+import "../libraries/OrderErrors.tsol";
 
-import "./interfaces/IOrderFactory.tsol";
-import "./interfaces/IOrderRoot.tsol";
-import "./interfaces/IHasEmergencyMode.tsol";
+import "../interfaces/IOrderFactory.tsol";
+import "../interfaces/IOrderRoot.tsol";
+import "../interfaces/IHasEmergencyMode.tsol";
 
-import "./OrderPlatform.tsol";
-import "./OrderRoot.tsol";
+import "../OrderPlatform.tsol";
+import "../OrderRoot.tsol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "tip3/contracts/TokenWalletPlatform.tsol";
 import "tip3/contracts/interfaces/ITokenWallet.tsol";
 
 
-
-contract OrderFactory is IOrderFactory {
+// This is just for test purposes, this is not a real contract!
+contract TestNewOrderFactory is IOrderFactory {
 	uint32 static randomNonce;
 	address static dexRoot;
 
@@ -40,6 +40,7 @@ contract OrderFactory is IOrderFactory {
 	TvmCell orderCode;
 	TvmCell orderClosedCode;
 	TvmCell tokenPlatformCode;
+    string newTestField;
 
 	constructor(address _owner, uint32 _version) public {
 		require(_owner.value != 0);
@@ -69,12 +70,12 @@ contract OrderFactory is IOrderFactory {
 		address sendGasTo
 	) external override {
 		require(
-			msg.sender.value != 0 && msg.sender == expectedAddressOrderRoot(token), 
+			msg.sender.value != 0 && msg.sender == expectedAddressOrderRoot(token),
 			OrderErrors.NOT_LIMIT_ORDER_ROOT
 		);
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		emit CreateOrderRoot(_orderRoot, token);
-		
+
 		sendGasTo.transfer({
 			value: 0,
 			flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
@@ -136,7 +137,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function setEmergency(
-		bool enabled, 
+		bool enabled,
 		address orderAddress,
 		uint256 manager
 	) external view onlyOwner {
@@ -154,7 +155,7 @@ contract OrderFactory is IOrderFactory {
 				flag: MsgFlag.ALL_NOT_RESERVED,
 				bounce: false
 			}();
-		}	
+		}
 	}
 
 	function upgradeOrderRoot(address orderAddress) external view onlyOwner {
@@ -462,6 +463,7 @@ contract OrderFactory is IOrderFactory {
 			});
 		} else {
 			emit OrderFactoryUpgrade(currentVersion, newVersion);
+
 			TvmBuilder builder;
 			builder.store(currentVersion);
 			builder.store(newVersion);
@@ -469,27 +471,16 @@ contract OrderFactory is IOrderFactory {
 			builder.store(owner);
 			builder.store(pendingOwner);
 			builder.store(dexRoot);
-
-			TvmBuilder builderCode;
-			builderCode.store(orderRootCode);
-			builderCode.store(orderCode);
-			builderCode.store(orderClosedCode);
-			builderCode.store(orderPlatformCode);
-			builder.storeRef(builderCode);
-
-			TvmBuilder builderTokenPlatformCode;
-			builderTokenPlatformCode.store(tokenPlatformCode);
-			builder.storeRef(builderTokenPlatformCode);
+			builder.store(orderRootCode);
+			builder.store(orderCode);
+			builder.store(orderClosedCode);
+			builder.store(orderPlatformCode);
+			builder.store(tokenPlatformCode);
 
 			TvmBuilder builderFee;
 			builderFee.store(fee.numerator);
 			builderFee.store(fee.denominator);
 			builder.storeRef(builderFee);
-
-			TvmBuilder builderSendGasTo;
-			builderSendGasTo.store(sendGasTo);
-			builder.storeRef(builderSendGasTo);
-
 
 			tvm.setcode(newCode);
 			tvm.setCurrentCode(newCode);
@@ -498,5 +489,51 @@ contract OrderFactory is IOrderFactory {
 		}
 	}
 
-	function onCodeUpgrade(TvmCell data) private {}
+	function onCodeUpgrade(TvmCell data) private {
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 2);
+        tvm.resetStorage();
+        TvmSlice s = data.toSlice();
+        uint32 oldVersion;
+        address sendGasTo;
+        (
+		oldVersion,
+		currentVersion,
+		versionOrderRoot,
+		owner,
+		pendingOwner,
+		dexRoot
+		) =
+        s.decode
+		(
+			uint32,
+			uint32,
+			uint32,
+			address,
+			address,
+			address
+		);
+
+		TvmSlice codeParamsSlice = s.loadRefAsSlice();
+        orderRootCode = codeParamsSlice.loadRef();
+		orderCode = codeParamsSlice.loadRef();
+		orderClosedCode = codeParamsSlice.loadRef();
+		orderPlatformCode = codeParamsSlice.loadRef();
+
+		TvmSlice tokenPlatformCodeParamsSlice = s.loadRefAsSlice();
+		tokenPlatformCode = tokenPlatformCodeParamsSlice.loadRef();
+
+        TvmSlice feeParams = s.loadRefAsSlice();
+        fee.numerator = feeParams.decode(uint128);
+		fee.denominator = feeParams.decode(uint128);
+
+		TvmSlice sendGasToParams = s.loadRefAsSlice();
+		sendGasTo = sendGasToParams.decode(address);
+        newTestField = "New Order Factory";
+
+        sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
+	}
+
+	function newFunc() public view returns (string) {
+        return newTestField;
+    }
 }

@@ -4,26 +4,27 @@ pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
-import "./libraries/OrderGas.tsol";
-import "./libraries/OrderErrors.tsol";
+import "../libraries/OrderGas.tsol";
+import "../libraries/OrderErrors.tsol";
 
-import "./structures/IOrderRootCreateResult.tsol";
+import "../structures/IOrderRootCreateResult.tsol";
 
-import "./interfaces/IOrderRoot.tsol";
-import "./interfaces/IOrderFactory.tsol";
-import "./interfaces/IOrderOperationCallback.tsol";
+import "../interfaces/IOrderRoot.tsol";
+import "../interfaces/IOrderFactory.tsol";
+import "../interfaces/IOrderOperationCallback.tsol";
 
-import "./Order.tsol";
+import "../Order.tsol";
+
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "tip3/contracts/interfaces/ITokenRoot.tsol";
 import "tip3/contracts/interfaces/ITokenWallet.tsol";
 import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
 
-contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
+contract TestNewOrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     address factory;
     address spentToken;
-    
+
     uint32 version;
     TvmCell orderCode;
     TvmCell orderClosedCode;
@@ -31,6 +32,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     address spentTokenWallet;
     address deployer;
     address dexRoot;
+    string newTestField;
 
     OrderFeeParams fee;
 	address beneficiary;
@@ -154,7 +156,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         if (payloadSlice.bits() == 779 &&
             msg.sender.value != 0 &&
             msg.sender.value >= OrderGas.DEPLOY_ORDER_MIN_VALUE &&
-            msg.sender == spentTokenWallet) 
+            msg.sender == spentTokenWallet)
         {
             (address receiveToken, uint128 expectedAmount, uint128 deployWalletValue, uint256 backPubKey) =
             payloadSlice.decode(address, uint128, uint128, uint256);
@@ -171,8 +173,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 value: OrderGas.DEPLOY_ORDER_MIN_VALUE
             }(
                 expectedAmount,
-                amount, 
-                backPubKey, 
+                amount,
+                backPubKey,
                 dexRoot,
                 fee,
                 beneficiary,
@@ -189,17 +191,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 }(callbackId);
             }
 
-            ITokenRoot(receiveToken).deployWallet { 
-                value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
-                flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: OrderRoot.onTokenWalletReceive
-            }(sender, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
-
-            ITokenRoot(receiveToken).deployWallet {
-                value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
-                flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: OrderRoot.onTokenWalletBeneficiary
-            }(beneficiary, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
             ITokenWallet(msg.sender).transfer{
                 value: 0, flag: MsgFlag.ALL_NOT_RESERVED,
@@ -229,7 +220,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 bounce: false
             }(
                 amount,
-                sender, 
+                sender,
                 uint128(0),
                 originalGasTo,
                 true,
@@ -246,7 +237,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         address _receiveToken,
         uint64 timeTx,
         uint64 nowTx
-    ) override external view responsible returns (address) 
+    ) override external view responsible returns (address)
     {
         TvmBuilder salt;
         salt.store(_root);
@@ -266,11 +257,11 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                     spentToken: _spentToken,
                     receiveToken: _receiveToken,
                     timeTx: timeTx,
-                    nowTx: nowTx    
+                    nowTx: nowTx
                },
-               code: tvm.setCodeSalt(orderCode, salt.toCell())  
+               code: tvm.setCodeSalt(orderCode, salt.toCell())
            })
-       ));    
+       ));
     }
 
     function buildCode(
@@ -304,8 +295,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     }
 
     function upgrade(
-        TvmCell _code, 
-        uint32 _newVersion, 
+        TvmCell _code,
+        uint32 _newVersion,
         address _sendGasTo
     ) external override onlyFactory {
         if (version == _newVersion) {
@@ -318,10 +309,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             builder.store(spentToken);
             builder.store(factory);
             builder.store(version);
-            builder.store(_newVersion);
             builder.store(orderCode);
             builder.store(orderClosedCode);
-
 
             TvmBuilder builder1;
             builder1.store(spentTokenWallet);
@@ -335,6 +324,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             builder2.store(beneficiary);
             builder.storeRef(builder2);
 
+
             tvm.setcode(_code);
             tvm.setCurrentCode(_code);
 
@@ -346,42 +336,45 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
         TvmSlice sl = _data.toSlice();
-
-        (address _factory, address _spentToken, uint32 oldVersion, uint32 _version, address _deployer) =
-        sl.decode(address, address, uint32, uint32, address);
+        address sendGasTo;
+        uint32 oldVersion;
+        (
+        spentToken,
+        factory,
+        oldVersion,
+        version
+        ) =
+        sl.decode(address, address, uint32, uint32);
 
         if (oldVersion == 0) {
             tvm.resetStorage();
         }
 
-        factory = _factory;
-        beneficiary = _factory;
-        spentToken = _spentToken;
-        version = _version;
-        deployer = _deployer;
+        orderCode = sl.loadRef();
+        orderClosedCode = sl.loadRef();
 
         TvmSlice dataSl = sl.loadRefAsSlice();
-        dexRoot = dataSl.decode(address);
-        orderCode = dataSl.loadRef();
-        orderClosedCode = dataSl.loadRef();
+        (spentTokenWallet, deployer, dexRoot) = dataSl.decode(address, address, address);
 
-        (uint128 numerator_, uint128 denominator_) = dataSl.decode(uint128, uint128);
+        TvmSlice dataSlFee = sl.loadRefAsSlice();
+        (uint128 numerator_, uint128 denominator_, address beneficiary_) = dataSlFee.decode(uint128, uint128, address);
+
+        beneficiary = beneficiary_;
         fee = OrderFeeParams(numerator_, denominator_);
+
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
-        ITokenRoot(spentToken).deployWallet{
-            value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
-            flag: MsgFlag.SENDER_PAYS_FEES,
-            callback: OrderRoot.onTokenWallet
-        }(
-            address(this), 
-            OrderGas.DEPLOY_EMPTY_WALLET_GRAMS
-        );
+        newTestField = "New Order Root";
 
         deployer.transfer({
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
             bounce: false
         });
+
     }
+    function newFunc() public view returns (string) {
+        return newTestField;
+    }
+
 }
