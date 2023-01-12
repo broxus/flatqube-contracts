@@ -679,7 +679,7 @@ contract DexRoot is
     function setPairAmplificationCoefficient(
         address[] _roots,
         AmplificationCoefficient _A,
-        address send_gas_to
+        address _remainingGasTo
     ) external view onlyManagerOrOwner {
         tvm.rawReserve(
             math.max(
@@ -691,7 +691,7 @@ contract DexRoot is
 
         IDexStablePair(_expectedPoolAddress(_roots))
             .setAmplificationCoefficient{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (_A, send_gas_to);
+            (_A, _remainingGasTo);
     }
 
     function resetTargetGas(

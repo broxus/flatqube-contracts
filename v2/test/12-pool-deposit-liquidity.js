@@ -28,7 +28,7 @@ program.parse(process.argv);
 const options = program.opts();
 
 options.roots = options.roots ? JSON.parse(options.roots) : ['foo', 'bar', 'qwe'];
-options.amounts = options.amounts ? JSON.parse(options.amounts) : ['1000000, 1000000, 1000000'];
+options.amounts = options.amounts ? JSON.parse(options.amounts) : [1000000, 1000000, 1000000];
 options.contract_name = options.contract_name || 'DexStablePool';
 options.auto_change = options.auto_change || false;
 

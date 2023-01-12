@@ -1,4 +1,6 @@
-const {afterRun, displayTx} = require(process.cwd() + '/scripts/utils')
+import {Address, toNano, WalletTypes} from "locklift";
+
+const {displayTx} = require(process.cwd() + '/scripts/utils')
 const {Migration} = require(process.cwd()+'/scripts/utils')
 
 const fs = require('fs');
@@ -12,29 +14,27 @@ if (data) dexPairs = JSON.parse(data);
 
 async function main() {
     const migration = new Migration();
-    const dexOwner = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
-    const keyPairs = await locklift.keys.getKeyPairs();
-    const DEX_OWNER_KEYS = keyPairs[0];
+    const dexOwner = await locklift.factory.accounts.addExistingAccount({
+        type: WalletTypes.EverWallet,
+        address: migration.getAddress('Account1')
+    });
 
-    const dexRoot = await locklift.factory.getContract('DexRoot');
-    dexRoot.setAddress(DEX_ROOT_ADDRESS);
+    const dexRoot = await locklift.factory.getDeployedContract('DexRoot', new Address(DEX_ROOT_ADDRESS));
 
     console.log(`Start upgrade fee params. Count = ${dexPairs.length}`);
 
     for (let indx in dexPairs) {
         const pairData = dexPairs[indx];
         console.log(`${1 + (+indx)}/${dexPairs.length}: Update fee params for ${pairData.title}`);
-        const tx = await dexOwner.runTarget({
-            contract: dexRoot,
-            method: 'setPairFeeParams',
-            params: {
+        const tx = await dexRoot.methods.setPairFeeParams(
+            {
                 _roots: pairData.roots,
                 _params: pairData.fee,
                 _remainingGasTo: dexOwner.address
-            },
-            value: locklift.utils.convertCrystal(5, 'nano'),
-            keyPair: DEX_OWNER_KEYS
-        });
+            }).send({
+                from: dexOwner.address,
+                amount: toNano(5),
+            });
         displayTx(tx);
         console.log(``);
     }
