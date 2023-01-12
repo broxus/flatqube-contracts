@@ -149,6 +149,14 @@
 			]
 		},
 		{
+			"name": "setTokenWalletPlatformCodeOnce",
+			"inputs": [
+				{"name":"_tokenWalletPlatform","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "setFeeParams",
 			"inputs": [
 				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"params","type":"tuple"}
@@ -159,9 +167,10 @@
 		{
 			"name": "withdrawFee",
 			"inputs": [
-				{"name":"orderRoot","type":"address"},
 				{"name":"amount","type":"uint128"},
 				{"name":"recipient","type":"address"},
+				{"name":"deployWalletValue","type":"uint128"},
+				{"name":"gasValue","type":"uint128"},
 				{"name":"tokenRoot","type":"address"},
 				{"name":"rm_gas_to","type":"address"}
 			],
@@ -182,6 +191,24 @@
 			"inputs": [
 				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"params","type":"tuple"},
 				{"name":"order","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setOrderBeneficiary",
+			"inputs": [
+				{"name":"beneficiary_","type":"address"},
+				{"name":"order","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setRootBeneficiary",
+			"inputs": [
+				{"name":"beneficiary_","type":"address"},
+				{"name":"root","type":"address"}
 			],
 			"outputs": [
 			]
@@ -224,14 +251,6 @@
 			"inputs": [
 				{"name":"token","type":"address"},
 				{"name":"callbackId","type":"uint64"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "onTokenWallet",
-			"inputs": [
-				{"name":"wallet","type":"address"}
 			],
 			"outputs": [
 			]
@@ -323,6 +342,13 @@
 			]
 		},
 		{
+			"name": "TokenWalletPlatformCodeUpgraded",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "CreateOrderRoot",
 			"inputs": [
 				{"name":"order","type":"address"},
@@ -366,6 +392,7 @@
 		{"name":"orderRootCode","type":"cell"},
 		{"name":"orderPlatformCode","type":"cell"},
 		{"name":"orderCode","type":"cell"},
-		{"name":"orderClosedCode","type":"cell"}
+		{"name":"orderClosedCode","type":"cell"},
+		{"name":"tokenPlatformCode","type":"cell"}
 	]
 }
