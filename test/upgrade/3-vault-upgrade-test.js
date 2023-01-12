@@ -21,12 +21,16 @@ let newVaultData = {};
 
 const loadVaultData = async (vault) => {
   const data = {};
-  data.platform_code = await vault.call({method: 'platform_code'});
-  data.lp_token_pending_code = await vault.call({method: 'lp_token_pending_code'});
-  data.root = await vault.call({method: 'root'});
-  data.owner = await vault.call({method: 'owner'});
-  data.pending_owner = await vault.call({method: 'pending_owner'});
-  data.token_factory = await vault.call({method: 'token_factory'});
+  data.platform_code = await vault.call({method: 'platform_code', params: {}});
+  data.lp_token_pending_code = await vault.call({method: 'getLpTokenPendingCode', params: {}});
+  data.root = await vault.call({method: 'getRoot', params: {}});
+  data.owner = await vault.call({method: 'getOwner', params: {}});
+  data.pending_owner = await vault.call({method: 'getPendingOwner', params: {}});
+  data.token_factory = await vault.call({method: 'getTokenFactory', params: {}});
+  data.lpVaultWallets = await vault.call({method: '_lpVaultWallets'});
+  const referralProgramParams = await vault.call({method: 'getReferralProgramParams', params: {}});
+  data.projectId = referralProgramParams.value0.toString();
+  data.projectAddress = referralProgramParams.value1;
   return data;
 }
 
@@ -86,6 +90,18 @@ describe('Test Dex Vault contract upgrade', async function () {
       expect(newVaultData.token_factory)
         .to
         .equal(oldVaultData.token_factory, 'New token_factory value incorrect');
+
+      expect(JSON.stringify(newVaultData.lpVaultWallets))
+          .to
+          .equal(JSON.stringify(oldVaultData.lpVaultWallets), 'New lpVaultWallets value incorrect');
+
+      expect(newVaultData.projectId)
+          .to
+          .equal(oldVaultData.projectId, 'New projectId value incorrect');
+
+      expect(newVaultData.projectAddress)
+          .to
+          .equal(oldVaultData.projectAddress, 'New projectAddress value incorrect');
     });
   });
 });
