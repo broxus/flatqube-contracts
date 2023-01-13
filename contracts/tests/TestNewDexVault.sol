@@ -27,6 +27,7 @@ contract NewDexVault {
     // referral program
     uint256 private _projectId;
     address private _projectAddress;
+    address private _refSystemAddress;
 
     string newTestField;
 
@@ -72,12 +73,12 @@ contract NewDexVault {
         } _root;
     }
 
-    function getReferralProgramParams() external view responsible returns (uint256, address) {
+    function getReferralProgramParams() external view responsible returns (uint256, address, address) {
         return {
         value: 0,
         bounce: false,
         flag: MsgFlag.REMAINING_GAS
-        } (_projectId, _projectAddress);
+        } (_projectId, _projectAddress, _refSystemAddress);
     }
 
     function onCodeUpgrade(TvmCell _data) private {
@@ -95,7 +96,7 @@ contract NewDexVault {
         _lpTokenPendingCode = slice.loadRef();
 
         if (slice.refs() >= 1) {
-            (_lpVaultWallets, _projectId, _projectAddress)  = abi.decode(slice.loadRef(), (mapping(address => bool), uint256, address));
+            (_lpVaultWallets, _projectId, _projectAddress, _refSystemAddress)  = abi.decode(slice.loadRef(), (mapping(address => bool), uint256, address, address));
         }
 
         newTestField = "New Vault";

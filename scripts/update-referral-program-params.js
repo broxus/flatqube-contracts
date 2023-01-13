@@ -6,7 +6,8 @@ const migration = new Migration();
 program
     .allowUnknownOption()
     .option('-id, --project_id <project_id>', 'Project Id')
-    .option('-addr, --project_address <project_address>', 'Project address');
+    .option('-proj, --project_address <project_address>', 'Project address')
+    .option('-ref_sys, --ref_system_address <ref_system_address>', 'Referral system address');
 
 program.parse(process.argv);
 
@@ -19,14 +20,15 @@ async function main() {
 
     const dexVault = migration.load(await locklift.factory.getContract('DexVault'), 'DexVault');
 
-    if (options.project_id !== undefined && options.project_address !== undefined) {
-        console.log(`Set referral program params:\n -project_id: ${options.project_id}\n-project_address: ${options.project_address}`);
+    if (options.project_id !== undefined && options.project_address !== undefined && options.ref_system_address !== undefined) {
+        console.log(`Set referral program params:\n -project_id: ${options.project_id}\n    -project_address: ${options.project_address}\n    -ref_system_address: ${refSystemAddress}`);
         const tx = await account.runTarget({
             contract: dexVault,
             method: 'updateReferralProgramParams',
             params: {
                 project_id: options.project_id,
-                project_address: options.project_address
+                project_address: options.project_address,
+                ref_system_address: options.ref_system_address
             },
             value: locklift.utils.convertCrystal(1, 'nano'),
             keyPair

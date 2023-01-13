@@ -343,15 +343,17 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
 
     before('Set referral program params', async function () {
         let projectId = 22222;
-        let projectAddress = Account4.address;
+        let projectAddress = locklift.utils.zeroAddress;
+        let refSystemAddress = Account4.address;
 
-        logger.log(`Set referral program params:\n      -project_id: ${projectId}\n      -project_address: ${projectAddress}`);
+        logger.log(`Set referral program params:\n      -project_id: ${projectId}\n      -project_address: ${projectAddress}\n      -ref_system_address: ${refSystemAddress}`);
         const tx = await Account1.runTarget({
             contract: DexVault,
             method: 'updateReferralProgramParams',
             params: {
                 project_id: projectId,
-                project_address: projectAddress
+                project_address: projectAddress,
+                ref_system_address: refSystemAddress
             },
             value: locklift.utils.convertCrystal(1, 'nano'),
             keyPair: keyPairs[0]
@@ -486,7 +488,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                     _remainingGasTo: Account2.address,
                     _referrer: Account2.address
                 },
-                value: locklift.utils.convertCrystal('4', 'nano'),
+                value: locklift.utils.convertCrystal('5', 'nano'),
                 keyPair: keyPairs[1]
             });
 
@@ -741,7 +743,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: locklift.utils.convertCrystal('3.3', 'nano'),
                 keyPair: keyPairs[1]
             });
 
@@ -998,7 +1000,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: locklift.utils.convertCrystal('3.3', 'nano'),
                 keyPair: keyPairs[1]
             });
 
@@ -1168,7 +1170,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: locklift.utils.convertCrystal('3.3', 'nano'),
                 keyPair: keyPairs[1]
             });
 

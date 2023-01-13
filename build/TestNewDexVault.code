@@ -10,7 +10,7 @@ IFREF {
 GETGLOB 6
 THROWIF 51
 ENDS
-.loc ../contracts/tests/TestNewDexVault.sol, 33
+.loc ../contracts/tests/TestNewDexVault.sol, 34
 THROW 100
 .loc ../contracts/tests/TestNewDexVault.sol, 0
 
@@ -23,7 +23,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexVault.sol, 35
+.loc ../contracts/tests/TestNewDexVault.sol, 36
 LDU 32
 GETGLOB 4
 ROT
@@ -93,7 +93,7 @@ IFREF {
 THROW 0
 
 .macro getOwner_893d20e8_internal_macro
-.loc ../contracts/tests/TestNewDexVault.sol, 40
+.loc ../contracts/tests/TestNewDexVault.sol, 41
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -114,7 +114,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexVault.sol, 43
+.loc ../contracts/tests/TestNewDexVault.sol, 44
 LDU 32
 GETGLOB 4
 ROT
@@ -184,7 +184,7 @@ IFREF {
 THROW 0
 
 .macro getPendingOwner_93596c7b_internal_macro
-.loc ../contracts/tests/TestNewDexVault.sol, 48
+.loc ../contracts/tests/TestNewDexVault.sol, 49
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -205,7 +205,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexVault.sol, 51
+.loc ../contracts/tests/TestNewDexVault.sol, 52
 LDU 32
 GETGLOB 4
 ROT
@@ -268,7 +268,7 @@ IFREF {
 THROW 0
 
 .macro getLpTokenPendingCode_5ea0c66e_internal_macro
-.loc ../contracts/tests/TestNewDexVault.sol, 56
+.loc ../contracts/tests/TestNewDexVault.sol, 57
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -289,7 +289,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexVault.sol, 59
+.loc ../contracts/tests/TestNewDexVault.sol, 60
 LDU 32
 GETGLOB 4
 ROT
@@ -359,7 +359,7 @@ IFREF {
 THROW 0
 
 .macro getTokenFactory_925d6ba2_internal_macro
-.loc ../contracts/tests/TestNewDexVault.sol, 64
+.loc ../contracts/tests/TestNewDexVault.sol, 65
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -380,7 +380,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexVault.sol, 67
+.loc ../contracts/tests/TestNewDexVault.sol, 68
 LDU 32
 GETGLOB 4
 ROT
@@ -450,7 +450,7 @@ IFREF {
 THROW 0
 
 .macro getRoot_5ca1e165_internal_macro
-.loc ../contracts/tests/TestNewDexVault.sol, 72
+.loc ../contracts/tests/TestNewDexVault.sol, 73
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -471,7 +471,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexVault.sol, 75
+.loc ../contracts/tests/TestNewDexVault.sol, 76
 LDU 32
 GETGLOB 4
 ROT
@@ -482,9 +482,9 @@ ENDS
 CALLREF {
 	CALL $getReferralProgramParams_6871d9d6_internal_macro$
 }
-PUSH S2
+PUSH S3
 PUSHCONT {
-	PUSH S4
+	PUSH S5
 	CTOS
 	LDU 2
 	LDMSGADDR
@@ -495,11 +495,15 @@ PUSHCONT {
 	STSLICE
 	PUSHINT 1
 	STUR 98
-	XCHG S2
+	REVERSE 4, 0
 	NEWC
-	STSLICECONST xdf634742
+	STSLICECONST x9b18aa11
 	STU 256
 	STSLICE
+	SWAP
+	NEWC
+	STSLICE
+	STBREFR
 	STBREFR
 	ENDC
 	PUSHINT 0
@@ -523,13 +527,17 @@ PUSHCONT {
 	STDICT
 	PUSHINT 1
 	STUR 106
-	XCHG S2
+	REVERSE 4, 0
 	NEWC
 	GETGLOB 4
 	INDEX 5
 	STUR 32
 	STU 256
 	STSLICE
+	SWAP
+	NEWC
+	STSLICE
+	STBREFR
 	STBREFR
 	ENDC
 	GETGLOB 4
@@ -543,7 +551,7 @@ IFREF {
 THROW 0
 
 .macro getReferralProgramParams_6871d9d6_internal_macro
-.loc ../contracts/tests/TestNewDexVault.sol, 80
+.loc ../contracts/tests/TestNewDexVault.sol, 81
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -554,11 +562,12 @@ SETINDEXQ 4
 SETGLOB 4
 GETGLOB 18
 GETGLOB 19
+GETGLOB 20
 .loc ../contracts/tests/TestNewDexVault.sol, 0
 
 .internal-alias :onCodeUpgrade, 2
 .internal :onCodeUpgrade
-.loc ../contracts/tests/TestNewDexVault.sol, 84
+.loc ../contracts/tests/TestNewDexVault.sol, 85
 PUSHINT 0
 SETGLOB 10
 PUSHREF {
@@ -591,12 +600,16 @@ PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
 SETGLOB 19
-PUSHREF {
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
 SETGLOB 20
-.loc ../contracts/tests/TestNewDexVault.sol, 86
+PUSHREF {
+}
+SETGLOB 21
+.loc ../contracts/tests/TestNewDexVault.sol, 87
 CTOS
-.loc ../contracts/tests/TestNewDexVault.sol, 88
+.loc ../contracts/tests/TestNewDexVault.sol, 89
 DUP
 LDMSGADDR
 LDMSGADDR
@@ -604,35 +617,35 @@ POP S3
 SWAP
 SETGLOB 13
 SETGLOB 16
-.loc ../contracts/tests/TestNewDexVault.sol, 90
+.loc ../contracts/tests/TestNewDexVault.sol, 91
 DUP
 LDREF
 POP S2
-.loc ../contracts/tests/TestNewDexVault.sol, 91
-CTOS
 .loc ../contracts/tests/TestNewDexVault.sol, 92
+CTOS
+.loc ../contracts/tests/TestNewDexVault.sol, 93
 LDMSGADDR
 LDMSGADDR
 DROP
 SWAP
 SETGLOB 14
 SETGLOB 15
-.loc ../contracts/tests/TestNewDexVault.sol, 94
-DUP
-LDREF
-POP S2
-SETGLOB 11
 .loc ../contracts/tests/TestNewDexVault.sol, 95
 DUP
 LDREF
 POP S2
+SETGLOB 11
+.loc ../contracts/tests/TestNewDexVault.sol, 96
+DUP
+LDREF
+POP S2
 SETGLOB 12
-.loc ../contracts/tests/TestNewDexVault.sol, 97
+.loc ../contracts/tests/TestNewDexVault.sol, 98
 DUP
 SREFS
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/tests/TestNewDexVault.sol, 98
+	.loc ../contracts/tests/TestNewDexVault.sol, 99
 	DUP
 	LDREF
 	POP S2
@@ -640,21 +653,26 @@ PUSHCONT {
 	LDDICT
 	LDU 256
 	LDMSGADDR
+	LDREF
 	ENDS
-	XCHG S2
+	CTOS
+	LDMSGADDR
+	ENDS
+	REVERSE 4, 0
 	SETGLOB 17
 	SETGLOB 18
 	SETGLOB 19
+	SETGLOB 20
 	.loc ../contracts/tests/TestNewDexVault.sol, 0
 }
 IF
-.loc ../contracts/tests/TestNewDexVault.sol, 101
+.loc ../contracts/tests/TestNewDexVault.sol, 102
 DROP
 PUSHREF {
 	.blob x4e6577205661756c74
 }
-SETGLOB 20
-.loc ../contracts/tests/TestNewDexVault.sol, 104
+SETGLOB 21
+.loc ../contracts/tests/TestNewDexVault.sol, 105
 GETGLOB 14
 NEWC
 STSLICECONST x42_
@@ -682,7 +700,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexVault.sol, 111
+.loc ../contracts/tests/TestNewDexVault.sol, 112
 ENDS
 .loc ../contracts/tests/TestNewDexVault.sol, 0
 CALLREF {
@@ -720,8 +738,8 @@ THROW 0
 CALL $newFunc_572bedd5_internal_macro$
 
 .macro newFunc_572bedd5_internal_macro
-.loc ../contracts/tests/TestNewDexVault.sol, 112
-GETGLOB 20
+.loc ../contracts/tests/TestNewDexVault.sol, 113
+GETGLOB 21
 .loc ../contracts/tests/TestNewDexVault.sol, 0
 
 .macro c4_to_c7
@@ -755,6 +773,11 @@ CTOS
 LDMSGADDR
 LDREF
 ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+SETGLOB 21
 SETGLOB 20
 SETGLOB 19
 SETGLOB 18
@@ -800,8 +823,10 @@ PUSHCONT {
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
+	DUP
 	PUSHREF {
 	}
+	SETGLOB 21
 	SETGLOB 20
 	SETGLOB 19
 	SETGLOB 18
@@ -826,6 +851,7 @@ IFREFELSE {
 }
 
 .macro c7_to_c4
+GETGLOB 21
 GETGLOB 20
 GETGLOB 19
 GETGLOB 18
@@ -847,21 +873,25 @@ STU 32
 STREF
 STREF
 STSLICE
+ROLLREV 8
+NEWC
+STSLICE
 ROLLREV 7
 NEWC
 STSLICE
 ROLLREV 6
 NEWC
 STSLICE
-ROLLREV 5
-NEWC
-STSLICE
 STDICT
 STU 256
+ROLLREV 3
+NEWC
+STSLICE
 ROTREV
 NEWC
 STSLICE
 STREF
+STBREFR
 STBREFR
 STBREFR
 STBREFR
@@ -1026,7 +1056,7 @@ THROW 0
 
 .macro public_function_selector
 DUP
-PUSHINT 694778722
+PUSHINT 454601233
 LEQ
 IFJMPREF {
 	DUP
@@ -1048,10 +1078,10 @@ IFJMPREF {
 		CALL $newFunc$
 	}
 	DUP
-	PUSHINT 694778722
+	PUSHINT 454601233
 	EQUAL
 	IFJMPREF {
-		CALL $getPendingOwner$
+		CALL $getReferralProgramParams$
 	}
 }
 DUP
@@ -1059,16 +1089,16 @@ PUSHINT 1725189621
 LEQ
 IFJMPREF {
 	DUP
+	PUSHINT 694778722
+	EQUAL
+	IFJMPREF {
+		CALL $getPendingOwner$
+	}
+	DUP
 	PUSHINT 1178185679
 	EQUAL
 	IFJMPREF {
 		CALL $getTokenFactory$
-	}
-	DUP
-	PUSHINT 1600341826
-	EQUAL
-	IFJMPREF {
-		CALL $getReferralProgramParams$
 	}
 	DUP
 	PUSHINT 1656985116

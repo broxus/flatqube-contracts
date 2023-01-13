@@ -19,6 +19,7 @@ import "./interfaces/IDexAccount.sol";
 import "./interfaces/IUpgradable.sol";
 import "./interfaces/IResetGas.sol";
 import "./interfaces/IDexPairOperationCallback.sol";
+import "./interfaces/IReferralProgramCallbacks.sol";
 
 import "./structures/INextExchangeData.sol";
 
@@ -51,6 +52,7 @@ contract DexVault is
     // referral program
     uint256 private _projectId = 0;
     address private _projectAddress = address.makeAddrStd(0, 0x0);
+    address private _refSystemAddress = address.makeAddrStd(0, 0x0);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, DexErrors.NOT_MY_OWNER);
@@ -159,12 +161,12 @@ contract DexVault is
         } _root;
     }
 
-    function getReferralProgramParams() external view responsible returns (uint256, address) {
+    function getReferralProgramParams() external view responsible returns (uint256, address, address) {
         return {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } (_projectId, _projectAddress);
+        } (_projectId, _projectAddress, _refSystemAddress);
     }
 
     function setTokenFactory(address new_token_factory) public override onlyOwner {
@@ -459,7 +461,7 @@ contract DexVault is
 
         builder.store(platform_code);
         builder.store(_lpTokenPendingCode);
-        builder.store(abi.encode(_lpVaultWallets, _projectId, _projectAddress));
+        builder.store(abi.encode(_lpVaultWallets, _projectId, _projectAddress, _refSystemAddress));
 
         tvm.setcode(code);
         tvm.setCurrentCode(code);
@@ -718,7 +720,11 @@ contract DexVault is
         _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
     }
 
-    function updateReferralProgramParams(uint256 project_id, address project_address) external onlyOwner {
+    function updateReferralProgramParams(
+        uint256 project_id,
+        address project_address,
+        address ref_system_address
+    ) external onlyOwner {
         tvm.rawReserve(
             math.max(
                 DexGas.VAULT_INITIAL_BALANCE,
@@ -729,6 +735,7 @@ contract DexVault is
 
         _projectId = project_id;
         _projectAddress = project_address;
+        _refSystemAddress = ref_system_address;
 
         _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
     }
@@ -738,7 +745,6 @@ contract DexVault is
         address _vaultWallet,
         address _referrer,
         address _referral,
-        uint128 _deployWalletGrams,
         address[] _roots
     ) external override onlyPool(_roots) {
         tvm.rawReserve(
@@ -757,14 +763,21 @@ contract DexVault is
             _referral
         );
 
+        IReferralProgramCallbacks(_projectAddress)
+            .onRefLastUpdate{
+                value: DexGas.REFERRAL_PROGRAM_CALLBACK,
+                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                bounce: false
+        }(_referral, _referrer, _referral);
+
         TvmCell payload = abi.encode(_projectId, _referrer, _referral);
 
         ITokenWallet(_vaultWallet)
             .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (
                 _amount,
-                _projectAddress,
-                _deployWalletGrams,
+                _refSystemAddress,
+                DexGas.DEPLOY_REFERRER_FEE_EMPTY_WALLET,
                 _referral,
                 true,
                 payload

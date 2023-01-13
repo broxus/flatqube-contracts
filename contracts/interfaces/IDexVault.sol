@@ -103,7 +103,6 @@ interface IDexVault {
         address _vaultWallet,
         address _referrer,
         address _referral,
-        uint128 _deployWalletGrams,
         address[] _roots
     ) external;
 
