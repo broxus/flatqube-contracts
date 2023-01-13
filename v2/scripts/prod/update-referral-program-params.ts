@@ -25,9 +25,9 @@ async function main() {
 
     const dexVault = await locklift.factory.getDeployedContract('DexVault', new Address(DEX_VAULT_ADDRESS));
 
-    if (options.project_id !== undefined && options.project_address !== undefined) {
-        console.log(`Set referral program params:\n -project_id: ${options.project_id}\n -project_address: ${options.project_address}\n -ref_system_address: ${refSystemAddress}`);
-        const tx = dexVault.methods.updateReferralProgramParams(
+    if (options.project_id !== undefined && options.project_address !== undefined && options.ref_system_address !== undefined) {
+        console.log(`Set referral program params:\n -project_id: ${options.project_id}\n -project_address: ${options.project_address}\n -ref_system_address: ${options.ref_system_address}`);
+        const tx = await dexVault.methods.updateReferralProgramParams(
             {
                 project_id: options.project_id,
                 project_address: options.project_address,
@@ -36,7 +36,7 @@ async function main() {
         ).send({
             from: account.address,
             amount: toNano(1)
-        })
+        });
         displayTx(tx);
     }
 }
