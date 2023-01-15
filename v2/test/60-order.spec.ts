@@ -1,4 +1,4 @@
-import {Address, Contract, getRandomNonce} from 'locklift';
+import {Address, Contract, getRandomNonce, zeroAddress} from 'locklift';
 import {FactorySource} from '../../build/factorySource';
 import {Constants, sleep} from '../../scripts/utils';
 import {
@@ -316,7 +316,7 @@ describe('OrderTest', () => {
         console.log(`TstWallet6: ${tstWallet6.address}`);
         console.log('')
         const fees = await RootOrderBar.methods.getFeeParams({answerId: 0}).call()
-        console.log(`Beneficary = ${fees.beneficiary_}\nFee - ${fees.params.numerator}/${fees.params.denominator}`)
+        console.log(`Beneficary = ${fees.params.beneficiary}\nFee - ${fees.params.numerator}/${fees.params.denominator}`)
     });
 
     describe('Direct execution Order', async () => {
@@ -1423,7 +1423,7 @@ describe('OrderTest', () => {
             NUMERATOR = 1;
             DENOMINATOR = 100;
 
-            await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({root: RootOrderBar.address, params: {numerator: NUMERATOR, denominator: DENOMINATOR}})
+            await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({root: RootOrderBar.address, params: {numerator: NUMERATOR, denominator: DENOMINATOR, beneficiary: zeroAddress}})
                 .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
 
             const feeParams = await RootOrderBar.methods.getFeeParams({answerId: 1}).call()
@@ -1559,7 +1559,7 @@ describe('OrderTest', () => {
             NUMERATOR = 15;
             DENOMINATOR = 90;
 
-            await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({root: RootOrderBar.address, params: {numerator: NUMERATOR, denominator: DENOMINATOR}})
+            await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({root: RootOrderBar.address, params: {numerator: NUMERATOR, denominator: DENOMINATOR, beneficiary: zeroAddress}})
                 .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
 
             const feeParams = await RootOrderBar.methods.getFeeParams({answerId: 1}).call()
@@ -1700,7 +1700,7 @@ describe('OrderTest', () => {
             NUMERATOR = 1;
             DENOMINATOR = 100;
 
-            await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({root: RootOrderBar.address, params: {numerator: NUMERATOR, denominator: DENOMINATOR}})
+            await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({root: RootOrderBar.address, params: {numerator: NUMERATOR, denominator: DENOMINATOR, beneficiary: zeroAddress}})
                 .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
 
             const feeParams = await RootOrderBar.methods.getFeeParams({answerId: 1}).call()
@@ -1787,8 +1787,8 @@ describe('OrderTest', () => {
             await locklift.tracing.trace(factoryOrder.methods.withdrawFee({
                 amount: new BigNumber(fees).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 recipient: account2.address,
-                rm_gas_to: account1.address,
-                tokenRoot: rootTokenReceive.address,
+                sendGasTo: account1.address,
+                tokenWallet: FactoryAddress,
                 deployWalletValue: locklift.utils.toNano(0.5),
                 gasValue: locklift.utils.toNano(0.7)
             }).send({amount: locklift.utils.toNano(2), from: account1.address}),{allowedCodes: {compute: [60]}})
@@ -1866,7 +1866,7 @@ describe('OrderTest', () => {
             NUMERATOR = 1;
             DENOMINATOR = 100;
 
-            await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({root: RootOrderBar.address, params: {numerator: NUMERATOR, denominator: DENOMINATOR}})
+            await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({root: RootOrderBar.address, params: {numerator: NUMERATOR, denominator: DENOMINATOR, beneficiary: zeroAddress}})
                 .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
 
             const feeParams = await RootOrderBar.methods.getFeeParams({answerId: 1}).call()
@@ -1874,7 +1874,7 @@ describe('OrderTest', () => {
             expect(feeParams.params.denominator).to.equal(DENOMINATOR.toString(), 'Wrong DENOMINATOR');
 
 
-            await locklift.tracing.trace(factoryOrder.methods.setRootBeneficiary({beneficiary_: newBeneficiary.address, root: RootOrderBar.address}).send({from: account1.address, amount: locklift.utils.toNano(0.2)}))
+            await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({params: {beneficiary: newBeneficiary.address, numerator: NUMERATOR, denominator: DENOMINATOR}, root: RootOrderBar.address}).send({from: account1.address, amount: locklift.utils.toNano(0.2)}))
             const params = {
                 callbackId: 0,
                 tokenReceive: rootTokenReceive.address,

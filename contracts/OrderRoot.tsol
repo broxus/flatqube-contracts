@@ -33,7 +33,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     address dexRoot;
 
     OrderFeeParams fee;
-	address beneficiary;
     mapping(address => OrderWithdrawalFeeParams) withdrawalFeeParams;
 
     constructor() public { revert(); }
@@ -79,8 +78,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         }
     }
 
-    function getFeeParams() override external view responsible returns (OrderFeeParams params, address beneficiary_) {
-		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee, beneficiary_);
+    function getFeeParams() override external view responsible returns (OrderFeeParams params) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
 	}
 
     function getVersion() override external view responsible returns (uint32) {
@@ -106,17 +105,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         );
     }
 
-    function setBeneficiary(address beneficiary_) override external onlyFactory {
-        require(beneficiary_.value != 0,
-            OrderErrors.WRONG_BENEFICIARY);
-        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-        beneficiary = beneficiary_;
-        factory.transfer(
-            0,
-            false,
-            MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
-        );
-    }
 
 
     function buildPayload(
@@ -175,7 +163,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 backPubKey, 
                 dexRoot,
                 fee,
-                beneficiary,
                 orderClosedCode
             );
 
@@ -199,7 +186,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: OrderRoot.onTokenWalletBeneficiary
-            }(beneficiary, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
+            }(fee.beneficiary, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
             ITokenWallet(msg.sender).transfer{
                 value: 0, flag: MsgFlag.ALL_NOT_RESERVED,
@@ -332,7 +319,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             TvmBuilder builder2;
             builder2.store(fee.numerator);
             builder2.store(fee.denominator);
-            builder2.store(beneficiary);
+            builder2.store(fee.beneficiary);
             builder.storeRef(builder2);
 
             tvm.setcode(_code);
@@ -355,18 +342,19 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         }
 
         factory = _factory;
-        beneficiary = _factory;
         spentToken = _spentToken;
         version = _version;
         deployer = _deployer;
+
+        TvmSlice feeSl = sl.loadRefAsSlice();
+        (uint128 numerator_, uint128 denominator_, address beneficiary_) = feeSl.decode(uint128, uint128, address);
+        fee = OrderFeeParams(numerator_, denominator_, beneficiary_);
 
         TvmSlice dataSl = sl.loadRefAsSlice();
         dexRoot = dataSl.decode(address);
         orderCode = dataSl.loadRef();
         orderClosedCode = dataSl.loadRef();
 
-        (uint128 numerator_, uint128 denominator_) = dataSl.decode(uint128, uint128);
-        fee = OrderFeeParams(numerator_, denominator_);
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
         ITokenRoot(spentToken).deployWallet{

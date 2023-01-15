@@ -151,7 +151,6 @@ export const dexVaultMigration = async (
 
   logMigrationProcess(
     'dexVaultMigration',
-    'constructor',
     'Deploying DexVault...',
   );
   const { contract } = await locklift.factory.deployContract({
@@ -352,7 +351,8 @@ export const orderFactoryMigration = async (
     params:
     {
     denominator: feeDenominator,
-    numerator: feeNumerator
+    numerator: feeNumerator,
+    beneficiary: zeroAddress
     }
   }).send({
     amount: locklift.utils.toNano(5),
@@ -362,16 +362,16 @@ export const orderFactoryMigration = async (
   const feeParams = await contract.methods.getFeeParams({answerId:1}).call()
   // Log and save address
 
-  logMigrationProcess(
-    'OrderFactoryMigration',
-    'setTokenWalletPlatformCodeOnce',
-    'setTokenWalletPlatformCodeOnce...',
-  );
-  const walletPlatform = await locklift.factory.getContractArtifacts("TokenWalletPlatform")
-  await locklift.tracing.trace(contract.methods.setTokenWalletPlatformCodeOnce({_tokenWalletPlatform: walletPlatform.code}).send({
-    amount: locklift.utils.toNano(5),
-    from: account.address
-  }))
+  // logMigrationProcess(
+  //   'OrderFactoryMigration',
+  //   'setTokenWalletPlatformCodeOnce',
+  //   'setTokenWalletPlatformCodeOnce...',
+  // );
+  // const walletPlatform = await locklift.factory.getContractArtifacts("TokenWalletPlatform")
+  // await contract.methods.setTokenWalletPlatformCodeOnce({_tokenWalletPlatform: walletPlatform.code}).send({
+  //   amount: locklift.utils.toNano(5),
+  //   from: account.address
+  // })
 
   logMigrationSuccess(
     'OrderFactoryMigration',

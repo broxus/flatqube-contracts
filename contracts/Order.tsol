@@ -57,7 +57,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 	bool autoExchange;
 
 	OrderFeeParams fee;
-	address beneficiary;
 
 	constructor(
 		uint128 _expectedAmount,
@@ -65,7 +64,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		uint256 _backPK,
 		address _dexRoot,
 		OrderFeeParams _fee,
-		address _beneficiary,
 		TvmCell _codeClosed
 	) public {
 		changeState(OrderStatus.Initialize);
@@ -90,7 +88,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 			dexRoot = _dexRoot;
 			codeClosed = _codeClosed;
 			fee = _fee;
-			beneficiary = _beneficiary;
 
 			IDexRoot(dexRoot).getExpectedPairAddress{
 				value: OrderGas.GET_DEX_PAIR,
@@ -148,8 +145,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 	function onTokenWalletReceive(address _wallet) external {}
 
 
-	function getFeeParams() override external view responsible returns (OrderFeeParams params, address beneficiary_) {
-		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee, beneficiary_);
+	function getFeeParams() override external view responsible returns (OrderFeeParams params) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
 	}
 
     function _expectedSpendAmount(uint128 b_amount) private view returns (uint128, uint128) {
@@ -166,28 +163,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
 		fee = params;
-		factory.transfer(
-			0,
-			false,
-			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
-		);
-	}
-
-	function setBeneficiary(address beneficiary_) override external onlyFactory {
-		require(beneficiary_.value != 0,
-			OrderErrors.WRONG_BENEFICIARY);
-		require(msg.value >= OrderGas.DEPLOY_EMPTY_WALLET_VALUE, OrderErrors.AMOUNT_TOO_LOW);
-
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-
-		beneficiary = beneficiary_;
-
-		ITokenRoot(receiveToken).deployWallet {
-                value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
-                flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: Order.onTokenWalletReceive
-        }(beneficiary_, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
-
 		factory.transfer(
 			0,
 			false,
@@ -362,7 +337,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 							bounce : false
 							}(
 								senderFee,
-								beneficiary,
+								fee.beneficiary,
 								uint128(0),
 								originalGasTo,
 								true,
@@ -462,7 +437,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 								bounce: false
 								}(
 									senderFee,
-									beneficiary,
+									fee.beneficiary,
 									uint128(0),
 									originalGasTo,
 									true,
@@ -871,7 +846,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		TvmBuilder builderFee;
 		builderFee.store(fee.numerator);
 		builderFee.store(fee.denominator);
-		builderFee.store(beneficiary);
+		builderFee.store(fee.beneficiary);
 		builderUpg.storeRef(builderFee);
 
 		onCodeUpgrade(builderUpg.toCell());
