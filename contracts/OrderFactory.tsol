@@ -39,7 +39,6 @@ contract OrderFactory is IOrderFactory {
 	TvmCell orderPlatformCode;
 	TvmCell orderCode;
 	TvmCell orderClosedCode;
-	TvmCell tokenPlatformCode;
 
 	constructor(address _owner, uint32 _version) public {
 		require(_owner.value != 0);
@@ -180,18 +179,6 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
-	function setTokenWalletPlatformCodeOnce(TvmCell _tokenWalletPlatform) public onlyOwner {
-		require(tokenPlatformCode.toSlice().empty(), OrderErrors.PLATFORM_CODE_NON_EMPTY);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-		tokenPlatformCode = _tokenWalletPlatform;
-
-		emit TokenWalletPlatformCodeUpgraded();
-		owner.transfer(
-			0,
-			false,
-			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
-		);
-	}
 
 	function setFeeParams(OrderFeeParams params) override external onlyOwner {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
@@ -208,28 +195,15 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
-	function getTokenWallet(
-        address token
-    ) internal view returns (address) {
-        return
-        address(tvm.hash(
-            tvm.buildStateInit({
-                contr: TokenWalletPlatform,
-                varInit: { root: token, owner: address(this) },
-                code: tokenPlatformCode
-        })
-        ));
-    }
 
-	function withdrawFee(uint128 amount, address recipient, uint128 deployWalletValue, uint128 gasValue, address tokenRoot, address sendGasTo) override external onlyOwner {
-		require(amount != 0 && recipient.value != 0 && sendGasTo.value != 0 && tokenRoot.value != 0,
+	function withdrawFee(uint128 amount, address recipient, uint128 deployWalletValue, uint128 gasValue, address tokenWallet, address sendGasTo) override external onlyOwner {
+		require(amount != 0 && recipient.value != 0 && sendGasTo.value != 0 && tokenWallet.value != 0,
 			OrderErrors.WRONG_WITHDRAW_FEE_PARAMS);
 		tvm.accept();
 
-		address walletBeneficiary = getTokenWallet(tokenRoot);
 		TvmCell empty;
 
-        ITokenWallet(walletBeneficiary).transfer{
+        ITokenWallet(tokenWallet).transfer{
             value: gasValue,
             flag: MsgFlag.SENDER_PAYS_FEES
         }(
@@ -481,7 +455,6 @@ contract OrderFactory is IOrderFactory {
 			builder.store(orderCode);
 			builder.store(orderClosedCode);
 			builder.store(orderPlatformCode);
-			builder.store(tokenPlatformCode);
 
 			TvmBuilder builderFee;
 			builderFee.store(fee.numerator);

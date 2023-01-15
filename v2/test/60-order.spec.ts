@@ -316,7 +316,7 @@ describe('OrderTest', () => {
         console.log(`TstWallet6: ${tstWallet6.address}`);
         console.log('')
         const fees = await RootOrderBar.methods.getFeeParams({answerId: 0}).call()
-        console.log(`Beneficary = ${fees.beneficiary_}\nFee - ${fees.params.numerator}/${fees.params.denominator}`)
+        console.log(`Beneficary = ${fees.params.beneficiary}\nFee - ${fees.params.numerator}/${fees.params.denominator}`)
     });
 
     describe('Direct execution Order', async () => {
@@ -1788,7 +1788,7 @@ describe('OrderTest', () => {
                 amount: new BigNumber(fees).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 recipient: account2.address,
                 sendGasTo: account1.address,
-                tokenRoot: rootTokenReceive.address,
+                tokenWallet: FactoryAddress,
                 deployWalletValue: locklift.utils.toNano(0.5),
                 gasValue: locklift.utils.toNano(0.7)
             }).send({amount: locklift.utils.toNano(2), from: account1.address}),{allowedCodes: {compute: [60]}})
