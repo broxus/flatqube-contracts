@@ -195,7 +195,9 @@ contract OrderFactory is IOrderFactory {
 
 	function setFeeParams(OrderFeeParams params) override external onlyOwner {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-
+		if (params.beneficiary.value == 0){
+			params.beneficiary = address(this);
+		}
 		fee = params;
 
 		emit OrderFeesParamsUpdated(fee);
@@ -219,8 +221,8 @@ contract OrderFactory is IOrderFactory {
         ));
     }
 
-	function withdrawFee(uint128 amount, address recipient, uint128 deployWalletValue, uint128 gasValue, address tokenRoot, address rm_gas_to) override external onlyOwner {
-		require(amount != 0 && recipient.value != 0 && rm_gas_to.value != 0 && tokenRoot.value != 0,
+	function withdrawFee(uint128 amount, address recipient, uint128 deployWalletValue, uint128 gasValue, address tokenRoot, address sendGasTo) override external onlyOwner {
+		require(amount != 0 && recipient.value != 0 && sendGasTo.value != 0 && tokenRoot.value != 0,
 			OrderErrors.WRONG_WITHDRAW_FEE_PARAMS);
 		tvm.accept();
 
@@ -234,7 +236,7 @@ contract OrderFactory is IOrderFactory {
             amount,
             recipient,
             deployWalletValue,
-            rm_gas_to,
+            sendGasTo,
             false,
             empty
         );
@@ -243,7 +245,9 @@ contract OrderFactory is IOrderFactory {
 	function setRootFeeParams(OrderFeeParams params, address root) override external onlyOwner {
 		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-
+		if (params.beneficiary.value == 0){
+			params.beneficiary = address(this);
+		}
 		IOrderRoot(root).setFeeParams{
 			value: OrderGas.SET_FEE_PARAMS_VALUE,
 			flag: MsgFlag.SENDER_PAYS_FEES,
@@ -262,7 +266,9 @@ contract OrderFactory is IOrderFactory {
 
 		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-
+		if (params.beneficiary.value == 0){
+			params.beneficiary = address(this);
+		}
 		IOrder(order).setFeeParams{
 		value: OrderGas.SET_FEE_PARAMS_VALUE,
 		flag: MsgFlag.SENDER_PAYS_FEES,
@@ -277,45 +283,45 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
-		function setOrderBeneficiary(address beneficiary_, address order) override external onlyOwner {
+//		function setOrderBeneficiary(address beneficiary_, address order) override external onlyOwner {
+//
+//		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
+//		require(beneficiary_.value != 0, OrderErrors.WRONG_BENEFICIARY);
+//		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+//
+//		IOrder(order).setBeneficiary{
+//		value: OrderGas.SET_FEE_PARAMS_VALUE,
+//		flag: MsgFlag.SENDER_PAYS_FEES,
+//		bounce: false
+//		}(
+//			beneficiary_
+//		);
+//		owner.transfer(
+//			0,
+//			false,
+//			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+//		);
+//	}
 
-		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
-		require(beneficiary_.value != 0, OrderErrors.WRONG_BENEFICIARY);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-
-		IOrder(order).setBeneficiary{
-		value: OrderGas.SET_FEE_PARAMS_VALUE,
-		flag: MsgFlag.SENDER_PAYS_FEES,
-		bounce: false
-		}(
-			beneficiary_
-		);
-		owner.transfer(
-			0,
-			false,
-			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
-		);
-	}
-
-		function setRootBeneficiary(address beneficiary_, address root) override external onlyOwner {
-
-		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
-		require(beneficiary_.value != 0, OrderErrors.WRONG_BENEFICIARY);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-
-		IOrderRoot(root).setBeneficiary{
-		value: OrderGas.SET_FEE_PARAMS_VALUE,
-		flag: MsgFlag.SENDER_PAYS_FEES,
-		bounce: false
-		}(
-			beneficiary_
-		);
-		owner.transfer(
-			0,
-			false,
-			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
-		);
-	}
+//		function setRootBeneficiary(address beneficiary_, address root) override external onlyOwner {
+//
+//		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
+//		require(beneficiary_.value != 0, OrderErrors.WRONG_BENEFICIARY);
+//		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+//
+//		IOrderRoot(root).setBeneficiary{
+//		value: OrderGas.SET_FEE_PARAMS_VALUE,
+//		flag: MsgFlag.SENDER_PAYS_FEES,
+//		bounce: false
+//		}(
+//			beneficiary_
+//		);
+//		owner.transfer(
+//			0,
+//			false,
+//			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+//		);
+//	}
 
     function getFeeParams() override external view responsible returns (OrderFeeParams) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
@@ -376,6 +382,7 @@ contract OrderFactory is IOrderFactory {
 			}(
 				orderRootCode,
 				versionOrderRoot,
+				fee,
 				msg.sender
 			);
 			if (callbackId > 0) {
@@ -445,7 +452,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function buildParams() internal view returns (TvmCell) {
-		return abi.encode(dexRoot, orderCode, orderClosedCode, fee);
+		return abi.encode(dexRoot, orderCode, orderClosedCode);
 	}
 
 	function upgrade(
@@ -479,6 +486,7 @@ contract OrderFactory is IOrderFactory {
 			TvmBuilder builderFee;
 			builderFee.store(fee.numerator);
 			builderFee.store(fee.denominator);
+			builderFee.store(fee.beneficiary);
 			builder.storeRef(builderFee);
 
 			tvm.setcode(newCode);

@@ -352,7 +352,8 @@ export const orderFactoryMigration = async (
     params:
     {
     denominator: feeDenominator,
-    numerator: feeNumerator
+    numerator: feeNumerator,
+    beneficiary: zeroAddress
     }
   }).send({
     amount: locklift.utils.toNano(5),

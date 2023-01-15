@@ -18,9 +18,8 @@ interface IOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams {
 	function getVersion() external view responsible returns(uint32);
 	function getSpentToken() external view responsible returns (address);
 	function getFactory() external view responsible returns (address);
-	function getFeeParams() external view responsible returns (OrderFeeParams, address);
+	function getFeeParams() external view responsible returns (OrderFeeParams);
 	function setFeeParams(OrderFeeParams params) external;
-	function setBeneficiary(address beneficiary_) external;
 
 	function expectedAddressOrder(
 		address root,
