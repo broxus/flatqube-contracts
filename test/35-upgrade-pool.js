@@ -232,6 +232,12 @@ describe('Test Dex Pool contract upgrade', async function () {
             expect(newPoolData.fee_referrer)
                 .to
                 .equal(oldPoolData.fee_referrer, 'New fee referrer value incorrect');
+
+            if(options.new_contract_name.indexOf('Pool') !== -1) {
+                migration.store(NewVersionContract, 'DexPool' + poolName);
+            } else {
+                migration.store(NewVersionContract, 'DexPair' + poolName);
+            }
         });
     });
 });

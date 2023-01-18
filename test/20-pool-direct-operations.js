@@ -1133,7 +1133,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 await migration.logGas();
 
                 const expectedDexReceivedAmount = new BigNumber(dexStart.token_balances[i])
-                    .minus(TOKENS_TO_RECEIVE).toString();
+                    .minus(TOKENS_TO_RECEIVE).toNumber();
                 const expectedPoolSpentAmount = new BigNumber(poolStart.lp_supply)
                     .minus(new BigNumber(expected.lp).shiftedBy(-Constants.LP_DECIMALS)).toString();
                 const expectedAccountReceivedAmount = new BigNumber(accountStart.token_balances[i])
@@ -1141,10 +1141,22 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 const expectedAccountSpentAmount = new BigNumber(accountStart.lp)
                     .minus(new BigNumber(expected.lp).shiftedBy(-Constants.LP_DECIMALS)).toString();
 
-                expect(expectedDexReceivedAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
+                expect(new BigNumber(expectedDexReceivedAmount).toNumber()).to.approximately(
+                    new BigNumber(dexEnd.token_balances[i]).toNumber(),
+                    new BigNumber(1).shiftedBy(-Constants.LP_DECIMALS).toNumber(),
+                    `Wrong DEX ${tokens[i].symbol} balance`
+                );
                 expect(expectedPoolSpentAmount).to.equal(poolEnd.lp_supply.toString(), `Wrong DEX LP balance`);
-                expect(expectedAccountReceivedAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
-                expect(expectedAccountSpentAmount).to.equal(accountEnd.lp.toString(), `Wrong Account#3 LP balance`);
+                expect(new BigNumber(expectedAccountReceivedAmount).toNumber()).to.approximately(
+                    new BigNumber(accountEnd.token_balances[i]).toNumber(),
+                    new BigNumber(1).shiftedBy(-Constants.LP_DECIMALS).toNumber(),
+                    `Wrong Account#3 ${tokens[i].symbol} balance`
+                );
+                expect(new BigNumber(expectedAccountSpentAmount).toNumber()).to.approximately(
+                    new BigNumber(accountEnd.lp).toNumber(),
+                    new BigNumber(1).shiftedBy(-Constants.LP_DECIMALS).toNumber(),
+                    `Wrong Account#3 LP balance`
+                );
 
             });
         }

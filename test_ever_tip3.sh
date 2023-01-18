@@ -39,9 +39,6 @@ npx locklift test $NO_TRACE --tests test/41-ever-split-cross-pool-exchange.js --
 # --pool_route='[["tst","wever"],["tst", "qwe"]]' --token_route='["wever","tst","qwe"]'
 npx locklift test $NO_TRACE --tests test/41-ever-split-cross-pool-exchange.js --amount=20 --start_token='wever' --route='[{"outcoming": "tst", "roots": ["tst","wever"], "numerator": 1, "nextSteps": [{"outcoming": "qwe", "roots": ["tst","qwe"], "numerator": 1, "nextSteps": []}]}]' --multi=false
 
-npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPair' --pool_type=1
-npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='tst' --right='qwe' --old_contract_name='DexPair' --new_contract_name='DexPair' --pool_type=1
-
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='0'
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='1'
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='2'

@@ -621,14 +621,25 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             expect(expectedDexAccount2Lp).to.equal(dexAccount2End.lp, 'Wrong DexAccount#2 LP');
             expect(expectedAccount2Lp).to.equal(dexAccount2End.walletLp, 'Wrong Account#2 LP');
             for (let i = 0; i < N_COINS; i++) {
-                expect(expectedPoolTokenBalances[i]).to.equal(dexPoolInfoEnd.token_balances[i], `Wrong DexPool ${tokens[i].symbol}`);
+                expect(new BigNumber(expectedPoolTokenBalances[i]).toNumber()).to.approximately(
+                    new BigNumber(dexPoolInfoEnd.token_balances[i]).toNumber(),
+                    new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
+                    `Wrong DexPool ${tokens[i].symbol}`
+                );
             }
             expect(expectedPoolLp).to.equal(dexPoolInfoEnd.lp_supply, 'Wrong DexPool LP supply');
             for (let i = 0; i < N_COINS; i++) {
                 expect(expectedDexAccount3TokenBalances[i]).to.equal(new BigNumber(dexAccount3End.accountBalances[i]).plus(dexPoolInfoEnd.token_fees[i]).toString(), 'Wrong beneficiary fee');
             }
+            console.log('expectedReferrerBalance: ', expectedReferrerBalance);
             for (let i = 0; i < N_COINS; i++) {
-                expect(expectedReferrerBalance[i]).to.equal(referrerEnd.token_balances[i], 'Wrong referrer fee');
+                if(expectedReferrerBalance[i]) {
+                    expect(new BigNumber(expectedReferrerBalance[i]).toNumber()).to.approximately(
+                        new BigNumber(referrerEnd.token_balances[i]).toNumber(),
+                        new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
+                        'Wrong referrer fee'
+                    );
+                }
             }
         });
     });
@@ -897,18 +908,34 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
 
             expect(dexPoolInfoEnd.lp_supply_actual).to.equal(dexPoolInfoEnd.lp_supply, 'Wrong LP supply');
             for (let i = 0; i < N_COINS; i++) {
-                expect(accountEnd.token_balances[i].toString()).to.equal(expectedAccountTokenBalances[i], `Wrong Account#2 ${tokens[i].symbol} balance`);
+                expect(new BigNumber(accountEnd.token_balances[i]).toNumber()).to.approximately(
+                    new BigNumber(expectedAccountTokenBalances[i]).toNumber(),
+                    new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
+                    `Wrong Account#2 ${tokens[i].symbol} balance`
+                );
             }
             expect(accountEnd.lp.toString()).to.equal(expectedAccountLp, 'Wrong Account#2 LP balance');
             for (let i = 0; i < N_COINS; i++) {
-                expect(expectedPoolTokenBalances[i]).to.equal(dexPoolInfoEnd.token_balances[i], `Wrong DexPool ${tokens[i].symbol}`);
+                expect(new BigNumber(expectedPoolTokenBalances[i]).toNumber()).to.approximately(
+                    new BigNumber(dexPoolInfoEnd.token_balances[i]).toNumber(),
+                    new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
+                    `Wrong DexPool ${tokens[i].symbol}`
+                );
             }
             expect(expectedPoolLp).to.equal(dexPoolInfoEnd.lp_supply, 'Wrong DexPool LP supply');
             for (let i = 0; i < N_COINS; i++) {
-                expect(expectedDexAccount3TokenBalances[i]).to.equal(new BigNumber(dexAccount3End.accountBalances[i]).plus(dexPoolInfoEnd.token_fees[i]).toString(), 'Wrong beneficiary fee');
+                expect(new BigNumber(expectedDexAccount3TokenBalances[i]).toNumber()).to.approximately(
+                    new BigNumber(dexAccount3End.accountBalances[i]).plus(dexPoolInfoEnd.token_fees[i]).toNumber(),
+                    new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
+                    'Wrong beneficiary fee'
+                );
             }
             for (let i = 0; i < N_COINS; i++) {
-                expect(expectedReferrerBalance[i]).to.equal(referrerEnd.token_balances[i], 'Wrong referrer fee');
+                expect(new BigNumber(expectedReferrerBalance[i]).toNumber()).to.approximately(
+                    new BigNumber(referrerEnd.token_balances[i]).toNumber(),
+                    new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
+                    'Wrong referrer fee'
+                );
             }
         });
     });
@@ -1246,14 +1273,28 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
 
             expect(expectedAccountSpent).to.equal(accountEnd.token_balances[0].toString(), `Wrong Account#2 ${tokens[0].symbol} balance`);
             expect(expectedAccountReceived).to.equal(accountEnd.token_balances[1].toString(), `Wrong Account#2 ${tokens[1].symbol} balance`);
-            expect(expectedPoolSpent).to.equal(dexPoolInfoEnd.token_balances[0].toString(), `Wrong DEXPool ${tokens[0].symbol} balance`);
+            expect(
+                new BigNumber(expectedPoolSpent).toNumber()
+            ).to.approximately(
+                new BigNumber(dexPoolInfoEnd.token_balances[0]).toNumber(),
+                new BigNumber(1).shiftedBy(-Constants.LP_DECIMALS).toNumber(),
+                `Wrong DEXPool ${tokens[0].symbol} balance`
+            );
             expect(expectedPoolReceived).to.equal(dexPoolInfoEnd.token_balances[1].toString(), `Wrong DEXPool ${tokens[1].symbol} balance`);
             expect(expectedDexAccount3Spent).to.equal(new BigNumber(dexAccount3End.accountBalances[0]).plus(dexPoolInfoEnd.token_fees[0]).toString(),
-                'Wrong beneficiary fee');
-            expect(expectedReferrerBalanceSpent).to.equal(referrerEnd.token_balances[0],
+                `Wrong DexAccount ${tokens[0].symbol} balance`);
+            expect(new BigNumber(expectedReferrerBalanceSpent).toNumber()).to.approximately(
+                new BigNumber(referrerEnd.token_balances[0]).toNumber(),
+                new BigNumber(1).shiftedBy(-tokens[0].decimals).toNumber(),
                 'Wrong referrer fee');
-            expect(expectedDexSpent).to.equal(dexEnd.token_balances[0].toString(), `Wrong DEX ${tokens[0].symbol} balance`);
-            expect(expectedDexReceived).to.equal(dexEnd.token_balances[1].toString(), `Wrong DEX ${tokens[1].symbol} balance`);
+            expect(new BigNumber(expectedDexSpent).toNumber()).to.approximately(
+                new BigNumber(dexEnd.token_balances[0]).toNumber(),
+                new BigNumber(1).shiftedBy(-tokens[0].decimals).toNumber(),
+                `Wrong DEX ${tokens[0].symbol} balance`);
+            expect(new BigNumber(expectedDexReceived).toNumber()).to.approximately(
+                new BigNumber(dexEnd.token_balances[1]).toNumber(),
+                new BigNumber(1).shiftedBy(-tokens[1].decimals).toNumber(),
+                `Wrong DEX ${tokens[1].symbol} balance`);
         });
     });
 

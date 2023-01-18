@@ -110,5 +110,8 @@ echo "root ->  next root";
 #npx locklift run $DEFAULT_PARAMS --script scripts/update-dexRoot.js --old_contract='DexRoot' --new_contract='TestNewDexRoot'
 npx locklift test $DEFAULT_PARAMS --tests test/upgrade/4-root-upgrade-test.js
 
+echo "get-evers-back";
+npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='0'
+npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='1'
 
 echo "test_only_upgrade.sh END";
