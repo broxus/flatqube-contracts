@@ -25,9 +25,6 @@ options.old_contract_name = options.old_contract_name || 'DexPairPrev';
 options.new_contract_name = options.new_contract_name || 'DexPair';
 options.pool_type = options.pool_type || '1';
 
-const tokenLeft = Constants.tokens[options.left];
-const tokenRight = Constants.tokens[options.right];
-
 const tokens = {};
 let poolName = '';
 for (let item of options.roots) {

@@ -262,7 +262,8 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
                             amount: new BigNumber(LP_REWARD).shiftedBy(Constants.LP_DECIMALS).toString(),
                             root: poolLpRoot.address},
                         _autoChange: false,
-                        _remainingGasTo: Account2.address
+                        _remainingGasTo: Account2.address,
+                        _referrer: locklift.utils.zeroAddress
                     },
                     value: locklift.utils.convertCrystal('1.1', 'nano'),
                     keyPair: keyPairs[1]
@@ -378,7 +379,8 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
                             root: poolLpRoot.address
                         },
                         _autoChange: true,
-                        _remainingGasTo: Account2.address
+                        _remainingGasTo: Account2.address,
+                        _referrer: locklift.utils.zeroAddress
                     },
                     value: locklift.utils.convertCrystal('2', 'nano'),
                     keyPair: keyPairs[1]
@@ -490,7 +492,8 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
                         root: poolLpRoot.address
                     },
                     _autoChange: true,
-                    _remainingGasTo: Account2.address
+                    _remainingGasTo: Account2.address,
+                    _referrer: locklift.utils.zeroAddress
                 },
                 value: locklift.utils.convertCrystal('2', 'nano'),
                 keyPair: keyPairs[1]

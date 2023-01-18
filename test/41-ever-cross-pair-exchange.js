@@ -83,10 +83,10 @@ async function dexPairInfo(left, right) {
         };
     }
     const Pair = await locklift.factory.getContract(options.contract_name);
-    if (migration.exists(`DexPair${tokenLeft.symbol}${tokenRight.symbol}`)) {
-        migration.load(Pair, `DexPair${tokenLeft.symbol}${tokenRight.symbol}`);
+    if (migration.exists(`DexPool${tokenLeft.symbol}${tokenRight.symbol}`)) {
+        migration.load(Pair, `DexPool${tokenLeft.symbol}${tokenRight.symbol}`);
     } else {
-        migration.load(Pair, `DexPair${tokenRight.symbol}${tokenLeft.symbol}`);
+        migration.load(Pair, `DexPool${tokenRight.symbol}${tokenLeft.symbol}`);
     }
     const pairRoots = await Pair.call({method: 'getTokenRoots', params: {}});
     const balances = await Pair.call({method: 'getBalances', params: {}});

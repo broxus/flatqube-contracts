@@ -34,7 +34,7 @@ describe('Check for correct deployment', async function () {
   before('Load contracts', async function () {
     DexRoot = await locklift.factory.getContract('DexRoot');
     DexVault = await locklift.factory.getContract('DexVault');
-    DexPlatform = await locklift.factory.getContract('DexPlatform');
+    DexPlatform = await locklift.factory.getContract('DexPlatform', 'precompiled');
     DexAccount = await locklift.factory.getContract(options.account_contract_name);
     DexPair = await locklift.factory.getContract(options.pair_contract_name);
     TokenFactory = await locklift.factory.getContract('TokenFactory');

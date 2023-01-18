@@ -72,19 +72,19 @@ async function main() {
       }
     })
 
-    console.log(`DexPair${pair.left}${pair.right}: ${dexPairFooBarAddress}`);
+    console.log(`DexPool${pair.left}${pair.right}: ${dexPairFooBarAddress}`);
 
     const dexPairFooBar = await locklift.factory.getContract(options.contract_name);
     dexPairFooBar.address = dexPairFooBarAddress;
-    migration.store(dexPairFooBar, 'DexPair' + pair.left + pair.right);
+    migration.store(dexPairFooBar, 'DexPool' + pair.left + pair.right);
 
     const version = await dexPairFooBar.call({method: "getVersion", params: {}})
-    console.log(`DexPair${pair.left}${pair.right} version = ${version}`);
+    console.log(`DexPool${pair.left}${pair.right} version = ${version}`);
 
     // await new Promise(resolve => setTimeout(resolve, 10000));
 
     const active = await dexPairFooBar.call({method: "isActive", params: {}})
-    console.log(`DexPair${pair.left}${pair.right} active = ${active}`);
+    console.log(`DexPool${pair.left}${pair.right} active = ${active}`);
 
     const FooBarLpRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
     FooBarLpRoot.setAddress((await dexPairFooBar.call({method: "getTokenRoots"})).lp);
@@ -138,9 +138,9 @@ async function main() {
     }));
 
     migration.store(FooBarLpRoot, pair.left + pair.right + 'LpRoot');
-    migration.store(FooPairWallet, pair.left + pair.right + 'Pair_' + pair.left + 'Wallet');
-    migration.store(BarPairWallet, pair.left + pair.right + 'Pair_' + pair.right + 'Wallet');
-    migration.store(FooBarLpPairWallet, pair.left + pair.right + 'Pair_LpWallet');
+    migration.store(FooPairWallet, pair.left + pair.right + 'Pool_' + pair.left + 'Wallet');
+    migration.store(BarPairWallet, pair.left + pair.right + 'Pool_' + pair.right + 'Wallet');
+    migration.store(FooBarLpPairWallet, pair.left + pair.right + 'Pool_LpWallet');
     migration.store(FooVaultWallet, pair.left + 'VaultWallet');
     migration.store(BarVaultWallet, pair.right + 'VaultWallet');
     migration.store(FooBarLpVaultWallet, pair.left + pair.right + 'LpVaultWallet');

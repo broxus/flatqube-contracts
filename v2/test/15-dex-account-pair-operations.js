@@ -116,7 +116,7 @@ describe(`DexAccount interact with ${options.pair_contract_name}`, async functio
         BarWallet2 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
 
         migration.load(DexRoot, 'DexRoot');
-        migration.load(DexPairFooBar, 'DexPairFooBar');
+        migration.load(DexPairFooBar, 'DexPoolFooBar');
         migration.load(FooRoot, 'FooRoot');
         migration.load(BarRoot, 'BarRoot');
         migration.load(FooBarLpRoot, 'FooBarLpRoot');

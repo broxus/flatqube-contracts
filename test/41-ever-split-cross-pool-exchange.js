@@ -222,14 +222,14 @@ describe('Check direct operations', async function () {
 
                     const tokenLeft = tokens[pool_tokens[0]];
                     const tokenRight = tokens[pool_tokens[1]];
-                    if (migration.exists(`DexPair${tokenLeft.symbol}${tokenRight.symbol}`)) {
-                        migration.load(pool, `DexPair${tokenLeft.symbol}${tokenRight.symbol}`);
-                        logger.log(`DexPair${tokenLeft.symbol}${tokenRight.symbol}: ${pool.address}`);
-                    } else if (migration.exists(`DexPair${tokenRight.symbol}${tokenLeft.symbol}`)) {
-                        migration.load(pool, `DexPair${tokenRight.symbol}${tokenLeft.symbol}`);
-                        logger.log(`DexPair${tokenRight.symbol}${tokenLeft.symbol}: ${pool.address}`);
+                    if (migration.exists(`DexPool${tokenLeft.symbol}${tokenRight.symbol}`)) {
+                        migration.load(pool, `DexPool${tokenLeft.symbol}${tokenRight.symbol}`);
+                        logger.log(`DexPool${tokenLeft.symbol}${tokenRight.symbol}: ${pool.address}`);
+                    } else if (migration.exists(`DexPool${tokenRight.symbol}${tokenLeft.symbol}`)) {
+                        migration.load(pool, `DexPool${tokenRight.symbol}${tokenLeft.symbol}`);
+                        logger.log(`DexPool${tokenRight.symbol}${tokenLeft.symbol}: ${pool.address}`);
                     } else {
-                        logger.log(`DexPair${tokenLeft.symbol}${tokenRight.symbol} NOT EXISTS`);
+                        logger.log(`DexPool${tokenLeft.symbol}${tokenRight.symbol} NOT EXISTS`);
                     }
                 } else { // pool
                     pool = await locklift.factory.getContract(options.pool_contract_name);

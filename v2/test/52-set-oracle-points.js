@@ -31,7 +31,7 @@ describe('DexPair set points', function () {
     pair = await locklift.factory.getContract('TestOracleDexPair');
     account = await locklift.factory.getAccount('Wallet');
 
-    migration.load(pair, `DexPair${options.left}${options.right}`);
+    migration.load(pair, `DexPool${options.left}${options.right}`);
     migration.load(account, 'Account2');
 
     account.setKeyPair(keyPairs[1]);

@@ -172,7 +172,7 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
         options.fee.beneficiary = Account3.address;
 
         DexPairFooBar = await locklift.factory.getContract(options.pair_contract_name);
-        migration.load(DexPairFooBar, 'DexPairFooBar');
+        migration.load(DexPairFooBar, 'DexPoolFooBar');
 
         FooRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
         BarRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
@@ -218,9 +218,9 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
         FooPairWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
         BarPairWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
         FooBarLpPairWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
-        migration.load(FooPairWallet, 'FooBarPair_FooWallet');
-        migration.load(BarPairWallet, 'FooBarPair_BarWallet');
-        migration.load(FooBarLpPairWallet, 'FooBarPair_LpWallet');
+        migration.load(FooPairWallet, 'FooBarPool_FooWallet');
+        migration.load(BarPairWallet, 'FooBarPool_BarWallet');
+        migration.load(FooBarLpPairWallet, 'FooBarPool_LpWallet');
 
         const pairRoots = await DexPairFooBar.call({method: 'getTokenRoots', params: {}});
         IS_FOO_LEFT = pairRoots.left === FooRoot.address;
@@ -231,7 +231,7 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
         logger.log('Account#2: ' + Account2.address);
         logger.log('Account#3: ' + Account3.address);
 
-        logger.log('DexPairFooBar: ' + DexPairFooBar.address);
+        logger.log('DexPoolFooBar: ' + DexPairFooBar.address);
 
         logger.log('FooRoot: ' + FooRoot.address);
         logger.log('BarRoot: ' + BarRoot.address);

@@ -110,11 +110,7 @@ describe('Test Dex Pool contract upgrade', async function () {
         account = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
         account.afterRun = afterRun;
         dexRoot = migration.load(await locklift.factory.getContract('DexRoot'), 'DexRoot');
-        if (migration.exists('DexPool' + poolName)) {
-            dexPool = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPool' + poolName);
-        } else {
-            dexPool = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPair' + poolName);
-        }
+        dexPool = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPool' + poolName);
         NewVersionContract = await locklift.factory.getContract(options.new_contract_name);
 
         targetVersion = new BigNumber(await dexRoot.call({method: 'getPoolVersion', params: {pool_type: options.pool_type}})).toNumber();
@@ -233,11 +229,6 @@ describe('Test Dex Pool contract upgrade', async function () {
                 .to
                 .equal(oldPoolData.fee_referrer, 'New fee referrer value incorrect');
 
-            if(options.new_contract_name.indexOf('Pool') !== -1) {
-                migration.store(NewVersionContract, 'DexPool' + poolName);
-            } else {
-                migration.store(NewVersionContract, 'DexPair' + poolName);
-            }
         });
     });
 });

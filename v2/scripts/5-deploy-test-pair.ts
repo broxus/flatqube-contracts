@@ -75,19 +75,19 @@ async function main() {
             'right_root': tokenBar.address,
         }).call()).value0;
 
-        console.log(`DexPair${pair.left}${pair.right}: ${dexPairFooBarAddress}`);
+        console.log(`DexPool${pair.left}${pair.right}: ${dexPairFooBarAddress}`);
 
 
         const dexPairFooBar = await locklift.factory.getDeployedContract(options.contract_name, dexPairFooBarAddress);
-        migration.store(dexPairFooBar, 'DexPair' + pair.left + pair.right);
+        migration.store(dexPairFooBar, 'DexPool' + pair.left + pair.right);
 
         // @ts-ignore
         const version = (await dexPairFooBar.methods.getVersion({answerId: 0}).call()).version;
-        console.log(`DexPair${pair.left}${pair.right} version = ${version}`);
+        console.log(`DexPool${pair.left}${pair.right} version = ${version}`);
 
         // @ts-ignore
         const active = (await dexPairFooBar.methods.isActive({answerId: 0}).call()).value0;
-        console.log(`DexPair${pair.left}${pair.right} active = ${active}`);
+        console.log(`DexPool${pair.left}${pair.right} active = ${active}`);
 
         // @ts-ignore
         const FooBarLpRoot = await locklift.factory.getDeployedContract('TokenRootUpgradeable', (await dexPairFooBar.methods.getTokenRoots({answerId: 0}).call()).lp);
@@ -135,9 +135,9 @@ async function main() {
         );
 
         migration.store(FooBarLpRoot, pair.left + pair.right + 'LpRoot');
-        migration.store(FooPairWallet, pair.left + pair.right + 'Pair_' + pair.left + 'Wallet');
-        migration.store(BarPairWallet, pair.left + pair.right + 'Pair_' + pair.right + 'Wallet');
-        migration.store(FooBarLpPairWallet, pair.left + pair.right + 'Pair_LpWallet');
+        migration.store(FooPairWallet, pair.left + pair.right + 'Pool_' + pair.left + 'Wallet');
+        migration.store(BarPairWallet, pair.left + pair.right + 'Pool_' + pair.right + 'Wallet');
+        migration.store(FooBarLpPairWallet, pair.left + pair.right + 'Pool_LpWallet');
         migration.store(FooVaultWallet, pair.left + 'VaultWallet');
         migration.store(BarVaultWallet, pair.right + 'VaultWallet');
         migration.store(FooBarLpVaultWallet, pair.left + pair.right + 'LpVaultWallet');

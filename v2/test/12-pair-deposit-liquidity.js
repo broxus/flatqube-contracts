@@ -135,7 +135,7 @@ describe('DexAccount interact with DexPair', async function () {
         let symbols = left_token.symbol + right_token.symbol;
 
         migration.load(DexRoot, 'DexRoot');
-        migration.load(DexPairFooBar, 'DexPair' + symbols);
+        migration.load(DexPairFooBar, 'DexPool' + symbols);
         migration.load(FooRoot, left_token.symbol + 'Root');
         migration.load(BarRoot, right_token.symbol + 'Root');
         migration.load(FooBarLpRoot, symbols + 'LpRoot');
@@ -194,7 +194,7 @@ describe('DexAccount interact with DexPair', async function () {
         IS_FOO_LEFT = pairRoots.left === FooRoot.address;
 
         logger.log('DexRoot: ' + DexRoot.address);
-        logger.log(`DexPair${symbols}: ` + DexPairFooBar.address);
+        logger.log(`DexPool${symbols}: ` + DexPairFooBar.address);
         logger.log(`${left_token.symbol}Root: ` + FooRoot.address);
         logger.log(`${right_token.symbol}Root: ` + BarRoot.address);
         logger.log(`${symbols}LpRoot: ` + FooBarLpRoot.address);

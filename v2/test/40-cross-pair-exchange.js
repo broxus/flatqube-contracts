@@ -73,10 +73,10 @@ async function dexPairInfo(left, right) {
         };
     }
     const Pair = await locklift.factory.getContract(options.contract_name);
-    if (migration.exists(`DexPair${tokenLeft.symbol}${tokenRight.symbol}`)) {
-        migration.load(Pair, `DexPair${tokenLeft.symbol}${tokenRight.symbol}`);
+    if (migration.exists(`DexPool${tokenLeft.symbol}${tokenRight.symbol}`)) {
+        migration.load(Pair, `DexPool${tokenLeft.symbol}${tokenRight.symbol}`);
     } else {
-        migration.load(Pair, `DexPair${tokenRight.symbol}${tokenLeft.symbol}`);
+        migration.load(Pair, `DexPool${tokenRight.symbol}${tokenLeft.symbol}`);
     }
     const pairRoots = await Pair.call({method: 'getTokenRoots', params: {}});
     const balances = await Pair.call({method: 'getBalances', params: {}});
@@ -162,14 +162,14 @@ describe('Check direct DexPairFooBar operations', async function () {
             const tokenLeft = Constants.tokens[options.route[i - 1]];
             const tokenRight = Constants.tokens[options.route[i]];
             const pair = await locklift.factory.getContract(options.contract_name);
-            if (migration.exists(`DexPair${tokenLeft.symbol}${tokenRight.symbol}`)) {
-                migration.load(pair, `DexPair${tokenLeft.symbol}${tokenRight.symbol}`);
-                logger.log(`DexPair${tokenLeft.symbol}${tokenRight.symbol}: ${pair.address}`);
-            } else if (migration.exists(`DexPair${tokenRight.symbol}${tokenLeft.symbol}`)) {
-                migration.load(pair, `DexPair${tokenRight.symbol}${tokenLeft.symbol}`);
-                logger.log(`DexPair${tokenRight.symbol}${tokenLeft.symbol}: ${pair.address}`);
+            if (migration.exists(`DexPool${tokenLeft.symbol}${tokenRight.symbol}`)) {
+                migration.load(pair, `DexPool${tokenLeft.symbol}${tokenRight.symbol}`);
+                logger.log(`DexPool${tokenLeft.symbol}${tokenRight.symbol}: ${pair.address}`);
+            } else if (migration.exists(`DexPool${tokenRight.symbol}${tokenLeft.symbol}`)) {
+                migration.load(pair, `DexPool${tokenRight.symbol}${tokenLeft.symbol}`);
+                logger.log(`DexPool${tokenRight.symbol}${tokenLeft.symbol}: ${pair.address}`);
             } else {
-                logger.log(`DexPair${tokenLeft.symbol}${tokenRight.symbol} NOT EXISTS`);
+                logger.log(`DexPool${tokenLeft.symbol}${tokenRight.symbol} NOT EXISTS`);
             }
             pairsContracts[options.route[i - 1] + '-' + options.route[i]] = pair;
         }
