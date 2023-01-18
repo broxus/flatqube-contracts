@@ -29,3 +29,7 @@ npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_tok
 # update to pair
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPair' --pool_type=1
 npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexStablePair' --new_contract_name='DexPair' --pool_type=1
+
+npx locklift test $NO_TRACE --tests test/15-dex-account-pair-operations.js --pair_contract_name='DexPair' --account_contract_name='DexAccount'
+npx locklift test $NO_TRACE --tests test/20-pair-direct-operations.js --contract_name='DexPair'
+npx locklift test $NO_TRACE --tests test/20-pair-direct-operations-v2.js --contract_name='DexPair'

@@ -12,7 +12,7 @@ npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"ac
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2 --contract_name='DexAccount'
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=3 --contract_name='DexAccount'
 
-# prepare pair
+# prepare stablepair
 npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["foo", "bar"],["tst","foo"]]' --contract_name='DexPair'
 npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='foo' --right='bar' --account=2 --contract_name='DexPair' --ignore_already_added='true'
 npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='tst' --right='foo' --account=2 --contract_name='DexPair' --ignore_already_added='true'
@@ -20,9 +20,12 @@ npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'foo' --right_token_id 'bar' --left_amount '10000' --right_amount '10000' --auto_change 'true' --contract_name='DexPair'
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'tst' --right_token_id 'foo' --left_amount '10000' --right_amount '10000' --auto_change 'false' --contract_name='DexPair'
 
+npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexStablePair' --pool_type=2
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPair' --new_contract_name='DexStablePair' --pool_type=2
+
 # upgrade to stablepool
 npx locklift test $NO_TRACE --tests test/30-install-pool-code.js --contract_name='DexStablePool' --pool_type=3
-npx locklift test $NO_TRACE --tests test/35-upgrade-pool.js --roots='["foo", "bar"]' --old_contract_name='DexPair' --new_contract_name='DexStablePool' --pool_type=3
+npx locklift test $NO_TRACE --tests test/35-upgrade-pool.js --roots='["foo", "bar"]' --old_contract_name='DexStablePair' --new_contract_name='DexStablePool' --pool_type=3
 
 npx locklift test $NO_TRACE --tests test/15-dex-account-pool-operations.js --roots='["foo", "bar"]' --pool_contract_name='DexStablePool' --account_contract_name='DexAccount'
 npx locklift test $NO_TRACE --tests test/20-pool-direct-operations.js --roots='["foo", "bar"]' --contract_name='DexStablePool'
