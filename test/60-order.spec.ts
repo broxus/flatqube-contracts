@@ -321,7 +321,8 @@ describe('OrderTest', () => {
                 tokenReceive: rootTokenReceive.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0
+                backPK: 0,
+                backMatchingPK: 0
             }
             console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
             const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -438,7 +439,8 @@ describe('OrderTest', () => {
                 tokenReceive: rootTokenReceive.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0
+                backPK: 0,
+                backMatchingPK: 0
             }
             console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
             const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -567,7 +569,8 @@ describe('OrderTest', () => {
                 tokenReceive: rootTokenReceive.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0
+                backPK: 0,
+                backMatchingPK: 0
             }
             console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
             const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -681,7 +684,8 @@ describe('OrderTest', () => {
                 tokenReceive: rootTokenReceive.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0
+                backPK: 0,
+                backMatchingPK: 0
             }
             console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
             const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -745,7 +749,8 @@ describe('OrderTest', () => {
                 tokenReceive: rootTokenReceive.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0
+                backPK: 0,
+                backMatchingPK: 0
             }
             console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
             const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -836,7 +841,8 @@ describe('OrderTest', () => {
                 tokenReceive: rootTokenReceive.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0
+                backPK: 0,
+                backMatchingPK: 0
             }
             console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
             const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -925,7 +931,8 @@ describe('OrderTest', () => {
               tokenReceive: rootTokenReceive.address,
               expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
               deployWalletValue: locklift.utils.toNano(0.1),
-              backPK: `0x${signer.publicKey}`
+              backPK: `0x${signer.publicKey}`,
+              backMatchingPK: 0
           }
           console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
           const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -992,7 +999,8 @@ describe('OrderTest', () => {
               tokenReceive: rootTokenReceive.address,
               expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
               deployWalletValue: locklift.utils.toNano(0.1),
-              backPK: `0x${signer.publicKey}`
+              backPK: `0x${signer.publicKey}`,
+              backMatchingPK: 0
 
           }
           console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
@@ -1062,7 +1070,8 @@ describe('OrderTest', () => {
               tokenReceive: rootTokenReceive.address,
               expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
               deployWalletValue: locklift.utils.toNano(0.2),
-              backPK: 0
+              backPK: 0,
+              backMatchingPK: 0
           }
           console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
           const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -1148,7 +1157,8 @@ describe('OrderTest', () => {
               tokenReceive: rootTokenReceive.address,
               expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
               deployWalletValue: locklift.utils.toNano(0.2),
-              backPK: 0
+              backPK: 0,
+              backMatchingPK: 0
           }
           console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
           const payload = await RootOrderBar.methods.buildPayload(params).call();
@@ -1226,7 +1236,8 @@ describe('OrderTest', () => {
                 tokenReceive: rootTokenReceive.address,
                 expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0
+                backPK: 0,
+                backMatchingPK: 0
             }
             console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
             const payload = await RootOrderBar.methods.buildPayload(params).call();

@@ -217,7 +217,8 @@ contract OrderFactory is IOrderFactory {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		if (msg.value >= OrderGas.DEPLOY_ORDERS_ROOT) {
 			new OrderPlatform {
-					stateInit: buildState(token, buildCode(token), buildParams()),
+					//stateInit: buildState(token, buildCode(token), buildParams()),
+					stateInit: buildState(token, orderPlatformCode, buildParams()),
 					value: OrderGas.DEPLOY_ORDERS_ROOT,
 					flag: MsgFlag.SENDER_PAYS_FEES
 			}(
@@ -227,7 +228,7 @@ contract OrderFactory is IOrderFactory {
 			);
 			if (callbackId > 0) {
 				IOrderOperationCallback(msg.sender).onOrderRootCreateSuccess{
-						value: 0, //OrderGas.OPERATION_CALLBACK_BASE
+						value: 0,
 						flag: MsgFlag.ALL_NOT_RESERVED,
 						bounce: false
 				}(
@@ -264,17 +265,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function expectedAddressOrderRoot(address token) internal view returns(address) {
-		return address(tvm.hash(buildState(token, buildCode(token), buildParams())));
-	}
-
-	function buildCode(
-		address token
-	) internal view returns (TvmCell) {
-		TvmBuilder salt;
-		salt.store(owner);
-		salt.store(token);
-
-		return tvm.setCodeSalt(orderPlatformCode, salt.toCell());
+		return address(tvm.hash(buildState(token, orderPlatformCode, buildParams())));
 	}
 
 	function buildState(address token, TvmCell _code, TvmCell params) internal pure returns (TvmCell) {
@@ -291,7 +282,7 @@ contract OrderFactory is IOrderFactory {
 	}
 
 	function buildParams() internal view returns (TvmCell) {
-		return abi.encode(dexRoot, orderCode, orderClosedCode);
+		return abi.encode(dexRoot, orderCode, orderClosedCode, orderPlatformCode);
 	}
 
 	function upgrade(

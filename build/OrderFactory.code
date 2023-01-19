@@ -1696,10 +1696,8 @@ PUSHCONT {
 	GETGLOB 9
 	GETGLOB 13
 	GETGLOB 18
-	PUSH2 S4, S4
-	CALLREF {
-		CALL $buildCode_b72b56ae_internal_macro$
-	}
+	PUSH S4
+	GETGLOB 19
 	CALLREF {
 		CALL $buildParams_c863cf6a_internal_macro$
 	}
@@ -1751,11 +1749,11 @@ PUSHCONT {
 	ENDC
 	PUSHINT 1
 	SENDRAWMSG
-	.loc ../contracts/OrderFactory.tsol, 228
+	.loc ../contracts/OrderFactory.tsol, 229
 	DUP
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/OrderFactory.tsol, 229
+		.loc ../contracts/OrderFactory.tsol, 230
 		MYADDR
 		PUSH S2
 		PUSHINT 0
@@ -1799,7 +1797,7 @@ PUSHCONT {
 	IF
 }
 PUSHCONT {
-	.loc ../contracts/OrderFactory.tsol, 245
+	.loc ../contracts/OrderFactory.tsol, 246
 	OVER
 	PUSHSLICE xc00000000000000000000000005c5284da
 	NEWC
@@ -1808,11 +1806,11 @@ PUSHCONT {
 	ENDC
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/OrderFactory.tsol, 246
+	.loc ../contracts/OrderFactory.tsol, 247
 	DUP
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/OrderFactory.tsol, 247
+		.loc ../contracts/OrderFactory.tsol, 248
 		DUP
 		GETGLOB 9
 		FALSE
@@ -1846,7 +1844,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/OrderFactory.tsol, 256
+.loc ../contracts/OrderFactory.tsol, 257
 LDU 32
 GETGLOB 4
 ROT
@@ -1924,7 +1922,7 @@ IFREF {
 THROW 0
 
 .macro getExpectedAddressOrderRoot_f1929fb8_internal_macro
-.loc ../contracts/OrderFactory.tsol, 263
+.loc ../contracts/OrderFactory.tsol, 264
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -1943,11 +1941,8 @@ CALLREF {
 CALL $expectedAddressOrderRoot_2defd8e7_internal_macro$
 
 .macro expectedAddressOrderRoot_2defd8e7_internal_macro
-.loc ../contracts/OrderFactory.tsol, 267
-DUP
-CALLREF {
-	CALL $buildCode_b72b56ae_internal_macro$
-}
+.loc ../contracts/OrderFactory.tsol, 268
+GETGLOB 19
 CALLREF {
 	CALL $buildParams_c863cf6a_internal_macro$
 }
@@ -1962,135 +1957,12 @@ ENDC
 CTOS
 .loc ../contracts/OrderFactory.tsol, 0
 
-.globl	buildCode_b72b56ae_internal
-.type	buildCode_b72b56ae_internal, @function
-CALL $buildCode_b72b56ae_internal_macro$
-
-.macro buildCode_b72b56ae_internal_macro
-.loc ../contracts/OrderFactory.tsol, 274
-GETGLOB 16
-NEWC
-STSLICE
-.loc ../contracts/OrderFactory.tsol, 275
-STSLICE
-.loc ../contracts/OrderFactory.tsol, 277
-GETGLOB 19
-CTOS
-SWAP
-ENDC
-
-CALLREF {
-	PUSH S1
-	PUSHSLICE x8adb35
-	SDEQ
-	PUSHREFCONT {
-		SWAP      ; salt sliceCode
-		LDREF
-		LDREF
-		DROP         ; salt selfCallCode usualSelector
-		XCHG S1, S2  ; selfCallCode salt usualSelector
-		CTOS         ; selfCallCode salt usualSelector
-		CALLREF {
-			
-			LDREFRTOS  ; selfCallCode salt restUsualSelector intSelector
-
-			PUSHSLICE xF4A4_
-			SDBEGINSX
-			LDDICT     ; selfCallCode salt restUsualSelector dict intSelector
-			LDU 10
-			NIP
-			DUP
-			SREFS      ; selfCallCode salt restUsualSelector dict intSelector refs
-			PUSHCONT {
-				LDREF
-			}
-			PUSHCONT {
-				PUSHREF {
-				}
-				SWAP
-			}
-			IFELSE
-		                ; selfCallCode salt restUsualSelector dict version intSelector
-			PUSHSLICE xF4A1
-			SDBEGINSX
-			DROP
-			            ; selfCallCode salt restUsualSelector dict version
-			SWAP        ; selfCallCode salt restUsualSelector version dict
-			NEWC        ; selfCallCode salt restUsualSelector version dict builder
-			STSLICECONST xF4A4_ ; DICTPUSHCONST
-			STDICT
-			PUSHINT 32
-			STUR 10
-			STSLICECONST xF4A1 ; DICTUGETJMP
-			STREF       ; selfCallCode salt restUsualSelector builder
-			XCHG S1, S2 ; selfCallCode restUsualSelector salt builder
-			STREF       ; selfCallCode restUsualSelector builder
-			NEWC        ; selfCallCode restUsualSelector builder usualBuilder
-			STBREF      ; selfCallCode restUsualSelector usualBuilder
-			STSLICE     ; selfCallCode usualBuilder
-
-		}
-		NEWC        ; selfCallCode usualBuilder mainBuilder
-		STSLICECONST x8adb35
-		XCHG S1, S2 ; usualBuilder selfCallCode mainBuilder
-		STREF
-		STBREF
-		ENDC
-	}
-	PUSHREFCONT {
-		SWAP
-		CALLREF {
-			
-			LDREFRTOS  ; selfCallCode salt restUsualSelector intSelector
-
-			PUSHSLICE xF4A4_
-			SDBEGINSX
-			LDDICT     ; selfCallCode salt restUsualSelector dict intSelector
-			LDU 10
-			NIP
-			DUP
-			SREFS      ; selfCallCode salt restUsualSelector dict intSelector refs
-			PUSHCONT {
-				LDREF
-			}
-			PUSHCONT {
-				PUSHREF {
-				}
-				SWAP
-			}
-			IFELSE
-		                ; selfCallCode salt restUsualSelector dict version intSelector
-			PUSHSLICE xF4A1
-			SDBEGINSX
-			DROP
-			            ; selfCallCode salt restUsualSelector dict version
-			SWAP        ; selfCallCode salt restUsualSelector version dict
-			NEWC        ; selfCallCode salt restUsualSelector version dict builder
-			STSLICECONST xF4A4_ ; DICTPUSHCONST
-			STDICT
-			PUSHINT 32
-			STUR 10
-			STSLICECONST xF4A1 ; DICTUGETJMP
-			STREF       ; selfCallCode salt restUsualSelector builder
-			XCHG S1, S2 ; selfCallCode restUsualSelector salt builder
-			STREF       ; selfCallCode restUsualSelector builder
-			NEWC        ; selfCallCode restUsualSelector builder usualBuilder
-			STBREF      ; selfCallCode restUsualSelector usualBuilder
-			STSLICE     ; selfCallCode usualBuilder
-
-		}
-		ENDC
-	}
-	IFELSE
-}
-.loc ../contracts/OrderFactory.tsol, 0
-
 .globl	buildState_695d2281_internal
 .type	buildState_695d2281_internal, @function
 CALL $buildState_695d2281_internal_macro$
 
 .macro buildState_695d2281_internal_macro
-.loc ../contracts/OrderFactory.tsol, 281
+.loc ../contracts/OrderFactory.tsol, 272
 PUSHINT 0
 NEWC
 STU 256
@@ -2130,12 +2002,14 @@ ENDC
 CALL $buildParams_c863cf6a_internal_macro$
 
 .macro buildParams_c863cf6a_internal_macro
-.loc ../contracts/OrderFactory.tsol, 294
+.loc ../contracts/OrderFactory.tsol, 285
+GETGLOB 19
 GETGLOB 21
 GETGLOB 20
 GETGLOB 11
 NEWC
 STSLICE
+STREF
 STREF
 STREF
 ENDC
@@ -2150,7 +2024,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/OrderFactory.tsol, 297
+.loc ../contracts/OrderFactory.tsol, 288
 OVER
 PUSHCONT {
 	LDREF
@@ -2188,12 +2062,12 @@ GETGLOB 16
 SDEQ
 AND
 THROWIFNOT 300
-.loc ../contracts/OrderFactory.tsol, 302
+.loc ../contracts/OrderFactory.tsol, 293
 GETGLOB 12
 PUSH S2
 EQUAL
 PUSHCONT {
-	.loc ../contracts/OrderFactory.tsol, 303
+	.loc ../contracts/OrderFactory.tsol, 294
 	GETPARAM 7
 	FIRST
 	DEPTH
@@ -2203,7 +2077,7 @@ PUSHCONT {
 	UFITS 128
 	PUSHINT 0
 	RAWRESERVE
-	.loc ../contracts/OrderFactory.tsol, 304
+	.loc ../contracts/OrderFactory.tsol, 295
 	DUP
 	NEWC
 	STSLICECONST x42_
@@ -2217,7 +2091,7 @@ PUSHCONT {
 	SENDRAWMSG
 }
 PUSHCONT {
-	.loc ../contracts/OrderFactory.tsol, 310
+	.loc ../contracts/OrderFactory.tsol, 301
 	OVER
 	GETGLOB 12
 	PUSHSLICE xc000000000000000000000000059867dc5
@@ -2228,45 +2102,45 @@ PUSHCONT {
 	ENDC
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/OrderFactory.tsol, 313
+	.loc ../contracts/OrderFactory.tsol, 304
 	GETGLOB 12
 	NEWC
 	STU 32
-	.loc ../contracts/OrderFactory.tsol, 314
+	.loc ../contracts/OrderFactory.tsol, 305
 	PUSH S2
 	STUR 32
-	.loc ../contracts/OrderFactory.tsol, 315
+	.loc ../contracts/OrderFactory.tsol, 306
 	GETGLOB 13
 	STUR 32
-	.loc ../contracts/OrderFactory.tsol, 316
+	.loc ../contracts/OrderFactory.tsol, 307
 	GETGLOB 16
 	STSLICER
-	.loc ../contracts/OrderFactory.tsol, 317
+	.loc ../contracts/OrderFactory.tsol, 308
 	GETGLOB 17
 	STSLICER
-	.loc ../contracts/OrderFactory.tsol, 318
+	.loc ../contracts/OrderFactory.tsol, 309
 	GETGLOB 11
 	STSLICER
-	.loc ../contracts/OrderFactory.tsol, 319
+	.loc ../contracts/OrderFactory.tsol, 310
 	GETGLOB 18
 	SWAP
 	STREF
-	.loc ../contracts/OrderFactory.tsol, 320
+	.loc ../contracts/OrderFactory.tsol, 311
 	GETGLOB 20
 	SWAP
 	STREF
-	.loc ../contracts/OrderFactory.tsol, 321
+	.loc ../contracts/OrderFactory.tsol, 312
 	GETGLOB 21
 	SWAP
 	STREF
-	.loc ../contracts/OrderFactory.tsol, 322
+	.loc ../contracts/OrderFactory.tsol, 313
 	GETGLOB 19
 	SWAP
 	STREF
-	.loc ../contracts/OrderFactory.tsol, 324
+	.loc ../contracts/OrderFactory.tsol, 315
 	PUSH S3
 	SETCODE
-	.loc ../contracts/OrderFactory.tsol, 325
+	.loc ../contracts/OrderFactory.tsol, 316
 	PUSH S3
 	CTOS
 	DUP
@@ -2281,7 +2155,7 @@ PUSHCONT {
 	CTOS
 	BLESS
 	POP C3
-	.loc ../contracts/OrderFactory.tsol, 327
+	.loc ../contracts/OrderFactory.tsol, 318
 	ENDC
 	CALLREF {
 		CALL $:onCodeUpgrade$

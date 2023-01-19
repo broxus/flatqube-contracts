@@ -18,6 +18,8 @@ import "./interfaces/IHasEmergencyMode.tsol";
 import "./interfaces/IDexRoot.tsol";
 import "./interfaces/IOrderOperationCallback.tsol";
 
+import "./OrderPlatform.tsol";
+
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "tip3/contracts/interfaces/ITokenRoot.tsol";
 import "tip3/contracts/interfaces/ITokenWallet.tsol";
@@ -40,6 +42,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 	uint128 currentAmountReceiveToken;
 
 	uint256 backPK;
+	uint256 backMatchingPK;
+
 	address dexRoot;
 	address dexPair;
 
@@ -47,6 +51,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 	address receiveWallet;
 
 	TvmCell codeClosed;
+	TvmCell orderPlatformCode;
 
 	uint8 state;
 	uint64 swapAttempt;
@@ -55,25 +60,19 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 	uint256 emergencyManager;
 
 	bool autoExchange;
+	address matchingOrder;
 
 	constructor(
 		uint128 _expectedAmount,
 		uint128 _initialAmount,
 		uint256 _backPK,
+		uint256 _backMatchingPK,
 		address _dexRoot,
-		TvmCell _codeClosed
+		TvmCell _codeClosed,
+		TvmCell _orderPlatformCode
 	) public {
 		changeState(OrderStatus.Initialize);
-		optional(TvmCell) optSalt = tvm.codeSalt(tvm.code());
-		require(optSalt.hasValue(), OrderErrors.EMPTY_SALT_IN_ORDER);
-		(address rootSalt, address tokenRootSalt) = optSalt
-			.get()
-			.toSlice()
-			.decode(address, address);
-
 		if (
-			rootSalt == root &&
-			tokenRootSalt == receiveToken &&
 			msg.sender.value != 0 &&
 			msg.sender == root
 		) {
@@ -82,8 +81,10 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 			currentAmountReceiveToken = expectedAmount = _expectedAmount;
 			currentAmountSpentToken = initialAmount = _initialAmount;
 			backPK = _backPK;
+			backMatchingPK = _backMatchingPK;
 			dexRoot = _dexRoot;
 			codeClosed = _codeClosed;
+			orderPlatformCode = _orderPlatformCode;
 
 			IDexRoot(dexRoot).getExpectedPairAddress{
 				value: OrderGas.GET_DEX_PAIR,
@@ -123,6 +124,14 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		require(
 			(msg.sender.value != 0 && msg.sender == owner),
 			OrderErrors.NOT_LIMIT_ORDER_OWNER
+		);
+		_;
+	}
+
+	modifier onlyBackend(uint256 _backendPK) {
+		require(
+			msg.pubkey() == _backendPK,
+			OrderErrors.NOT_BACKEND_PUB_KEY
 		);
 		_;
 	}
@@ -240,7 +249,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		uint128 transferAmount;
 		uint64 callbackId;
 		TvmSlice payloadSlice = payload.toSlice();
-
 		if (
 			sender == root &&
 			tokenRoot == spentToken &&
@@ -251,11 +259,31 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 			changeState(OrderStatus.Active);
 		} else {
 			if ((msg.sender.value != 0 && msg.sender == receiveWallet)
-				&& state == OrderStatus.Active
-				&& payloadSlice.bits() >= 192)
+				&& ((state == OrderStatus.Active && payloadSlice.bits() >= 192)
+				|| (sender == matchingOrder && state == OrderStatus.MatchInProgress && payloadSlice.bits() == 843)))
 			{
 				callbackId = payloadSlice.decode(uint64);
 				uint128 deployWalletValue = payloadSlice.decode(uint128);
+				TvmCell payloadForTransfer;
+				if (state == OrderStatus.MatchInProgress) {
+					(uint128 amountForDeal,
+					uint128 amountSum,
+					uint128 reward,
+					address sendGasTo)
+					= payloadSlice.decode(uint128, uint128, uint128, address);
+
+					payloadForTransfer = abi.encode(
+						callbackId,
+						deployWalletValue,
+						amountForDeal,
+						amountSum,
+						reward,
+						sendGasTo
+					);
+
+					//TODO matchingOrder = 0
+				}
+
 				if (msg.value >= OrderGas.FILL_ORDER_MIN_VALUE + deployWalletValue) {
 					if (amount > currentAmountReceiveToken) {
 						ITokenWallet(msg.sender).transfer{
@@ -281,7 +309,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 							deployWalletValue,
 							originalGasTo,
 							true,
-							emptyPayload
+							(state != OrderStatus.MatchInProgress ? emptyPayload : payloadForTransfer)
 						);
 
 						ITokenWallet(receiveWallet).transfer{
@@ -317,7 +345,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 								deployWalletValue,
 								originalGasTo,
 								true,
-								emptyPayload
+								(state != OrderStatus.MatchInProgress ? emptyPayload : payloadForTransfer)
 							);
 						}
 
@@ -336,9 +364,9 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 
 							if (callbackId > 0) {
 								IOrderOperationCallback(sender).onOrderPartExchangeSuccess{
-										value: OrderGas.OPERATION_CALLBACK_BASE,
-										flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-										bounce: false
+									value: OrderGas.OPERATION_CALLBACK_BASE,
+									flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+									bounce: false
 								}(
 									callbackId,
 									owner,
@@ -481,6 +509,59 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 						changeState(OrderStatus.Active);
 					}
 				}
+			} else if(
+				msg.sender.value != 0 && msg.sender == receiveWallet &&
+				sender == matchingOrder && state == OrderStatus.MatchInComplete && payloadSlice.bits() == 843
+			){
+
+				callbackId = payloadSlice.decode(uint64);
+				(uint128 deployWalletValue,
+				uint128 amountForDeal,
+				,
+				uint128 reward,
+				address sendGasTo
+				) = payloadSlice.decode(uint128, uint128, uint128, uint128, address);
+
+				ITokenWallet(receiveWallet).transfer{
+					value: OrderGas.TRANSFER_MIN_VALUE,
+					flag: MsgFlag.SENDER_PAYS_FEES,
+					bounce: false
+				}(
+					amount,
+					owner,
+					uint128(0),
+					originalGasTo,
+					true,
+					emptyPayload
+				);
+
+				if (reward > 0) {
+					ITokenWallet(receiveWallet).transfer{
+						value: OrderGas.TRANSFER_MIN_VALUE,
+						flag: MsgFlag.SENDER_PAYS_FEES,
+						bounce: false
+					}(
+						reward,
+						sendGasTo,
+						deployWalletValue,
+						originalGasTo,
+						true,
+						emptyPayload
+					);
+				}
+
+				currentAmountReceiveToken -= amount;
+				//TODO matchingOrder = 0
+				if (currentAmountSpentToken > 0) {
+					emit PartExchange(
+						spentToken,
+						amountForDeal,
+						receiveToken,
+						amount,
+						currentAmountSpentToken,
+						currentAmountReceiveToken
+					);
+				}
 			} else {
 				needCancel = true;
 			}
@@ -593,12 +674,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		close();
 	}
 
-	function backendSwap(uint64 callbackId) external {
-		require(
-			msg.pubkey() == backPK,
-			OrderErrors.NOT_BACKEND_PUB_KEY
-		);
-
+	function backendSwap(uint64 callbackId) external onlyBackend(backPK) {
 		require(
 			state == OrderStatus.Active,
 			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
@@ -710,6 +786,227 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		);
 	}
 
+	function backendMatching(uint64 callbackId, address limitOrder) external onlyBackend(backMatchingPK){
+		require(
+			state == OrderStatus.Active,
+			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
+		);
+
+		require(
+			address(this).balance > OrderGas.MATCHING_BACK_MIN_VALUE + 0.1 ever,
+			OrderErrors.VALUE_TOO_LOW
+		);
+
+		tvm.accept();
+		changeState(OrderStatus.MatchInProgress);
+		matchingOrder = limitOrder;
+
+		IOrder(limitOrder).matchingCheck{
+			value: OrderGas.MATCHING_BACK_MIN_VALUE,
+			flag: MsgFlag.SENDER_PAYS_FEES,
+			bounce: false
+		}(
+			callbackId,
+			uint128(0),
+			buildDetails()
+		);
+	}
+
+	function matching(uint64 callbackId, uint128 deployWalletValue, address limitOrder) external {
+		require(
+			state == OrderStatus.Active,
+			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
+		);
+
+		require(
+			msg.value >= OrderGas.MATCHING_MIN_VALUE,
+			OrderErrors.VALUE_TOO_LOW
+		);
+
+		tvm.rawReserve(
+			math.max(
+			address(this).balance - msg.value,
+			OrderGas.MATCHING_MIN_VALUE
+		), 0);
+
+		changeState(OrderStatus.MatchInProgress);
+		matchingOrder = limitOrder;
+
+		IOrder(limitOrder).matchingCheck{
+			value: 0,
+			flag: MsgFlag.ALL_NOT_RESERVED,
+			bounce: false
+		}(
+			callbackId,
+			deployWalletValue,
+			buildDetails()
+		);
+	}
+
+	function matchingCheck(uint64 callbackId, uint128 deployWalletValue, Details detailsLO) override external {
+		require(
+			factory == detailsLO.factory,
+			OrderErrors.NOT_EQUAL_FACTORY_FOR_MATCHING
+		);
+
+		require(
+			expectedOrderRoot(detailsLO.spentToken) == detailsLO.root,
+			OrderErrors.NOT_CORRECT_ORDER_ROOT_FOR_MATCHING
+		);
+
+		require(
+			expectedOrder(
+				factory,
+				detailsLO.root,
+				detailsLO.owner,
+				receiveToken,
+				spentToken,
+				detailsLO.timeTx,
+				detailsLO.nowTx) == msg.sender,
+			OrderErrors.NOT_CORRECT_ORDER_ADDRESS
+		);
+
+		tvm.rawReserve(
+			math.max(
+			address(this).balance - msg.value,
+			OrderGas.TARGET_BALANCE
+		), 0);
+
+		uint128 currentAmount;
+		uint128 currentAmountSpent;
+		if (detailsLO.currentAmountReceiveToken >= currentAmountSpentToken) {
+			currentAmount = currentAmountSpentToken;
+		} else {
+			currentAmount = detailsLO.currentAmountReceiveToken;
+		}
+		uint128 priceSpentLO = detailsLO.currentAmountSpentToken/detailsLO.currentAmountReceiveToken;
+		uint128 priceReceiveLO = currentAmountReceiveToken/currentAmountSpentToken;
+		if (priceSpentLO <= priceReceiveLO) {
+			currentAmountSpent = math.muldiv(currentAmount, detailsLO.currentAmountReceiveToken, detailsLO.currentAmountSpentToken);
+		}
+		uint128 reward = (
+			detailsLO.currentAmountReceiveToken - currentAmountSpent > 0 ?
+			detailsLO.currentAmountReceiveToken - currentAmountSpent : 0
+		);
+
+		matchingOrder = msg.sender;
+
+		if (currentAmount == 0) {
+			changeState(OrderStatus.Active);
+			matchingOrder = address.makeAddrStd(0, 0);
+		} else {
+			changeState(OrderStatus.MatchInProgress);
+		}
+
+		IOrder(matchingOrder).matchingInProgress{
+				value: 0,
+				flag: MsgFlag.ALL_NOT_RESERVED,
+				bounce: false
+		}(
+			callbackId,
+			deployWalletValue,
+			currentAmount,
+			currentAmountSpent,
+			reward,
+			detailsLO.msgSender
+		);
+	}
+
+	function matchingInProgress(
+		uint64 callbackId,
+		uint128 deployWalletValue,
+		uint128 amountForDeal,
+		uint128 amountSum,
+		uint128 reward,
+		address sendGasTo
+	) override external {
+		require(msg.sender.value != 0 && msg.sender == matchingOrder, OrderErrors.NOT_ORDER_FOR_MATCHING);
+
+		tvm.rawReserve(
+			math.max(
+			address(this).balance - msg.value,
+			OrderGas.TARGET_BALANCE
+		), 0);
+
+		if (amountForDeal == 0) {
+			changeState(OrderStatus.Active);
+			matchingOrder = address.makeAddrStd(0, 0);
+		} else {
+			changeState(OrderStatus.MatchInComplete);
+
+			//TODO add fee builder.store(fee)
+			TvmCell payload = abi.encode(
+				callbackId,
+				deployWalletValue,
+				amountForDeal,
+				amountSum,
+				reward,
+				sendGasTo
+			);
+
+			//TODO check it
+			currentAmountSpentToken -= amountForDeal;
+
+			ITokenWallet(spentWallet).transfer{
+				value: OrderGas.TRANSFER_MIN_VALUE,
+				flag: MsgFlag.ALL_NOT_RESERVED,
+				bounce: false
+			}(
+				amountForDeal,
+				matchingOrder,
+				uint128(0),
+				sendGasTo,
+				true,
+				payload // before 843 after add 971 + fee?????
+			);
+		}
+	}
+
+	function expectedOrderRoot(address tokenRoot) internal view returns(address){
+		return address(tvm.hash(buildState(factory, tokenRoot, orderPlatformCode, buildParams())));
+	}
+
+	function buildState(address _factory, address token, TvmCell _code, TvmCell params) internal pure returns (TvmCell) {
+		return tvm.buildStateInit({
+				contr: OrderPlatform,
+				varInit: {
+					factory: _factory,
+					spentToken: token,
+					params: params
+				},
+				pubkey: 0,
+				code: _code
+		});
+	}
+
+	function buildParams() internal view returns (TvmCell) {
+		return abi.encode(dexRoot, tvm.code(), codeClosed, orderPlatformCode);
+	}
+
+	function expectedOrder(
+		address _factory,
+		address _root,
+		address _owner,
+		address _spentToken,
+		address _receiveToken,
+		uint64 _timeTx,
+		uint64 _nowTx
+	) internal pure returns(address) {
+		return address(tvm.hash(tvm.buildStateInit({
+			contr: Order,
+			varInit : {
+				factory: _factory,
+				root: _root,
+				owner: _owner,
+				spentToken: _spentToken,
+				receiveToken: _receiveToken,
+				timeTx: _timeTx,
+				nowTx: _nowTx
+			},
+			code: tvm.code()
+		})));
+	}
+
 	function changeState(uint8 newState) private {
 		uint8 prevStateN = state;
 		state = newState;
@@ -719,9 +1016,11 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 	function buildDetails() private view returns (Details) {
 		return
 			Details(
+				factory,
 				root,
 				owner,
 				backPK,
+				backMatchingPK,
 				dexRoot,
 				dexPair,
 				msg.sender,
@@ -734,7 +1033,10 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 				expectedAmount,
 				initialAmount,
 				currentAmountSpentToken,
-				currentAmountReceiveToken
+				currentAmountReceiveToken,
+				timeTx,
+				nowTx,
+				matchingOrder
 			);
 	}
 
@@ -754,13 +1056,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 			builder.store("Cancelled");
 		}
 
-		TvmCell saltNewCode = tvm.setCodeSalt(
-			codeClosed,
-			builder.toCell()
-		);
-
-		tvm.setcode(saltNewCode);
-		tvm.setCurrentCode(saltNewCode);
+		tvm.setcode(codeClosed);
+		tvm.setCurrentCode(codeClosed);
 
 		TvmBuilder builderUpg;
 		builderUpg.store(state);
@@ -827,6 +1124,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		bool _notify,
 		TvmCell _payload
 	) public view onlyEmergencyManager {
+
 		require(
 			state == OrderStatus.Emergency,
 			OrderErrors.NOT_EMERGENCY_STATUS_NOW
@@ -844,7 +1142,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 			_notify,
 			_payload
 		);
-		//TODO:добавить обновление currentSpentToken and currentReceiveToken, после отправки закрывать ордер.
 	}
 
 	function sendGas(
