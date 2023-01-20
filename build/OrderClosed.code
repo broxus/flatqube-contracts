@@ -878,9 +878,27 @@ GETGLOB 17
 TUPLE 11
 .loc ../contracts/OrderClosed.tsol, 0
 
-.globl	upgrade_7916ae0d_internal
-.type	upgrade_7916ae0d_internal, @function
-CALL $upgrade_7916ae0d_internal_macro$
+.macro upgrade
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/OrderClosed.tsol, 173
+LDREF
+ENDS
+.loc ../contracts/OrderClosed.tsol, 0
+CALLREF {
+	CALL $upgrade_7916ae0d_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
 
 .macro upgrade_7916ae0d_internal_macro
 .loc ../contracts/OrderClosed.tsol, 46
@@ -1455,9 +1473,15 @@ THROW 60
 
 .macro public_function_selector
 DUP
-PUSHINT 902618978
+PUSHINT 872557582
 LEQ
 IFJMPREF {
+	DUP
+	PUSHINT 388172858
+	EQUAL
+	IFJMPREF {
+		CALL $upgrade$
+	}
 	DUP
 	PUSHINT 622096114
 	EQUAL
@@ -1476,17 +1500,17 @@ IFJMPREF {
 	IFJMPREF {
 		CALL $proxyTokensTransfer$
 	}
+}
+DUP
+PUSHINT 1756716863
+LEQ
+IFJMPREF {
 	DUP
 	PUSHINT 902618978
 	EQUAL
 	IFJMPREF {
 		CALL $getDetails$
 	}
-}
-DUP
-PUSHINT 1893244873
-LEQ
-IFJMPREF {
 	DUP
 	PUSHINT 1147733178
 	EQUAL
@@ -1505,17 +1529,22 @@ IFJMPREF {
 	IFJMPREF {
 		CALL $constructor$
 	}
+}
+DUP
+PUSHINT 2119812359
+LEQ
+IFJMPREF {
 	DUP
 	PUSHINT 1893244873
 	EQUAL
 	IFJMPREF {
 		CALL $onAcceptTokensTransfer$
 	}
-}
-DUP
-PUSHINT 2119812359
-EQUAL
-IFJMPREF {
-	CALL $initParams$
+	DUP
+	PUSHINT 2119812359
+	EQUAL
+	IFJMPREF {
+		CALL $initParams$
+	}
 }
 
