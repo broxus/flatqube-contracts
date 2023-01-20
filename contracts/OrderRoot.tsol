@@ -94,7 +94,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } factory;
     }
 
-
     function setFeeParams(OrderFeeParams params) override external onlyFactory {
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
         fee = params;
@@ -104,8 +103,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
         );
     }
-
-
 
     function buildPayload(
         uint64 callbackId,
@@ -151,7 +148,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 receiveToken,
                 orderCode
             );
-
 
             TvmCell stateInit = buildState(sender, indexCode, receiveToken);
             address orderAddress = new Order{
@@ -243,21 +239,20 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED,
                 bounce: false
-            } address(tvm.hash(
-           tvm.buildStateInit({
-               contr: Order,
-               varInit: {
-                    factory: _factory,
-                    root: _root,
-                    owner: _owner,
-                    spentToken: _spentToken,
-                    receiveToken: _receiveToken,
-                    timeTx: timeTx,
-                    nowTx: nowTx    
-               },
-               code: tvm.setCodeSalt(orderCode, salt.toCell())  
-           })
-       ));    
+             } address(tvm.hash(tvm.buildStateInit({
+                   contr: Order,
+                   varInit: {
+                        factory: _factory,
+                        root: _root,
+                        owner: _owner,
+                        spentToken: _spentToken,
+                        receiveToken: _receiveToken,
+                        timeTx: timeTx,
+                        nowTx: nowTx
+                   },
+                   code: tvm.setCodeSalt(orderCode, salt.toCell())
+               })
+            ));
     }
 
     function buildCode(

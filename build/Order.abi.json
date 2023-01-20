@@ -10,8 +10,7 @@
 				{"name":"_initialAmount","type":"uint128"},
 				{"name":"_backPK","type":"uint256"},
 				{"name":"_dexRoot","type":"address"},
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"_fee","type":"tuple"},
-				{"name":"_beneficiary","type":"address"},
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"_fee","type":"tuple"},
 				{"name":"_codeClosed","type":"cell"}
 			],
 			"outputs": [
@@ -31,22 +30,13 @@
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"params","type":"tuple"},
-				{"name":"beneficiary_","type":"address"}
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
 			]
 		},
 		{
 			"name": "setFeeParams",
 			"inputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"params","type":"tuple"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "setBeneficiary",
-			"inputs": [
-				{"name":"beneficiary_","type":"address"}
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
 			],
 			"outputs": [
 			]
@@ -211,7 +201,8 @@
 				{"name":"receiveToken","type":"address"},
 				{"name":"receiveAmount","type":"uint128"},
 				{"name":"currentSpentTokenAmount","type":"uint128"},
-				{"name":"currentReceiveTokenAmount","type":"uint128"}
+				{"name":"currentReceiveTokenAmount","type":"uint128"},
+				{"name":"fee","type":"uint128"}
 			],
 			"outputs": [
 			]
@@ -243,7 +234,6 @@
 		{"name":"prevState","type":"uint8"},
 		{"name":"emergencyManager","type":"uint256"},
 		{"name":"autoExchange","type":"bool"},
-		{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"}],"name":"fee","type":"tuple"},
-		{"name":"beneficiary","type":"address"}
+		{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"}
 	]
 }

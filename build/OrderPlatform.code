@@ -22,9 +22,18 @@ PUSHCONT {
 	LDU 32
 }
 IFELSE
+LDU 128
+LDU 128
+LDMSGADDR
+ROLLREV 3
+TRIPLE
+SWAP
+LDREF
+ENDS
+CTOS
 LDMSGADDR
 ENDS
-.loc ../contracts/OrderPlatform.tsol, 20
+.loc ../contracts/OrderPlatform.tsol, 21
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -35,14 +44,14 @@ GETGLOB 10
 SDEQ
 AND
 PUSHCONT {
-	.loc ../contracts/OrderPlatform.tsol, 21
-	BLKPUSH 3, 2
+	.loc ../contracts/OrderPlatform.tsol, 22
+	BLKPUSH 4, 3
 	CALLREF {
-		CALL $initialize_041df5ea_internal_macro$
+		CALL $initialize_7519657d_internal_macro$
 	}
 }
 PUSHCONT {
-	.loc ../contracts/OrderPlatform.tsol, 23
+	.loc ../contracts/OrderPlatform.tsol, 24
 	DUP
 	NEWC
 	STSLICECONST x42_
@@ -57,39 +66,53 @@ PUSHCONT {
 }
 IFELSE
 .loc ../contracts/OrderPlatform.tsol, 0
-BLKDROP 3
+BLKDROP 4
 CALLREF {
 	CALL $c7_to_c4$
 }
 THROW 0
 
-.globl	initialize_041df5ea_internal
-.type	initialize_041df5ea_internal, @function
-CALL $initialize_041df5ea_internal_macro$
+.globl	initialize_7519657d_internal
+.type	initialize_7519657d_internal, @function
+CALL $initialize_7519657d_internal_macro$
 
-.macro initialize_041df5ea_internal_macro
-.loc ../contracts/OrderPlatform.tsol, 37
+.macro initialize_7519657d_internal_macro
+.loc ../contracts/OrderPlatform.tsol, 39
 GETGLOB 10
 NEWC
 STSLICE
-.loc ../contracts/OrderPlatform.tsol, 38
+.loc ../contracts/OrderPlatform.tsol, 40
 GETGLOB 11
 STSLICER
-.loc ../contracts/OrderPlatform.tsol, 39
-STSLICECONST x00000000
-.loc ../contracts/OrderPlatform.tsol, 40
-XCHG S1, S2
-STU 32
 .loc ../contracts/OrderPlatform.tsol, 41
-STSLICE
+STSLICECONST x00000000
 .loc ../contracts/OrderPlatform.tsol, 42
+ROLL 3
+STUR 32
+.loc ../contracts/OrderPlatform.tsol, 43
+STSLICE
+.loc ../contracts/OrderPlatform.tsol, 44
+OVER
+THIRD
+PUSH S2
+FIRST
+ROLL 3
+SECOND
+NEWC
+STU 128
+STU 128
+STSLICE
+ENDC
+SWAP
+STREF
+.loc ../contracts/OrderPlatform.tsol, 45
 GETGLOB 12
 SWAP
 STREF
-.loc ../contracts/OrderPlatform.tsol, 44
+.loc ../contracts/OrderPlatform.tsol, 47
 OVER
 SETCODE
-.loc ../contracts/OrderPlatform.tsol, 45
+.loc ../contracts/OrderPlatform.tsol, 48
 SWAP
 CTOS
 DUP
@@ -104,7 +127,7 @@ PLDREF
 CTOS
 BLESS
 POP C3
-.loc ../contracts/OrderPlatform.tsol, 47
+.loc ../contracts/OrderPlatform.tsol, 50
 ENDC
 CALLREF {
 	CALL $:onCodeUpgrade$
@@ -325,7 +348,7 @@ THROW 60
 
 .macro public_function_selector
 DUP
-PUSHINT 1094808157
+PUSHINT 476722619
 EQUAL
 IFJMPREF {
 	CALL $constructor$

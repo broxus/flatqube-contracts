@@ -42,7 +42,6 @@ contract OrderClosed is
 
 	OrderFeeParams fee;
 
-
 	constructor() public { revert(); }
 
 	modifier onlyFactory() {	
@@ -114,7 +113,6 @@ contract OrderClosed is
 
     function disableEmergency() override external onlyFactory {
         require(state == OrderStatus.Emergency, OrderErrors.EMERGENCY_STATUS_NOW);
-
         state = prevState;
         prevState = 0;
         emergencyManager = 0;
@@ -173,7 +171,7 @@ contract OrderClosed is
         );
     }
 
-	function upgrade(TvmCell newCode) internal onlyFactory { 
+	function upgrade(TvmCell newCode) external override onlyFactory {
 		tvm.setcode(newCode);
 		tvm.setCurrentCode(newCode);
 

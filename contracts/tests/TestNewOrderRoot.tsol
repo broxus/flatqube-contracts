@@ -8,6 +8,7 @@ import "../libraries/OrderGas.tsol";
 import "../libraries/OrderErrors.tsol";
 
 import "../structures/IOrderRootCreateResult.tsol";
+import "../structures/IOrderWithdrawalFeeParams.tsol";
 
 import "../interfaces/IOrderRoot.tsol";
 import "../interfaces/IOrderFactory.tsol";
@@ -15,12 +16,7 @@ import "../interfaces/IOrderOperationCallback.tsol";
 
 import "../Order.tsol";
 
-
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
-import "tip3/contracts/interfaces/ITokenRoot.tsol";
-import "tip3/contracts/interfaces/ITokenWallet.tsol";
-import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
-import "../structures/IOrderWithdrawalFeeParams.tsol";
 
 contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
     address factory;
@@ -73,7 +69,6 @@ contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
             builder2.store(fee.beneficiary);
             builder.storeRef(builder2);
 
-
             tvm.setcode(_code);
             tvm.setCurrentCode(_code);
 
@@ -83,17 +78,15 @@ contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
 
     function onCodeUpgrade(TvmCell _data) private {
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-
         TvmSlice sl = _data.toSlice();
-        address sendGasTo;
+
         uint32 oldVersion;
         (
-        spentToken,
-        factory,
-        oldVersion,
-        version
-        ) =
-        sl.decode(address, address, uint32, uint32);
+            spentToken,
+            factory,
+            oldVersion,
+            version
+        ) = sl.decode(address, address, uint32, uint32);
 
         if (oldVersion == 0) {
             tvm.resetStorage();
@@ -106,7 +99,11 @@ contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
         (spentTokenWallet, deployer, dexRoot) = dataSl.decode(address, address, address);
 
         TvmSlice dataSlFee = sl.loadRefAsSlice();
-        (uint128 numerator_, uint128 denominator_, address beneficiary_) = dataSlFee.decode(uint128, uint128, address);
+        (
+            uint128 numerator_,
+            uint128 denominator_,
+            address beneficiary_
+        ) = dataSlFee.decode(uint128, uint128, address);
 
         fee = OrderFeeParams(numerator_, denominator_, beneficiary_);
 
@@ -119,10 +116,9 @@ contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
             flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
             bounce: false
         });
-
     }
+
     function newFunc() public view returns (string) {
         return newTestField;
     }
-
 }
