@@ -181,54 +181,17 @@ contract TestNewOrderFactory is IOrderFactory {
 		);
 	}
 
-	function setTokenWalletPlatformCodeOnce(TvmCell _tokenWalletPlatform) public onlyOwner {
-		require(tokenPlatformCode.toSlice().empty(), OrderErrors.PLATFORM_CODE_NON_EMPTY);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-		tokenPlatformCode = _tokenWalletPlatform;
 
-		emit TokenWalletPlatformCodeUpgraded();
-		owner.transfer(
-			0,
-			false,
-			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
-		);
-	}
 
-	function setFeeParams(OrderFeeParams params) override external onlyOwner {
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
-		fee = params;
-
-		emit OrderFeesParamsUpdated(fee);
-		owner.transfer(
-			0,
-			false,
-			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
-		);
-	}
-
-	function getTokenWallet(
-        address token
-    ) internal view returns (address) {
-        return
-        address(tvm.hash(
-            tvm.buildStateInit({
-                contr: TokenWalletPlatform,
-                varInit: { root: token, owner: address(this) },
-                code: tokenPlatformCode
-        })
-        ));
-    }
-
-	function withdrawFee(uint128 amount, address recipient, uint128 deployWalletValue, uint128 gasValue, address tokenRoot, address rm_gas_to) override external onlyOwner {
-		require(amount != 0 && recipient.value != 0 && rm_gas_to.value != 0 && tokenRoot.value != 0,
+	function withdrawFee(uint128 amount, address recipient, uint128 deployWalletValue, uint128 gasValue, address tokenWallet, address rm_gas_to) override external onlyOwner {
+		require(amount != 0 && recipient.value != 0 && rm_gas_to.value != 0 && tokenWallet.value != 0,
 			OrderErrors.WRONG_WITHDRAW_FEE_PARAMS);
 		tvm.accept();
 
-		address walletBeneficiary = getTokenWallet(tokenRoot);
 		TvmCell empty;
 
-        ITokenWallet(walletBeneficiary).transfer{
+        ITokenWallet(tokenWallet).transfer{
             value: gasValue,
             flag: MsgFlag.SENDER_PAYS_FEES
         }(
@@ -278,19 +241,14 @@ contract TestNewOrderFactory is IOrderFactory {
 		);
 	}
 
-		function setOrderBeneficiary(address beneficiary_, address order) override external onlyOwner {
-
-		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
-		require(beneficiary_.value != 0, OrderErrors.WRONG_BENEFICIARY);
+	function setFeeParams(OrderFeeParams params) override external onlyOwner {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		if (params.beneficiary.value == 0){
+			params.beneficiary = address(this);
+		}
+		fee = params;
 
-		IOrder(order).setBeneficiary{
-		value: OrderGas.SET_FEE_PARAMS_VALUE,
-		flag: MsgFlag.SENDER_PAYS_FEES,
-		bounce: false
-		}(
-			beneficiary_
-		);
+		emit OrderFeesParamsUpdated(fee);
 		owner.transfer(
 			0,
 			false,
@@ -298,25 +256,7 @@ contract TestNewOrderFactory is IOrderFactory {
 		);
 	}
 
-		function setRootBeneficiary(address beneficiary_, address root) override external onlyOwner {
 
-		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
-		require(beneficiary_.value != 0, OrderErrors.WRONG_BENEFICIARY);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-
-		IOrderRoot(root).setBeneficiary{
-		value: OrderGas.SET_FEE_PARAMS_VALUE,
-		flag: MsgFlag.SENDER_PAYS_FEES,
-		bounce: false
-		}(
-			beneficiary_
-		);
-		owner.transfer(
-			0,
-			false,
-			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
-		);
-	}
 
     function getFeeParams() override external view responsible returns (OrderFeeParams) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
@@ -377,6 +317,7 @@ contract TestNewOrderFactory is IOrderFactory {
 			}(
 				orderRootCode,
 				versionOrderRoot,
+				fee,
 				msg.sender
 			);
 			if (callbackId > 0) {
@@ -446,7 +387,7 @@ contract TestNewOrderFactory is IOrderFactory {
 	}
 
 	function buildParams() internal view returns (TvmCell) {
-		return abi.encode(dexRoot, orderCode, orderClosedCode, fee);
+		return abi.encode(dexRoot, orderCode, orderClosedCode);
 	}
 
 	function upgrade(
@@ -518,9 +459,6 @@ contract TestNewOrderFactory is IOrderFactory {
 		orderCode = codeParamsSlice.loadRef();
 		orderClosedCode = codeParamsSlice.loadRef();
 		orderPlatformCode = codeParamsSlice.loadRef();
-
-		TvmSlice tokenPlatformCodeParamsSlice = s.loadRefAsSlice();
-		tokenPlatformCode = tokenPlatformCodeParamsSlice.loadRef();
 
         TvmSlice feeParams = s.loadRefAsSlice();
         fee.numerator = feeParams.decode(uint128);
