@@ -40,7 +40,7 @@ contract OrderClosed is
 	uint8 prevState;
 	uint256 emergencyManager;
 
-	OrderClosedFeeParams fee;
+	OrderFeeParams fee;
 
 
 	constructor() public { revert(); }
@@ -257,7 +257,7 @@ contract OrderClosed is
 			address _beneficiary
 		) = dataFee.decode(uint128, uint128, address);
 
-		fee = OrderClosedFeeParams(_numerator, _denominator, _beneficiary);
+		fee = OrderFeeParams(_numerator, _denominator, _beneficiary);
 
 		if (state == OrderStatus.Cancelled) {
 			TvmCell emptyPayload;

@@ -1977,6 +1977,127 @@ describe('OrderTest', () => {
 
 
     });
+    describe('Upgrade Order contracts', async () => {
+        it('Check Order Factory upgrade', async () => {
+            console.log(`#############################\n`);
+
+            console.log(`Upgrade OrderFactory...`)
+
+            const testFactoryCode = (await locklift.factory.getContractArtifacts("TestNewOrderFactory")).code
+            const NEW_VERSION = 3
+            await locklift.tracing.trace(factoryOrder.methods.upgrade({newCode: testFactoryCode, sendGasTo: account1.address, newVersion: NEW_VERSION})
+                .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
+
+            const newFactory = await locklift.factory.getDeployedContract("TestNewOrderFactory", factoryOrder.address)
+            const testMessage = (await newFactory.methods.newFunc().call()).value0
+            const newVersion = (await newFactory.methods.getVersion({answerId: 1}).call()).value0
+            expect(testMessage).to.equal("New Order Factory", "Wrong Upgrade OrderFactory")
+            expect(newVersion.toString()).to.equal(NEW_VERSION.toString(), "Wrong OrderFactory new version")
+        });
+        it('Check Order Root upgrade', async () => {
+            console.log(`#############################\n`);
+
+            console.log(`Upgrade OrderRoot...`)
+            const NEW_VERSION = 2
+
+            const testFactoryCode = (await locklift.factory.getContractArtifacts("TestNewOrderRoot")).code
+             await locklift.tracing.trace(factoryOrder.methods.setOrderRootCode({_orderRootCode: testFactoryCode})
+                .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
+
+            await locklift.tracing.trace(factoryOrder.methods.upgradeOrderRoot({orderAddress: RootOrderBar.address})
+                .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
+
+            const newRoot = await locklift.factory.getDeployedContract("TestNewOrderRoot", RootOrderBar.address)
+            const testMessage = (await newRoot.methods.newFunc().call()).value0
+            const newVersion = (await newRoot.methods.getVersion({answerId: 1}).call()).value0
+            expect(testMessage).to.equal("New Order Root", "Wrong Upgrade OrderFactory")
+            expect(newVersion.toString()).to.equal(NEW_VERSION.toString(), "Wrong OrderFactory new version")
+
+        });
+        // it('Check Order Root upgrade', async () => {
+        //     console.log(`#############################\n`);
+        //     console.log(``);
+        //     const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
+        //     const balanceTstAcc3Start = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
+        //     await displayLog(balanceBarAcc3Start, balanceTstAcc3Start, true, "Account3");
+        //
+        //     const balanceBarAcc4Start = await accountTokenBalances(barWallet4, Constants.tokens.bar.decimals);
+        //     const balanceTstAcc4Start = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
+        //     await displayLog(balanceBarAcc4Start, balanceTstAcc4Start, true, 'Account4');
+        //
+        //     TOKENS_TO_EXCHANGE1 = 15;
+        //     TOKENS_TO_EXCHANGE2 = 30;
+        //
+        //     const params = {
+        //         callbackId: 0,
+        //         tokenReceive: rootTokenReceive.address,
+        //         expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+        //         deployWalletValue: locklift.utils.toNano(0.1),
+        //         backPK: 0
+        //     }
+        //     const payload = await RootOrderBar.methods.buildPayload(params).call();
+        //
+        //     await barWallet3.methods.transfer({
+        //         amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
+        //         recipient: RootOrderBar.address,
+        //         deployWalletValue: locklift.utils.toNano(0.1),
+        //         remainingGasTo: account3.address,
+        //         notify: true,
+        //         payload: payload.value0
+        //     }).send({
+        //         amount: locklift.utils.toNano(5), from: account3.address
+        //     })
+        //     const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+        //     // @ts-ignore
+        //     const orderAddress = pastEvents.events[0].data.order
+        //     console.log(`Order - ${orderAddress}`)
+        //     pastEvents.events.forEach(event => {
+        //         console.log(`address - ${event.data.order}\ncreated_at - ${event.data.createdAt}`)
+        //     })
+        //     Order = await locklift.factory.getDeployedContract("Order", orderAddress)
+        //
+        //     const payloadLO = await Order.methods.buildPayload({
+        //         callbackId: "1",
+        //         deployWalletValue: locklift.utils.toNano(0.1)
+        //     }).call();
+        //
+        //     await Order.methods.cancel({callbackId: 0}).send({
+        //         amount: locklift.utils.toNano(1), from: account3.address
+        //     })
+        //
+        //     await tstWallet4.methods.transfer({
+        //         amount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+        //         recipient: Order.address,
+        //         deployWalletValue: locklift.utils.toNano(0.1),
+        //         remainingGasTo: account4.address,
+        //         notify: true,
+        //         payload: payloadLO.value0
+        //     }).send({
+        //         amount: locklift.utils.toNano(3), from: account4.address
+        //     })
+        //     const stateL0 = await Order.methods.currentStatus({answerId: 1}).call()
+        //
+        //     expect(stateL0.value0.toString()).to.equal(new BigNumber(5).toString(), 'Wrong status Limit order');
+        //
+        //     console.log(`Upgrade OrderRoot...`)
+        //     const NEW_VERSION = 2
+        //
+        //     const testFactoryCode = (await locklift.factory.getContractArtifacts("TestNewOrderClosed")).code
+        //     const newOrder = await locklift.factory.getDeployedContract("OrderClosed", Order.address)
+        //     await locklift.tracing.trace(newOrder.methods.({_orderRootCode: testFactoryCode})
+        //         .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
+        //
+        //     await locklift.tracing.trace(factoryOrder.methods.upgradeOrderRoot({orderAddress: RootOrderBar.address})
+        //         .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
+        //
+        //     const newRoot = await locklift.factory.getDeployedContract("TestNewOrderRoot", RootOrderBar.address)
+        //     const testMessage = (await newRoot.methods.newFunc().call()).value0
+        //     const newVersion = (await newRoot.methods.getVersion({answerId: 1}).call()).value0
+        //     expect(testMessage).to.equal("New Order Root", "Wrong Upgrade OrderFactory")
+        //     expect(newVersion.toString()).to.equal(NEW_VERSION.toString(), "Wrong OrderFactory new version")
+        //
+        // });
+    })
 
 });
 
