@@ -2871,10 +2871,10 @@ contract DexStablePool is
             uint256 dx_expected = 0;
             if (j == i) {
                 sell[j] = false;
-                dx_expected = math.muldiv(xp_mem[j], D1, D0) - new_y;
+                dx_expected = (math.muldiv(xp_mem[j], D1, D0) - new_y) / tokenData[j].precisionMul;
             } else {
                 sell[j] = true;
-                dx_expected = xp_mem[j] - math.muldiv(xp_mem[j], D1, D0);
+                dx_expected = (xp_mem[j] - math.muldiv(xp_mem[j], D1, D0)) / tokenData[j].precisionMul;
             }
             differences[j] = uint128(dx_expected);
         }
