@@ -345,6 +345,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 							);
 						}
 
+						transferAmount = currentAmountSpentToken;
+
 						currentAmountReceiveToken = 0;
 						currentAmountSpentToken = 0;
 					} else {
@@ -397,8 +399,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 										expectedSenderAmount,
 										spentToken,
 										transferAmount,
-										currentAmountSpentToken,
-										currentAmountReceiveToken
+										currentAmountReceiveToken,
+										currentAmountSpentToken
 									)
 								);
 
@@ -421,6 +423,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 								);
 							}
 						}
+
 						ITokenWallet(receiveWallet).transfer{
 							value: OrderGas.TRANSFER_MIN_VALUE,
 							flag: MsgFlag.SENDER_PAYS_FEES,
