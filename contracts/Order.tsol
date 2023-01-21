@@ -297,6 +297,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 							emptyPayload
 						);
 
+						transferAmount = currentAmountSpentToken;
+
 						currentAmountReceiveToken = 0;
 						currentAmountSpentToken = 0;
 					} else {
@@ -336,36 +338,36 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 
 							if (callbackId > 0) {
 								IOrderOperationCallback(sender).onOrderPartExchangeSuccess{
-										value: OrderGas.OPERATION_CALLBACK_BASE,
-										flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-										bounce: false
+									value: OrderGas.OPERATION_CALLBACK_BASE,
+									flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+									bounce: false
 								}(
 									callbackId,
 									owner,
 									IOrderExchangeResult.OrderExchangeResult(
-									receiveToken,
-									amount,
-									spentToken,
-									transferAmount,
-									currentAmountSpentToken,
-									currentAmountReceiveToken
+										receiveToken,
+										amount,
+										spentToken,
+										transferAmount,
+										currentAmountReceiveToken,
+										currentAmountSpentToken
 									)
 								);
 
 								IOrderOperationCallback(owner).onOrderPartExchangeSuccess{
-										value: OrderGas.OPERATION_CALLBACK_BASE,
-										flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-										bounce: false
+									value: OrderGas.OPERATION_CALLBACK_BASE,
+									flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+									bounce: false
 								}(
 									callbackId,
 									owner,
 									IOrderExchangeResult.OrderExchangeResult(
-									spentToken,
-									transferAmount,
-									receiveToken,
-									amount,
-									currentAmountSpentToken,
-									currentAmountReceiveToken
+										spentToken,
+										transferAmount,
+										receiveToken,
+										amount,
+										currentAmountSpentToken,
+										currentAmountReceiveToken
 									)
 								);
 							}
@@ -491,13 +493,13 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 
 			if (callbackId > 0) {
 				IOrderOperationCallback(sender).onOrderStateFilled{
-						value: OrderGas.OPERATION_CALLBACK_BASE,
-						flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-						bounce: false
+					value: OrderGas.OPERATION_CALLBACK_BASE,
+					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+					bounce: false
 				}(
 					callbackId,
 					owner,
-						IOrderExchangeResult.OrderExchangeFilledResult(
+					IOrderExchangeResult.OrderExchangeFilledResult(
 						receiveToken,
 						amount,
 						spentToken,
@@ -520,7 +522,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 					)
 				);
 			}
-
 			close();
 		} else if (makeReserve) {
 			tvm.rawReserve(
@@ -546,9 +547,9 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 
 			if (callbackId > 0) {
 				IOrderOperationCallback(sender).onOrderReject{
-						value: OrderGas.OPERATION_CALLBACK_BASE,
-						flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-						bounce: false
+					value: OrderGas.OPERATION_CALLBACK_BASE,
+					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+					bounce: false
 				}(callbackId);
 			}
 
