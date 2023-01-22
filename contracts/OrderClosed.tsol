@@ -170,7 +170,7 @@ contract OrderClosed is
         );
     }
 
-	function upgrade(TvmCell newCode) internal onlyFactory { 
+	function upgrade(TvmCell newCode) external override onlyFactory {
 		tvm.setcode(newCode);
 		tvm.setCurrentCode(newCode);
 
