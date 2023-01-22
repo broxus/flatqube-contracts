@@ -33,7 +33,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
     address dexRoot;
 
     OrderFeeParams fee;
-    mapping(address => OrderWithdrawalFeeParams) withdrawalFeeParams;
 
     constructor() public { revert(); }
 
@@ -166,9 +165,9 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
 
             if (callbackId > 0) {
                 IOrderOperationCallback(sender).onOrderCreateOrderSuccess{
-                        value: OrderGas.OPERATION_CALLBACK_BASE,
-                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                        bounce: false
+                    value: OrderGas.OPERATION_CALLBACK_BASE,
+                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
                 }(callbackId);
             }
 
@@ -199,9 +198,9 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             emit CreateOrderReject();
             if (callbackId > 0){
                 IOrderOperationCallback(sender).onOrderCreateOrderReject{
-                        value: OrderGas.OPERATION_CALLBACK_BASE,
-                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                        bounce: false
+                    value: OrderGas.OPERATION_CALLBACK_BASE,
+                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
                 }(callbackId);
             }
 
@@ -240,17 +239,17 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
                 flag: MsgFlag.ALL_NOT_RESERVED,
                 bounce: false
              } address(tvm.hash(tvm.buildStateInit({
-                   contr: Order,
-                   varInit: {
-                        factory: _factory,
-                        root: _root,
-                        owner: _owner,
-                        spentToken: _spentToken,
-                        receiveToken: _receiveToken,
-                        timeTx: timeTx,
-                        nowTx: nowTx
-                   },
-                   code: tvm.setCodeSalt(orderCode, salt.toCell())
+                contr: Order,
+                varInit: {
+                    factory: _factory,
+                    root: _root,
+                    owner: _owner,
+                    spentToken: _spentToken,
+                    receiveToken: _receiveToken,
+                    timeTx: timeTx,
+                    nowTx: nowTx
+               },
+               code: tvm.setCodeSalt(orderCode, salt.toCell())
                })
             ));
     }
@@ -303,7 +302,6 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot  {
             builder.store(_newVersion);
             builder.store(orderCode);
             builder.store(orderClosedCode);
-
 
             TvmBuilder builder1;
             builder1.store(spentTokenWallet);

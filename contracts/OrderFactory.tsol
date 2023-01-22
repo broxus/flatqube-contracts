@@ -28,10 +28,8 @@ contract OrderFactory is IOrderFactory {
 
 	address owner;
 	address pendingOwner;
-	OrderFeeParams fee;
 
-	// token_root -> send_gas_to
-    mapping(address => address) _tmp_deploying_wallets;
+	OrderFeeParams fee;
 
 	TvmCell orderRootCode;
 	TvmCell orderPlatformCode;
@@ -179,6 +177,7 @@ contract OrderFactory is IOrderFactory {
 
 	function setFeeParams(OrderFeeParams params) override external onlyOwner {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+
 		if (params.beneficiary.value == 0){
 			params.beneficiary = address(this);
 		}
@@ -196,7 +195,6 @@ contract OrderFactory is IOrderFactory {
 		uint128 amount,
 		address recipient,
 		uint128 deployWalletValue,
-		uint128 gasValue,
 		address tokenWallet,
 		address sendGasTo
 	) override external onlyOwner {
@@ -208,8 +206,9 @@ contract OrderFactory is IOrderFactory {
 		TvmCell empty;
 
         ITokenWallet(tokenWallet).transfer{
-            value: gasValue,
-            flag: MsgFlag.SENDER_PAYS_FEES
+            value: OrderGas.TRANSFER_MIN_VALUE,
+            flag: MsgFlag.SENDER_PAYS_FEES,
+			bounce: false
         }(
             amount,
             recipient,
@@ -316,9 +315,9 @@ contract OrderFactory is IOrderFactory {
 		if (msg.value >= OrderGas.DEPLOY_ORDERS_ROOT + OrderGas.DEPLOY_EMPTY_WALLET_GRAMS) {
 
 			new OrderPlatform {
-					stateInit: buildState(token, buildCode(token), buildParams()),
-					value: OrderGas.DEPLOY_ORDERS_ROOT,
-					flag: MsgFlag.SENDER_PAYS_FEES
+				stateInit: buildState(token, buildCode(token), buildParams()),
+				value: OrderGas.DEPLOY_ORDERS_ROOT,
+				flag: MsgFlag.SENDER_PAYS_FEES
 			}(
 				orderRootCode,
 				versionOrderRoot,
@@ -328,9 +327,9 @@ contract OrderFactory is IOrderFactory {
 
 			if (callbackId > 0) {
 				IOrderOperationCallback(msg.sender).onOrderRootCreateSuccess{
-						value: 0,
-						flag: MsgFlag.ALL_NOT_RESERVED,
-						bounce: false
+					value: 0,
+					flag: MsgFlag.ALL_NOT_RESERVED,
+					bounce: false
 				}(
 					callbackId,
 					IOrderRootCreateResult.OrderRootCreateResult(

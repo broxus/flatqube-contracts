@@ -55,7 +55,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 	uint256 emergencyManager;
 
 	bool autoExchange;
-
 	OrderFeeParams fee;
 
 	constructor(
@@ -144,36 +143,12 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 
 	function onTokenWalletReceive(address _wallet) external {}
 
-	function getFeeParams() override external view responsible returns (OrderFeeParams params) {
-		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
-	}
-
-    function _expectedSpendAmount(uint128 b_amount) private view returns (uint128, uint128) {
-		if (fee.numerator == 0 || fee.denominator == 0){
-			return (b_amount, 0);
-		}
-		uint128 a_fee = math.muldivc(b_amount, fee.numerator, fee.denominator);
-		uint128 expected_a_amount = math.muldiv(b_amount, fee.denominator - fee.numerator, fee.denominator);
-		return (expected_a_amount, a_fee);
-    }
-
-    function setFeeParams(OrderFeeParams params) override external onlyFactory {
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-
-		fee = params;
-		factory.transfer(
-			0,
-			false,
-			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
-		);
-	}
-
 	function onBeginData(address inAddress) external {
 		require(
 			msg.sender.value != 0 &&
-				(msg.sender == dexRoot ||
-					msg.sender == spentToken ||
-					msg.sender == receiveToken),
+			(msg.sender == dexRoot ||
+			msg.sender == spentToken ||
+			msg.sender == receiveToken),
 			OrderErrors.NOT_BEGIN_DATA
 		);
 
@@ -191,9 +166,9 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 			receiveWallet.value != 0
 		) {
 			TIP3TokenWallet(receiveWallet).balance{
-				value: OrderGas.GET_BALANCE_WALLET,
-				flag: MsgFlag.SENDER_PAYS_FEES,
-				callback: Order.onBalanceReceiveWallet
+					value: OrderGas.GET_BALANCE_WALLET,
+					flag: MsgFlag.SENDER_PAYS_FEES,
+					callback: Order.onBalanceReceiveWallet
 			}();
 		}
 	}
@@ -223,25 +198,49 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 				value: 0,
 				bounce: false,
 				flag: MsgFlag.REMAINING_GAS
-			} InitParams(
-				factory,
-				root,
-				owner,
-				spentToken,
-				receiveToken,
-				timeTx,
-				nowTx
-			);
+		} InitParams(
+			factory,
+			root,
+			owner,
+			spentToken,
+			receiveToken,
+			timeTx,
+			nowTx
+		);
 	}
 
 	function getDetails()
-		external
-		view
-		responsible
-		override
-		returns (Details)
+	external
+	view
+	responsible
+	override
+	returns (Details)
 	{
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } buildDetails();
+	}
+
+	function getFeeParams() override external view responsible returns (OrderFeeParams params) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
+	}
+
+    function _expectedSpendAmount(uint128 b_amount) private view returns (uint128, uint128) {
+		if (fee.numerator == 0 || fee.denominator == 0){
+			return (b_amount, 0);
+		}
+		uint128 a_fee = math.muldivc(b_amount, fee.numerator, fee.denominator);
+		uint128 expected_a_amount = math.muldiv(b_amount, fee.denominator - fee.numerator, fee.denominator);
+		return (expected_a_amount, a_fee);
+    }
+
+    function setFeeParams(OrderFeeParams params) override external onlyFactory {
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+
+		fee = params;
+		factory.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
 	}
 
 	function buildPayload(uint64 callbackId, uint128 deployWalletValue)
@@ -568,9 +567,9 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 
 			if (callbackId > 0) {
 				IOrderOperationCallback(sender).onOrderStateFilled{
-						value: OrderGas.OPERATION_CALLBACK_BASE,
-						flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-						bounce: false
+					value: OrderGas.OPERATION_CALLBACK_BASE,
+					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+					bounce: false
 				}(
 					callbackId,
 					owner,
