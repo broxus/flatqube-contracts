@@ -60,6 +60,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 	uint256 emergencyManager;
 
 	bool autoExchange;
+	OrderFeeParams fee;
 	address matchingOrder;
 
 	constructor(
@@ -68,6 +69,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		uint256 _backPK,
 		uint256 _backMatchingPK,
 		address _dexRoot,
+		OrderFeeParams _fee,
 		TvmCell _codeClosed,
 		TvmCell _orderPlatformCode
 	) public {
@@ -84,6 +86,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 			backMatchingPK = _backMatchingPK;
 			dexRoot = _dexRoot;
 			codeClosed = _codeClosed;
+			fee = _fee;
 			orderPlatformCode = _orderPlatformCode;
 
 			IDexRoot(dexRoot).getExpectedPairAddress{
@@ -147,12 +150,14 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		_;
 	}
 
+	function onTokenWalletReceive(address _wallet) external {}
+
 	function onBeginData(address inAddress) external {
 		require(
 			msg.sender.value != 0 &&
-				(msg.sender == dexRoot ||
-					msg.sender == spentToken ||
-					msg.sender == receiveToken),
+			(msg.sender == dexRoot ||
+			msg.sender == spentToken ||
+			msg.sender == receiveToken),
 			OrderErrors.NOT_BEGIN_DATA
 		);
 
@@ -170,9 +175,9 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 			receiveWallet.value != 0
 		) {
 			TIP3TokenWallet(receiveWallet).balance{
-				value: OrderGas.GET_BALANCE_WALLET,
-				flag: MsgFlag.SENDER_PAYS_FEES,
-				callback: Order.onBalanceReceiveWallet
+					value: OrderGas.GET_BALANCE_WALLET,
+					flag: MsgFlag.SENDER_PAYS_FEES,
+					callback: Order.onBalanceReceiveWallet
 			}();
 		}
 	}
@@ -202,25 +207,49 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 				value: 0,
 				bounce: false,
 				flag: MsgFlag.REMAINING_GAS
-			} InitParams(
-				factory,
-				root,
-				owner,
-				spentToken,
-				receiveToken,
-				timeTx,
-				nowTx
-			);
+		} InitParams(
+			factory,
+			root,
+			owner,
+			spentToken,
+			receiveToken,
+			timeTx,
+			nowTx
+		);
 	}
 
 	function getDetails()
-		external
-		view
-		responsible
-		override
-		returns (Details)
+	external
+	view
+	responsible
+	override
+	returns (Details)
 	{
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } buildDetails();
+	}
+
+	function getFeeParams() override external view responsible returns (OrderFeeParams params) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
+	}
+
+    function _expectedSpendAmount(uint128 b_amount) private view returns (uint128, uint128) {
+		if (fee.numerator == 0 || fee.denominator == 0){
+			return (b_amount, 0);
+		}
+		uint128 a_fee = math.muldivc(b_amount, fee.numerator, fee.denominator);
+		uint128 expected_a_amount = math.muldiv(b_amount, fee.denominator - fee.numerator, fee.denominator);
+		return (expected_a_amount, a_fee);
+    }
+
+    function setFeeParams(OrderFeeParams params) override external onlyFactory {
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+
+		fee = params;
+		factory.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
 	}
 
 	function buildPayload(uint64 callbackId, uint128 deployWalletValue)
@@ -246,8 +275,10 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		TvmCell emptyPayload;
 		bool needCancel = false;
 		bool makeReserve = false;
-		uint128 transferAmount;
 		uint64 callbackId;
+		uint128 transferAmount;
+		uint128 expectedSenderAmount;
+		uint128 senderFee;
 		TvmSlice payloadSlice = payload.toSlice();
 		if (
 			sender == root &&
@@ -264,6 +295,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 			{
 				callbackId = payloadSlice.decode(uint64);
 				uint128 deployWalletValue = payloadSlice.decode(uint128);
+				(expectedSenderAmount, senderFee) = _expectedSpendAmount(amount);
 				TvmCell payloadForTransfer;
 				if (state == OrderStatus.MatchInProgress) {
 					(uint128 amountForDeal,
@@ -283,13 +315,13 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 				}
 
 				if (msg.value >= OrderGas.FILL_ORDER_MIN_VALUE + deployWalletValue) {
-					if (amount > currentAmountReceiveToken) {
+					if (expectedSenderAmount > currentAmountReceiveToken) {
 						ITokenWallet(msg.sender).transfer{
 							value: OrderGas.TRANSFER_MIN_VALUE,
 							flag: MsgFlag.SENDER_PAYS_FEES,
 							bounce: false
 						}(
-							amount - currentAmountReceiveToken,
+							expectedSenderAmount - currentAmountReceiveToken,
 							sender,
 							uint128(0),
 							originalGasTo,
@@ -323,6 +355,21 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 							emptyPayload
 						);
 
+						if (senderFee != 0) {
+							ITokenWallet(receiveWallet).transfer{
+								value : OrderGas.TRANSFER_MIN_VALUE,
+								flag : MsgFlag.SENDER_PAYS_FEES,
+								bounce : false
+							}(
+								senderFee,
+								fee.beneficiary,
+								uint128(0),
+								originalGasTo,
+								true,
+								emptyPayload
+							);
+						}
+
 						transferAmount = currentAmountSpentToken;
 
 						currentAmountReceiveToken = 0;
@@ -330,7 +377,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 					} else {
 						makeReserve = true;
 						transferAmount = math.muldiv(
-							amount,
+							expectedSenderAmount,
 							initialAmount,
 							expectedAmount
 						);
@@ -351,16 +398,17 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 						}
 
 						currentAmountSpentToken -= transferAmount;
-						currentAmountReceiveToken -= amount;
+						currentAmountReceiveToken -= expectedSenderAmount;
 
 						if (currentAmountSpentToken > 0) {
 							emit PartExchange(
 								spentToken,
 								transferAmount,
 								receiveToken,
-								amount,
+								expectedSenderAmount,
 								currentAmountSpentToken,
-								currentAmountReceiveToken
+								currentAmountReceiveToken,
+								senderFee
 							);
 
 							if (callbackId > 0) {
@@ -371,9 +419,10 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 								}(
 									callbackId,
 									owner,
+									uint128(0),
 									IOrderExchangeResult.OrderExchangeResult(
 										receiveToken,
-										amount,
+										expectedSenderAmount,
 										spentToken,
 										transferAmount,
 										currentAmountReceiveToken,
@@ -388,11 +437,12 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 								}(
 									callbackId,
 									owner,
+									senderFee,
 									IOrderExchangeResult.OrderExchangeResult(
 										spentToken,
 										transferAmount,
 										receiveToken,
-										amount,
+										expectedSenderAmount,
 										currentAmountSpentToken,
 										currentAmountReceiveToken
 									)
@@ -405,13 +455,28 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 							flag: MsgFlag.SENDER_PAYS_FEES,
 							bounce: false
 						}(
-							amount,
+							expectedSenderAmount,
 							owner,
 							uint128(0),
 							originalGasTo,
 							true,
 							emptyPayload
 						);
+
+						if (senderFee != 0){
+							ITokenWallet(receiveWallet).transfer{
+								value: OrderGas.TRANSFER_MIN_VALUE,
+								flag: MsgFlag.SENDER_PAYS_FEES,
+								bounce: false
+							}(
+								senderFee,
+								fee.beneficiary,
+								uint128(0),
+								originalGasTo,
+								true,
+								emptyPayload
+							);
+						}
 					}
 				} else {
 					needCancel = true;
@@ -473,7 +538,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 									owner,
 									initiator,
 									amount - currentAmountReceiveToken
-								)
+									)
 								);
 							}
 						}
@@ -569,6 +634,15 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		}
 
 		if (currentAmountReceiveToken == 0 && currentAmountSpentToken == 0) {
+			emit PartExchange(
+				spentToken,
+				transferAmount,
+				receiveToken,
+				expectedSenderAmount,
+				currentAmountSpentToken,
+				currentAmountReceiveToken,
+				senderFee
+			);
 			changeState(OrderStatus.Filled);
 
 			if (callbackId > 0) {
@@ -579,6 +653,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 				}(
 					callbackId,
 					owner,
+					uint128(0),
 					IOrderExchangeResult.OrderExchangeFilledResult(
 						receiveToken,
 						amount,
@@ -594,6 +669,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 				}(
 					callbackId,
 					owner,
+					senderFee,
 					IOrderExchangeResult.OrderExchangeFilledResult(
 						spentToken,
 						transferAmount,
@@ -1072,6 +1148,12 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		builderSum.store(initialAmount);
 		builderSum.store(receiveWallet);
 		builderUpg.storeRef(builderSum);
+
+		TvmBuilder builderFee;
+		builderFee.store(fee.numerator);
+		builderFee.store(fee.denominator);
+		builderFee.store(fee.beneficiary);
+		builderUpg.storeRef(builderFee);
 
 		onCodeUpgrade(builderUpg.toCell());
 	}

@@ -5,8 +5,9 @@ pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
+import "./structures/IOrderFeeParams.tsol";
 
-contract OrderPlatform {
+contract OrderPlatform is IOrderFeeParams{
 	address static factory;
 	address static spentToken;
 	TvmCell static params;
@@ -14,10 +15,11 @@ contract OrderPlatform {
 	constructor(
 		TvmCell code,
 		uint32 version,
+		OrderFeeParams fee,
 		address sendGasTo
 	) public {
 		if (msg.sender.value != 0 && msg.sender == factory) {
-			initialize(code, version, sendGasTo);
+			initialize(code, version, fee, sendGasTo);
 		} else {
 			sendGasTo.transfer({
 				value: 0,
@@ -30,6 +32,7 @@ contract OrderPlatform {
 	function initialize(
 		TvmCell code,
 		uint32 version,
+		OrderFeeParams fee,
 		address sendGasTo
 	) private {
 		TvmBuilder builder;
@@ -38,6 +41,7 @@ contract OrderPlatform {
 		builder.store(uint32(0));
 		builder.store(version);
 		builder.store(sendGasTo);
+		builder.store(abi.encode(fee.numerator, fee.denominator, fee.beneficiary));
 		builder.store(params);
 
 		tvm.setcode(code);

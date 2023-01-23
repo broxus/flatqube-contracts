@@ -33,7 +33,9 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
     address spentTokenWallet;
     address deployer;
     address dexRoot;
-    
+
+    OrderFeeParams fee;
+
     constructor() public { revert(); }
 
     modifier onlyFactory() {
@@ -59,6 +61,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
     }
 
     function onTokenWalletReceive(address _wallet) external {}
+    function onTokenWalletBeneficiary(address _wallet) external {}
 
     onBounce(TvmSlice body) external view {
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
@@ -76,6 +79,10 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
         }
     }
 
+    function getFeeParams() override external view responsible returns (OrderFeeParams params) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
+	}
+
     function getVersion() override external view responsible returns (uint32) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } version;
     }
@@ -86,6 +93,16 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
 
     function getFactory() override external view responsible returns(address) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } factory;
+    }
+
+    function setFeeParams(OrderFeeParams params) override external onlyFactory {
+        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+        fee = params;
+        factory.transfer(
+            0,
+            false,
+            MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+        );
     }
 
     function buildPayload(
@@ -155,6 +172,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
                 backPubKey,
                 backMatchingPK,
                 dexRoot, 
+                fee,
                 orderClosedCode,
                 orderPlatformCode
             );
@@ -163,9 +181,9 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
 
             if (callbackId > 0) {
                 IOrderOperationCallback(sender).onOrderCreateOrderSuccess{
-                        value: OrderGas.OPERATION_CALLBACK_BASE,
-                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                        bounce: false
+                    value: OrderGas.OPERATION_CALLBACK_BASE,
+                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
                 }(callbackId);
             }
 
@@ -174,6 +192,12 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: OrderRoot.onTokenWalletReceive
             }(sender, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
+
+            ITokenRoot(receiveToken).deployWallet {
+                value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
+                flag: MsgFlag.SENDER_PAYS_FEES,
+                callback: OrderRoot.onTokenWalletBeneficiary
+            }(fee.beneficiary, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
             ITokenWallet(msg.sender).transfer{
                 value: 0, flag: MsgFlag.ALL_NOT_RESERVED,
@@ -190,9 +214,9 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
             emit CreateOrderReject();
             if (callbackId > 0){
                 IOrderOperationCallback(sender).onOrderCreateOrderReject{
-                        value: OrderGas.OPERATION_CALLBACK_BASE,
-                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                        bounce: false
+                    value: OrderGas.OPERATION_CALLBACK_BASE,
+                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
                 }(callbackId);
             }
 
@@ -226,17 +250,16 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED,
                 bounce: false
-            } address(tvm.hash(
-           tvm.buildStateInit({
-               contr: Order,
-               varInit: {
+             } address(tvm.hash(tvm.buildStateInit({
+                contr: Order,
+                varInit: {
                     factory: _factory,
                     root: _root,
                     owner: _owner,
                     spentToken: _spentToken,
                     receiveToken: _receiveToken,
                     timeTx: timeTx,
-                    nowTx: nowTx    
+                    nowTx: nowTx
                },
                code: orderCode
            })
@@ -278,6 +301,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
             builder.store(spentToken);
             builder.store(factory);
             builder.store(version);
+            builder.store(_newVersion);
             builder.store(orderCode);
             builder.store(orderClosedCode);
             builder.store(orderPlatformCode);
@@ -287,6 +311,12 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
             builder1.store(deployer);
             builder1.store(dexRoot);
             builder.storeRef(builder1);
+
+            TvmBuilder builder2;
+            builder2.store(fee.numerator);
+            builder2.store(fee.denominator);
+            builder2.store(fee.beneficiary);
+            builder.storeRef(builder2);
 
             tvm.setcode(_code);
             tvm.setCurrentCode(_code);
@@ -311,6 +341,10 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
         spentToken = _spentToken;
         version = _version;
         deployer = _deployer;
+
+        TvmSlice feeSl = sl.loadRefAsSlice();
+        (uint128 numerator_, uint128 denominator_, address beneficiary_) = feeSl.decode(uint128, uint128, address);
+        fee = OrderFeeParams(numerator_, denominator_, beneficiary_);
 
         TvmSlice dataSl = sl.loadRefAsSlice();
         dexRoot = dataSl.decode(address);

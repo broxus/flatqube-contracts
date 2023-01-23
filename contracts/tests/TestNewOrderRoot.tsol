@@ -1,0 +1,124 @@
+pragma ton-solidity >= 0.62.0;
+
+pragma AbiHeader time;
+pragma AbiHeader expire;
+pragma AbiHeader pubkey;
+
+import "../libraries/OrderGas.tsol";
+import "../libraries/OrderErrors.tsol";
+
+import "../structures/IOrderRootCreateResult.tsol";
+import "../structures/IOrderWithdrawalFeeParams.tsol";
+
+import "../interfaces/IOrderRoot.tsol";
+import "../interfaces/IOrderFactory.tsol";
+import "../interfaces/IOrderOperationCallback.tsol";
+
+import "../Order.tsol";
+
+import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
+
+contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
+    address factory;
+    address spentToken;
+
+    uint32 version;
+    TvmCell orderCode;
+    TvmCell orderClosedCode;
+
+    address spentTokenWallet;
+    address deployer;
+    address dexRoot;
+    string newTestField;
+
+    OrderFeeParams fee;
+    mapping(address => OrderWithdrawalFeeParams) withdrawalFeeParams;
+
+    constructor() public { revert(); }
+
+     function getVersion() external view responsible returns (uint32) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } version;
+    }
+
+    function upgrade(
+        TvmCell _code,
+        uint32 _newVersion,
+        address _sendGasTo
+    ) external   {
+        if (version == _newVersion) {
+            tvm.rawReserve(address(this).balance - msg.value, 0);
+            _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
+        } else {
+
+            TvmBuilder builder;
+            builder.store(spentToken);
+            builder.store(factory);
+            builder.store(version);
+            builder.store(orderCode);
+            builder.store(orderClosedCode);
+
+            TvmBuilder builder1;
+            builder1.store(spentTokenWallet);
+            builder1.store(deployer);
+            builder1.store(dexRoot);
+            builder.storeRef(builder1);
+
+            TvmBuilder builder2;
+            builder2.store(fee.numerator);
+            builder2.store(fee.denominator);
+            builder2.store(fee.beneficiary);
+            builder.storeRef(builder2);
+
+            tvm.setcode(_code);
+            tvm.setCurrentCode(_code);
+
+            onCodeUpgrade(builder.toCell());
+        }
+    }
+
+    function onCodeUpgrade(TvmCell _data) private {
+        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+        TvmSlice sl = _data.toSlice();
+
+        uint32 oldVersion;
+        (
+            spentToken,
+            factory,
+            oldVersion,
+            version
+        ) = sl.decode(address, address, uint32, uint32);
+
+        if (oldVersion == 0) {
+            tvm.resetStorage();
+        }
+
+        orderCode = sl.loadRef();
+        orderClosedCode = sl.loadRef();
+
+        TvmSlice dataSl = sl.loadRefAsSlice();
+        (spentTokenWallet, deployer, dexRoot) = dataSl.decode(address, address, address);
+
+        TvmSlice dataSlFee = sl.loadRefAsSlice();
+        (
+            uint128 numerator_,
+            uint128 denominator_,
+            address beneficiary_
+        ) = dataSlFee.decode(uint128, uint128, address);
+
+        fee = OrderFeeParams(numerator_, denominator_, beneficiary_);
+
+        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+
+        newTestField = "New Order Root";
+
+        deployer.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
+    }
+
+    function newFunc() public view returns (string) {
+        return newTestField;
+    }
+}

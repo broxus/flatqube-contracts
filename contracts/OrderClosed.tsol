@@ -18,7 +18,7 @@ import "tip3/contracts/interfaces/ITokenWallet.tsol";
 contract OrderClosed is 
 	IAcceptTokensTransferCallback, 
 	IOrderClosed, 
-	IHasEmergencyMode 
+	IHasEmergencyMode
 {
 	address static factory;
 	address static root;
@@ -39,6 +39,8 @@ contract OrderClosed is
 
 	uint8 prevState;
 	uint256 emergencyManager;
+
+	OrderFeeParams fee;
 
 	constructor() public { revert(); }
 
@@ -111,7 +113,6 @@ contract OrderClosed is
 
     function disableEmergency() override external onlyFactory {
         require(state == OrderStatus.Emergency, OrderErrors.EMERGENCY_STATUS_NOW);
-
         state = prevState;
         prevState = 0;
         emergencyManager = 0;
@@ -194,6 +195,12 @@ contract OrderClosed is
         builderSum.store(receiveWallet);
         builderUpg.storeRef(builderSum);
 
+		TvmBuilder builderFee;
+		builderFee.store(fee.numerator);
+		builderFee.store(fee.denominator);
+		builderFee.store(fee.beneficiary);
+		builderUpg.storeRef(builderFee);
+
         onCodeUpgrade(builderUpg.toCell());
 	}
 
@@ -239,6 +246,16 @@ contract OrderClosed is
 		expectedAmount = _expectedAmount;
 		initialAmount = _initialAmount;
 		receiveWallet = _receiveWallet;
+
+		TvmSlice dataFee = upg.loadRefAsSlice();
+
+		(
+			uint128 _numerator,
+			uint128 _denominator,
+			address _beneficiary
+		) = dataFee.decode(uint128, uint128, address);
+
+		fee = OrderFeeParams(_numerator, _denominator, _beneficiary);
 
 		if (state == OrderStatus.Cancelled) {
 			TvmCell emptyPayload;
