@@ -609,14 +609,15 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 						receiveToken,
 						amount,
 						currentAmountSpentToken,
-						currentAmountReceiveToken
+						currentAmountReceiveToken,
+						0 //add fee
 					);
 				}
 
 				//				sendFee
 				if (reward > 0) {
 					ITokenWallet(receiveWallet).transfer{
-						value: OrderGas.TRANSFER_MIN_VALUE, ALL_NOT_RESERVED
+						value: OrderGas.TRANSFER_MIN_VALUE, //ALL_NOT_RESERVED
 						flag: MsgFlag.SENDER_PAYS_FEES,
 						bounce: false
 					}(

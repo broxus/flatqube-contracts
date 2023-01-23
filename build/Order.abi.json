@@ -11,8 +11,17 @@
 				{"name":"_backPK","type":"uint256"},
 				{"name":"_backMatchingPK","type":"uint256"},
 				{"name":"_dexRoot","type":"address"},
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"_fee","type":"tuple"},
 				{"name":"_codeClosed","type":"cell"},
 				{"name":"_orderPlatformCode","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onTokenWalletReceive",
+			"inputs": [
+				{"name":"_wallet","type":"address"}
 			],
 			"outputs": [
 			]
@@ -58,6 +67,23 @@
 			],
 			"outputs": [
 				{"components":[{"name":"factory","type":"address"},{"name":"root","type":"address"},{"name":"owner","type":"address"},{"name":"backPK","type":"uint256"},{"name":"backMatchingPK","type":"uint256"},{"name":"dexRoot","type":"address"},{"name":"dexPair","type":"address"},{"name":"msgSender","type":"address"},{"name":"swapAttempt","type":"uint64"},{"name":"state","type":"uint8"},{"name":"spentToken","type":"address"},{"name":"receiveToken","type":"address"},{"name":"spentWallet","type":"address"},{"name":"receiveWallet","type":"address"},{"name":"expectedAmount","type":"uint128"},{"name":"initialAmount","type":"uint128"},{"name":"currentAmountSpentToken","type":"uint128"},{"name":"currentAmountReceiveToken","type":"uint128"},{"name":"timeTx","type":"uint64"},{"name":"nowTx","type":"uint64"},{"name":"matchingOrder","type":"address"}],"name":"value0","type":"tuple"}
+			]
+		},
+		{
+			"name": "getFeeParams",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
+			]
+		},
+		{
+			"name": "setFeeParams",
+			"inputs": [
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
+			],
+			"outputs": [
 			]
 		},
 		{
@@ -142,8 +168,7 @@
 			"inputs": [
 				{"name":"callbackId","type":"uint64"},
 				{"name":"deployWalletValue","type":"uint128"},
-				{"name":"amountForDeal","type":"uint128"},
-				{"name":"amountSum","type":"uint128"},
+				{"name":"amount","type":"uint128"},
 				{"name":"reward","type":"uint128"},
 				{"name":"sendGasTo","type":"address"}
 			],
@@ -219,7 +244,8 @@
 				{"name":"receiveToken","type":"address"},
 				{"name":"receiveAmount","type":"uint128"},
 				{"name":"currentSpentTokenAmount","type":"uint128"},
-				{"name":"currentReceiveTokenAmount","type":"uint128"}
+				{"name":"currentReceiveTokenAmount","type":"uint128"},
+				{"name":"fee","type":"uint128"}
 			],
 			"outputs": [
 			]
@@ -253,6 +279,7 @@
 		{"name":"prevState","type":"uint8"},
 		{"name":"emergencyManager","type":"uint256"},
 		{"name":"autoExchange","type":"bool"},
+		{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"},
 		{"name":"matchingOrder","type":"address"}
 	]
 }

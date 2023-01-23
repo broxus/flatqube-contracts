@@ -25,6 +25,7 @@ contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
     uint32 version;
     TvmCell orderCode;
     TvmCell orderClosedCode;
+    TvmCell orderPlatformCode;
 
     address spentTokenWallet;
     address deployer;
@@ -36,7 +37,7 @@ contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
 
     constructor() public { revert(); }
 
-     function getVersion() external view responsible returns (uint32) {
+    function getVersion() external view responsible returns (uint32) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } version;
     }
 
@@ -82,10 +83,10 @@ contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
 
         uint32 oldVersion;
         (
-            spentToken,
-            factory,
-            oldVersion,
-            version
+        spentToken,
+        factory,
+        oldVersion,
+        version
         ) = sl.decode(address, address, uint32, uint32);
 
         if (oldVersion == 0) {
@@ -100,9 +101,9 @@ contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
 
         TvmSlice dataSlFee = sl.loadRefAsSlice();
         (
-            uint128 numerator_,
-            uint128 denominator_,
-            address beneficiary_
+        uint128 numerator_,
+        uint128 denominator_,
+        address beneficiary_
         ) = dataSlFee.decode(uint128, uint128, address);
 
         fee = OrderFeeParams(numerator_, denominator_, beneficiary_);
@@ -112,9 +113,9 @@ contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
         newTestField = "New Order Root";
 
         deployer.transfer({
-            value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
-            bounce: false
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+                bounce: false
         });
     }
 
