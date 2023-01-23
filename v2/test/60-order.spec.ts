@@ -1707,8 +1707,6 @@ describe('OrderTest', () => {
             expect(feeParams.params.numerator).to.equal(NUMERATOR.toString(), 'Wrong NUMERATOR');
             expect(feeParams.params.denominator).to.equal(DENOMINATOR.toString(), 'Wrong DENOMINATOR');
 
-
-            // await locklift.tracing.trace(factoryOrder.methods.setRootBeneficiary({beneficiary_: newBeneficiary.address, root: RootOrderBar.address}).send({from: account1.address, amount: locklift.utils.toNano(0.2)}))
             const params = {
                 callbackId: 0,
                 tokenReceive: rootTokenReceive.address,
@@ -1779,18 +1777,12 @@ describe('OrderTest', () => {
             const FactoryAddress = (await rootTokenReceive.methods.walletOf({walletOwner: factoryOrder.address, answerId: 0}).call()).value0
             console.log("FactoryAddress - ", FactoryAddress)
 
-
-
-            // console.log(`WALLET of Beneficiary (new)  - ${newBeneficiaryWalletTst.address}`)
-            // const owner = await newBeneficiaryWalletTst.methods.owner({answerId: 1}).call()
-            // console.log(`Owner of Beneficiary (new)  - ${owner.value0}`)
             await locklift.tracing.trace(factoryOrder.methods.withdrawFee({
                 amount: new BigNumber(fees).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 recipient: account2.address,
                 sendGasTo: account1.address,
                 tokenWallet: FactoryAddress,
-                deployWalletValue: locklift.utils.toNano(0.5),
-                gasValue: locklift.utils.toNano(0.7)
+                deployWalletValue: locklift.utils.toNano(0.5)
             }).send({amount: locklift.utils.toNano(2), from: account1.address}),{allowedCodes: {compute: [60]}})
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);

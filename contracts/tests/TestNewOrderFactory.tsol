@@ -17,7 +17,7 @@ import "../OrderRoot.tsol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "tip3/contracts/interfaces/ITokenWallet.tsol";
 
-contract TestNewOrderFactory is IOrderFactory {
+contract TestNewOrderFactory is IOrderFactory{
 	uint32 static randomNonce;
 	address static dexRoot;
 
@@ -37,7 +37,7 @@ contract TestNewOrderFactory is IOrderFactory {
 	TvmCell orderPlatformCode;
 	TvmCell orderCode;
 	TvmCell orderClosedCode;
-	TvmCell tokenPlatformCode;
+
     string newTestField;
 
 	constructor(address _owner, uint32 _version) public {
@@ -183,25 +183,24 @@ contract TestNewOrderFactory is IOrderFactory {
 		uint128 amount,
 		address recipient,
 		uint128 deployWalletValue,
-		uint128 gasValue,
 		address tokenWallet,
-		address rm_gas_to
+		address sendGasTo
 	) override external onlyOwner {
 		require(
-			amount != 0 && recipient.value != 0 && rm_gas_to.value != 0 && tokenWallet.value != 0,
+			amount != 0 && recipient.value != 0 && sendGasTo.value != 0 && tokenWallet.value != 0,
 			OrderErrors.WRONG_WITHDRAW_FEE_PARAMS
 		);
 		tvm.accept();
 
 		TvmCell empty;
         ITokenWallet(tokenWallet).transfer{
-            value: gasValue,
+            value: OrderGas.TRANSFER_MIN_VALUE,
             flag: MsgFlag.SENDER_PAYS_FEES
         }(
             amount,
             recipient,
             deployWalletValue,
-            rm_gas_to,
+			sendGasTo,
             false,
             empty
         );
