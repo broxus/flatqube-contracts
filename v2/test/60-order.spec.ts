@@ -1720,8 +1720,6 @@ describe('OrderTest', () => {
             expect(feeParams.params.numerator).to.equal(NUMERATOR.toString(), 'Wrong NUMERATOR');
             expect(feeParams.params.denominator).to.equal(DENOMINATOR.toString(), 'Wrong DENOMINATOR');
 
-
-            // await locklift.tracing.trace(factoryOrder.methods.setRootBeneficiary({beneficiary_: newBeneficiary.address, root: RootOrderBar.address}).send({from: account1.address, amount: locklift.utils.toNano(0.2)}))
             const params = {
                 callbackId: 0,
                 tokenReceive: rootTokenReceive.address,
