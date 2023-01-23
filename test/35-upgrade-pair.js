@@ -117,10 +117,10 @@ describe('Test Dex Pair contract upgrade', async function () {
     account = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
     account.afterRun = afterRun;
     dexRoot = migration.load(await locklift.factory.getContract('DexRoot'), 'DexRoot');
-    if (migration.exists('DexPair' + tokenLeft.symbol + tokenRight.symbol)) {
-      dexPairFooBar = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPair' + tokenLeft.symbol + tokenRight.symbol);
-    } else {
+    if (migration.exists('DexPool' + tokenLeft.symbol + tokenRight.symbol)) {
       dexPairFooBar = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPool' + tokenLeft.symbol + tokenRight.symbol);
+    } else {
+      dexPairFooBar = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPool' + tokenRight.symbol + tokenLeft.symbol);
     }
 
     NewVersionContract = await locklift.factory.getContract(options.new_contract_name);

@@ -44,6 +44,7 @@ let targetVersion: string;
 
 type PairData = {
     threshold?: any;
+    referrer_threshold?: any,
     fee_referrer?: any;
     fee_beneficiary_address?: any;
     fee_beneficiary?: any;
@@ -107,6 +108,7 @@ async function loadPairData(pair: Contract<TestNewDexPairAbi>, contractName: str
   data.threshold = fee_params.threshold;
   if (contractName === 'DexPair' || contractName === 'DexStablePair') {
     data.fee_referrer = new BigNumber(fee_params.referrer_numerator).div(fee_params.denominator).times(100).toString();
+    data.referrer_threshold = fee_params.referrer_threshold;
   }
   data.pool_type = Number((await pair.methods.getPoolType({answerId: 0}).call()).value0);
 
@@ -127,7 +129,7 @@ describe('Test Dex Pair contract upgrade', async function () {
       address: migration.getAddress('Account1')
     });
     dexRoot = await locklift.factory.getDeployedContract( 'DexRoot', migration.getAddress('DexRoot'));
-    dexPairFooBar = await locklift.factory.getDeployedContract(options.old_contract_name, migration.getAddress('DexPair' + tokenLeft.symbol + tokenRight.symbol));
+    dexPairFooBar = await locklift.factory.getDeployedContract(options.old_contract_name, migration.getAddress('DexPool' + tokenLeft.symbol + tokenRight.symbol));
 
     targetVersion = (await dexRoot.methods.getPairVersion({ answerId: 0, pool_type: options.pool_type }).call()).value0;
 
