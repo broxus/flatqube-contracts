@@ -7,18 +7,14 @@ pragma AbiHeader pubkey;
 import "../libraries/OrderGas.tsol";
 import "../libraries/OrderErrors.tsol";
 
-import "../structures/IOrderRootCreateResult.tsol";
 import "../structures/IOrderWithdrawalFeeParams.tsol";
 
 import "../interfaces/IOrderRoot.tsol";
 import "../interfaces/IOrderFactory.tsol";
-import "../interfaces/IOrderOperationCallback.tsol";
-
-import "../Order.tsol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 
-contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
+contract TestNewOrderRoot is IOrderFeeParams {
     address factory;
     address spentToken;
 
@@ -33,7 +29,6 @@ contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
     string newTestField;
 
     OrderFeeParams fee;
-    mapping(address => OrderWithdrawalFeeParams) withdrawalFeeParams;
 
     constructor() public { revert(); }
 
@@ -50,13 +45,17 @@ contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
             tvm.rawReserve(address(this).balance - msg.value, 0);
             _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
         } else {
-
             TvmBuilder builder;
             builder.store(spentToken);
             builder.store(factory);
             builder.store(version);
-            builder.store(orderCode);
-            builder.store(orderClosedCode);
+            builder.store(_newVersion);
+
+            TvmBuilder builderCode;
+            builderCode.store(orderCode);
+            builderCode.store(orderClosedCode);
+            builderCode.store(orderPlatformCode);
+            builder.storeRef(builderCode);
 
             TvmBuilder builder1;
             builder1.store(spentTokenWallet);
@@ -83,33 +82,37 @@ contract TestNewOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams  {
 
         uint32 oldVersion;
         (
-        spentToken,
-        factory,
-        oldVersion,
-        version
+            factory,
+            spentToken,
+            oldVersion,
+            version
         ) = sl.decode(address, address, uint32, uint32);
 
         if (oldVersion == 0) {
             tvm.resetStorage();
         }
 
-        orderCode = sl.loadRef();
-        orderClosedCode = sl.loadRef();
+        TvmSlice dataSlCode = sl.loadRefAsSlice();
+
+        orderCode = dataSlCode.loadRef();
+        orderClosedCode = dataSlCode.loadRef();
+        orderPlatformCode = dataSlCode.loadRef();
 
         TvmSlice dataSl = sl.loadRefAsSlice();
-        (spentTokenWallet, deployer, dexRoot) = dataSl.decode(address, address, address);
-
+        (
+            spentTokenWallet,
+            deployer,
+            dexRoot
+        ) = dataSl.decode(address, address, address);
 
         TvmSlice dataSlFee = sl.loadRefAsSlice();
         (
-        uint128 numerator_,
-        uint128 denominator_,
-        address beneficiary_
+            uint128 numerator_,
+            uint128 denominator_,
+            address beneficiary_
         ) = dataSlFee.decode(uint128, uint128, address);
 
         fee = OrderFeeParams(numerator_, denominator_, beneficiary_);
-
-        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
         newTestField = "New Order Root";
 

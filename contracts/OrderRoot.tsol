@@ -298,18 +298,21 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
             emit OrderRootCodeUpgraded(_newVersion);
 
             TvmBuilder builder;
-            builder.store(spentToken);
             builder.store(factory);
+            builder.store(spentToken);
             builder.store(version);
             builder.store(_newVersion);
-            builder.store(orderCode);
-            builder.store(orderClosedCode);
+
+            TvmBuilder builderCode;
+            builderCode.store(orderCode);
+            builderCode.store(orderClosedCode);
+            builderCode.store(orderPlatformCode);
+            builder.storeRef(builderCode);
 
             TvmBuilder builder1;
             builder1.store(spentTokenWallet);
             builder1.store(deployer);
             builder1.store(dexRoot);
-            builder1.store(orderPlatformCode);
             builder.storeRef(builder1);
 
             TvmBuilder builder2;
