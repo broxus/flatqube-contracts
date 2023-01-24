@@ -25,7 +25,7 @@ async function main() {
         console.log(`${1 + (+indx)}/${dexPairs.length}: Upgrading DexPair(${pairData.dexPair}). left = ${pairData.left}, right = ${pairData.right}`);
         console.log('');
 
-        dexRoot.methods.upgradePair(
+        await dexRoot.methods.upgradePair(
             {
                 left_root: pairData.left,
                 right_root: pairData.right,
