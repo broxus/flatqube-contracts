@@ -483,7 +483,6 @@ contract DexStablePair is
                             dy_result.amount,
                             fees
                         );
-                        emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
 
                         if (dy_result.beneficiary_fee > 0) {
                             tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
@@ -501,6 +500,8 @@ contract DexStablePair is
                                 original_gas_to,
                                 _tokenRoots()
                             );
+
+                            emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
                         }
 
                         IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
@@ -617,7 +618,6 @@ contract DexStablePair is
                             dy_result.amount,
                             fees
                         );
-                        emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
 
                         if (dy_result.beneficiary_fee > 0) {
                             tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
@@ -635,6 +635,8 @@ contract DexStablePair is
                                 original_gas_to,
                                 _tokenRoots()
                             );
+
+                            emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
                         }
 
                         IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
@@ -1180,7 +1182,6 @@ contract DexStablePair is
                     dy_result.amount,
                     fees
                 );
-                emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
 
                _sync();
 
@@ -1200,6 +1201,8 @@ contract DexStablePair is
                         original_gas_to,
                         _tokenRoots()
                     );
+
+                    emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
                 }
 
                 IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
@@ -2109,6 +2112,7 @@ contract DexStablePair is
         TokenOperation[] referrer_fees_data;
         TokenOperation[] deposits;
 
+        bool is_zero_referrer_fees = true;
         for (uint8 i = 0; i < N_COINS; i++) {
             if (r.differences[i] > 0) {
                 fees.push(ExchangeFee(tokenData[i].root, r.pool_fees[i], r.beneficiary_fees[i], fee.beneficiary));
@@ -2137,6 +2141,8 @@ contract DexStablePair is
             referrer_fees_data.push(TokenOperation(referrer_fees[i], tokenData[i].root));
 
             if (referrer_fees[i] > 0) {
+                is_zero_referrer_fees = false;
+
                 IDexVault(vault).referralFeeTransfer{
                     value: referrer_value,
                     flag: MsgFlag.SENDER_PAYS_FEES
@@ -2162,7 +2168,10 @@ contract DexStablePair is
                 receive_amount,
                 fees
             );
-            emit ReferrerFees(referrer_fees_data);
+
+            if (!is_zero_referrer_fees) {
+                emit ReferrerFees(referrer_fees_data);
+            }
         }
 
         emit DepositLiquidity(sender_address, recipient, deposits, r.lp_reward);

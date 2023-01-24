@@ -863,6 +863,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                 _remainingGasTo,
                 _tokenRoots()
             );
+
+            emit ReferrerFees([TokenOperation(_referrerFee, _tokenRoots()[spentTokenIndex])]);
         }
 
         ExchangeFee[] fees;
@@ -886,7 +888,6 @@ contract DexPair is DexPairBase, INextExchangeData {
             _amount,
             fees
         );
-        emit ReferrerFees([TokenOperation(_referrerFee, _tokenRoots()[spentTokenIndex])]);
 
         _write(
             oldReserves[0],

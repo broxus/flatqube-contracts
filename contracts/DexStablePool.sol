@@ -502,7 +502,6 @@ contract DexStablePool is
                         dy_result.amount,
                         fees
                     );
-                    emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
 
                     if (dy_result.beneficiary_fee > 0) {
                         tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
@@ -520,6 +519,8 @@ contract DexStablePool is
                             original_gas_to,
                             _tokenRoots()
                         );
+
+                        emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
                     }
 
                     IDexPairOperationCallback(sender_address).dexPairExchangeSuccessV2{
@@ -724,7 +725,6 @@ contract DexStablePool is
                                 dy_result.amount,
                                 fees
                             );
-                            emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
 
                             if (dy_result.beneficiary_fee > 0) {
                                 tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
@@ -742,6 +742,8 @@ contract DexStablePool is
                                     original_gas_to,
                                     _tokenRoots()
                                 );
+
+                                emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
                             }
                         }
                     }
@@ -1484,7 +1486,6 @@ contract DexStablePool is
                         dy_result.amount,
                         fees
                     );
-                    emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
 
                     if (dy_result.beneficiary_fee > 0) {
                         tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
@@ -1502,6 +1503,8 @@ contract DexStablePool is
                             original_gas_to,
                             _tokenRoots()
                         );
+
+                        emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
                     }
                 }
             }
@@ -2696,6 +2699,7 @@ contract DexStablePool is
         TokenOperation[] referrer_fees_data;
         TokenOperation[] amounts;
 
+        bool is_zero_referrer_fees = true;
         for (uint8 i = 0; i < N_COINS; i++) {
             amounts.push(TokenOperation(r.amounts[i], tokenData[i].root));
             if (r.differences[i] > 0) {
@@ -2713,6 +2717,8 @@ contract DexStablePool is
             referrer_fees_data.push(TokenOperation(referrer_fees[i], tokenData[i].root));
 
             if (referrer_fees[i] > 0) {
+                is_zero_referrer_fees = false;
+
                 IDexVault(vault).referralFeeTransfer{
                     value: referrer_value,
                     flag: MsgFlag.SENDER_PAYS_FEES
@@ -2729,7 +2735,9 @@ contract DexStablePool is
         lp_supply += r.lp_reward;
 
         emit DepositLiquidityV2(sender_address, recipient, amounts, fees, spent_tokens, receive_tokens, r.lp_reward);
-        emit ReferrerFees(referrer_fees_data);
+        if (!is_zero_referrer_fees) {
+            emit ReferrerFees(referrer_fees_data);
+        }
 
         IDexPairOperationCallback(sender_address).dexPairDepositLiquiditySuccessV2{
             value: DexGas.OPERATION_CALLBACK_BASE + 2,
@@ -2931,6 +2939,7 @@ contract DexStablePool is
         TokenOperation[] referrer_fees_data;
         TokenOperation[] amounts;
 
+        bool is_zero_referrer_fees = true;
         for (uint8 i = 0; i < N_COINS; i++) {
             amounts.push(TokenOperation(r.amounts[i], tokenData[i].root));
             if (r.differences[i] > 0) {
@@ -2948,6 +2957,8 @@ contract DexStablePool is
             referrer_fees_data.push(TokenOperation(referrer_fees[i], tokenData[i].root));
 
             if (referrer_fees[i] > 0) {
+                is_zero_referrer_fees = false;
+
                 IDexVault(vault).referralFeeTransfer{
                     value: referrer_value,
                     flag: MsgFlag.SENDER_PAYS_FEES
@@ -2964,7 +2975,9 @@ contract DexStablePool is
         lp_supply -= r.lp_amount;
 
         emit WithdrawLiquidityV2(sender_address, recipient, r.lp_amount, amounts, fees, spent_tokens, receive_tokens);
-        emit ReferrerFees(referrer_fees_data);
+        if (!is_zero_referrer_fees) {
+            emit ReferrerFees(referrer_fees_data);
+        }
 
         IDexPairOperationCallback(sender_address).dexPairWithdrawSuccessV2{
             value: DexGas.OPERATION_CALLBACK_BASE + 2,
