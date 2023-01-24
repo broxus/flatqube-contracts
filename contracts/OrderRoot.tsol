@@ -304,12 +304,12 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
             builder.store(_newVersion);
             builder.store(orderCode);
             builder.store(orderClosedCode);
-            builder.store(orderPlatformCode);
 
             TvmBuilder builder1;
             builder1.store(spentTokenWallet);
             builder1.store(deployer);
             builder1.store(dexRoot);
+            builder1.store(orderPlatformCode);
             builder.storeRef(builder1);
 
             TvmBuilder builder2;

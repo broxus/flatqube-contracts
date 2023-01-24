@@ -1187,12 +1187,12 @@ describe('OrderTest', () => {
         console.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
         console.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
-        await Order.methods.swap({
+        await locklift.tracing.trace(Order.methods.swap({
             callbackId: 1,
             deployWalletValue: locklift.utils.toNano(0.1)
         }).send({
-            amount: locklift.utils.toNano(5), from: account4.address
-        }), {allowedCodes: {compute: [60]}}
+            amount: locklift.utils.toNano(6), from: account4.address
+        }), {allowedCodes: {compute: [60]}})
 
         await sleep(10000)
         const stateLO2 = await Order.methods.currentStatus({answerId: 1}).call()
