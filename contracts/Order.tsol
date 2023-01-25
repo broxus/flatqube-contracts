@@ -644,6 +644,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 
 				if (reward > 0) {
 					(expectedReward, expectedFeeOnReward) = _expectedSpendAmountOfMatching(reward);
+					currentAmountSpentToken -= reward;
 				}
 
 				if (currentAmountSpentToken > 0) {
@@ -1084,8 +1085,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 			currentAmountSpentToken -= amount;
 
 			ITokenWallet(spentWallet).transfer{
-//				value: OrderGas.FILL_ORDER_MIN_VALUE,
-//				flag: MsgFlag.SENDER_PAYS_FEES,
 				value: 0,
 				flag: MsgFlag.ALL_NOT_RESERVED,
 				bounce: false
