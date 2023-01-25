@@ -41,7 +41,15 @@ contract OrderPlatform is IOrderFeeParams{
 		builder.store(uint32(0));
 		builder.store(version);
 		builder.store(sendGasTo);
-		builder.store(abi.encode(fee.numerator, fee.denominator, fee.beneficiary));
+
+		TvmBuilder builder1;
+		builder1.store(fee.numerator);
+		builder1.store(fee.denominator);
+		builder1.store(fee.matchingNumerator);
+		builder1.store(fee.matchingDenominator);
+		builder1.store(fee.beneficiary);
+		builder.storeRef(builder1);
+
 		builder.store(params);
 
 		tvm.setcode(code);

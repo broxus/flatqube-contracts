@@ -878,125 +878,9 @@ GETGLOB 17
 TUPLE 11
 .loc ../contracts/OrderClosed.tsol, 0
 
-.macro upgrade
-DROP
-GETGLOB 6
-THROWIFNOT 76
-GETGLOB 2
-ISNULL
-IFREF {
-	CALL $c4_to_c7$
-}
-.loc ../contracts/OrderClosed.tsol, 174
-LDREF
-ENDS
-.loc ../contracts/OrderClosed.tsol, 0
-CALLREF {
-	CALL $upgrade_7916ae0d_internal_macro$
-}
-DROP
-CALLREF {
-	CALL $c7_to_c4$
-}
-THROW 0
-
-.macro upgrade_7916ae0d_internal_macro
-.loc ../contracts/OrderClosed.tsol, 48
-GETGLOB 9
-PARSEMSGADDR
-INDEX 3
-PLDU 256
-NEQINT 0
-GETGLOB 9
-GETGLOB 10
-SDEQ
-AND
-THROWIFNOT 312
-.loc ../contracts/OrderClosed.tsol, 175
-DUP
-SETCODE
-.loc ../contracts/OrderClosed.tsol, 176
-CTOS
-DUP
-PUSHSLICE x8adb35
-SDEQ
-PUSHCONT {
-	PLDREFIDX 1
-	CTOS
-}
-IF
-PLDREF
-CTOS
-BLESS
-POP C3
-.loc ../contracts/OrderClosed.tsol, 179
-GETGLOB 20
-NEWC
-STU 8
-.loc ../contracts/OrderClosed.tsol, 180
-GETGLOB 12
-STSLICER
-.loc ../contracts/OrderClosed.tsol, 181
-GETGLOB 10
-STSLICER
-.loc ../contracts/OrderClosed.tsol, 182
-GETGLOB 11
-STSLICER
-.loc ../contracts/OrderClosed.tsol, 183
-GETGLOB 21
-STUR 64
-.loc ../contracts/OrderClosed.tsol, 186
-GETGLOB 18
-NEWC
-STSLICE
-.loc ../contracts/OrderClosed.tsol, 187
-GETGLOB 17
-STUR 128
-.loc ../contracts/OrderClosed.tsol, 188
-GETGLOB 13
-STSLICER
-.loc ../contracts/OrderClosed.tsol, 189
-GETGLOB 14
-STSLICER
-.loc ../contracts/OrderClosed.tsol, 190
-STBREFR
-.loc ../contracts/OrderClosed.tsol, 193
-GETGLOB 15
-NEWC
-STU 128
-.loc ../contracts/OrderClosed.tsol, 194
-GETGLOB 16
-STUR 128
-.loc ../contracts/OrderClosed.tsol, 195
-GETGLOB 19
-STSLICER
-.loc ../contracts/OrderClosed.tsol, 196
-STBREFR
-.loc ../contracts/OrderClosed.tsol, 199
-GETGLOB 24
-SECOND
-NEWC
-STU 128
-.loc ../contracts/OrderClosed.tsol, 200
-GETGLOB 24
-FIRST
-STUR 128
-.loc ../contracts/OrderClosed.tsol, 201
-GETGLOB 24
-THIRD
-STSLICER
-.loc ../contracts/OrderClosed.tsol, 202
-STBREFR
-.loc ../contracts/OrderClosed.tsol, 204
-ENDC
-CALLREF {
-	CALL $:onCodeUpgrade$
-}
-.loc ../contracts/OrderClosed.tsol, 0
-
 .internal-alias :onCodeUpgrade, 2
 .internal :onCodeUpgrade
-.loc ../contracts/OrderClosed.tsol, 209
+.loc ../contracts/OrderClosed.tsol, 176
 PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
@@ -1040,15 +924,15 @@ SETGLOB 22
 PUSHINT 0
 SETGLOB 23
 PUSHINT 0
-DUP
+BLKPUSH 3, 0
 PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
-TRIPLE
+TUPLE 5
 SETGLOB 24
-.loc ../contracts/OrderClosed.tsol, 210
+.loc ../contracts/OrderClosed.tsol, 177
 CTOS
-.loc ../contracts/OrderClosed.tsol, 212
+.loc ../contracts/OrderClosed.tsol, 179
 DUP
 LDU 8
 LDMSGADDR
@@ -1056,73 +940,75 @@ LDMSGADDR
 LDMSGADDR
 LDU 64
 POP S6
-.loc ../contracts/OrderClosed.tsol, 220
+.loc ../contracts/OrderClosed.tsol, 187
 ROLL 4
 SETGLOB 20
-.loc ../contracts/OrderClosed.tsol, 221
+.loc ../contracts/OrderClosed.tsol, 188
 ROLL 3
 SETGLOB 12
-.loc ../contracts/OrderClosed.tsol, 222
+.loc ../contracts/OrderClosed.tsol, 189
 ROT
 SETGLOB 10
-.loc ../contracts/OrderClosed.tsol, 223
+.loc ../contracts/OrderClosed.tsol, 190
 SWAP
 SETGLOB 11
-.loc ../contracts/OrderClosed.tsol, 224
+.loc ../contracts/OrderClosed.tsol, 191
 SETGLOB 21
-.loc ../contracts/OrderClosed.tsol, 226
+.loc ../contracts/OrderClosed.tsol, 193
 LDREFRTOS
-.loc ../contracts/OrderClosed.tsol, 227
+.loc ../contracts/OrderClosed.tsol, 194
 LDMSGADDR
 LDU 128
 LDMSGADDR
 LDMSGADDR
 DROP
-.loc ../contracts/OrderClosed.tsol, 234
+.loc ../contracts/OrderClosed.tsol, 201
 ROLL 3
 SETGLOB 18
-.loc ../contracts/OrderClosed.tsol, 235
+.loc ../contracts/OrderClosed.tsol, 202
 ROT
 SETGLOB 17
-.loc ../contracts/OrderClosed.tsol, 236
+.loc ../contracts/OrderClosed.tsol, 203
 SWAP
 SETGLOB 13
-.loc ../contracts/OrderClosed.tsol, 237
+.loc ../contracts/OrderClosed.tsol, 204
 SETGLOB 14
-.loc ../contracts/OrderClosed.tsol, 239
+.loc ../contracts/OrderClosed.tsol, 206
 LDREFRTOS
-.loc ../contracts/OrderClosed.tsol, 240
+.loc ../contracts/OrderClosed.tsol, 207
 LDU 128
 LDU 128
 LDMSGADDR
 DROP
-.loc ../contracts/OrderClosed.tsol, 246
+.loc ../contracts/OrderClosed.tsol, 213
 ROT
 SETGLOB 15
-.loc ../contracts/OrderClosed.tsol, 247
+.loc ../contracts/OrderClosed.tsol, 214
 SWAP
 SETGLOB 16
-.loc ../contracts/OrderClosed.tsol, 248
+.loc ../contracts/OrderClosed.tsol, 215
 SETGLOB 19
-.loc ../contracts/OrderClosed.tsol, 250
+.loc ../contracts/OrderClosed.tsol, 217
 LDREFRTOS
 NIP
-.loc ../contracts/OrderClosed.tsol, 252
+.loc ../contracts/OrderClosed.tsol, 219
+LDU 128
+LDU 128
 LDU 128
 LDU 128
 LDMSGADDR
 DROP
-.loc ../contracts/OrderClosed.tsol, 258
-TRIPLE
+.loc ../contracts/OrderClosed.tsol, 227
+TUPLE 5
 SETGLOB 24
-.loc ../contracts/OrderClosed.tsol, 260
+.loc ../contracts/OrderClosed.tsol, 229
 GETGLOB 20
 EQINT 5
 PUSHCONT {
-	.loc ../contracts/OrderClosed.tsol, 261
+	.loc ../contracts/OrderClosed.tsol, 230
 	PUSHREF {
 	}
-	.loc ../contracts/OrderClosed.tsol, 262
+	.loc ../contracts/OrderClosed.tsol, 231
 	TRUE
 	GETGLOB 12
 	PUSHINT 0
@@ -1154,7 +1040,7 @@ PUSHCONT {
 	PUSHPOW2 7
 }
 PUSHCONT {
-	.loc ../contracts/OrderClosed.tsol, 275
+	.loc ../contracts/OrderClosed.tsol, 244
 	GETGLOB 12
 	NEWC
 	STSLICECONST x42_
@@ -1219,9 +1105,14 @@ ENDS
 CTOS
 LDU 128
 LDU 128
+LDU 128
+LDU 128
+LDREF
+ENDS
+CTOS
 LDMSGADDR
-ROLLREV 3
-TRIPLE
+ROLLREV 5
+TUPLE 5
 SWAP
 ENDS
 SETGLOB 24
@@ -1309,11 +1200,11 @@ PUSHCONT {
 	}
 	DUP
 	PUSHINT 0
-	BLKPUSH 5, 0
+	BLKPUSH 7, 0
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
-	TRIPLE
+	TUPLE 5
 	SETGLOB 24
 	SETGLOB 23
 	SETGLOB 22
@@ -1390,12 +1281,17 @@ STU 64
 STU 8
 STU 256
 SWAP
-UNTRIPLE
-XCHG S2
+UNTUPLE 5
+REVERSE 5, 0
 NEWC
 STU 128
 STU 128
+STU 128
+STU 128
+SWAP
+NEWC
 STSLICE
+STBREFR
 STBREFR
 STBREFR
 STBREFR
@@ -1529,15 +1425,9 @@ THROW 60
 
 .macro public_function_selector
 DUP
-PUSHINT 872557582
+PUSHINT 902618978
 LEQ
 IFJMPREF {
-	DUP
-	PUSHINT 388172858
-	EQUAL
-	IFJMPREF {
-		CALL $upgrade$
-	}
 	DUP
 	PUSHINT 622096114
 	EQUAL
@@ -1556,17 +1446,17 @@ IFJMPREF {
 	IFJMPREF {
 		CALL $proxyTokensTransfer$
 	}
-}
-DUP
-PUSHINT 1756716863
-LEQ
-IFJMPREF {
 	DUP
 	PUSHINT 902618978
 	EQUAL
 	IFJMPREF {
 		CALL $getDetails$
 	}
+}
+DUP
+PUSHINT 1893244873
+LEQ
+IFJMPREF {
 	DUP
 	PUSHINT 1147733178
 	EQUAL
@@ -1585,22 +1475,17 @@ IFJMPREF {
 	IFJMPREF {
 		CALL $constructor$
 	}
-}
-DUP
-PUSHINT 2119812359
-LEQ
-IFJMPREF {
 	DUP
 	PUSHINT 1893244873
 	EQUAL
 	IFJMPREF {
 		CALL $onAcceptTokensTransfer$
 	}
-	DUP
-	PUSHINT 2119812359
-	EQUAL
-	IFJMPREF {
-		CALL $initParams$
-	}
+}
+DUP
+PUSHINT 2119812359
+EQUAL
+IFJMPREF {
+	CALL $initParams$
 }
 

@@ -118,6 +118,10 @@ contract OrderFactory is IOrderFactory {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } versionOrderClosed;
 	}
 
+	function getFeeParams() override external view responsible returns (OrderFeeParams) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
+	}
+
 	function codeOrderRoot() external view responsible returns (TvmCell) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } orderRootCode;
 	}
@@ -191,34 +195,6 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
-	function withdrawFee(
-		uint128 amount,
-		address recipient,
-		uint128 deployWalletValue,
-		address tokenWallet,
-		address sendGasTo
-	) override external onlyOwner {
-		require(
-			amount != 0 && recipient.value != 0 && sendGasTo.value != 0 && tokenWallet.value != 0,
-			OrderErrors.WRONG_WITHDRAW_FEE_PARAMS
-		);
-		tvm.accept();
-		TvmCell empty;
-
-        ITokenWallet(tokenWallet).transfer{
-            value: OrderGas.TRANSFER_MIN_VALUE,
-            flag: MsgFlag.SENDER_PAYS_FEES,
-			bounce: false
-        }(
-            amount,
-            recipient,
-            deployWalletValue,
-            sendGasTo,
-            false,
-            empty
-        );
-	}
-
 	function setRootFeeParams(OrderFeeParams params, address root) override external onlyOwner {
 		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
@@ -261,8 +237,32 @@ contract OrderFactory is IOrderFactory {
 		);
 	}
 
-    function getFeeParams() override external view responsible returns (OrderFeeParams) {
-		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
+	function withdrawFee(
+		uint128 amount,
+		address recipient,
+		uint128 deployWalletValue,
+		address tokenWallet,
+		address sendGasTo
+	) override external onlyOwner {
+		require(
+			amount != 0 && recipient.value != 0 && sendGasTo.value != 0 && tokenWallet.value != 0,
+			OrderErrors.WRONG_WITHDRAW_FEE_PARAMS
+		);
+		tvm.accept();
+		TvmCell empty;
+
+		ITokenWallet(tokenWallet).transfer{
+				value: OrderGas.TRANSFER_MIN_VALUE,
+				flag: MsgFlag.SENDER_PAYS_FEES,
+				bounce: false
+		}(
+			amount,
+			recipient,
+			deployWalletValue,
+			sendGasTo,
+			false,
+			empty
+		);
 	}
 
 	function setOrderRootCode(TvmCell _orderRootCode) public onlyOwner {
@@ -315,10 +315,9 @@ contract OrderFactory is IOrderFactory {
 		if (msg.value >= OrderGas.DEPLOY_ORDERS_ROOT + OrderGas.DEPLOY_EMPTY_WALLET_GRAMS) {
 
 			new OrderPlatform {
-					//stateInit: buildState(token, buildCode(token), buildParams()),
-					stateInit: buildState(token, orderPlatformCode, buildParams()),
-					value: OrderGas.DEPLOY_ORDERS_ROOT,
-					flag: MsgFlag.SENDER_PAYS_FEES
+				stateInit: buildState(token, orderPlatformCode, buildParams()),
+				value: OrderGas.DEPLOY_ORDERS_ROOT,
+				flag: MsgFlag.SENDER_PAYS_FEES
 			}(
 				orderRootCode,
 				versionOrderRoot,
@@ -328,9 +327,9 @@ contract OrderFactory is IOrderFactory {
 
 			if (callbackId > 0) {
 				IOrderOperationCallback(msg.sender).onOrderRootCreateSuccess{
-						value: 0,
-						flag: MsgFlag.ALL_NOT_RESERVED,
-						bounce: false
+					value: 0,
+					flag: MsgFlag.ALL_NOT_RESERVED,
+					bounce: false
 				}(
 					callbackId,
 					IOrderRootCreateResult.OrderRootCreateResult(
@@ -417,6 +416,8 @@ contract OrderFactory is IOrderFactory {
 			TvmBuilder builderFee;
 			builderFee.store(fee.numerator);
 			builderFee.store(fee.denominator);
+			builderFee.store(fee.matchingNumerator);
+			builderFee.store(fee.matchingDenominator);
 			builderFee.store(fee.beneficiary);
 			builder.storeRef(builderFee);
 

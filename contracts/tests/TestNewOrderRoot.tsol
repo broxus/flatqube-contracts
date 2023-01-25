@@ -66,6 +66,8 @@ contract TestNewOrderRoot is IOrderFeeParams {
             TvmBuilder builder2;
             builder2.store(fee.numerator);
             builder2.store(fee.denominator);
+            builder2.store(fee.matchingNumerator);
+            builder2.store(fee.matchingDenominator);
             builder2.store(fee.beneficiary);
             builder.storeRef(builder2);
 
@@ -109,10 +111,12 @@ contract TestNewOrderRoot is IOrderFeeParams {
         (
             uint128 numerator_,
             uint128 denominator_,
+            uint128 matchingNumerator_,
+            uint128 matchingDenominator_,
             address beneficiary_
-        ) = dataSlFee.decode(uint128, uint128, address);
+        ) = dataSlFee.decode(uint128, uint128, uint128, uint128, address);
 
-        fee = OrderFeeParams(numerator_, denominator_, beneficiary_);
+        fee = OrderFeeParams(numerator_, denominator_, matchingNumerator_, matchingDenominator_, beneficiary_);
 
         newTestField = "New Order Root";
 

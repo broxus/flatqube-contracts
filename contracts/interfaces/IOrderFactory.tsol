@@ -3,39 +3,30 @@ pragma ton-solidity >=0.62.0;
 import "../structures/IOrderFeeParams.tsol";
 
 interface IOrderFactory is IOrderFeeParams {
-    
-    event RequestedOwnerTransfer(
-        address oldOwner, 
-        address newOwner
-    );
-    
-    event OwnerTransferAccepted(
-        address oldOwner,
-        address newOwner
-    );
+    event RequestedOwnerTransfer(address oldOwner, address newOwner);
+    event OwnerTransferAccepted(address oldOwner, address newOwner);
     event OrderFeesParamsUpdated(OrderFeeParams params);
+    event CreateOrderRoot(address order, address token);
+    event CreateOrderRootReject(address token);
+    event OrderFactoryUpgrade(uint32 oldVersion, uint32 newVersion);
+    event PlatformCodeUpgraded();
     event OrderRootCodeUpgraded(uint32 oldVersion, uint32 newVersion);
     event OrderCodeUpgraded(uint32 oldVersion, uint32 newVersion);
     event OrderClosedCodeUpgraded(uint32 oldVersion, uint32 newVersion);
-    event PlatformCodeUpgraded();
-    event TokenWalletPlatformCodeUpgraded();
-    event CreateOrderRoot(
-        address order,
-        address token
-    );
-    event CreateOrderRootReject(address token);
-    event OrderFactoryUpgrade(uint32 oldVersion, uint32 newVersion);
 
-    function createOrderRoot(
-        address token,
-        uint64 callbackId
-    ) external;
+    function createOrderRoot(address token, uint64 callbackId) external;
 
+    function getFeeParams() external view responsible returns (OrderFeeParams);
     function setFeeParams(OrderFeeParams params) external;
     function setRootFeeParams(OrderFeeParams params, address root) external;
     function setOrderFeeParams(OrderFeeParams params, address order) external;
-    function withdrawFee(uint128 amount, address recipient, uint128 deployWalletValue, address tokenWallet, address sendGasTo) external;
-    function getFeeParams() external view responsible returns (OrderFeeParams);
+    function withdrawFee(
+        uint128 amount,
+        address recipient,
+        uint128 deployWalletValue,
+        address tokenWallet,
+        address sendGasTo
+    ) external;
 
     function getExpectedAddressOrderRoot(address token)
 		external

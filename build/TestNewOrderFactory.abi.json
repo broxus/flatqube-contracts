@@ -163,7 +163,7 @@
 		{
 			"name": "setRootFeeParams",
 			"inputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"},
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"},
 				{"name":"root","type":"address"}
 			],
 			"outputs": [
@@ -172,7 +172,7 @@
 		{
 			"name": "setOrderFeeParams",
 			"inputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"},
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"},
 				{"name":"order","type":"address"}
 			],
 			"outputs": [
@@ -181,7 +181,7 @@
 		{
 			"name": "setFeeParams",
 			"inputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
 			],
 			"outputs": [
 			]
@@ -192,7 +192,7 @@
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"value0","type":"tuple"}
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"value0","type":"tuple"}
 			]
 		},
 		{
@@ -283,7 +283,40 @@
 		{
 			"name": "OrderFeesParamsUpdated",
 			"inputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "CreateOrderRoot",
+			"inputs": [
+				{"name":"order","type":"address"},
+				{"name":"token","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "CreateOrderRootReject",
+			"inputs": [
+				{"name":"token","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "OrderFactoryUpgrade",
+			"inputs": [
+				{"name":"oldVersion","type":"uint32"},
+				{"name":"newVersion","type":"uint32"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "PlatformCodeUpgraded",
+			"inputs": [
 			],
 			"outputs": [
 			]
@@ -314,46 +347,6 @@
 			],
 			"outputs": [
 			]
-		},
-		{
-			"name": "PlatformCodeUpgraded",
-			"inputs": [
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "TokenWalletPlatformCodeUpgraded",
-			"inputs": [
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "CreateOrderRoot",
-			"inputs": [
-				{"name":"order","type":"address"},
-				{"name":"token","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "CreateOrderRootReject",
-			"inputs": [
-				{"name":"token","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "OrderFactoryUpgrade",
-			"inputs": [
-				{"name":"oldVersion","type":"uint32"},
-				{"name":"newVersion","type":"uint32"}
-			],
-			"outputs": [
-			]
 		}
 	],
 	"fields": [
@@ -368,7 +361,7 @@
 		{"name":"versionOrderClosed","type":"uint32"},
 		{"name":"owner","type":"address"},
 		{"name":"pendingOwner","type":"address"},
-		{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"},
+		{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"},
 		{"name":"_tmp_deploying_wallets","type":"map(address,address)"},
 		{"name":"orderRootCode","type":"cell"},
 		{"name":"orderPlatformCode","type":"cell"},

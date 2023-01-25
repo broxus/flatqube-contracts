@@ -15,9 +15,9 @@ import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
 import "tip3/contracts/interfaces/ITokenWallet.tsol";
 
-contract OrderClosed is 
-	IAcceptTokensTransferCallback, 
-	IOrderClosed, 
+contract OrderClosed is
+	IAcceptTokensTransferCallback,
+	IOrderClosed,
 	IHasEmergencyMode
 {
 	address static factory;
@@ -44,7 +44,7 @@ contract OrderClosed is
 
 	constructor() public { revert(); }
 
-	modifier onlyFactory() {	
+	modifier onlyFactory() {
 		require(
 			msg.sender.value != 0 && msg.sender == factory,
 			OrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT
@@ -56,8 +56,8 @@ contract OrderClosed is
         require(
             emergencyManager != 0 && (msg.sender.value == emergencyManager || msg.pubkey() == emergencyManager),
             OrderErrors.NOT_EMERGENCY_MANAGER
-        );  
-        _;  
+        );
+        _;
     }
 
 	function currentStatus() override external view responsible returns(uint8) {
@@ -104,7 +104,7 @@ contract OrderClosed is
 
 	function enableEmergency(uint256 _emergencyManager) override external onlyFactory {
         require(state != OrderStatus.Emergency, OrderErrors.EMERGENCY_STATUS_NOW);
-        
+
         prevState = state;
         state = OrderStatus.Emergency;
         emergencyManager = _emergencyManager;
@@ -171,39 +171,6 @@ contract OrderClosed is
         );
     }
 
-	function upgrade(TvmCell newCode) external override onlyFactory {
-		tvm.setcode(newCode);
-		tvm.setCurrentCode(newCode);
-
-		TvmBuilder builderUpg;
-        builderUpg.store(state);
-        builderUpg.store(owner);
-        builderUpg.store(factory);
-        builderUpg.store(root);
-        builderUpg.store(swapAttempt);
-
-        TvmBuilder builderTokens;
-        builderTokens.store(spentWallet);
-        builderTokens.store(currentAmountSpentToken);
-        builderTokens.store(spentToken);
-        builderTokens.store(receiveToken);
-        builderUpg.storeRef(builderTokens);
-
-        TvmBuilder builderSum;
-        builderSum.store(expectedAmount);
-        builderSum.store(initialAmount);
-        builderSum.store(receiveWallet);
-        builderUpg.storeRef(builderSum);
-
-		TvmBuilder builderFee;
-		builderFee.store(fee.numerator);
-		builderFee.store(fee.denominator);
-		builderFee.store(fee.beneficiary);
-		builderUpg.storeRef(builderFee);
-
-        onCodeUpgrade(builderUpg.toCell());
-	}
-
 	function onCodeUpgrade(TvmCell data) private {
 
 		tvm.resetStorage();
@@ -252,10 +219,12 @@ contract OrderClosed is
 		(
 			uint128 _numerator,
 			uint128 _denominator,
+			uint128 _matchingNumerator,
+			uint128 _matchingDenominator,
 			address _beneficiary
-		) = dataFee.decode(uint128, uint128, address);
+		) = dataFee.decode(uint128, uint128, uint128, uint128, address);
 
-		fee = OrderFeeParams(_numerator, _denominator, _beneficiary);
+		fee = OrderFeeParams(_numerator, _denominator, _matchingNumerator, _matchingDenominator, _beneficiary);
 
 		if (state == OrderStatus.Cancelled) {
 			TvmCell emptyPayload;

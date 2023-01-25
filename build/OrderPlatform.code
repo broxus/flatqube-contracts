@@ -24,9 +24,14 @@ PUSHCONT {
 IFELSE
 LDU 128
 LDU 128
+LDU 128
+LDU 128
+LDREF
+ENDS
+CTOS
 LDMSGADDR
-ROLLREV 3
-TRIPLE
+ROLLREV 5
+TUPLE 5
 SWAP
 LDREF
 ENDS
@@ -91,28 +96,37 @@ ROLL 3
 STUR 32
 .loc ../contracts/OrderPlatform.tsol, 43
 STSLICE
-.loc ../contracts/OrderPlatform.tsol, 44
+.loc ../contracts/OrderPlatform.tsol, 46
 OVER
-THIRD
-PUSH S2
 FIRST
-ROLL 3
-SECOND
 NEWC
 STU 128
-STU 128
-STSLICE
-ENDC
-SWAP
-STREF
-.loc ../contracts/OrderPlatform.tsol, 45
+.loc ../contracts/OrderPlatform.tsol, 47
+PUSH S2
+SECOND
+STUR 128
+.loc ../contracts/OrderPlatform.tsol, 48
+PUSH S2
+THIRD
+STUR 128
+.loc ../contracts/OrderPlatform.tsol, 49
+PUSH S2
+INDEX 3
+STUR 128
+.loc ../contracts/OrderPlatform.tsol, 50
+ROT
+INDEX 4
+STSLICER
+.loc ../contracts/OrderPlatform.tsol, 51
+STBREFR
+.loc ../contracts/OrderPlatform.tsol, 53
 GETGLOB 12
 SWAP
 STREF
-.loc ../contracts/OrderPlatform.tsol, 47
+.loc ../contracts/OrderPlatform.tsol, 55
 OVER
 SETCODE
-.loc ../contracts/OrderPlatform.tsol, 48
+.loc ../contracts/OrderPlatform.tsol, 56
 SWAP
 CTOS
 DUP
@@ -127,7 +141,7 @@ PLDREF
 CTOS
 BLESS
 POP C3
-.loc ../contracts/OrderPlatform.tsol, 50
+.loc ../contracts/OrderPlatform.tsol, 58
 ENDC
 CALLREF {
 	CALL $:onCodeUpgrade$
@@ -348,7 +362,7 @@ THROW 60
 
 .macro public_function_selector
 DUP
-PUSHINT 476722619
+PUSHINT 1997036373
 EQUAL
 IFJMPREF {
 	CALL $constructor$

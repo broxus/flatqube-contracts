@@ -343,7 +343,6 @@ contract TestNewOrderFactory is IOrderFactory{
 		}
 	}
 
-
 	function getExpectedAddressOrderRoot(address token)
 		override
 		external
@@ -415,6 +414,8 @@ contract TestNewOrderFactory is IOrderFactory{
 			TvmBuilder builderFee;
 			builderFee.store(fee.numerator);
 			builderFee.store(fee.denominator);
+			builderFee.store(fee.matchingNumerator);
+			builderFee.store(fee.matchingDenominator);
 			builder.storeRef(builderFee);
 
 			tvm.setcode(newCode);

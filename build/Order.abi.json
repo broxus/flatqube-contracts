@@ -11,7 +11,7 @@
 				{"name":"_backPK","type":"uint256"},
 				{"name":"_backMatchingPK","type":"uint256"},
 				{"name":"_dexRoot","type":"address"},
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"_fee","type":"tuple"},
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"_fee","type":"tuple"},
 				{"name":"_codeClosed","type":"cell"},
 				{"name":"_orderPlatformCode","type":"cell"}
 			],
@@ -75,13 +75,13 @@
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
 			]
 		},
 		{
 			"name": "setFeeParams",
 			"inputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
 			],
 			"outputs": [
 			]
@@ -227,6 +227,60 @@
 	],
 	"events": [
 		{
+			"name": "DEBUGINFO1",
+			"inputs": [
+				{"name":"send","type":"address"},
+				{"name":"matched","type":"address"},
+				{"name":"msgValue","type":"uint128"},
+				{"name":"status","type":"uint8"},
+				{"name":"bits","type":"uint16"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "DDD1",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "DDD2",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "DDD3",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "DDD4",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "DDD5",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "DDD6",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "StateChanged",
 			"inputs": [
 				{"name":"from","type":"uint8"},
@@ -279,7 +333,7 @@
 		{"name":"prevState","type":"uint8"},
 		{"name":"emergencyManager","type":"uint256"},
 		{"name":"autoExchange","type":"bool"},
-		{"components":[{"name":"denominator","type":"uint128"},{"name":"numerator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"},
+		{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"},
 		{"name":"matchingOrder","type":"address"}
 	]
 }
