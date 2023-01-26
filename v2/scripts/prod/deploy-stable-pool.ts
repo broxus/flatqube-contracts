@@ -5,7 +5,7 @@ const {Command} = require('commander');
 const program = new Command();
 const prompts = require('prompts');
 
-const DEX_ROOT_ADDRESS = '0:5eb5713ea9b4a0f3a13bc91b282cde809636eb1e68d2fcb6427b9ad78a5a9008';
+const DEFAULT_DEX_ROOT_ADDRESS = '0:5eb5713ea9b4a0f3a13bc91b282cde809636eb1e68d2fcb6427b9ad78a5a9008';
 
 async function main() {
     console.log('deploy-stable-pool.ts');
@@ -15,10 +15,9 @@ async function main() {
 
     const promptsData = [];
 
-    const dexRoot = await locklift.factory.getDeployedContract('DexRoot', new Address(DEX_ROOT_ADDRESS));
-
     program
         .allowUnknownOption()
+        .option('-dr, --dex_root <dex_root>', 'DexRoot')
         .option('-r, --roots <roots>', 'Pool roots')
         .option(`-f, --fee <fee>`, 'Pool fee')
         .option(`-amp, --a_coef <a_coef>`, 'Pool amplification coefficient')
@@ -26,9 +25,28 @@ async function main() {
     program.parse(process.argv);
 
     const options = program.opts();
+    options.dex_root = options.dex_root && isValidTonAddress(options.dex_root) ? options.dex_root : undefined;
     options.roots = options.roots ? JSON.parse(options.roots) : undefined;
     options.fee = options.fee ? JSON.parse(options.fee) : undefined;
     options.a_coef = options.a_coef ? JSON.parse(options.a_coef) : undefined;
+
+    let dexRootAddress = '';
+
+    if (migration.exists('DexRoot')) {
+        dexRootAddress = migration.getAddress('DexRoot').toString();
+    } else {
+        dexRootAddress = DEFAULT_DEX_ROOT_ADDRESS;
+    }
+
+    if (options.dex_root === undefined) {
+        promptsData.push({
+            type: 'text',
+            name: 'dex_root',
+            message: 'DexRoot address',
+            initial: dexRootAddress,
+            validate: (value: any) => isValidTonAddress(value) ? true : 'Invalid address'
+        })
+    }
 
     if (options.roots === undefined) {
         promptsData.push({
@@ -69,9 +87,14 @@ async function main() {
     }
 
     const response = await prompts(promptsData);
+    dexRootAddress = options.dex_root || response.dex_root;
     const roots = options.roots || (response.roots ? response.roots : undefined);
     const fee = options.fee || (response.fee ? JSON.parse(response.fee) : undefined);
     const a_coef = options.a_coef || (response.a_coef ? JSON.parse(response.a_coef) : undefined);
+
+    console.log('DexRoot', dexRootAddress);
+
+    const dexRoot = await locklift.factory.getDeployedContract('DexRoot', new Address(dexRootAddress));
 
     const account = await locklift.factory.accounts.addExistingAccount({
         type: WalletTypes.EverWallet,
