@@ -1456,7 +1456,7 @@ CALLREF {
 THROW 0
 
 .macro setAmplificationCoefficient_12ba17dc_internal_macro
-.loc ../contracts/DexStablePool.sol, 1694
+.loc ../contracts/DexStablePool.sol, 1700
 GETGLOB 9
 GETGLOB 11
 SDEQ
@@ -1544,7 +1544,7 @@ CALLREF {
 THROW 0
 
 .macro setFeeParams_360e8671_internal_macro
-.loc ../contracts/DexStablePool.sol, 1694
+.loc ../contracts/DexStablePool.sol, 1700
 GETGLOB 9
 GETGLOB 11
 SDEQ
@@ -6237,10 +6237,10 @@ CALLREF {
 THROW 0
 
 .macro depositLiquidity_fd8c8ab0_internal_macro
-.loc ../contracts/DexStablePool.sol, 1672
+.loc ../contracts/DexStablePool.sol, 1678
 GETGLOB 13
 THROWIFNOT 114
-.loc ../contracts/DexStablePool.sol, 1673
+.loc ../contracts/DexStablePool.sol, 1679
 GETGLOB 9
 PUSH S4
 .loc ../contracts/abstract/DexContractBase.sol, 32
@@ -7209,10 +7209,10 @@ CALLREF {
 THROW 0
 
 .macro withdrawLiquidity_6b1781e6_internal_macro
-.loc ../contracts/DexStablePool.sol, 1672
+.loc ../contracts/DexStablePool.sol, 1678
 GETGLOB 13
 THROWIFNOT 114
-.loc ../contracts/DexStablePool.sol, 1673
+.loc ../contracts/DexStablePool.sol, 1679
 GETGLOB 9
 PUSH S3
 .loc ../contracts/abstract/DexContractBase.sol, 32
@@ -7925,10 +7925,10 @@ CALLREF {
 THROW 0
 
 .macro exchange_ff7e2245_internal_macro
-.loc ../contracts/DexStablePool.sol, 1672
+.loc ../contracts/DexStablePool.sol, 1678
 GETGLOB 13
 THROWIFNOT 114
-.loc ../contracts/DexStablePool.sol, 1673
+.loc ../contracts/DexStablePool.sol, 1679
 GETGLOB 9
 PUSH S3
 .loc ../contracts/abstract/DexContractBase.sol, 32
@@ -8916,7 +8916,7 @@ THROW 0
 .macro crossPoolExchange_bd0becbe_internal_macro
 .loc ../contracts/DexStablePool.sol, 1325
 PUSH S13
-.loc ../contracts/DexStablePool.sol, 1704
+.loc ../contracts/DexStablePool.sol, 1710
 GETGLOB 9
 OVER
 CALLREF {
@@ -8928,7 +8928,7 @@ GETGLOB 12
 SDEQ
 OR
 THROWIFNOT 146
-.loc ../contracts/DexStablePool.sol, 1705
+.loc ../contracts/DexStablePool.sol, 1711
 PUSHINT 17
 ROLLREVX
 .loc ../contracts/DexStablePool.sol, 1350
@@ -9071,11 +9071,15 @@ PUSHCONT {
 			CALLREF {
 				CALL $_applyAddLiquidity_c0387a6a_internal_macro$
 			}
-			.loc ../contracts/DexStablePool.sol, 1391
+			.loc ../contracts/DexStablePool.sol, 1390
+			CALLREF {
+				CALL $_sync_ee5e2717_internal_macro$
+			}
+			.loc ../contracts/DexStablePool.sol, 1393
 			GETGLOB 20
 			NEWC
 			STSLICE
-			.loc ../contracts/DexStablePool.sol, 1393
+			.loc ../contracts/DexStablePool.sol, 1395
 			PUSH S8
 			PUSH S17
 			PUSH S20
@@ -9112,16 +9116,16 @@ PUSHCONT {
 			STBREFR
 			STBREFR
 			ENDC
-			.loc ../contracts/DexStablePool.sol, 1404
+			.loc ../contracts/DexStablePool.sol, 1406
 			SWAP
 			STREF
-			.loc ../contracts/DexStablePool.sol, 1406
+			.loc ../contracts/DexStablePool.sol, 1408
 			PUXC S13, S-1
 			STREF
-			.loc ../contracts/DexStablePool.sol, 1407
+			.loc ../contracts/DexStablePool.sol, 1409
 			PUXC S11, S-1
 			STREF
-			.loc ../contracts/DexStablePool.sol, 1409
+			.loc ../contracts/DexStablePool.sol, 1411
 			ENDC
 			TRUE
 			PUSH S18
@@ -9165,7 +9169,7 @@ PUSHCONT {
 		SDEQ
 		AND
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 1423
+			.loc ../contracts/DexStablePool.sol, 1425
 			PUSH S17
 			PUSH S6
 			GETGLOB 16
@@ -9186,7 +9190,7 @@ PUSHCONT {
 			}
 			SWAP
 			TUCK
-			.loc ../contracts/DexStablePool.sol, 1425
+			.loc ../contracts/DexStablePool.sol, 1427
 			PUSH S8
 			GETGLOB 16
 			PUSHINT 267
@@ -9201,14 +9205,14 @@ PUSHCONT {
 				CALL $_checkOneCoinWithdrawalReceivedAmount_6065aed4_internal_macro$
 			}
 			POP S4
-			.loc ../contracts/DexStablePool.sol, 1426
+			.loc ../contracts/DexStablePool.sol, 1428
 			PUSH S3
 			PUSHCONT {
-				.loc ../contracts/DexStablePool.sol, 1427
+				.loc ../contracts/DexStablePool.sol, 1429
 				PUSH2 S1, S1
 				ISNULL
 				THROWIF 63
-				.loc ../contracts/DexStablePool.sol, 1428
+				.loc ../contracts/DexStablePool.sol, 1430
 				PUSH S8
 				GETGLOB 16
 				PUSHINT 267
@@ -9218,7 +9222,7 @@ PUSHCONT {
 					PLDU 8
 				}
 				IF
-				.loc ../contracts/DexStablePool.sol, 1430
+				.loc ../contracts/DexStablePool.sol, 1432
 				PUSH2 S1, S2
 				PUSH S29
 				FALSE
@@ -9230,7 +9234,11 @@ PUSHCONT {
 				CALLREF {
 					CALL $_applyWithdrawLiquidity_2683cff0_internal_macro$
 				}
-				.loc ../contracts/DexStablePool.sol, 1442
+				.loc ../contracts/DexStablePool.sol, 1444
+				CALLREF {
+					CALL $_sync_ee5e2717_internal_macro$
+				}
+				.loc ../contracts/DexStablePool.sol, 1446
 				DUP
 				ROT
 				INDEX2 2, 1
@@ -9271,7 +9279,7 @@ PUSHCONT {
 				FIRST
 				PAIR
 				POP S3
-				.loc ../contracts/DexStablePool.sol, 1444
+				.loc ../contracts/DexStablePool.sol, 1448
 				PUSH S5
 				PUSHREFSLICE {
 					.blob x8000000000000000000000000000000000000000000000000000000000000000001_
@@ -9316,20 +9324,20 @@ PUSHCONT {
 			IFNOT
 		}
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 1457
+			.loc ../contracts/DexStablePool.sol, 1461
 			NULL
-			.loc ../contracts/DexStablePool.sol, 1458
+			.loc ../contracts/DexStablePool.sol, 1462
 			PUSHINT 0
-			.loc ../contracts/DexStablePool.sol, 1460
+			.loc ../contracts/DexStablePool.sol, 1464
 			PUSH S20
 			PUSH S8
 			SDEQ
 			PUSHCONT {
-				.loc ../contracts/DexStablePool.sol, 1461
+				.loc ../contracts/DexStablePool.sol, 1465
 				PUSHINT 112
 			}
 			PUSHCONT {
-				.loc ../contracts/DexStablePool.sol, 1463
+				.loc ../contracts/DexStablePool.sol, 1467
 				PUSH S20
 				GETGLOB 16
 				PUSHINT 267
@@ -9354,7 +9362,7 @@ PUSHCONT {
 					CALL $_get_dy_216b1085_internal_macro$
 				}
 				BLKDROP2 2, 2
-				.loc ../contracts/DexStablePool.sol, 1464
+				.loc ../contracts/DexStablePool.sol, 1468
 				PUSH2 S1, S8
 				CALLREF {
 					CALL $_checkExchangeReceivedAmount_5264ee5e_internal_macro$
@@ -9362,10 +9370,10 @@ PUSHCONT {
 			}
 			IFELSE
 			POP S4
-			.loc ../contracts/DexStablePool.sol, 1467
+			.loc ../contracts/DexStablePool.sol, 1471
 			PUSH S3
 			PUSHCONT {
-				.loc ../contracts/DexStablePool.sol, 1468
+				.loc ../contracts/DexStablePool.sol, 1472
 				PUSH S20
 				GETGLOB 16
 				PUSHINT 267
@@ -9375,7 +9383,7 @@ PUSHCONT {
 					PLDU 8
 				}
 				IF
-				.loc ../contracts/DexStablePool.sol, 1469
+				.loc ../contracts/DexStablePool.sol, 1473
 				PUSH S8
 				GETGLOB 16
 				PUSHINT 267
@@ -9385,11 +9393,11 @@ PUSHCONT {
 					PLDU 8
 				}
 				IF
-				.loc ../contracts/DexStablePool.sol, 1471
+				.loc ../contracts/DexStablePool.sol, 1475
 				PUSH2 S3, S3
 				ISNULL
 				THROWIF 63
-				.loc ../contracts/DexStablePool.sol, 1472
+				.loc ../contracts/DexStablePool.sol, 1476
 				DUP
 				FIRST
 				PUSH S2
@@ -9425,7 +9433,7 @@ PUSHCONT {
 				FIRST
 				PAIR
 				POP S6
-				.loc ../contracts/DexStablePool.sol, 1474
+				.loc ../contracts/DexStablePool.sol, 1478
 				PUSH S22
 				OVER
 				THIRD
@@ -9504,7 +9512,7 @@ PUSHCONT {
 				DICTUSETREF
 				PAIR
 				SETGLOB 15
-				.loc ../contracts/DexStablePool.sol, 1475
+				.loc ../contracts/DexStablePool.sol, 1479
 				DUP
 				FIRST
 				GETGLOB 15
@@ -9577,11 +9585,11 @@ PUSHCONT {
 				DICTUSETREF
 				PAIR
 				SETGLOB 15
-				.loc ../contracts/DexStablePool.sol, 1477
+				.loc ../contracts/DexStablePool.sol, 1481
 				PUSHINT 0
 				NEWDICT
 				PAIR
-				.loc ../contracts/DexStablePool.sol, 1478
+				.loc ../contracts/DexStablePool.sol, 1482
 				PUSH S3
 				GETGLOB 15
 				SECOND
@@ -9641,7 +9649,7 @@ PUSHCONT {
 				PUSHINT 32
 				DICTUSETREF
 				PAIR
-				.loc ../contracts/DexStablePool.sol, 1480
+				.loc ../contracts/DexStablePool.sol, 1484
 				OVER
 				FIRST
 				ROLL 3
@@ -9741,12 +9749,16 @@ PUSHCONT {
 				ENDC
 				PUSHINT 0
 				SENDRAWMSG
-				.loc ../contracts/DexStablePool.sol, 1490
+				.loc ../contracts/DexStablePool.sol, 1494
+				CALLREF {
+					CALL $_sync_ee5e2717_internal_macro$
+				}
+				.loc ../contracts/DexStablePool.sol, 1496
 				DUP
 				THIRD
 				GTINT 0
 				PUSHCONT {
-					.loc ../contracts/DexStablePool.sol, 1491
+					.loc ../contracts/DexStablePool.sol, 1497
 					DUP
 					THIRD
 					GETGLOB 15
@@ -9819,7 +9831,7 @@ PUSHCONT {
 					DICTUSETREF
 					PAIR
 					SETGLOB 15
-					.loc ../contracts/DexStablePool.sol, 1492
+					.loc ../contracts/DexStablePool.sol, 1498
 					FALSE
 					PUSH S18
 					CALLREF {
@@ -9828,12 +9840,12 @@ PUSHCONT {
 					.loc ../contracts/DexStablePool.sol, 0
 				}
 				IF
-				.loc ../contracts/DexStablePool.sol, 1495
+				.loc ../contracts/DexStablePool.sol, 1501
 				DROP
 				OVER
 				GTINT 0
 				PUSHCONT {
-					.loc ../contracts/DexStablePool.sol, 1496
+					.loc ../contracts/DexStablePool.sol, 1502
 					CALLREF {
 						CALL $_tokenRoots_475f7f72_internal_macro$
 					}
@@ -9901,7 +9913,7 @@ PUSHCONT {
 					ENDC
 					PUSHINT 1
 					SENDRAWMSG
-					.loc ../contracts/DexStablePool.sol, 1507
+					.loc ../contracts/DexStablePool.sol, 1513
 					DUP2
 					GETGLOB 15
 					SECOND
@@ -9981,31 +9993,31 @@ PUSHCONT {
 	IFELSE
 	.loc ../contracts/DexStablePool.sol, 0
 	DROP2
-	.loc ../contracts/DexStablePool.sol, 1512
+	.loc ../contracts/DexStablePool.sol, 1518
 	OVER
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 1514
+		.loc ../contracts/DexStablePool.sol, 1520
 		PUSH S5
 		GETGLOB 18
 		SDEQ
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 1516
+			.loc ../contracts/DexStablePool.sol, 1522
 			PUSHINT 0
 			PUSH2 S0, S5
-			.loc ../contracts/DexStablePool.sol, 1519
+			.loc ../contracts/DexStablePool.sol, 1525
 			FIRST
 			UFITS 32
-			.loc ../contracts/DexStablePool.sol, 1520
+			.loc ../contracts/DexStablePool.sol, 1526
 			PUSHINT 0
 			BLKPUSH 3, 0
-			.loc ../contracts/DexStablePool.sol, 1523
+			.loc ../contracts/DexStablePool.sol, 1529
 			PUSHCONT {
 				PUSH2 S0, S11
 				FIRST
 				LESS
 			}
 			PUSHCONT {
-				.loc ../contracts/DexStablePool.sol, 1524
+				.loc ../contracts/DexStablePool.sol, 1530
 				PUSH2 S0, S11
 				SECOND
 				PUSHINT 32
@@ -10020,7 +10032,7 @@ PUSHCONT {
 					ENDS
 					TUPLE 5
 				}
-				.loc ../contracts/DexStablePool.sol, 1525
+				.loc ../contracts/DexStablePool.sol, 1531
 				DUP
 				SECOND
 				PARSEMSGADDR
@@ -10041,58 +10053,58 @@ PUSHCONT {
 				OR
 				OR
 				PUSHCONT {
-					.loc ../contracts/DexStablePool.sol, 1528
+					.loc ../contracts/DexStablePool.sol, 1534
 					PUSHINT 111
 					POP S8
-					.loc ../contracts/DexStablePool.sol, 1529
+					.loc ../contracts/DexStablePool.sol, 1535
 					DROP
 					RETALT
 					.loc ../contracts/DexStablePool.sol, 0
 				}
 				IFJMP
-				.loc ../contracts/DexStablePool.sol, 1531
+				.loc ../contracts/DexStablePool.sol, 1537
 				DUP
 				INDEX 3
 				PUSH S4
 				GREATER
 				PUSHCONT {
-					.loc ../contracts/DexStablePool.sol, 1532
+					.loc ../contracts/DexStablePool.sol, 1538
 					DUP
 					INDEX 3
 					POP S4
-					.loc ../contracts/DexStablePool.sol, 1533
+					.loc ../contracts/DexStablePool.sol, 1539
 					OVER
 					POP S3
 					.loc ../contracts/DexStablePool.sol, 0
 				}
 				IF
-				.loc ../contracts/DexStablePool.sol, 1535
+				.loc ../contracts/DexStablePool.sol, 1541
 				DUP
 				FIRST
 				PUSH S7
 				ADD
 				POP S7
-				.loc ../contracts/DexStablePool.sol, 1536
+				.loc ../contracts/DexStablePool.sol, 1542
 				DUP
 				INDEX 3
 				PUSH S6
 				ADD
 				UFITS 32
 				POP S6
-				.loc ../contracts/DexStablePool.sol, 1537
+				.loc ../contracts/DexStablePool.sol, 1543
 				INDEX 4
 				PUSH S4
 				ADD
 				UFITS 32
 				POP S4
-				.loc ../contracts/DexStablePool.sol, 1523
+				.loc ../contracts/DexStablePool.sol, 1529
 				INC
 				UFITS 32
 				.loc ../contracts/DexStablePool.sol, 0
 			}
 			WHILEBRK
 			DROP
-			.loc ../contracts/DexStablePool.sol, 1540
+			.loc ../contracts/DexStablePool.sol, 1546
 			PUSH S5
 			EQINT 0
 			DUP
@@ -10115,13 +10127,13 @@ PUSHCONT {
 			}
 			IF
 			PUSHCONT {
-				.loc ../contracts/DexStablePool.sol, 1541
+				.loc ../contracts/DexStablePool.sol, 1547
 				PUSHINT 103
 				POP S6
 				.loc ../contracts/DexStablePool.sol, 0
 			}
 			IF
-			.loc ../contracts/DexStablePool.sol, 1544
+			.loc ../contracts/DexStablePool.sol, 1550
 			PUSH S5
 			EQINT 0
 			PUSH S11
@@ -10129,7 +10141,7 @@ PUSHCONT {
 			GTINT 0
 			AND
 			PUSHCONT {
-				.loc ../contracts/DexStablePool.sol, 1545
+				.loc ../contracts/DexStablePool.sol, 1551
 				DEPTH
 				ADDCONST -2
 				PICK
@@ -10145,7 +10157,7 @@ PUSHCONT {
 				UFITS 128
 				SUB
 				UFITS 128
-				.loc ../contracts/DexStablePool.sol, 1547
+				.loc ../contracts/DexStablePool.sol, 1553
 				PUSHINT 0
 				PUSHCONT {
 					PUSH2 S0, S12
@@ -10153,7 +10165,7 @@ PUSHCONT {
 					LESS
 				}
 				PUSHCONT {
-					.loc ../contracts/DexStablePool.sol, 1548
+					.loc ../contracts/DexStablePool.sol, 1554
 					PUSH2 S0, S12
 					SECOND
 					PUSHINT 32
@@ -10168,7 +10180,7 @@ PUSHCONT {
 						ENDS
 						TUPLE 5
 					}
-					.loc ../contracts/DexStablePool.sol, 1550
+					.loc ../contracts/DexStablePool.sol, 1556
 					PUSH S9
 					FIRST
 					OVER
@@ -10176,13 +10188,13 @@ PUSHCONT {
 					PUSH S9
 					MULDIV
 					UFITS 128
-					.loc ../contracts/DexStablePool.sol, 1551
+					.loc ../contracts/DexStablePool.sol, 1557
 					OVER
 					INDEX 4
 					PUSH2 S4, S7
 					MULDIV
 					UFITS 128
-					.loc ../contracts/DexStablePool.sol, 1553
+					.loc ../contracts/DexStablePool.sol, 1559
 					PUSH S18
 					PUSH S20
 					PUSH S22
@@ -10281,7 +10293,7 @@ PUSHCONT {
 					SENDRAWMSG
 					.loc ../contracts/DexStablePool.sol, 0
 					DROP
-					.loc ../contracts/DexStablePool.sol, 1547
+					.loc ../contracts/DexStablePool.sol, 1553
 					INC
 					UFITS 32
 					.loc ../contracts/DexStablePool.sol, 0
@@ -10290,7 +10302,7 @@ PUSHCONT {
 				DROP2
 			}
 			PUSHCONT {
-				.loc ../contracts/DexStablePool.sol, 1583
+				.loc ../contracts/DexStablePool.sol, 1589
 				PUSH S6
 				SECOND
 				GETGLOB 16
@@ -10301,14 +10313,14 @@ PUSHCONT {
 					PLDU 8
 				}
 				IF
-				.loc ../contracts/DexStablePool.sol, 1584
+				.loc ../contracts/DexStablePool.sol, 1590
 				PUSH S11
 				FIRST
 				EQINT 0
-				.loc ../contracts/DexStablePool.sol, 1586
+				.loc ../contracts/DexStablePool.sol, 1592
 				DUP
 				PUSHCONT {
-					.loc ../contracts/DexStablePool.sol, 1587
+					.loc ../contracts/DexStablePool.sol, 1593
 					PUSH S31
 					PUSHINT 10000000
 					ADDCONST 44
@@ -10330,12 +10342,12 @@ PUSHCONT {
 					ADDCONST 2
 					UFITS 8
 					SENDRAWMSG
-					.loc ../contracts/DexStablePool.sol, 1593
+					.loc ../contracts/DexStablePool.sol, 1599
 					PUSH S23
 					PUSH S25
 					SDEQ
 					PUSHCONT {
-						.loc ../contracts/DexStablePool.sol, 1594
+						.loc ../contracts/DexStablePool.sol, 1600
 						PUSH S31
 						PUSH S24
 						FALSE
@@ -10358,7 +10370,7 @@ PUSHCONT {
 					.loc ../contracts/DexStablePool.sol, 0
 				}
 				IFNOT
-				.loc ../contracts/DexStablePool.sol, 1602
+				.loc ../contracts/DexStablePool.sol, 1608
 				PUSH S21
 				GETGLOB 14
 				CALLREF {
@@ -10513,10 +10525,10 @@ PUSHCONT {
 	DROP
 }
 IFNOT
-.loc ../contracts/DexStablePool.sol, 1624
+.loc ../contracts/DexStablePool.sol, 1630
 DUP
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1625
+	.loc ../contracts/DexStablePool.sol, 1631
 	PUSH S22
 	PUSHINT 10000000
 	ADDCONST 44
@@ -10538,11 +10550,11 @@ PUSHCONT {
 	ADDCONST 2
 	UFITS 8
 	SENDRAWMSG
-	.loc ../contracts/DexStablePool.sol, 1631
+	.loc ../contracts/DexStablePool.sol, 1637
 	PUSH2 S14, S15
 	SDEQ
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 1632
+		.loc ../contracts/DexStablePool.sol, 1638
 		PUSH S22
 		PUSH S15
 		FALSE
@@ -10562,7 +10574,7 @@ PUSHCONT {
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	IFNOT
-	.loc ../contracts/DexStablePool.sol, 1639
+	.loc ../contracts/DexStablePool.sol, 1645
 	PUSH S12
 	GETGLOB 14
 	CALLREF {
@@ -10677,7 +10689,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexStablePool.sol, 1660
+.loc ../contracts/DexStablePool.sol, 1666
 OVER
 PUSHCONT {
 	LDREF
@@ -10699,7 +10711,7 @@ CALLREF {
 THROW 0
 
 .macro checkPair_29d167fd_internal_macro
-.loc ../contracts/DexStablePool.sol, 1660
+.loc ../contracts/DexStablePool.sol, 1666
 DROP
 .loc ../contracts/abstract/DexContractBase.sol, 32
 GETGLOB 9
@@ -10709,11 +10721,11 @@ CALLREF {
 }
 SDEQ
 THROWIFNOT 105
-.loc ../contracts/DexStablePool.sol, 1661
+.loc ../contracts/DexStablePool.sol, 1667
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/DexStablePool.sol, 1662
+.loc ../contracts/DexStablePool.sol, 1668
 GETGLOB 18
 CALLREF {
 	CALL $_tokenRoots_475f7f72_internal_macro$
@@ -10748,7 +10760,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexStablePool.sol, 1711
+.loc ../contracts/DexStablePool.sol, 1717
 OVER
 PUSHCONT {
 	LDREF
@@ -10777,12 +10789,12 @@ CALLREF {
 THROW 0
 
 .macro upgrade_8f230973_internal_macro
-.loc ../contracts/DexStablePool.sol, 1694
+.loc ../contracts/DexStablePool.sol, 1700
 GETGLOB 9
 GETGLOB 11
 SDEQ
 THROWIFNOT 101
-.loc ../contracts/DexStablePool.sol, 1712
+.loc ../contracts/DexStablePool.sol, 1718
 GETGLOB 14
 PUSH S3
 EQUAL
@@ -10790,11 +10802,11 @@ PUSH S2
 EQINT 3
 AND
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1713
+	.loc ../contracts/DexStablePool.sol, 1719
 	PUSHINT 1000000000
 	PUSHINT 0
 	RAWRESERVE
-	.loc ../contracts/DexStablePool.sol, 1714
+	.loc ../contracts/DexStablePool.sol, 1720
 	DUP
 	NEWC
 	STSLICECONST x42_
@@ -10808,14 +10820,14 @@ PUSHCONT {
 	SENDRAWMSG
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1716
+	.loc ../contracts/DexStablePool.sol, 1722
 	GETGLOB 22
 	INDEX 4
 	PARSEMSGADDR
 	INDEX 3
 	PLDU 256
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 1717
+		.loc ../contracts/DexStablePool.sol, 1723
 		TRUE
 		OVER
 		CALLREF {
@@ -10824,7 +10836,7 @@ PUSHCONT {
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	IF
-	.loc ../contracts/DexStablePool.sol, 1719
+	.loc ../contracts/DexStablePool.sol, 1725
 	PUSH2 S1, S2
 	PUSHSLICE xc0000000000000000000000000475c5966
 	NEWC
@@ -10834,29 +10846,29 @@ PUSHCONT {
 	ENDC
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/DexStablePool.sol, 1723
+	.loc ../contracts/DexStablePool.sol, 1729
 	GETGLOB 11
 	NEWC
 	STSLICE
-	.loc ../contracts/DexStablePool.sol, 1724
+	.loc ../contracts/DexStablePool.sol, 1730
 	GETGLOB 12
 	STSLICER
-	.loc ../contracts/DexStablePool.sol, 1725
+	.loc ../contracts/DexStablePool.sol, 1731
 	GETGLOB 14
 	STUR 32
-	.loc ../contracts/DexStablePool.sol, 1726
+	.loc ../contracts/DexStablePool.sol, 1732
 	PUSH S3
 	STUR 32
-	.loc ../contracts/DexStablePool.sol, 1727
+	.loc ../contracts/DexStablePool.sol, 1733
 	OVER
 	STSLICER
-	.loc ../contracts/DexStablePool.sol, 1728
+	.loc ../contracts/DexStablePool.sol, 1734
 	STSLICECONST x03
-	.loc ../contracts/DexStablePool.sol, 1730
+	.loc ../contracts/DexStablePool.sol, 1736
 	GETGLOB 10
 	SWAP
 	STREF
-	.loc ../contracts/DexStablePool.sol, 1733
+	.loc ../contracts/DexStablePool.sol, 1739
 	CALLREF {
 		CALL $_tokenRoots_475f7f72_internal_macro$
 	}
@@ -10867,10 +10879,10 @@ PUSHCONT {
 	STU 32
 	STDICT
 	ENDC
-	.loc ../contracts/DexStablePool.sol, 1734
+	.loc ../contracts/DexStablePool.sol, 1740
 	SWAP
 	STREF
-	.loc ../contracts/DexStablePool.sol, 1736
+	.loc ../contracts/DexStablePool.sol, 1742
 	GETGLOB 17
 	GETGLOB 23
 	GETGLOB 15
@@ -10918,13 +10930,13 @@ PUSHCONT {
 	STBREFR
 	STBREFR
 	ENDC
-	.loc ../contracts/DexStablePool.sol, 1748
+	.loc ../contracts/DexStablePool.sol, 1754
 	SWAP
 	STREF
-	.loc ../contracts/DexStablePool.sol, 1751
+	.loc ../contracts/DexStablePool.sol, 1757
 	PUSH S4
 	SETCODE
-	.loc ../contracts/DexStablePool.sol, 1754
+	.loc ../contracts/DexStablePool.sol, 1760
 	PUSH S4
 	CTOS
 	DUP
@@ -10939,7 +10951,7 @@ PUSHCONT {
 	CTOS
 	BLESS
 	POP C3
-	.loc ../contracts/DexStablePool.sol, 1755
+	.loc ../contracts/DexStablePool.sol, 1761
 	ENDC
 	CALLREF {
 		CALL $:onCodeUpgrade$
@@ -10951,11 +10963,11 @@ BLKDROP 4
 
 .internal-alias :onCodeUpgrade, 2
 .internal :onCodeUpgrade
-.loc ../contracts/DexStablePool.sol, 1760
+.loc ../contracts/DexStablePool.sol, 1766
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/DexStablePool.sol, 1761
+.loc ../contracts/DexStablePool.sol, 1767
 PUSHREF {
 }
 SETGLOB 10
@@ -11008,17 +11020,17 @@ PAIR
 SETGLOB 23
 PUSHINT 0
 SETGLOB 24
-.loc ../contracts/DexStablePool.sol, 1762
+.loc ../contracts/DexStablePool.sol, 1768
 DUP
 CTOS
-.loc ../contracts/DexStablePool.sol, 1764
+.loc ../contracts/DexStablePool.sol, 1770
 PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
-.loc ../contracts/DexStablePool.sol, 1765
+.loc ../contracts/DexStablePool.sol, 1771
 PUSHINT 0
 PUSH2 S0, S2
-.loc ../contracts/DexStablePool.sol, 1768
+.loc ../contracts/DexStablePool.sol, 1774
 LDMSGADDR
 LDMSGADDR
 LDU 32
@@ -11031,12 +11043,12 @@ SETGLOB 12
 POP S4
 SETGLOB 14
 POP S3
-.loc ../contracts/DexStablePool.sol, 1770
+.loc ../contracts/DexStablePool.sol, 1776
 PUSH S3
 SBITS
 GTINT 7
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1771
+	.loc ../contracts/DexStablePool.sol, 1777
 	PUSH S3
 	LDU 8
 	POP S5
@@ -11044,32 +11056,32 @@ PUSHCONT {
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IF
-.loc ../contracts/DexStablePool.sol, 1774
+.loc ../contracts/DexStablePool.sol, 1780
 PUSH S3
 LDREF
 POP S5
 SETGLOB 10
-.loc ../contracts/DexStablePool.sol, 1776
+.loc ../contracts/DexStablePool.sol, 1782
 PUSHINT 0
 NEWDICT
 PAIR
-.loc ../contracts/DexStablePool.sol, 1777
+.loc ../contracts/DexStablePool.sol, 1783
 OVER
 NEQINT 1
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1778
+	.loc ../contracts/DexStablePool.sol, 1784
 	PUSH S4
 	LDREF
 	POP S6
-	.loc ../contracts/DexStablePool.sol, 1780
+	.loc ../contracts/DexStablePool.sol, 1786
 	DUP
 	CTOS
-	.loc ../contracts/DexStablePool.sol, 1781
+	.loc ../contracts/DexStablePool.sol, 1787
 	DUP
 	SBITS
 	EQINT 33
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 1782
+		.loc ../contracts/DexStablePool.sol, 1788
 		OVER
 		CTOS
 		LDU 32
@@ -11080,12 +11092,12 @@ PUSHCONT {
 		ENDS
 	}
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 1784
+		.loc ../contracts/DexStablePool.sol, 1790
 		DUP
 		LDMSGADDR
 		LDMSGADDR
 		POP S3
-		.loc ../contracts/DexStablePool.sol, 1785
+		.loc ../contracts/DexStablePool.sol, 1791
 		SWAP
 		PUSHINT 0
 		NEWDICT
@@ -11104,12 +11116,12 @@ PUSHCONT {
 	}
 	IFELSE
 	BLKDROP2 3, 1
-	.loc ../contracts/DexStablePool.sol, 1787
+	.loc ../contracts/DexStablePool.sol, 1793
 	DUP
 	FIRST
 	UFITS 8
 	SETGLOB 24
-	.loc ../contracts/DexStablePool.sol, 1789
+	.loc ../contracts/DexStablePool.sol, 1795
 	PUSHINT 0
 	PUSHCONT {
 		DUP
@@ -11117,7 +11129,7 @@ PUSHCONT {
 		LESS
 	}
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 1790
+		.loc ../contracts/DexStablePool.sol, 1796
 		DUP
 		GETGLOB 16
 		PUSH2 S2, S3
@@ -11132,7 +11144,7 @@ PUSHCONT {
 		PUSHINT 267
 		DICTSETB
 		SETGLOB 16
-		.loc ../contracts/DexStablePool.sol, 1789
+		.loc ../contracts/DexStablePool.sol, 1795
 		INC
 		UFITS 8
 		.loc ../contracts/DexStablePool.sol, 0
@@ -11142,27 +11154,27 @@ PUSHCONT {
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IF
-.loc ../contracts/DexStablePool.sol, 1794
+.loc ../contracts/DexStablePool.sol, 1800
 PUSH S2
 PUSHCONT {
 	OVER
 	EQINT 1
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 1809
+		.loc ../contracts/DexStablePool.sol, 1815
 		FALSE
 		SETGLOB 13
-		.loc ../contracts/DexStablePool.sol, 1810
+		.loc ../contracts/DexStablePool.sol, 1816
 		PUSHINT 200
 		PUSHINT 1
 		PAIR
 		SETGLOB 23
-		.loc ../contracts/DexStablePool.sol, 1812
+		.loc ../contracts/DexStablePool.sol, 1818
 		NEWDICT
 		PUSH2 S0, S5
-		.loc ../contracts/DexStablePool.sol, 1816
+		.loc ../contracts/DexStablePool.sol, 1822
 		LDREF
 		POP S8
-		.loc ../contracts/DexStablePool.sol, 1817
+		.loc ../contracts/DexStablePool.sol, 1823
 		CTOS
 		LDU 128
 		LDU 128
@@ -11188,7 +11200,7 @@ PUSHCONT {
 		SETGLOB 22
 		POP S4
 		POP S2
-		.loc ../contracts/DexStablePool.sol, 1829
+		.loc ../contracts/DexStablePool.sol, 1835
 		PUSHINT 0
 		PUSHINT 2
 		PUSH S3
@@ -11209,7 +11221,7 @@ PUSHCONT {
 		DICTUGET
 		THROWIFNOT 50
 		SETGLOB 18
-		.loc ../contracts/DexStablePool.sol, 1830
+		.loc ../contracts/DexStablePool.sol, 1836
 		PUSHINT 0
 		PUSHINT 2
 		PUSH S2
@@ -11230,7 +11242,7 @@ PUSHCONT {
 		DICTUGET
 		THROWIFNOT 50
 		SETGLOB 19
-		.loc ../contracts/DexStablePool.sol, 1831
+		.loc ../contracts/DexStablePool.sol, 1837
 		PUSHINT 0
 		PUSHINT 3
 		PUSH S4
@@ -11252,7 +11264,7 @@ PUSHCONT {
 		THROWIFNOT 50
 		PLDU 128
 		SETGLOB 21
-		.loc ../contracts/DexStablePool.sol, 1833
+		.loc ../contracts/DexStablePool.sol, 1839
 		GETGLOB 16
 		PUSHINT 0
 		PUSHINT 1
@@ -11281,7 +11293,7 @@ PUSHCONT {
 		DICTSETB
 		DUP
 		SETGLOB 16
-		.loc ../contracts/DexStablePool.sol, 1834
+		.loc ../contracts/DexStablePool.sol, 1840
 		PUSHINT 1
 		PUSH2 S0, S3
 		PUSHINT 8
@@ -11307,11 +11319,11 @@ PUSHCONT {
 		PUSHINT 267
 		DICTSETB
 		SETGLOB 16
-		.loc ../contracts/DexStablePool.sol, 1835
+		.loc ../contracts/DexStablePool.sol, 1841
 		PUSHINT 2
 		DUP
 		SETGLOB 24
-		.loc ../contracts/DexStablePool.sol, 1837
+		.loc ../contracts/DexStablePool.sol, 1843
 		PUSHREF
 		.compute $default_tuple_builder_t_address_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool$
 		PUSHINT 0
@@ -11329,7 +11341,7 @@ PUSHCONT {
 		BLKDROP2 2, 1
 		PAIR
 		SETGLOB 15
-		.loc ../contracts/DexStablePool.sol, 1838
+		.loc ../contracts/DexStablePool.sol, 1844
 		PUSHINT 0
 		PUSHINT 1
 		PUSH S3
@@ -11469,7 +11481,7 @@ PUSHCONT {
 		DICTUSETREF
 		PAIR
 		SETGLOB 15
-		.loc ../contracts/DexStablePool.sol, 1839
+		.loc ../contracts/DexStablePool.sol, 1845
 		PUSHINT 1
 		PUSH2 S0, S2
 		PUSHINT 8
@@ -11606,7 +11618,7 @@ PUSHCONT {
 		DICTUSETREF
 		PAIR
 		SETGLOB 15
-		.loc ../contracts/DexStablePool.sol, 1841
+		.loc ../contracts/DexStablePool.sol, 1847
 		GETGLOB 18
 		NEWC
 		STSLICECONST x62_
@@ -11622,7 +11634,7 @@ PUSHCONT {
 		ENDC
 		PUSHINT 1
 		SENDRAWMSG
-		.loc ../contracts/DexStablePool.sol, 1846
+		.loc ../contracts/DexStablePool.sol, 1852
 		PUSHINT 0
 		PUSHINT 1
 		PUSH S2
@@ -11650,7 +11662,7 @@ PUSHCONT {
 		ENDC
 		PUSHINT 1
 		SENDRAWMSG
-		.loc ../contracts/DexStablePool.sol, 1851
+		.loc ../contracts/DexStablePool.sol, 1857
 		PUSHINT 1
 		DUP
 		ROT
@@ -11683,14 +11695,14 @@ PUSHCONT {
 		OVER
 		EQINT 2
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 1857
+			.loc ../contracts/DexStablePool.sol, 1863
 			FALSE
 			SETGLOB 13
-			.loc ../contracts/DexStablePool.sol, 1858
+			.loc ../contracts/DexStablePool.sol, 1864
 			PUSH S4
 			LDREF
 			POP S6
-			.loc ../contracts/DexStablePool.sol, 1860
+			.loc ../contracts/DexStablePool.sol, 1866
 			CTOS
 			LDMSGADDR
 			LDREF
@@ -11734,7 +11746,7 @@ PUSHCONT {
 			SETGLOB 15
 			SETGLOB 23
 			SETGLOB 17
-			.loc ../contracts/DexStablePool.sol, 1873
+			.loc ../contracts/DexStablePool.sol, 1879
 			GETGLOB 18
 			NEWC
 			STSLICECONST x62_
@@ -11755,14 +11767,14 @@ PUSHCONT {
 			OVER
 			EQINT 3
 			PUSHCONT {
-				.loc ../contracts/DexStablePool.sol, 1880
+				.loc ../contracts/DexStablePool.sol, 1886
 				FALSE
 				SETGLOB 13
-				.loc ../contracts/DexStablePool.sol, 1881
+				.loc ../contracts/DexStablePool.sol, 1887
 				PUSH S4
 				LDREF
 				POP S6
-				.loc ../contracts/DexStablePool.sol, 1884
+				.loc ../contracts/DexStablePool.sol, 1890
 				DUP
 				CTOS
 				LDMSGADDR
@@ -11812,9 +11824,9 @@ PUSHCONT {
 				SETGLOB 15
 				SETGLOB 23
 				SETGLOB 17
-				.loc ../contracts/DexStablePool.sol, 1899
+				.loc ../contracts/DexStablePool.sol, 1905
 				TRUE
-				.loc ../contracts/DexStablePool.sol, 1900
+				.loc ../contracts/DexStablePool.sol, 1906
 				PUSHINT 0
 				PUSHCONT {
 					DUP
@@ -11822,7 +11834,7 @@ PUSHCONT {
 					LESS
 				}
 				PUSHCONT {
-					.loc ../contracts/DexStablePool.sol, 1901
+					.loc ../contracts/DexStablePool.sol, 1907
 					DUP
 					GETGLOB 15
 					SECOND
@@ -11855,21 +11867,21 @@ PUSHCONT {
 					}
 					INDEX 9
 					PUSHCONT {
-						.loc ../contracts/DexStablePool.sol, 1902
+						.loc ../contracts/DexStablePool.sol, 1908
 						FALSE
 						POP S2
-						.loc ../contracts/DexStablePool.sol, 1903
+						.loc ../contracts/DexStablePool.sol, 1909
 						RETALT
 						.loc ../contracts/DexStablePool.sol, 0
 					}
 					IFNOTJMP
-					.loc ../contracts/DexStablePool.sol, 1900
+					.loc ../contracts/DexStablePool.sol, 1906
 					INC
 					.loc ../contracts/DexStablePool.sol, 0
 				}
 				WHILEBRK
 				DROP
-				.loc ../contracts/DexStablePool.sol, 1906
+				.loc ../contracts/DexStablePool.sol, 1912
 				GETGLOB 19
 				PARSEMSGADDR
 				INDEX 3
@@ -11898,7 +11910,7 @@ PUSHCONT {
 	IFELSE
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1795
+	.loc ../contracts/DexStablePool.sol, 1801
 	PUSHINT 1000000
 	PUSHINT 3000
 	PUSHINT 0
@@ -11910,7 +11922,7 @@ PUSHCONT {
 	DUP
 	TUPLE 7
 	SETGLOB 22
-	.loc ../contracts/DexStablePool.sol, 1796
+	.loc ../contracts/DexStablePool.sol, 1802
 	PUSHINT 100
 	GETGLOB 24
 	DUP
@@ -11928,7 +11940,7 @@ PUSHCONT {
 	PUSHINT 1
 	PAIR
 	SETGLOB 23
-	.loc ../contracts/DexStablePool.sol, 1798
+	.loc ../contracts/DexStablePool.sol, 1804
 	GETGLOB 24
 	PUSHREF
 	.compute $default_tuple_builder_t_address_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool$
@@ -11947,7 +11959,7 @@ PUSHCONT {
 	BLKDROP2 2, 1
 	PAIR
 	SETGLOB 15
-	.loc ../contracts/DexStablePool.sol, 1799
+	.loc ../contracts/DexStablePool.sol, 1805
 	PUSHINT 0
 	PUSHCONT {
 		DUP
@@ -11955,7 +11967,7 @@ PUSHCONT {
 		LESS
 	}
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 1800
+		.loc ../contracts/DexStablePool.sol, 1806
 		PUSH2 S0, S1
 		SECOND
 		PUSHINT 32
@@ -12005,14 +12017,14 @@ PUSHCONT {
 		DICTUSETREF
 		PAIR
 		SETGLOB 15
-		.loc ../contracts/DexStablePool.sol, 1799
+		.loc ../contracts/DexStablePool.sol, 1805
 		INC
 		UFITS 8
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	WHILE
 	DROP
-	.loc ../contracts/DexStablePool.sol, 1803
+	.loc ../contracts/DexStablePool.sol, 1809
 	PUSH2 S3, S0
 	MYADDR
 	GETGLOB 12
@@ -12040,7 +12052,7 @@ PUSHCONT {
 	SENDRAWMSG
 }
 IFELSE
-.loc ../contracts/DexStablePool.sol, 1909
+.loc ../contracts/DexStablePool.sol, 1915
 BLKDROP 3
 NEWC
 STSLICECONST x42_
@@ -12065,7 +12077,7 @@ THROW 0
 CALL $_configureToken_f3b69562_internal_macro$
 
 .macro _configureToken_f3b69562_internal_macro
-.loc ../contracts/DexStablePool.sol, 1913
+.loc ../contracts/DexStablePool.sol, 1919
 PUSHINT 200000000
 MYADDR
 PUSH S2
@@ -12084,7 +12096,7 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/DexStablePool.sol, 1919
+.loc ../contracts/DexStablePool.sol, 1925
 DUP
 NEWC
 STSLICECONST x62_
@@ -12100,12 +12112,12 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/DexStablePool.sol, 1925
+.loc ../contracts/DexStablePool.sol, 1931
 DUP
 GETGLOB 18
 SDEQ
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1926
+	.loc ../contracts/DexStablePool.sol, 1932
 	DUP
 	NEWC
 	STSLICECONST x62_
@@ -12130,7 +12142,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexStablePool.sol, 1934
+.loc ../contracts/DexStablePool.sol, 1940
 OVER
 PUSHCONT {
 	LDREF
@@ -12151,7 +12163,7 @@ CALLREF {
 THROW 0
 
 .macro onTokenWallet_e6d1bd58_internal_macro
-.loc ../contracts/DexStablePool.sol, 1935
+.loc ../contracts/DexStablePool.sol, 1941
 GETGLOB 9
 GETGLOB 16
 PUSHINT 267
@@ -12163,7 +12175,7 @@ GETGLOB 18
 SDEQ
 OR
 THROWIFNOT 101
-.loc ../contracts/DexStablePool.sol, 1937
+.loc ../contracts/DexStablePool.sol, 1943
 GETGLOB 9
 GETGLOB 18
 SDEQ
@@ -12178,12 +12190,12 @@ PUSHCONT {
 }
 IF
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1938
+	.loc ../contracts/DexStablePool.sol, 1944
 	DUP
 	SETGLOB 19
-	.loc ../contracts/DexStablePool.sol, 1940
+	.loc ../contracts/DexStablePool.sol, 1946
 	TRUE
-	.loc ../contracts/DexStablePool.sol, 1941
+	.loc ../contracts/DexStablePool.sol, 1947
 	PUSHINT 0
 	PUSHCONT {
 		DUP
@@ -12191,7 +12203,7 @@ PUSHCONT {
 		LESS
 	}
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 1942
+		.loc ../contracts/DexStablePool.sol, 1948
 		DUP
 		GETGLOB 15
 		SECOND
@@ -12224,21 +12236,21 @@ PUSHCONT {
 		}
 		INDEX 9
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 1943
+			.loc ../contracts/DexStablePool.sol, 1949
 			FALSE
 			POP S2
-			.loc ../contracts/DexStablePool.sol, 1944
+			.loc ../contracts/DexStablePool.sol, 1950
 			RETALT
 			.loc ../contracts/DexStablePool.sol, 0
 		}
 		IFNOTJMP
-		.loc ../contracts/DexStablePool.sol, 1941
+		.loc ../contracts/DexStablePool.sol, 1947
 		INC
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	WHILEBRK
 	DROP
-	.loc ../contracts/DexStablePool.sol, 1947
+	.loc ../contracts/DexStablePool.sol, 1953
 	GETGLOB 20
 	PARSEMSGADDR
 	INDEX 3
@@ -12248,7 +12260,7 @@ PUSHCONT {
 	SETGLOB 13
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1949
+	.loc ../contracts/DexStablePool.sol, 1955
 	DUP
 	GETGLOB 15
 	UNPAIR
@@ -12339,7 +12351,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexStablePool.sol, 1953
+.loc ../contracts/DexStablePool.sol, 1959
 LDU 8
 ENDS
 .loc ../contracts/DexStablePool.sol, 0
@@ -12353,7 +12365,7 @@ CALLREF {
 THROW 0
 
 .macro onTokenDecimals_7d1e9aa6_internal_macro
-.loc ../contracts/DexStablePool.sol, 1954
+.loc ../contracts/DexStablePool.sol, 1960
 GETGLOB 9
 GETGLOB 16
 PUSHINT 267
@@ -12361,7 +12373,7 @@ DICTGET
 NULLSWAPIFNOT
 NIP
 THROWIFNOT 101
-.loc ../contracts/DexStablePool.sol, 1956
+.loc ../contracts/DexStablePool.sol, 1962
 GETGLOB 15
 UNPAIR
 GETGLOB 9
@@ -12438,7 +12450,7 @@ DICTUSETREF
 PAIR
 DUP
 SETGLOB 15
-.loc ../contracts/DexStablePool.sol, 1957
+.loc ../contracts/DexStablePool.sol, 1963
 UNPAIR
 GETGLOB 9
 GETGLOB 16
@@ -12513,9 +12525,9 @@ PUSHINT 32
 DICTUSETREF
 PAIR
 SETGLOB 15
-.loc ../contracts/DexStablePool.sol, 1959
+.loc ../contracts/DexStablePool.sol, 1965
 TRUE
-.loc ../contracts/DexStablePool.sol, 1961
+.loc ../contracts/DexStablePool.sol, 1967
 PUSHINT 0
 PUSHCONT {
 	DUP
@@ -12523,7 +12535,7 @@ PUSHCONT {
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1962
+	.loc ../contracts/DexStablePool.sol, 1968
 	PUSH2 S1, S1
 	PUSHCONT {
 		DROP
@@ -12561,14 +12573,14 @@ PUSHCONT {
 	}
 	IF
 	POP S2
-	.loc ../contracts/DexStablePool.sol, 1961
+	.loc ../contracts/DexStablePool.sol, 1967
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/DexStablePool.sol, 1965
+.loc ../contracts/DexStablePool.sol, 1971
 IFREF {
 	CALL $_initializeTokenData_e4d64904_internal_macro$
 }
@@ -12579,17 +12591,17 @@ IFREF {
 CALL $_initializeTokenData_e4d64904_internal_macro$
 
 .macro _initializeTokenData_e4d64904_internal_macro
-.loc ../contracts/DexStablePool.sol, 1971
+.loc ../contracts/DexStablePool.sol, 1977
 PUSHINT 0
 DUP
-.loc ../contracts/DexStablePool.sol, 1973
+.loc ../contracts/DexStablePool.sol, 1979
 PUSHCONT {
 	DUP
 	GETGLOB 24
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1974
+	.loc ../contracts/DexStablePool.sol, 1980
 	DUP2
 	GETGLOB 15
 	SECOND
@@ -12623,14 +12635,14 @@ PUSHCONT {
 	INDEX 4
 	MAX
 	POP S2
-	.loc ../contracts/DexStablePool.sol, 1973
+	.loc ../contracts/DexStablePool.sol, 1979
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/DexStablePool.sol, 1977
+.loc ../contracts/DexStablePool.sol, 1983
 PUSHINT 10
 BLKPUSH 3, 1
 OR
@@ -12639,7 +12651,7 @@ CALLREF {
 	CALL $__exp_macro$
 }
 SETGLOB 17
-.loc ../contracts/DexStablePool.sol, 1979
+.loc ../contracts/DexStablePool.sol, 1985
 PUSHINT 0
 PUSHCONT {
 	DUP
@@ -12647,7 +12659,7 @@ PUSHCONT {
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1980
+	.loc ../contracts/DexStablePool.sol, 1986
 	PUSHINT 10
 	BLKPUSH 2, 2
 	GETGLOB 15
@@ -12754,7 +12766,7 @@ PUSHCONT {
 	DICTUSETREF
 	PAIR
 	SETGLOB 15
-	.loc ../contracts/DexStablePool.sol, 1981
+	.loc ../contracts/DexStablePool.sol, 1987
 	DUP
 	GETGLOB 15
 	SECOND
@@ -12855,7 +12867,7 @@ PUSHCONT {
 	PAIR
 	DUP
 	SETGLOB 15
-	.loc ../contracts/DexStablePool.sol, 1982
+	.loc ../contracts/DexStablePool.sol, 1988
 	UNPAIR
 	PUXC S2, S-1
 	PUSH2 S1, S2
@@ -12921,14 +12933,14 @@ PUSHCONT {
 	DICTUSETREF
 	PAIR
 	SETGLOB 15
-	.loc ../contracts/DexStablePool.sol, 1979
+	.loc ../contracts/DexStablePool.sol, 1985
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILE
 DROP2
-.loc ../contracts/DexStablePool.sol, 1985
+.loc ../contracts/DexStablePool.sol, 1991
 GETGLOB 19
 PARSEMSGADDR
 INDEX 3
@@ -12956,7 +12968,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexStablePool.sol, 1988
+.loc ../contracts/DexStablePool.sol, 1994
 OVER
 PUSHCONT {
 	LDREF
@@ -12977,7 +12989,7 @@ CALLREF {
 THROW 0
 
 .macro onVaultTokenWallet_a255247d_internal_macro
-.loc ../contracts/DexStablePool.sol, 1989
+.loc ../contracts/DexStablePool.sol, 1995
 GETGLOB 9
 GETGLOB 16
 PUSHINT 267
@@ -12989,11 +13001,11 @@ GETGLOB 18
 SDEQ
 OR
 THROWIFNOT 101
-.loc ../contracts/DexStablePool.sol, 1991
+.loc ../contracts/DexStablePool.sol, 1997
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/DexStablePool.sol, 1993
+.loc ../contracts/DexStablePool.sol, 1999
 GETGLOB 9
 GETGLOB 18
 SDEQ
@@ -13008,10 +13020,10 @@ PUSHCONT {
 }
 IF
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 1994
+	.loc ../contracts/DexStablePool.sol, 2000
 	BLKPUSH 2, 0
 	SETGLOB 20
-	.loc ../contracts/DexStablePool.sol, 1996
+	.loc ../contracts/DexStablePool.sol, 2002
 	CALLREF {
 		CALL $_tokenRoots_475f7f72_internal_macro$
 	}
@@ -13034,9 +13046,9 @@ PUSHCONT {
 	ENDC
 	PUSHPOW2 7
 	SENDRAWMSG
-	.loc ../contracts/DexStablePool.sol, 2004
+	.loc ../contracts/DexStablePool.sol, 2010
 	TRUE
-	.loc ../contracts/DexStablePool.sol, 2005
+	.loc ../contracts/DexStablePool.sol, 2011
 	PUSHINT 0
 	PUSHCONT {
 		DUP
@@ -13044,7 +13056,7 @@ PUSHCONT {
 		LESS
 	}
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2006
+		.loc ../contracts/DexStablePool.sol, 2012
 		DUP
 		GETGLOB 15
 		SECOND
@@ -13077,21 +13089,21 @@ PUSHCONT {
 		}
 		INDEX 9
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 2007
+			.loc ../contracts/DexStablePool.sol, 2013
 			FALSE
 			POP S2
-			.loc ../contracts/DexStablePool.sol, 2008
+			.loc ../contracts/DexStablePool.sol, 2014
 			RETALT
 			.loc ../contracts/DexStablePool.sol, 0
 		}
 		IFNOTJMP
-		.loc ../contracts/DexStablePool.sol, 2005
+		.loc ../contracts/DexStablePool.sol, 2011
 		INC
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	WHILEBRK
 	DROP
-	.loc ../contracts/DexStablePool.sol, 2011
+	.loc ../contracts/DexStablePool.sol, 2017
 	GETGLOB 19
 	PARSEMSGADDR
 	INDEX 3
@@ -13101,7 +13113,7 @@ PUSHCONT {
 	SETGLOB 13
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2013
+	.loc ../contracts/DexStablePool.sol, 2019
 	DUP
 	GETGLOB 15
 	UNPAIR
@@ -13192,7 +13204,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexStablePool.sol, 2017
+.loc ../contracts/DexStablePool.sol, 2023
 OVER
 PUSHCONT {
 	LDREF
@@ -13217,27 +13229,27 @@ CALLREF {
 THROW 0
 
 .macro liquidityTokenRootDeployed_b6e607f1_internal_macro
-.loc ../contracts/DexStablePool.sol, 1699
+.loc ../contracts/DexStablePool.sol, 1705
 GETGLOB 9
 GETGLOB 12
 SDEQ
 THROWIFNOT 115
-.loc ../contracts/DexStablePool.sol, 2018
+.loc ../contracts/DexStablePool.sol, 2024
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/DexStablePool.sol, 2020
+.loc ../contracts/DexStablePool.sol, 2026
 XCPU S1, S0
 SETGLOB 18
-.loc ../contracts/DexStablePool.sol, 2022
+.loc ../contracts/DexStablePool.sol, 2028
 CALLREF {
 	CALL $_configureToken_f3b69562_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2024
+.loc ../contracts/DexStablePool.sol, 2030
 PUSHINT 0
 NEWDICT
 PAIR
-.loc ../contracts/DexStablePool.sol, 2025
+.loc ../contracts/DexStablePool.sol, 2031
 GETGLOB 15
 SECOND
 PUSHINT 0
@@ -13279,13 +13291,13 @@ PUSHCONT {
 	NOT
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2026
+	.loc ../contracts/DexStablePool.sol, 2032
 	DUP
 	FIRST
 	CALLREF {
 		CALL $_configureToken_f3b69562_internal_macro$
 	}
-	.loc ../contracts/DexStablePool.sol, 2027
+	.loc ../contracts/DexStablePool.sol, 2033
 	PUSH2 S3, S0
 	FIRST
 	SWAP
@@ -13304,7 +13316,7 @@ PUSHCONT {
 }
 WHILE
 BLKDROP 3
-.loc ../contracts/DexStablePool.sol, 2030
+.loc ../contracts/DexStablePool.sol, 2036
 SWAP
 PUSHINT 3
 ROT
@@ -13339,7 +13351,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexStablePool.sol, 2033
+.loc ../contracts/DexStablePool.sol, 2039
 OVER
 PUSHCONT {
 	LDREF
@@ -13364,19 +13376,19 @@ CALLREF {
 THROW 0
 
 .macro liquidityTokenRootNotDeployed_4ce5331d_internal_macro
-.loc ../contracts/DexStablePool.sol, 1699
+.loc ../contracts/DexStablePool.sol, 1705
 GETGLOB 9
 GETGLOB 12
 SDEQ
 THROWIFNOT 115
-.loc ../contracts/DexStablePool.sol, 2034
+.loc ../contracts/DexStablePool.sol, 2040
 GETGLOB 13
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2036
+	.loc ../contracts/DexStablePool.sol, 2042
 	PUSHINT 1000000000
 	PUSHINT 0
 	RAWRESERVE
-	.loc ../contracts/DexStablePool.sol, 2037
+	.loc ../contracts/DexStablePool.sol, 2043
 	DUP
 	NEWC
 	STSLICECONST x42_
@@ -13388,7 +13400,7 @@ PUSHCONT {
 	ADDCONST 2
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2034
+	.loc ../contracts/DexStablePool.sol, 2040
 	DUP
 	NEWC
 	STSLICECONST x42_
@@ -13414,7 +13426,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexStablePool.sol, 2041
+.loc ../contracts/DexStablePool.sol, 2047
 LDU 32
 GETGLOB 4
 ROT
@@ -13502,16 +13514,16 @@ IFREF {
 THROW 0
 
 .macro getVirtualPrice_e25aa5fa_internal_macro
-.loc ../contracts/DexStablePool.sol, 2042
+.loc ../contracts/DexStablePool.sol, 2048
 NULL
-.loc ../contracts/DexStablePool.sol, 2044
+.loc ../contracts/DexStablePool.sol, 2050
 GETGLOB 21
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2045
+	.loc ../contracts/DexStablePool.sol, 2051
 	PUSHINT 0
 	NEWDICT
 	PAIR
-	.loc ../contracts/DexStablePool.sol, 2047
+	.loc ../contracts/DexStablePool.sol, 2053
 	GETGLOB 15
 	SECOND
 	PUSHINT 0
@@ -13553,7 +13565,7 @@ PUSHCONT {
 		NOT
 	}
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2048
+		.loc ../contracts/DexStablePool.sol, 2054
 		PUSH2 S3, S0
 		INDEX 6
 		PUSH S2
@@ -13579,15 +13591,15 @@ PUSHCONT {
 	}
 	WHILE
 	BLKDROP 3
-	.loc ../contracts/DexStablePool.sol, 2051
+	.loc ../contracts/DexStablePool.sol, 2057
 	CALLREF {
 		CALL $_get_D_115bcc50_internal_macro$
 	}
-	.loc ../contracts/DexStablePool.sol, 2053
+	.loc ../contracts/DexStablePool.sol, 2059
 	DUP
 	ISNULL
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2054
+		.loc ../contracts/DexStablePool.sol, 2060
 		BLKPUSH 2, 0
 		ISNULL
 		THROWIF 63
@@ -13595,7 +13607,7 @@ PUSHCONT {
 		GETGLOB 21
 		MULDIV
 		UFITS 256
-		.loc ../contracts/DexStablePool.sol, 2055
+		.loc ../contracts/DexStablePool.sol, 2061
 		PUSHINT 1000000000
 		GETGLOB 17
 		MULDIV
@@ -13608,7 +13620,7 @@ PUSHCONT {
 	DROP
 }
 IF
-.loc ../contracts/DexStablePool.sol, 2059
+.loc ../contracts/DexStablePool.sol, 2065
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -13628,7 +13640,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexStablePool.sol, 2062
+.loc ../contracts/DexStablePool.sol, 2068
 OVER
 PUSHCONT {
 	LDREF
@@ -13687,9 +13699,9 @@ IFREF {
 THROW 0
 
 .macro getPriceImpact_738221ce_internal_macro
-.loc ../contracts/DexStablePool.sol, 2068
+.loc ../contracts/DexStablePool.sol, 2074
 NULL
-.loc ../contracts/DexStablePool.sol, 2070
+.loc ../contracts/DexStablePool.sol, 2076
 PUSH S3
 GETGLOB 16
 PUSHINT 267
@@ -13714,7 +13726,7 @@ PUSHCONT {
 }
 IF
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2072
+	.loc ../contracts/DexStablePool.sol, 2078
 	PUSH S3
 	GETGLOB 16
 	PUSHINT 267
@@ -13724,7 +13736,7 @@ PUSHCONT {
 		PLDU 8
 	}
 	IF
-	.loc ../contracts/DexStablePool.sol, 2073
+	.loc ../contracts/DexStablePool.sol, 2079
 	PUSH S3
 	GETGLOB 16
 	PUSHINT 267
@@ -13734,16 +13746,16 @@ PUSHCONT {
 		PLDU 8
 	}
 	IF
-	.loc ../contracts/DexStablePool.sol, 2075
+	.loc ../contracts/DexStablePool.sol, 2081
 	CALLREF {
 		CALL $_reserves_02c6ae9f_internal_macro$
 	}
-	.loc ../contracts/DexStablePool.sol, 2076
+	.loc ../contracts/DexStablePool.sol, 2082
 	DUP
 	CALLREF {
 		CALL $_xp_mem_ec48ffce_internal_macro$
 	}
-	.loc ../contracts/DexStablePool.sol, 2078
+	.loc ../contracts/DexStablePool.sol, 2084
 	OVER2
 	PUSH2 S7, S2
 	PUSHREFSLICE {
@@ -13753,7 +13765,7 @@ PUSHCONT {
 		CALL $_get_dy_mem_fbce9de3_internal_macro$
 	}
 	DROP
-	.loc ../contracts/DexStablePool.sol, 2080
+	.loc ../contracts/DexStablePool.sol, 2086
 	BLKPUSH 2, 4
 	PUSH S11
 	ROLL 4
@@ -13764,7 +13776,7 @@ PUSHCONT {
 		CALL $_get_dy_mem_fbce9de3_internal_macro$
 	}
 	DROP
-	.loc ../contracts/DexStablePool.sol, 2082
+	.loc ../contracts/DexStablePool.sol, 2088
 	DUP
 	ISNULL
 	NOT
@@ -13773,16 +13785,16 @@ PUSHCONT {
 	NOT
 	AND
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2086
+		.loc ../contracts/DexStablePool.sol, 2092
 		PUSH2 S1, S1
 		ISNULL
 		THROWIF 63
 		FIRST
-		.loc ../contracts/DexStablePool.sol, 2087
+		.loc ../contracts/DexStablePool.sol, 2093
 		PUSH2 S1, S1
 		ISNULL
 		THROWIF 63
-		.loc ../contracts/DexStablePool.sol, 2089
+		.loc ../contracts/DexStablePool.sol, 2095
 		PUSH2 S11, S0
 		THIRD
 		SUB
@@ -13808,7 +13820,7 @@ PUSHCONT {
 		DICTUSETB
 		PAIR
 		POP S5
-		.loc ../contracts/DexStablePool.sol, 2090
+		.loc ../contracts/DexStablePool.sol, 2096
 		FIRST
 		PUSH S4
 		UNPAIR
@@ -13831,7 +13843,7 @@ PUSHCONT {
 		DICTUSETB
 		PAIR
 		POP S4
-		.loc ../contracts/DexStablePool.sol, 2092
+		.loc ../contracts/DexStablePool.sol, 2098
 		BLKPUSH 2, 5
 		PUSH2 S9, S5
 		CALLREF {
@@ -13844,11 +13856,11 @@ PUSHCONT {
 			CALL $_get_dy_mem_fbce9de3_internal_macro$
 		}
 		DROP
-		.loc ../contracts/DexStablePool.sol, 2094
+		.loc ../contracts/DexStablePool.sol, 2100
 		DUP
 		ISNULL
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 2095
+			.loc ../contracts/DexStablePool.sol, 2101
 			DUP2
 			DUP
 			ISNULL
@@ -13872,7 +13884,7 @@ PUSHCONT {
 	BLKDROP 5
 }
 IF
-.loc ../contracts/DexStablePool.sol, 2106
+.loc ../contracts/DexStablePool.sol, 2112
 BLKDROP2 4, 1
 .loc ../contracts/DexStablePool.sol, 0
 
@@ -13885,7 +13897,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexStablePool.sol, 2109
+.loc ../contracts/DexStablePool.sol, 2115
 OVER
 PUSHCONT {
 	LDREF
@@ -13940,9 +13952,9 @@ IFREF {
 THROW 0
 
 .macro getDepositPriceImpact_cd18fd15_internal_macro
-.loc ../contracts/DexStablePool.sol, 2114
+.loc ../contracts/DexStablePool.sol, 2120
 NULL
-.loc ../contracts/DexStablePool.sol, 2116
+.loc ../contracts/DexStablePool.sol, 2122
 PUSH S2
 GETGLOB 16
 PUSHINT 267
@@ -13956,7 +13968,7 @@ NEQINT 0
 AND
 AND
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2118
+	.loc ../contracts/DexStablePool.sol, 2124
 	PUSH S2
 	GETGLOB 16
 	PUSHINT 267
@@ -13966,11 +13978,11 @@ PUSHCONT {
 		PLDU 8
 	}
 	IF
-	.loc ../contracts/DexStablePool.sol, 2119
+	.loc ../contracts/DexStablePool.sol, 2125
 	CALLREF {
 		CALL $_reserves_02c6ae9f_internal_macro$
 	}
-	.loc ../contracts/DexStablePool.sol, 2121
+	.loc ../contracts/DexStablePool.sol, 2127
 	PUSH3 S3, S1, S0
 	GETGLOB 21
 	PUSHREFSLICE {
@@ -13980,7 +13992,7 @@ PUSHCONT {
 		CALL $_expectedOneCoinDepositLiquidity_68880401_internal_macro$
 	}
 	DROP
-	.loc ../contracts/DexStablePool.sol, 2123
+	.loc ../contracts/DexStablePool.sol, 2129
 	PUSH3 S6, S2, S1
 	GETGLOB 21
 	PUSHREFSLICE {
@@ -13990,7 +14002,7 @@ PUSHCONT {
 		CALL $_expectedOneCoinDepositLiquidity_68880401_internal_macro$
 	}
 	DROP
-	.loc ../contracts/DexStablePool.sol, 2125
+	.loc ../contracts/DexStablePool.sol, 2131
 	DUP
 	ISNULL
 	NOT
@@ -13999,16 +14011,16 @@ PUSHCONT {
 	NOT
 	AND
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2129
+		.loc ../contracts/DexStablePool.sol, 2135
 		PUSH2 S1, S1
 		ISNULL
 		THROWIF 63
 		THIRD
-		.loc ../contracts/DexStablePool.sol, 2130
+		.loc ../contracts/DexStablePool.sol, 2136
 		PUSH2 S1, S1
 		ISNULL
 		THROWIF 63
-		.loc ../contracts/DexStablePool.sol, 2132
+		.loc ../contracts/DexStablePool.sol, 2138
 		PUSH2 S5, S0
 		INDEX2 3, 1
 		PUSHINT 32
@@ -14029,13 +14041,13 @@ PUSHCONT {
 		DICTUSETB
 		PAIR
 		POP S5
-		.loc ../contracts/DexStablePool.sol, 2133
+		.loc ../contracts/DexStablePool.sol, 2139
 		GETGLOB 21
 		SWAP
 		THIRD
 		ADD
 		UFITS 128
-		.loc ../contracts/DexStablePool.sol, 2135
+		.loc ../contracts/DexStablePool.sol, 2141
 		PUSH3 S7, S5, S4
 		ROLL 3
 		PUSHREFSLICE {
@@ -14045,11 +14057,11 @@ PUSHCONT {
 			CALL $_expectedOneCoinDepositLiquidity_68880401_internal_macro$
 		}
 		DROP
-		.loc ../contracts/DexStablePool.sol, 2137
+		.loc ../contracts/DexStablePool.sol, 2143
 		DUP
 		ISNULL
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 2138
+			.loc ../contracts/DexStablePool.sol, 2144
 			DUP2
 			DUP
 			ISNULL
@@ -14083,7 +14095,7 @@ PUSHCONT {
 	BLKDROP 4
 }
 IF
-.loc ../contracts/DexStablePool.sol, 2149
+.loc ../contracts/DexStablePool.sol, 2155
 BLKDROP2 3, 1
 .loc ../contracts/DexStablePool.sol, 0
 
@@ -14096,7 +14108,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexStablePool.sol, 2152
+.loc ../contracts/DexStablePool.sol, 2158
 OVER
 PUSHCONT {
 	LDREF
@@ -14151,9 +14163,9 @@ IFREF {
 THROW 0
 
 .macro getWithdrawalPriceImpact_b51888a2_internal_macro
-.loc ../contracts/DexStablePool.sol, 2157
+.loc ../contracts/DexStablePool.sol, 2163
 NULL
-.loc ../contracts/DexStablePool.sol, 2159
+.loc ../contracts/DexStablePool.sol, 2165
 PUSH S2
 GETGLOB 16
 PUSHINT 267
@@ -14177,7 +14189,7 @@ PUSHCONT {
 }
 IF
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2161
+	.loc ../contracts/DexStablePool.sol, 2167
 	PUSH S2
 	GETGLOB 16
 	PUSHINT 267
@@ -14187,11 +14199,11 @@ PUSHCONT {
 		PLDU 8
 	}
 	IF
-	.loc ../contracts/DexStablePool.sol, 2162
+	.loc ../contracts/DexStablePool.sol, 2168
 	CALLREF {
 		CALL $_reserves_02c6ae9f_internal_macro$
 	}
-	.loc ../contracts/DexStablePool.sol, 2164
+	.loc ../contracts/DexStablePool.sol, 2170
 	PUSH3 S3, S1, S0
 	GETGLOB 21
 	PUSHREFSLICE {
@@ -14201,7 +14213,7 @@ PUSHCONT {
 		CALL $_expectedWithdrawLiquidityOneCoin_fecc72b5_internal_macro$
 	}
 	DROP
-	.loc ../contracts/DexStablePool.sol, 2166
+	.loc ../contracts/DexStablePool.sol, 2172
 	PUSH3 S6, S2, S1
 	GETGLOB 21
 	PUSHREFSLICE {
@@ -14211,7 +14223,7 @@ PUSHCONT {
 		CALL $_expectedWithdrawLiquidityOneCoin_fecc72b5_internal_macro$
 	}
 	DROP
-	.loc ../contracts/DexStablePool.sol, 2168
+	.loc ../contracts/DexStablePool.sol, 2174
 	DUP
 	ISNULL
 	NOT
@@ -14220,7 +14232,7 @@ PUSHCONT {
 	NOT
 	AND
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2172
+		.loc ../contracts/DexStablePool.sol, 2178
 		PUSH3 S3, S1, S1
 		ISNULL
 		THROWIF 63
@@ -14229,11 +14241,11 @@ PUSHCONT {
 		DICTUGET
 		THROWIFNOT 50
 		PLDU 128
-		.loc ../contracts/DexStablePool.sol, 2173
+		.loc ../contracts/DexStablePool.sol, 2179
 		PUSH2 S1, S1
 		ISNULL
 		THROWIF 63
-		.loc ../contracts/DexStablePool.sol, 2175
+		.loc ../contracts/DexStablePool.sol, 2181
 		PUSH2 S5, S0
 		INDEX2 3, 1
 		PUSHINT 32
@@ -14254,13 +14266,13 @@ PUSHCONT {
 		DICTUSETB
 		PAIR
 		POP S5
-		.loc ../contracts/DexStablePool.sol, 2176
+		.loc ../contracts/DexStablePool.sol, 2182
 		GETGLOB 21
 		SWAP
 		FIRST
 		SUB
 		UFITS 128
-		.loc ../contracts/DexStablePool.sol, 2178
+		.loc ../contracts/DexStablePool.sol, 2184
 		PUSH3 S7, S5, S4
 		ROLL 3
 		PUSHREFSLICE {
@@ -14270,11 +14282,11 @@ PUSHCONT {
 			CALL $_expectedWithdrawLiquidityOneCoin_fecc72b5_internal_macro$
 		}
 		DROP
-		.loc ../contracts/DexStablePool.sol, 2180
+		.loc ../contracts/DexStablePool.sol, 2186
 		DUP
 		ISNULL
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 2181
+			.loc ../contracts/DexStablePool.sol, 2187
 			PUSH3 S1, S5, S0
 			DUP
 			ISNULL
@@ -14316,7 +14328,7 @@ PUSHCONT {
 	BLKDROP 4
 }
 IF
-.loc ../contracts/DexStablePool.sol, 2192
+.loc ../contracts/DexStablePool.sol, 2198
 BLKDROP2 3, 1
 .loc ../contracts/DexStablePool.sol, 0
 
@@ -14325,12 +14337,12 @@ BLKDROP2 3, 1
 CALL $_get_D_115bcc50_internal_macro$
 
 .macro _get_D_115bcc50_internal_macro
-.loc ../contracts/DexStablePool.sol, 2197
+.loc ../contracts/DexStablePool.sol, 2203
 NULL
-.loc ../contracts/DexStablePool.sol, 2199
+.loc ../contracts/DexStablePool.sol, 2205
 PUSHINT 0
 PUSH2 S0, S2
-.loc ../contracts/DexStablePool.sol, 2202
+.loc ../contracts/DexStablePool.sol, 2208
 SECOND
 PUSHINT 0
 NULL
@@ -14349,7 +14361,7 @@ PUSHCONT {
 	NOT
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2203
+	.loc ../contracts/DexStablePool.sol, 2209
 	PUSH2 S4, S0
 	ADD
 	POP S5
@@ -14360,27 +14372,27 @@ PUSHCONT {
 }
 WHILE
 BLKDROP 3
-.loc ../contracts/DexStablePool.sol, 2205
+.loc ../contracts/DexStablePool.sol, 2211
 OVER
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2206
+	.loc ../contracts/DexStablePool.sol, 2212
 	PUSHINT 0
 	POP S3
-	.loc ../contracts/DexStablePool.sol, 2207
+	.loc ../contracts/DexStablePool.sol, 2213
 	ROT
 	BLKDROP2 3, 1
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFNOTJMP
-.loc ../contracts/DexStablePool.sol, 2210
+.loc ../contracts/DexStablePool.sol, 2216
 OVER
-.loc ../contracts/DexStablePool.sol, 2211
+.loc ../contracts/DexStablePool.sol, 2217
 GETGLOB 23
 FIRST
 GETGLOB 24
 MUL
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2213
+.loc ../contracts/DexStablePool.sol, 2219
 PUSHINT 0
 FALSE ; decl return flag
 PUSHCONT {
@@ -14389,9 +14401,9 @@ PUSHCONT {
 	LEQ
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2214
+	.loc ../contracts/DexStablePool.sol, 2220
 	PUSH2 S3, S7
-	.loc ../contracts/DexStablePool.sol, 2215
+	.loc ../contracts/DexStablePool.sol, 2221
 	SECOND
 	PUSHINT 0
 	NULL
@@ -14410,7 +14422,7 @@ PUSHCONT {
 		NOT
 	}
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2216
+		.loc ../contracts/DexStablePool.sol, 2222
 		PUSH3 S3, S7, S0
 		GETGLOB 24
 		MUL
@@ -14424,10 +14436,10 @@ PUSHCONT {
 	}
 	WHILE
 	BLKDROP 3
-	.loc ../contracts/DexStablePool.sol, 2218
+	.loc ../contracts/DexStablePool.sol, 2224
 	PUSH S4
 	POP S6
-	.loc ../contracts/DexStablePool.sol, 2219
+	.loc ../contracts/DexStablePool.sol, 2225
 	PUSH2 S3, S6
 	GETGLOB 23
 	SECOND
@@ -14456,7 +14468,7 @@ PUSHCONT {
 	MULDIV
 	UFITS 256
 	POP S4
-	.loc ../contracts/DexStablePool.sol, 2224
+	.loc ../contracts/DexStablePool.sol, 2230
 	PUSH2 S3, S4
 	GREATER
 	PUSHCONT {
@@ -14472,10 +14484,10 @@ PUSHCONT {
 	IFELSE
 	LESSINT 2
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2225
+		.loc ../contracts/DexStablePool.sol, 2231
 		ROLL 3
 		POP S6
-		.loc ../contracts/DexStablePool.sol, 2226
+		.loc ../contracts/DexStablePool.sol, 2232
 		ROLL 5
 		BLKDROP2 6, 1
 		PUSHINT 4
@@ -14483,7 +14495,7 @@ PUSHCONT {
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	IFJMP
-	.loc ../contracts/DexStablePool.sol, 2213
+	.loc ../contracts/DexStablePool.sol, 2219
 	OVER
 	INC
 	UFITS 8
@@ -14493,7 +14505,7 @@ PUSHCONT {
 WHILEBRK
 IFRET
 BLKDROP 5
-.loc ../contracts/DexStablePool.sol, 2229
+.loc ../contracts/DexStablePool.sol, 2235
 NIP
 .loc ../contracts/DexStablePool.sol, 0
 
@@ -14502,14 +14514,14 @@ NIP
 CALL $_get_y_3ed0eecb_internal_macro$
 
 .macro _get_y_3ed0eecb_internal_macro
-.loc ../contracts/DexStablePool.sol, 2232
+.loc ../contracts/DexStablePool.sol, 2238
 NULL
 PUSH2 S0, S1
-.loc ../contracts/DexStablePool.sol, 2234
+.loc ../contracts/DexStablePool.sol, 2240
 CALLREF {
 	CALL $_get_D_115bcc50_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2235
+.loc ../contracts/DexStablePool.sol, 2241
 DUP
 ISNULL
 BLKPUSH 2, 7
@@ -14524,46 +14536,46 @@ OR
 OR
 OR
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2236
+	.loc ../contracts/DexStablePool.sol, 2242
 	DROP
 	BLKDROP2 5, 1
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFJMP
-.loc ../contracts/DexStablePool.sol, 2239
+.loc ../contracts/DexStablePool.sol, 2245
 BLKPUSH 2, 0
 ISNULL
 THROWIF 63
-.loc ../contracts/DexStablePool.sol, 2240
+.loc ../contracts/DexStablePool.sol, 2246
 GETGLOB 23
 FIRST
 GETGLOB 24
 MUL
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2241
+.loc ../contracts/DexStablePool.sol, 2247
 OVER
-.loc ../contracts/DexStablePool.sol, 2242
+.loc ../contracts/DexStablePool.sol, 2248
 PUSHINT 0
 BLKPUSH 3, 0
-.loc ../contracts/DexStablePool.sol, 2246
+.loc ../contracts/DexStablePool.sol, 2252
 PUSHCONT {
 	DUP
 	GETGLOB 24
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2247
+	.loc ../contracts/DexStablePool.sol, 2253
 	PUSH2 S0, S13
 	EQUAL
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2248
+		.loc ../contracts/DexStablePool.sol, 2254
 		PUSH S11
 		POP S3
-		.loc ../contracts/DexStablePool.sol, 2249
+		.loc ../contracts/DexStablePool.sol, 2255
 		OVER2
 		ADD
 		POP S4
-		.loc ../contracts/DexStablePool.sol, 2250
+		.loc ../contracts/DexStablePool.sol, 2256
 		PUSH3 S4, S6, S2
 		GETGLOB 24
 		MUL
@@ -14575,7 +14587,7 @@ PUSHCONT {
 		PUSH2 S0, S12
 		NEQ
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 2252
+			.loc ../contracts/DexStablePool.sol, 2258
 			PUSH2 S0, S10
 			SECOND
 			PUSHINT 32
@@ -14583,11 +14595,11 @@ PUSHCONT {
 			THROWIFNOT 50
 			PLDU 256
 			POP S3
-			.loc ../contracts/DexStablePool.sol, 2253
+			.loc ../contracts/DexStablePool.sol, 2259
 			OVER2
 			ADD
 			POP S4
-			.loc ../contracts/DexStablePool.sol, 2254
+			.loc ../contracts/DexStablePool.sol, 2260
 			PUSH3 S4, S6, S2
 			GETGLOB 24
 			MUL
@@ -14599,14 +14611,14 @@ PUSHCONT {
 		IF
 	}
 	IFELSE
-	.loc ../contracts/DexStablePool.sol, 2246
+	.loc ../contracts/DexStablePool.sol, 2252
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/DexStablePool.sol, 2258
+.loc ../contracts/DexStablePool.sol, 2264
 PUSH2 S3, S5
 GETGLOB 23
 SECOND
@@ -14617,7 +14629,7 @@ MUL
 MULDIV
 UFITS 256
 POP S4
-.loc ../contracts/DexStablePool.sol, 2259
+.loc ../contracts/DexStablePool.sol, 2265
 PUSH2 S2, S5
 GETGLOB 23
 SECOND
@@ -14625,9 +14637,9 @@ PUSH S7
 MULDIV
 UFITS 256
 ADD
-.loc ../contracts/DexStablePool.sol, 2260
+.loc ../contracts/DexStablePool.sol, 2266
 PUSH S6
-.loc ../contracts/DexStablePool.sol, 2262
+.loc ../contracts/DexStablePool.sol, 2268
 PUSHINT 0
 PUSHCONT {
 	DUP
@@ -14635,10 +14647,10 @@ PUSHCONT {
 	LEQ
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2263
+	.loc ../contracts/DexStablePool.sol, 2269
 	OVER
 	POP S4
-	.loc ../contracts/DexStablePool.sol, 2264
+	.loc ../contracts/DexStablePool.sol, 2270
 	PUSH2 S1, S1
 	MUL
 	PUSH S7
@@ -14653,7 +14665,7 @@ PUSHCONT {
 	UFITS 256
 	DIV
 	POP S2
-	.loc ../contracts/DexStablePool.sol, 2265
+	.loc ../contracts/DexStablePool.sol, 2271
 	PUSH2 S1, S3
 	GREATER
 	PUSHCONT {
@@ -14669,23 +14681,23 @@ PUSHCONT {
 	IFELSE
 	LESSINT 2
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2266
+		.loc ../contracts/DexStablePool.sol, 2272
 		OVER
 		UFITS 128
 		POP S11
-		.loc ../contracts/DexStablePool.sol, 2267
+		.loc ../contracts/DexStablePool.sol, 2273
 		RETALT
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	IFJMP
-	.loc ../contracts/DexStablePool.sol, 2262
+	.loc ../contracts/DexStablePool.sol, 2268
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILEBRK
 BLKDROP 10
-.loc ../contracts/DexStablePool.sol, 2271
+.loc ../contracts/DexStablePool.sol, 2277
 BLKDROP2 5, 1
 .loc ../contracts/DexStablePool.sol, 0
 
@@ -14694,11 +14706,11 @@ BLKDROP2 5, 1
 CALL $_xp_mem_ec48ffce_internal_macro$
 
 .macro _xp_mem_ec48ffce_internal_macro
-.loc ../contracts/DexStablePool.sol, 2275
+.loc ../contracts/DexStablePool.sol, 2281
 PUSHINT 0
 NEWDICT
 PAIR
-.loc ../contracts/DexStablePool.sol, 2277
+.loc ../contracts/DexStablePool.sol, 2283
 PUSHINT 0
 PUSHCONT {
 	DUP
@@ -14706,7 +14718,7 @@ PUSHCONT {
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2278
+	.loc ../contracts/DexStablePool.sol, 2284
 	DUP2
 	GETGLOB 15
 	SECOND
@@ -14758,14 +14770,14 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S2
-	.loc ../contracts/DexStablePool.sol, 2277
+	.loc ../contracts/DexStablePool.sol, 2283
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/DexStablePool.sol, 2281
+.loc ../contracts/DexStablePool.sol, 2287
 NIP
 .loc ../contracts/DexStablePool.sol, 0
 
@@ -14774,11 +14786,11 @@ NIP
 CALL $_get_dy_216b1085_internal_macro$
 
 .macro _get_dy_216b1085_internal_macro
-.loc ../contracts/DexStablePool.sol, 2291
+.loc ../contracts/DexStablePool.sol, 2297
 PUSHINT 0
 NEWDICT
 PAIR
-.loc ../contracts/DexStablePool.sol, 2293
+.loc ../contracts/DexStablePool.sol, 2299
 GETGLOB 15
 SECOND
 PUSHINT 0
@@ -14820,7 +14832,7 @@ PUSHCONT {
 	NOT
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2294
+	.loc ../contracts/DexStablePool.sol, 2300
 	PUSH2 S3, S0
 	INDEX 6
 	PUSH S2
@@ -14846,7 +14858,7 @@ PUSHCONT {
 }
 WHILE
 BLKDROP 3
-.loc ../contracts/DexStablePool.sol, 2297
+.loc ../contracts/DexStablePool.sol, 2303
 SWAP
 CALLREF {
 	CALL $_get_dy_mem_fbce9de3_internal_macro$
@@ -14858,9 +14870,9 @@ CALLREF {
 CALL $_get_dy_mem_fbce9de3_internal_macro$
 
 .macro _get_dy_mem_fbce9de3_internal_macro
-.loc ../contracts/DexStablePool.sol, 2301
+.loc ../contracts/DexStablePool.sol, 2307
 NULL
-.loc ../contracts/DexStablePool.sol, 2303
+.loc ../contracts/DexStablePool.sol, 2309
 GETGLOB 22
 SECOND
 GETGLOB 22
@@ -14871,23 +14883,23 @@ GETGLOB 22
 INDEX 3
 ADD
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2304
+.loc ../contracts/DexStablePool.sol, 2310
 PUSH2 S4, S0
 GETGLOB 22
 FIRST
 MULDIVC
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2305
+.loc ../contracts/DexStablePool.sol, 2311
 DUP
 GETGLOB 22
 INDEX 3
 PUSH S3
 MULDIV
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2306
+.loc ../contracts/DexStablePool.sol, 2312
 PUSHINT 0
 DUP
-.loc ../contracts/DexStablePool.sol, 2309
+.loc ../contracts/DexStablePool.sol, 2315
 ROLL 6
 PARSEMSGADDR
 INDEX 3
@@ -14984,7 +14996,7 @@ PUSHCONT {
 }
 IF
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2313
+	.loc ../contracts/DexStablePool.sol, 2319
 	PUSH S3
 	GETGLOB 22
 	THIRD
@@ -14992,17 +15004,17 @@ PUSHCONT {
 	MULDIV
 	UFITS 128
 	POP S2
-	.loc ../contracts/DexStablePool.sol, 2314
+	.loc ../contracts/DexStablePool.sol, 2320
 	OVER2
 	SUB
 	UFITS 128
 	PUSH S2
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2316
+	.loc ../contracts/DexStablePool.sol, 2322
 	PUSHINT 0
 	POP S3
-	.loc ../contracts/DexStablePool.sol, 2317
+	.loc ../contracts/DexStablePool.sol, 2323
 	PUSH S3
 	GETGLOB 22
 	THIRD
@@ -15015,14 +15027,14 @@ PUSHCONT {
 	MULDIV
 	UFITS 128
 	POP S2
-	.loc ../contracts/DexStablePool.sol, 2318
+	.loc ../contracts/DexStablePool.sol, 2324
 	PUSH2 S3, S1
 }
 IFELSE
 SUB
 UFITS 128
 NIP
-.loc ../contracts/DexStablePool.sol, 2321
+.loc ../contracts/DexStablePool.sol, 2327
 PUSH2 S9, S6
 SECOND
 PUSHINT 32
@@ -15068,7 +15080,7 @@ GETGLOB 17
 MULDIV
 UFITS 256
 ADD
-.loc ../contracts/DexStablePool.sol, 2322
+.loc ../contracts/DexStablePool.sol, 2328
 ROLL 8
 PUSH S8
 ROT
@@ -15076,11 +15088,11 @@ PUSH S8
 CALLREF {
 	CALL $_get_y_3ed0eecb_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2324
+.loc ../contracts/DexStablePool.sol, 2330
 DUP
 ISNULL
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2325
+	.loc ../contracts/DexStablePool.sol, 2331
 	BLKPUSH 2, 7
 	SECOND
 	PUSHINT 32
@@ -15126,7 +15138,7 @@ PUSHCONT {
 	INDEX 6
 	MULDIV
 	UFITS 128
-	.loc ../contracts/DexStablePool.sol, 2326
+	.loc ../contracts/DexStablePool.sol, 2332
 	PUSH2 S0, S8
 	GETGLOB 15
 	SECOND
@@ -15177,7 +15189,7 @@ PUSHCONT {
 	AND
 	AND
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2332
+		.loc ../contracts/DexStablePool.sol, 2338
 		PUSH3 S0, S2, S3
 		TRIPLE
 		POP S7
@@ -15188,7 +15200,7 @@ PUSHCONT {
 	DROP
 }
 IFNOT
-.loc ../contracts/DexStablePool.sol, 2340
+.loc ../contracts/DexStablePool.sol, 2346
 BLKDROP 3
 PUSH S2
 ROLL 3
@@ -15206,9 +15218,9 @@ BLKDROP2 4, 2
 CALL $_get_dx_597df641_internal_macro$
 
 .macro _get_dx_597df641_internal_macro
-.loc ../contracts/DexStablePool.sol, 2344
+.loc ../contracts/DexStablePool.sol, 2350
 NULL
-.loc ../contracts/DexStablePool.sol, 2346
+.loc ../contracts/DexStablePool.sol, 2352
 PUSH2 S1, S2
 GETGLOB 15
 SECOND
@@ -15245,16 +15257,16 @@ PUSH S2
 EQINT 0
 OR
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2347
+	.loc ../contracts/DexStablePool.sol, 2353
 	BLKDROP2 3, 1
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFJMP
-.loc ../contracts/DexStablePool.sol, 2350
+.loc ../contracts/DexStablePool.sol, 2356
 PUSHINT 0
 NEWDICT
 PAIR
-.loc ../contracts/DexStablePool.sol, 2352
+.loc ../contracts/DexStablePool.sol, 2358
 GETGLOB 15
 SECOND
 PUSHINT 0
@@ -15296,7 +15308,7 @@ PUSHCONT {
 	NOT
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2353
+	.loc ../contracts/DexStablePool.sol, 2359
 	PUSH2 S3, S0
 	INDEX 6
 	PUSH S2
@@ -15322,7 +15334,7 @@ PUSHCONT {
 }
 WHILE
 BLKDROP 3
-.loc ../contracts/DexStablePool.sol, 2356
+.loc ../contracts/DexStablePool.sol, 2362
 PUSH2 S3, S0
 SECOND
 PUSHINT 32
@@ -15366,7 +15378,7 @@ MULDIV
 UFITS 256
 SUB
 UFITS 256
-.loc ../contracts/DexStablePool.sol, 2357
+.loc ../contracts/DexStablePool.sol, 2363
 ROLL 3
 PUSH S4
 ROT
@@ -15374,11 +15386,11 @@ PUSH S3
 CALLREF {
 	CALL $_get_y_3ed0eecb_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2359
+.loc ../contracts/DexStablePool.sol, 2365
 DUP
 ISNULL
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2360
+	.loc ../contracts/DexStablePool.sol, 2366
 	GETGLOB 22
 	FIRST
 	GETGLOB 22
@@ -15393,7 +15405,7 @@ PUSHCONT {
 	INDEX 3
 	SUB
 	UFITS 128
-	.loc ../contracts/DexStablePool.sol, 2361
+	.loc ../contracts/DexStablePool.sol, 2367
 	PUSH2 S1, S1
 	ISNULL
 	THROWIF 63
@@ -15439,13 +15451,13 @@ PUSHCONT {
 	INDEX 6
 	MULDIVC
 	UFITS 128
-	.loc ../contracts/DexStablePool.sol, 2362
+	.loc ../contracts/DexStablePool.sol, 2368
 	GETGLOB 22
 	FIRST
 	ROT
 	MULDIVC
 	UFITS 128
-	.loc ../contracts/DexStablePool.sol, 2364
+	.loc ../contracts/DexStablePool.sol, 2370
 	DUP
 	GETGLOB 22
 	SECOND
@@ -15461,7 +15473,7 @@ PUSHCONT {
 	FIRST
 	MULDIVC
 	UFITS 128
-	.loc ../contracts/DexStablePool.sol, 2366
+	.loc ../contracts/DexStablePool.sol, 2372
 	DUP
 	GETGLOB 22
 	THIRD
@@ -15473,11 +15485,11 @@ PUSHCONT {
 	UFITS 128
 	MULDIV
 	UFITS 128
-	.loc ../contracts/DexStablePool.sol, 2367
+	.loc ../contracts/DexStablePool.sol, 2373
 	TUCK
 	SUB
 	UFITS 128
-	.loc ../contracts/DexStablePool.sol, 2369
+	.loc ../contracts/DexStablePool.sol, 2375
 	DUP
 	GTINT 0
 	GETGLOB 22
@@ -15492,7 +15504,7 @@ PUSHCONT {
 	OR
 	AND
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2373
+		.loc ../contracts/DexStablePool.sol, 2379
 		PUSH3 S2, S0, S1
 		TRIPLE
 		POP S6
@@ -15503,7 +15515,7 @@ PUSHCONT {
 	BLKDROP 3
 }
 IFNOT
-.loc ../contracts/DexStablePool.sol, 2381
+.loc ../contracts/DexStablePool.sol, 2387
 DROP2
 NIP
 .loc ../contracts/DexStablePool.sol, 0
@@ -15513,25 +15525,25 @@ NIP
 CALL $_getExpectedDepositAmount_177fba43_internal_macro$
 
 .macro _getExpectedDepositAmount_177fba43_internal_macro
-.loc ../contracts/DexStablePool.sol, 2385
+.loc ../contracts/DexStablePool.sol, 2391
 GETGLOB 23
-.loc ../contracts/DexStablePool.sol, 2386
+.loc ../contracts/DexStablePool.sol, 2392
 NULL
-.loc ../contracts/DexStablePool.sol, 2387
+.loc ../contracts/DexStablePool.sol, 2393
 PUSHINT 0
-.loc ../contracts/DexStablePool.sol, 2389
+.loc ../contracts/DexStablePool.sol, 2395
 PUSH S3
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2390
+	.loc ../contracts/DexStablePool.sol, 2396
 	BLKDROP2 3, 2
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFNOTJMP
-.loc ../contracts/DexStablePool.sol, 2393
+.loc ../contracts/DexStablePool.sol, 2399
 PUSHINT 0
 NEWDICT
 PAIR
-.loc ../contracts/DexStablePool.sol, 2394
+.loc ../contracts/DexStablePool.sol, 2400
 GETGLOB 15
 SECOND
 PUSHINT 0
@@ -15573,7 +15585,7 @@ PUSHCONT {
 	NOT
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2395
+	.loc ../contracts/DexStablePool.sol, 2401
 	PUSH2 S3, S0
 	INDEX 6
 	PUSH S2
@@ -15599,27 +15611,27 @@ PUSHCONT {
 }
 WHILE
 BLKDROP 3
-.loc ../contracts/DexStablePool.sol, 2398
+.loc ../contracts/DexStablePool.sol, 2404
 DUP
 CALLREF {
 	CALL $_get_D_115bcc50_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2399
+.loc ../contracts/DexStablePool.sol, 2405
 FALSE ; decl return flag
 OVER
 ISNULL
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2400
+	.loc ../contracts/DexStablePool.sol, 2406
 	PUSH2 S1, S1
 	ISNULL
 	THROWIF 63
-	.loc ../contracts/DexStablePool.sol, 2402
+	.loc ../contracts/DexStablePool.sol, 2408
 	PUSHINT 0
-	.loc ../contracts/DexStablePool.sol, 2403
+	.loc ../contracts/DexStablePool.sol, 2409
 	GETGLOB 21
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2404
+		.loc ../contracts/DexStablePool.sol, 2410
 		PUSH3 S1, S1, S8
 		GETGLOB 21
 		MULDIVC
@@ -15627,29 +15639,29 @@ PUSHCONT {
 		ADD
 	}
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2406
+		.loc ../contracts/DexStablePool.sol, 2412
 		PUSH S8
 	}
 	IFELSE
 	NIP
-	.loc ../contracts/DexStablePool.sol, 2409
+	.loc ../contracts/DexStablePool.sol, 2415
 	PUSH3 S7, S9, S4
 	ROLL 3
 	CALLREF {
 		CALL $_get_y_D_5546bb02_internal_macro$
 	}
-	.loc ../contracts/DexStablePool.sol, 2410
+	.loc ../contracts/DexStablePool.sol, 2416
 	DUP
 	ISNULL
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2411
+		.loc ../contracts/DexStablePool.sol, 2417
 		BLKSWAP 2, 5
 		BLKDROP2 8, 2
 		PUSHINT 4
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	IFJMP
-	.loc ../contracts/DexStablePool.sol, 2413
+	.loc ../contracts/DexStablePool.sol, 2419
 	DUP
 	ISNULL
 	THROWIF 63
@@ -15661,7 +15673,7 @@ PUSHCONT {
 	PLDU 256
 	SUB
 	UFITS 256
-	.loc ../contracts/DexStablePool.sol, 2414
+	.loc ../contracts/DexStablePool.sol, 2420
 	DUP
 	GETGLOB 22
 	FIRST
@@ -15681,7 +15693,7 @@ PUSHCONT {
 	UFITS 128
 	MULDIVC
 	UFITS 256
-	.loc ../contracts/DexStablePool.sol, 2415
+	.loc ../contracts/DexStablePool.sol, 2421
 	DUP
 	ROT
 	SUB
@@ -15720,7 +15732,7 @@ PUSHCONT {
 	DIVC
 	UFITS 128
 	POP S6
-	.loc ../contracts/DexStablePool.sol, 2417
+	.loc ../contracts/DexStablePool.sol, 2423
 	PUSH S9
 	GETGLOB 15
 	SECOND
@@ -15761,7 +15773,7 @@ PUSHCONT {
 IFNOT
 .loc ../contracts/DexStablePool.sol, 0
 IFRET
-.loc ../contracts/DexStablePool.sol, 2420
+.loc ../contracts/DexStablePool.sol, 2426
 DROP2
 BLKDROP2 3, 2
 .loc ../contracts/DexStablePool.sol, 0
@@ -15771,11 +15783,11 @@ BLKDROP2 3, 2
 CALL $_getExpectedLpAmount_e849a3d2_internal_macro$
 
 .macro _getExpectedLpAmount_e849a3d2_internal_macro
-.loc ../contracts/DexStablePool.sol, 2424
+.loc ../contracts/DexStablePool.sol, 2430
 NULL
-.loc ../contracts/DexStablePool.sol, 2425
+.loc ../contracts/DexStablePool.sol, 2431
 PUSHINT 0
-.loc ../contracts/DexStablePool.sol, 2427
+.loc ../contracts/DexStablePool.sol, 2433
 PUSH2 S2, S3
 GETGLOB 15
 SECOND
@@ -15812,25 +15824,25 @@ PUSH S3
 EQINT 0
 OR
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2428
+	.loc ../contracts/DexStablePool.sol, 2434
 	BLKDROP2 2, 2
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFJMP
-.loc ../contracts/DexStablePool.sol, 2431
+.loc ../contracts/DexStablePool.sol, 2437
 CALLREF {
 	CALL $_reserves_02c6ae9f_internal_macro$
 }
 CALLREF {
 	CALL $_xp_mem_ec48ffce_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2432
+.loc ../contracts/DexStablePool.sol, 2438
 PUSH2 S0, S0
-.loc ../contracts/DexStablePool.sol, 2434
+.loc ../contracts/DexStablePool.sol, 2440
 CALLREF {
 	CALL $_get_D_115bcc50_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2436
+.loc ../contracts/DexStablePool.sol, 2442
 ROLL 5
 PUSH S6
 GETGLOB 15
@@ -15866,7 +15878,7 @@ INDEX 6
 GETGLOB 17
 MULDIVC
 UFITS 256
-.loc ../contracts/DexStablePool.sol, 2438
+.loc ../contracts/DexStablePool.sol, 2444
 PUSH2 S0, S2
 UNPAIR
 PUXC S9, S-1
@@ -15888,12 +15900,12 @@ PUSHINT 32
 DICTUSETB
 PAIR
 POP S3
-.loc ../contracts/DexStablePool.sol, 2439
+.loc ../contracts/DexStablePool.sol, 2445
 ROT
 CALLREF {
 	CALL $_get_D_115bcc50_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2441
+.loc ../contracts/DexStablePool.sol, 2447
 DUP
 ISNULL
 NOT
@@ -15902,15 +15914,15 @@ ISNULL
 NOT
 AND
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2444
+	.loc ../contracts/DexStablePool.sol, 2450
 	PUSH2 S2, S2
 	ISNULL
 	THROWIF 63
-	.loc ../contracts/DexStablePool.sol, 2445
+	.loc ../contracts/DexStablePool.sol, 2451
 	PUSH2 S1, S1
 	ISNULL
 	THROWIF 63
-	.loc ../contracts/DexStablePool.sol, 2447
+	.loc ../contracts/DexStablePool.sol, 2453
 	GETGLOB 21
 	PUSH S2
 	ROT
@@ -15919,7 +15931,7 @@ PUSHCONT {
 	PUSH S2
 	MULDIVC
 	UFITS 128
-	.loc ../contracts/DexStablePool.sol, 2448
+	.loc ../contracts/DexStablePool.sol, 2454
 	GETGLOB 22
 	FIRST
 	GETGLOB 22
@@ -15938,7 +15950,7 @@ PUSHCONT {
 	UFITS 128
 	MULDIVC
 	UFITS 128
-	.loc ../contracts/DexStablePool.sol, 2450
+	.loc ../contracts/DexStablePool.sol, 2456
 	DUP2
 	ROLL 3
 	GETGLOB 21
@@ -15946,21 +15958,21 @@ PUSHCONT {
 	UFITS 256
 	SUB
 	UFITS 256
-	.loc ../contracts/DexStablePool.sol, 2451
+	.loc ../contracts/DexStablePool.sol, 2457
 	GETGLOB 23
 	PUSH2 S9, S6
 	ROLL 3
 	CALLREF {
 		CALL $_get_y_D_5546bb02_internal_macro$
 	}
-	.loc ../contracts/DexStablePool.sol, 2453
+	.loc ../contracts/DexStablePool.sol, 2459
 	DUP
 	ISNULL
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2454
+		.loc ../contracts/DexStablePool.sol, 2460
 		OVER
 		POP S8
-		.loc ../contracts/DexStablePool.sol, 2455
+		.loc ../contracts/DexStablePool.sol, 2461
 		PUSH2 S8, S5
 		SECOND
 		PUSHINT 32
@@ -16016,7 +16028,7 @@ PUSHCONT {
 	DROP2
 }
 IF
-.loc ../contracts/DexStablePool.sol, 2459
+.loc ../contracts/DexStablePool.sol, 2465
 BLKDROP 4
 BLKDROP2 1, 2
 .loc ../contracts/DexStablePool.sol, 0
@@ -16026,11 +16038,11 @@ BLKDROP2 1, 2
 CALL $_tokenRoots_475f7f72_internal_macro$
 
 .macro _tokenRoots_475f7f72_internal_macro
-.loc ../contracts/DexStablePool.sol, 2463
+.loc ../contracts/DexStablePool.sol, 2469
 PUSHINT 0
 NEWDICT
 PAIR
-.loc ../contracts/DexStablePool.sol, 2464
+.loc ../contracts/DexStablePool.sol, 2470
 GETGLOB 15
 SECOND
 PUSHINT 0
@@ -16072,7 +16084,7 @@ PUSHCONT {
 	NOT
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2465
+	.loc ../contracts/DexStablePool.sol, 2471
 	PUSH2 S3, S0
 	FIRST
 	SWAP
@@ -16098,11 +16110,11 @@ BLKDROP 3
 CALL $_reserves_02c6ae9f_internal_macro$
 
 .macro _reserves_02c6ae9f_internal_macro
-.loc ../contracts/DexStablePool.sol, 2471
+.loc ../contracts/DexStablePool.sol, 2477
 PUSHINT 0
 NEWDICT
 PAIR
-.loc ../contracts/DexStablePool.sol, 2472
+.loc ../contracts/DexStablePool.sol, 2478
 GETGLOB 15
 SECOND
 PUSHINT 0
@@ -16144,7 +16156,7 @@ PUSHCONT {
 	NOT
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2473
+	.loc ../contracts/DexStablePool.sol, 2479
 	PUSH2 S3, S0
 	INDEX 3
 	NEWC
@@ -16172,7 +16184,7 @@ BLKDROP 3
 CALL $_sync_ee5e2717_internal_macro$
 
 .macro _sync_ee5e2717_internal_macro
-.loc ../contracts/DexStablePool.sol, 2479
+.loc ../contracts/DexStablePool.sol, 2485
 GETGLOB 21
 CALLREF {
 	CALL $_reserves_02c6ae9f_internal_macro$
@@ -16196,9 +16208,9 @@ SENDRAWMSG
 CALL $_expectedDepositLiquidity_011338e1_internal_macro$
 
 .macro _expectedDepositLiquidity_011338e1_internal_macro
-.loc ../contracts/DexStablePool.sol, 2488
+.loc ../contracts/DexStablePool.sol, 2494
 NULL
-.loc ../contracts/DexStablePool.sol, 2490
+.loc ../contracts/DexStablePool.sol, 2496
 PUSH S3
 CALLREF {
 	CALL $_xp_mem_ec48ffce_internal_macro$
@@ -16206,89 +16218,89 @@ CALLREF {
 CALLREF {
 	CALL $_get_D_115bcc50_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2492
-PUSH S4
-.loc ../contracts/DexStablePool.sol, 2493
-GETGLOB 24
-PUSHINT 0
-NEWC
-STU 128
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
-.loc ../contracts/DexStablePool.sol, 2494
-GETGLOB 24
-PUSHINT 0
-NEWC
-STU 128
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
-.loc ../contracts/DexStablePool.sol, 2495
-GETGLOB 24
-PUSHINT 0
-NEWC
-STU 128
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
-.loc ../contracts/DexStablePool.sol, 2496
-PUSH S8
-.loc ../contracts/DexStablePool.sol, 2497
-GETGLOB 24
-PUSHINT 0
-NEWC
-STU 128
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
 .loc ../contracts/DexStablePool.sol, 2498
-PUSHINT 0
+PUSH S4
 .loc ../contracts/DexStablePool.sol, 2499
+GETGLOB 24
+PUSHINT 0
+NEWC
+STU 128
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
+.loc ../contracts/DexStablePool.sol, 2500
+GETGLOB 24
+PUSHINT 0
+NEWC
+STU 128
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
+.loc ../contracts/DexStablePool.sol, 2501
+GETGLOB 24
+PUSHINT 0
+NEWC
+STU 128
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
+.loc ../contracts/DexStablePool.sol, 2502
+PUSH S8
+.loc ../contracts/DexStablePool.sol, 2503
+GETGLOB 24
+PUSHINT 0
+NEWC
+STU 128
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
+.loc ../contracts/DexStablePool.sol, 2504
+PUSHINT 0
+.loc ../contracts/DexStablePool.sol, 2505
 GETGLOB 24
 PUSHINT 0
 NEWC
@@ -16307,17 +16319,17 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 PAIR
-.loc ../contracts/DexStablePool.sol, 2501
+.loc ../contracts/DexStablePool.sol, 2507
 FALSE
 DUP
-.loc ../contracts/DexStablePool.sol, 2502
+.loc ../contracts/DexStablePool.sol, 2508
 PUSHCONT {
 	DUP
 	GETGLOB 24
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2503
+	.loc ../contracts/DexStablePool.sol, 2509
 	PUSH2 S1, S1
 	PUSHCONT {
 		DROP
@@ -16331,7 +16343,7 @@ PUSHCONT {
 	}
 	IFNOT
 	POP S2
-	.loc ../contracts/DexStablePool.sol, 2504
+	.loc ../contracts/DexStablePool.sol, 2510
 	PUSH2 S0, S15
 	SECOND
 	PUSHINT 32
@@ -16359,7 +16371,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S10
-	.loc ../contracts/DexStablePool.sol, 2507
+	.loc ../contracts/DexStablePool.sol, 2513
 	PUSH S4
 	UNPAIR
 	PUXC S2, S-1
@@ -16374,7 +16386,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S5
-	.loc ../contracts/DexStablePool.sol, 2508
+	.loc ../contracts/DexStablePool.sol, 2514
 	PUSH S8
 	UNPAIR
 	PUXC S2, S-1
@@ -16389,7 +16401,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S9
-	.loc ../contracts/DexStablePool.sol, 2509
+	.loc ../contracts/DexStablePool.sol, 2515
 	PUSH S7
 	UNPAIR
 	PUXC S2, S-1
@@ -16404,7 +16416,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S8
-	.loc ../contracts/DexStablePool.sol, 2510
+	.loc ../contracts/DexStablePool.sol, 2516
 	PUSH S6
 	UNPAIR
 	PUXC S2, S-1
@@ -16419,7 +16431,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S7
-	.loc ../contracts/DexStablePool.sol, 2511
+	.loc ../contracts/DexStablePool.sol, 2517
 	PUSH S2
 	UNPAIR
 	PUXC S2, S-1
@@ -16433,14 +16445,14 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S3
-	.loc ../contracts/DexStablePool.sol, 2502
+	.loc ../contracts/DexStablePool.sol, 2508
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/DexStablePool.sol, 2514
+.loc ../contracts/DexStablePool.sol, 2520
 PUSH S8
 CALLREF {
 	CALL $_xp_mem_ec48ffce_internal_macro$
@@ -16448,7 +16460,7 @@ CALLREF {
 CALLREF {
 	CALL $_get_D_115bcc50_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2517
+.loc ../contracts/DexStablePool.sol, 2523
 PUSH S13
 EQINT 0
 ROT
@@ -16460,40 +16472,40 @@ ISNULL
 OR
 OR
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2518
+	.loc ../contracts/DexStablePool.sol, 2524
 	ROLL 10
 	ROLL 6
 	BLKDROP2 13, 2
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFJMP
-.loc ../contracts/DexStablePool.sol, 2521
+.loc ../contracts/DexStablePool.sol, 2527
 ROLL 9
 DUP
 ISNULL
 THROWIF 63
-.loc ../contracts/DexStablePool.sol, 2522
+.loc ../contracts/DexStablePool.sol, 2528
 XCPU S1, S0
 ISNULL
 THROWIF 63
-.loc ../contracts/DexStablePool.sol, 2524
+.loc ../contracts/DexStablePool.sol, 2530
 DUP2
 GEQ
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2525
+	.loc ../contracts/DexStablePool.sol, 2531
 	ROLL 10
 	ROLL 7
 	BLKDROP2 13, 2
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFJMP
-.loc ../contracts/DexStablePool.sol, 2528
+.loc ../contracts/DexStablePool.sol, 2534
 NULL
-.loc ../contracts/DexStablePool.sol, 2530
+.loc ../contracts/DexStablePool.sol, 2536
 PUSH S13
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2531
+	.loc ../contracts/DexStablePool.sol, 2537
 	GETGLOB 22
 	SECOND
 	GETGLOB 22
@@ -16513,7 +16525,7 @@ PUSHCONT {
 	UFITS 8
 	MULDIV
 	UFITS 128
-	.loc ../contracts/DexStablePool.sol, 2533
+	.loc ../contracts/DexStablePool.sol, 2539
 	PUSHINT 0
 	PUSHCONT {
 		DUP
@@ -16521,7 +16533,7 @@ PUSHCONT {
 		LESS
 	}
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2534
+		.loc ../contracts/DexStablePool.sol, 2540
 		PUSH2 S3, S0
 		PUSH S18
 		SECOND
@@ -16532,14 +16544,14 @@ PUSHCONT {
 		PUSH S6
 		MULDIV
 		UFITS 128
-		.loc ../contracts/DexStablePool.sol, 2535
+		.loc ../contracts/DexStablePool.sol, 2541
 		PUSH2 S1, S13
 		SECOND
 		PUSHINT 32
 		DICTUGET
 		THROWIFNOT 50
 		PLDU 128
-		.loc ../contracts/DexStablePool.sol, 2536
+		.loc ../contracts/DexStablePool.sol, 2542
 		DUP2
 		GREATER
 		PUSHCONT {
@@ -16553,7 +16565,7 @@ PUSHCONT {
 			UFITS 128
 		}
 		IFELSE
-		.loc ../contracts/DexStablePool.sol, 2537
+		.loc ../contracts/DexStablePool.sol, 2543
 		ROT
 		PUSH S2
 		LESS
@@ -16571,13 +16583,13 @@ PUSHCONT {
 		DICTUSETB
 		PAIR
 		POP S8
-		.loc ../contracts/DexStablePool.sol, 2539
+		.loc ../contracts/DexStablePool.sol, 2545
 		PUSH2 S3, S0
 		GETGLOB 22
 		FIRST
 		MULDIVC
 		UFITS 128
-		.loc ../contracts/DexStablePool.sol, 2540
+		.loc ../contracts/DexStablePool.sol, 2546
 		DUP
 		GETGLOB 22
 		INDEX 3
@@ -16593,7 +16605,7 @@ PUSHCONT {
 		UFITS 128
 		MULDIV
 		UFITS 128
-		.loc ../contracts/DexStablePool.sol, 2542
+		.loc ../contracts/DexStablePool.sol, 2548
 		PUSH S18
 		PARSEMSGADDR
 		INDEX 3
@@ -16690,7 +16702,7 @@ PUSHCONT {
 		}
 		IF
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 2546
+			.loc ../contracts/DexStablePool.sol, 2552
 			PUSH2 S0, S13
 			UNPAIR
 			PUXC S7, S-1
@@ -16705,7 +16717,7 @@ PUSHCONT {
 			DICTUSETB
 			PAIR
 			POP S14
-			.loc ../contracts/DexStablePool.sol, 2547
+			.loc ../contracts/DexStablePool.sol, 2553
 			OVER
 			GETGLOB 22
 			THIRD
@@ -16735,14 +16747,14 @@ PUSHCONT {
 			DICTUSETB
 			PAIR
 			POP S15
-			.loc ../contracts/DexStablePool.sol, 2548
+			.loc ../contracts/DexStablePool.sol, 2554
 			DUP2
 			SUB
 			UFITS 128
 			PUSH2 S5, S15
 		}
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 2550
+			.loc ../contracts/DexStablePool.sol, 2556
 			OVER
 			GETGLOB 22
 			THIRD
@@ -16768,7 +16780,7 @@ PUSHCONT {
 			DICTUSETB
 			PAIR
 			POP S15
-			.loc ../contracts/DexStablePool.sol, 2551
+			.loc ../contracts/DexStablePool.sol, 2557
 			PUSH3 S1, S4, S14
 		}
 		IFELSE
@@ -16793,7 +16805,7 @@ PUSHCONT {
 		DICTUSETB
 		PAIR
 		POP S16
-		.loc ../contracts/DexStablePool.sol, 2554
+		.loc ../contracts/DexStablePool.sol, 2560
 		DROP2
 		XCPU S1, S2
 		PUSH S13
@@ -16826,7 +16838,7 @@ PUSHCONT {
 		DICTUSETB
 		PAIR
 		POP S10
-		.loc ../contracts/DexStablePool.sol, 2555
+		.loc ../contracts/DexStablePool.sol, 2561
 		PUSH2 S1, S13
 		SECOND
 		PUSHINT 32
@@ -16871,7 +16883,7 @@ PUSHCONT {
 		DICTUSETB
 		PAIR
 		POP S14
-		.loc ../contracts/DexStablePool.sol, 2556
+		.loc ../contracts/DexStablePool.sol, 2562
 		PUSH S8
 		UNPAIR
 		PUXC S3, S-1
@@ -16886,14 +16898,14 @@ PUSHCONT {
 		DICTUSETB
 		PAIR
 		POP S8
-		.loc ../contracts/DexStablePool.sol, 2533
+		.loc ../contracts/DexStablePool.sol, 2539
 		INC
 		UFITS 8
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	WHILE
 	DROP2
-	.loc ../contracts/DexStablePool.sol, 2558
+	.loc ../contracts/DexStablePool.sol, 2564
 	PUSH S10
 	CALLREF {
 		CALL $_xp_mem_ec48ffce_internal_macro$
@@ -16902,11 +16914,11 @@ PUSHCONT {
 		CALL $_get_D_115bcc50_internal_macro$
 	}
 	NIP
-	.loc ../contracts/DexStablePool.sol, 2559
+	.loc ../contracts/DexStablePool.sol, 2565
 	DUP
 	ISNULL
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2560
+		.loc ../contracts/DexStablePool.sol, 2566
 		PUSH3 S13, S0, S0
 		ISNULL
 		THROWIF 63
@@ -16922,13 +16934,13 @@ PUSHCONT {
 	IFNOT
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2563
+	.loc ../contracts/DexStablePool.sol, 2569
 	OVER
 	NIP
-	.loc ../contracts/DexStablePool.sol, 2564
+	.loc ../contracts/DexStablePool.sol, 2570
 	PUSH S10
 	POP S7
-	.loc ../contracts/DexStablePool.sol, 2565
+	.loc ../contracts/DexStablePool.sol, 2571
 	PUSHINT 10
 	PUSHINT 9
 	DUP2
@@ -16937,18 +16949,18 @@ PUSHCONT {
 	CALLREF {
 		CALL $__exp_macro$
 	}
-	.loc ../contracts/DexStablePool.sol, 2566
+	.loc ../contracts/DexStablePool.sol, 2572
 	GETGLOB 17
 	OVER
 	GREATER
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2567
+		.loc ../contracts/DexStablePool.sol, 2573
 		PUSH2 S2, S0
 		GETGLOB 17
 		MULDIV
 	}
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2569
+		.loc ../contracts/DexStablePool.sol, 2575
 		PUSH S2
 	}
 	IFELSE
@@ -16958,20 +16970,20 @@ PUSHCONT {
 	DROP
 }
 IFELSE
-.loc ../contracts/DexStablePool.sol, 2573
+.loc ../contracts/DexStablePool.sol, 2579
 ISNULL
 PUSH S4
 EQINT 0
 OR
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2574
+	.loc ../contracts/DexStablePool.sol, 2580
 	ROLL 10
 	ROLL 7
 	BLKDROP2 13, 2
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFJMP
-.loc ../contracts/DexStablePool.sol, 2577
+.loc ../contracts/DexStablePool.sol, 2583
 BLKSWAP 2, 13
 SWAP
 ROLL 5
@@ -16982,7 +16994,7 @@ BLKSWAP 2, 6
 BLKSWAP 2, 9
 TUPLE 9
 POP S4
-.loc ../contracts/DexStablePool.sol, 2589
+.loc ../contracts/DexStablePool.sol, 2595
 DROP
 XCHG S1, S2
 BLKDROP2 3, 2
@@ -16993,9 +17005,9 @@ BLKDROP2 3, 2
 CALL $_expectedOneCoinDepositLiquidity_68880401_internal_macro$
 
 .macro _expectedOneCoinDepositLiquidity_68880401_internal_macro
-.loc ../contracts/DexStablePool.sol, 2600
+.loc ../contracts/DexStablePool.sol, 2606
 NULL
-.loc ../contracts/DexStablePool.sol, 2602
+.loc ../contracts/DexStablePool.sol, 2608
 PUSH S3
 CALLREF {
 	CALL $_xp_mem_ec48ffce_internal_macro$
@@ -17003,87 +17015,9 @@ CALLREF {
 CALLREF {
 	CALL $_get_D_115bcc50_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2604
-PUSH S4
-.loc ../contracts/DexStablePool.sol, 2605
-GETGLOB 24
-PUSHINT 0
-NEWC
-STU 128
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
-.loc ../contracts/DexStablePool.sol, 2606
-GETGLOB 24
-PUSHINT 0
-NEWC
-STU 128
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
-.loc ../contracts/DexStablePool.sol, 2607
-GETGLOB 24
-PUSHINT 0
-NEWC
-STU 128
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
-.loc ../contracts/DexStablePool.sol, 2608
-PUSH S8
-.loc ../contracts/DexStablePool.sol, 2609
-GETGLOB 24
-PUSHINT 0
-NEWC
-STU 128
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
 .loc ../contracts/DexStablePool.sol, 2610
+PUSH S4
+.loc ../contracts/DexStablePool.sol, 2611
 GETGLOB 24
 PUSHINT 0
 NEWC
@@ -17102,9 +17036,87 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 PAIR
-.loc ../contracts/DexStablePool.sol, 2611
-PUSHINT 0
 .loc ../contracts/DexStablePool.sol, 2612
+GETGLOB 24
+PUSHINT 0
+NEWC
+STU 128
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
+.loc ../contracts/DexStablePool.sol, 2613
+GETGLOB 24
+PUSHINT 0
+NEWC
+STU 128
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
+.loc ../contracts/DexStablePool.sol, 2614
+PUSH S8
+.loc ../contracts/DexStablePool.sol, 2615
+GETGLOB 24
+PUSHINT 0
+NEWC
+STU 128
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
+.loc ../contracts/DexStablePool.sol, 2616
+GETGLOB 24
+PUSHINT 0
+NEWC
+STU 128
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
+.loc ../contracts/DexStablePool.sol, 2617
+PUSHINT 0
+.loc ../contracts/DexStablePool.sol, 2618
 GETGLOB 24
 PUSHINT 0
 NEWC
@@ -17123,7 +17135,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 PAIR
-.loc ../contracts/DexStablePool.sol, 2614
+.loc ../contracts/DexStablePool.sol, 2620
 PUSH2 S15, S8
 UNPAIR
 PUSH S17
@@ -17146,7 +17158,7 @@ PUSHINT 32
 DICTUSETB
 PAIR
 POP S9
-.loc ../contracts/DexStablePool.sol, 2615
+.loc ../contracts/DexStablePool.sol, 2621
 PUSH2 S15, S2
 UNPAIR
 PUSH S17
@@ -17162,7 +17174,7 @@ PUSHINT 32
 DICTUSETB
 PAIR
 POP S3
-.loc ../contracts/DexStablePool.sol, 2617
+.loc ../contracts/DexStablePool.sol, 2623
 PUSH S8
 CALLREF {
 	CALL $_xp_mem_ec48ffce_internal_macro$
@@ -17170,7 +17182,7 @@ CALLREF {
 CALLREF {
 	CALL $_get_D_115bcc50_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2620
+.loc ../contracts/DexStablePool.sol, 2626
 PUSH S13
 EQINT 0
 PUSH S17
@@ -17183,27 +17195,27 @@ OR
 OR
 OR
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2621
+	.loc ../contracts/DexStablePool.sol, 2627
 	ROLL 11
 	ROLL 7
 	BLKDROP2 15, 2
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFJMP
-.loc ../contracts/DexStablePool.sol, 2624
+.loc ../contracts/DexStablePool.sol, 2630
 ROLL 10
 DUP
 ISNULL
 THROWIF 63
-.loc ../contracts/DexStablePool.sol, 2625
+.loc ../contracts/DexStablePool.sol, 2631
 XCPU S1, S0
 ISNULL
 THROWIF 63
-.loc ../contracts/DexStablePool.sol, 2627
+.loc ../contracts/DexStablePool.sol, 2633
 DUP2
 GEQ
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2628
+	.loc ../contracts/DexStablePool.sol, 2634
 	ROLL 11
 	ROLL 7
 	XCHG S8
@@ -17211,7 +17223,7 @@ PUSHCONT {
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFJMP
-.loc ../contracts/DexStablePool.sol, 2633
+.loc ../contracts/DexStablePool.sol, 2639
 PUSHINT 0
 PUSHCONT {
 	DUP
@@ -17219,7 +17231,7 @@ PUSHCONT {
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2634
+	.loc ../contracts/DexStablePool.sol, 2640
 	DUP2
 	PUSH S17
 	SECOND
@@ -17230,14 +17242,14 @@ PUSHCONT {
 	PUSH S4
 	MULDIV
 	UFITS 128
-	.loc ../contracts/DexStablePool.sol, 2635
+	.loc ../contracts/DexStablePool.sol, 2641
 	PUSH2 S1, S12
 	SECOND
 	PUSHINT 32
 	DICTUGET
 	THROWIFNOT 50
 	PLDU 128
-	.loc ../contracts/DexStablePool.sol, 2636
+	.loc ../contracts/DexStablePool.sol, 2642
 	DUP2
 	GREATER
 	PUSHCONT {
@@ -17251,7 +17263,7 @@ PUSHCONT {
 		UFITS 128
 	}
 	IFELSE
-	.loc ../contracts/DexStablePool.sol, 2637
+	.loc ../contracts/DexStablePool.sol, 2643
 	PUSH S9
 	UNPAIR
 	PUSH S21
@@ -17267,7 +17279,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S9
-	.loc ../contracts/DexStablePool.sol, 2638
+	.loc ../contracts/DexStablePool.sol, 2644
 	LESS
 	PUSH S4
 	UNPAIR
@@ -17284,14 +17296,14 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S4
-	.loc ../contracts/DexStablePool.sol, 2633
+	.loc ../contracts/DexStablePool.sol, 2639
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/DexStablePool.sol, 2641
+.loc ../contracts/DexStablePool.sol, 2647
 GETGLOB 22
 THIRD
 GETGLOB 22
@@ -17302,7 +17314,7 @@ GETGLOB 22
 INDEX 3
 ADD
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2642
+.loc ../contracts/DexStablePool.sol, 2648
 DUP
 PUSHINT 18
 ROLLX
@@ -17310,14 +17322,14 @@ GETGLOB 22
 FIRST
 MULDIV
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2643
+.loc ../contracts/DexStablePool.sol, 2649
 DUP
 GETGLOB 22
 INDEX 3
 PUSH S3
 MULDIV
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2645
+.loc ../contracts/DexStablePool.sol, 2651
 ROLL 15
 PARSEMSGADDR
 INDEX 3
@@ -17414,7 +17426,7 @@ PUSHCONT {
 }
 IF
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2649
+	.loc ../contracts/DexStablePool.sol, 2655
 	PUSH2 S0, S10
 	UNPAIR
 	PUSH S20
@@ -17430,7 +17442,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S11
-	.loc ../contracts/DexStablePool.sol, 2650
+	.loc ../contracts/DexStablePool.sol, 2656
 	OVER
 	GETGLOB 22
 	THIRD
@@ -17452,13 +17464,13 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S12
-	.loc ../contracts/DexStablePool.sol, 2651
+	.loc ../contracts/DexStablePool.sol, 2657
 	DUP2
 	SUB
 	UFITS 128
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2653
+	.loc ../contracts/DexStablePool.sol, 2659
 	OVER
 	GETGLOB 22
 	THIRD
@@ -17485,7 +17497,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S12
-	.loc ../contracts/DexStablePool.sol, 2654
+	.loc ../contracts/DexStablePool.sol, 2660
 	OVER
 }
 IFELSE
@@ -17513,7 +17525,7 @@ PUSHINT 32
 DICTUSETB
 PAIR
 POP S13
-.loc ../contracts/DexStablePool.sol, 2657
+.loc ../contracts/DexStablePool.sol, 2663
 BLKDROP 3
 PUSH2 S14, S10
 SECOND
@@ -17552,7 +17564,7 @@ PUSHINT 32
 DICTUSETB
 PAIR
 POP S7
-.loc ../contracts/DexStablePool.sol, 2658
+.loc ../contracts/DexStablePool.sol, 2664
 PUSH2 S14, S10
 SECOND
 PUSHINT 32
@@ -17599,7 +17611,7 @@ PUSHINT 32
 DICTUSETB
 PAIR
 POP S11
-.loc ../contracts/DexStablePool.sol, 2660
+.loc ../contracts/DexStablePool.sol, 2666
 ROLL 10
 CALLREF {
 	CALL $_xp_mem_ec48ffce_internal_macro$
@@ -17607,11 +17619,11 @@ CALLREF {
 CALLREF {
 	CALL $_get_D_115bcc50_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2661
+.loc ../contracts/DexStablePool.sol, 2667
 DUP
 ISNULL
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2662
+	.loc ../contracts/DexStablePool.sol, 2668
 	PUSH3 S12, S0, S0
 	ISNULL
 	THROWIF 63
@@ -17625,13 +17637,13 @@ PUSHCONT {
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFNOT
-.loc ../contracts/DexStablePool.sol, 2665
+.loc ../contracts/DexStablePool.sol, 2671
 ISNULL
 PUSH S4
 EQINT 0
 OR
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2666
+	.loc ../contracts/DexStablePool.sol, 2672
 	ROLL 10
 	ROLL 7
 	XCHG S8
@@ -17639,7 +17651,7 @@ PUSHCONT {
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFJMP
-.loc ../contracts/DexStablePool.sol, 2669
+.loc ../contracts/DexStablePool.sol, 2675
 ROLL 12
 BLKSWAP 2, 4
 ROLL 7
@@ -17649,7 +17661,7 @@ BLKSWAP 2, 6
 BLKSWAP 2, 9
 TUPLE 9
 POP S3
-.loc ../contracts/DexStablePool.sol, 2681
+.loc ../contracts/DexStablePool.sol, 2687
 DROP
 BLKDROP2 1, 2
 .loc ../contracts/DexStablePool.sol, 0
@@ -17659,14 +17671,14 @@ BLKDROP2 1, 2
 CALL $_applyAddLiquidity_c0387a6a_internal_macro$
 
 .macro _applyAddLiquidity_c0387a6a_internal_macro
-.loc ../contracts/DexStablePool.sol, 2696
+.loc ../contracts/DexStablePool.sol, 2702
 PUSHINT 0
 NEWDICT
 PAIR
 BLKPUSH 4, 0
-.loc ../contracts/DexStablePool.sol, 2702
+.loc ../contracts/DexStablePool.sol, 2708
 TRUE
-.loc ../contracts/DexStablePool.sol, 2703
+.loc ../contracts/DexStablePool.sol, 2709
 PUSHINT 0
 PUSHCONT {
 	DUP
@@ -17674,7 +17686,7 @@ PUSHCONT {
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2704
+	.loc ../contracts/DexStablePool.sol, 2710
 	PUSH3 S2, S0, S15
 	INDEX2 1, 1
 	PUSHINT 32
@@ -17729,7 +17741,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S3
-	.loc ../contracts/DexStablePool.sol, 2705
+	.loc ../contracts/DexStablePool.sol, 2711
 	PUSH2 S0, S15
 	INDEX 5
 	SECOND
@@ -17739,7 +17751,7 @@ PUSHCONT {
 	PLDU 128
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2706
+		.loc ../contracts/DexStablePool.sol, 2712
 		PUSH2 S4, S0
 		GETGLOB 15
 		SECOND
@@ -17812,7 +17824,7 @@ PUSHCONT {
 		DICTUSETREF
 		PAIR
 		POP S5
-		.loc ../contracts/DexStablePool.sol, 2707
+		.loc ../contracts/DexStablePool.sol, 2713
 		PUSH2 S0, S15
 		INDEX 6
 		SECOND
@@ -17821,7 +17833,7 @@ PUSHCONT {
 		THROWIFNOT 50
 		PLDI 1
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 2708
+			.loc ../contracts/DexStablePool.sol, 2714
 			PUSH3 S6, S0, S15
 			INDEX 5
 			SECOND
@@ -17879,7 +17891,7 @@ PUSHCONT {
 			POP S7
 		}
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 2710
+			.loc ../contracts/DexStablePool.sol, 2716
 			PUSH3 S5, S0, S15
 			INDEX 5
 			SECOND
@@ -17940,7 +17952,7 @@ PUSHCONT {
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	IF
-	.loc ../contracts/DexStablePool.sol, 2714
+	.loc ../contracts/DexStablePool.sol, 2720
 	PUSH2 S0, S15
 	INDEX2 3, 1
 	PUSHINT 32
@@ -18013,7 +18025,7 @@ PUSHCONT {
 	DICTUSETREF
 	PAIR
 	SETGLOB 15
-	.loc ../contracts/DexStablePool.sol, 2715
+	.loc ../contracts/DexStablePool.sol, 2721
 	PUSH2 S0, S15
 	INDEX 8
 	SECOND
@@ -18091,7 +18103,7 @@ PUSHCONT {
 	DICTUSETREF
 	PAIR
 	SETGLOB 15
-	.loc ../contracts/DexStablePool.sol, 2717
+	.loc ../contracts/DexStablePool.sol, 2723
 	PUSH3 S3, S0, S14
 	SECOND
 	PUSHINT 32
@@ -18146,7 +18158,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S4
-	.loc ../contracts/DexStablePool.sol, 2719
+	.loc ../contracts/DexStablePool.sol, 2725
 	PUSH2 S0, S14
 	SECOND
 	PUSHINT 32
@@ -18155,10 +18167,10 @@ PUSHCONT {
 	PLDU 128
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2720
+		.loc ../contracts/DexStablePool.sol, 2726
 		FALSE
 		POP S2
-		.loc ../contracts/DexStablePool.sol, 2722
+		.loc ../contracts/DexStablePool.sol, 2728
 		CALLREF {
 			CALL $_tokenRoots_475f7f72_internal_macro$
 		}
@@ -18234,21 +18246,21 @@ PUSHCONT {
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	IF
-	.loc ../contracts/DexStablePool.sol, 2703
+	.loc ../contracts/DexStablePool.sol, 2709
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/DexStablePool.sol, 2735
+.loc ../contracts/DexStablePool.sol, 2741
 PUSH S14
 THIRD
 GETGLOB 21
 ADD
 UFITS 128
 SETGLOB 21
-.loc ../contracts/DexStablePool.sol, 2737
+.loc ../contracts/DexStablePool.sol, 2743
 PUSH S14
 THIRD
 ROT
@@ -18293,9 +18305,9 @@ STBREFR
 ENDC
 PUSHINT 0
 SENDRAWMSG
-.loc ../contracts/DexStablePool.sol, 2738
+.loc ../contracts/DexStablePool.sol, 2744
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2739
+	.loc ../contracts/DexStablePool.sol, 2745
 	DUP
 	PUSHREFSLICE {
 		.blob xc000000000000000000000000031ca4ab1
@@ -18313,7 +18325,7 @@ PUSHCONT {
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFNOT
-.loc ../contracts/DexStablePool.sol, 2742
+.loc ../contracts/DexStablePool.sol, 2748
 BLKDROP 4
 PUSH3 S5, S2, S3
 PUSHINT 10000000
@@ -18384,12 +18396,12 @@ PUSHINT 1
 ADDCONST 2
 UFITS 8
 SENDRAWMSG
-.loc ../contracts/DexStablePool.sol, 2748
+.loc ../contracts/DexStablePool.sol, 2754
 DUP
 ROT
 SDEQ
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2749
+	.loc ../contracts/DexStablePool.sol, 2755
 	PUSH3 S4, S1, S2
 	PUSH S3
 	FALSE
@@ -18465,30 +18477,30 @@ BLKDROP 5
 CALL $_get_y_D_5546bb02_internal_macro$
 
 .macro _get_y_D_5546bb02_internal_macro
-.loc ../contracts/DexStablePool.sol, 2757
+.loc ../contracts/DexStablePool.sol, 2763
 NULL
 PUSH2 S0, S3
-.loc ../contracts/DexStablePool.sol, 2759
+.loc ../contracts/DexStablePool.sol, 2765
 GETGLOB 24
 GEQ
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2760
+	.loc ../contracts/DexStablePool.sol, 2766
 	BLKDROP2 5, 1
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFJMP
-.loc ../contracts/DexStablePool.sol, 2763
+.loc ../contracts/DexStablePool.sol, 2769
 PUSH S5
 FIRST
 GETGLOB 24
 MUL
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2764
+.loc ../contracts/DexStablePool.sol, 2770
 PUSH S3
-.loc ../contracts/DexStablePool.sol, 2765
+.loc ../contracts/DexStablePool.sol, 2771
 PUSHINT 0
 BLKPUSH 2, 0
-.loc ../contracts/DexStablePool.sol, 2768
+.loc ../contracts/DexStablePool.sol, 2774
 PUSHCONT {
 	DUP
 	GETGLOB 24
@@ -18496,11 +18508,11 @@ PUSHCONT {
 }
 PUSHCONT {
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2769
+		.loc ../contracts/DexStablePool.sol, 2775
 		PUSH2 S0, S9
 		EQUAL
 		IFRET
-		.loc ../contracts/DexStablePool.sol, 2772
+		.loc ../contracts/DexStablePool.sol, 2778
 		PUSH2 S0, S8
 		SECOND
 		PUSHINT 32
@@ -18508,11 +18520,11 @@ PUSHCONT {
 		THROWIFNOT 50
 		PLDU 256
 		POP S2
-		.loc ../contracts/DexStablePool.sol, 2773
+		.loc ../contracts/DexStablePool.sol, 2779
 		BLKPUSH 2, 2
 		ADD
 		POP S3
-		.loc ../contracts/DexStablePool.sol, 2774
+		.loc ../contracts/DexStablePool.sol, 2780
 		PUSH3 S3, S7, S1
 		GETGLOB 24
 		MUL
@@ -18522,14 +18534,14 @@ PUSHCONT {
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	CALLX
-	.loc ../contracts/DexStablePool.sol, 2768
+	.loc ../contracts/DexStablePool.sol, 2774
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/DexStablePool.sol, 2777
+.loc ../contracts/DexStablePool.sol, 2783
 PUSH3 S2, S6, S9
 SECOND
 MUL
@@ -18539,18 +18551,18 @@ MUL
 MULDIV
 UFITS 256
 POP S3
-.loc ../contracts/DexStablePool.sol, 2778
+.loc ../contracts/DexStablePool.sol, 2784
 PUSH3 S1, S6, S9
 SECOND
 PUSH S6
 MULDIV
 UFITS 256
 ADD
-.loc ../contracts/DexStablePool.sol, 2779
+.loc ../contracts/DexStablePool.sol, 2785
 PUSHINT 0
-.loc ../contracts/DexStablePool.sol, 2780
+.loc ../contracts/DexStablePool.sol, 2786
 PUSH S8
-.loc ../contracts/DexStablePool.sol, 2782
+.loc ../contracts/DexStablePool.sol, 2788
 PUSHINT 0
 PUSHCONT {
 	DUP
@@ -18558,10 +18570,10 @@ PUSHCONT {
 	LEQ
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2783
+	.loc ../contracts/DexStablePool.sol, 2789
 	OVER
 	POP S3
-	.loc ../contracts/DexStablePool.sol, 2784
+	.loc ../contracts/DexStablePool.sol, 2790
 	PUSH2 S1, S1
 	MUL
 	PUSH S7
@@ -18576,7 +18588,7 @@ PUSHCONT {
 	UFITS 256
 	DIV
 	POP S2
-	.loc ../contracts/DexStablePool.sol, 2785
+	.loc ../contracts/DexStablePool.sol, 2791
 	PUSH2 S1, S2
 	GREATER
 	PUSHCONT {
@@ -18592,23 +18604,23 @@ PUSHCONT {
 	IFELSE
 	LESSINT 2
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2786
+		.loc ../contracts/DexStablePool.sol, 2792
 		OVER
 		UFITS 128
 		POP S9
-		.loc ../contracts/DexStablePool.sol, 2787
+		.loc ../contracts/DexStablePool.sol, 2793
 		RETALT
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	IFJMP
-	.loc ../contracts/DexStablePool.sol, 2782
+	.loc ../contracts/DexStablePool.sol, 2788
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILEBRK
 BLKDROP 8
-.loc ../contracts/DexStablePool.sol, 2791
+.loc ../contracts/DexStablePool.sol, 2797
 BLKDROP2 5, 1
 .loc ../contracts/DexStablePool.sol, 0
 
@@ -18617,17 +18629,17 @@ BLKDROP2 5, 1
 CALL $_expectedWithdrawLiquidity_71e320a0_internal_macro$
 
 .macro _expectedWithdrawLiquidity_71e320a0_internal_macro
-.loc ../contracts/DexStablePool.sol, 2795
+.loc ../contracts/DexStablePool.sol, 2801
 NULL
-.loc ../contracts/DexStablePool.sol, 2797
+.loc ../contracts/DexStablePool.sol, 2803
 GETGLOB 21
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2798
+	.loc ../contracts/DexStablePool.sol, 2804
 	NIP
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFNOTJMP
-.loc ../contracts/DexStablePool.sol, 2801
+.loc ../contracts/DexStablePool.sol, 2807
 DROP
 GETGLOB 24
 PUSHINT 0
@@ -18647,7 +18659,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 PAIR
-.loc ../contracts/DexStablePool.sol, 2802
+.loc ../contracts/DexStablePool.sol, 2808
 GETGLOB 24
 PUSHINT 0
 NEWC
@@ -18666,7 +18678,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 PAIR
-.loc ../contracts/DexStablePool.sol, 2803
+.loc ../contracts/DexStablePool.sol, 2809
 GETGLOB 24
 PUSHINT 0
 NEWC
@@ -18685,7 +18697,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 PAIR
-.loc ../contracts/DexStablePool.sol, 2804
+.loc ../contracts/DexStablePool.sol, 2810
 GETGLOB 24
 PUSHINT 0
 NEWC
@@ -18704,16 +18716,16 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 PAIR
-.loc ../contracts/DexStablePool.sol, 2806
+.loc ../contracts/DexStablePool.sol, 2812
 CALLREF {
 	CALL $_reserves_02c6ae9f_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2808
+.loc ../contracts/DexStablePool.sol, 2814
 PUSHINT 0
 NEWDICT
 PAIR
 DUP
-.loc ../contracts/DexStablePool.sol, 2811
+.loc ../contracts/DexStablePool.sol, 2817
 PUSHINT 0
 PUSHCONT {
 	DUP
@@ -18721,7 +18733,7 @@ PUSHCONT {
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2812
+	.loc ../contracts/DexStablePool.sol, 2818
 	PUSH2 S0, S3
 	SECOND
 	PUSHINT 32
@@ -18732,7 +18744,7 @@ PUSHCONT {
 	GETGLOB 21
 	MULDIV
 	UFITS 128
-	.loc ../contracts/DexStablePool.sol, 2813
+	.loc ../contracts/DexStablePool.sol, 2819
 	PUSH2 S3, S0
 	NEWC
 	STU 128
@@ -18745,7 +18757,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S4
-	.loc ../contracts/DexStablePool.sol, 2814
+	.loc ../contracts/DexStablePool.sol, 2820
 	BLKPUSH 2, 2
 	PUSH S6
 	SECOND
@@ -18767,14 +18779,14 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S2
-	.loc ../contracts/DexStablePool.sol, 2811
+	.loc ../contracts/DexStablePool.sol, 2817
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/DexStablePool.sol, 2817
+.loc ../contracts/DexStablePool.sol, 2823
 ROLL 7
 SWAP2
 PUSH S3
@@ -18800,105 +18812,10 @@ TUPLE 9
 CALL $_expectedWithdrawLiquidityOneCoin_fecc72b5_internal_macro$
 
 .macro _expectedWithdrawLiquidityOneCoin_fecc72b5_internal_macro
-.loc ../contracts/DexStablePool.sol, 2839
-GETGLOB 23
-.loc ../contracts/DexStablePool.sol, 2841
-NULL
-.loc ../contracts/DexStablePool.sol, 2843
-GETGLOB 24
-PUSHINT 0
-NEWC
-STU 128
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
-.loc ../contracts/DexStablePool.sol, 2844
-GETGLOB 24
-PUSHINT 0
-NEWC
-STU 128
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
 .loc ../contracts/DexStablePool.sol, 2845
-GETGLOB 24
-PUSHINT 0
-NEWC
-STU 128
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
+GETGLOB 23
 .loc ../contracts/DexStablePool.sol, 2847
-GETGLOB 24
-PUSHINT 0
-NEWC
-STU 128
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
-.loc ../contracts/DexStablePool.sol, 2848
-GETGLOB 24
-PUSHINT 0
-NEWC
-STI 1
-PUSHINT 0
-NEWDICT
-PUSH S3
-PUSHCONT {
-	BLKPUSH 2, 2
-	INC
-	XCHG S3
-	ROT
-	PUSHINT 32
-	DICTUSETB
-}
-REPEAT
-BLKDROP2 2, 1
-PAIR
+NULL
 .loc ../contracts/DexStablePool.sol, 2849
 GETGLOB 24
 PUSHINT 0
@@ -18918,33 +18835,128 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 PAIR
+.loc ../contracts/DexStablePool.sol, 2850
+GETGLOB 24
+PUSHINT 0
+NEWC
+STU 128
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
 .loc ../contracts/DexStablePool.sol, 2851
+GETGLOB 24
+PUSHINT 0
+NEWC
+STU 128
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
+.loc ../contracts/DexStablePool.sol, 2853
+GETGLOB 24
+PUSHINT 0
+NEWC
+STU 128
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
+.loc ../contracts/DexStablePool.sol, 2854
+GETGLOB 24
+PUSHINT 0
+NEWC
+STI 1
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
+.loc ../contracts/DexStablePool.sol, 2855
+GETGLOB 24
+PUSHINT 0
+NEWC
+STU 128
+PUSHINT 0
+NEWDICT
+PUSH S3
+PUSHCONT {
+	BLKPUSH 2, 2
+	INC
+	XCHG S3
+	ROT
+	PUSHINT 32
+	DICTUSETB
+}
+REPEAT
+BLKDROP2 2, 1
+PAIR
+.loc ../contracts/DexStablePool.sol, 2857
 PUSH S10
 CALLREF {
 	CALL $_xp_mem_ec48ffce_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2853
+.loc ../contracts/DexStablePool.sol, 2859
 PUSH2 S11, S0
-.loc ../contracts/DexStablePool.sol, 2855
+.loc ../contracts/DexStablePool.sol, 2861
 CALLREF {
 	CALL $_get_D_115bcc50_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2856
+.loc ../contracts/DexStablePool.sol, 2862
 DUP
 ISNULL
 THROWIF 63
-.loc ../contracts/DexStablePool.sol, 2858
+.loc ../contracts/DexStablePool.sol, 2864
 PUSH3 S0, S15, S0
 PUSH S15
 MULDIV
 UFITS 256
 SUB
 UFITS 256
-.loc ../contracts/DexStablePool.sol, 2859
+.loc ../contracts/DexStablePool.sol, 2865
 DUP
 ISNULL
 THROWIF 63
-.loc ../contracts/DexStablePool.sol, 2861
+.loc ../contracts/DexStablePool.sol, 2867
 PUSH S16
 GETGLOB 22
 THIRD
@@ -18960,7 +18972,7 @@ GETGLOB 22
 FIRST
 MULDIVC
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2863
+.loc ../contracts/DexStablePool.sol, 2869
 PUSH S2
 PUSH S18
 ROT
@@ -18972,17 +18984,17 @@ MULDIV
 UFITS 256
 SUB
 UFITS 256
-.loc ../contracts/DexStablePool.sol, 2864
+.loc ../contracts/DexStablePool.sol, 2870
 DUP
 ISNULL
 THROWIF 63
-.loc ../contracts/DexStablePool.sol, 2866
+.loc ../contracts/DexStablePool.sol, 2872
 PUSH3 S12, S15, S4
 PUSH S4
 CALLREF {
 	CALL $_get_y_D_5546bb02_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2867
+.loc ../contracts/DexStablePool.sol, 2873
 ROLL 13
 PUSH S16
 PUSH S7
@@ -18990,7 +19002,7 @@ ROLL 4
 CALLREF {
 	CALL $_get_y_D_5546bb02_internal_macro$
 }
-.loc ../contracts/DexStablePool.sol, 2869
+.loc ../contracts/DexStablePool.sol, 2875
 DUP
 ISNULL
 PUSH S2
@@ -19016,14 +19028,14 @@ PUSHCONT {
 }
 IFNOT
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2870
+	.loc ../contracts/DexStablePool.sol, 2876
 	ROLL 12
 	ROLL 10
 	BLKDROP2 15, 2
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFJMP
-.loc ../contracts/DexStablePool.sol, 2873
+.loc ../contracts/DexStablePool.sol, 2879
 PUSH2 S15, S5
 SECOND
 PUSHINT 32
@@ -19068,11 +19080,11 @@ CALLREF {
 }
 INDEX 7
 DIV
-.loc ../contracts/DexStablePool.sol, 2875
+.loc ../contracts/DexStablePool.sol, 2881
 XCPU S1, S0
 ISNULL
 THROWIF 63
-.loc ../contracts/DexStablePool.sol, 2876
+.loc ../contracts/DexStablePool.sol, 2882
 PUSH2 S15, S5
 SECOND
 PUSHINT 32
@@ -19114,7 +19126,7 @@ CALLREF {
 }
 INDEX 7
 DIV
-.loc ../contracts/DexStablePool.sol, 2878
+.loc ../contracts/DexStablePool.sol, 2884
 PUSHINT 0
 PUSHCONT {
 	DUP
@@ -19122,14 +19134,14 @@ PUSHCONT {
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2879
+	.loc ../contracts/DexStablePool.sol, 2885
 	PUSHINT 0
-	.loc ../contracts/DexStablePool.sol, 2880
+	.loc ../contracts/DexStablePool.sol, 2886
 	OVER
 	PUSH S19
 	EQUAL
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2881
+		.loc ../contracts/DexStablePool.sol, 2887
 		PUSH S10
 		UNPAIR
 		PUXC S3, S-1
@@ -19143,7 +19155,7 @@ PUSHCONT {
 		DICTUSETB
 		PAIR
 		POP S11
-		.loc ../contracts/DexStablePool.sol, 2882
+		.loc ../contracts/DexStablePool.sol, 2888
 		PUSH2 S1, S8
 		SECOND
 		PUSHINT 32
@@ -19156,7 +19168,7 @@ PUSHCONT {
 		PUSH S4
 	}
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2884
+		.loc ../contracts/DexStablePool.sol, 2890
 		PUSH S10
 		UNPAIR
 		PUXC S3, S-1
@@ -19170,7 +19182,7 @@ PUSHCONT {
 		DICTUSETB
 		PAIR
 		POP S11
-		.loc ../contracts/DexStablePool.sol, 2885
+		.loc ../contracts/DexStablePool.sol, 2891
 		PUSH2 S1, S8
 		SECOND
 		PUSHINT 32
@@ -19223,7 +19235,7 @@ PUSHCONT {
 	INDEX 7
 	DIV
 	NIP
-	.loc ../contracts/DexStablePool.sol, 2887
+	.loc ../contracts/DexStablePool.sol, 2893
 	UFITS 128
 	PUSH S11
 	UNPAIR
@@ -19239,19 +19251,19 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S11
-	.loc ../contracts/DexStablePool.sol, 2878
+	.loc ../contracts/DexStablePool.sol, 2884
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/DexStablePool.sol, 2890
+.loc ../contracts/DexStablePool.sol, 2896
 ROT
 OVER
 SUB
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2891
+.loc ../contracts/DexStablePool.sol, 2897
 GETGLOB 22
 SECOND
 GETGLOB 22
@@ -19262,14 +19274,14 @@ GETGLOB 22
 INDEX 3
 ADD
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2892
+.loc ../contracts/DexStablePool.sol, 2898
 OVER
 GETGLOB 22
 INDEX 3
 PUSH S2
 MULDIV
 UFITS 128
-.loc ../contracts/DexStablePool.sol, 2894
+.loc ../contracts/DexStablePool.sol, 2900
 ROLL 16
 PARSEMSGADDR
 INDEX 3
@@ -19366,7 +19378,7 @@ PUSHCONT {
 }
 IF
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2898
+	.loc ../contracts/DexStablePool.sol, 2904
 	PUSH2 S0, S12
 	UNPAIR
 	PUSH S20
@@ -19382,7 +19394,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S13
-	.loc ../contracts/DexStablePool.sol, 2899
+	.loc ../contracts/DexStablePool.sol, 2905
 	PUSH S2
 	GETGLOB 22
 	THIRD
@@ -19404,13 +19416,13 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S14
-	.loc ../contracts/DexStablePool.sol, 2900
+	.loc ../contracts/DexStablePool.sol, 2906
 	PUSH2 S2, S0
 	SUB
 	UFITS 128
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2902
+	.loc ../contracts/DexStablePool.sol, 2908
 	PUSH S2
 	GETGLOB 22
 	THIRD
@@ -19437,7 +19449,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S14
-	.loc ../contracts/DexStablePool.sol, 2903
+	.loc ../contracts/DexStablePool.sol, 2909
 	PUSH S2
 }
 IFELSE
@@ -19465,7 +19477,7 @@ PUSHINT 32
 DICTUSETB
 PAIR
 POP S15
-.loc ../contracts/DexStablePool.sol, 2906
+.loc ../contracts/DexStablePool.sol, 2912
 BLKDROP 3
 DUP
 UFITS 128
@@ -19484,7 +19496,7 @@ PUSHINT 32
 DICTUSETB
 PAIR
 POP S7
-.loc ../contracts/DexStablePool.sol, 2907
+.loc ../contracts/DexStablePool.sol, 2913
 BLKPUSH 2, 14
 SECOND
 PUSHINT 32
@@ -19524,7 +19536,7 @@ PUSHINT 32
 DICTUSETB
 PAIR
 POP S4
-.loc ../contracts/DexStablePool.sol, 2909
+.loc ../contracts/DexStablePool.sol, 2915
 DROP
 BLKSWAP 2, 11
 ROLL 6
@@ -19535,7 +19547,7 @@ BLKSWAP 2, 7
 BLKSWAP 2, 10
 TUPLE 9
 POP S4
-.loc ../contracts/DexStablePool.sol, 2921
+.loc ../contracts/DexStablePool.sol, 2927
 DROP2
 .loc ../contracts/DexStablePool.sol, 0
 
@@ -19544,14 +19556,14 @@ DROP2
 CALL $_applyWithdrawLiquidity_2683cff0_internal_macro$
 
 .macro _applyWithdrawLiquidity_2683cff0_internal_macro
-.loc ../contracts/DexStablePool.sol, 2936
+.loc ../contracts/DexStablePool.sol, 2942
 PUSHINT 0
 NEWDICT
 PAIR
 BLKPUSH 4, 0
-.loc ../contracts/DexStablePool.sol, 2942
+.loc ../contracts/DexStablePool.sol, 2948
 TRUE
-.loc ../contracts/DexStablePool.sol, 2943
+.loc ../contracts/DexStablePool.sol, 2949
 PUSHINT 0
 PUSHCONT {
 	DUP
@@ -19559,7 +19571,7 @@ PUSHCONT {
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2944
+	.loc ../contracts/DexStablePool.sol, 2950
 	PUSH3 S2, S0, S15
 	INDEX2 2, 1
 	PUSHINT 32
@@ -19614,7 +19626,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S3
-	.loc ../contracts/DexStablePool.sol, 2945
+	.loc ../contracts/DexStablePool.sol, 2951
 	PUSH2 S0, S15
 	INDEX 5
 	SECOND
@@ -19624,7 +19636,7 @@ PUSHCONT {
 	PLDU 128
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2946
+		.loc ../contracts/DexStablePool.sol, 2952
 		PUSH2 S4, S0
 		GETGLOB 15
 		SECOND
@@ -19697,7 +19709,7 @@ PUSHCONT {
 		DICTUSETREF
 		PAIR
 		POP S5
-		.loc ../contracts/DexStablePool.sol, 2947
+		.loc ../contracts/DexStablePool.sol, 2953
 		PUSH2 S0, S15
 		INDEX 6
 		SECOND
@@ -19706,7 +19718,7 @@ PUSHCONT {
 		THROWIFNOT 50
 		PLDI 1
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 2948
+			.loc ../contracts/DexStablePool.sol, 2954
 			PUSH3 S6, S0, S15
 			INDEX 5
 			SECOND
@@ -19764,7 +19776,7 @@ PUSHCONT {
 			POP S7
 		}
 		PUSHCONT {
-			.loc ../contracts/DexStablePool.sol, 2950
+			.loc ../contracts/DexStablePool.sol, 2956
 			PUSH3 S5, S0, S15
 			INDEX 5
 			SECOND
@@ -19825,7 +19837,7 @@ PUSHCONT {
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	IF
-	.loc ../contracts/DexStablePool.sol, 2954
+	.loc ../contracts/DexStablePool.sol, 2960
 	PUSH2 S0, S15
 	INDEX2 3, 1
 	PUSHINT 32
@@ -19898,7 +19910,7 @@ PUSHCONT {
 	DICTUSETREF
 	PAIR
 	SETGLOB 15
-	.loc ../contracts/DexStablePool.sol, 2955
+	.loc ../contracts/DexStablePool.sol, 2961
 	PUSH2 S0, S15
 	INDEX 8
 	SECOND
@@ -19976,7 +19988,7 @@ PUSHCONT {
 	DICTUSETREF
 	PAIR
 	SETGLOB 15
-	.loc ../contracts/DexStablePool.sol, 2957
+	.loc ../contracts/DexStablePool.sol, 2963
 	PUSH3 S3, S0, S14
 	SECOND
 	PUSHINT 32
@@ -20031,7 +20043,7 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S4
-	.loc ../contracts/DexStablePool.sol, 2959
+	.loc ../contracts/DexStablePool.sol, 2965
 	PUSH2 S0, S14
 	SECOND
 	PUSHINT 32
@@ -20040,10 +20052,10 @@ PUSHCONT {
 	PLDU 128
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/DexStablePool.sol, 2960
+		.loc ../contracts/DexStablePool.sol, 2966
 		FALSE
 		POP S2
-		.loc ../contracts/DexStablePool.sol, 2962
+		.loc ../contracts/DexStablePool.sol, 2968
 		CALLREF {
 			CALL $_tokenRoots_475f7f72_internal_macro$
 		}
@@ -20119,21 +20131,21 @@ PUSHCONT {
 		.loc ../contracts/DexStablePool.sol, 0
 	}
 	IF
-	.loc ../contracts/DexStablePool.sol, 2943
+	.loc ../contracts/DexStablePool.sol, 2949
 	INC
 	UFITS 8
 	.loc ../contracts/DexStablePool.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/DexStablePool.sol, 2975
+.loc ../contracts/DexStablePool.sol, 2981
 PUSH S14
 FIRST
 GETGLOB 21
 SUBR
 UFITS 128
 SETGLOB 21
-.loc ../contracts/DexStablePool.sol, 2977
+.loc ../contracts/DexStablePool.sol, 2983
 SWAP
 XCHG S1, S3
 REVERSE 4, 2
@@ -20178,9 +20190,9 @@ STBREFR
 ENDC
 PUSHINT 0
 SENDRAWMSG
-.loc ../contracts/DexStablePool.sol, 2978
+.loc ../contracts/DexStablePool.sol, 2984
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2979
+	.loc ../contracts/DexStablePool.sol, 2985
 	DUP
 	PUSHREFSLICE {
 		.blob xc000000000000000000000000031ca4ab1
@@ -20198,7 +20210,7 @@ PUSHCONT {
 	.loc ../contracts/DexStablePool.sol, 0
 }
 IFNOT
-.loc ../contracts/DexStablePool.sol, 2982
+.loc ../contracts/DexStablePool.sol, 2988
 BLKDROP 4
 PUSH3 S5, S2, S3
 PUSHINT 10000000
@@ -20269,11 +20281,11 @@ PUSHINT 1
 ADDCONST 2
 UFITS 8
 SENDRAWMSG
-.loc ../contracts/DexStablePool.sol, 2988
+.loc ../contracts/DexStablePool.sol, 2994
 TUCK
 SDEQ
 PUSHCONT {
-	.loc ../contracts/DexStablePool.sol, 2989
+	.loc ../contracts/DexStablePool.sol, 2995
 	PUSH3 S4, S1, S2
 	PUSH S3
 	FALSE
@@ -20976,753 +20988,6 @@ PUSHCONT {
 }
 IF
 THROW 0
-
-.globl	PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e
-.type	PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e, @function
-CALL $PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e_macro$
-
-.macro PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e_macro
-.loc ../contracts/libraries/PairPayload.sol, 643
-PUSHINT 0
-.loc ../contracts/libraries/PairPayload.sol, 644
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-.loc ../contracts/libraries/PairPayload.sol, 645
-PUSHINT 0
-NEWDICT
-PAIR
-.loc ../contracts/libraries/PairPayload.sol, 647
-PUSH S3
-EQINT 4
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 648
-	PUSH S4
-	CTOS
-	.loc ../contracts/libraries/PairPayload.sol, 650
-	DUP
-	LDU 128
-	POP S2
-	POP S4
-	.loc ../contracts/libraries/PairPayload.sol, 651
-	DUP
-	SREFS
-	GTINT 0
-	.loc ../contracts/libraries/PairPayload.sol, 653
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 654
-		DUP
-		SBITS
-		PUSHINT 267
-		GEQ
-		PUSHCONT {
-			DUP
-			LDMSGADDR
-			POP S2
-		}
-		PUSHCONT {
-			PUSHREFSLICE {
-				.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-			}
-		}
-		IFELSE
-		.loc ../contracts/libraries/PairPayload.sol, 655
-		PUSH S2
-		PUSHINT 1
-		ROT
-		PUSH S3
-		LDREF
-		POP S5
-		PUSHINT 1
-		DUP
-		TUPLE 5
-		CALLREF {
-			UNTUPLE 5
-			REVERSE 5, 0
-			NEWC
-			STU 128
-			STSLICE
-			STREF
-			STU 32
-			STU 32
-		}
-		SWAP
-		UNPAIR
-		OVER
-		INC
-		ROLLREV 3
-		PUSHINT 32
-		DICTUSETB
-		PAIR
-		POP S2
-		.loc ../contracts/libraries/PairPayload.sol, 0
-	}
-	IF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-	DROP
-}
-PUSHCONT {
-	PUSH S3
-	EQINT 9
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 664
-		PUSH S4
-		CTOS
-		LDU 128
-		LDMSGADDR
-		LDU 32
-		LDDICT
-		ROTREV
-		PAIR
-		SWAP
-		ENDS
-		BLKDROP2 3, 3
-		.loc ../contracts/libraries/PairPayload.sol, 0
-	}
-	IF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFELSE
-.loc ../contracts/libraries/PairPayload.sol, 667
-BLKDROP2 1, 3
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e
-.type	PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e, @function
-CALL $PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e_macro$
-
-.macro PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e_macro
-.loc ../contracts/libraries/PairPayload.sol, 643
-PUSHINT 0
-.loc ../contracts/libraries/PairPayload.sol, 644
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-.loc ../contracts/libraries/PairPayload.sol, 645
-PUSHINT 0
-NEWDICT
-PAIR
-.loc ../contracts/libraries/PairPayload.sol, 647
-PUSH S3
-EQINT 4
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 648
-	PUSH S4
-	CTOS
-	.loc ../contracts/libraries/PairPayload.sol, 650
-	DUP
-	LDU 128
-	POP S2
-	POP S4
-	.loc ../contracts/libraries/PairPayload.sol, 651
-	DUP
-	SREFS
-	GTINT 0
-	.loc ../contracts/libraries/PairPayload.sol, 653
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 654
-		DUP
-		SBITS
-		PUSHINT 267
-		GEQ
-		PUSHCONT {
-			DUP
-			LDMSGADDR
-			POP S2
-		}
-		PUSHCONT {
-			PUSHREFSLICE {
-				.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-			}
-		}
-		IFELSE
-		.loc ../contracts/libraries/PairPayload.sol, 655
-		PUSH S2
-		PUSHINT 1
-		ROT
-		PUSH S3
-		LDREF
-		POP S5
-		PUSHINT 1
-		DUP
-		TUPLE 5
-		CALLREF {
-			UNTUPLE 5
-			REVERSE 5, 0
-			NEWC
-			STU 128
-			STSLICE
-			STREF
-			STU 32
-			STU 32
-		}
-		SWAP
-		UNPAIR
-		OVER
-		INC
-		ROLLREV 3
-		PUSHINT 32
-		DICTUSETB
-		PAIR
-		POP S2
-		.loc ../contracts/libraries/PairPayload.sol, 0
-	}
-	IF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-	DROP
-}
-PUSHCONT {
-	PUSH S3
-	EQINT 9
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 664
-		PUSH S4
-		CTOS
-		LDU 128
-		LDMSGADDR
-		LDU 32
-		LDDICT
-		ROTREV
-		PAIR
-		SWAP
-		ENDS
-		BLKDROP2 3, 3
-		.loc ../contracts/libraries/PairPayload.sol, 0
-	}
-	IF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFELSE
-.loc ../contracts/libraries/PairPayload.sol, 667
-BLKDROP2 2, 3
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
-.type	PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
-CALL $PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
-
-.macro PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
-.loc ../contracts/libraries/PairPayload.sol, 584
-OVER
-CTOS
-.loc ../contracts/libraries/PairPayload.sol, 585
-DUP
-SREFS
-.loc ../contracts/libraries/PairPayload.sol, 588
-PUSHINT 0
-DUP
-.loc ../contracts/libraries/PairPayload.sol, 591
-PUSHREF {
-}
-PUSH2 S0, S3
-.loc ../contracts/libraries/PairPayload.sol, 594
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 595
-	XCHG S1, S2
-	BLKDROP2 3, 4
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOTJMP
-.loc ../contracts/libraries/PairPayload.sol, 598
-PUSH S6
-EQINT 1
-PUSH S7
-EQINT 2
-PUSH S8
-EQINT 3
-OR
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 603
-	PUSH S4
-	GTINT 0
-	POP S4
-	.loc ../contracts/libraries/PairPayload.sol, 604
-	PUSH S4
-	GTINT 1
-	POP S3
-}
-PUSHCONT {
-	PUSH S6
-	EQINT 4
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 606
-		PUSH S4
-		GTINT 1
-		POP S4
-		.loc ../contracts/libraries/PairPayload.sol, 607
-		PUSH S4
-		GTINT 2
-		POP S3
-		.loc ../contracts/libraries/PairPayload.sol, 609
-	}
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 611
-		PUSH S4
-		GTINT 2
-		POP S4
-		.loc ../contracts/libraries/PairPayload.sol, 612
-		PUSH S4
-		EQINT 4
-		POP S3
-		.loc ../contracts/libraries/PairPayload.sol, 614
-		PUSH S5
-		LDREF
-		POP S7
-		DROP
-		.loc ../contracts/libraries/PairPayload.sol, 615
-	}
-	IFELSE
-	PUSH S5
-	LDREF
-	POP S7
-	DROP
-}
-IFELSE
-.loc ../contracts/libraries/PairPayload.sol, 618
-PUSH S3
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 618
-	PUSH S5
-	LDREF
-	POP S7
-	POP S2
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IF
-.loc ../contracts/libraries/PairPayload.sol, 620
-PUSH S2
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 620
-	PUSH S5
-	LDREF
-	POP S7
-	NIP
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IF
-.loc ../contracts/libraries/PairPayload.sol, 622
-XCHG S1, S2
-BLKDROP2 3, 4
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
-.type	PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
-CALL $PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
-
-.macro PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
-.loc ../contracts/libraries/PairPayload.sol, 584
-SWAP
-CTOS
-.loc ../contracts/libraries/PairPayload.sol, 585
-DUP
-SREFS
-.loc ../contracts/libraries/PairPayload.sol, 588
-PUSHINT 0
-DUP
-.loc ../contracts/libraries/PairPayload.sol, 591
-PUSHREF {
-}
-PUSH2 S0, S3
-.loc ../contracts/libraries/PairPayload.sol, 594
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 595
-	XCHG S1, S2
-	BLKDROP2 3, 4
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOTJMP
-.loc ../contracts/libraries/PairPayload.sol, 598
-PUSH S6
-EQINT 1
-PUSH S7
-EQINT 2
-PUSH S8
-EQINT 3
-OR
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 603
-	PUSH S4
-	GTINT 0
-	POP S4
-	.loc ../contracts/libraries/PairPayload.sol, 604
-	PUSH S4
-	GTINT 1
-	POP S3
-}
-PUSHCONT {
-	PUSH S6
-	EQINT 4
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 606
-		PUSH S4
-		GTINT 1
-		POP S4
-		.loc ../contracts/libraries/PairPayload.sol, 607
-		PUSH S4
-		GTINT 2
-		POP S3
-		.loc ../contracts/libraries/PairPayload.sol, 609
-	}
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 611
-		PUSH S4
-		GTINT 2
-		POP S4
-		.loc ../contracts/libraries/PairPayload.sol, 612
-		PUSH S4
-		EQINT 4
-		POP S3
-		.loc ../contracts/libraries/PairPayload.sol, 614
-		PUSH S5
-		LDREF
-		POP S7
-		DROP
-		.loc ../contracts/libraries/PairPayload.sol, 615
-	}
-	IFELSE
-	PUSH S5
-	LDREF
-	POP S7
-	DROP
-}
-IFELSE
-.loc ../contracts/libraries/PairPayload.sol, 618
-PUSH S3
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 618
-	PUSH S5
-	LDREF
-	POP S7
-	POP S2
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IF
-.loc ../contracts/libraries/PairPayload.sol, 620
-PUSH S2
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 620
-	PUSH S5
-	LDREF
-	POP S7
-	NIP
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IF
-.loc ../contracts/libraries/PairPayload.sol, 622
-XCHG S1, S2
-BLKDROP2 3, 4
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_with_obj_buildCancelPayload_d16d279d
-.type	PairPayload_with_obj_buildCancelPayload_d16d279d, @function
-CALL $PairPayload_with_obj_buildCancelPayload_d16d279d_macro$
-
-.macro PairPayload_with_obj_buildCancelPayload_d16d279d_macro
-.loc ../contracts/libraries/PairPayload.sol, 680
-PUSH S3
-EQINT 1
-PUSH S4
-EQINT 2
-PUSH S5
-EQINT 3
-PUSH S6
-EQINT 4
-OR
-OR
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 685
-	DROP
-	NIP
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFJMP
-.loc ../contracts/libraries/PairPayload.sol, 690
-NEWC
-STSLICECONST xc9
-.loc ../contracts/libraries/PairPayload.sol, 691
-PUSH S4
-STUR 8
-.loc ../contracts/libraries/PairPayload.sol, 692
-ROLL 3
-STUR 16
-.loc ../contracts/libraries/PairPayload.sol, 693
-XCHG S1, S2
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 695
-PUSH S2
-EQINT 9
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 699
-	OVER
-	FIRST
-	PUSHINT 0
-	PUSHINT 1
-	CONDSEL
-	.loc ../contracts/libraries/PairPayload.sol, 700
-	PUSH S2
-	SECOND
-	PUSHINT 0
-	NULL
-	PUSHCONT {
-		PUSH2 S1, S2
-		PUSHINT 32
-		DICTUGET
-		NULLSWAPIFNOT
-		IFREF {
-			LDU 128
-			LDMSGADDR
-			LDREF
-			LDU 32
-			LDU 32
-			ENDS
-			TUPLE 5
-		}
-		DUP
-		POP S2
-		ISNULL
-		NOT
-	}
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 701
-		DUP
-		INDEX 4
-		PUSH S4
-		ADD
-		UFITS 32
-		POP S4
-		.loc ../contracts/libraries/PairPayload.sol, 0
-		OVER
-		INC
-		POP S2
-	}
-	WHILE
-	BLKDROP 3
-	.loc ../contracts/libraries/PairPayload.sol, 704
-	NEWC
-	STU 32
-	.loc ../contracts/libraries/PairPayload.sol, 706
-	ENDC
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 707
-	NEWC
-	PUSH S2
-	UNPAIR
-	XCHG S2
-	STU 32
-	STDICT
-	ENDC
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IF
-.loc ../contracts/libraries/PairPayload.sol, 710
-ENDC
-NIP
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_no_obj_buildCancelPayload_d16d279d
-.type	PairPayload_no_obj_buildCancelPayload_d16d279d, @function
-CALL $PairPayload_no_obj_buildCancelPayload_d16d279d_macro$
-
-.macro PairPayload_no_obj_buildCancelPayload_d16d279d_macro
-.loc ../contracts/libraries/PairPayload.sol, 680
-PUSH S3
-EQINT 1
-PUSH S4
-EQINT 2
-PUSH S5
-EQINT 3
-PUSH S6
-EQINT 4
-OR
-OR
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 685
-	DROP
-	BLKDROP2 2, 1
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFJMP
-.loc ../contracts/libraries/PairPayload.sol, 690
-NEWC
-STSLICECONST xc9
-.loc ../contracts/libraries/PairPayload.sol, 691
-PUSH S4
-STUR 8
-.loc ../contracts/libraries/PairPayload.sol, 692
-ROLL 3
-STUR 16
-.loc ../contracts/libraries/PairPayload.sol, 693
-XCHG S1, S2
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 695
-ROT
-EQINT 9
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 699
-	OVER
-	FIRST
-	PUSHINT 0
-	PUSHINT 1
-	CONDSEL
-	.loc ../contracts/libraries/PairPayload.sol, 700
-	PUSH S2
-	SECOND
-	PUSHINT 0
-	NULL
-	PUSHCONT {
-		PUSH2 S1, S2
-		PUSHINT 32
-		DICTUGET
-		NULLSWAPIFNOT
-		IFREF {
-			LDU 128
-			LDMSGADDR
-			LDREF
-			LDU 32
-			LDU 32
-			ENDS
-			TUPLE 5
-		}
-		DUP
-		POP S2
-		ISNULL
-		NOT
-	}
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 701
-		DUP
-		INDEX 4
-		PUSH S4
-		ADD
-		UFITS 32
-		POP S4
-		.loc ../contracts/libraries/PairPayload.sol, 0
-		OVER
-		INC
-		POP S2
-	}
-	WHILE
-	BLKDROP 3
-	.loc ../contracts/libraries/PairPayload.sol, 704
-	NEWC
-	STU 32
-	.loc ../contracts/libraries/PairPayload.sol, 706
-	ENDC
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 707
-	NEWC
-	PUSH S2
-	UNPAIR
-	XCHG S2
-	STU 32
-	STDICT
-	ENDC
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IF
-.loc ../contracts/libraries/PairPayload.sol, 710
-ENDC
-NIP
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_with_obj_buildSuccessPayload_ca821d98
-.type	PairPayload_with_obj_buildSuccessPayload_ca821d98, @function
-CALL $PairPayload_with_obj_buildSuccessPayload_ca821d98_macro$
-
-.macro PairPayload_with_obj_buildSuccessPayload_ca821d98_macro
-.loc ../contracts/libraries/PairPayload.sol, 718
-PUSH S2
-EQINT 1
-PUSH S3
-EQINT 2
-PUSH S4
-EQINT 3
-PUSH S5
-EQINT 4
-OR
-OR
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 723
-	DROP
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFJMP
-.loc ../contracts/libraries/PairPayload.sol, 728
-NEWC
-STSLICECONST xc8
-.loc ../contracts/libraries/PairPayload.sol, 729
-PUSH S3
-STUR 8
-.loc ../contracts/libraries/PairPayload.sol, 730
-XCHG S1, S2
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 733
-SWAP
-NEWC
-STSLICE
-.loc ../contracts/libraries/PairPayload.sol, 735
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 737
-ENDC
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_no_obj_buildSuccessPayload_ca821d98
-.type	PairPayload_no_obj_buildSuccessPayload_ca821d98, @function
-CALL $PairPayload_no_obj_buildSuccessPayload_ca821d98_macro$
-
-.macro PairPayload_no_obj_buildSuccessPayload_ca821d98_macro
-.loc ../contracts/libraries/PairPayload.sol, 718
-PUSH S2
-EQINT 1
-PUSH S3
-EQINT 2
-PUSH S4
-EQINT 3
-PUSH S5
-EQINT 4
-OR
-OR
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 723
-	DROP
-	NIP
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFJMP
-.loc ../contracts/libraries/PairPayload.sol, 728
-NEWC
-STSLICECONST xc8
-.loc ../contracts/libraries/PairPayload.sol, 729
-ROLL 3
-STUR 8
-.loc ../contracts/libraries/PairPayload.sol, 730
-XCHG S1, S2
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 733
-SWAP
-NEWC
-STSLICE
-.loc ../contracts/libraries/PairPayload.sol, 735
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 737
-ENDC
-.loc ../contracts/libraries/PairPayload.sol, 0
 
 .globl	PairPayload_with_obj_buildCrossPairExchangePayloadV2_3181478d
 .type	PairPayload_with_obj_buildCrossPairExchangePayloadV2_3181478d, @function
@@ -23481,6 +22746,226 @@ PUSHREFSLICE {
 }
 .loc ../contracts/libraries/PairPayload.sol, 0
 
+.globl	PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e
+.type	PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e, @function
+CALL $PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e_macro$
+
+.macro PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e_macro
+.loc ../contracts/libraries/PairPayload.sol, 643
+PUSHINT 0
+.loc ../contracts/libraries/PairPayload.sol, 644
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+.loc ../contracts/libraries/PairPayload.sol, 645
+PUSHINT 0
+NEWDICT
+PAIR
+.loc ../contracts/libraries/PairPayload.sol, 647
+PUSH S3
+EQINT 4
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 648
+	PUSH S4
+	CTOS
+	.loc ../contracts/libraries/PairPayload.sol, 650
+	DUP
+	LDU 128
+	POP S2
+	POP S4
+	.loc ../contracts/libraries/PairPayload.sol, 651
+	DUP
+	SREFS
+	GTINT 0
+	.loc ../contracts/libraries/PairPayload.sol, 653
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 654
+		DUP
+		SBITS
+		PUSHINT 267
+		GEQ
+		PUSHCONT {
+			DUP
+			LDMSGADDR
+			POP S2
+		}
+		PUSHCONT {
+			PUSHREFSLICE {
+				.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+			}
+		}
+		IFELSE
+		.loc ../contracts/libraries/PairPayload.sol, 655
+		PUSH S2
+		PUSHINT 1
+		ROT
+		PUSH S3
+		LDREF
+		POP S5
+		PUSHINT 1
+		DUP
+		TUPLE 5
+		CALLREF {
+			UNTUPLE 5
+			REVERSE 5, 0
+			NEWC
+			STU 128
+			STSLICE
+			STREF
+			STU 32
+			STU 32
+		}
+		SWAP
+		UNPAIR
+		OVER
+		INC
+		ROLLREV 3
+		PUSHINT 32
+		DICTUSETB
+		PAIR
+		POP S2
+		.loc ../contracts/libraries/PairPayload.sol, 0
+	}
+	IF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+	DROP
+}
+PUSHCONT {
+	PUSH S3
+	EQINT 9
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 664
+		PUSH S4
+		CTOS
+		LDU 128
+		LDMSGADDR
+		LDU 32
+		LDDICT
+		ROTREV
+		PAIR
+		SWAP
+		ENDS
+		BLKDROP2 3, 3
+		.loc ../contracts/libraries/PairPayload.sol, 0
+	}
+	IF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFELSE
+.loc ../contracts/libraries/PairPayload.sol, 667
+BLKDROP2 1, 3
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e
+.type	PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e, @function
+CALL $PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e_macro$
+
+.macro PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e_macro
+.loc ../contracts/libraries/PairPayload.sol, 643
+PUSHINT 0
+.loc ../contracts/libraries/PairPayload.sol, 644
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+.loc ../contracts/libraries/PairPayload.sol, 645
+PUSHINT 0
+NEWDICT
+PAIR
+.loc ../contracts/libraries/PairPayload.sol, 647
+PUSH S3
+EQINT 4
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 648
+	PUSH S4
+	CTOS
+	.loc ../contracts/libraries/PairPayload.sol, 650
+	DUP
+	LDU 128
+	POP S2
+	POP S4
+	.loc ../contracts/libraries/PairPayload.sol, 651
+	DUP
+	SREFS
+	GTINT 0
+	.loc ../contracts/libraries/PairPayload.sol, 653
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 654
+		DUP
+		SBITS
+		PUSHINT 267
+		GEQ
+		PUSHCONT {
+			DUP
+			LDMSGADDR
+			POP S2
+		}
+		PUSHCONT {
+			PUSHREFSLICE {
+				.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+			}
+		}
+		IFELSE
+		.loc ../contracts/libraries/PairPayload.sol, 655
+		PUSH S2
+		PUSHINT 1
+		ROT
+		PUSH S3
+		LDREF
+		POP S5
+		PUSHINT 1
+		DUP
+		TUPLE 5
+		CALLREF {
+			UNTUPLE 5
+			REVERSE 5, 0
+			NEWC
+			STU 128
+			STSLICE
+			STREF
+			STU 32
+			STU 32
+		}
+		SWAP
+		UNPAIR
+		OVER
+		INC
+		ROLLREV 3
+		PUSHINT 32
+		DICTUSETB
+		PAIR
+		POP S2
+		.loc ../contracts/libraries/PairPayload.sol, 0
+	}
+	IF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+	DROP
+}
+PUSHCONT {
+	PUSH S3
+	EQINT 9
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 664
+		PUSH S4
+		CTOS
+		LDU 128
+		LDMSGADDR
+		LDU 32
+		LDDICT
+		ROTREV
+		PAIR
+		SWAP
+		ENDS
+		BLKDROP2 3, 3
+		.loc ../contracts/libraries/PairPayload.sol, 0
+	}
+	IF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFELSE
+.loc ../contracts/libraries/PairPayload.sol, 667
+BLKDROP2 2, 3
+.loc ../contracts/libraries/PairPayload.sol, 0
+
 .globl	PairPayload_with_obj__decodeOnAcceptTokensTransferDataV2_e91032f2
 .type	PairPayload_with_obj__decodeOnAcceptTokensTransferDataV2_e91032f2, @function
 CALL $PairPayload_with_obj__decodeOnAcceptTokensTransferDataV2_e91032f2_macro$
@@ -23866,6 +23351,533 @@ ROLL 9
 REVERSE 8, 0
 REVERSE 8, 1
 BLKDROP2 3, 9
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
+.type	PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
+CALL $PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
+
+.macro PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
+.loc ../contracts/libraries/PairPayload.sol, 584
+OVER
+CTOS
+.loc ../contracts/libraries/PairPayload.sol, 585
+DUP
+SREFS
+.loc ../contracts/libraries/PairPayload.sol, 588
+PUSHINT 0
+DUP
+.loc ../contracts/libraries/PairPayload.sol, 591
+PUSHREF {
+}
+PUSH2 S0, S3
+.loc ../contracts/libraries/PairPayload.sol, 594
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 595
+	XCHG S1, S2
+	BLKDROP2 3, 4
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOTJMP
+.loc ../contracts/libraries/PairPayload.sol, 598
+PUSH S6
+EQINT 1
+PUSH S7
+EQINT 2
+PUSH S8
+EQINT 3
+OR
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 603
+	PUSH S4
+	GTINT 0
+	POP S4
+	.loc ../contracts/libraries/PairPayload.sol, 604
+	PUSH S4
+	GTINT 1
+	POP S3
+}
+PUSHCONT {
+	PUSH S6
+	EQINT 4
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 606
+		PUSH S4
+		GTINT 1
+		POP S4
+		.loc ../contracts/libraries/PairPayload.sol, 607
+		PUSH S4
+		GTINT 2
+		POP S3
+		.loc ../contracts/libraries/PairPayload.sol, 609
+	}
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 611
+		PUSH S4
+		GTINT 2
+		POP S4
+		.loc ../contracts/libraries/PairPayload.sol, 612
+		PUSH S4
+		EQINT 4
+		POP S3
+		.loc ../contracts/libraries/PairPayload.sol, 614
+		PUSH S5
+		LDREF
+		POP S7
+		DROP
+		.loc ../contracts/libraries/PairPayload.sol, 615
+	}
+	IFELSE
+	PUSH S5
+	LDREF
+	POP S7
+	DROP
+}
+IFELSE
+.loc ../contracts/libraries/PairPayload.sol, 618
+PUSH S3
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 618
+	PUSH S5
+	LDREF
+	POP S7
+	POP S2
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IF
+.loc ../contracts/libraries/PairPayload.sol, 620
+PUSH S2
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 620
+	PUSH S5
+	LDREF
+	POP S7
+	NIP
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IF
+.loc ../contracts/libraries/PairPayload.sol, 622
+XCHG S1, S2
+BLKDROP2 3, 4
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
+.type	PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
+CALL $PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
+
+.macro PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
+.loc ../contracts/libraries/PairPayload.sol, 584
+SWAP
+CTOS
+.loc ../contracts/libraries/PairPayload.sol, 585
+DUP
+SREFS
+.loc ../contracts/libraries/PairPayload.sol, 588
+PUSHINT 0
+DUP
+.loc ../contracts/libraries/PairPayload.sol, 591
+PUSHREF {
+}
+PUSH2 S0, S3
+.loc ../contracts/libraries/PairPayload.sol, 594
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 595
+	XCHG S1, S2
+	BLKDROP2 3, 4
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOTJMP
+.loc ../contracts/libraries/PairPayload.sol, 598
+PUSH S6
+EQINT 1
+PUSH S7
+EQINT 2
+PUSH S8
+EQINT 3
+OR
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 603
+	PUSH S4
+	GTINT 0
+	POP S4
+	.loc ../contracts/libraries/PairPayload.sol, 604
+	PUSH S4
+	GTINT 1
+	POP S3
+}
+PUSHCONT {
+	PUSH S6
+	EQINT 4
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 606
+		PUSH S4
+		GTINT 1
+		POP S4
+		.loc ../contracts/libraries/PairPayload.sol, 607
+		PUSH S4
+		GTINT 2
+		POP S3
+		.loc ../contracts/libraries/PairPayload.sol, 609
+	}
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 611
+		PUSH S4
+		GTINT 2
+		POP S4
+		.loc ../contracts/libraries/PairPayload.sol, 612
+		PUSH S4
+		EQINT 4
+		POP S3
+		.loc ../contracts/libraries/PairPayload.sol, 614
+		PUSH S5
+		LDREF
+		POP S7
+		DROP
+		.loc ../contracts/libraries/PairPayload.sol, 615
+	}
+	IFELSE
+	PUSH S5
+	LDREF
+	POP S7
+	DROP
+}
+IFELSE
+.loc ../contracts/libraries/PairPayload.sol, 618
+PUSH S3
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 618
+	PUSH S5
+	LDREF
+	POP S7
+	POP S2
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IF
+.loc ../contracts/libraries/PairPayload.sol, 620
+PUSH S2
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 620
+	PUSH S5
+	LDREF
+	POP S7
+	NIP
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IF
+.loc ../contracts/libraries/PairPayload.sol, 622
+XCHG S1, S2
+BLKDROP2 3, 4
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_with_obj_buildCancelPayload_d16d279d
+.type	PairPayload_with_obj_buildCancelPayload_d16d279d, @function
+CALL $PairPayload_with_obj_buildCancelPayload_d16d279d_macro$
+
+.macro PairPayload_with_obj_buildCancelPayload_d16d279d_macro
+.loc ../contracts/libraries/PairPayload.sol, 680
+PUSH S3
+EQINT 1
+PUSH S4
+EQINT 2
+PUSH S5
+EQINT 3
+PUSH S6
+EQINT 4
+OR
+OR
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 685
+	DROP
+	NIP
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFJMP
+.loc ../contracts/libraries/PairPayload.sol, 690
+NEWC
+STSLICECONST xc9
+.loc ../contracts/libraries/PairPayload.sol, 691
+PUSH S4
+STUR 8
+.loc ../contracts/libraries/PairPayload.sol, 692
+ROLL 3
+STUR 16
+.loc ../contracts/libraries/PairPayload.sol, 693
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 695
+PUSH S2
+EQINT 9
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 699
+	OVER
+	FIRST
+	PUSHINT 0
+	PUSHINT 1
+	CONDSEL
+	.loc ../contracts/libraries/PairPayload.sol, 700
+	PUSH S2
+	SECOND
+	PUSHINT 0
+	NULL
+	PUSHCONT {
+		PUSH2 S1, S2
+		PUSHINT 32
+		DICTUGET
+		NULLSWAPIFNOT
+		IFREF {
+			LDU 128
+			LDMSGADDR
+			LDREF
+			LDU 32
+			LDU 32
+			ENDS
+			TUPLE 5
+		}
+		DUP
+		POP S2
+		ISNULL
+		NOT
+	}
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 701
+		DUP
+		INDEX 4
+		PUSH S4
+		ADD
+		UFITS 32
+		POP S4
+		.loc ../contracts/libraries/PairPayload.sol, 0
+		OVER
+		INC
+		POP S2
+	}
+	WHILE
+	BLKDROP 3
+	.loc ../contracts/libraries/PairPayload.sol, 704
+	NEWC
+	STU 32
+	.loc ../contracts/libraries/PairPayload.sol, 706
+	ENDC
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 707
+	NEWC
+	PUSH S2
+	UNPAIR
+	XCHG S2
+	STU 32
+	STDICT
+	ENDC
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IF
+.loc ../contracts/libraries/PairPayload.sol, 710
+ENDC
+NIP
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_no_obj_buildCancelPayload_d16d279d
+.type	PairPayload_no_obj_buildCancelPayload_d16d279d, @function
+CALL $PairPayload_no_obj_buildCancelPayload_d16d279d_macro$
+
+.macro PairPayload_no_obj_buildCancelPayload_d16d279d_macro
+.loc ../contracts/libraries/PairPayload.sol, 680
+PUSH S3
+EQINT 1
+PUSH S4
+EQINT 2
+PUSH S5
+EQINT 3
+PUSH S6
+EQINT 4
+OR
+OR
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 685
+	DROP
+	BLKDROP2 2, 1
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFJMP
+.loc ../contracts/libraries/PairPayload.sol, 690
+NEWC
+STSLICECONST xc9
+.loc ../contracts/libraries/PairPayload.sol, 691
+PUSH S4
+STUR 8
+.loc ../contracts/libraries/PairPayload.sol, 692
+ROLL 3
+STUR 16
+.loc ../contracts/libraries/PairPayload.sol, 693
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 695
+ROT
+EQINT 9
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 699
+	OVER
+	FIRST
+	PUSHINT 0
+	PUSHINT 1
+	CONDSEL
+	.loc ../contracts/libraries/PairPayload.sol, 700
+	PUSH S2
+	SECOND
+	PUSHINT 0
+	NULL
+	PUSHCONT {
+		PUSH2 S1, S2
+		PUSHINT 32
+		DICTUGET
+		NULLSWAPIFNOT
+		IFREF {
+			LDU 128
+			LDMSGADDR
+			LDREF
+			LDU 32
+			LDU 32
+			ENDS
+			TUPLE 5
+		}
+		DUP
+		POP S2
+		ISNULL
+		NOT
+	}
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 701
+		DUP
+		INDEX 4
+		PUSH S4
+		ADD
+		UFITS 32
+		POP S4
+		.loc ../contracts/libraries/PairPayload.sol, 0
+		OVER
+		INC
+		POP S2
+	}
+	WHILE
+	BLKDROP 3
+	.loc ../contracts/libraries/PairPayload.sol, 704
+	NEWC
+	STU 32
+	.loc ../contracts/libraries/PairPayload.sol, 706
+	ENDC
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 707
+	NEWC
+	PUSH S2
+	UNPAIR
+	XCHG S2
+	STU 32
+	STDICT
+	ENDC
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IF
+.loc ../contracts/libraries/PairPayload.sol, 710
+ENDC
+NIP
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_with_obj_buildSuccessPayload_ca821d98
+.type	PairPayload_with_obj_buildSuccessPayload_ca821d98, @function
+CALL $PairPayload_with_obj_buildSuccessPayload_ca821d98_macro$
+
+.macro PairPayload_with_obj_buildSuccessPayload_ca821d98_macro
+.loc ../contracts/libraries/PairPayload.sol, 718
+PUSH S2
+EQINT 1
+PUSH S3
+EQINT 2
+PUSH S4
+EQINT 3
+PUSH S5
+EQINT 4
+OR
+OR
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 723
+	DROP
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFJMP
+.loc ../contracts/libraries/PairPayload.sol, 728
+NEWC
+STSLICECONST xc8
+.loc ../contracts/libraries/PairPayload.sol, 729
+PUSH S3
+STUR 8
+.loc ../contracts/libraries/PairPayload.sol, 730
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 733
+SWAP
+NEWC
+STSLICE
+.loc ../contracts/libraries/PairPayload.sol, 735
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 737
+ENDC
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_no_obj_buildSuccessPayload_ca821d98
+.type	PairPayload_no_obj_buildSuccessPayload_ca821d98, @function
+CALL $PairPayload_no_obj_buildSuccessPayload_ca821d98_macro$
+
+.macro PairPayload_no_obj_buildSuccessPayload_ca821d98_macro
+.loc ../contracts/libraries/PairPayload.sol, 718
+PUSH S2
+EQINT 1
+PUSH S3
+EQINT 2
+PUSH S4
+EQINT 3
+PUSH S5
+EQINT 4
+OR
+OR
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 723
+	DROP
+	NIP
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFJMP
+.loc ../contracts/libraries/PairPayload.sol, 728
+NEWC
+STSLICECONST xc8
+.loc ../contracts/libraries/PairPayload.sol, 729
+ROLL 3
+STUR 8
+.loc ../contracts/libraries/PairPayload.sol, 730
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 733
+SWAP
+NEWC
+STSLICE
+.loc ../contracts/libraries/PairPayload.sol, 735
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 737
+ENDC
 .loc ../contracts/libraries/PairPayload.sol, 0
 
 .macro default_tuple_builder_t_address_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool

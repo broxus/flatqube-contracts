@@ -1387,6 +1387,8 @@ contract DexStablePool is
                         original_gas_to
                     );
 
+                    _sync();
+
                     TvmBuilder builder;
                     builder.store(lp_vault_wallet);
 
@@ -1439,6 +1441,8 @@ contract DexStablePool is
                         original_gas_to
                     );
 
+                    _sync();
+
                     operation = TokenOperation(result.amounts[j], tokenData[j].root);
 
                     IDexVault(vault).burn{
@@ -1486,6 +1490,8 @@ contract DexStablePool is
                         dy_result.amount,
                         fees
                     );
+
+                    _sync();
 
                     if (dy_result.beneficiary_fee > 0) {
                         tokenData[i].accumulatedFee += dy_result.beneficiary_fee;
