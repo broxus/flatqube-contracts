@@ -22,12 +22,17 @@ async function main() {
 
   const signer = await locklift.keystore.getSigner('0');
   const account = (await locklift.factory.accounts.addNewAccount({
-    type: WalletTypes.WalletV3, // or WalletTypes.HighLoadWallet,
-    //Value which will send to the new account from a giver
+    type: WalletTypes.EverWallet,
     value: toNano(10),
-    //owner publicKey
     publicKey: signer!.publicKey,
   })).account;
+
+  await locklift.provider.sendMessage({
+    sender: account.address,
+    recipient: account.address,
+    amount: toNano(1),
+    bounce: false
+  })
 
   const name = `Account1`;
   migration.store(account, name);
@@ -84,12 +89,12 @@ async function main() {
   console.log(`Deploying DexRoot...`);
   const {contract: dexRoot} = await locklift.factory.deployContract({
     contract: 'DexRoot',
-    //@ts-ignore
+
     constructorParams: {
       initial_owner: account.address,
       initial_vault: zeroAddress
     },
-    //@ts-ignore
+
     initParams: {
       _nonce: getRandomNonce(),
     },
@@ -101,7 +106,7 @@ async function main() {
 
 
   console.log(`DexRoot: installing Platform code...`);
-  //@ts-ignore
+
   let tx = await dexRoot.methods.installPlatformOnce({code: DexPlatform.code}).send({
     from: account.address,
     amount: toNano(2)
@@ -109,7 +114,7 @@ async function main() {
   displayTx(tx);
 
   console.log(`DexRoot: installing DexAccount code...`);
-  //@ts-ignore
+
   tx = await dexRoot.methods.installOrUpdateAccountCode({code: DexAccount.code}).send({
     from: account.address,
     amount: toNano(2)
@@ -117,7 +122,7 @@ async function main() {
   displayTx(tx);
 
   console.log(`DexRoot: installing DexPair CONSTANT_PRODUCT code...`);
-  //@ts-ignore
+
   tx = await dexRoot.methods.installOrUpdatePairCode({code: DexPair.code, pool_type: 1}).send({
     from: account.address,
     amount: toNano(2)
@@ -125,7 +130,7 @@ async function main() {
   displayTx(tx);
 
   console.log(`DexRoot: installing DexStablePool code...`);
-  //@ts-ignore
+
   tx = await dexRoot.methods.installOrUpdatePoolCode({code: DexStablePool.code, pool_type: 3}).send({
     from: account.address,
     amount: toNano(2)
@@ -133,26 +138,23 @@ async function main() {
   displayTx(tx);
 
   console.log(`DexRoot: installing DexPair STABLESWAP code...`);
-  //@ts-ignore
+
   tx = await dexRoot.methods.installOrUpdatePairCode({code: DexStablePair.code, pool_type: 2}).send({
     from: account.address,
     amount: toNano(2)
   });
   displayTx(tx);
 
-
   console.log(`Deploying DexVault...`);
   const {contract: dexVault} = await locklift.factory.deployContract({
     contract: 'DexVault',
-    //@ts-ignore
     constructorParams: {
       owner_: account.address,
-      token_factory_: migration.getAddress('TokenFactory'),
+      token_factory_: migration.getAddress('TokenFactory').toString(),
       root_: dexRoot.address
     },
-    //@ts-ignore
     initParams: {
-      _nonce: getRandomNonce(),
+      _nonce: getRandomNonce()
     },
     publicKey: signer!.publicKey,
     value: toNano(2),
@@ -161,7 +163,7 @@ async function main() {
   migration.store(dexVault, 'DexVault');
 
   console.log(`DexVault: installing Platform code...`);
-  //@ts-ignore
+
   tx = await dexVault.methods.installPlatformOnce({code: DexPlatform.code}).send({
     from: account.address,
     amount: toNano(2)
@@ -169,14 +171,14 @@ async function main() {
   displayTx(tx);
 
   console.log(`DexVault: installing VaultLpTokenPendingV2 code...`);
-  //@ts-ignore
+
   tx = await dexVault.methods.installOrUpdateLpTokenPendingCode({code: DexVaultLpTokenPendingV2.code}).send({
     from: account.address,
     amount: toNano(2)
   });
 
   console.log(`DexRoot: installing vault address...`);
-  //@ts-ignore
+
   tx = await dexRoot.methods.setVaultOnce({new_vault: dexVault.address}).send({
     from: account.address,
     amount: toNano(2)
@@ -184,7 +186,7 @@ async function main() {
   displayTx(tx);
 
   console.log(`DexRoot: set Dex is active...`);
-  //@ts-ignore
+
   tx = await dexRoot.methods.setActive( {new_active: true}).send({
     from: account.address,
     amount: toNano(2)
@@ -194,8 +196,16 @@ async function main() {
 
   if (options.owner) {
     console.log(`Transferring DEX ownership from ${account.address} to ${options.owner}`);
+
+    console.log(`Set manager for DexRoot, manager = ${account.address}`);
+    let tx = await dexRoot.methods.setManager({_newManager: account.address}).send({
+      from: account.address,
+      amount: toNano(2)
+    });
+    displayTx(tx);
+
     console.log(`Transfer for DexRoot: ${dexRoot.address}`);
-    //@ts-ignore
+
     tx = await dexRoot.methods.transferOwner(
         {
           new_owner: newOwner
@@ -207,7 +217,7 @@ async function main() {
     displayTx(tx);
 
     console.log(`Transfer for DexVault: ${dexRoot.address}`);
-    //@ts-ignore
+
     tx = await dexVault.methods.transferOwner(
         {
           new_owner: newOwner
@@ -219,7 +229,7 @@ async function main() {
     displayTx(tx);
 
     console.log(`Transfer for TokenFactory: ${dexRoot.address}`);
-    //@ts-ignore
+
     tx = await tokenFactory.methods.transferOwner(
         {
           answerId: 0,
