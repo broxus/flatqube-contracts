@@ -19,6 +19,9 @@ contract TestNewOrderRoot is IOrderFeeParams {
     address spentToken;
 
     uint32 version;
+    uint32 versionOrder;
+    uint32 versionOrderClosed;
+
     TvmCell orderCode;
     TvmCell orderClosedCode;
     TvmCell orderPlatformCode;
@@ -46,10 +49,12 @@ contract TestNewOrderRoot is IOrderFeeParams {
             _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
         } else {
             TvmBuilder builder;
-            builder.store(spentToken);
             builder.store(factory);
+            builder.store(spentToken);
             builder.store(version);
             builder.store(_newVersion);
+            builder.store(versionOrder);
+            builder.store(versionOrderClosed);
 
             TvmBuilder builderCode;
             builderCode.store(orderCode);
@@ -59,7 +64,7 @@ contract TestNewOrderRoot is IOrderFeeParams {
 
             TvmBuilder builder1;
             builder1.store(spentTokenWallet);
-            builder1.store(deployer);
+            builder.store(deployer);
             builder1.store(dexRoot);
             builder.storeRef(builder1);
 
@@ -87,8 +92,9 @@ contract TestNewOrderRoot is IOrderFeeParams {
             factory,
             spentToken,
             oldVersion,
-            version
-        ) = sl.decode(address, address, uint32, uint32);
+            version,
+            versionOrder,
+            versionOrderClosed) = sl.decode(address, address, uint32, uint32, uint32, uint32);
 
         if (oldVersion == 0) {
             tvm.resetStorage();

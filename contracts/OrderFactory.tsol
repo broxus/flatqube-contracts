@@ -122,18 +122,6 @@ contract OrderFactory is IOrderFactory {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
 	}
 
-	function codeOrderRoot() external view responsible returns (TvmCell) {
-		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } orderRootCode;
-	}
-
-	function codeOrder() external view responsible returns (TvmCell) {
-		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } orderCode;
-	}
-
-	function codeOrderClosed() external view responsible returns (TvmCell) {
-		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } orderClosedCode;
-	}
-
 	function setEmergency(
 		bool enabled, 
 		address orderAddress,
@@ -164,6 +152,26 @@ contract OrderFactory is IOrderFactory {
 			flag: MsgFlag.ALL_NOT_RESERVED,
 			bounce: false
 		}(orderRootCode, versionOrderRoot, address(this));
+	}
+
+	function upgradeOrder(address order) external view onlyOwner {
+		require(msg.value >= OrderGas.UPDATE_ORDER_ROOT, OrderErrors.VALUE_TOO_LOW);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
+		IOrderRoot(order).upgrade{
+				value: 0,
+				flag: MsgFlag.ALL_NOT_RESERVED,
+				bounce: false
+		}(orderCode, versionOrder, address(this));
+	}
+
+	function upgradeOrderClosed(address order) external view onlyOwner {
+		require(msg.value >= OrderGas.UPDATE_ORDER_ROOT, OrderErrors.VALUE_TOO_LOW);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
+		IOrderRoot(order).upgrade{
+				value: 0,
+				flag: MsgFlag.ALL_NOT_RESERVED,
+				bounce: false
+		}(orderClosedCode, versionOrderClosed, address(this));
 	}
 
 	function setPlatformCodeOnce(TvmCell _orderPlatform) public onlyOwner {
@@ -321,6 +329,8 @@ contract OrderFactory is IOrderFactory {
 			}(
 				orderRootCode,
 				versionOrderRoot,
+				versionOrder,
+				versionOrderClosed,
 				fee,
 				msg.sender
 			);
@@ -388,7 +398,7 @@ contract OrderFactory is IOrderFactory {
 		TvmCell newCode,
 		uint32 newVersion,
 		address sendGasTo
-	) external override onlyOwner {
+	) external override onlyOwner { //TODO UPDATE for value
 		if (currentVersion == newVersion) {
 			tvm.rawReserve(address(this).balance - msg.value, 0);
 			sendGasTo.transfer({
@@ -402,6 +412,8 @@ contract OrderFactory is IOrderFactory {
 			builder.store(currentVersion);
 			builder.store(newVersion);
 			builder.store(versionOrderRoot);
+			builder.store(versionOrder);
+			builder.store(versionOrderClosed);
 			builder.store(owner);
 			builder.store(pendingOwner);
 			builder.store(dexRoot);

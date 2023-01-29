@@ -35,6 +35,8 @@ interface IOrder is IOrderFeeParams {
 		uint64 timeTx;
 		uint64 nowTx;
 		address matchingOrder;
+//		uint32 versionOrder;
+//		uint32 versionOrderClosed;
 	}
 
 	event StateChanged(uint8 from, uint8 to, Details);
@@ -47,7 +49,7 @@ interface IOrder is IOrderFeeParams {
 		uint128 currentReceiveTokenAmount,
 		uint128 fee
 	);
-
+	event OrderCodeUpgraded();
 	function currentStatus() external view responsible returns(uint8);
 	function initParams() external view responsible returns (InitParams);
 	function getDetails() external view responsible returns (Details);
@@ -59,4 +61,5 @@ interface IOrder is IOrderFeeParams {
 		uint128 amount,
 		uint128 reward,
 		address sendGasTo) external;
+//	function upgrade(TvmCell _code, uint32 _newVersion, address _sendGasTo) external;
 }

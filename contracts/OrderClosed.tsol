@@ -64,7 +64,7 @@ contract OrderClosed is
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } state;
     }
 
-    function initParams() override external view responsible returns(InitParams){
+    function initParams() override external view responsible returns(InitParams){ //TODO
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } InitParams(
             root,
             factory,
@@ -157,31 +157,30 @@ contract OrderClosed is
 
 	function buildDetails() private view returns(Details){
         return Details(
-            root,
-            owner,
-            swapAttempt,
-            state,
-            spentToken,
-            receiveToken,
-            spentWallet,
-            receiveWallet,
-            expectedAmount,
-            initialAmount,
+			root,
+			owner,
+			swapAttempt,
+			state,
+			spentToken,
+			receiveToken,
+			spentWallet,
+			receiveWallet,
+			expectedAmount,
+			initialAmount,
 			currentAmountSpentToken
-        );
+		);
     }
 
 	function onCodeUpgrade(TvmCell data) private {
-
 		tvm.resetStorage();
 		TvmSlice upg = data.toSlice();
-	
+
 		(
-			uint8 _state, 
-			address _owner,
-			address _factory,
-			address _root,
-			uint64 _swapAttempt
+		uint8 _state,
+		address _owner,
+		address _factory,
+		address _root,
+		uint64 _swapAttempt
 		) = upg.decode(uint8, address, address, address, uint64);
 
 		state = _state;
@@ -192,10 +191,10 @@ contract OrderClosed is
 
 		TvmSlice dataTokens = upg.loadRefAsSlice();
 		(
-			address _spentWallet, 
-			uint128 _currentAmountSpentToken,
-			address _spentToken,
-			address _receiveToken
+		address _spentWallet,
+		uint128 _currentAmountSpentToken,
+		address _spentToken,
+		address _receiveToken
 		) = dataTokens.decode(address, uint128, address, address);
 
 		spentWallet = _spentWallet;
@@ -205,9 +204,9 @@ contract OrderClosed is
 
 		TvmSlice dataSum = upg.loadRefAsSlice();
 		(
-			uint128 _expectedAmount,
-			uint128 _initialAmount,
-			address _receiveWallet
+		uint128 _expectedAmount,
+		uint128 _initialAmount,
+		address _receiveWallet
 		) = dataSum.decode(uint128, uint128, address);
 
 		expectedAmount = _expectedAmount;
@@ -217,11 +216,11 @@ contract OrderClosed is
 		TvmSlice dataFee = upg.loadRefAsSlice();
 
 		(
-			uint128 _numerator,
-			uint128 _denominator,
-			uint128 _matchingNumerator,
-			uint128 _matchingDenominator,
-			address _beneficiary
+		uint128 _numerator,
+		uint128 _denominator,
+		uint128 _matchingNumerator,
+		uint128 _matchingDenominator,
+		address _beneficiary
 		) = dataFee.decode(uint128, uint128, uint128, uint128, address);
 
 		fee = OrderFeeParams(_numerator, _denominator, _matchingNumerator, _matchingDenominator, _beneficiary);
@@ -229,15 +228,15 @@ contract OrderClosed is
 		if (state == OrderStatus.Cancelled) {
 			TvmCell emptyPayload;
 			ITokenWallet(spentWallet).transfer{
-				value: 0,
-				flag: MsgFlag.ALL_NOT_RESERVED,
-				bounce: false
+					value: 0,
+					flag: MsgFlag.ALL_NOT_RESERVED,
+					bounce: false
 			}(
 				currentAmountSpentToken,
-				owner, 
-				0, 
 				owner,
-				true, 
+				0,
+				owner,
+				true,
 				emptyPayload
 			);
 		} else {

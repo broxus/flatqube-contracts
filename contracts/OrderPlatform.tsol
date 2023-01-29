@@ -15,11 +15,13 @@ contract OrderPlatform is IOrderFeeParams{
 	constructor(
 		TvmCell code,
 		uint32 version,
+		uint32 versionOrder,
+		uint32 versionOrderClosed,
 		OrderFeeParams fee,
 		address sendGasTo
 	) public {
 		if (msg.sender.value != 0 && msg.sender == factory) {
-			initialize(code, version, fee, sendGasTo);
+			initialize(code, version, versionOrder, versionOrderClosed, fee, sendGasTo);
 		} else {
 			sendGasTo.transfer({
 				value: 0,
@@ -32,6 +34,8 @@ contract OrderPlatform is IOrderFeeParams{
 	function initialize(
 		TvmCell code,
 		uint32 version,
+		uint32 versionOrder,
+		uint32 versionOrderClosed,
 		OrderFeeParams fee,
 		address sendGasTo
 	) private {
@@ -40,6 +44,8 @@ contract OrderPlatform is IOrderFeeParams{
 		builder.store(spentToken);
 		builder.store(uint32(0));
 		builder.store(version);
+		builder.store(versionOrder);
+		builder.store(versionOrderClosed);
 		builder.store(sendGasTo);
 
 		TvmBuilder builder1;

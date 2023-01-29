@@ -25,6 +25,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
     address spentToken;
     
     uint32 version;
+    uint32 versionOrder;
+    uint32 versionOrderClosed;
 
     TvmCell orderCode;
     TvmCell orderClosedCode;
@@ -175,6 +177,9 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
                 fee,
                 orderClosedCode,
                 orderPlatformCode
+//                ,
+//                versionOrder,
+//                versionOrderClosed
             );
 
             emit CreateOrder(orderAddress, tokenRoot, amount, receiveToken, expectedAmount);
@@ -302,6 +307,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
             builder.store(spentToken);
             builder.store(version);
             builder.store(_newVersion);
+            builder.store(versionOrder);
+            builder.store(versionOrderClosed);
 
             TvmBuilder builderCode;
             builderCode.store(orderCode);
@@ -335,8 +342,15 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
 
         TvmSlice sl = _data.toSlice();
 
-        (address _factory, address _spentToken, uint32 oldVersion, uint32 _version, address _deployer) =
-        sl.decode(address, address, uint32, uint32, address);
+        (
+            address _factory,
+            address _spentToken,
+            uint32 oldVersion,
+            uint32 _version,
+            uint32 _versionOrder,
+            uint32 _versionOrderClosed,
+            address _deployer
+        ) = sl.decode(address, address, uint32, uint32, uint32, uint32, address);
 
         if (oldVersion == 0) {
             tvm.resetStorage();
@@ -345,6 +359,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
         factory = _factory;
         spentToken = _spentToken;
         version = _version;
+        versionOrder = _versionOrder;
+        versionOrderClosed = _versionOrderClosed;
         deployer = _deployer;
 
         TvmSlice feeSl = sl.loadRefAsSlice();

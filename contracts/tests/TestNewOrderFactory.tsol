@@ -312,6 +312,8 @@ contract TestNewOrderFactory is IOrderFactory{
 			}(
 				orderRootCode,
 				versionOrderRoot,
+				versionOrder,
+				versionOrderClosed,
 				fee,
 				msg.sender
 			);
@@ -435,11 +437,15 @@ contract TestNewOrderFactory is IOrderFactory{
 			oldVersion,
 			currentVersion,
 			versionOrderRoot,
+			versionOrder,
+			versionOrderClosed,
 			owner,
 			pendingOwner,
 			dexRoot
 		) = s.decode
 		(
+			uint32,
+			uint32,
 			uint32,
 			uint32,
 			uint32,
