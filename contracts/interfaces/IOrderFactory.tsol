@@ -12,14 +12,40 @@ interface IOrderFactory is IOrderFeeParams {
     event PlatformCodeUpgraded();
     event OrderRootCodeUpgraded(uint32 oldVersion, uint32 newVersion);
     event OrderCodeUpgraded(uint32 oldVersion, uint32 newVersion);
-    event OrderClosedCodeUpgraded(uint32 oldVersion, uint32 newVersion);
 
-    function createOrderRoot(address token, uint64 callbackId) external;
+    function onOrderRootDeployed(
+        address orderRoot,
+        address token,
+        address sendGasTo
+    ) external;
 
+    function transferOwner(address newOwner) external responsible returns (address);
+    function acceptOwner() external responsible returns (address);
+    function getOwner() external view responsible returns (address);
+    function getPendingOwner() external view responsible returns (address);
+    function getVersion()  external view responsible returns (uint32);
+    function getVersionRoot()  external view responsible returns (uint32);
+    function getVersionOrder()  external view responsible returns (uint32);
     function getFeeParams() external view responsible returns (OrderFeeParams);
+
+    function getExpectedAddressOrderRoot(address token)
+    external
+    view
+    responsible
+    returns (address);
+
+    function setEmergency(
+        bool enabled,
+        address orderAddress,
+        uint256 manager
+    ) external view;
+
     function setFeeParams(OrderFeeParams params) external;
     function setRootFeeParams(OrderFeeParams params, address root) external;
     function setOrderFeeParams(OrderFeeParams params, address order) external;
+    function setOrderRootCode(TvmCell _orderRootCode) external;
+    function setOrderCode(TvmCell _orderCode) external;
+
     function withdrawFee(
         uint128 amount,
         address recipient,
@@ -28,17 +54,7 @@ interface IOrderFactory is IOrderFeeParams {
         address sendGasTo
     ) external;
 
-    function getExpectedAddressOrderRoot(address token)
-		external
-		view
-		responsible
-		returns (address);
-
-    function onOrderRootDeployed(
-        address orderRoot,
-        address token,
-        address sendGasTo
-    ) external;
+    function createOrderRoot(address token, uint64 callbackId) external;
 
     function upgrade(
         TvmCell newCode, 

@@ -96,27 +96,21 @@
 			]
 		},
 		{
+			"name": "getExpectedAddressOrderRoot",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"token","type":"address"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
 			"name": "setEmergency",
 			"inputs": [
 				{"name":"enabled","type":"bool"},
 				{"name":"orderAddress","type":"address"},
 				{"name":"manager","type":"uint256"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "upgradeOrderRoot",
-			"inputs": [
-				{"name":"orderAddress","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "upgradeOrder",
-			"inputs": [
-				{"name":"order","type":"address"}
 			],
 			"outputs": [
 			]
@@ -156,18 +150,6 @@
 			]
 		},
 		{
-			"name": "withdrawFee",
-			"inputs": [
-				{"name":"amount","type":"uint128"},
-				{"name":"recipient","type":"address"},
-				{"name":"deployWalletValue","type":"uint128"},
-				{"name":"tokenWallet","type":"address"},
-				{"name":"sendGasTo","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
 			"name": "setOrderRootCode",
 			"inputs": [
 				{"name":"_orderRootCode","type":"cell"}
@@ -184,22 +166,40 @@
 			]
 		},
 		{
+			"name": "upgradeOrderRoot",
+			"inputs": [
+				{"name":"orderAddress","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "upgradeOrder",
+			"inputs": [
+				{"name":"order","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "withdrawFee",
+			"inputs": [
+				{"name":"amount","type":"uint128"},
+				{"name":"recipient","type":"address"},
+				{"name":"deployWalletValue","type":"uint128"},
+				{"name":"tokenWallet","type":"address"},
+				{"name":"sendGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "createOrderRoot",
 			"inputs": [
 				{"name":"token","type":"address"},
 				{"name":"callbackId","type":"uint64"}
 			],
 			"outputs": [
-			]
-		},
-		{
-			"name": "getExpectedAddressOrderRoot",
-			"inputs": [
-				{"name":"answerId","type":"uint32"},
-				{"name":"token","type":"address"}
-			],
-			"outputs": [
-				{"name":"value0","type":"address"}
 			]
 		},
 		{
@@ -294,15 +294,6 @@
 			],
 			"outputs": [
 			]
-		},
-		{
-			"name": "OrderClosedCodeUpgraded",
-			"inputs": [
-				{"name":"oldVersion","type":"uint32"},
-				{"name":"newVersion","type":"uint32"}
-			],
-			"outputs": [
-			]
 		}
 	],
 	"fields": [
@@ -311,7 +302,7 @@
 		{"name":"_constructorFlag","type":"bool"},
 		{"name":"randomNonce","type":"uint32"},
 		{"name":"dexRoot","type":"address"},
-		{"name":"currentVersion","type":"uint32"},
+		{"name":"version","type":"uint32"},
 		{"name":"versionOrderRoot","type":"uint32"},
 		{"name":"versionOrder","type":"uint32"},
 		{"name":"owner","type":"address"},

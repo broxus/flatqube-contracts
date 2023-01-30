@@ -1,10 +1,8 @@
 pragma ton-solidity >=0.62.0;
 
 import "../structures/IOrderFeeParams.tsol";
-import "../structures/IOrderWithdrawalFeeParams.tsol";
 
-
-interface IOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams {
+interface IOrderRoot is IOrderFeeParams {
 	event CreateOrder(
 		address order,
 		address spentToken,
@@ -19,7 +17,6 @@ interface IOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams {
 	function getSpentToken() external view responsible returns (address);
 	function getFactory() external view responsible returns (address);
 	function getFeeParams() external view responsible returns (OrderFeeParams);
-	function setFeeParams(OrderFeeParams params) external;
 
 	function expectedAddressOrder(
 		address root,
@@ -30,5 +27,7 @@ interface IOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams {
 		uint64 timeTx,
 		uint64 nowTx
 	) external view responsible returns (address);
+
+	function setFeeParams(OrderFeeParams params) external;
 	function upgrade(TvmCell _code, uint32 _newVersion, address _sendGasTo) external;
 }

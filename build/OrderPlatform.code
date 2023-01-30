@@ -84,25 +84,7 @@ THROW 0
 CALL $initialize_088dd74b_internal_macro$
 
 .macro initialize_088dd74b_internal_macro
-.loc ../contracts/OrderPlatform.tsol, 41
-PUSH S4
-SETCODE
-.loc ../contracts/OrderPlatform.tsol, 42
-ROLL 4
-CTOS
-DUP
-PUSHSLICE x8adb35
-SDEQ
-PUSHCONT {
-	PLDREFIDX 1
-	CTOS
-}
-IF
-PLDREF
-CTOS
-BLESS
-POP C3
-.loc ../contracts/OrderPlatform.tsol, 64
+.loc ../contracts/OrderPlatform.tsol, 40
 GETGLOB 12
 ROLL 4
 XCHG S1, S4
@@ -133,7 +115,25 @@ STBREFR
 STBREFR
 STBREFR
 ENDC
-.loc ../contracts/OrderPlatform.tsol, 69
+.loc ../contracts/OrderPlatform.tsol, 45
+OVER
+SETCODE
+.loc ../contracts/OrderPlatform.tsol, 46
+SWAP
+CTOS
+DUP
+PUSHSLICE x8adb35
+SDEQ
+PUSHCONT {
+	PLDREFIDX 1
+	CTOS
+}
+IF
+PLDREF
+CTOS
+BLESS
+POP C3
+.loc ../contracts/OrderPlatform.tsol, 48
 CALLREF {
 	CALL $:onCodeUpgrade$
 }

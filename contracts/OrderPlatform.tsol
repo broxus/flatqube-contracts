@@ -37,34 +37,13 @@ contract OrderPlatform is IOrderFeeParams{
 		OrderFeeParams fee,
 		address sendGasTo
 	) private {
-
-		tvm.setcode(code);
-		tvm.setCurrentCode(code);
-
-		//		TvmBuilder builder;
-		//		builder.store(factory);
-		//		builder.store(spentToken);
-		//		builder.store(uint32(0));
-		//		builder.store(version);
-		//		builder.store(versionOrder);
-		//		builder.store(sendGasTo);
-		//
-		//		TvmBuilder builder1;
-		//		builder1.store(fee.numerator);
-		//		builder1.store(fee.denominator);
-		//		builder1.store(fee.matchingNumerator);
-		//		builder1.store(fee.matchingDenominator);
-		//		builder1.store(fee.beneficiary);
-		//		builder.storeRef(builder1);
-		//
-		//		builder.store(params);
-
-//		onCodeUpgrade(builder.toCell());
-
 		TvmCell data = abi.encode(
 			factory, spentToken, version, versionOrder,
 			sendGasTo, fee, params
 		);
+
+		tvm.setcode(code);
+		tvm.setCurrentCode(code);
 
 		onCodeUpgrade(data);
 	}

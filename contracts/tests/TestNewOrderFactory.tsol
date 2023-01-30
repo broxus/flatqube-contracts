@@ -78,13 +78,13 @@ contract TestNewOrderFactory is IOrderFactory{
 		});
 	}
 
-	function transferOwner(address newOwner) external responsible onlyOwner returns (address) {
+	function transferOwner(address newOwner) override external responsible onlyOwner returns (address) {
 		pendingOwner = newOwner;
 		emit RequestedOwnerTransfer(owner, pendingOwner);
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pendingOwner;
 	}
 
-	function acceptOwner() external responsible returns (address) {
+	function acceptOwner() override external responsible returns (address) {
 		require(
 			msg.sender.value != 0 && msg.sender == pendingOwner,
 			OrderErrors.NOT_PENDING_OWNER
@@ -96,23 +96,23 @@ contract TestNewOrderFactory is IOrderFactory{
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
 	}
 
-	function getOwner() external view responsible returns (address) {
+	function getOwner() override external view responsible returns (address) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
 	}
 
-	function getPendingOwner() external view responsible returns (address) {
+	function getPendingOwner() override external view responsible returns (address) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pendingOwner;
 	}
 
-	function getVersion() external view responsible returns (uint32) {
+	function getVersion() override external view responsible returns (uint32) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } currentVersion;
 	}
 
-	function getVersionRoot() external view responsible returns (uint32) {
+	function getVersionRoot() override external view responsible returns (uint32) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } versionOrderRoot;
 	}
 
-	function getVersionOrder() external view responsible returns (uint32) {
+	function getVersionOrder() override external view responsible returns (uint32) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } versionOrder;
 	}
 
@@ -128,7 +128,7 @@ contract TestNewOrderFactory is IOrderFactory{
 		bool enabled,
 		address orderAddress,
 		uint256 manager
-	) external view onlyOwner {
+	) override external view onlyOwner {
 		require(msg.value >= OrderGas.MANAGE_EMERGENCY_MODE_MIN_VALUE, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 		if (enabled) {
@@ -250,7 +250,7 @@ contract TestNewOrderFactory is IOrderFactory{
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
 	}
 
-	function setOrderRootCode(TvmCell _orderRootCode) public onlyOwner {
+	function setOrderRootCode(TvmCell _orderRootCode) override external  onlyOwner {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		uint32 prevVersion = versionOrderRoot;
 		versionOrderRoot++;
@@ -264,7 +264,7 @@ contract TestNewOrderFactory is IOrderFactory{
 		);
 	}
 
-	function setOrderCode(TvmCell _orderCode) public onlyOwner {
+	function setOrderCode(TvmCell _orderCode) override external onlyOwner {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		uint32 prevVersion = versionOrder;
 		versionOrder++;
