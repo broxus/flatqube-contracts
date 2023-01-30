@@ -1,16 +1,18 @@
 pragma ton-solidity >= 0.62.0;
 
 interface IDexTokenVault {
-
-    event TokenVaultCodeUpgraded();
+    event TokenVaultCodeUpgraded(
+        uint32 currentVersion,
+        uint32 previousVersion
+    );
 
     event WithdrawTokens(
         uint128 amount,
-        address account_owner,
-        address recipient_address
+        address accountOwner,
+        address recipientAddress
     );
 
-    event PairTransferTokensV2(
+    event PairTransferTokens(
         uint128 amount,
         address[] roots,
         address recipientAddress
@@ -23,36 +25,27 @@ interface IDexTokenVault {
         address referral
     );
 
-    function withdraw(
-        uint64 call_id,
-        uint128 amount,
-        address recipient_address,
-        uint128 deploy_wallet_grams,
-        address account_owner,
-        uint32  account_version,
-        address send_gas_to
-    ) external;
+    function getDexRoot() external view responsible returns (address);
+
+    function getVersion() external view responsible returns (uint32);
+
+    function getPlatformCode() external view responsible returns (TvmCell);
 
     function getTokenRoot() external view responsible returns (address);
 
     function getTokenWallet() external view responsible returns (address);
 
-//    FIXME:
-//    function transfer(
-//        uint128 amount,
-//        address token_root,
-//        address vault_wallet,
-//        address recipient_address,
-//        uint128 deploy_wallet_grams,
-//        bool    notify_receiver,
-//        TvmCell payload,
-//        address left_root,
-//        address right_root,
-//        uint32  pair_version,
-//        address send_gas_to
-//    ) external;
+    function withdraw(
+        uint64 _callId,
+        uint128 _amount,
+        address _recipientAddress,
+        uint128 _deployWalletGrams,
+        address _accountOwner,
+        uint32  _accountVersion,
+        address _remainingGasTo
+    ) external;
 
-    function transferV2(
+    function transfer(
         uint128 _amount,
         address _recipientAddress,
         uint128 _deployWalletGrams,
@@ -63,20 +56,26 @@ interface IDexTokenVault {
         address _remainingGasTo
     ) external;
 
-    function referralFeeTransfer(
-        uint128 _amount,
-        address _referrer,
-        address _referral,
-        address[] _roots
-    ) external;
+//    function referralFeeTransfer(
+//        uint128 _amount,
+//        address _referrer,
+//        address _referral,
+//        address[] _roots
+//    ) external;
+//
+//    function burn(
+//        address[] _roots,
+//        address _lpTokenRoot,
+//        uint128 _amount,
+//        address _remainingGasTo,
+//        address _callbackTo,
+//        TvmCell _payload
+//    ) external;
 
-    function burn(
-        address[] _roots,
-        address _lpTokenRoot,
-        uint128 _amount,
-        address _remainingGasTo,
-        address _callbackTo,
-        TvmCell _payload
-    ) external;
-
+    function redeploy(
+        TvmCell _code,
+        uint32 _version,
+        address,
+        address _remainingGasTo
+    ) external functionID(0x15a038fb);
 }

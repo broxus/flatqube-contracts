@@ -2020,6 +2020,18 @@ contract DexStablePool is
         }
     }
 
+    function onSuccessVaultDeploy(
+        address _tokenRoot,
+        address _tokenWallet,
+        uint32 _version,
+        address _remainingGasTo
+    ) external override {}
+
+    function onCanceledVaultDeploy(
+        address _tokenRoot,
+        address _remainingGasTo
+    ) external override {}
+
     function liquidityTokenRootDeployed(address lp_root_, address send_gas_to) override external onlyVault {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 

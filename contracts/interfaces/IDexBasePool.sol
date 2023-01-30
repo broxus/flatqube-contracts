@@ -231,4 +231,16 @@ interface IDexBasePool is
         address _accountOwner,
         uint32 _accountVersion
     ) external;
+
+    function onSuccessVaultDeploy(
+        address _tokenRoot,
+        address _tokenWallet,
+        uint32 _version,
+        address _remainingGasTo
+    ) external;
+
+    function onCanceledVaultDeploy(
+        address _tokenRoot,
+        address _remainingGasTo
+    ) external;
 }

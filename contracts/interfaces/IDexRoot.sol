@@ -16,6 +16,11 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         uint8 poolType
     );
 
+    event VaultCodeUpgraded(
+        uint32 version,
+        uint codeHash
+    );
+
     event RootCodeUpgraded();
 
     event ActiveUpdated(bool newActive);
@@ -39,6 +44,13 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         uint8 poolType
     );
 
+    event NewVaultCreated(
+        address vault,
+        address tokenRoot,
+        uint32 version,
+        uint codeHash
+    );
+
     function getAccountVersion() external view responsible returns (uint32);
 
     function getAccountCode() external view responsible returns (TvmCell);
@@ -53,8 +65,9 @@ interface IDexRoot is IFeeParams, IOracleOptions {
 
     function isActive() external view responsible returns (bool);
 
-    // FIXME:
-    function getVault() external view responsible returns (address);
+    function getVaultCode() external view responsible returns (TvmCell);
+
+    function getVaultVersion() external view responsible returns (uint32);
 
     function getExpectedTokenVaultAddress(address _tokenRoot) external view responsible returns (address);
 
@@ -66,6 +79,21 @@ interface IDexRoot is IFeeParams, IOracleOptions {
     function getExpectedPoolAddress(address[] _roots) external view responsible returns (address);
 
     function getExpectedAccountAddress(address account_owner) external view responsible returns (address);
+
+    function installOrUpdateVaultCode(
+        TvmCell _newCode,
+        address _remainingGasTo
+    ) external;
+
+    function deployVault(
+        address _tokenRoot,
+        address _remainingGasTo
+    ) external;
+
+    function upgradeVault(
+        address _tokenRoot,
+        address _remainingGasTo
+    ) external;
 
     function deployAccount(
         address account_owner,

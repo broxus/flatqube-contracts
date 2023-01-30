@@ -1570,6 +1570,18 @@ contract DexPair is DexPairBase, INextExchangeData {
         }
     }
 
+    function onSuccessVaultDeploy(
+        address _tokenRoot,
+        address _tokenWallet,
+        uint32 _version,
+        address _remainingGasTo
+    ) external override {}
+
+    function onCanceledVaultDeploy(
+        address _tokenRoot,
+        address _remainingGasTo
+    ) external override {}
+
     function _checkOperationData(
         address _msgSender,
         uint128 _msgValue,

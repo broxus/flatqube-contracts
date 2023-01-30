@@ -6,8 +6,7 @@
 		{
 			"name": "constructor",
 			"inputs": [
-				{"name":"initial_owner","type":"address"},
-				{"name":"initial_vault","type":"address"}
+				{"name":"initial_owner","type":"address"}
 			],
 			"outputs": [
 			]
@@ -71,12 +70,21 @@
 			]
 		},
 		{
-			"name": "getVault",
+			"name": "getVaultCode",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
-				{"name":"value0","type":"address"}
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "getVaultVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
 			]
 		},
 		{
@@ -157,14 +165,6 @@
 			]
 		},
 		{
-			"name": "setVaultOnce",
-			"inputs": [
-				{"name":"new_vault","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
 			"name": "setActive",
 			"inputs": [
 				{"name":"new_active","type":"bool"}
@@ -237,6 +237,15 @@
 			]
 		},
 		{
+			"name": "installOrUpdateVaultCode",
+			"inputs": [
+				{"name":"_newCode","type":"cell"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "upgrade",
 			"inputs": [
 				{"name":"code","type":"cell"}
@@ -248,6 +257,24 @@
 			"name": "resetGas",
 			"inputs": [
 				{"name":"receiver","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "deployVault",
+			"inputs": [
+				{"name":"_tokenRoot","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "upgradeVault",
+			"inputs": [
+				{"name":"_tokenRoot","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -421,6 +448,15 @@
 			]
 		},
 		{
+			"name": "VaultCodeUpgraded",
+			"inputs": [
+				{"name":"version","type":"uint32"},
+				{"name":"codeHash","type":"uint256"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "RootCodeUpgraded",
 			"inputs": [
 			],
@@ -477,6 +513,17 @@
 			],
 			"outputs": [
 			]
+		},
+		{
+			"name": "NewVaultCreated",
+			"inputs": [
+				{"name":"vault","type":"address"},
+				{"name":"tokenRoot","type":"address"},
+				{"name":"version","type":"uint32"},
+				{"name":"codeHash","type":"uint256"}
+			],
+			"outputs": [
+			]
 		}
 	],
 	"fields": [
@@ -491,9 +538,10 @@
 		{"name":"_pairVersions","type":"map(uint8,uint32)"},
 		{"name":"_poolCodes","type":"map(uint8,cell)"},
 		{"name":"_poolVersions","type":"map(uint8,uint32)"},
+		{"name":"_vaultCode","type":"cell"},
+		{"name":"_vaultVersion","type":"uint32"},
 		{"name":"_active","type":"bool"},
 		{"name":"_owner","type":"address"},
-		{"name":"_vault","type":"address"},
 		{"name":"_pendingOwner","type":"address"},
 		{"name":"_manager","type":"address"}
 	]

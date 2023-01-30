@@ -3309,7 +3309,7 @@ SENDRAWMSG
 CALL $_expectedAccountAddress_25e7253f_internal_macro$
 
 .macro _expectedAccountAddress_25e7253f_internal_macro
-.loc ../contracts/abstract/DexContractBase.sol, 44
+.loc ../contracts/abstract/DexContractBase.sol, 49
 PUSHINT 1
 SWAP
 CALLREF {
@@ -3331,11 +3331,33 @@ CTOS
 CALL $_expectedPoolAddress_95044983_internal_macro$
 
 .macro _expectedPoolAddress_95044983_internal_macro
-.loc ../contracts/abstract/DexContractBase.sol, 55
+.loc ../contracts/abstract/DexContractBase.sol, 60
 PUSHINT 2
 SWAP
 CALLREF {
 	CALL $_buildPairParams_623f79c1_internal_macro$
+}
+CALLREF {
+	CALL $_buildInitData_65db94e9_internal_macro$
+}
+HASHCU
+NEWC
+STSLICECONST x801_
+STU 256
+ENDC
+CTOS
+.loc ../contracts/abstract/DexContractBase.sol, 0
+
+.globl	_expectedTokenVaultAddress_3a7b5f9b_internal
+.type	_expectedTokenVaultAddress_3a7b5f9b_internal, @function
+CALL $_expectedTokenVaultAddress_3a7b5f9b_internal_macro$
+
+.macro _expectedTokenVaultAddress_3a7b5f9b_internal_macro
+.loc ../contracts/abstract/DexContractBase.sol, 71
+PUSHINT 3
+SWAP
+CALLREF {
+	CALL $_buildTokenVaultParams_0c367c47_internal_macro$
 }
 CALLREF {
 	CALL $_buildInitData_65db94e9_internal_macro$
@@ -3353,10 +3375,22 @@ CTOS
 CALL $_buildAccountParams_aabfc73f_internal_macro$
 
 .macro _buildAccountParams_aabfc73f_internal_macro
-.loc ../contracts/abstract/DexContractBase.sol, 68
+.loc ../contracts/abstract/DexContractBase.sol, 84
 NEWC
 STSLICE
-.loc ../contracts/abstract/DexContractBase.sol, 70
+.loc ../contracts/abstract/DexContractBase.sol, 86
+ENDC
+.loc ../contracts/abstract/DexContractBase.sol, 0
+
+.globl	_buildTokenVaultParams_0c367c47_internal
+.type	_buildTokenVaultParams_0c367c47_internal, @function
+CALL $_buildTokenVaultParams_0c367c47_internal_macro$
+
+.macro _buildTokenVaultParams_0c367c47_internal_macro
+.loc ../contracts/abstract/DexContractBase.sol, 92
+NEWC
+STSLICE
+.loc ../contracts/abstract/DexContractBase.sol, 94
 ENDC
 .loc ../contracts/abstract/DexContractBase.sol, 0
 
@@ -3365,9 +3399,9 @@ ENDC
 CALL $_buildPairParams_623f79c1_internal_macro$
 
 .macro _buildPairParams_623f79c1_internal_macro
-.loc ../contracts/abstract/DexContractBase.sol, 74
+.loc ../contracts/abstract/DexContractBase.sol, 98
 NEWDICT
-.loc ../contracts/abstract/DexContractBase.sol, 76
+.loc ../contracts/abstract/DexContractBase.sol, 100
 OVER
 SECOND
 PUSHINT 0
@@ -3384,7 +3418,7 @@ PUSHCONT {
 	NOT
 }
 PUSHCONT {
-	.loc ../contracts/abstract/DexContractBase.sol, 77
+	.loc ../contracts/abstract/DexContractBase.sol, 101
 	PUSH2 S0, S3
 	NEWC
 	STSLICECONST x00
@@ -3399,14 +3433,14 @@ PUSHCONT {
 }
 WHILE
 BLKDROP 3
-.loc ../contracts/abstract/DexContractBase.sol, 80
+.loc ../contracts/abstract/DexContractBase.sol, 104
 SWAP
 FIRST
 LESSINT 3
 PUSHCONT {
-	.loc ../contracts/abstract/DexContractBase.sol, 81
+	.loc ../contracts/abstract/DexContractBase.sol, 105
 	NEWC
-	.loc ../contracts/abstract/DexContractBase.sol, 83
+	.loc ../contracts/abstract/DexContractBase.sol, 107
 	XCPU S1, S0
 	PUSHINT 267
 	DICTMIN
@@ -3426,7 +3460,7 @@ PUSHCONT {
 		NOT
 	}
 	PUSHCONT {
-		.loc ../contracts/abstract/DexContractBase.sol, 84
+		.loc ../contracts/abstract/DexContractBase.sol, 108
 		PUSH2 S1, S4
 		STSLICE
 		POP S5
@@ -3448,16 +3482,16 @@ PUSHCONT {
 	}
 	WHILE
 	BLKDROP 4
-	.loc ../contracts/abstract/DexContractBase.sol, 87
+	.loc ../contracts/abstract/DexContractBase.sol, 111
 	ENDC
 	.loc ../contracts/abstract/DexContractBase.sol, 0
 }
 PUSHCONT {
-	.loc ../contracts/abstract/DexContractBase.sol, 89
+	.loc ../contracts/abstract/DexContractBase.sol, 113
 	PUSHINT 0
 	NEWDICT
 	PAIR
-	.loc ../contracts/abstract/DexContractBase.sol, 90
+	.loc ../contracts/abstract/DexContractBase.sol, 114
 	XCPU S1, S0
 	PUSHINT 267
 	DICTMIN
@@ -3477,7 +3511,7 @@ PUSHCONT {
 		NOT
 	}
 	PUSHCONT {
-		.loc ../contracts/abstract/DexContractBase.sol, 91
+		.loc ../contracts/abstract/DexContractBase.sol, 115
 		PUSH2 S1, S4
 		UNPAIR
 		OVER
@@ -3505,7 +3539,7 @@ PUSHCONT {
 	}
 	WHILE
 	BLKDROP 4
-	.loc ../contracts/abstract/DexContractBase.sol, 93
+	.loc ../contracts/abstract/DexContractBase.sol, 117
 	NEWC
 	SWAP
 	UNPAIR
@@ -3523,7 +3557,7 @@ IFELSE
 CALL $_buildInitData_65db94e9_internal_macro$
 
 .macro _buildInitData_65db94e9_internal_macro
-.loc ../contracts/abstract/DexContractBase.sol, 101
+.loc ../contracts/abstract/DexContractBase.sol, 125
 PUSHINT 0
 NEWC
 STU 256
