@@ -1,6 +1,10 @@
 pragma ton-solidity >=0.62.0;
 
-interface IOrderRoot {
+import "../structures/IOrderFeeParams.tsol";
+import "../structures/IOrderWithdrawalFeeParams.tsol";
+
+
+interface IOrderRoot is IOrderFeeParams, IOrderWithdrawalFeeParams {
 	event CreateOrder(
 		address order,
 		address spentToken,
@@ -14,6 +18,9 @@ interface IOrderRoot {
 	function getVersion() external view responsible returns(uint32);
 	function getSpentToken() external view responsible returns (address);
 	function getFactory() external view responsible returns (address);
+	function getFeeParams() external view responsible returns (OrderFeeParams);
+	function setFeeParams(OrderFeeParams params) external;
+
 	function expectedAddressOrder(
 		address root,
 		address factory,

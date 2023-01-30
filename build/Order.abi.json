@@ -9,8 +9,19 @@
 				{"name":"_expectedAmount","type":"uint128"},
 				{"name":"_initialAmount","type":"uint128"},
 				{"name":"_backPK","type":"uint256"},
+				{"name":"_backMatchingPK","type":"uint256"},
 				{"name":"_dexRoot","type":"address"},
-				{"name":"_codeClosed","type":"cell"}
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"_fee","type":"tuple"},
+				{"name":"_codeClosed","type":"cell"},
+				{"name":"_orderPlatformCode","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onTokenWalletReceive",
+			"inputs": [
+				{"name":"_wallet","type":"address"}
 			],
 			"outputs": [
 			]
@@ -55,7 +66,24 @@
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
-				{"components":[{"name":"root","type":"address"},{"name":"owner","type":"address"},{"name":"backPK","type":"uint256"},{"name":"dexRoot","type":"address"},{"name":"dexPair","type":"address"},{"name":"msgSender","type":"address"},{"name":"swapAttempt","type":"uint64"},{"name":"state","type":"uint8"},{"name":"spentToken","type":"address"},{"name":"receiveToken","type":"address"},{"name":"spentWallet","type":"address"},{"name":"receiveWallet","type":"address"},{"name":"expectedAmount","type":"uint128"},{"name":"initialAmount","type":"uint128"},{"name":"currentAmountSpentToken","type":"uint128"},{"name":"currentAmountReceiveToken","type":"uint128"}],"name":"value0","type":"tuple"}
+				{"components":[{"name":"factory","type":"address"},{"name":"root","type":"address"},{"name":"owner","type":"address"},{"name":"backPK","type":"uint256"},{"name":"backMatchingPK","type":"uint256"},{"name":"dexRoot","type":"address"},{"name":"dexPair","type":"address"},{"name":"msgSender","type":"address"},{"name":"swapAttempt","type":"uint64"},{"name":"state","type":"uint8"},{"name":"spentToken","type":"address"},{"name":"receiveToken","type":"address"},{"name":"spentWallet","type":"address"},{"name":"receiveWallet","type":"address"},{"name":"expectedAmount","type":"uint128"},{"name":"initialAmount","type":"uint128"},{"name":"currentAmountSpentToken","type":"uint128"},{"name":"currentAmountReceiveToken","type":"uint128"},{"name":"timeTx","type":"uint64"},{"name":"nowTx","type":"uint64"},{"name":"matchingOrder","type":"address"}],"name":"value0","type":"tuple"}
+			]
+		},
+		{
+			"name": "getFeeParams",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
+			]
+		},
+		{
+			"name": "setFeeParams",
+			"inputs": [
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
+			],
+			"outputs": [
 			]
 		},
 		{
@@ -102,6 +130,47 @@
 			"inputs": [
 				{"name":"callbackId","type":"uint64"},
 				{"name":"deployWalletValue","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "backendMatching",
+			"inputs": [
+				{"name":"callbackId","type":"uint64"},
+				{"name":"limitOrder","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "matching",
+			"inputs": [
+				{"name":"callbackId","type":"uint64"},
+				{"name":"deployWalletValue","type":"uint128"},
+				{"name":"limitOrder","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "matchingCheck",
+			"inputs": [
+				{"name":"callbackId","type":"uint64"},
+				{"name":"deployWalletValue","type":"uint128"},
+				{"components":[{"name":"factory","type":"address"},{"name":"root","type":"address"},{"name":"owner","type":"address"},{"name":"backPK","type":"uint256"},{"name":"backMatchingPK","type":"uint256"},{"name":"dexRoot","type":"address"},{"name":"dexPair","type":"address"},{"name":"msgSender","type":"address"},{"name":"swapAttempt","type":"uint64"},{"name":"state","type":"uint8"},{"name":"spentToken","type":"address"},{"name":"receiveToken","type":"address"},{"name":"spentWallet","type":"address"},{"name":"receiveWallet","type":"address"},{"name":"expectedAmount","type":"uint128"},{"name":"initialAmount","type":"uint128"},{"name":"currentAmountSpentToken","type":"uint128"},{"name":"currentAmountReceiveToken","type":"uint128"},{"name":"timeTx","type":"uint64"},{"name":"nowTx","type":"uint64"},{"name":"matchingOrder","type":"address"}],"name":"detailsLO","type":"tuple"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "matchingInProgress",
+			"inputs": [
+				{"name":"callbackId","type":"uint64"},
+				{"name":"deployWalletValue","type":"uint128"},
+				{"name":"amount","type":"uint128"},
+				{"name":"reward","type":"uint128"},
+				{"name":"sendGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -162,7 +231,7 @@
 			"inputs": [
 				{"name":"from","type":"uint8"},
 				{"name":"to","type":"uint8"},
-				{"components":[{"name":"root","type":"address"},{"name":"owner","type":"address"},{"name":"backPK","type":"uint256"},{"name":"dexRoot","type":"address"},{"name":"dexPair","type":"address"},{"name":"msgSender","type":"address"},{"name":"swapAttempt","type":"uint64"},{"name":"state","type":"uint8"},{"name":"spentToken","type":"address"},{"name":"receiveToken","type":"address"},{"name":"spentWallet","type":"address"},{"name":"receiveWallet","type":"address"},{"name":"expectedAmount","type":"uint128"},{"name":"initialAmount","type":"uint128"},{"name":"currentAmountSpentToken","type":"uint128"},{"name":"currentAmountReceiveToken","type":"uint128"}],"name":"value2","type":"tuple"}
+				{"components":[{"name":"factory","type":"address"},{"name":"root","type":"address"},{"name":"owner","type":"address"},{"name":"backPK","type":"uint256"},{"name":"backMatchingPK","type":"uint256"},{"name":"dexRoot","type":"address"},{"name":"dexPair","type":"address"},{"name":"msgSender","type":"address"},{"name":"swapAttempt","type":"uint64"},{"name":"state","type":"uint8"},{"name":"spentToken","type":"address"},{"name":"receiveToken","type":"address"},{"name":"spentWallet","type":"address"},{"name":"receiveWallet","type":"address"},{"name":"expectedAmount","type":"uint128"},{"name":"initialAmount","type":"uint128"},{"name":"currentAmountSpentToken","type":"uint128"},{"name":"currentAmountReceiveToken","type":"uint128"},{"name":"timeTx","type":"uint64"},{"name":"nowTx","type":"uint64"},{"name":"matchingOrder","type":"address"}],"name":"value2","type":"tuple"}
 			],
 			"outputs": [
 			]
@@ -175,7 +244,15 @@
 				{"name":"receiveToken","type":"address"},
 				{"name":"receiveAmount","type":"uint128"},
 				{"name":"currentSpentTokenAmount","type":"uint128"},
-				{"name":"currentReceiveTokenAmount","type":"uint128"}
+				{"name":"currentReceiveTokenAmount","type":"uint128"},
+				{"name":"fee","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "OrderCodeUpgraded",
+			"inputs": [
 			],
 			"outputs": [
 			]
@@ -197,15 +274,19 @@
 		{"name":"currentAmountSpentToken","type":"uint128"},
 		{"name":"currentAmountReceiveToken","type":"uint128"},
 		{"name":"backPK","type":"uint256"},
+		{"name":"backMatchingPK","type":"uint256"},
 		{"name":"dexRoot","type":"address"},
 		{"name":"dexPair","type":"address"},
 		{"name":"spentWallet","type":"address"},
 		{"name":"receiveWallet","type":"address"},
 		{"name":"codeClosed","type":"cell"},
+		{"name":"orderPlatformCode","type":"cell"},
 		{"name":"state","type":"uint8"},
 		{"name":"swapAttempt","type":"uint64"},
 		{"name":"prevState","type":"uint8"},
 		{"name":"emergencyManager","type":"uint256"},
-		{"name":"autoExchange","type":"bool"}
+		{"name":"autoExchange","type":"bool"},
+		{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"},
+		{"name":"matchingOrder","type":"address"}
 	]
 }

@@ -15,10 +15,10 @@ import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
 import "tip3/contracts/interfaces/ITokenWallet.tsol";
 
-contract OrderClosed is 
-	IAcceptTokensTransferCallback, 
-	IOrderClosed, 
-	IHasEmergencyMode 
+contract OrderClosed is
+	IAcceptTokensTransferCallback,
+	IOrderClosed,
+	IHasEmergencyMode
 {
 	address static factory;
 	address static root;
@@ -40,9 +40,11 @@ contract OrderClosed is
 	uint8 prevState;
 	uint256 emergencyManager;
 
+	OrderFeeParams fee;
+
 	constructor() public { revert(); }
 
-	modifier onlyFactory() {	
+	modifier onlyFactory() {
 		require(
 			msg.sender.value != 0 && msg.sender == factory,
 			OrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT
@@ -54,15 +56,15 @@ contract OrderClosed is
         require(
             emergencyManager != 0 && (msg.sender.value == emergencyManager || msg.pubkey() == emergencyManager),
             OrderErrors.NOT_EMERGENCY_MANAGER
-        );  
-        _;  
+        );
+        _;
     }
 
 	function currentStatus() override external view responsible returns(uint8) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } state;
     }
 
-    function initParams() override external view responsible returns(InitParams){
+    function initParams() override external view responsible returns(InitParams){ //TODO
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } InitParams(
             root,
             factory,
@@ -102,7 +104,7 @@ contract OrderClosed is
 
 	function enableEmergency(uint256 _emergencyManager) override external onlyFactory {
         require(state != OrderStatus.Emergency, OrderErrors.EMERGENCY_STATUS_NOW);
-        
+
         prevState = state;
         state = OrderStatus.Emergency;
         emergencyManager = _emergencyManager;
@@ -111,7 +113,6 @@ contract OrderClosed is
 
     function disableEmergency() override external onlyFactory {
         require(state == OrderStatus.Emergency, OrderErrors.EMERGENCY_STATUS_NOW);
-
         state = prevState;
         prevState = 0;
         emergencyManager = 0;
@@ -156,58 +157,30 @@ contract OrderClosed is
 
 	function buildDetails() private view returns(Details){
         return Details(
-            root,
-            owner,
-            swapAttempt,
-            state,
-            spentToken,
-            receiveToken,
-            spentWallet,
-            receiveWallet,
-            expectedAmount,
-            initialAmount,
+			root,
+			owner,
+			swapAttempt,
+			state,
+			spentToken,
+			receiveToken,
+			spentWallet,
+			receiveWallet,
+			expectedAmount,
+			initialAmount,
 			currentAmountSpentToken
-        );
+		);
     }
 
-	function upgrade(TvmCell newCode) internal onlyFactory { 
-		tvm.setcode(newCode);
-		tvm.setCurrentCode(newCode);
-
-		TvmBuilder builderUpg;
-        builderUpg.store(state);
-        builderUpg.store(owner);
-        builderUpg.store(factory);
-        builderUpg.store(root);
-        builderUpg.store(swapAttempt);
-
-        TvmBuilder builderTokens;
-        builderTokens.store(spentWallet);
-        builderTokens.store(currentAmountSpentToken);
-        builderTokens.store(spentToken);
-        builderTokens.store(receiveToken);
-        builderUpg.storeRef(builderTokens);
-
-        TvmBuilder builderSum;
-        builderSum.store(expectedAmount);
-        builderSum.store(initialAmount);
-        builderSum.store(receiveWallet);
-        builderUpg.storeRef(builderSum);
-
-        onCodeUpgrade(builderUpg.toCell());
-	}
-
 	function onCodeUpgrade(TvmCell data) private {
-
 		tvm.resetStorage();
 		TvmSlice upg = data.toSlice();
-	
+
 		(
-			uint8 _state, 
-			address _owner,
-			address _factory,
-			address _root,
-			uint64 _swapAttempt
+		uint8 _state,
+		address _owner,
+		address _factory,
+		address _root,
+		uint64 _swapAttempt
 		) = upg.decode(uint8, address, address, address, uint64);
 
 		state = _state;
@@ -218,10 +191,10 @@ contract OrderClosed is
 
 		TvmSlice dataTokens = upg.loadRefAsSlice();
 		(
-			address _spentWallet, 
-			uint128 _currentAmountSpentToken,
-			address _spentToken,
-			address _receiveToken
+		address _spentWallet,
+		uint128 _currentAmountSpentToken,
+		address _spentToken,
+		address _receiveToken
 		) = dataTokens.decode(address, uint128, address, address);
 
 		spentWallet = _spentWallet;
@@ -231,27 +204,39 @@ contract OrderClosed is
 
 		TvmSlice dataSum = upg.loadRefAsSlice();
 		(
-			uint128 _expectedAmount,
-			uint128 _initialAmount,
-			address _receiveWallet
+		uint128 _expectedAmount,
+		uint128 _initialAmount,
+		address _receiveWallet
 		) = dataSum.decode(uint128, uint128, address);
 
 		expectedAmount = _expectedAmount;
 		initialAmount = _initialAmount;
 		receiveWallet = _receiveWallet;
 
+		TvmSlice dataFee = upg.loadRefAsSlice();
+
+		(
+		uint128 _numerator,
+		uint128 _denominator,
+		uint128 _matchingNumerator,
+		uint128 _matchingDenominator,
+		address _beneficiary
+		) = dataFee.decode(uint128, uint128, uint128, uint128, address);
+
+		fee = OrderFeeParams(_numerator, _denominator, _matchingNumerator, _matchingDenominator, _beneficiary);
+
 		if (state == OrderStatus.Cancelled) {
 			TvmCell emptyPayload;
 			ITokenWallet(spentWallet).transfer{
-				value: 0,
-				flag: MsgFlag.ALL_NOT_RESERVED,
-				bounce: false
+					value: 0,
+					flag: MsgFlag.ALL_NOT_RESERVED,
+					bounce: false
 			}(
 				currentAmountSpentToken,
-				owner, 
-				0, 
 				owner,
-				true, 
+				0,
+				owner,
+				true,
 				emptyPayload
 			);
 		} else {

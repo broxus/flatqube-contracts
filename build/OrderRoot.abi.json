@@ -27,6 +27,23 @@
 			]
 		},
 		{
+			"name": "onTokenWalletBeneficiary",
+			"inputs": [
+				{"name":"_wallet","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getFeeParams",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
+			]
+		},
+		{
 			"name": "getVersion",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
@@ -54,13 +71,22 @@
 			]
 		},
 		{
+			"name": "setFeeParams",
+			"inputs": [
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "buildPayload",
 			"inputs": [
 				{"name":"callbackId","type":"uint64"},
 				{"name":"tokenReceive","type":"address"},
 				{"name":"expectedTokenAmount","type":"uint128"},
 				{"name":"deployWalletValue","type":"uint128"},
-				{"name":"backPK","type":"uint256"}
+				{"name":"backPK","type":"uint256"},
+				{"name":"backMatchingPK","type":"uint256"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
@@ -144,10 +170,14 @@
 		{"name":"factory","type":"address"},
 		{"name":"spentToken","type":"address"},
 		{"name":"version","type":"uint32"},
+		{"name":"versionOrder","type":"uint32"},
+		{"name":"versionOrderClosed","type":"uint32"},
 		{"name":"orderCode","type":"cell"},
 		{"name":"orderClosedCode","type":"cell"},
+		{"name":"orderPlatformCode","type":"cell"},
 		{"name":"spentTokenWallet","type":"address"},
 		{"name":"deployer","type":"address"},
-		{"name":"dexRoot","type":"address"}
+		{"name":"dexRoot","type":"address"},
+		{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"}
 	]
 }

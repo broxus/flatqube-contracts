@@ -1,6 +1,8 @@
 pragma ton-solidity >=0.62.0;
 
-interface IOrder {
+import "../structures/IOrderFeeParams.tsol";
+
+interface IOrder is IOrderFeeParams {
 	struct InitParams {
 		address factory;
 		address root;
@@ -12,9 +14,11 @@ interface IOrder {
 	}
 
 	struct Details {
+		address factory;
 		address root;
 		address owner;
 		uint256 backPK;
+		uint256 backMatchingPK;
 		address dexRoot;
 		address dexPair;
 		address msgSender;
@@ -28,6 +32,11 @@ interface IOrder {
 		uint128 initialAmount;
 		uint128 currentAmountSpentToken;
 		uint128 currentAmountReceiveToken;
+		uint64 timeTx;
+		uint64 nowTx;
+		address matchingOrder;
+//		uint32 versionOrder;
+//		uint32 versionOrderClosed;
 	}
 
 	event StateChanged(uint8 from, uint8 to, Details);
@@ -37,10 +46,20 @@ interface IOrder {
 		address receiveToken,
 		uint128 receiveAmount,
 		uint128 currentSpentTokenAmount,
-		uint128 currentReceiveTokenAmount
+		uint128 currentReceiveTokenAmount,
+		uint128 fee
 	);
-
+	event OrderCodeUpgraded();
 	function currentStatus() external view responsible returns(uint8);
 	function initParams() external view responsible returns (InitParams);
-	function getDetails() external view responsible returns (Details);	
+	function getDetails() external view responsible returns (Details);
+	function getFeeParams() external view responsible returns (OrderFeeParams);
+	function setFeeParams(OrderFeeParams params) external;
+	function matchingCheck(uint64 callbackId, uint128 deployWalletValue, Details detailsLO) external;
+	function matchingInProgress(uint64 callbackId,
+		uint128 deployWalletValue,
+		uint128 amount,
+		uint128 reward,
+		address sendGasTo) external;
+//	function upgrade(TvmCell _code, uint32 _newVersion, address _sendGasTo) external;
 }

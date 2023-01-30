@@ -3,6 +3,7 @@ import { Migration } from './migration';
 import { Address, Contract, WalletTypes, zeroAddress } from 'locklift';
 import { FactorySource } from '../build/factorySource';
 import { Account } from 'everscale-standalone-client/nodejs';
+
 import {
   logMigrationParams,
   logMigrationProcess,
@@ -151,7 +152,6 @@ export const dexVaultMigration = async (
 
   logMigrationProcess(
     'dexVaultMigration',
-    'constructor',
     'Deploying DexVault...',
   );
   const { contract } = await locklift.factory.deployContract({
@@ -261,7 +261,11 @@ export const tokenFactoryMigration = async (
 export const orderFactoryMigration = async (
     account: Account,
     version: number,
-    dexRoot: Contract<FactorySource['DexRoot']>
+    dexRoot: Contract<FactorySource['DexRoot']>,
+    feeNumerator : number = 1,
+    feeDenominator : number = 100,
+    matchingNumerator: number = 1,
+    matchingDenominator: number = 4
 ): Promise<
   Contract<FactorySource['OrderFactory']>
 > => {
@@ -340,12 +344,34 @@ export const orderFactoryMigration = async (
     amount: locklift.utils.toNano(0.1),
     from: account.address
   }))
-  // Log and save address
+
+  logMigrationProcess(
+    'OrderFactoryMigration',
+    'setFeeParams',
+    'setFeeParams...',
+  );
+  await locklift.tracing.trace(contract.methods.setFeeParams({
+    params:
+    {
+      numerator: feeNumerator,
+      denominator: feeDenominator,
+      matchingNumerator: matchingNumerator,
+      matchingDenominator: matchingDenominator,
+      beneficiary: zeroAddress
+    }
+  }).send({
+    amount: locklift.utils.toNano(5),
+    from: account.address
+  }))
+
+  const feeParams = await contract.methods.getFeeParams({answerId:1}).call()
+
   logMigrationSuccess(
     'OrderFactoryMigration',
     'constructor',
-    `Deployed OrderFactory: ${contract.address}`,
+    `Deployed OrderFactory: ${contract.address}\nFee params:\nnumerator - ${feeParams.value0.numerator}\ndenominator - ${feeParams.value0.denominator}`,
   );
+
   new Migration().store(contract, 'OrderFactory');
 
   return contract;
@@ -368,13 +394,14 @@ export const orderRootMigration = async (
     'Deploying OrderRoot...',
   );
 
-  await
+  await locklift.tracing.trace(
       orderFactory.methods.createOrderRoot(
           {token: token.address, callbackId: callbackId}
       ).send({
-        amount: locklift.utils.toNano(5),
+        amount: locklift.utils.toNano(6),
         from: account.address
       }
+  ), {allowedCodes: {compute: [60]}}
   )
 
   const orderRootAddress = await orderFactory.methods.getExpectedAddressOrderRoot({

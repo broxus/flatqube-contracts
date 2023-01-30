@@ -13,7 +13,7 @@ async function main() {
     const account = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
 
     const content = '' +
-        `pragma ton-solidity >= 0.57.0;
+        `pragma ton-solidity >= 0.62.0;
 abstract contract ManagerAddress {
     address constant MANAGER_ADDRESS = address.makeAddrStd(0, 0x${account.address.toString().substr(2).toLowerCase()});
 }`

@@ -1,0 +1,29 @@
+pragma ton-solidity >= 0.62.0;
+
+import "./IOrderFeeParams.tsol";
+
+interface IOrderCloseUpdate is IOrderFeeParams{
+    struct OrderCloseUpdate{
+        address factory;
+        address root;
+		address	owner;
+        address spentToken;
+        address receiveToken;
+        uint128 expectedAmount;
+        uint128 initialAmount;
+        uint128 currentAmountSpentToken;
+        uint128 currentAmountReceiveToken;
+        uint256 backPK;
+        uint256 backMatchingPK;
+        address dexRoot;
+        address dexPair;
+        address spentWallet;
+        address receiveWallet;
+        uint8 state;
+        uint64 swapAttempt;
+        bool autoExchange;
+        OrderFeeParams fee;
+        address matchingOrder;
+        uint32 version;
+    }
+}

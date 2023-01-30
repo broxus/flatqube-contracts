@@ -45,6 +45,7 @@ export class OrderCallbacks {
                 inputs: [
                     { name: 'id', type: 'uint64'},
                     { name: 'owner', type: 'address'},
+                    { name: 'fee', type: 'uint128' },
                     { name: 'result',
                         components: [
                             { name: 'spentToken', type: 'address'},
@@ -63,6 +64,7 @@ export class OrderCallbacks {
                 inputs: [
                     { name: 'id', type: 'uint64'},
                     { name: 'owner', type: 'address'},
+                    { name: 'fee', type: 'uint128' },
                     { name: 'result',
                         components: [
                             { name: 'spentToken', type: 'address' },
