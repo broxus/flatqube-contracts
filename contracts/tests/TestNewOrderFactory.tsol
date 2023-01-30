@@ -400,72 +400,45 @@ contract TestNewOrderFactory is IOrderFactory{
 			});
 		} else {
 			emit OrderFactoryUpgrade(currentVersion, newVersion);
-
-			TvmBuilder builder;
-			builder.store(currentVersion);
-			builder.store(newVersion);
-			builder.store(versionOrderRoot);
-			builder.store(owner);
-			builder.store(pendingOwner);
-			builder.store(dexRoot);
-			builder.store(orderRootCode);
-			builder.store(orderCode);
-			builder.store(orderClosedCode);
-			builder.store(orderPlatformCode);
-
-			TvmBuilder builderFee;
-			builderFee.store(fee.numerator);
-			builderFee.store(fee.denominator);
-			builderFee.store(fee.matchingNumerator);
-			builderFee.store(fee.matchingDenominator);
-			builder.storeRef(builderFee);
+			TvmCell data = abi.encode(
+				currentVersion,
+				newVersion,
+				versionOrderRoot,
+				versionOrder,
+				versionOrderClosed,
+				owner,
+				pendingOwner,
+				dexRoot,
+				orderRootCode,
+				orderCode,
+				orderClosedCode,
+				orderPlatformCode,
+				fee,
+				sendGasTo
+			);
 
 			tvm.setcode(newCode);
 			tvm.setCurrentCode(newCode);
 
-			onCodeUpgrade(builder.toCell());
+			onCodeUpgrade(data);
 		}
 	}
 
 	function onCodeUpgrade(TvmCell data) private {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 2);
         tvm.resetStorage();
-        TvmSlice s = data.toSlice();
+
         uint32 oldVersion;
         address sendGasTo;
-        (
-			oldVersion,
-			currentVersion,
-			versionOrderRoot,
-			versionOrder,
-			versionOrderClosed,
-			owner,
-			pendingOwner,
-			dexRoot
-		) = s.decode
+
 		(
-			uint32,
-			uint32,
-			uint32,
-			uint32,
-			uint32,
-			address,
-			address,
-			address
+			oldVersion, currentVersion, versionOrderRoot, versionOrder, versionOrderClosed, owner, pendingOwner,
+			dexRoot, orderRootCode, orderCode, orderClosedCode, orderPlatformCode, fee, sendGasTo
+		) = abi.decode(data,(
+			uint32, uint32, uint32, uint32, uint32, address, address,
+			address, TvmCell, TvmCell, TvmCell, TvmCell, OrderFeeParams, address)
 		);
 
-		TvmSlice codeParamsSlice = s.loadRefAsSlice();
-        orderRootCode = codeParamsSlice.loadRef();
-		orderCode = codeParamsSlice.loadRef();
-		orderClosedCode = codeParamsSlice.loadRef();
-		orderPlatformCode = codeParamsSlice.loadRef();
-
-        TvmSlice feeParams = s.loadRefAsSlice();
-        fee.numerator = feeParams.decode(uint128);
-		fee.denominator = feeParams.decode(uint128);
-
-		TvmSlice sendGasToParams = s.loadRefAsSlice();
-		sendGasTo = sendGasToParams.decode(address);
         newTestField = "New Order Factory";
 
         sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });

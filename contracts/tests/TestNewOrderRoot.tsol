@@ -48,6 +48,7 @@ contract TestNewOrderRoot is IOrderFeeParams {
             tvm.rawReserve(address(this).balance - msg.value, 0);
             _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
         } else {
+
             TvmBuilder builder;
             builder.store(factory);
             builder.store(spentToken);

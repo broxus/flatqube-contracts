@@ -2619,81 +2619,62 @@ PUSHCONT {
 	PUSHINT 0
 	SENDRAWMSG
 	.loc ../contracts/OrderFactory.tsol, 412
+	DUP
+	GETGLOB 18
+	GETGLOB 20
+	GETGLOB 22
+	GETGLOB 21
+	GETGLOB 19
+	GETGLOB 11
+	GETGLOB 17
+	GETGLOB 16
+	GETGLOB 15
+	GETGLOB 14
+	GETGLOB 13
+	PUSH S13
 	GETGLOB 12
 	NEWC
 	STU 32
-	.loc ../contracts/OrderFactory.tsol, 413
-	PUSH S2
-	STUR 32
-	.loc ../contracts/OrderFactory.tsol, 414
-	GETGLOB 13
-	STUR 32
-	.loc ../contracts/OrderFactory.tsol, 415
-	GETGLOB 14
-	STUR 32
-	.loc ../contracts/OrderFactory.tsol, 416
-	GETGLOB 15
-	STUR 32
-	.loc ../contracts/OrderFactory.tsol, 417
-	GETGLOB 16
-	STSLICER
-	.loc ../contracts/OrderFactory.tsol, 418
-	GETGLOB 17
-	STSLICER
-	.loc ../contracts/OrderFactory.tsol, 419
-	GETGLOB 11
-	STSLICER
-	.loc ../contracts/OrderFactory.tsol, 422
-	GETGLOB 19
-	NEWC
-	STREF
-	.loc ../contracts/OrderFactory.tsol, 423
-	GETGLOB 21
-	SWAP
-	STREF
-	.loc ../contracts/OrderFactory.tsol, 424
-	GETGLOB 22
-	SWAP
-	STREF
-	.loc ../contracts/OrderFactory.tsol, 425
-	GETGLOB 20
-	SWAP
-	STREF
-	.loc ../contracts/OrderFactory.tsol, 426
-	STBREFR
-	.loc ../contracts/OrderFactory.tsol, 429
-	GETGLOB 18
-	FIRST
-	NEWC
-	STU 128
-	.loc ../contracts/OrderFactory.tsol, 430
-	GETGLOB 18
-	SECOND
-	STUR 128
-	.loc ../contracts/OrderFactory.tsol, 431
-	GETGLOB 18
-	THIRD
-	STUR 128
-	.loc ../contracts/OrderFactory.tsol, 432
-	GETGLOB 18
-	INDEX 3
-	STUR 128
-	.loc ../contracts/OrderFactory.tsol, 433
-	GETGLOB 18
-	INDEX 4
-	STSLICER
-	.loc ../contracts/OrderFactory.tsol, 434
-	STBREFR
-	.loc ../contracts/OrderFactory.tsol, 437
-	OVER
+	STU 32
+	STU 32
+	STU 32
+	STU 32
+	STSLICE
+	ROLLREV 8
 	NEWC
 	STSLICE
-	.loc ../contracts/OrderFactory.tsol, 438
+	ROLLREV 7
+	NEWC
+	STSLICE
+	STREF
+	STREF
+	STREF
+	ROLLREV 3
+	NEWC
+	STREF
+	SWAP
+	UNTUPLE 5
+	REVERSE 6, 0
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	ROTREV
+	NEWC
+	STSLICE
+	SWAP
+	NEWC
+	STSLICE
 	STBREFR
-	.loc ../contracts/OrderFactory.tsol, 440
+	STBREFR
+	STBREFR
+	STBREFR
+	STBREFR
+	ENDC
+	.loc ../contracts/OrderFactory.tsol, 429
 	PUSH S3
 	SETCODE
-	.loc ../contracts/OrderFactory.tsol, 441
+	.loc ../contracts/OrderFactory.tsol, 430
 	PUSH S3
 	CTOS
 	DUP
@@ -2708,8 +2689,7 @@ PUSHCONT {
 	CTOS
 	BLESS
 	POP C3
-	.loc ../contracts/OrderFactory.tsol, 443
-	ENDC
+	.loc ../contracts/OrderFactory.tsol, 432
 	CALLREF {
 		CALL $:onCodeUpgrade$
 	}

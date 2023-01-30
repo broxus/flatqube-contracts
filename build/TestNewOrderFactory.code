@@ -2799,64 +2799,63 @@ PUSHCONT {
 	ENDC
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 405
+	.loc ../contracts/tests/TestNewOrderFactory.tsol, 403
+	DUP
+	GETGLOB 18
+	GETGLOB 21
+	GETGLOB 23
+	GETGLOB 22
+	GETGLOB 20
+	GETGLOB 11
+	GETGLOB 17
+	GETGLOB 16
+	GETGLOB 15
+	GETGLOB 14
+	GETGLOB 13
+	PUSH S13
 	GETGLOB 12
 	NEWC
 	STU 32
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 406
-	PUSH S2
-	STUR 32
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 407
-	GETGLOB 13
-	STUR 32
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 408
-	GETGLOB 16
-	STSLICER
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 409
-	GETGLOB 17
-	STSLICER
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 410
-	GETGLOB 11
-	STSLICER
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 411
-	GETGLOB 20
-	SWAP
-	STREF
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 412
-	GETGLOB 22
-	SWAP
-	STREF
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 413
-	GETGLOB 23
-	SWAP
-	STREF
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 414
-	GETGLOB 21
-	SWAP
-	STREF
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 417
-	GETGLOB 18
-	FIRST
+	STU 32
+	STU 32
+	STU 32
+	STU 32
+	STSLICE
+	ROLLREV 8
 	NEWC
+	STSLICE
+	ROLLREV 7
+	NEWC
+	STSLICE
+	STREF
+	STREF
+	STREF
+	ROLLREV 3
+	NEWC
+	STREF
+	SWAP
+	UNTUPLE 5
+	REVERSE 6, 0
 	STU 128
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 418
-	GETGLOB 18
-	SECOND
-	STUR 128
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 419
-	GETGLOB 18
-	THIRD
-	STUR 128
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 420
-	GETGLOB 18
-	INDEX 3
-	STUR 128
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 421
+	STU 128
+	STU 128
+	STU 128
+	ROTREV
+	NEWC
+	STSLICE
+	SWAP
+	NEWC
+	STSLICE
 	STBREFR
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 423
+	STBREFR
+	STBREFR
+	STBREFR
+	STBREFR
+	ENDC
+	.loc ../contracts/tests/TestNewOrderFactory.tsol, 420
 	PUSH S3
 	SETCODE
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 424
+	.loc ../contracts/tests/TestNewOrderFactory.tsol, 421
 	PUSH S3
 	CTOS
 	DUP
@@ -2871,8 +2870,7 @@ PUSHCONT {
 	CTOS
 	BLESS
 	POP C3
-	.loc ../contracts/tests/TestNewOrderFactory.tsol, 426
-	ENDC
+	.loc ../contracts/tests/TestNewOrderFactory.tsol, 423
 	CALLREF {
 		CALL $:onCodeUpgrade$
 	}
@@ -2883,11 +2881,11 @@ BLKDROP 3
 
 .internal-alias :onCodeUpgrade, 2
 .internal :onCodeUpgrade
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 431
+.loc ../contracts/tests/TestNewOrderFactory.tsol, 428
 PUSHINT 1000000000
 PUSHINT 2
 RAWRESERVE
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 432
+.loc ../contracts/tests/TestNewOrderFactory.tsol, 429
 PUSHINT 0
 SETGLOB 10
 PUSHREFSLICE {
@@ -2934,20 +2932,46 @@ SETGLOB 23
 PUSHREF {
 }
 SETGLOB 24
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 433
+.loc ../contracts/tests/TestNewOrderFactory.tsol, 434
 CTOS
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 436
-DUP
 LDU 32
 LDU 32
 LDU 32
 LDU 32
 LDU 32
 LDMSGADDR
+LDREF
+ENDS
+CTOS
 LDMSGADDR
+LDREF
+ENDS
+CTOS
 LDMSGADDR
-POP S9
-REVERSE 8, 0
+LDREF
+LDREF
+LDREF
+LDREF
+ENDS
+CTOS
+LDREF
+LDU 128
+LDU 128
+LDU 128
+LDU 128
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+ROLLREV 5
+TUPLE 5
+SWAP
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+ENDS
+REVERSE 14, 0
 DROP
 SETGLOB 12
 SETGLOB 13
@@ -2956,54 +2980,17 @@ SETGLOB 15
 SETGLOB 16
 SETGLOB 17
 SETGLOB 11
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 457
-LDREFRTOS
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 458
-DUP
-LDREF
-POP S2
 SETGLOB 20
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 459
-DUP
-LDREF
-POP S2
 SETGLOB 22
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 460
-DUP
-LDREF
-POP S2
 SETGLOB 23
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 461
-PLDREF
 SETGLOB 21
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 463
-LDREFRTOS
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 464
-DUP
-LDU 128
-POP S2
-GETGLOB 18
-SWAP
-SETINDEX 0
 SETGLOB 18
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 465
-PLDU 128
-GETGLOB 18
-SWAP
-SETINDEX 1
-SETGLOB 18
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 467
-LDREFRTOS
-NIP
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 468
-LDMSGADDR
-DROP
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 469
+.loc ../contracts/tests/TestNewOrderFactory.tsol, 442
 PUSHREF {
 	.blob x4e6577204f7264657220466163746f7279
 }
 SETGLOB 24
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 471
+.loc ../contracts/tests/TestNewOrderFactory.tsol, 444
 NEWC
 STSLICECONST x62_
 STSLICE
@@ -3028,7 +3015,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 474
+.loc ../contracts/tests/TestNewOrderFactory.tsol, 447
 ENDS
 .loc ../contracts/tests/TestNewOrderFactory.tsol, 0
 CALLREF {
@@ -3066,7 +3053,7 @@ THROW 0
 CALL $newFunc_572bedd5_internal_macro$
 
 .macro newFunc_572bedd5_internal_macro
-.loc ../contracts/tests/TestNewOrderFactory.tsol, 475
+.loc ../contracts/tests/TestNewOrderFactory.tsol, 448
 GETGLOB 24
 .loc ../contracts/tests/TestNewOrderFactory.tsol, 0
 

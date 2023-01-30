@@ -398,7 +398,7 @@ contract OrderFactory is IOrderFactory {
 		TvmCell newCode,
 		uint32 newVersion,
 		address sendGasTo
-	) external override onlyOwner { //TODO UPDATE for value
+	) external override onlyOwner {
 		if (currentVersion == newVersion) {
 			tvm.rawReserve(address(this).balance - msg.value, 0);
 			sendGasTo.transfer({
@@ -408,39 +408,28 @@ contract OrderFactory is IOrderFactory {
 			});
 		} else {
 			emit OrderFactoryUpgrade(currentVersion, newVersion);
-			TvmBuilder builder;
-			builder.store(currentVersion);
-			builder.store(newVersion);
-			builder.store(versionOrderRoot);
-			builder.store(versionOrder);
-			builder.store(versionOrderClosed);
-			builder.store(owner);
-			builder.store(pendingOwner);
-			builder.store(dexRoot);
 
-			TvmBuilder builderCode;
-			builderCode.store(orderRootCode);
-			builderCode.store(orderCode);
-			builderCode.store(orderClosedCode);
-			builderCode.store(orderPlatformCode);
-			builder.storeRef(builderCode);
-
-			TvmBuilder builderFee;
-			builderFee.store(fee.numerator);
-			builderFee.store(fee.denominator);
-			builderFee.store(fee.matchingNumerator);
-			builderFee.store(fee.matchingDenominator);
-			builderFee.store(fee.beneficiary);
-			builder.storeRef(builderFee);
-
-			TvmBuilder builderSendGasTo;
-			builderSendGasTo.store(sendGasTo);
-			builder.storeRef(builderSendGasTo);
+			TvmCell data = abi.encode(
+				currentVersion,
+				newVersion,
+				versionOrderRoot,
+					versionOrder,
+					versionOrderClosed,
+					owner,
+					pendingOwner,
+					dexRoot,
+					orderRootCode,
+					orderCode,
+					orderClosedCode,
+					orderPlatformCode,
+					fee,
+					sendGasTo
+			);
 
 			tvm.setcode(newCode);
 			tvm.setCurrentCode(newCode);
 
-			onCodeUpgrade(builder.toCell());
+			onCodeUpgrade(data);
 		}
 	}
 
