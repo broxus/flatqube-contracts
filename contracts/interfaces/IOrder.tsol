@@ -35,8 +35,7 @@ interface IOrder is IOrderFeeParams {
 		uint64 timeTx;
 		uint64 nowTx;
 		address matchingOrder;
-//		uint32 versionOrder;
-//		uint32 versionOrderClosed;
+		uint32 version;
 	}
 
 	event StateChanged(uint8 from, uint8 to, Details);
@@ -54,6 +53,8 @@ interface IOrder is IOrderFeeParams {
 	function initParams() external view responsible returns (InitParams);
 	function getDetails() external view responsible returns (Details);
 	function getFeeParams() external view responsible returns (OrderFeeParams);
+	function getExpectedSpendAmount(uint128 amount) external view responsible returns(uint128, uint128);
+	function getExpectedSpendAmountOfMatching(uint128 amount) external view responsible returns(uint128, uint128);
 	function setFeeParams(OrderFeeParams params) external;
 	function matchingCheck(uint64 callbackId, uint128 deployWalletValue, Details detailsLO) external;
 	function matchingInProgress(uint64 callbackId,
@@ -61,5 +62,5 @@ interface IOrder is IOrderFeeParams {
 		uint128 amount,
 		uint128 reward,
 		address sendGasTo) external;
-//	function upgrade(TvmCell _code, uint32 _newVersion, address _sendGasTo) external;
+	function upgrade(TvmCell _code, uint32 _newVersion, address _sendGasTo) external;
 }

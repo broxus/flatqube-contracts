@@ -26,10 +26,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
     
     uint32 version;
     uint32 versionOrder;
-    uint32 versionOrderClosed;
 
     TvmCell orderCode;
-    TvmCell orderClosedCode;
     TvmCell orderPlatformCode;
 
     address spentTokenWallet;
@@ -115,19 +113,10 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
         uint256 backPK,
         uint256 backMatchingPK
     ) external pure returns (TvmCell) {
-
-        TvmBuilder builderBackendPK;
-        builderBackendPK.store(backPK);
-        builderBackendPK.store(backMatchingPK);
-
-        TvmBuilder builder;
-        builder.store(callbackId);
-        builder.store(tokenReceive);
-        builder.store(expectedTokenAmount);
-        builder.store(deployWalletValue);
-        builder.storeRef(builderBackendPK);
-
-        return builder.toCell();
+        return abi.encode(
+            callbackId, tokenReceive, expectedTokenAmount, deployWalletValue,
+            backPK, backMatchingPK
+        );
     }
 
     function onAcceptTokensTransfer(
@@ -175,11 +164,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
                 backMatchingPK,
                 dexRoot, 
                 fee,
-                orderClosedCode,
-                orderPlatformCode
-//                ,
-//                versionOrder,
-//                versionOrderClosed
+                orderPlatformCode,
+                version
             );
 
             emit CreateOrder(orderAddress, tokenRoot, amount, receiveToken, expectedAmount);
@@ -302,89 +288,37 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
         } else {
             emit OrderRootCodeUpgraded(_newVersion);
 
-            TvmBuilder builder;
-            builder.store(factory);
-            builder.store(spentToken);
-            builder.store(version);
-            builder.store(_newVersion);
-            builder.store(versionOrder);
-            builder.store(versionOrderClosed);
-
-            TvmBuilder builderCode;
-            builderCode.store(orderCode);
-            builderCode.store(orderClosedCode);
-            builderCode.store(orderPlatformCode);
-            builder.storeRef(builderCode);
-
-            TvmBuilder builder1;
-            builder1.store(spentTokenWallet);
-            builder1.store(deployer);
-            builder1.store(dexRoot);
-            builder.storeRef(builder1);
-
-            TvmBuilder builder2;
-            builder2.store(fee.numerator);
-            builder2.store(fee.denominator);
-            builder2.store(fee.matchingNumerator);
-            builder2.store(fee.matchingDenominator);
-            builder2.store(fee.beneficiary);
-            builder.storeRef(builder2);
-
             tvm.setcode(_code);
             tvm.setCurrentCode(_code);
 
-            onCodeUpgrade(builder.toCell());
+            TvmCell data = abi.encode(
+                factory, spentToken, version, _newVersion, versionOrder,
+                orderCode, orderPlatformCode, spentTokenWallet, deployer,
+                dexRoot, fee
+            );
+
+            onCodeUpgrade(data);
         }
     }
 
     function onCodeUpgrade(TvmCell _data) private {
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+        tvm.resetStorage();
 
-        TvmSlice sl = _data.toSlice();
-
+        TvmCell data;
         (
-            address _factory,
-            address _spentToken,
-            uint32 oldVersion,
-            uint32 _version,
-            uint32 _versionOrder,
-            uint32 _versionOrderClosed,
-            address _deployer
-        ) = sl.decode(address, address, uint32, uint32, uint32, uint32, address);
+            factory, spentToken, version,
+            versionOrder, deployer, fee, data
+        ) = abi.decode(_data, (address, address, uint32, uint32, address, OrderFeeParams, TvmCell));
 
-        if (oldVersion == 0) {
-            tvm.resetStorage();
-        }
-
-        factory = _factory;
-        spentToken = _spentToken;
-        version = _version;
-        versionOrder = _versionOrder;
-        versionOrderClosed = _versionOrderClosed;
-        deployer = _deployer;
-
-        TvmSlice feeSl = sl.loadRefAsSlice();
-        (
-            uint128 numerator_,
-            uint128 denominator_,
-            uint128 matchingNumerator_,
-            uint128 matchingDenominator_,
-            address beneficiary_
-        ) = feeSl.decode(uint128, uint128, uint128, uint128, address);
-        fee = OrderFeeParams(numerator_, denominator_, matchingNumerator_, matchingDenominator_, beneficiary_);
-
-        TvmSlice dataSl = sl.loadRefAsSlice();
-        dexRoot = dataSl.decode(address);
-        orderCode = dataSl.loadRef();
-        orderClosedCode = dataSl.loadRef();
-        orderPlatformCode = dataSl.loadRef();
+        (dexRoot, orderCode, orderPlatformCode) = abi.decode(data, (address, TvmCell, TvmCell));
 
         ITokenRoot(spentToken).deployWallet{
             value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
             flag: MsgFlag.SENDER_PAYS_FEES,
             callback: OrderRoot.onTokenWallet
         }(
-            address(this), 
+            address(this),
             OrderGas.DEPLOY_EMPTY_WALLET_GRAMS
         );
 

@@ -2492,23 +2492,67 @@ describe('OrderTest', () => {
         });
     });
     describe('Upgrade Order contracts', async () => {
-        it('Check Order Factory upgrade', async () => {
+        it('Check Order upgrade', async () => {
             console.log(`#############################\n`);
 
-            console.log(`Upgrade OrderFactory...`)
+            TOKENS_TO_EXCHANGE1 = 10;
+            TOKENS_TO_EXCHANGE2 = 20;
 
-            const testFactoryCode = (await locklift.factory.getContractArtifacts("TestNewOrderFactory")).code
-            const NEW_VERSION = 3
-            await locklift.tracing.trace(factoryOrder.methods.upgrade({newCode: testFactoryCode, sendGasTo: account1.address, newVersion: NEW_VERSION})
+            const params = {
+                callbackId: 0,
+                tokenReceive: rootTokenBar.address,
+                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                deployWalletValue: locklift.utils.toNano(0.1),
+                backPK: 0,
+                backMatchingPK: 0
+            }
+            console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
+            const payload = await RootOrderTst.methods.buildPayload(params).call();
+            console.log(`Result payload = ${payload.value0}`);
+
+            console.log(`TstWallet3(${barWallet3.address}).transfer()
+                amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.tst.decimals).toString()},
+                recipient: ${RootOrderTst.address},
+                deployWalletValue: ${locklift.utils.toNano(0.1)},
+                remainingGasTo: ${account3.address},
+                notify: ${true},
+                payload: ${JSON.stringify(params)}
+            )`);
+
+            await locklift.tracing.trace(tstWallet3.methods.transfer({
+                amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                recipient: RootOrderTst.address,
+                deployWalletValue: locklift.utils.toNano(0.1),
+                remainingGasTo: account3.address,
+                notify: true,
+                payload: payload.value0
+            }).send({
+                amount: locklift.utils.toNano(5), from: account3.address
+            }), {allowedCodes: {compute: [60]}})
+
+            const pastEvents = await RootOrderTst.getPastEvents({filter: event => event.event === "CreateOrder"});
+            // @ts-ignore
+            // @ts-ignore
+            const orderAddress = pastEvents.events[0].data.order
+            console.log(`Order - ${orderAddress}`)
+            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
+
+            console.log(`Upgrade Order...`)
+            const NEW_VERSION = 2
+
+            const testOrderCode = (await locklift.factory.getContractArtifacts("TestNewOrder")).code
+            await locklift.tracing.trace(factoryOrder.methods.setOrderCode({_orderCode: testOrderCode})
                 .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
 
-            const newFactory = await locklift.factory.getDeployedContract("TestNewOrderFactory", factoryOrder.address)
-            const testMessage = (await newFactory.methods.newFunc().call()).value0
-            const newVersion = (await newFactory.methods.getVersion({answerId: 1}).call()).value0
-            const owner = (await newFactory.methods.getOwner({answerId: 2}).call()).value0
-            expect(testMessage).to.equal("New Order Factory", "Wrong Upgrade OrderFactory")
-            expect(newVersion.toString()).to.equal(NEW_VERSION.toString(), "Wrong OrderFactory new version")
-            expect(owner.toString()).to.equal(account1.address.toString(), "Wrong OrderFactory owner");
+            await locklift.tracing.trace(factoryOrder.methods.upgradeOrder({order: Order.address})
+                .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
+
+            const newOrder = await locklift.factory.getDeployedContract("TestNewOrder", Order.address)
+            const testMessage = (await newOrder.methods.newFunc().call()).value0
+            const newVersion = (await newOrder.methods.getDetails({answerId: 1}).call()).value0.version
+
+            expect(testMessage).to.equal("New Order", "Wrong Upgrade OrderFactory")
+            expect(newVersion.toString()).to.equal(NEW_VERSION.toString(), "Wrong Order new version")
         });
         it('Check Order Root upgrade', async () => {
             console.log(`#############################\n`);
@@ -2529,7 +2573,24 @@ describe('OrderTest', () => {
 
             expect(testMessage).to.equal("New Order Root", "Wrong Upgrade OrderFactory")
             expect(newVersion.toString()).to.equal(NEW_VERSION.toString(), "Wrong OrderFactory new version")
+        });
+        it('Check Order Factory upgrade', async () => {
+            console.log(`#############################\n`);
 
+            console.log(`Upgrade OrderFactory...`)
+
+            const testFactoryCode = (await locklift.factory.getContractArtifacts("TestNewOrderFactory")).code
+            const NEW_VERSION = 3
+            await locklift.tracing.trace(factoryOrder.methods.upgrade({newCode: testFactoryCode, sendGasTo: account1.address, newVersion: NEW_VERSION})
+                .send({amount: locklift.utils.toNano(1.1), from: account1.address}))
+
+            const newFactory = await locklift.factory.getDeployedContract("TestNewOrderFactory", factoryOrder.address)
+            const testMessage = (await newFactory.methods.newFunc().call()).value0
+            const newVersion = (await newFactory.methods.getVersion({answerId: 1}).call()).value0
+            const owner = (await newFactory.methods.getOwner({answerId: 2}).call()).value0
+            expect(testMessage).to.equal("New Order Factory", "Wrong Upgrade OrderFactory")
+            expect(newVersion.toString()).to.equal(NEW_VERSION.toString(), "Wrong OrderFactory new version")
+            expect(owner.toString()).to.equal(account1.address.toString(), "Wrong OrderFactory owner");
         });
     });
 });

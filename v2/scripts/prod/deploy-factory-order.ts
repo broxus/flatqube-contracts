@@ -29,7 +29,6 @@ async function main() {
     const PlatformOrder = await locklift.factory.getContractArtifacts('OrderPlatform');
     const RootOrder = await locklift.factory.getContractArtifacts('OrderRoot');
     const Order = await locklift.factory.getContractArtifacts('Order');
-    const ClosedOrder = await locklift.factory.getContractArtifacts('OrderClosed');
 
     const {contract: factoryOrder} = await locklift.factory.deployContract({
         contract: 'OrderFactory',
@@ -65,13 +64,6 @@ async function main() {
     console.log(`Set code Order`)
     //@ts-ignore
     await factoryOrder.methods.setOrderCode({_orderCode: Order.code}).send({
-        from: account.address,
-        amount: toNano(0.1)
-    })
-
-    console.log(`Set code OrderClosed`)
-    //@ts-ignore
-    await factoryOrder.methods.setOrderClosedCode({_orderClosedCode: ClosedOrder.code}).send({
         from: account.address,
         amount: toNano(0.1)
     })

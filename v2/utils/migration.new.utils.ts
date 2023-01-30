@@ -330,21 +330,6 @@ export const orderFactoryMigration = async (
     from: account.address
   }))
 
-    logMigrationProcess(
-    'OrderFactoryMigration',
-    'setOrderClosedCode',
-    'setOrderClosedCode...',
-  );
-
-  const orderClosedArtifacts = await locklift.factory.getContractArtifacts("OrderClosed")
-
-  await locklift.tracing.trace(contract.methods.setOrderClosedCode({
-    _orderClosedCode: orderClosedArtifacts.code
-  }).send({
-    amount: locklift.utils.toNano(0.1),
-    from: account.address
-  }))
-
   logMigrationProcess(
     'OrderFactoryMigration',
     'setFeeParams',

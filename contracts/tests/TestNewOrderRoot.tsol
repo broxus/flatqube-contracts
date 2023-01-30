@@ -20,10 +20,8 @@ contract TestNewOrderRoot is IOrderFeeParams {
 
     uint32 version;
     uint32 versionOrder;
-    uint32 versionOrderClosed;
 
     TvmCell orderCode;
-    TvmCell orderClosedCode;
     TvmCell orderPlatformCode;
 
     address spentTokenWallet;
@@ -35,6 +33,14 @@ contract TestNewOrderRoot is IOrderFeeParams {
 
     constructor() public { revert(); }
 
+    modifier onlyFactory() {
+        require(
+            msg.sender.value != 0 && msg.sender == factory,
+            OrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT
+        );
+        _;
+    }
+
     function getVersion() external view responsible returns (uint32) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } version;
     }
@@ -43,91 +49,39 @@ contract TestNewOrderRoot is IOrderFeeParams {
         TvmCell _code,
         uint32 _newVersion,
         address _sendGasTo
-    ) external   {
+    ) external  onlyFactory {
         if (version == _newVersion) {
             tvm.rawReserve(address(this).balance - msg.value, 0);
             _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
         } else {
-
-            TvmBuilder builder;
-            builder.store(factory);
-            builder.store(spentToken);
-            builder.store(version);
-            builder.store(_newVersion);
-            builder.store(versionOrder);
-            builder.store(versionOrderClosed);
-
-            TvmBuilder builderCode;
-            builderCode.store(orderCode);
-            builderCode.store(orderClosedCode);
-            builderCode.store(orderPlatformCode);
-            builder.storeRef(builderCode);
-
-            TvmBuilder builder1;
-            builder1.store(spentTokenWallet);
-            builder.store(deployer);
-            builder1.store(dexRoot);
-            builder.storeRef(builder1);
-
-            TvmBuilder builder2;
-            builder2.store(fee.numerator);
-            builder2.store(fee.denominator);
-            builder2.store(fee.matchingNumerator);
-            builder2.store(fee.matchingDenominator);
-            builder2.store(fee.beneficiary);
-            builder.storeRef(builder2);
+            TvmCell data = abi.encode(
+                factory, spentToken, version, _newVersion, versionOrder,
+                orderCode, orderPlatformCode, spentTokenWallet, deployer,
+                dexRoot, fee
+            );
 
             tvm.setcode(_code);
             tvm.setCurrentCode(_code);
 
-            onCodeUpgrade(builder.toCell());
+            onCodeUpgrade(data);
         }
     }
 
     function onCodeUpgrade(TvmCell _data) private {
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-        TvmSlice sl = _data.toSlice();
+        tvm.resetStorage();
 
         uint32 oldVersion;
         (
-            factory,
-            spentToken,
-            oldVersion,
-            version,
-            versionOrder,
-            versionOrderClosed) = sl.decode(address, address, uint32, uint32, uint32, uint32);
-
-        if (oldVersion == 0) {
-            tvm.resetStorage();
-        }
-
-        TvmSlice dataSlCode = sl.loadRefAsSlice();
-
-        orderCode = dataSlCode.loadRef();
-        orderClosedCode = dataSlCode.loadRef();
-        orderPlatformCode = dataSlCode.loadRef();
-
-        TvmSlice dataSl = sl.loadRefAsSlice();
-        (
-            spentTokenWallet,
-            deployer,
-            dexRoot
-        ) = dataSl.decode(address, address, address);
-
-        TvmSlice dataSlFee = sl.loadRefAsSlice();
-        (
-            uint128 numerator_,
-            uint128 denominator_,
-            uint128 matchingNumerator_,
-            uint128 matchingDenominator_,
-            address beneficiary_
-        ) = dataSlFee.decode(uint128, uint128, uint128, uint128, address);
-
-        fee = OrderFeeParams(numerator_, denominator_, matchingNumerator_, matchingDenominator_, beneficiary_);
-
+            factory, spentToken, oldVersion, version, versionOrder, orderCode,
+            orderPlatformCode, spentTokenWallet, deployer, dexRoot, fee
+        ) = abi.decode(_data, (
+            address, address, uint32, uint32, uint32,
+            TvmCell, TvmCell, address, address, address, OrderFeeParams
+            ));
         newTestField = "New Order Root";
 
-        deployer.transfer({
+        factory.transfer({
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
                 bounce: false
