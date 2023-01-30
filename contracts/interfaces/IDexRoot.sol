@@ -53,7 +53,10 @@ interface IDexRoot is IFeeParams, IOracleOptions {
 
     function isActive() external view responsible returns (bool);
 
+    // FIXME:
     function getVault() external view responsible returns (address);
+
+    function getExpectedTokenVaultAddress(address _tokenRoot) external view responsible returns (address);
 
     function getExpectedPairAddress(
         address left_root,

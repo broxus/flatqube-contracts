@@ -93,8 +93,6 @@ interface IDexAccount is
 
     function getVersion() external view responsible returns (uint32);
 
-    function getVault() external view responsible returns (address);
-
     function getWalletData(address token_root) external view responsible returns (
         address wallet,
         uint128 balance

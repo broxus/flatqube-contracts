@@ -212,6 +212,14 @@ contract DexRoot is
         } _expectedPoolAddress(_roots);
     }
 
+    function getExpectedTokenVaultAddress(address _tokenRoot) override external view responsible returns (address) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _expectedTokenVaultAddress(_tokenRoot);
+    }
+
     function getManager() external view responsible returns (address) {
         return {
             value: 0,

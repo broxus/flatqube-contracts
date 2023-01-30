@@ -72,4 +72,6 @@ library DexErrors {
 
     uint16 constant INVALID_NEXT_STEPS               = 147;
     uint16 constant INVALID_SUCCESS_PAYLOAD          = 148;
+
+    uint16 constant NOT_TOKEN_VAULT                  = 149;
 }

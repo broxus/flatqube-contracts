@@ -38,6 +38,11 @@ abstract contract DexContractBase  {
         _;
     }
 
+    modifier onlyTokenVault(address _tokenRoot) {
+        require(msg.sender == _expectedTokenVaultAddress(_tokenRoot), DexErrors.NOT_TOKEN_VAULT);
+        _;
+    }
+
     function _dexRoot() virtual internal view returns (address);
 
     function _expectedAccountAddress(address _accountOwner) internal view returns (address) {
@@ -62,10 +67,29 @@ abstract contract DexContractBase  {
         );
     }
 
+    function _expectedTokenVaultAddress(address _tokenRoot) internal view returns (address) {
+        return address(
+            tvm.hash(
+                _buildInitData(
+                    DexPlatformTypes.Vault,
+                    _buildTokenVaultParams(_tokenRoot)
+                )
+            )
+        );
+    }
+
     function _buildAccountParams(address _accountOwner) internal pure returns (TvmCell) {
         TvmBuilder builder;
 
         builder.store(_accountOwner);
+
+        return builder.toCell();
+    }
+
+    function _buildTokenVaultParams(address _tokenRoot) internal pure returns (TvmCell) {
+        TvmBuilder builder;
+
+        builder.store(_tokenRoot);
 
         return builder.toCell();
     }
