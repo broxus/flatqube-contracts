@@ -198,6 +198,18 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
 		}
 	}
 
+	onBounce(TvmSlice body) external {
+		uint32 functionId = body.decode(uint32);
+
+		if (
+			functionId == tvm.functionId(Order.matchingCheck) &&
+			msg.sender == matchingOrder
+		){
+			changeState(OrderStatus.Active);
+			matchingOrder = address(0);
+		}
+	}
+
 	function currentStatus() external view responsible override returns (uint8){
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } state;
 	}
