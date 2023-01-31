@@ -333,6 +333,8 @@ contract DexPair is DexPairBase, INextExchangeData {
             _accountOwner
         );
 
+        _sync();
+
         TvmCell empty;
 
         ITokenRoot(_lpRoot())
@@ -374,7 +376,6 @@ contract DexPair is DexPairBase, INextExchangeData {
             oldReserves[1],
             now
         );
-        _sync();
 
         if (_result.step_1_lp_reward > 0) {
             TokenOperation[] step1Operations;
@@ -557,6 +558,8 @@ contract DexPair is DexPairBase, INextExchangeData {
             empty
         );
 
+        _sync();
+
         IBurnableByRootTokenRoot(_lpRoot())
             .burnTokens{ value: DexGas.BURN_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
             (
@@ -601,7 +604,6 @@ contract DexPair is DexPairBase, INextExchangeData {
             oldReserves[1],
             now
         );
-        _sync();
 
         IWithdrawResult.WithdrawResult result = IWithdrawResult.WithdrawResult(
             _lpAmount,
@@ -794,6 +796,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                 0
             );
 
+            _sync();
+
             IDexAccount(msg.sender)
                 .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                 (
@@ -894,7 +898,6 @@ contract DexPair is DexPairBase, INextExchangeData {
             oldReserves[1],
             now
         );
-        _sync();
 
         IExchangeResult.ExchangeResult result =  IExchangeResult.ExchangeResult(
             spentTokenIndex == 0 && receiveTokenIndex == 1,
@@ -1158,6 +1161,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                         _currentVersion,
                         _remainingGasTo
                     );
+            } else {
+                _sync();
             }
         } else {
             revert(DexErrors.NOT_TOKEN_ROOT);
@@ -1567,6 +1572,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                     notifyCancel,
                     PairPayload.buildCancelPayload(op, errorCode, cancelPayload, nextSteps)
                 );
+        } else {
+            _sync();
         }
     }
 
