@@ -8,8 +8,12 @@ import "./libraries/OrderGas.tsol";
 import "./libraries/OrderErrors.tsol";
 
 import "./interfaces/IOrderFactory.tsol";
+import "./interfaces/IOrderFactoryEvents.tsol";
+import "./interfaces/IOrderFactoryCallbacks.tsol";
 import "./interfaces/IOrderRoot.tsol";
 import "./interfaces/IHasEmergencyMode.tsol";
+
+import "./structures/IOrderFeeParams.tsol";
 
 import "./OrderPlatform.tsol";
 import "./OrderRoot.tsol";
@@ -17,7 +21,7 @@ import "./OrderRoot.tsol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "tip3/contracts/interfaces/ITokenWallet.tsol";
 
-contract OrderFactory is IOrderFactory {
+contract OrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactoryCallbacks {
 	uint32 static randomNonce;
 	address static dexRoot;
 
@@ -56,7 +60,7 @@ contract OrderFactory is IOrderFactory {
 		_;
 	}
 
-	function onOrderRootDeployed(
+	function onOrderRootDeployedCallback(
 		address _orderRoot,
 		address token,
 		address sendGasTo

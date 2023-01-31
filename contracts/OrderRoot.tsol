@@ -10,7 +10,7 @@ import "./libraries/OrderErrors.tsol";
 import "./structures/IOrderRootCreateResult.tsol";
 
 import "./interfaces/IOrderRoot.tsol";
-import "./interfaces/IOrderFactory.tsol";
+import "./interfaces/IOrderFactoryCallbacks.tsol";
 import "./interfaces/IOrderOperationCallback.tsol";
 
 import "./Order.tsol";
@@ -54,7 +54,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
         spentTokenWallet = _wallet;
 
-        IOrderFactory(factory).onOrderRootDeployed{
+        IOrderFactoryCallbacks(factory).onOrderRootDeployedCallback{
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED
         }(address(this), spentToken, deployer);
