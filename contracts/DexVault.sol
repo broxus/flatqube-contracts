@@ -39,6 +39,8 @@ contract DexVault is
     INextExchangeData,
     IReferralProgramParams
 {
+    uint32 private static _nonce;
+
     address private _root;
     address private _owner;
     address private _pendingOwner;

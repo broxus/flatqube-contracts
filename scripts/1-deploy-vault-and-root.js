@@ -80,11 +80,11 @@ async function main() {
   });
   displayTx(tx);
 
-  console.log(`DexVault: installing VaultLpTokenPendingV2 code...`);
+  console.log(`DexRoot: installing VaultLpTokenPendingV2 code...`);
   tx = await account.runTarget({
-    contract: dexVault,
+    contract: dexRoot,
     method: 'installOrUpdateLpTokenPendingCode',
-    params: {code: DexVaultLpTokenPendingV2.code},
+    params: {_newCode: DexVaultLpTokenPendingV2.code, _remainingGasTo: account.address},
     keyPair
   });
 
