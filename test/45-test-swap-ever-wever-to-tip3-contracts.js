@@ -32,7 +32,7 @@ describe('Tests Swap Evers', async function () {
         everWeverToTip3 = migration.load(await locklift.factory.getContract('EverWeverToTip3'), 'EverWeverToTip3');
 
         keyPairs = await locklift.keys.getKeyPairs();
-        dexPair = migration.load(await locklift.factory.getContract('DexPool'), 'DexPoolTstWEVER');
+        dexPair = migration.load(await locklift.factory.getContract('DexPair'), 'DexPoolTstWEVER');
         wEverRoot = migration.load(await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH), 'WEVERRoot');
         tstRoot = migration.load(await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH), 'TstRoot');
         wEverVault = migration.load(await locklift.factory.getContract('TestWeverVault'), 'WEVERVault');
