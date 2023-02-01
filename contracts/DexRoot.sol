@@ -515,7 +515,7 @@ contract DexRoot is
             _poolCodes,
             _poolVersions,
             _owner,
-            /* _vault */,
+            _vault,
             _pendingOwner
         ) = abi.decode(_data, (
             TvmCell,
@@ -861,7 +861,7 @@ contract DexRoot is
         }(
             _pairCodes[DexPoolTypes.CONSTANT_PRODUCT],
             _pairVersions[DexPoolTypes.CONSTANT_PRODUCT],
-            address(0),
+            _vault,
             send_gas_to
         );
     }
@@ -889,6 +889,10 @@ contract DexRoot is
             2
         );
 
+        for (address root: roots) {
+            _deployVaultInternal(root, address(this), send_gas_to);
+        }
+
         new DexPlatform{
             stateInit: _buildInitData(
                 DexPlatformTypes.Pool,
@@ -899,7 +903,7 @@ contract DexRoot is
         }(
             _poolCodes[DexPoolTypes.STABLE_POOL],
             _poolVersions[DexPoolTypes.STABLE_POOL],
-            address(0),
+            _vault,
             send_gas_to
         );
     }
