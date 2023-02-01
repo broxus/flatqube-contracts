@@ -93,12 +93,12 @@ describe('Check for correct deployment', async function () {
         .to
         .equal(dexRoot.address, 'Wrong DexRoot address in DexVault');
     });
-    it('Check TokenFactory address', async function () {
+    it.skip('Check TokenFactory address', async function () {
       expect(await dexVault.call({ method: 'getTokenFactory' }))
         .to
         .equal(tokenFactory.address, 'Wrong TokenFactory address in DexVault');
     });
-    it('Check DexVaultLpTokenPending code is installed', async function () {
+    it.skip('Check DexVaultLpTokenPending code is installed', async function () {
       expect(await dexVault.call({ method: 'getLpTokenPendingCode' }))
         .to
         .equal(DexVaultLpTokenPending.code, 'Wrong DexVaultLpTokenPending code in DexVault');

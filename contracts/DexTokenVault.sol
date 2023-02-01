@@ -14,8 +14,6 @@ import "./abstract/DexContractBase.sol";
 import "./interfaces/IDexAccount.sol";
 import "./interfaces/IDexBasePool.sol";
 import "./interfaces/IDexTokenVault.sol";
-import "./interfaces/IUpgradableByRequest.sol";
-import "./interfaces/IResetGas.sol";
 import "./interfaces/IDexVault.sol";
 
 import "./libraries/DexErrors.sol";
@@ -24,12 +22,10 @@ import "./libraries/DexOperationTypes.sol";
 
 contract DexTokenVault is
     DexContractBase,
-    IDexTokenVault,
-    IResetGas,
-    IUpgradableByRequest
+    IDexTokenVault
 {
     address private _root;
-    address private _vault;
+    address private _legacyVault;
     uint32 private _version;
     address private _tokenRoot;
     address private _tokenWallet;
@@ -50,6 +46,19 @@ contract DexTokenVault is
         _;
     }
 
+    modifier reserve(uint128 _reserve) {
+        tvm.rawReserve(_reserve, 0);
+        _;
+    }
+
+    function _getTargetBalanceInternal()
+        internal
+        view
+        returns (uint128)
+    {
+        return DexGas.VAULT_INITIAL_BALANCE;
+    }
+
     receive() external pure { revert(); }
 
     fallback() external pure { revert(); }
@@ -65,10 +74,9 @@ contract DexTokenVault is
         external
         override
         functionID(0x15a038fb)
+        reserve(_getTargetBalanceInternal())
         onlyDexRoot
     {
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
-
         _remainingGasTo.transfer({
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED,
@@ -116,6 +124,22 @@ contract DexTokenVault is
         } _tokenWallet;
     }
 
+    function getLegacyVault() external view override responsible returns (address) {
+        return {
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS,
+            bounce: false
+        } _legacyVault;
+    }
+
+    function getTargetBalance() external view override responsible returns (uint128) {
+        return {
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS,
+            bounce: false
+        } _getTargetBalanceInternal();
+    }
+
     function withdraw(
         uint64 _callId,
         uint128 _amount,
@@ -124,15 +148,12 @@ contract DexTokenVault is
         address _accountOwner,
         uint32 /* _accountVersion */,
         address _remainingGasTo
-    ) external override onlyAccount(_accountOwner) {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
+    )
+        external
+        override
+        reserve(_getTargetBalanceInternal())
+        onlyAccount(_accountOwner)
+    {
         emit WithdrawTokens({
             amount: _amount,
             accountOwner: _accountOwner,
@@ -172,15 +193,11 @@ contract DexTokenVault is
         address[] _roots,
         uint32 /* _pairVersion */,
         address _remainingGasTo
-    ) external override {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
+    )
+        external
+        override
+        reserve(_getTargetBalanceInternal())
+    {
         emit PairTransferTokens({
             amount: _amount,
             roots: _roots,
@@ -207,43 +224,39 @@ contract DexTokenVault is
         address _referrer,
         address _referral,
         address[] _roots
-    ) external override onlyPool(_roots) {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
+    )
+        external
+        override
+        reserve(_getTargetBalanceInternal())
+        onlyPool(_roots)
+    {
         TvmBuilder builder;
+
         builder.store(DexOperationTypes.REFERRAL_FEE);
         builder.storeRef(abi.encode(_roots, _referrer, _referral));
 
         ITokenWallet(_tokenWallet)
-        .transfer{
-            value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED,
-            bounce: false
-        }(
-            _amount,
-            _vault,
-            //FIXME: pre-deploy vault tokenWallet
-            0,
-            _referral,
-            true,
-            builder.toCell()
-        );
+            .transfer{
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED,
+                bounce: false
+            }(
+                _amount,
+                _legacyVault,
+                DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
+                _referral,
+                true,
+                builder.toCell()
+            );
     }
 
     function resetGas(address _remainingGasTo)
         external
         override
         view
+        reserve(_getTargetBalanceInternal())
         onlyDexRoot
     {
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
-
         _remainingGasTo.transfer({
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
@@ -255,9 +268,7 @@ contract DexTokenVault is
         TvmCell _newCode,
         uint32 _newVersion,
         address _remainingGasTo
-    ) external override onlyDexRoot {
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
-
+    ) external override reserve(_getTargetBalanceInternal()) onlyDexRoot {
         TvmBuilder builder;
         TvmBuilder params;
 
@@ -280,15 +291,14 @@ contract DexTokenVault is
         onCodeUpgrade(builder.toCell());
     }
 
-    function onCodeUpgrade(TvmCell _data) private {
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
+    function onCodeUpgrade(TvmCell _data) private reserve(_getTargetBalanceInternal()) {
         tvm.resetStorage();
 
         TvmSlice slice = _data.toSlice();
 
         (
             address root,
-            address vault,
+            address legacyVault,
             uint32 previousVersion
         ) = slice.decode(
             address,
@@ -297,7 +307,7 @@ contract DexTokenVault is
         );
 
         _root = root;
-        _vault = vault;
+        _legacyVault = legacyVault;
 
         if (previousVersion == 0) {
             _onPlatformUpgrade(_data);
@@ -392,9 +402,11 @@ contract DexTokenVault is
             }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
     }
 
-    function onTokenWallet(address _wallet) external onlyTokenRoot {
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
-
+    function onTokenWallet(address _wallet)
+        external
+        reserve(_getTargetBalanceInternal())
+        onlyTokenRoot
+    {
         _tokenWallet = _wallet;
 
         _firstCallbackRemainingGasTo.transfer({

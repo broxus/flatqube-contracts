@@ -1,6 +1,9 @@
 pragma ton-solidity >= 0.62.0;
 
-interface IDexTokenVault {
+import "./IResetGas.sol";
+import "./IUpgradableByRequest.sol";
+
+interface IDexTokenVault is IResetGas, IUpgradableByRequest {
     event TokenVaultCodeUpgraded(
         uint32 currentVersion,
         uint32 previousVersion
@@ -35,6 +38,10 @@ interface IDexTokenVault {
 
     function getTokenWallet() external view responsible returns (address);
 
+    function getLegacyVault() external view responsible returns (address);
+
+    function getTargetBalance() external view responsible returns (uint128);
+
     function withdraw(
         uint64 _callId,
         uint128 _amount,
@@ -62,15 +69,6 @@ interface IDexTokenVault {
         address _referral,
         address[] _roots
     ) external;
-
-//    function burn(
-//        address[] _roots,
-//        address _lpTokenRoot,
-//        uint128 _amount,
-//        address _remainingGasTo,
-//        address _callbackTo,
-//        TvmCell _payload
-//    ) external;
 
     function redeploy(
         TvmCell _code,

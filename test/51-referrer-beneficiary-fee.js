@@ -345,11 +345,13 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
         logger.log(`Set referral program params:\n      -project_id: ${projectId}\n      -project_address: ${projectAddress}\n      -ref_system_address: ${refSystemAddress}`);
         const tx = await Account1.runTarget({
             contract: DexVault,
-            method: 'updateReferralProgramParams',
+            method: 'setReferralProgramParams',
             params: {
-                project_id: projectId,
-                project_address: projectAddress,
-                ref_system_address: refSystemAddress
+                params: {
+                    projectId: projectId,
+                    projectAddress: projectAddress,
+                    systemAddress: refSystemAddress,
+                },
             },
             value: locklift.utils.convertCrystal(1, 'nano'),
             keyPair: keyPairs[0]

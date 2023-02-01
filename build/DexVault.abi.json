@@ -7,8 +7,15 @@
 			"name": "constructor",
 			"inputs": [
 				{"name":"owner_","type":"address"},
-				{"name":"root_","type":"address"},
-				{"name":"token_factory_","type":"address"}
+				{"name":"root_","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "installPlatformOnce",
+			"inputs": [
+				{"name":"code","type":"cell"}
 			],
 			"outputs": [
 			]
@@ -47,21 +54,27 @@
 			]
 		},
 		{
-			"name": "getLpTokenPendingCode",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"value0","type":"cell"}
-			]
-		},
-		{
-			"name": "getTokenFactory",
+			"name": "getManager",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
 				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "setManager",
+			"inputs": [
+				{"name":"_newManager","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "revokeManager",
+			"inputs": [
+			],
+			"outputs": [
 			]
 		},
 		{
@@ -79,76 +92,13 @@
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
-				{"name":"value0","type":"uint256"},
-				{"name":"value1","type":"address"},
-				{"name":"value2","type":"address"}
+				{"components":[{"name":"projectId","type":"uint256"},{"name":"projectAddress","type":"address"},{"name":"systemAddress","type":"address"}],"name":"value0","type":"tuple"}
 			]
 		},
 		{
-			"name": "setTokenFactory",
+			"name": "setReferralProgramParams",
 			"inputs": [
-				{"name":"new_token_factory","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "installPlatformOnce",
-			"inputs": [
-				{"name":"code","type":"cell"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "installOrUpdateLpTokenPendingCode",
-			"inputs": [
-				{"name":"code","type":"cell"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "addLiquidityToken",
-			"inputs": [
-				{"name":"pair","type":"address"},
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"},
-				{"name":"send_gas_to","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "addLiquidityTokenV2",
-			"inputs": [
-				{"name":"pool","type":"address"},
-				{"name":"roots","type":"address[]"},
-				{"name":"send_gas_to","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "onLiquidityTokenDeployed",
-			"inputs": [
-				{"name":"nonce","type":"uint32"},
-				{"name":"pool","type":"address"},
-				{"name":"roots","type":"address[]"},
-				{"name":"lp_root","type":"address"},
-				{"name":"send_gas_to","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "onLiquidityTokenNotDeployed",
-			"inputs": [
-				{"name":"nonce","type":"uint32"},
-				{"name":"pool","type":"address"},
-				{"name":"roots","type":"address[]"},
-				{"name":"lp_root","type":"address"},
-				{"name":"send_gas_to","type":"address"}
+				{"components":[{"name":"projectId","type":"uint256"},{"name":"projectAddress","type":"address"},{"name":"systemAddress","type":"address"}],"name":"params","type":"tuple"}
 			],
 			"outputs": [
 			]
@@ -173,7 +123,7 @@
 			"name": "transfer",
 			"inputs": [
 				{"name":"amount","type":"uint128"},
-				{"name":"value1","type":"address"},
+				{"name":"token_root","type":"address"},
 				{"name":"vault_wallet","type":"address"},
 				{"name":"recipient_address","type":"address"},
 				{"name":"deploy_wallet_grams","type":"uint128"},
@@ -183,23 +133,6 @@
 				{"name":"right_root","type":"address"},
 				{"name":"value9","type":"uint32"},
 				{"name":"send_gas_to","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "transferV2",
-			"inputs": [
-				{"name":"_amount","type":"uint128"},
-				{"name":"value1","type":"address"},
-				{"name":"_vaultWallet","type":"address"},
-				{"name":"_recipientAddress","type":"address"},
-				{"name":"_deployWalletGrams","type":"uint128"},
-				{"name":"_notifyReceiver","type":"bool"},
-				{"name":"_payload","type":"cell"},
-				{"name":"_roots","type":"address[]"},
-				{"name":"value8","type":"uint32"},
-				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -230,17 +163,6 @@
 			]
 		},
 		{
-			"name": "onAcceptTokensMint",
-			"inputs": [
-				{"name":"tokenRoot","type":"address"},
-				{"name":"amount","type":"uint128"},
-				{"name":"remainingGasTo","type":"address"},
-				{"name":"payload","type":"cell"}
-			],
-			"outputs": [
-			]
-		},
-		{
 			"name": "burn",
 			"inputs": [
 				{"name":"_roots","type":"address[]"},
@@ -254,41 +176,14 @@
 			]
 		},
 		{
-			"name": "addLpWallet",
+			"name": "onAcceptTokensTransfer",
 			"inputs": [
-				{"name":"_roots","type":"address[]"},
-				{"name":"_lpVaultWallet","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "addLpWalletByOwner",
-			"inputs": [
-				{"name":"_lpVaultWallet","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "updateReferralProgramParams",
-			"inputs": [
-				{"name":"project_id","type":"uint256"},
-				{"name":"project_address","type":"address"},
-				{"name":"ref_system_address","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "referralFeeTransfer",
-			"inputs": [
-				{"name":"_amount","type":"uint128"},
 				{"name":"_tokenRoot","type":"address"},
-				{"name":"_vaultWallet","type":"address"},
-				{"name":"_referrer","type":"address"},
-				{"name":"_referral","type":"address"},
-				{"name":"_roots","type":"address[]"}
+				{"name":"_amount","type":"uint128"},
+				{"name":"_sender","type":"address"},
+				{"name":"_senderWallet","type":"address"},
+				{"name":"_remainingGasTo","type":"address"},
+				{"name":"_payload","type":"cell"}
 			],
 			"outputs": [
 			]
@@ -302,11 +197,11 @@
 			]
 		},
 		{
-			"name": "_lpVaultWallets",
+			"name": "_vaultWallets",
 			"inputs": [
 			],
 			"outputs": [
-				{"name":"_lpVaultWallets","type":"map(address,bool)"}
+				{"name":"_vaultWallets","type":"map(address,address)"}
 			]
 		}
 	],
@@ -372,19 +267,9 @@
 			]
 		},
 		{
-			"name": "PairTransferTokensV2",
-			"inputs": [
-				{"name":"vaultTokenWallet","type":"address"},
-				{"name":"amount","type":"uint128"},
-				{"name":"roots","type":"address[]"},
-				{"name":"recipientAddress","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
 			"name": "ReferralFeeTransfer",
 			"inputs": [
+				{"name":"tokenRoot","type":"address"},
 				{"name":"vaultWallet","type":"address"},
 				{"name":"amount","type":"uint128"},
 				{"name":"roots","type":"address[]"},
@@ -401,14 +286,11 @@
 		{"name":"_constructorFlag","type":"bool"},
 		{"name":"platform_code","type":"cell"},
 		{"name":"_nonce","type":"uint32"},
-		{"name":"_lpTokenPendingCode","type":"cell"},
 		{"name":"_root","type":"address"},
 		{"name":"_owner","type":"address"},
 		{"name":"_pendingOwner","type":"address"},
-		{"name":"_tokenFactory","type":"address"},
-		{"name":"_lpVaultWallets","type":"map(address,bool)"},
-		{"name":"_projectId","type":"uint256"},
-		{"name":"_projectAddress","type":"address"},
-		{"name":"_refSystemAddress","type":"address"}
+		{"name":"_manager","type":"address"},
+		{"name":"_vaultWallets","type":"map(address,address)"},
+		{"components":[{"name":"projectId","type":"uint256"},{"name":"projectAddress","type":"address"},{"name":"systemAddress","type":"address"}],"name":"_refProgramParams","type":"tuple"}
 	]
 }
