@@ -62,7 +62,7 @@ interface IDexTokenVault {
         address _referral,
         address[] _roots
     ) external;
-//
+
 //    function burn(
 //        address[] _roots,
 //        address _lpTokenRoot,

@@ -31,10 +31,6 @@ contract NewDexRoot {
 
     constructor() public {revert();}
 
-    function getVault() external view responsible returns (address) {
-        return {value : 0, bounce : false, flag : MsgFlag.REMAINING_GAS} vault;
-    }
-
     function getOwner() external view responsible returns (address dex_owner) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
     }

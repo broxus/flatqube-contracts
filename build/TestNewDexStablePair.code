@@ -222,10 +222,6 @@ CALLREF {
 	ENDS
 	CTOS
 	LDMSGADDR
-	LDREF
-	ENDS
-	CTOS
-	LDMSGADDR
 	LDU 128
 	LDU 8
 	LDU 128
@@ -237,7 +233,7 @@ CALLREF {
 	LDI 1
 	LDI 1
 	ENDS
-	TUPLE 10
+	TUPLE 9
 }
 FIRST
 PUSHINT 1
@@ -253,10 +249,6 @@ CALLREF {
 	ENDS
 	CTOS
 	LDMSGADDR
-	LDREF
-	ENDS
-	CTOS
-	LDMSGADDR
 	LDU 128
 	LDU 8
 	LDU 128
@@ -268,7 +260,7 @@ CALLREF {
 	LDI 1
 	LDI 1
 	ENDS
-	TUPLE 10
+	TUPLE 9
 }
 FIRST
 GETGLOB 20
@@ -391,10 +383,6 @@ CALLREF {
 	ENDS
 	CTOS
 	LDMSGADDR
-	LDREF
-	ENDS
-	CTOS
-	LDMSGADDR
 	LDU 128
 	LDU 8
 	LDU 128
@@ -406,7 +394,7 @@ CALLREF {
 	LDI 1
 	LDI 1
 	ENDS
-	TUPLE 10
+	TUPLE 9
 }
 SECOND
 PUSHINT 1
@@ -422,10 +410,6 @@ CALLREF {
 	ENDS
 	CTOS
 	LDMSGADDR
-	LDREF
-	ENDS
-	CTOS
-	LDMSGADDR
 	LDU 128
 	LDU 8
 	LDU 128
@@ -437,7 +421,7 @@ CALLREF {
 	LDI 1
 	LDI 1
 	ENDS
-	TUPLE 10
+	TUPLE 9
 }
 SECOND
 GETGLOB 19
@@ -606,257 +590,6 @@ SETGLOB 4
 PUSHINT 2
 .loc ../contracts/tests/TestNewDexStablePair.sol, 0
 
-.macro getVault
-DROP
-GETGLOB 6
-THROWIFNOT 76
-GETGLOB 2
-ISNULL
-IFREF {
-	CALL $c4_to_c7$
-}
-.loc ../contracts/tests/TestNewDexStablePair.sol, 87
-LDU 32
-GETGLOB 4
-ROT
-SETINDEXQ 5
-SETGLOB 4
-ENDS
-.loc ../contracts/tests/TestNewDexStablePair.sol, 0
-CALLREF {
-	CALL $getVault_8d928af8_internal_macro$
-}
-OVER
-PUSHCONT {
-	PUSH S3
-	CTOS
-	LDU 2
-	LDMSGADDR
-	DROP
-	NIP
-	NEWC
-	STSLICECONST xc
-	STSLICE
-	PUSHINT 1
-	STUR 98
-	SWAP
-	NEWC
-	STSLICECONST xbd1bd325
-	STSLICE
-	STBREFR
-	ENDC
-	PUSHINT 0
-}
-PUSHCONT {
-	GETGLOB 4
-	DUP
-	INDEX 3
-	OVER
-	THIRD
-	GETGLOB 9
-	ROLL 3
-	SECOND
-	NEWC
-	STSLICECONST x2_
-	STI 1
-	STSLICECONST x1_
-	STSLICE
-	SWAP
-	STGRAMS
-	STDICT
-	PUSHINT 1
-	STUR 106
-	SWAP
-	NEWC
-	GETGLOB 4
-	INDEX 5
-	STUR 32
-	STSLICE
-	STBREFR
-	ENDC
-	GETGLOB 4
-	INDEX 4
-}
-IFELSE
-SENDRAWMSG
-IFREF {
-	CALL $upd_only_time_in_c4$
-}
-THROW 0
-
-.macro getVault_8d928af8_internal_macro
-.loc ../contracts/tests/TestNewDexStablePair.sol, 88
-GETGLOB 4
-PUSHINT 0
-SETINDEXQ 2
-FALSE
-SETINDEXQ 1
-PUSHINT 64
-SETINDEXQ 4
-SETGLOB 4
-GETGLOB 11
-.loc ../contracts/tests/TestNewDexStablePair.sol, 0
-
-.macro getVaultWallets
-DROP
-GETGLOB 6
-THROWIFNOT 76
-GETGLOB 2
-ISNULL
-IFREF {
-	CALL $c4_to_c7$
-}
-.loc ../contracts/tests/TestNewDexStablePair.sol, 91
-LDU 32
-GETGLOB 4
-ROT
-SETINDEXQ 5
-SETGLOB 4
-ENDS
-.loc ../contracts/tests/TestNewDexStablePair.sol, 0
-CALLREF {
-	CALL $getVaultWallets_076d8b8d_internal_macro$
-}
-PUSH S2
-PUSHCONT {
-	PUSH S4
-	CTOS
-	LDU 2
-	LDMSGADDR
-	DROP
-	NIP
-	NEWC
-	STSLICECONST xc
-	STSLICE
-	PUSHINT 1
-	STUR 98
-	XCHG S2
-	NEWC
-	STSLICECONST xe144cd05
-	STSLICE
-	SWAP
-	NEWC
-	STSLICE
-	STBREFR
-	STBREFR
-	ENDC
-	PUSHINT 0
-}
-PUSHCONT {
-	GETGLOB 4
-	DUP
-	INDEX 3
-	OVER
-	THIRD
-	GETGLOB 9
-	ROLL 3
-	SECOND
-	NEWC
-	STSLICECONST x2_
-	STI 1
-	STSLICECONST x1_
-	STSLICE
-	SWAP
-	STGRAMS
-	STDICT
-	PUSHINT 1
-	STUR 106
-	XCHG S2
-	NEWC
-	GETGLOB 4
-	INDEX 5
-	STUR 32
-	STSLICE
-	SWAP
-	NEWC
-	STSLICE
-	STBREFR
-	STBREFR
-	ENDC
-	GETGLOB 4
-	INDEX 4
-}
-IFELSE
-SENDRAWMSG
-IFREF {
-	CALL $upd_only_time_in_c4$
-}
-THROW 0
-
-.macro getVaultWallets_076d8b8d_internal_macro
-.loc ../contracts/tests/TestNewDexStablePair.sol, 94
-GETGLOB 4
-PUSHINT 0
-SETINDEXQ 2
-FALSE
-SETINDEXQ 1
-PUSHINT 64
-SETINDEXQ 4
-SETGLOB 4
-PUSHINT 0
-GETGLOB 17
-SECOND
-PUSHINT 32
-DICTUGETREF
-THROWIFNOT 50
-CTOS
-CALLREF {
-	LDMSGADDR
-	LDREF
-	ENDS
-	CTOS
-	LDMSGADDR
-	LDREF
-	ENDS
-	CTOS
-	LDMSGADDR
-	LDU 128
-	LDU 8
-	LDU 128
-	LDREF
-	ENDS
-	CTOS
-	LDU 256
-	LDU 256
-	LDI 1
-	LDI 1
-	ENDS
-	TUPLE 10
-}
-THIRD
-PUSHINT 1
-GETGLOB 17
-SECOND
-PUSHINT 32
-DICTUGETREF
-THROWIFNOT 50
-CTOS
-CALLREF {
-	LDMSGADDR
-	LDREF
-	ENDS
-	CTOS
-	LDMSGADDR
-	LDREF
-	ENDS
-	CTOS
-	LDMSGADDR
-	LDU 128
-	LDU 8
-	LDU 128
-	LDREF
-	ENDS
-	CTOS
-	LDU 256
-	LDU 256
-	LDI 1
-	LDI 1
-	ENDS
-	TUPLE 10
-}
-THIRD
-.loc ../contracts/tests/TestNewDexStablePair.sol, 0
-
 .macro getAccumulatedFees
 DROP
 GETGLOB 6
@@ -866,7 +599,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexStablePair.sol, 97
+.loc ../contracts/tests/TestNewDexStablePair.sol, 87
 LDU 32
 GETGLOB 4
 ROT
@@ -937,18 +670,18 @@ IFREF {
 THROW 0
 
 .macro getAccumulatedFees_5df45a37_internal_macro
-.loc ../contracts/tests/TestNewDexStablePair.sol, 98
+.loc ../contracts/tests/TestNewDexStablePair.sol, 88
 PUSHINT 0
 NEWDICT
 PAIR
-.loc ../contracts/tests/TestNewDexStablePair.sol, 100
+.loc ../contracts/tests/TestNewDexStablePair.sol, 90
 PUSHINT 0
 PUSHCONT {
 	DUP
 	LESSINT 2
 }
 PUSHCONT {
-	.loc ../contracts/tests/TestNewDexStablePair.sol, 101
+	.loc ../contracts/tests/TestNewDexStablePair.sol, 91
 	DUP2
 	GETGLOB 17
 	SECOND
@@ -957,10 +690,6 @@ PUSHCONT {
 	THROWIFNOT 50
 	CTOS
 	CALLREF {
-		LDMSGADDR
-		LDREF
-		ENDS
-		CTOS
 		LDMSGADDR
 		LDREF
 		ENDS
@@ -977,9 +706,9 @@ PUSHCONT {
 		LDI 1
 		LDI 1
 		ENDS
-		TUPLE 10
+		TUPLE 9
 	}
-	INDEX 5
+	INDEX 4
 	NEWC
 	STU 128
 	SWAP
@@ -991,14 +720,14 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S2
-	.loc ../contracts/tests/TestNewDexStablePair.sol, 100
+	.loc ../contracts/tests/TestNewDexStablePair.sol, 90
 	INC
 	UFITS 8
 	.loc ../contracts/tests/TestNewDexStablePair.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/tests/TestNewDexStablePair.sol, 106
+.loc ../contracts/tests/TestNewDexStablePair.sol, 96
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -1018,7 +747,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexStablePair.sol, 109
+.loc ../contracts/tests/TestNewDexStablePair.sol, 99
 LDU 32
 GETGLOB 4
 ROT
@@ -1112,7 +841,7 @@ IFREF {
 THROW 0
 
 .macro getFeeParams_be6fc181_internal_macro
-.loc ../contracts/tests/TestNewDexStablePair.sol, 110
+.loc ../contracts/tests/TestNewDexStablePair.sol, 100
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -1133,7 +862,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexStablePair.sol, 113
+.loc ../contracts/tests/TestNewDexStablePair.sol, 103
 LDU 32
 GETGLOB 4
 ROT
@@ -1207,7 +936,7 @@ IFREF {
 THROW 0
 
 .macro getAmplificationCoefficient_226f990e_internal_macro
-.loc ../contracts/tests/TestNewDexStablePair.sol, 114
+.loc ../contracts/tests/TestNewDexStablePair.sol, 104
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -1228,7 +957,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexStablePair.sol, 117
+.loc ../contracts/tests/TestNewDexStablePair.sol, 107
 LDU 32
 GETGLOB 4
 ROT
@@ -1291,7 +1020,7 @@ IFREF {
 THROW 0
 
 .macro isActive_22f3e2d4_internal_macro
-.loc ../contracts/tests/TestNewDexStablePair.sol, 118
+.loc ../contracts/tests/TestNewDexStablePair.sol, 108
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -1312,7 +1041,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexStablePair.sol, 121
+.loc ../contracts/tests/TestNewDexStablePair.sol, 111
 LDU 32
 GETGLOB 4
 ROT
@@ -1392,7 +1121,7 @@ IFREF {
 THROW 0
 
 .macro getBalances_00113e08_internal_macro
-.loc ../contracts/tests/TestNewDexStablePair.sol, 122
+.loc ../contracts/tests/TestNewDexStablePair.sol, 112
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -1415,10 +1144,6 @@ CALLREF {
 	ENDS
 	CTOS
 	LDMSGADDR
-	LDREF
-	ENDS
-	CTOS
-	LDMSGADDR
 	LDU 128
 	LDU 8
 	LDU 128
@@ -1430,9 +1155,9 @@ CALLREF {
 	LDI 1
 	LDI 1
 	ENDS
-	TUPLE 10
+	TUPLE 9
 }
-INDEX 3
+THIRD
 PUSHINT 1
 GETGLOB 17
 SECOND
@@ -1446,10 +1171,6 @@ CALLREF {
 	ENDS
 	CTOS
 	LDMSGADDR
-	LDREF
-	ENDS
-	CTOS
-	LDMSGADDR
 	LDU 128
 	LDU 8
 	LDU 128
@@ -1461,19 +1182,19 @@ CALLREF {
 	LDI 1
 	LDI 1
 	ENDS
-	TUPLE 10
+	TUPLE 9
 }
-INDEX 3
+THIRD
 TRIPLE
 .loc ../contracts/tests/TestNewDexStablePair.sol, 0
 
 .internal-alias :onCodeUpgrade, 2
 .internal :onCodeUpgrade
-.loc ../contracts/tests/TestNewDexStablePair.sol, 130
+.loc ../contracts/tests/TestNewDexStablePair.sol, 120
 PUSHINT 1000000000
 PUSHINT 2
 RAWRESERVE
-.loc ../contracts/tests/TestNewDexStablePair.sol, 131
+.loc ../contracts/tests/TestNewDexStablePair.sol, 121
 PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
@@ -1541,12 +1262,12 @@ SETGLOB 29
 PUSHREF {
 }
 SETGLOB 30
-.loc ../contracts/tests/TestNewDexStablePair.sol, 132
+.loc ../contracts/tests/TestNewDexStablePair.sol, 122
 CTOS
-.loc ../contracts/tests/TestNewDexStablePair.sol, 137
+.loc ../contracts/tests/TestNewDexStablePair.sol, 127
 TRUE
 SETGLOB 16
-.loc ../contracts/tests/TestNewDexStablePair.sol, 139
+.loc ../contracts/tests/TestNewDexStablePair.sol, 129
 DUP
 LDMSGADDR
 LDMSGADDR
@@ -1559,27 +1280,27 @@ SETGLOB 10
 SETGLOB 11
 DROP
 SETGLOB 12
-.loc ../contracts/tests/TestNewDexStablePair.sol, 141
+.loc ../contracts/tests/TestNewDexStablePair.sol, 131
 OVER
 LDREF
 POP S3
 SETGLOB 13
-.loc ../contracts/tests/TestNewDexStablePair.sol, 143
+.loc ../contracts/tests/TestNewDexStablePair.sol, 133
 OVER
 LDREFRTOS
 SWAP
 POP S3
-.loc ../contracts/tests/TestNewDexStablePair.sol, 145
+.loc ../contracts/tests/TestNewDexStablePair.sol, 135
 LDMSGADDR
 LDMSGADDR
 DROP
 SWAP
 SETGLOB 14
 SETGLOB 15
-.loc ../contracts/tests/TestNewDexStablePair.sol, 147
+.loc ../contracts/tests/TestNewDexStablePair.sol, 137
 SWAP
 PLDREF
-.loc ../contracts/tests/TestNewDexStablePair.sol, 149
+.loc ../contracts/tests/TestNewDexStablePair.sol, 139
 CTOS
 LDMSGADDR
 LDREF
@@ -1623,12 +1344,12 @@ SETGLOB 22
 SETGLOB 17
 SETGLOB 23
 SETGLOB 18
-.loc ../contracts/tests/TestNewDexStablePair.sol, 162
+.loc ../contracts/tests/TestNewDexStablePair.sol, 152
 PUSHREF {
 	.blob x4e657720537461626c652050616972
 }
 SETGLOB 30
-.loc ../contracts/tests/TestNewDexStablePair.sol, 164
+.loc ../contracts/tests/TestNewDexStablePair.sol, 154
 NEWC
 STSLICECONST x62_
 STSLICE
@@ -1653,7 +1374,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewDexStablePair.sol, 167
+.loc ../contracts/tests/TestNewDexStablePair.sol, 157
 ENDS
 .loc ../contracts/tests/TestNewDexStablePair.sol, 0
 CALLREF {
@@ -1691,7 +1412,7 @@ THROW 0
 CALL $newFunc_572bedd5_internal_macro$
 
 .macro newFunc_572bedd5_internal_macro
-.loc ../contracts/tests/TestNewDexStablePair.sol, 168
+.loc ../contracts/tests/TestNewDexStablePair.sol, 158
 GETGLOB 30
 .loc ../contracts/tests/TestNewDexStablePair.sol, 0
 
@@ -2140,130 +1861,108 @@ THROW 0
 
 .macro public_function_selector
 DUP
-PUSHINT 1756716863
+PUSHINT 289559618
 LEQ
 IFJMPREF {
 	DUP
-	PUSHINT 289559618
-	LEQ
+	PUSHINT 1500968
+	EQUAL
 	IFJMPREF {
-		DUP
-		PUSHINT 1500968
-		EQUAL
-		IFJMPREF {
-			CALL $getBalances$
-		}
-		DUP
-		PUSHINT 42518620
-		EQUAL
-		IFJMPREF {
-			CALL $lp_root$
-		}
-		DUP
-		PUSHINT 124119770
-		EQUAL
-		IFJMPREF {
-			CALL $getFeeParams$
-		}
-		DUP
-		PUSHINT 289559618
-		EQUAL
-		IFJMPREF {
-			CALL $newFunc$
-		}
+		CALL $getBalances$
+	}
+	DUP
+	PUSHINT 42518620
+	EQUAL
+	IFJMPREF {
+		CALL $lp_root$
+	}
+	DUP
+	PUSHINT 124119770
+	EQUAL
+	IFJMPREF {
+		CALL $getFeeParams$
+	}
+	DUP
+	PUSHINT 289559618
+	EQUAL
+	IFJMPREF {
+		CALL $newFunc$
+	}
+}
+DUP
+PUSHINT 640502748
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 360538859
+	EQUAL
+	IFJMPREF {
+		CALL $getAccumulatedFees$
+	}
+	DUP
+	PUSHINT 439353572
+	EQUAL
+	IFJMPREF {
+		CALL $getTokenRoots$
+	}
+	DUP
+	PUSHINT 565050858
+	EQUAL
+	IFJMPREF {
+		CALL $isActive$
 	}
 	DUP
 	PUSHINT 640502748
-	LEQ
+	EQUAL
 	IFJMPREF {
-		DUP
-		PUSHINT 360538859
-		EQUAL
-		IFJMPREF {
-			CALL $getAccumulatedFees$
-		}
-		DUP
-		PUSHINT 439353572
-		EQUAL
-		IFJMPREF {
-			CALL $getTokenRoots$
-		}
-		DUP
-		PUSHINT 565050858
-		EQUAL
-		IFJMPREF {
-			CALL $isActive$
-		}
-		DUP
-		PUSHINT 640502748
-		EQUAL
-		IFJMPREF {
-			CALL $lp_supply$
-		}
+		CALL $lp_supply$
+	}
+}
+DUP
+PUSHINT 1344443485
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 766070063
+	EQUAL
+	IFJMPREF {
+		CALL $getVersion$
+	}
+	DUP
+	PUSHINT 1104691199
+	EQUAL
+	IFJMPREF {
+		CALL $lp_wallet$
 	}
 	DUP
 	PUSHINT 1298987007
-	LEQ
+	EQUAL
 	IFJMPREF {
-		DUP
-		PUSHINT 766070063
-		EQUAL
-		IFJMPREF {
-			CALL $getVersion$
-		}
-		DUP
-		PUSHINT 1025233701
-		EQUAL
-		IFJMPREF {
-			CALL $getVault$
-		}
-		DUP
-		PUSHINT 1104691199
-		EQUAL
-		IFJMPREF {
-			CALL $lp_wallet$
-		}
-		DUP
-		PUSHINT 1298987007
-		EQUAL
-		IFJMPREF {
-			CALL $getAmplificationCoefficient$
-		}
+		CALL $getAmplificationCoefficient$
 	}
 	DUP
-	PUSHINT 1756716863
-	LEQ
+	PUSHINT 1344443485
+	EQUAL
 	IFJMPREF {
-		DUP
-		PUSHINT 1344443485
-		EQUAL
-		IFJMPREF {
-			CALL $getPoolType$
-		}
-		DUP
-		PUSHINT 1631898885
-		EQUAL
-		IFJMPREF {
-			CALL $getVaultWallets$
-		}
-		DUP
-		PUSHINT 1725189621
-		EQUAL
-		IFJMPREF {
-			CALL $platform_code$
-		}
-		DUP
-		PUSHINT 1756716863
-		EQUAL
-		IFJMPREF {
-			CALL $constructor$
-		}
+		CALL $getPoolType$
 	}
 }
 DUP
 PUSHINT 1950458398
 LEQ
 IFJMPREF {
+	DUP
+	PUSHINT 1725189621
+	EQUAL
+	IFJMPREF {
+		CALL $platform_code$
+	}
+	DUP
+	PUSHINT 1756716863
+	EQUAL
+	IFJMPREF {
+		CALL $constructor$
+	}
 	DUP
 	PUSHINT 1844892595
 	EQUAL

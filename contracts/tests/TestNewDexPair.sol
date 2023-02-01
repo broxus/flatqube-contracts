@@ -92,14 +92,6 @@ contract TestNewDexPair is
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } DexPoolTypes.CONSTANT_PRODUCT;
     }
 
-    function getVault() external view responsible returns (address dex_vault) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } vault;
-    }
-
-    function getVaultWallets() external view responsible returns (address left, address right) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (vault_left_wallet, vault_right_wallet);
-    }
-
     function getFeeParams() external view responsible returns (FeeParams) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } fee;
     }

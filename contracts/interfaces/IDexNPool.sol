@@ -55,13 +55,6 @@ interface IDexNPool is IDexBasePool, IDexPoolBalances, IDepositLiquidityResultV2
         address lp
     );
 
-    /// @notice Get TIP-3 tokens' wallets of the DEX vault
-    /// @return token_vault_wallets Packed info response about TokenWallets addresses
-    function getVaultWallets() external view responsible returns (
-        address[] token_vault_wallets,
-        address lp_vault_wallet
-    );
-
     /// @notice Get pool's reserves
     /// @return DexPoolBalances Current reserves of the pool
     function getBalances() external view responsible returns (DexPoolBalances);

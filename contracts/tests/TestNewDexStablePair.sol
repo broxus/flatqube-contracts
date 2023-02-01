@@ -84,16 +84,6 @@ contract TestNewDexStablePair is
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } DexPoolTypes.STABLESWAP;
     }
 
-    function getVault() external view responsible returns (address dex_vault) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } vault;
-    }
-
-    function getVaultWallets() external view responsible returns (address left, address right) {
-        return {
-        value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS
-        } (tokenData[0].vaultWallet, tokenData[1].vaultWallet);
-    }
-
     function getAccumulatedFees() external view responsible returns (uint128[] accumulatedFees) {
         uint128[] _accumulatedFees = new uint128[](0);
 

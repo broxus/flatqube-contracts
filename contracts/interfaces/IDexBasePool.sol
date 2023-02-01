@@ -80,10 +80,6 @@ interface IDexBasePool is
     /// @return uint8 Type of the pool
     function getPoolType() external view responsible returns (uint8);
 
-    /// @notice Get DEX vault address
-    /// @return dex_vault DEX vault address
-    function getVault() external view responsible returns (address dex_vault);
-
     /// @notice Get pool's fees config
     /// @return params Packed info response about fee params
     function getFeeParams() external view responsible returns (FeeParams params);
@@ -230,17 +226,5 @@ interface IDexBasePool is
     function checkPair(
         address _accountOwner,
         uint32 _accountVersion
-    ) external;
-
-    function onSuccessVaultDeploy(
-        address _tokenRoot,
-        address _tokenWallet,
-        uint32 _version,
-        address _remainingGasTo
-    ) external;
-
-    function onCanceledVaultDeploy(
-        address _tokenRoot,
-        address _remainingGasTo
     ) external;
 }

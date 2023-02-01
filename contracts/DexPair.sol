@@ -334,6 +334,8 @@ contract DexPair is DexPairBase, INextExchangeData {
             _accountOwner
         );
 
+        _sync();
+
         TvmCell empty;
 
         ITokenRoot(_lpRoot())
@@ -375,7 +377,6 @@ contract DexPair is DexPairBase, INextExchangeData {
             oldReserves[1],
             now
         );
-        _sync();
 
         if (_result.step_1_lp_reward > 0) {
             TokenOperation[] step1Operations;
@@ -558,11 +559,13 @@ contract DexPair is DexPairBase, INextExchangeData {
             empty
         );
 
+        _sync();
+
         IBurnableByRootTokenRoot(_lpRoot())
             .burnTokens{ value: DexGas.BURN_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
             (
                 _operation.amount,
-                _vaultRoot(),
+                _expectedTokenVaultAddress(_lpRoot()),
                 _remainingGasTo,
                 address.makeAddrStd(0, 0),
                 empty
@@ -602,7 +605,6 @@ contract DexPair is DexPairBase, INextExchangeData {
             oldReserves[1],
             now
         );
-        _sync();
 
         IWithdrawResult.WithdrawResult result = IWithdrawResult.WithdrawResult(
             _lpAmount,
@@ -792,6 +794,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                 0
             );
 
+            _sync();
+
             IDexAccount(msg.sender)
                 .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                 (
@@ -892,7 +896,6 @@ contract DexPair is DexPairBase, INextExchangeData {
             oldReserves[1],
             now
         );
-        _sync();
 
         IExchangeResult.ExchangeResult result =  IExchangeResult.ExchangeResult(
             spentTokenIndex == 0 && receiveTokenIndex == 1,
@@ -947,7 +950,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         TvmCell _successPayload,
         bool _notifyCancel,
         TvmCell _cancelPayload
-    ) override external onlyPoolOrVault(_prevPoolTokenRoots) onlyActive notSelfCall {
+    ) override external onlyPoolOrTokenVault(_prevPoolTokenRoots, _spentTokenRoot) onlyActive notSelfCall {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         // Decode data from payload
@@ -1138,7 +1141,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                 }
 
                 // Refund incoming token to sender
-                IDexTokenVault(_vaultRoot())
+                IDexTokenVault(_expectedTokenVaultAddress(_spentTokenRoot))
                     .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                     (
                         _spentAmount,
@@ -1150,6 +1153,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                         _currentVersion,
                         _remainingGasTo
                     );
+            } else {
+                _sync();
             }
         } else {
             revert(DexErrors.NOT_TOKEN_ROOT);
@@ -1266,7 +1271,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                             referrerValue
                         );
 
-                        // Transfer incoming token to vault
+                        // Transfer incoming token to token vault
                         ITokenWallet(msg.sender)
                             .transferToWallet{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                             (
@@ -1451,7 +1456,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                             referrerValue
                         );
 
-                        // Transfer incoming token to vault
+                        // Transfer incoming token to token vault
                         ITokenWallet(msg.sender)
                             .transferToWallet{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                             (
@@ -1565,20 +1570,10 @@ contract DexPair is DexPairBase, INextExchangeData {
                     notifyCancel,
                     PairPayload.buildCancelPayload(op, errorCode, cancelPayload, nextSteps)
                 );
+        } else {
+            _sync();
         }
     }
-
-    function onSuccessVaultDeploy(
-        address _tokenRoot,
-        address _tokenWallet,
-        uint32 _version,
-        address _remainingGasTo
-    ) external override {}
-
-    function onCanceledVaultDeploy(
-        address _tokenRoot,
-        address _remainingGasTo
-    ) external override {}
 
     function _checkOperationData(
         address _msgSender,

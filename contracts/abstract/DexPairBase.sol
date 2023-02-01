@@ -5,6 +5,7 @@ import "tip3/contracts/interfaces/ITokenRoot.sol";
 import "../interfaces/IDexConstantProductPair.sol";
 import "../interfaces/IDexAccount.sol";
 import "../interfaces/IDexRoot.sol";
+import "../interfaces/IDexTokenVault.sol";
 
 import "../libraries/DexPoolTypes.sol";
 import "../libraries/DexGas.sol";
@@ -12,6 +13,7 @@ import "../libraries/DexAddressType.sol";
 import "../libraries/DexReserveType.sol";
 
 import "../structures/IPoolTokenData.sol";
+import "../structures/IPoolTokenDataPrev.sol";
 import "../structures/IAmplificationCoefficient.sol";
 import "../structures/IFeeParamsPrev.sol";
 
@@ -25,7 +27,8 @@ abstract contract DexPairBase is
     DexContractBase,
     IDexConstantProductPair,
     TWAPOracle,
-    IFeeParamsPrev
+    IFeeParamsPrev,
+    IPoolTokenDataPrev
 {
     /// @dev DexRoot address
     address private _root;
@@ -42,7 +45,7 @@ abstract contract DexPairBase is
     /// @dev Mapping for vault, lp and TIP-3 roots addresses
     mapping(uint8 => address[]) internal _typeToRootAddresses;
 
-    /// @dev Mapping for vault, lp and TIP-3 wallets addresses
+    /// @dev Mapping for lp and TIP-3 wallets addresses
     mapping(uint8 => address[]) internal _typeToWalletAddresses;
 
     /// @dev Mapping for pool, lp and fee reserves
@@ -94,21 +97,13 @@ abstract contract DexPairBase is
         _;
     }
 
-    /// @dev Only the DEX vault can call a function with this modifier
-    modifier onlyVault() {
+    /// @dev Only DEX pair or the DEX token vault can call a function with this modifier
+    modifier onlyPoolOrTokenVault(address[] _poolTokenRoots, address _tokenRoot) {
         require(
-            _typeToRootAddresses[DexAddressType.VAULT][0].value != 0 &&
-            msg.sender == _typeToRootAddresses[DexAddressType.VAULT][0],
-            DexErrors.NOT_VAULT
+            msg.sender == _expectedPoolAddress(_poolTokenRoots) ||
+            msg.sender == _expectedTokenVaultAddress(_tokenRoot),
+            DexErrors.NEITHER_POOL_NOR_VAULT
         );
-        _;
-    }
-
-    /// @dev Only DEX pair or the DEX vault can call a function with this modifier
-    modifier onlyPoolOrVault(address[] _roots) {
-        require(msg.sender == _expectedPoolAddress(_roots) ||
-            _typeToRootAddresses[DexAddressType.VAULT][0].value != 0 &&
-            msg.sender == _typeToRootAddresses[DexAddressType.VAULT][0], DexErrors.NEITHER_POOL_NOR_VAULT);
         _;
     }
 
@@ -180,30 +175,6 @@ abstract contract DexPairBase is
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } DexPoolTypes.CONSTANT_PRODUCT;
-    }
-
-    // Return vault address
-    function getVault() override external view responsible returns (address dex_vault) {
-        return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.REMAINING_GAS
-        } _typeToRootAddresses[DexAddressType.VAULT][0];
-    }
-
-    // Return vault wallets addresses
-    function getVaultWallets() override external view responsible returns (
-        address left,
-        address right
-    ) {
-        return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.REMAINING_GAS
-        } (
-            _typeToWalletAddresses[DexAddressType.VAULT][0],
-            _typeToWalletAddresses[DexAddressType.VAULT][1]
-        );
     }
 
     function _getVaultWallet(uint8 _index) internal view returns (address) {
@@ -563,10 +534,6 @@ abstract contract DexPairBase is
         return _typeToReserves[DexReserveType.LP][0];
     }
 
-    function _vaultRoot() internal view returns (address) {
-        return _typeToRootAddresses[DexAddressType.VAULT][0];
-    }
-
     /// @dev Deploys wallet by TIP-3 token root and wait for callback
     /// @param _tokenRoot Address of the TIP-3 TokenRoot for a new wallet deploy
     function _configureTokenRootWallets(address _tokenRoot) private view {
@@ -682,6 +649,7 @@ abstract contract DexPairBase is
             ));
 
             _typeToReserves[DexReserveType.FEE] = [_typeToReserves[DexReserveType.FEE][0], _typeToReserves[DexReserveType.FEE][1]];
+            _typeToWalletAddresses[DexAddressType.VAULT] = new address[](0);
 
             _fee = FeeParams(feePrev.denominator, feePrev.pool_numerator, feePrev.beneficiary_numerator, feePrev.referrer_numerator, feePrev.beneficiary, feePrev.threshold, emptyMap);
 
@@ -735,12 +703,10 @@ abstract contract DexPairBase is
 
             // Set left reserve and wallet
             _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[0].wallet);
-            _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[0].vaultWallet);
             _typeToReserves[DexReserveType.POOL].push(tokensData[0].balance);
 
             // Set right reserve and wallet
             _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[1].wallet);
-            _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[1].vaultWallet);
             _typeToReserves[DexReserveType.POOL].push(tokensData[1].balance);
 
             // Set fee reserves
@@ -759,16 +725,15 @@ abstract contract DexPairBase is
 
             address lpRoot;
             address lpWallet;
-            address lpVaultWallet;
             uint128 lpSupply;
 
             // Set lp reserve and fee options
             (
-                lpRoot, lpWallet, lpVaultWallet, lpSupply,
+                lpRoot, lpWallet, lpSupply,
                 _fee,
                 tokensData,,
             ) = abi.decode(otherData, (
-                address, address, address, uint128,
+                address, address, uint128,
                 FeeParams,
                 IPoolTokenData.PoolTokenData[],
                 IAmplificationCoefficient.AmplificationCoefficient,
@@ -782,12 +747,10 @@ abstract contract DexPairBase is
 
             // Set left reserve and wallet
             _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[0].wallet);
-            _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[0].vaultWallet);
             _typeToReserves[DexReserveType.POOL].push(tokensData[0].balance);
 
             // Set right reserve and wallet
             _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[1].wallet);
-            _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[1].vaultWallet);
             _typeToReserves[DexReserveType.POOL].push(tokensData[1].balance);
 
             // Set fee reserves
