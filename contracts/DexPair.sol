@@ -564,7 +564,7 @@ contract DexPair is DexPairBase, INextExchangeData {
             .burnTokens{ value: DexGas.BURN_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
             (
                 _operation.amount,
-                _vaultRoot(),
+                _expectedTokenVaultAddress(_lpRoot()),
                 _remainingGasTo,
                 address.makeAddrStd(0, 0),
                 empty
@@ -647,20 +647,17 @@ contract DexPair is DexPairBase, INextExchangeData {
                             _remainingGasTo
                         );
                 } else {
-                    IDexVault(_vaultRoot())
+                    IDexTokenVault(_expectedTokenVaultAddress(op.root))
                         .transfer{
                             value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + _deployWalletGrams,
                             flag: MsgFlag.SENDER_PAYS_FEES
                         }(
                             op.amount,
-                            op.root,
-                            _typeToWalletAddresses[DexAddressType.VAULT][op.root == _tokenRoots()[0] ? 0 : 1],
                             _recipient,
                             _deployWalletGrams,
                             _notifySuccess,
                             _successPayload,
-                            op.root,
-                            _typeToRootAddresses[DexAddressType.RESERVE][op.root == _tokenRoots()[0] ? 1 : 0],
+                            _tokenRoots(),
                             _currentVersion,
                             _remainingGasTo
                         );
@@ -857,12 +854,11 @@ contract DexPair is DexPairBase, INextExchangeData {
         }
 
         if (_referrerFee > 0) {
-            IDexVault(_vaultRoot()).referralFeeTransfer{
+            IDexTokenVault(_expectedTokenVaultAddress(_typeToRootAddresses[DexAddressType.RESERVES][spentTokenIndex])).referralFeeTransfer{
                 value: _referrerValue,
                 flag: MsgFlag.SENDER_PAYS_FEES
             }(
                 _referrerFee,
-                _typeToWalletAddresses[DexAddressType.VAULT][spentTokenIndex],
                 _referrer,
                 _remainingGasTo,
                 _tokenRoots()
@@ -952,7 +948,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         TvmCell _successPayload,
         bool _notifyCancel,
         TvmCell _cancelPayload
-    ) override external onlyPoolOrVault(_prevPoolTokenRoots) onlyActive notSelfCall {
+    ) override external onlyPoolOrTokenVault(_prevPoolTokenRoots, _spentTokenRoot) onlyActive notSelfCall {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         // Decode data from payload
@@ -1106,20 +1102,17 @@ contract DexPair is DexPairBase, INextExchangeData {
                             }
                         }
                         // Transfer final token to recipient in the case of success or to sender otherwise
-                        IDexVault(_vaultRoot())
+                        IDexTokenVault(_expectedTokenVaultAddress(_tokenRoots()[receiveTokenIndex]))
                             .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                             (
                                 amount,
-                                _tokenRoots()[receiveTokenIndex],
-                                _typeToWalletAddresses[DexAddressType.VAULT][receiveTokenIndex],
                                 isLastStep ? _recipient : _senderAddress,
                                 _deployWalletGrams,
                                 isLastStep ? _notifySuccess : _notifyCancel,
                                 isLastStep
                                     ? PairPayload.buildSuccessPayload(_op, _successPayload, _senderAddress)
                                     : PairPayload.buildCancelPayload(_op, postSwapErrorCode, _cancelPayload, nextSteps),
-                                _tokenRoots()[spentTokenIndex],
-                                _tokenRoots()[receiveTokenIndex],
+                                _tokenRoots(),
                                 _currentVersion,
                                 _remainingGasTo
                             );
@@ -1146,18 +1139,15 @@ contract DexPair is DexPairBase, INextExchangeData {
                 }
 
                 // Refund incoming token to sender
-                IDexVault(_vaultRoot())
+                IDexTokenVault(_expectedTokenVaultAddress(_spentTokenRoot))
                     .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                     (
                         _spentAmount,
-                        _spentTokenRoot,
-                        _typeToWalletAddresses[DexAddressType.VAULT][spentTokenIndex],
                         _senderAddress,
                         _deployWalletGrams,
                         _notifyCancel,
                         PairPayload.buildCancelPayload(_op, errorCode, _cancelPayload, nextSteps),
-                        _tokenRoots()[spentTokenIndex],
-                        _tokenRoots()[receiveTokenIndex],
+                        _tokenRoots(),
                         _currentVersion,
                         _remainingGasTo
                     );
@@ -1267,30 +1257,27 @@ contract DexPair is DexPairBase, INextExchangeData {
                             referrerValue
                         );
 
-                        // Transfer incoming token to vault
+                        // Transfer incoming token to token vault
                         ITokenWallet(msg.sender)
                             .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                             (
                                 _tokensAmount,
-                                _vaultRoot(),
+                                _expectedTokenVaultAddress(_tokenRoot),
                                 0,
                                 _remainingGasTo,
                                 false,
                                 empty
                             );
 
-                        IDexVault(_vaultRoot())
+                        IDexTokenVault(_expectedTokenVaultAddress(_tokenRoots()[receiveTokenIndex]))
                             .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                             (
                                 amount,
-                                _tokenRoots()[receiveTokenIndex],
-                                _typeToWalletAddresses[DexAddressType.VAULT][receiveTokenIndex],
                                 recipient,
                                 deployWalletGrams,
                                 notifySuccess,
                                 PairPayload.buildSuccessPayload(op, successPayload, _senderAddress),
-                                _tokenRoots()[spentTokenIndex],
-                                _tokenRoots()[receiveTokenIndex],
+                                _tokenRoots(),
                                 _currentVersion,
                                 _remainingGasTo
                             );
@@ -1359,7 +1346,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                             .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                             (
                                 _tokensAmount,
-                                _vaultRoot(),
+                                _expectedTokenVaultAddress(_tokenRoot),
                                 0,
                                 _remainingGasTo,
                                 false,
@@ -1457,12 +1444,12 @@ contract DexPair is DexPairBase, INextExchangeData {
                             referrerValue
                         );
 
-                        // Transfer incoming token to vault
+                        // Transfer incoming token to token vault
                         ITokenWallet(msg.sender)
                             .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                             (
                                 _tokensAmount,
-                                _vaultRoot(),
+                                _expectedTokenVaultAddress(_tokenRoot),
                                 0,
                                 _remainingGasTo,
                                 false,
@@ -1576,18 +1563,6 @@ contract DexPair is DexPairBase, INextExchangeData {
             _sync();
         }
     }
-
-    function onSuccessVaultDeploy(
-        address _tokenRoot,
-        address _tokenWallet,
-        uint32 _version,
-        address _remainingGasTo
-    ) external override {}
-
-    function onCanceledVaultDeploy(
-        address _tokenRoot,
-        address _remainingGasTo
-    ) external override {}
 
     function _checkOperationData(
         address _msgSender,

@@ -60,10 +60,6 @@ contract TestNewDexAccount is ITokenOperationStructure {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } current_version;
     }
 
-    function getVault() external view responsible returns (address) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } vault;
-    }
-
     function getWalletData(address token_root) external view responsible returns (address wallet, uint128 balance) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (
             _wallets.exists(token_root) ? _wallets.at(token_root) : address.makeAddrStd(0, 0),

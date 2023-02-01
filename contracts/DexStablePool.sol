@@ -26,7 +26,7 @@ import "./interfaces/IDexRoot.sol";
 import "./interfaces/IDexBasePool.sol";
 import "./interfaces/ISuccessCallback.sol";
 import "./interfaces/IDexAccount.sol";
-import "./interfaces/IDexVault.sol";
+import "./interfaces/IDexTokenVault.sol";
 import "./interfaces/IDexStablePool.sol";
 import "./interfaces/IDexPairOperationCallback.sol";
 
@@ -68,7 +68,6 @@ contract DexStablePool is
     // Liquidity tokens
     address lp_root;
     address lp_wallet;
-    address lp_vault_wallet;
     uint128 lp_supply;
 
     // Fee
@@ -122,19 +121,6 @@ contract DexStablePool is
 
     function getPoolType() override external view responsible returns (uint8) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } DexPoolTypes.STABLE_POOL;
-    }
-
-    function getVault() override external view responsible returns (address dex_vault) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } vault;
-    }
-
-    function getVaultWallets() override external view responsible returns (address[] token_vault_wallets, address lp) {
-        address[] vw = new address[](0);
-
-        for (uint8 i = 0; i < N_COINS; i++) {
-            vw.push(tokenData[i].vaultWallet);
-        }
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (vw, lp_vault_wallet);
     }
 
     function getAccumulatedFees() override external view responsible returns (uint128[] accumulatedFees) {
@@ -403,13 +389,11 @@ contract DexStablePool is
 
                     for (uint8 ii = 0; ii < N_COINS; ii++) {
                         if (result.amounts[ii] >= 0) {
-                            IDexVault(vault).transferV2{
+                            IDexTokenVault(_expectedTokenVaultAddress(tokenData[ii].root)).transfer{
                                 value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
                                 flag: MsgFlag.SENDER_PAYS_FEES
                             }(
                                 result.amounts[ii],
-                                tokenData[ii].root,
-                                tokenData[ii].vaultWallet,
                                 recipient,
                                 deploy_wallet_grams,
                                 notify_success,
@@ -449,13 +433,11 @@ contract DexStablePool is
                         original_gas_to
                     );
 
-                    IDexVault(vault).transferV2{
+                    IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).transfer{
                         value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
                         flag: MsgFlag.SENDER_PAYS_FEES
                     }(
                         result.amounts[i],
-                        tokenData[i].root,
-                        tokenData[i].vaultWallet,
                         recipient,
                         deploy_wallet_grams,
                         notify_success,
@@ -509,12 +491,11 @@ contract DexStablePool is
                     }
 
                     if (referrer_fee > 0) {
-                        IDexVault(vault).referralFeeTransfer{
+                        IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
                             value: referrer_value,
                             flag: MsgFlag.SENDER_PAYS_FEES
                         }(
                             referrer_fee,
-                            tokenData[i].vaultWallet,
                             referrer,
                             original_gas_to,
                             _tokenRoots()
@@ -554,20 +535,18 @@ contract DexStablePool is
                         flag: MsgFlag.SENDER_PAYS_FEES
                     }(
                         tokens_amount,
-                        vault,
+                        _expectedTokenVaultAddress(token_root),
                         0,
                         original_gas_to,
                         false,
                         empty
                     );
 
-                    IDexVault(vault).transferV2{
+                    IDexTokenVault(_expectedTokenVaultAddress(tokenData[j].root)).transfer{
                         value: 0,
                         flag: MsgFlag.ALL_NOT_RESERVED
                     }(
                         dy_result.amount,
-                        tokenData[j].root,
-                        tokenData[j].vaultWallet,
                         recipient,
                         deploy_wallet_grams,
                         notify_success,
@@ -630,7 +609,6 @@ contract DexStablePool is
                             );
 
                             TvmBuilder builder;
-                            builder.store(lp_vault_wallet);
 
                             TvmCell exchange_data = abi.encode(
                                 id,
@@ -653,7 +631,7 @@ contract DexStablePool is
                                 flag: MsgFlag.ALL_NOT_RESERVED
                             }(
                                 result.lp_reward,
-                                vault,
+                                _expectedTokenVaultAddress(lp_root),
                                 deploy_wallet_grams,
                                 original_gas_to,
                                 true,
@@ -732,12 +710,11 @@ contract DexStablePool is
                             }
 
                             if (referrer_fee > 0) {
-                                IDexVault(vault).referralFeeTransfer{
+                                IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
                                     value: referrer_value,
                                     flag: MsgFlag.SENDER_PAYS_FEES
                                 }(
                                     referrer_fee,
-                                    tokenData[i].vaultWallet,
                                     referrer,
                                     original_gas_to,
                                     _tokenRoots()
@@ -756,7 +733,7 @@ contract DexStablePool is
                             flag: MsgFlag.SENDER_PAYS_FEES
                         }(
                             tokens_amount,
-                            vault,
+                            _expectedTokenVaultAddress(token_root),
                             0,
                             original_gas_to,
                             false,
@@ -828,7 +805,7 @@ contract DexStablePool is
                         flag: MsgFlag.SENDER_PAYS_FEES
                     }(
                         tokens_amount,
-                        vault,
+                        _expectedTokenVaultAddress(token_root),
                         0,
                         original_gas_to,
                         false,
@@ -1164,7 +1141,7 @@ contract DexStablePool is
             flag: MsgFlag.SENDER_PAYS_FEES
         }(
             _operation.amount,
-            vault,
+            _expectedTokenVaultAddress(lp_root),
             send_gas_to,
             address(0),
             empty
@@ -1346,7 +1323,7 @@ contract DexStablePool is
         TvmCell success_payload,
         bool notify_cancel,
         TvmCell cancel_payload
-    ) override external onlyPoolOrVault(prev_pool_token_roots) {
+    ) override external onlyPoolOrTokenVault(prev_pool_token_roots, spent_token_root) {
         require(tokenIndex.exists(spent_token_root) || spent_token_root == lp_root, DexErrors.NOT_TOKEN_ROOT);
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
@@ -1388,7 +1365,6 @@ contract DexStablePool is
                     );
 
                     TvmBuilder builder;
-                    builder.store(lp_vault_wallet);
 
                     TvmCell exchange_data = abi.encode(
                         id,
@@ -1411,7 +1387,7 @@ contract DexStablePool is
                         flag: MsgFlag.ALL_NOT_RESERVED
                     }(
                         result.lp_reward,
-                        vault,
+                        _expectedTokenVaultAddress(lp_root),
                         deploy_wallet_grams,
                         original_gas_to,
                         true,
@@ -1441,15 +1417,14 @@ contract DexStablePool is
 
                     operation = TokenOperation(result.amounts[j], tokenData[j].root);
 
-                    IDexVault(vault).burn{
+                    IBurnableByRootTokenRoot(lp_root).burnTokens{
                         value: DexGas.BURN_VALUE,
                         flag: MsgFlag.SENDER_PAYS_FEES
                     }(
-                        _tokenRoots(),
-                        lp_vault_wallet,
                         spent_amount,
+                        _expectedTokenVaultAddress(lp_root),
                         original_gas_to,
-                        address.makeAddrStd(0, 0),
+                        address(0),
                         empty
                     );
                 }
@@ -1493,12 +1468,11 @@ contract DexStablePool is
                     }
 
                     if (referrer_fee > 0) {
-                        IDexVault(vault).referralFeeTransfer{
+                        IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
                             value: referrer_value,
                             flag: MsgFlag.SENDER_PAYS_FEES
                         }(
                             referrer_fee,
-                            tokenData[i].vaultWallet,
                             referrer,
                             original_gas_to,
                             _tokenRoots()
@@ -1599,13 +1573,11 @@ contract DexStablePool is
                             }
                         }
 
-                        IDexVault(vault).transferV2{
+                        IDexTokenVault(_expectedTokenVaultAddress(tokenData[j].root)).transfer{
                             value: 0,
                             flag: MsgFlag.ALL_NOT_RESERVED
                         }(
                             operation.amount,
-                            tokenData[j].root,
-                            tokenData[j].vaultWallet,
                             is_last_step ? recipient : sender_address,
                             deploy_wallet_grams,
                             is_last_step ? notify_success : notify_cancel,
@@ -1636,13 +1608,11 @@ contract DexStablePool is
                 }(id);
             }
 
-            IDexVault(vault).transferV2{
+            IDexTokenVault(_expectedTokenVaultAddress(spent_token_root)).transfer{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED
             }(
                 spent_amount,
-                spent_token_root,
-                spent_token_root == lp_root ? lp_vault_wallet : tokenData[tokenIndex[spent_token_root]].vaultWallet,
                 sender_address,
                 deploy_wallet_grams,
                 notify_cancel,
@@ -1697,13 +1667,12 @@ contract DexStablePool is
         _;
     }
 
-    modifier onlyVault() {
-        require(msg.sender == vault, DexErrors.NOT_VAULT);
-        _;
-    }
-
-    modifier onlyPoolOrVault(address[] _roots) {
-        require(msg.sender == _expectedPoolAddress(_roots) || msg.sender == vault, DexErrors.NEITHER_POOL_NOR_VAULT);
+    modifier onlyPoolOrTokenVault(address[] _poolTokenRoots, address _tokenRoot) {
+        require(
+            msg.sender == _expectedPoolAddress(_poolTokenRoots) ||
+            msg.sender == _expectedTokenVaultAddress(_tokenRoot),
+            DexErrors.NEITHER_POOL_NOR_VAULT
+        );
         _;
     }
 
@@ -1738,7 +1707,6 @@ contract DexStablePool is
             TvmCell other_data = abi.encode(
                 lp_root,
                 lp_wallet,
-                lp_vault_wallet,
                 lp_supply,
 
                 fee,
@@ -1799,10 +1767,10 @@ contract DexStablePool is
 
             tokenData = new PoolTokenData[](N_COINS);
             for (uint8 i = 0; i < N_COINS; i++) {
-                tokenData[i] = PoolTokenData(roots[i], address(0), address(0), 0, 0, 0, 0, 0, false, false);
+                tokenData[i] = PoolTokenData(roots[i], address(0), 0, 0, 0, 0, 0, false, false);
             }
 
-            IDexVault(vault).addLiquidityTokenV2{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
+            IDexRoot(root).addLiquidityToken{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
                 address(this),
                 roots,
                 send_gas_to
@@ -1837,14 +1805,9 @@ contract DexStablePool is
             N_COINS = 2;
 
             tokenData = new PoolTokenData[](N_COINS);
-            tokenData[0] = PoolTokenData(type_to_root_addresses[DexAddressType.RESERVE][0], type_to_wallet_addresses[DexAddressType.RESERVE][0], type_to_wallet_addresses[DexAddressType.VAULT][0], type_to_reserves[DexReserveType.POOL][0], 0, type_to_reserves[DexReserveType.FEE][0], 0, 0, false, false);
-            tokenData[1] = PoolTokenData(type_to_root_addresses[DexAddressType.RESERVE][1], type_to_wallet_addresses[DexAddressType.RESERVE][1], type_to_wallet_addresses[DexAddressType.VAULT][1], type_to_reserves[DexReserveType.POOL][1], 0, type_to_reserves[DexReserveType.FEE][1], 0, 0, false, false);
+            tokenData[0] = PoolTokenData(type_to_root_addresses[DexAddressType.RESERVE][0], type_to_wallet_addresses[DexAddressType.RESERVE][0], type_to_reserves[DexReserveType.POOL][0], 0, type_to_reserves[DexReserveType.FEE][0], 0, 0, false, false);
+            tokenData[1] = PoolTokenData(type_to_root_addresses[DexAddressType.RESERVE][1], type_to_wallet_addresses[DexAddressType.RESERVE][1], type_to_reserves[DexReserveType.POOL][1], 0, type_to_reserves[DexReserveType.FEE][1], 0, 0, false, false);
 
-            ITokenRoot(lp_root).walletOf{
-                value: DexGas.SEND_EXPECTED_WALLET_VALUE,
-                flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: DexStablePool.onVaultTokenWallet
-            }(vault);
             ITokenRoot(type_to_root_addresses[DexAddressType.RESERVE][0]).decimals{
                 value: DexGas.GET_TOKEN_DECIMALS_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
@@ -1871,27 +1834,20 @@ contract DexStablePool is
                 AmplificationCoefficient,
                 uint256
             ));
-
-            ITokenRoot(lp_root).walletOf{
-                value: DexGas.SEND_EXPECTED_WALLET_VALUE,
-                flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: DexStablePool.onVaultTokenWallet
-            }(vault);
-
         } else if (old_pool_type == DexPoolTypes.STABLE_POOL) {
             active = false;
             TvmCell other_data = s.loadRef(); // ref 3
 
             // Set lp reserve and fee options
             (
-                lp_root, lp_wallet, lp_vault_wallet, lp_supply,
+                lp_root, lp_wallet, lp_supply,
 
                 fee,
-                tokenData,
+                tokenDataPrev,
                 A,
                 PRECISION
             ) = abi.decode(other_data, (
-                address, address, address, uint128,
+                address, address, uint128,
                 FeeParams,
                 IPoolTokenData.PoolTokenData[],
                 IAmplificationCoefficient.AmplificationCoefficient,
@@ -1905,7 +1861,7 @@ contract DexStablePool is
                     break;
                 }
             }
-            active = lp_wallet.value != 0 && lp_vault_wallet.value != 0 && allTokensIsInit;
+            active = lp_wallet.value != 0 && allTokensIsInit;
         }
 
         send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS, bounce: false });
@@ -1917,12 +1873,6 @@ contract DexStablePool is
             flag: MsgFlag.SENDER_PAYS_FEES,
             callback: DexStablePool.onTokenWallet
         }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
-
-        ITokenRoot(token_root).walletOf{
-            value: DexGas.SEND_EXPECTED_WALLET_VALUE,
-            flag: MsgFlag.SENDER_PAYS_FEES,
-            callback: DexStablePool.onVaultTokenWallet
-        }(vault);
 
         if (token_root != lp_root) {
             ITokenRoot(token_root).decimals{
@@ -1946,7 +1896,7 @@ contract DexStablePool is
                     break;
                 }
             }
-            active = lp_vault_wallet.value != 0 && allTokensIsInit;
+            active = allTokensIsInit;
         } else {
             tokenData[tokenIndex[msg.sender]].wallet = wallet;
         }
@@ -1984,51 +1934,10 @@ contract DexStablePool is
             tokenData[_i].initialized = true;
         }
 
-        active = lp_wallet.value != 0 && lp_vault_wallet.value != 0;
+        active = lp_wallet.value != 0;
     }
 
-    function onVaultTokenWallet(address wallet) external {
-        require(tokenIndex.exists(msg.sender) || msg.sender == lp_root, DexErrors.NOT_ROOT);
-
-        tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
-
-        if (msg.sender == lp_root && lp_vault_wallet.value == 0) {
-            lp_vault_wallet = wallet;
-
-            IDexVault(vault).addLpWallet{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED
-            }(
-                _tokenRoots(),
-                lp_vault_wallet
-            );
-
-            bool allTokensIsInit = true;
-            for (uint i = 0; i < N_COINS; i++) {
-                if (!tokenData[i].initialized) {
-                    allTokensIsInit = false;
-                    break;
-                }
-            }
-            active = lp_wallet.value != 0 && allTokensIsInit;
-        } else {
-            tokenData[tokenIndex[msg.sender]].vaultWallet = wallet;
-        }
-    }
-
-    function onSuccessVaultDeploy(
-        address _tokenRoot,
-        address _tokenWallet,
-        uint32 _version,
-        address _remainingGasTo
-    ) external override {}
-
-    function onCanceledVaultDeploy(
-        address _tokenRoot,
-        address _remainingGasTo
-    ) external override {}
-
-    function liquidityTokenRootDeployed(address lp_root_, address send_gas_to) override external onlyVault {
+    function liquidityTokenRootDeployed(address lp_root_, address send_gas_to) override external onlyRoot {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         lp_root = lp_root_;
@@ -2044,7 +1953,7 @@ contract DexStablePool is
         IDexRoot(root).onPoolCreated{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(r, DexPoolTypes.STABLE_POOL, send_gas_to);
     }
 
-    function liquidityTokenRootNotDeployed(address /*lp_root_*/, address send_gas_to) override external onlyVault {
+    function liquidityTokenRootNotDeployed(address /*lp_root_*/, address send_gas_to) override external onlyRoot {
         if (!active) send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO, bounce: false});
         else {
             tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
@@ -2733,12 +2642,11 @@ contract DexStablePool is
             if (referrer_fees[i] > 0) {
                 is_zero_referrer_fees = false;
 
-                IDexVault(vault).referralFeeTransfer{
+                IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
                     value: referrer_value,
                     flag: MsgFlag.SENDER_PAYS_FEES
                 }(
                     referrer_fees[i],
-                    tokenData[i].vaultWallet,
                     referrer,
                     original_gas_to,
                     _tokenRoots()
@@ -2973,12 +2881,11 @@ contract DexStablePool is
             if (referrer_fees[i] > 0) {
                 is_zero_referrer_fees = false;
 
-                IDexVault(vault).referralFeeTransfer{
+                IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
                     value: referrer_value,
                     flag: MsgFlag.SENDER_PAYS_FEES
                 }(
                     referrer_fees[i],
-                    tokenData[i].vaultWallet,
                     referrer,
                     original_gas_to,
                     _tokenRoots()

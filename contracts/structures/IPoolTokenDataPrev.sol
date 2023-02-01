@@ -1,9 +1,10 @@
 pragma ton-solidity >= 0.62.0;
 
-interface IPoolTokenData {
-    struct PoolTokenData {
+interface IPoolTokenDataPrev {
+    struct PoolTokenDataPrev {
         address root;
         address wallet;
+        address vaultWallet;
         uint128 balance;
         uint8 decimals;
         uint128 accumulatedFee;

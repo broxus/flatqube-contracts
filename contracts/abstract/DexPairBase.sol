@@ -5,7 +5,7 @@ import "tip3/contracts/interfaces/ITokenRoot.sol";
 import "../interfaces/IDexConstantProductPair.sol";
 import "../interfaces/IDexAccount.sol";
 import "../interfaces/IDexRoot.sol";
-import "../interfaces/IDexVault.sol";
+import "../interfaces/IDexTokenVault.sol";
 
 import "../libraries/DexPoolTypes.sol";
 import "../libraries/DexGas.sol";
@@ -13,6 +13,7 @@ import "../libraries/DexAddressType.sol";
 import "../libraries/DexReserveType.sol";
 
 import "../structures/IPoolTokenData.sol";
+import "../structures/IPoolTokenDataPrev.sol";
 import "../structures/IAmplificationCoefficient.sol";
 import "../structures/IFeeParamsPrev.sol";
 
@@ -26,7 +27,8 @@ abstract contract DexPairBase is
     DexContractBase,
     IDexConstantProductPair,
     TWAPOracle,
-    IFeeParamsPrev
+    IFeeParamsPrev,
+    IPoolTokenDataPrev
 {
     /// @dev DexRoot address
     address private _root;
@@ -43,7 +45,7 @@ abstract contract DexPairBase is
     /// @dev Mapping for vault, lp and TIP-3 roots addresses
     mapping(uint8 => address[]) internal _typeToRootAddresses;
 
-    /// @dev Mapping for vault, lp and TIP-3 wallets addresses
+    /// @dev Mapping for lp and TIP-3 wallets addresses
     mapping(uint8 => address[]) internal _typeToWalletAddresses;
 
     /// @dev Mapping for pool, lp and fee reserves
@@ -95,21 +97,13 @@ abstract contract DexPairBase is
         _;
     }
 
-    /// @dev Only the DEX vault can call a function with this modifier
-    modifier onlyVault() {
+    /// @dev Only DEX pair or the DEX token vault can call a function with this modifier
+    modifier onlyPoolOrTokenVault(address[] _poolTokenRoots, address _tokenRoot) {
         require(
-            _typeToRootAddresses[DexAddressType.VAULT][0].value != 0 &&
-            msg.sender == _typeToRootAddresses[DexAddressType.VAULT][0],
-            DexErrors.NOT_VAULT
+            msg.sender == _expectedPoolAddress(_poolTokenRoots) ||
+            msg.sender == _expectedTokenVaultAddress(_tokenRoot),
+            DexErrors.NEITHER_POOL_NOR_VAULT
         );
-        _;
-    }
-
-    /// @dev Only DEX pair or the DEX vault can call a function with this modifier
-    modifier onlyPoolOrVault(address[] _roots) {
-        require(msg.sender == _expectedPoolAddress(_roots) ||
-            _typeToRootAddresses[DexAddressType.VAULT][0].value != 0 &&
-            msg.sender == _typeToRootAddresses[DexAddressType.VAULT][0], DexErrors.NEITHER_POOL_NOR_VAULT);
         _;
     }
 
@@ -181,30 +175,6 @@ abstract contract DexPairBase is
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } DexPoolTypes.CONSTANT_PRODUCT;
-    }
-
-    // Return vault address
-    function getVault() override external view responsible returns (address dex_vault) {
-        return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.REMAINING_GAS
-        } _typeToRootAddresses[DexAddressType.VAULT][0];
-    }
-
-    // Return vault wallets addresses
-    function getVaultWallets() override external view responsible returns (
-        address left,
-        address right
-    ) {
-        return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.REMAINING_GAS
-        } (
-            _typeToWalletAddresses[DexAddressType.VAULT][0],
-            _typeToWalletAddresses[DexAddressType.VAULT][1]
-        );
     }
 
     // Return fee options
@@ -370,7 +340,7 @@ abstract contract DexPairBase is
     function liquidityTokenRootDeployed(
         address _lpRootAddress,
         address _remainingGasTo
-    ) override external onlyVault {
+    ) override external onlyRoot {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         _typeToRootAddresses[DexAddressType.LP].push(_lpRootAddress);
@@ -393,7 +363,7 @@ abstract contract DexPairBase is
     function liquidityTokenRootNotDeployed(
         address,
         address _remainingGasTo
-    ) override external onlyVault {
+    ) override external onlyRoot {
         // Destroy pair if it's not active
         if (!_active) {
             _remainingGasTo.transfer({
@@ -466,42 +436,6 @@ abstract contract DexPairBase is
         _tryToActivate();
     }
 
-    /// @dev Callback after wallet deploy for vault's reserve
-    /// @param _wallet Address of the wallet with for vault's reserve
-    function onVaultTokenWallet(address _wallet) external onlyTokenRoot {
-        // Set vault wallets addresses
-        if (
-            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0]
-        ) {
-            if (
-                _typeToWalletAddresses[DexAddressType.VAULT].length == 0
-            ) {
-                _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
-            } else if (
-                _typeToWalletAddresses[DexAddressType.VAULT].length == 2 &&
-                _typeToWalletAddresses[DexAddressType.VAULT][0].value == 0
-            ) {
-                _typeToWalletAddresses[DexAddressType.VAULT][0] = _wallet;
-            }
-        } else if (
-            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1]
-        ) {
-            if (
-                _typeToWalletAddresses[DexAddressType.VAULT].length == 1 &&
-                _typeToWalletAddresses[DexAddressType.VAULT][0] != _wallet
-            ) {
-                _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
-            } else if (
-                _typeToWalletAddresses[DexAddressType.VAULT].length == 0
-            ) {
-                _typeToWalletAddresses[DexAddressType.VAULT].push(address(0));
-                _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
-            }
-        }
-
-        _tryToActivate();
-    }
-
     /// @dev Returns DEX root address
     /// @return address DexRoot address
     function _dexRoot() override internal view returns (address) {
@@ -560,10 +494,6 @@ abstract contract DexPairBase is
         return _typeToReserves[DexReserveType.LP][0];
     }
 
-    function _vaultRoot() internal view returns (address) {
-        return _typeToRootAddresses[DexAddressType.VAULT][0];
-    }
-
     /// @dev Deploys wallet by TIP-3 token root and wait for callback
     /// @param _tokenRoot Address of the TIP-3 TokenRoot for a new wallet deploy
     function _configureTokenRootWallets(address _tokenRoot) private view {
@@ -573,24 +503,13 @@ abstract contract DexPairBase is
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexPairBase.onTokenWallet
             }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
-
-        // Request wallet's address
-        if (_tokenRoot != _typeToRootAddresses[DexAddressType.LP][0]) {
-            ITokenRoot(_tokenRoot)
-                .walletOf{
-                    value: DexGas.SEND_EXPECTED_WALLET_VALUE,
-                    flag: MsgFlag.SENDER_PAYS_FEES,
-                    callback: DexPairBase.onVaultTokenWallet
-                }(_typeToRootAddresses[DexAddressType.VAULT][0]);
-        }
     }
 
     /// @dev Will activate pair if all wallets' addresses are set
     function _tryToActivate() private {
         if (
             _typeToWalletAddresses[DexAddressType.LP].length == 1 &&
-            _typeToWalletAddresses[DexAddressType.RESERVE].length == 2 &&
-            _typeToWalletAddresses[DexAddressType.VAULT].length == 2
+            _typeToWalletAddresses[DexAddressType.RESERVE].length == 2
         ) {
             _active = true;
         }
@@ -648,12 +567,11 @@ abstract contract DexPairBase is
             _fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap, emptyMap);
 
             // Deploy LP token for pair
-            IDexVault(_typeToRootAddresses[DexAddressType.VAULT][0])
+            IDexRoot(_root)
                 .addLiquidityToken{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                 (
                     address(this),
-                    _typeToRootAddresses[DexAddressType.RESERVE][0],
-                    _typeToRootAddresses[DexAddressType.RESERVE][1],
+                    _tokenRoots(),
                     remainingGasTo
                 );
 
@@ -663,6 +581,7 @@ abstract contract DexPairBase is
             TvmCell otherData = dataSlice.loadRef(); // ref 2
 
             FeeParamsPrev feePrev;
+
 
             // Decode reserves, wallets and fee options
             (
@@ -678,6 +597,7 @@ abstract contract DexPairBase is
             ));
 
             _typeToReserves[DexReserveType.FEE] = [_typeToReserves[DexReserveType.FEE][0], _typeToReserves[DexReserveType.FEE][1]];
+            _typeToWalletAddresses[DexReserveType.VAULT] = new address[](0);
 
             _fee = FeeParams(feePrev.denominator, feePrev.pool_numerator, feePrev.beneficiary_numerator, feePrev.referrer_numerator, feePrev.beneficiary, feePrev.threshold, emptyMap);
 
@@ -731,12 +651,10 @@ abstract contract DexPairBase is
 
             // Set left reserve and wallet
             _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[0].wallet);
-            _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[0].vaultWallet);
             _typeToReserves[DexReserveType.POOL].push(tokensData[0].balance);
 
             // Set right reserve and wallet
             _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[1].wallet);
-            _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[1].vaultWallet);
             _typeToReserves[DexReserveType.POOL].push(tokensData[1].balance);
 
             // Set fee reserves
@@ -755,16 +673,15 @@ abstract contract DexPairBase is
 
             address lpRoot;
             address lpWallet;
-            address lpVaultWallet;
             uint128 lpSupply;
 
             // Set lp reserve and fee options
             (
-                lpRoot, lpWallet, lpVaultWallet, lpSupply,
+                lpRoot, lpWallet, lpSupply,
                 _fee,
                 tokensData,,
             ) = abi.decode(otherData, (
-                address, address, address, uint128,
+                address, address, uint128,
                 FeeParams,
                 IPoolTokenData.PoolTokenData[],
                 IAmplificationCoefficient.AmplificationCoefficient,
@@ -778,12 +695,10 @@ abstract contract DexPairBase is
 
             // Set left reserve and wallet
             _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[0].wallet);
-            _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[0].vaultWallet);
             _typeToReserves[DexReserveType.POOL].push(tokensData[0].balance);
 
             // Set right reserve and wallet
             _typeToWalletAddresses[DexAddressType.RESERVE].push(tokensData[1].wallet);
-            _typeToWalletAddresses[DexAddressType.VAULT].push(tokensData[1].vaultWallet);
             _typeToReserves[DexReserveType.POOL].push(tokensData[1].balance);
 
             // Set fee reserves
