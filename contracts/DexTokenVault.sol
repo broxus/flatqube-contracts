@@ -8,21 +8,29 @@ import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
 import "tip3/contracts/interfaces/ITokenRoot.sol";
 import "tip3/contracts/interfaces/ITokenWallet.sol";
+import "tip3/contracts/interfaces/IAcceptTokensMintCallback.sol";
 
 import "./abstract/DexContractBase.sol";
+
+import "./structures/INextExchangeData.sol";
 
 import "./interfaces/IDexAccount.sol";
 import "./interfaces/IDexBasePool.sol";
 import "./interfaces/IDexTokenVault.sol";
 import "./interfaces/IDexVault.sol";
+import "./interfaces/IDexPairOperationCallback.sol";
 
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
 import "./libraries/DexOperationTypes.sol";
+import "./libraries/PairPayload.sol";
+import "./libraries/DirectOperationErrors.sol";
 
 contract DexTokenVault is
     DexContractBase,
-    IDexTokenVault
+    IDexTokenVault,
+    IAcceptTokensMintCallback,
+    INextExchangeData
 {
     address private _root;
     address private _legacyVault;
@@ -414,5 +422,153 @@ contract DexTokenVault is
             flag: MsgFlag.ALL_NOT_RESERVED,
             bounce: false
         });
+    }
+
+    function onAcceptTokensMint(
+        address tokenRoot,
+        uint128 amount,
+        address remainingGasTo,
+        TvmCell payload
+    ) override external {
+        tvm.rawReserve(
+            math.max(
+                DexGas.VAULT_INITIAL_BALANCE,
+                address(this).balance - msg.value
+            ),
+            2
+        );
+
+        TvmSlice payloadSlice = payload.toSlice();
+        uint8 op = DexOperationTypes.CROSS_PAIR_EXCHANGE_V2;
+
+        TvmCell exchangeData = payloadSlice.loadRef();
+
+        (uint64 id,
+        uint32 currentVersion,
+        uint8 currentType,
+        address[] roots,
+        address senderAddress,
+        address recipient,
+        address referrer,
+        uint128 deployWalletGrams,
+        NextExchangeData[] nextSteps) = abi.decode(exchangeData, (uint64, uint32, uint8, address[], address, address, address, uint128, NextExchangeData[]));
+
+        TvmCell successPayload;
+        TvmCell cancelPayload;
+
+        bool notifySuccess = payloadSlice.refs() >= 1;
+        bool notifyCancel = payloadSlice.refs() >= 2;
+
+        if (notifySuccess) {
+            successPayload = payloadSlice.loadRef();
+        }
+        if (notifyCancel) {
+            cancelPayload = payloadSlice.loadRef();
+        }
+
+        uint16 errorCode = 0;
+
+        uint256 denominator = 0;
+        address prevPool = _expectedPoolAddress(roots);
+        uint32 allNestedNodes = uint32(nextSteps.length);
+        uint32 allLeaves = 0;
+        uint32 maxNestedNodes = 0;
+        uint32 maxNestedNodesIdx = 0;
+        for (uint32 i = 0; i < nextSteps.length; i++) {
+            NextExchangeData nextStep = nextSteps[i];
+            if (nextStep.poolRoot.value == 0 || nextStep.poolRoot == prevPool ||
+                nextStep.numerator == 0 || nextStep.leaves == 0) {
+
+                errorCode = DirectOperationErrors.INVALID_NEXT_STEPS;
+                break;
+            }
+            if (nextStep.nestedNodes > maxNestedNodes) {
+                maxNestedNodes = nextStep.nestedNodes;
+                maxNestedNodesIdx = i;
+            }
+            denominator += nextStep.numerator;
+            allNestedNodes += nextStep.nestedNodes;
+            allLeaves += nextStep.leaves;
+        }
+
+        if (errorCode == 0 && msg.value < DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * allNestedNodes + 0.1 ton) {
+            errorCode = DirectOperationErrors.VALUE_TOO_LOW;
+        }
+
+        if (errorCode == 0 && nextSteps.length > 0) {
+            uint128 extraValue = msg.value - DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * allNestedNodes - 0.1 ton;
+
+            for (uint32 i = 0; i < nextSteps.length; i++) {
+                NextExchangeData nextStep = nextSteps[i];
+
+                uint128 nextPoolAmount = uint128(math.muldiv(amount, nextStep.numerator, denominator));
+                uint128 currentExtraValue = math.muldiv(uint128(nextStep.leaves), extraValue, uint128(allLeaves));
+
+                IDexBasePool(nextStep.poolRoot).crossPoolExchange{
+                    value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + currentExtraValue,
+                    flag: i == maxNestedNodesIdx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
+                }(
+                    id,
+
+                    currentVersion,
+                    currentType,
+
+                    roots,
+
+                    op,
+                    tokenRoot,
+                    nextPoolAmount,
+
+                    senderAddress,
+                    recipient,
+                    referrer,
+
+                    remainingGasTo,
+                    deployWalletGrams,
+
+                    nextStep.payload,
+                    notifySuccess,
+                    successPayload,
+                    notifyCancel,
+                    cancelPayload
+                );
+            }
+        } else {
+            bool isLastStep = nextSteps.length == 0;
+            if (isLastStep) {
+                emit PairTransferTokens({
+                    amount: amount,
+                    roots: roots,
+                    recipientAddress: recipient
+                });
+            } else {
+                IDexPairOperationCallback(senderAddress).dexPairOperationCancelled{
+                    value: DexGas.OPERATION_CALLBACK_BASE + 44,
+                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
+                }(id);
+
+                if (recipient != senderAddress) {
+                    IDexPairOperationCallback(recipient).dexPairOperationCancelled{
+                        value: DexGas.OPERATION_CALLBACK_BASE,
+                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                        bounce: false
+                    }(id);
+                }
+            }
+
+            ITokenWallet(_tokenWallet)
+                .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+                (
+                    amount,
+                    isLastStep ? recipient : senderAddress,
+                    deployWalletGrams,
+                    remainingGasTo,
+                    isLastStep ? notifySuccess : notifyCancel,
+                    isLastStep
+                    ? PairPayload.buildSuccessPayload(op, successPayload, senderAddress)
+                    : PairPayload.buildCancelPayload(op, errorCode, cancelPayload, nextSteps)
+                );
+        }
     }
 }
