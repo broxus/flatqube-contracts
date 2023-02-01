@@ -8,11 +8,10 @@ import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
 import "tip3/contracts/interfaces/ITokenWallet.sol";
 import "tip3/contracts/interfaces/IBurnableTokenWallet.sol";
-import "tip3/contracts/interfaces/IAcceptTokensMintCallback.sol";
+import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 
 import "./abstract/DexContractBase.sol";
 
-import "./DexVaultLpTokenPendingV2.sol";
 import "./interfaces/IDexVault.sol";
 import "./interfaces/IDexBasePool.sol";
 import "./interfaces/IDexAccount.sol";
@@ -23,6 +22,7 @@ import "./interfaces/IReferralProgramCallbacks.sol";
 import "./interfaces/IDexTokenVault.sol";
 
 import "./structures/INextExchangeData.sol";
+import "./structures/IReferralProgramParams.sol";
 
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
@@ -33,62 +33,51 @@ import "./libraries/DirectOperationErrors.sol";
 contract DexVault is
     DexContractBase,
     IDexVault,
-    IResetGas,
     IUpgradable,
-    IAcceptTokensMintCallback,
-    INextExchangeData
+    IResetGas,
+    IAcceptTokensTransferCallback,
+    INextExchangeData,
+    IReferralProgramParams
 {
-    uint32 private static _nonce;
-
-    TvmCell private _lpTokenPendingCode;
-
     address private _root;
     address private _owner;
     address private _pendingOwner;
+    address private _manager;
 
-    address private _tokenFactory;
-
-    mapping(address => bool) public _lpVaultWallets;
+    mapping(address => address) public _vaultWallets;
 
     // referral program
-    uint256 private _projectId = 0;
-    address private _projectAddress = address.makeAddrStd(0, 0x0);
-    address private _refSystemAddress = address.makeAddrStd(0, 0x0);
+    ReferralProgramParams _refProgramParams;
 
     modifier onlyOwner() {
         require(msg.sender == _owner, DexErrors.NOT_MY_OWNER);
         _;
     }
 
-    modifier onlyLpTokenPending(
-        uint32 nonce,
-        address pool,
-        address[] roots
-    ) {
-        address expected = address(
-            tvm.hash(
-                _buildLpTokenPendingInitData(
-                    nonce,
-                    pool,
-                    roots
-                )
-            )
+    modifier onlyManagerOrOwner() {
+        require(
+            msg.sender.value != 0 &&
+            (msg.sender == _owner || msg.sender == _manager),
+            DexErrors.NOT_MY_OWNER
         );
-
-        require(msg.sender == expected, DexErrors.NOT_LP_PENDING_CONTRACT);
         _;
     }
 
-    constructor(
-        address owner_,
-        address root_,
-        address token_factory_
-    ) public {
+    constructor(address owner_, address root_) public {
         tvm.accept();
 
         _root = root_;
         _owner = owner_;
-        _tokenFactory = token_factory_;
+    }
+
+    function installPlatformOnce(TvmCell code) external onlyOwner {
+        require(platform_code.toSlice().empty(), DexErrors.PLATFORM_CODE_NON_EMPTY);
+
+        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
+
+        platform_code = code;
+
+        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
     }
 
     function _dexRoot() override internal view returns(address) {
@@ -138,20 +127,36 @@ contract DexVault is
         } _pendingOwner;
     }
 
-    function getLpTokenPendingCode() external view responsible returns (TvmCell) {
+    function getManager() external view responsible returns (address) {
         return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.REMAINING_GAS
-        } _lpTokenPendingCode;
+        value: 0,
+        bounce: false,
+        flag: MsgFlag.REMAINING_GAS
+        } _manager;
     }
 
-    function getTokenFactory() external view responsible returns (address) {
-        return {
-            value: 0,
-            bounce: false,
-            flag: MsgFlag.REMAINING_GAS
-        } _tokenFactory;
+    function setManager(address _newManager) external onlyOwner {
+        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
+
+        _manager = _newManager;
+
+        msg.sender.transfer(
+            0,
+            false,
+            MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+        );
+    }
+
+    function revokeManager() external onlyManagerOrOwner {
+        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
+
+        _manager = address(0);
+
+        msg.sender.transfer(
+            0,
+            false,
+            MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+        );
     }
 
     function getRoot() external view responsible returns (address) {
@@ -162,142 +167,23 @@ contract DexVault is
         } _root;
     }
 
-    function getReferralProgramParams() external view responsible returns (uint256, address, address) {
+    function getReferralProgramParams() external view responsible returns (ReferralProgramParams) {
         return {
             value: 0,
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
-        } (_projectId, _projectAddress, _refSystemAddress);
+        } _refProgramParams;
     }
 
-    function setTokenFactory(address new_token_factory) public override onlyOwner {
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
-
-        emit TokenFactoryAddressUpdated(
-            _tokenFactory,
-            new_token_factory
-        );
-
-        _tokenFactory = new_token_factory;
-
-        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
-    }
-
-    function installPlatformOnce(TvmCell code) external onlyOwner {
-        require(platform_code.toSlice().empty(), DexErrors.PLATFORM_CODE_NON_EMPTY);
-
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
-
-        platform_code = code;
-
-        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
-    }
-
-    function installOrUpdateLpTokenPendingCode(TvmCell code) public onlyOwner {
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
-
-        _lpTokenPendingCode = code;
-
-        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
-    }
-
-    function addLiquidityToken(
-        address pair,
-        address left_root,
-        address right_root,
-        address send_gas_to
-    ) public override onlyPool([left_root, right_root]) {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-        new DexVaultLpTokenPendingV2{
-            stateInit: _buildLpTokenPendingInitData(
-                now,
-                pair,
-                [left_root, right_root]
-            ),
-            value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED
-        }(
-            _tokenFactory,
-            msg.value,
-            send_gas_to
-        );
-    }
-
-    function addLiquidityTokenV2(
-        address pool,
-        address[] roots,
-        address send_gas_to
-    ) public override onlyPool(roots) {
+    function setReferralProgramParams(ReferralProgramParams params) external onlyOwner {
         tvm.rawReserve(math.max(DexGas.VAULT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
-        new DexVaultLpTokenPendingV2{
-            stateInit: _buildLpTokenPendingInitData(
-                now,
-                pool,
-                roots
-            ),
-            value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED
-        }(
-            _tokenFactory,
-            msg.value,
-            send_gas_to
-        );
+
+        _refProgramParams = params;
+
+        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
     }
 
-    function onLiquidityTokenDeployed(
-        uint32 nonce,
-        address pool,
-        address[] roots,
-        address lp_root,
-        address send_gas_to
-    ) public override onlyLpTokenPending(
-        nonce,
-        pool,
-        roots
-    ) {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
-        IDexBasePool(pool)
-            .liquidityTokenRootDeployed{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (lp_root, send_gas_to);
-    }
-
-    function onLiquidityTokenNotDeployed(
-        uint32 nonce,
-        address pool,
-        address[] roots,
-        address lp_root,
-        address send_gas_to
-    ) public override onlyLpTokenPending(
-        nonce,
-        pool,
-        roots
-    ) {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
-        IDexBasePool(pool)
-            .liquidityTokenRootNotDeployed{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (lp_root, send_gas_to);
-    }
-
+    // TODO: remove me in next version
     function withdraw(
         uint64 call_id,
         uint128 amount,
@@ -344,9 +230,10 @@ contract DexVault is
             (call_id);
     }
 
+    // TODO: remove me in next version
     function transfer(
         uint128 amount,
-        address /* token_root */,
+        address token_root,
         address vault_wallet,
         address recipient_address,
         uint128 deploy_wallet_grams,
@@ -365,15 +252,20 @@ contract DexVault is
             2
         );
 
+        address vaultWallet = vault_wallet;
+        if (_vaultWallets.exists(token_root)) {
+            vaultWallet = _vaultWallets.at(token_root);
+        }
+
         emit PairTransferTokens(
-            vault_wallet,
+            vaultWallet,
             amount,
             left_root,
             right_root,
             recipient_address
         );
 
-        ITokenWallet(vault_wallet)
+        ITokenWallet(vaultWallet)
             .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (
                 amount,
@@ -385,63 +277,6 @@ contract DexVault is
             );
     }
 
-    function transferV2(
-        uint128 _amount,
-        address,
-        address _vaultWallet,
-        address _recipientAddress,
-        uint128 _deployWalletGrams,
-        bool _notifyReceiver,
-        TvmCell _payload,
-        address[] _roots,
-        uint32,
-        address _remainingGasTo
-    ) external override onlyPool(_roots) {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
-        emit PairTransferTokensV2(
-            _vaultWallet,
-            _amount,
-            _roots,
-            _recipientAddress
-        );
-
-        ITokenWallet(_vaultWallet)
-            .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (
-                _amount,
-                _recipientAddress,
-                _deployWalletGrams,
-                _remainingGasTo,
-                _notifyReceiver,
-                _payload
-            );
-    }
-
-    function _buildLpTokenPendingInitData(
-        uint32 nonce,
-        address pool,
-        address[] roots
-    ) private view returns (TvmCell) {
-        return tvm.buildStateInit({
-            contr: DexVaultLpTokenPendingV2,
-            varInit: {
-                _nonce: nonce,
-                vault: address(this),
-                pool: pool,
-                roots: roots
-            },
-            pubkey: 0,
-            code: _lpTokenPendingCode
-        });
-    }
-
     function upgrade(TvmCell code) public override onlyOwner {
         require(msg.value > DexGas.UPGRADE_VAULT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
 
@@ -450,19 +285,18 @@ contract DexVault is
         emit VaultCodeUpgraded();
 
         TvmBuilder builder;
-        TvmBuilder owners_data_builder;
-
-        owners_data_builder.store(_owner);
-        owners_data_builder.store(_pendingOwner);
 
         builder.store(_root);
-        builder.store(_tokenFactory);
 
-        builder.storeRef(owners_data_builder);
+        TvmBuilder ownersDataBuilder;
+        ownersDataBuilder.store(_owner);
+        ownersDataBuilder.store(_pendingOwner);
+        ownersDataBuilder.store(_manager);
+        builder.storeRef(ownersDataBuilder);
 
         builder.store(platform_code);
-        builder.store(_lpTokenPendingCode);
-        builder.store(abi.encode(_lpVaultWallets, _projectId, _projectAddress, _refSystemAddress));
+
+        builder.store(abi.encode(_refProgramParams));
 
         tvm.setcode(code);
         tvm.setCurrentCode(code);
@@ -475,18 +309,18 @@ contract DexVault is
 
         TvmSlice slice = _data.toSlice();
 
-        (_root, _tokenFactory) = slice.decode(address, address);
+        (_root,) = slice.decode(address, address);
 
         TvmCell ownersData = slice.loadRef();
         TvmSlice ownersSlice = ownersData.toSlice();
-        (_owner, _pendingOwner) = ownersSlice.decode(address, address);
+        (_owner, _pendingOwner, _manager) = ownersSlice.decode(address, address, address);
 
         platform_code = slice.loadRef();
-        _lpTokenPendingCode = slice.loadRef();
 
-        if (slice.refs() >= 1) {
-            _lpVaultWallets = abi.decode(slice.loadRef(), mapping(address => bool));
-        }
+        //ignore _lpTokenPendingCode
+        slice.loadRef();
+
+        (, _vaultWallets)  = abi.decode(slice.loadRef(), (mapping(address => bool), mapping(address => address)));
 
         // Refund remaining gas
         _owner.transfer({
@@ -519,159 +353,6 @@ contract DexVault is
             (receiver);
     }
 
-    function onAcceptTokensMint(
-        address tokenRoot,
-        uint128 amount,
-        address remainingGasTo,
-        TvmCell payload
-    ) override external {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
-        TvmSlice payloadSlice = payload.toSlice();
-
-        address lpVaultWallet = payloadSlice.decode(address);
-        require(msg.sender.value != 0 && msg.sender == lpVaultWallet && _lpVaultWallets[lpVaultWallet], DexErrors.NOT_LP_VAULT_WALLET);
-
-        uint8 op = DexOperationTypes.CROSS_PAIR_EXCHANGE_V2;
-
-        TvmCell exchangeData = payloadSlice.loadRef();
-
-        (uint64 id,
-        uint32 currentVersion,
-        uint8 currentType,
-        address[] roots,
-        address senderAddress,
-        address recipient,
-        address referrer,
-        uint128 deployWalletGrams,
-        NextExchangeData[] nextSteps) = abi.decode(exchangeData, (uint64, uint32, uint8, address[], address, address, address, uint128, NextExchangeData[]));
-
-        TvmCell successPayload;
-        TvmCell cancelPayload;
-
-        bool notifySuccess = payloadSlice.refs() >= 1;
-        bool notifyCancel = payloadSlice.refs() >= 2;
-
-        if (notifySuccess) {
-            successPayload = payloadSlice.loadRef();
-        }
-        if (notifyCancel) {
-            cancelPayload = payloadSlice.loadRef();
-        }
-
-        uint16 errorCode = 0;
-
-        uint256 denominator = 0;
-        address prevPool = _expectedPoolAddress(roots);
-        uint32 allNestedNodes = uint32(nextSteps.length);
-        uint32 allLeaves = 0;
-        uint32 maxNestedNodes = 0;
-        uint32 maxNestedNodesIdx = 0;
-        for (uint32 i = 0; i < nextSteps.length; i++) {
-            NextExchangeData nextStep = nextSteps[i];
-            if (nextStep.poolRoot.value == 0 || nextStep.poolRoot == prevPool ||
-                nextStep.numerator == 0 || nextStep.leaves == 0) {
-
-                errorCode = DirectOperationErrors.INVALID_NEXT_STEPS;
-                break;
-            }
-            if (nextStep.nestedNodes > maxNestedNodes) {
-                maxNestedNodes = nextStep.nestedNodes;
-                maxNestedNodesIdx = i;
-            }
-            denominator += nextStep.numerator;
-            allNestedNodes += nextStep.nestedNodes;
-            allLeaves += nextStep.leaves;
-        }
-
-        if (errorCode == 0 && msg.value < DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * allNestedNodes + 0.1 ton) {
-            errorCode = DirectOperationErrors.VALUE_TOO_LOW;
-        }
-
-        if (errorCode == 0 && nextSteps.length > 0) {
-            uint128 extraValue = msg.value - DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * allNestedNodes - 0.1 ton;
-
-            for (uint32 i = 0; i < nextSteps.length; i++) {
-                NextExchangeData nextStep = nextSteps[i];
-
-                uint128 nextPoolAmount = uint128(math.muldiv(amount, nextStep.numerator, denominator));
-                uint128 currentExtraValue = math.muldiv(uint128(nextStep.leaves), extraValue, uint128(allLeaves));
-
-                IDexBasePool(nextStep.poolRoot).crossPoolExchange{
-                    value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + currentExtraValue,
-                    flag: i == maxNestedNodesIdx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
-                }(
-                    id,
-
-                    currentVersion,
-                    currentType,
-
-                    roots,
-
-                    op,
-                    tokenRoot,
-                    nextPoolAmount,
-
-                    senderAddress,
-                    recipient,
-                    referrer,
-
-                    remainingGasTo,
-                    deployWalletGrams,
-
-                    nextStep.payload,
-                    notifySuccess,
-                    successPayload,
-                    notifyCancel,
-                    cancelPayload
-                );
-            }
-        } else {
-            bool isLastStep = nextSteps.length == 0;
-            if (isLastStep) {
-                emit PairTransferTokensV2(
-                    lpVaultWallet,
-                    amount,
-                    roots,
-                    recipient
-                );
-            } else {
-                IDexPairOperationCallback(senderAddress).dexPairOperationCancelled{
-                    value: DexGas.OPERATION_CALLBACK_BASE + 44,
-                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                    bounce: false
-                }(id);
-
-                if (recipient != senderAddress) {
-                    IDexPairOperationCallback(recipient).dexPairOperationCancelled{
-                        value: DexGas.OPERATION_CALLBACK_BASE,
-                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                        bounce: false
-                    }(id);
-                }
-            }
-
-            ITokenWallet(lpVaultWallet)
-                .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-                (
-                    amount,
-                    isLastStep ? recipient : senderAddress,
-                    deployWalletGrams,
-                    remainingGasTo,
-                    isLastStep ? notifySuccess : notifyCancel,
-                    isLastStep
-                        ? PairPayload.buildSuccessPayload(op, successPayload, senderAddress)
-                        : PairPayload.buildCancelPayload(op, errorCode, cancelPayload, nextSteps)
-                );
-        }
-    }
-
     function burn(
         address[] _roots,
         address _lpVaultWallet,
@@ -696,97 +377,62 @@ contract DexVault is
         );
     }
 
-    function addLpWallet(
-        address[] _roots,
-        address _lpVaultWallet
-    ) external override onlyPool(_roots) {
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
-
-        _lpVaultWallets[_lpVaultWallet] = true;
-    }
-
-    function addLpWalletByOwner(
-        address _lpVaultWallet
-    ) external override onlyOwner {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
-        _lpVaultWallets[_lpVaultWallet] = true;
-
-        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
-    }
-
-    function updateReferralProgramParams(
-        uint256 project_id,
-        address project_address,
-        address ref_system_address
-    ) external onlyOwner {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
-        _projectId = project_id;
-        _projectAddress = project_address;
-        _refSystemAddress = ref_system_address;
-
-        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
-    }
-
-    function referralFeeTransfer(
-        uint128 _amount,
+    function onAcceptTokensTransfer(
         address _tokenRoot,
-        address _vaultWallet,
-        address _referrer,
-        address _referral,
-        address[] _roots
-    ) external override onlyTokenVault(_tokenRoot) {
+        uint128 _amount,
+        address _sender,
+        address _senderWallet,
+        address _remainingGasTo,
+        TvmCell _payload
+    ) override external {
         tvm.rawReserve(
             math.max(
                 DexGas.VAULT_INITIAL_BALANCE,
                 address(this).balance - msg.value
             ),
-            2
+            0
         );
 
-        emit ReferralFeeTransfer(
-            _vaultWallet,
-            _amount,
-            _roots,
-            _referrer,
-            _referral
-        );
+        TvmSlice payloadSlice = _payload.toSlice();
+        optional(uint8) op = payloadSlice.decodeQ(uint8);
 
-        IReferralProgramCallbacks(_projectAddress)
+        if (
+            op.hasValue() &&
+            op.get() == DexOperationTypes.REFERRAL_FEE &&
+            _sender == _expectedTokenVaultAddress(_tokenRoot) &&
+            payloadSlice.refs() >= 1
+        ) {
+            (address[] _roots, address _referrer, address _referral) =
+                abi.decode(payloadSlice.loadRef(), (address[], address, address));
+
+            emit ReferralFeeTransfer(
+                _tokenRoot,
+                msg.sender,
+                _amount,
+                _roots,
+                _referrer,
+                _referral
+            );
+
+            IReferralProgramCallbacks(_refProgramParams.projectAddress)
             .onRefLastUpdate{
                 value: DexGas.REFERRAL_PROGRAM_CALLBACK,
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 bounce: false
             }(_referral, _referrer, _referral);
 
-        TvmCell payload = abi.encode(_projectId, _referrer, _referral);
+            TvmCell refPayload = abi.encode(_refProgramParams.projectId, _referrer, _referral);
 
-        IDexTokenVault(msg.sender)
-            .transfer{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED
-            }(
+            ITokenWallet(msg.sender)
+            .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+            (
                 _amount,
-                _refSystemAddress,
+                _refProgramParams.systemAddress,
                 DexGas.DEPLOY_REFERRER_FEE_EMPTY_WALLET,
+                _remainingGasTo,
                 true,
-                payload,
-                _roots,
-                0,
-                _referral
+                refPayload
             );
+        }
     }
 }

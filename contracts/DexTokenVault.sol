@@ -20,6 +20,7 @@ import "./interfaces/IDexVault.sol";
 
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
+import "./libraries/DexOperationTypes.sol";
 
 contract DexTokenVault is
     DexContractBase,
@@ -215,19 +216,24 @@ contract DexTokenVault is
             2
         );
 
-        emit ReferralFeeTransfer({
-            amount: _amount,
-            roots: _roots,
-            referrer: _referrer,
-            referral: _referral
-        });
+        TvmBuilder builder;
+        builder.store(DexOperationTypes.REFERRAL_FEE);
+        builder.storeRef(abi.encode(_roots, _referrer, _referral));
 
-        IDexVault(_vault)
-            .referralFeeTransfer{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED,
-                bounce: false
-            }(_amount, _tokenRoot, _tokenWallet, _referrer, _referral, _roots);
+        ITokenWallet(_tokenWallet)
+        .transfer{
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED,
+            bounce: false
+        }(
+            _amount,
+            _vault,
+            //FIXME: pre-deploy vault tokenWallet
+            0,
+            _referral,
+            true,
+            builder.toCell()
+        );
     }
 
     function resetGas(address _remainingGasTo)

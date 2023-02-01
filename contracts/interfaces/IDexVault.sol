@@ -24,40 +24,14 @@ interface IDexVault {
         address recipient_address
     );
 
-    event PairTransferTokensV2(
-        address vaultTokenWallet,
-        uint128 amount,
-        address[] roots,
-        address recipientAddress
-    );
-
     event ReferralFeeTransfer(
+        address tokenRoot,
         address vaultWallet,
         uint128 amount,
         address[] roots,
         address referrer,
         address referral
     );
-
-    function addLiquidityToken(address pair, address left_root, address right_root, address send_gas_to) external;
-
-    function addLiquidityTokenV2(address pool, address[] roots, address send_gas_to) external;
-
-    function onLiquidityTokenDeployed(
-        uint32 nonce,
-        address pair,
-        address[] roots,
-        address lp_root,
-        address send_gas_to
-    ) external;
-
-    function onLiquidityTokenNotDeployed(
-        uint32 nonce,
-        address pair,
-        address[] roots,
-        address lp_root,
-        address send_gas_to
-    ) external;
 
     function withdraw(
         uint64 call_id,
@@ -85,28 +59,6 @@ interface IDexVault {
         address send_gas_to
     ) external;
 
-    function transferV2(
-        uint128 _amount,
-        address _tokenRoot,
-        address _vaultWallet,
-        address _recipientAddress,
-        uint128 _deployWalletGrams,
-        bool _notifyReceiver,
-        TvmCell _payload,
-        address[] _roots,
-        uint32 _pairVersion,
-        address _remainingGasTo
-    ) external;
-
-    function referralFeeTransfer(
-        uint128 _amount,
-        address _tokenRoot,
-        address _vaultWallet,
-        address _referrer,
-        address _referral,
-        address[] _roots
-    ) external;
-
     function burn(
         address[] _roots,
         address _lpVaultWallet,
@@ -116,18 +68,7 @@ interface IDexVault {
         TvmCell _payload
     ) external;
 
-    function addLpWallet(
-        address[] _roots,
-        address _lpVaultWallet
-    ) external;
-
-    function addLpWalletByOwner(
-        address _lpVaultWallet
-    ) external;
-
     function transferOwner(address new_owner) external;
     function acceptOwner() external;
-
-    function setTokenFactory(address new_token_factory) external;
 
 }
