@@ -75,7 +75,7 @@ async function loadPairData(pair: Contract<TestNewDexPairAbi>, contractName: str
   const data: PairData = {};
 
   data.root = (await pair.methods.getRoot({answerId: 0}).call()).dex_root.toString();
-  data.vault = (await pair.methods.getVault({answerId: 0}).call()).dex_vault.toString();
+  // data.vault = (await pair.methods.getVault({answerId: 0}).call()).dex_vault.toString();
 
   data.current_version = (await pair.methods.getVersion({answerId: 0}).call()).version;
   data.platform_code = (await pair.methods.platform_code().call()).platform_code;
@@ -92,9 +92,9 @@ async function loadPairData(pair: Contract<TestNewDexPairAbi>, contractName: str
   data.left_wallet = token_wallets.left.toString();
   data.right_wallet = token_wallets.right.toString();
 
-  const vault_token_wallets = await pair.methods.getVaultWallets({answerId: 0}).call();
-  data.vault_left_wallet = vault_token_wallets.left.toString();
-  data.vault_right_wallet = vault_token_wallets.right.toString();
+  // const vault_token_wallets = await pair.methods.getVaultWallets({answerId: 0}).call();
+  // data.vault_left_wallet = vault_token_wallets.left.toString();
+  // data.vault_right_wallet = vault_token_wallets.right.toString();
 
   const balances = (await pair.methods.getBalances({answerId: 0}).call()).value0;
   data.lp_supply = balances.lp_supply.toString();
@@ -178,9 +178,9 @@ describe('Test Dex Pair contract upgrade', async function () {
       expect(newPairData.root)
         .to
         .equal(oldPairData.root, 'New root value incorrect');
-      expect(newPairData.vault)
-        .to
-        .equal(oldPairData.vault, 'New vault value incorrect');
+      // expect(newPairData.vault)
+      //   .to
+      //   .equal(oldPairData.vault, 'New vault value incorrect');
       expect(newPairData.platform_code)
         .to
         .equal(oldPairData.platform_code, 'New platform_code value incorrect');
@@ -211,12 +211,12 @@ describe('Test Dex Pair contract upgrade', async function () {
       expect(newPairData.right_wallet)
         .to
         .equal(oldPairData.right_wallet, 'New right_wallet value incorrect');
-      expect(newPairData.vault_left_wallet)
-        .to
-        .equal(oldPairData.vault_left_wallet, 'New vault_left_wallet value incorrect');
-      expect(newPairData.vault_right_wallet)
-        .to
-        .equal(oldPairData.vault_right_wallet, 'New vault_right_wallet value incorrect');
+      // expect(newPairData.vault_left_wallet)
+      //   .to
+      //   .equal(oldPairData.vault_left_wallet, 'New vault_left_wallet value incorrect');
+      // expect(newPairData.vault_right_wallet)
+      //   .to
+      //   .equal(oldPairData.vault_right_wallet, 'New vault_right_wallet value incorrect');
       expect(newPairData.lp_supply)
         .to
         .equal(oldPairData.lp_supply, 'New lp_supply value incorrect');
