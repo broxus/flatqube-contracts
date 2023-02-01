@@ -71,6 +71,12 @@ interface IDexRoot is IFeeParams, IOracleOptions {
 
     function getExpectedTokenVaultAddress(address _tokenRoot) external view responsible returns (address);
 
+    function getTokenFactory() external view responsible returns (address);
+
+    function getLpTokenPendingCode() external view responsible returns (TvmCell);
+
+    function getLpTokenPendingVersion() external view responsible returns (uint32);
+
     function getExpectedPairAddress(
         address left_root,
         address right_root
@@ -80,18 +86,50 @@ interface IDexRoot is IFeeParams, IOracleOptions {
 
     function getExpectedAccountAddress(address account_owner) external view responsible returns (address);
 
+    function setTokenFactory(
+        address _newTokenFactory,
+        address _remainingGasTo
+    ) external;
+
     function installOrUpdateVaultCode(
         TvmCell _newCode,
         address _remainingGasTo
     ) external;
 
+    function installOrUpdateLpTokenPendingCode(
+        TvmCell _newCode,
+        address _remainingGasTo
+    ) external;
+
+    function deployLpToken(
+        address[] _tokenRoots,
+        address _remainingGasTo
+    ) external;
+
     function deployVault(
         address _tokenRoot,
+        address _callbackRecipient,
         address _remainingGasTo
     ) external;
 
     function upgradeVault(
         address _tokenRoot,
+        address _remainingGasTo
+    ) external;
+
+    function onLiquidityTokenDeployed(
+        uint32 _nonce,
+        address _pair,
+        address[] _roots,
+        address _lpRoot,
+        address _remainingGasTo
+    ) external;
+
+    function onLiquidityTokenNotDeployed(
+        uint32 _nonce,
+        address _pair,
+        address[] _roots,
+        address _lpRoot,
         address _remainingGasTo
     ) external;
 

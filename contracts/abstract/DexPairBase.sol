@@ -5,7 +5,6 @@ import "tip3/contracts/interfaces/ITokenRoot.sol";
 import "../interfaces/IDexConstantProductPair.sol";
 import "../interfaces/IDexAccount.sol";
 import "../interfaces/IDexRoot.sol";
-import "../interfaces/IDexVault.sol";
 
 import "../libraries/DexPoolTypes.sol";
 import "../libraries/DexGas.sol";
@@ -207,6 +206,10 @@ abstract contract DexPairBase is
         );
     }
 
+    function _getVaultWallet(uint8 _index) internal view returns (address) {
+        return _typeToWalletAddresses[DexAddressType.VAULT][_index];
+    }
+
     // Return fee options
     function getFeeParams() override external view responsible returns (FeeParams) {
         return {
@@ -370,7 +373,7 @@ abstract contract DexPairBase is
     function liquidityTokenRootDeployed(
         address _lpRootAddress,
         address _remainingGasTo
-    ) override external onlyVault {
+    ) override external onlyRoot {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         _typeToRootAddresses[DexAddressType.LP].push(_lpRootAddress);
@@ -393,7 +396,7 @@ abstract contract DexPairBase is
     function liquidityTokenRootNotDeployed(
         address,
         address _remainingGasTo
-    ) override external onlyVault {
+    ) override external onlyRoot {
         // Destroy pair if it's not active
         if (!_active) {
             _remainingGasTo.transfer({
@@ -581,7 +584,7 @@ abstract contract DexPairBase is
                     value: DexGas.SEND_EXPECTED_WALLET_VALUE,
                     flag: MsgFlag.SENDER_PAYS_FEES,
                     callback: DexPairBase.onVaultTokenWallet
-                }(_typeToRootAddresses[DexAddressType.VAULT][0]);
+                }(_expectedTokenVaultAddress(_tokenRoot));
         }
     }
 
@@ -647,13 +650,14 @@ abstract contract DexPairBase is
             // Set initial params for fees
             _fee = FeeParams(1000000, 3000, 0, 0, address(0), emptyMap, emptyMap);
 
-            // Deploy LP token for pair
-            IDexVault(_typeToRootAddresses[DexAddressType.VAULT][0])
-                .addLiquidityToken{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-                (
-                    address(this),
-                    _typeToRootAddresses[DexAddressType.RESERVE][0],
-                    _typeToRootAddresses[DexAddressType.RESERVE][1],
+            // Deploy LP TokenRoot and vault for each token
+            IDexRoot(_root)
+                .deployLpToken{
+                    value: DexGas.DEPLOY_LP_TOKEN_ROOT_VALUE + DexGas.DEPLOY_VAULT_MIN_VALUE + DexGas.CREATE_TOKEN_VALUE,
+                    flag: MsgFlag.SENDER_PAYS_FEES,
+                    bounce: false
+                }(
+                    _typeToRootAddresses[DexAddressType.RESERVE],
                     remainingGasTo
                 );
 

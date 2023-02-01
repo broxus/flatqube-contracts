@@ -7,6 +7,7 @@ pragma AbiHeader pubkey;
 import "../libraries/DexPlatformTypes.sol";
 
 import "../DexPlatform.sol";
+import "../DexVaultLpTokenPendingV2.sol";
 
 abstract contract DexContractBase  {
     TvmCell public platform_code;
@@ -131,6 +132,25 @@ abstract contract DexContractBase  {
             },
             pubkey: 0,
             code: platform_code
+        });
+    }
+
+    function _buildLpTokenPendingInitData(
+        uint32 _nonce,
+        address _pool,
+        address[] _roots,
+        TvmCell _code
+    ) internal pure returns (TvmCell) {
+        return tvm.buildStateInit({
+            contr: DexVaultLpTokenPendingV2,
+            varInit: {
+                _nonce: _nonce,
+                vault: address(this),
+                pool: _pool,
+                roots: _roots
+            },
+            pubkey: 0,
+            code: _code
         });
     }
 }

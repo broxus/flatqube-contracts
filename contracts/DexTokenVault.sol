@@ -16,6 +16,7 @@ import "./interfaces/IDexBasePool.sol";
 import "./interfaces/IDexTokenVault.sol";
 import "./interfaces/IUpgradableByRequest.sol";
 import "./interfaces/IResetGas.sol";
+import "./interfaces/IDexVault.sol";
 
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
@@ -27,8 +28,8 @@ contract DexTokenVault is
     IUpgradableByRequest
 {
     address private _root;
+    address private _vault;
     uint32 private _version;
-    TvmCell private _platformCode;
     address private _tokenRoot;
     address private _tokenWallet;
     address private _firstCallbackRecipient;
@@ -56,8 +57,8 @@ contract DexTokenVault is
 
     function redeploy(
         TvmCell /* _code */,
-        uint32 _vaultCodeVersionInRoot,
-        address _callbackRecipient,
+        uint32 /* _vaultCodeVersionInRoot */,
+        address /* _callbackRecipient */,
         address _remainingGasTo
     )
         external
@@ -67,17 +68,11 @@ contract DexTokenVault is
     {
         tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
 
-        IDexBasePool(_callbackRecipient)
-            .onSuccessVaultDeploy{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED,
-                bounce: false
-            }(
-                _tokenRoot,
-                _tokenWallet,
-                _vaultCodeVersionInRoot,
-                _remainingGasTo
-            );
+        _remainingGasTo.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED,
+            bounce: false
+        });
     }
 
     function getDexRoot() external view override responsible returns (address) {
@@ -101,7 +96,7 @@ contract DexTokenVault is
             value: 0,
             flag: MsgFlag.REMAINING_GAS,
             bounce: false
-        } _platformCode;
+        } platform_code;
     }
 
     function getTokenRoot() external view override responsible returns (address) {
@@ -176,7 +171,7 @@ contract DexTokenVault is
         address[] _roots,
         uint32 /* _pairVersion */,
         address _remainingGasTo
-    ) external override onlyPool(_roots) {
+    ) external override {
         tvm.rawReserve(
             math.max(
                 DexGas.VAULT_INITIAL_BALANCE,
@@ -204,6 +199,35 @@ contract DexTokenVault is
                 _notifyReceiver,
                 _payload
             );
+    }
+
+    function referralFeeTransfer(
+        uint128 _amount,
+        address _referrer,
+        address _referral,
+        address[] _roots
+    ) external override onlyPool(_roots) {
+        tvm.rawReserve(
+            math.max(
+                DexGas.VAULT_INITIAL_BALANCE,
+                address(this).balance - msg.value
+            ),
+            2
+        );
+
+        emit ReferralFeeTransfer({
+            amount: _amount,
+            roots: _roots,
+            referrer: _referrer,
+            referral: _referral
+        });
+
+        IDexVault(_vault)
+            .referralFeeTransfer{
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED,
+                bounce: false
+            }(_amount, _tokenRoot, _tokenWallet, _referrer, _referral, _roots);
     }
 
     function resetGas(address _remainingGasTo)
@@ -241,7 +265,7 @@ contract DexTokenVault is
         builder.store(_newVersion);
         builder.store(_remainingGasTo);
 
-        builder.store(_platformCode);
+        builder.store(platform_code);
         builder.store(params);
 
         tvm.setcode(_newCode);
@@ -251,13 +275,14 @@ contract DexTokenVault is
     }
 
     function onCodeUpgrade(TvmCell _data) private {
+        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
         tvm.resetStorage();
 
         TvmSlice slice = _data.toSlice();
 
         (
             address root,
-            address firstCallbackRecipient,
+            address vault,
             uint32 previousVersion
         ) = slice.decode(
             address,
@@ -266,7 +291,7 @@ contract DexTokenVault is
         );
 
         _root = root;
-        _firstCallbackRecipient = firstCallbackRecipient;
+        _vault = vault;
 
         if (previousVersion == 0) {
             _onPlatformUpgrade(_data);
@@ -294,7 +319,7 @@ contract DexTokenVault is
 
         _version = currentVersion;
         _firstCallbackRemainingGasTo = remainingGasTo;
-        _platformCode = slice.loadRef();
+        platform_code = slice.loadRef();
         _tokenRoot = slice.loadRefAsSlice().decode(address);
 
         emit TokenVaultCodeUpgraded({
@@ -302,7 +327,7 @@ contract DexTokenVault is
             previousVersion: 0
         });
 
-        _getTokenWallet();
+        _deployTokenWallet();
 
         remainingGasTo.transfer({
             value: 0,
@@ -329,7 +354,7 @@ contract DexTokenVault is
         );
 
         _version = currentVersion;
-        _platformCode = slice.loadRef();
+        platform_code = slice.loadRef();
         (
             _tokenRoot,
             _tokenWallet,
@@ -352,13 +377,13 @@ contract DexTokenVault is
         });
     }
 
-    function _getTokenWallet() private {
+    function _deployTokenWallet() private {
         ITokenRoot(_tokenRoot)
-            .walletOf{
-                value: DexGas.SEND_EXPECTED_WALLET_VALUE,
+            .deployWallet{
+                value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexTokenVault.onTokenWallet
-            }(address(this));
+            }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
     }
 
     function onTokenWallet(address _wallet) external onlyTokenRoot {
@@ -366,16 +391,10 @@ contract DexTokenVault is
 
         _tokenWallet = _wallet;
 
-        IDexBasePool(_firstCallbackRecipient)
-            .onSuccessVaultDeploy{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED,
-                bounce: false
-            }(
-                _tokenRoot,
-                _tokenWallet,
-                _version,
-                _firstCallbackRemainingGasTo
-            );
+        _firstCallbackRemainingGasTo.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED,
+            bounce: false
+        });
     }
 }

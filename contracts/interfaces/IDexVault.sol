@@ -100,6 +100,7 @@ interface IDexVault {
 
     function referralFeeTransfer(
         uint128 _amount,
+        address _tokenRoot,
         address _vaultWallet,
         address _referrer,
         address _referral,

@@ -490,16 +490,16 @@ contract DexStablePair is
                         }
 
                         if (referrer_fee > 0) {
-                            IDexVault(vault).referralFeeTransfer{
-                                value: referrer_value,
-                                flag: MsgFlag.SENDER_PAYS_FEES
-                            }(
-                                referrer_fee,
-                                tokenData[i].vaultWallet,
-                                referrer,
-                                original_gas_to,
-                                _tokenRoots()
-                            );
+//                            IDexVault(vault).referralFeeTransfer{
+//                                value: referrer_value,
+//                                flag: MsgFlag.SENDER_PAYS_FEES
+//                            }(
+//                                referrer_fee,
+//                                tokenData[i].vaultWallet,
+//                                referrer,
+//                                original_gas_to,
+//                                _tokenRoots()
+//                            );
 
                             emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
                         }
@@ -625,16 +625,16 @@ contract DexStablePair is
                         }
 
                         if (referrer_fee > 0) {
-                            IDexVault(vault).referralFeeTransfer{
-                                value: referrer_value,
-                                flag: MsgFlag.SENDER_PAYS_FEES
-                            }(
-                                referrer_fee,
-                                tokenData[i].vaultWallet,
-                                referrer,
-                                original_gas_to,
-                                _tokenRoots()
-                            );
+//                            IDexVault(vault).referralFeeTransfer{
+//                                value: referrer_value,
+//                                flag: MsgFlag.SENDER_PAYS_FEES
+//                            }(
+//                                referrer_fee,
+//                                tokenData[i].vaultWallet,
+//                                referrer,
+//                                original_gas_to,
+//                                _tokenRoots()
+//                            );
 
                             emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
                         }
@@ -1191,16 +1191,16 @@ contract DexStablePair is
                 }
 
                 if (referrer_fee > 0) {
-                    IDexVault(vault).referralFeeTransfer{
-                        value: referrer_value,
-                        flag: MsgFlag.SENDER_PAYS_FEES
-                    }(
-                        referrer_fee,
-                        tokenData[i].vaultWallet,
-                        referrer,
-                        original_gas_to,
-                        _tokenRoots()
-                    );
+//                    IDexVault(vault).referralFeeTransfer{
+//                        value: referrer_value,
+//                        flag: MsgFlag.SENDER_PAYS_FEES
+//                    }(
+//                        referrer_fee,
+//                        tokenData[i].vaultWallet,
+//                        referrer,
+//                        original_gas_to,
+//                        _tokenRoots()
+//                    );
 
                     emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
                 }
@@ -2155,16 +2155,16 @@ contract DexStablePair is
             if (referrer_fees[i] > 0) {
                 is_zero_referrer_fees = false;
 
-                IDexVault(vault).referralFeeTransfer{
-                    value: referrer_value,
-                    flag: MsgFlag.SENDER_PAYS_FEES
-                }(
-                    referrer_fees[i],
-                    tokenData[i].vaultWallet,
-                    referrer,
-                    original_gas_to,
-                    _tokenRoots()
-                );
+//                IDexVault(vault).referralFeeTransfer{
+//                    value: referrer_value,
+//                    flag: MsgFlag.SENDER_PAYS_FEES
+//                }(
+//                    referrer_fees[i],
+//                    tokenData[i].vaultWallet,
+//                    referrer,
+//                    original_gas_to,
+//                    _tokenRoots()
+//                );
             }
         }
 

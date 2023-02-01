@@ -56,12 +56,12 @@ interface IDexTokenVault {
         address _remainingGasTo
     ) external;
 
-//    function referralFeeTransfer(
-//        uint128 _amount,
-//        address _referrer,
-//        address _referral,
-//        address[] _roots
-//    ) external;
+    function referralFeeTransfer(
+        uint128 _amount,
+        address _referrer,
+        address _referral,
+        address[] _roots
+    ) external;
 //
 //    function burn(
 //        address[] _roots,

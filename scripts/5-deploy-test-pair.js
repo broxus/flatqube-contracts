@@ -56,7 +56,7 @@ async function main() {
         right_root: tokenBar.address,
         send_gas_to: account2.address,
       },
-      value: locklift.utils.convertCrystal(10, 'nano'),
+      value: locklift.utils.convertCrystal(15, 'nano'),
       keyPair: keyPairs[1]
     });
 
@@ -113,27 +113,42 @@ async function main() {
       }
     }));
 
+    const FooTokenVault = await dexRoot.call({
+      method: 'getExpectedTokenVaultAddress',
+      params: { _tokenRoot: tokenFoo.address },
+    });
+
     const FooVaultWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
     FooVaultWallet.setAddress(await tokenFoo.call({
       method: "walletOf",
       params: {
-        walletOwner: dexVault.address,
+        walletOwner: FooTokenVault,
       }
     }));
+
+    const BarTokenVault = await dexRoot.call({
+      method: 'getExpectedTokenVaultAddress',
+      params: { _tokenRoot: tokenBar.address },
+    });
 
     const BarVaultWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
     BarVaultWallet.setAddress(await tokenBar.call({
       method: "walletOf",
       params: {
-        walletOwner: dexVault.address,
+        walletOwner: BarTokenVault,
       }
     }));
+
+    const LpTokenVault = await dexRoot.call({
+      method: 'getExpectedTokenVaultAddress',
+      params: { _tokenRoot: FooBarLpRoot.address },
+    });
 
     const FooBarLpVaultWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
     FooBarLpVaultWallet.setAddress(await FooBarLpRoot.call({
       method: "walletOf",
       params: {
-        walletOwner: dexVault.address,
+        walletOwner: LpTokenVault,
       }
     }));
 

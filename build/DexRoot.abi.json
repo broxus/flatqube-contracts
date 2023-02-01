@@ -88,6 +88,33 @@
 			]
 		},
 		{
+			"name": "getLpTokenPendingCode",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "getLpTokenPendingVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "getTokenFactory",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
 			"name": "isActive",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
@@ -165,6 +192,14 @@
 			]
 		},
 		{
+			"name": "setVaultOnce",
+			"inputs": [
+				{"name":"new_vault","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "setActive",
 			"inputs": [
 				{"name":"new_active","type":"bool"}
@@ -198,6 +233,15 @@
 		{
 			"name": "acceptOwner",
 			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setTokenFactory",
+			"inputs": [
+				{"name":"_newTokenFactory","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -246,6 +290,15 @@
 			]
 		},
 		{
+			"name": "installOrUpdateLpTokenPendingCode",
+			"inputs": [
+				{"name":"_newCode","type":"cell"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "upgrade",
 			"inputs": [
 				{"name":"code","type":"cell"}
@@ -265,6 +318,40 @@
 			"name": "deployVault",
 			"inputs": [
 				{"name":"_tokenRoot","type":"address"},
+				{"name":"_callbackRecipient","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "deployLpToken",
+			"inputs": [
+				{"name":"_tokenRoots","type":"address[]"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onLiquidityTokenDeployed",
+			"inputs": [
+				{"name":"_nonce","type":"uint32"},
+				{"name":"_pair","type":"address"},
+				{"name":"_roots","type":"address[]"},
+				{"name":"_lpRoot","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onLiquidityTokenNotDeployed",
+			"inputs": [
+				{"name":"_nonce","type":"uint32"},
+				{"name":"_pair","type":"address"},
+				{"name":"_roots","type":"address[]"},
+				{"name":"_lpRoot","type":"address"},
 				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
@@ -540,6 +627,10 @@
 		{"name":"_poolVersions","type":"map(uint8,uint32)"},
 		{"name":"_vaultCode","type":"cell"},
 		{"name":"_vaultVersion","type":"uint32"},
+		{"name":"_lpTokenPendingCode","type":"cell"},
+		{"name":"_lpTokenPendingVersion","type":"uint32"},
+		{"name":"_vault","type":"address"},
+		{"name":"_tokenFactory","type":"address"},
 		{"name":"_active","type":"bool"},
 		{"name":"_owner","type":"address"},
 		{"name":"_pendingOwner","type":"address"},

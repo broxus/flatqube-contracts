@@ -20,6 +20,7 @@ import "./interfaces/IUpgradable.sol";
 import "./interfaces/IResetGas.sol";
 import "./interfaces/IDexPairOperationCallback.sol";
 import "./interfaces/IReferralProgramCallbacks.sol";
+import "./interfaces/IDexTokenVault.sol";
 
 import "./structures/INextExchangeData.sol";
 
@@ -742,11 +743,12 @@ contract DexVault is
 
     function referralFeeTransfer(
         uint128 _amount,
+        address _tokenRoot,
         address _vaultWallet,
         address _referrer,
         address _referral,
         address[] _roots
-    ) external override onlyPool(_roots) {
+    ) external override onlyTokenVault(_tokenRoot) {
         tvm.rawReserve(
             math.max(
                 DexGas.VAULT_INITIAL_BALANCE,
@@ -768,19 +770,23 @@ contract DexVault is
                 value: DexGas.REFERRAL_PROGRAM_CALLBACK,
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 bounce: false
-        }(_referral, _referrer, _referral);
+            }(_referral, _referrer, _referral);
 
         TvmCell payload = abi.encode(_projectId, _referrer, _referral);
 
-        ITokenWallet(_vaultWallet)
-            .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (
+        IDexTokenVault(msg.sender)
+            .transfer{
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED
+            }(
                 _amount,
                 _refSystemAddress,
                 DexGas.DEPLOY_REFERRER_FEE_EMPTY_WALLET,
-                _referral,
                 true,
-                payload
+                payload,
+                _roots,
+                0,
+                _referral
             );
     }
 }

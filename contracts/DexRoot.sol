@@ -15,6 +15,8 @@ import "./interfaces/IDexBasePool.sol";
 import "./interfaces/IDexStablePair.sol";
 import "./interfaces/IDexConstantProductPair.sol";
 import "./interfaces/IResetGas.sol";
+import "./interfaces/ILiquidityTokenRootDeployedCallback.sol";
+import "./interfaces/ILiquidityTokenRootNotDeployedCallback.sol";
 
 import "./libraries/DexPlatformTypes.sol";
 import "./libraries/DexErrors.sol";
@@ -38,13 +40,21 @@ contract DexRoot is
 
     TvmCell private _accountCode;
     uint32 private _accountVersion;
+
     mapping(uint8 => TvmCell) private _pairCodes;
     mapping(uint8 => uint32) private _pairVersions;
+
     mapping(uint8 => TvmCell) private _poolCodes;
     mapping(uint8 => uint32) private _poolVersions;
+
     TvmCell private _vaultCode;
     uint32 private _vaultVersion;
 
+    TvmCell private _lpTokenPendingCode;
+    uint32 private _lpTokenPendingVersion;
+
+    address private _vault;
+    address private _tokenFactory;
     bool private _active;
 
     address private _owner;
@@ -169,6 +179,29 @@ contract DexRoot is
         } _vaultVersion;
     }
 
+    function getLpTokenPendingCode() override external view responsible returns (TvmCell) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _lpTokenPendingCode;
+    }
+
+    function getLpTokenPendingVersion() override external view responsible returns (uint32) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _lpTokenPendingVersion;
+    }
+
+    function getTokenFactory() override external view responsible returns (address) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _tokenFactory;
+    }
 
     function isActive() override external view responsible returns (bool) {
         return {
@@ -240,6 +273,18 @@ contract DexRoot is
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // SETTERS
 
+    function setVaultOnce(address new_vault) external onlyOwner {
+        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
+
+        _vault = new_vault;
+
+        _owner.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
+    }
+
     function setActive(bool new_active) external onlyOwner {
         tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
 
@@ -304,6 +349,21 @@ contract DexRoot is
 
         _owner = _pendingOwner;
         _pendingOwner = address.makeAddrStd(0, 0);
+    }
+
+    function setTokenFactory(
+        address _newTokenFactory,
+        address _remainingGasTo
+    ) external override onlyOwner {
+        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
+
+        _tokenFactory = _newTokenFactory;
+
+        _remainingGasTo.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -394,6 +454,24 @@ contract DexRoot is
         });
     }
 
+    function installOrUpdateLpTokenPendingCode(
+        TvmCell _newCode,
+        address _remainingGasTo
+    ) external override onlyManagerOrOwner {
+        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
+
+        require(!_newCode.toSlice().empty(), DexErrors.VAULT_CODE_EMPTY);
+
+        _lpTokenPendingCode = _newCode;
+        _lpTokenPendingVersion += 1;
+
+        _remainingGasTo.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // INTERNAL
 
@@ -469,6 +547,7 @@ contract DexRoot is
 
     function deployVault(
         address _tokenRoot,
+        address _callbackRecipient,
         address _remainingGasTo
     ) override external onlyActive {
         require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
@@ -482,6 +561,24 @@ contract DexRoot is
             2
         );
 
+        _deployVaultInternal(
+            _tokenRoot,
+            _callbackRecipient,
+            _remainingGasTo
+        );
+
+        _remainingGasTo.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
+    }
+
+    function _deployVaultInternal(
+        address _tokenRoot,
+        address _callbackRecipient,
+        address _remainingGasTo
+    ) internal {
         TvmCell data = _buildInitData(
             DexPlatformTypes.Vault,
             _buildTokenVaultParams(_tokenRoot)
@@ -494,7 +591,7 @@ contract DexRoot is
             }(
                 _vaultCode,
                 _vaultVersion,
-                msg.sender,
+                _vault,
                 _remainingGasTo
             );
 
@@ -504,12 +601,65 @@ contract DexRoot is
             version: _vaultVersion,
             codeHash: tvm.hash(_vaultCode)
         });
+    }
 
-        _remainingGasTo.transfer({
-            value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
-            bounce: false
-        });
+    function deployLpToken(
+        address[] _tokenRoots,
+        address _remainingGasTo
+    ) override external onlyPool(_tokenRoots) {
+        require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+
+        tvm.rawReserve(
+            math.max(
+                DexGas.ROOT_INITIAL_BALANCE,
+                address(this).balance - msg.value
+            ),
+            2
+        );
+
+        TvmCell data = _buildLpTokenPendingInitData(
+            now,
+            msg.sender,
+            _tokenRoots,
+            _lpTokenPendingCode
+        );
+
+        new DexVaultLpTokenPendingV2{
+                stateInit: data,
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED
+            }(
+                _tokenFactory,
+                msg.value,
+                _remainingGasTo
+            );
+    }
+
+    function onLiquidityTokenDeployed(
+        uint32 _nonce,
+        address _pair,
+        address[] _roots,
+        address _lpRoot,
+        address _remainingGasTo
+    ) external override {
+        _deployVaultInternal(_lpRoot, address(this), _remainingGasTo);
+
+        ILiquidityTokenRootDeployedCallback(_pair)
+            .liquidityTokenRootDeployed{
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED,
+                bounce: false
+            }(_lpRoot, _remainingGasTo);
+    }
+
+    function onLiquidityTokenNotDeployed(
+        uint32 _nonce,
+        address _pair,
+        address[] _roots,
+        address _lpRoot,
+        address _remainingGasTo
+    ) external override {
+
     }
 
     function upgradeVault(
@@ -697,6 +847,9 @@ contract DexRoot is
             ),
             2
         );
+
+        _deployVaultInternal(left_root, address(this), send_gas_to);
+        _deployVaultInternal(right_root, address(this), send_gas_to);
 
         new DexPlatform{
             stateInit: _buildInitData(

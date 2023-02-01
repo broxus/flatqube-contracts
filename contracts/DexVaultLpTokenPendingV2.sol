@@ -1,21 +1,25 @@
 pragma ton-solidity >= 0.62.0;
 
-import "./libraries/DexErrors.sol";
-import "./libraries/DexGas.sol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
-
-import "./interfaces/ITokenFactory.sol";
-import "./interfaces/IDexVault.sol";
-import "./interfaces/ITokenRootDeployedCallback.sol";
 
 import "tip3/contracts/interfaces/ITokenRoot.sol";
 import "tip3/contracts/interfaces/ITransferableOwnership.sol";
 import "tip3/contracts/interfaces/ITransferTokenRootOwnershipCallback.sol";
 import "tip3/contracts/structures/ICallbackParamsStructure.sol";
 
+import "./interfaces/ITokenFactory.sol";
+import "./interfaces/ITokenRootDeployedCallback.sol";
 
-contract DexVaultLpTokenPendingV2 is ITokenRootDeployedCallback, ITransferTokenRootOwnershipCallback {
+import "./libraries/DexErrors.sol";
+import "./libraries/DexGas.sol";
 
+import "./DexPlatform.sol";
+import "./interfaces/IDexRoot.sol";
+
+contract DexVaultLpTokenPendingV2 is
+    ITokenRootDeployedCallback,
+    ITransferTokenRootOwnershipCallback
+{
     string LP_TOKEN_SYMBOL_PREFIX = "FlatQube-LP-";
     string LP_TOKEN_SYMBOL_SEPARATOR = "-";
     uint8 LP_TOKEN_DECIMALS = 9;
@@ -43,6 +47,8 @@ contract DexVaultLpTokenPendingV2 is ITokenRootDeployedCallback, ITransferTokenR
 
     uint8 N_COINS;
 
+    address private _root;
+
     modifier onlyVault {
         require(msg.sender == vault, DexErrors.NOT_VAULT);
         _;
@@ -58,10 +64,11 @@ contract DexVaultLpTokenPendingV2 is ITokenRootDeployedCallback, ITransferTokenR
         _;
     }
 
-    constructor(address token_factory_, uint128 value_, address send_gas_to_) public onlyVault {
+    constructor(address token_factory_, uint128 value_, address send_gas_to_) public {
         token_factory = token_factory_;
         send_gas_to = send_gas_to_;
         deploy_value = value_;
+        _root = msg.sender;
 
         N_COINS = uint8(roots.length);
 
@@ -132,20 +139,32 @@ contract DexVaultLpTokenPendingV2 is ITokenRootDeployedCallback, ITransferTokenR
         pending_messages--;
 
         if (oldOwner == address(this) && newOwner == pool) {
-            IDexVault(vault).onLiquidityTokenDeployed{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO
-            }(_nonce, pool, roots, lp_token_root, send_gas_to);
+            roots.push(lp_token_root);
+
+            IDexRoot(_root)
+                .onLiquidityTokenDeployed{
+                    value: 0,
+                    flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO,
+                    bounce: false
+                }(_nonce, pool, roots, lp_token_root, send_gas_to);
         } else {
             _onLiquidityTokenNotDeployed();
         }
     }
 
     function _onLiquidityTokenNotDeployed() private inline view {
-        IDexVault(vault).onLiquidityTokenNotDeployed{
-            value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO
-        }(_nonce, pool, roots, lp_token_root, send_gas_to);
+        IDexRoot(_root)
+            .onLiquidityTokenNotDeployed{
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO,
+                bounce: false
+            }(
+                _nonce,
+                pool,
+                roots,
+                lp_token_root,
+                send_gas_to
+            );
     }
 
     function createLpTokenAndWallets() private {
