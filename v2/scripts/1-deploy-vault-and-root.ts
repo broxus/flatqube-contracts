@@ -40,14 +40,14 @@ async function main() {
   const DexStablePool = await locklift.factory.getContractArtifacts('DexStablePool');
   const DexVaultLpTokenPending = await locklift.factory.getContractArtifacts('DexVaultLpTokenPending');
   const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts('DexVaultLpTokenPendingV2');
+  const DexTokenVault = await locklift.factory.getContractArtifacts('DexTokenVault');
 
   console.log(`Deploying DexRoot...`);
   const {contract: dexRoot} = await locklift.factory.deployContract({
     contract: options.root_contract_name,
     //@ts-ignore
     constructorParams: {
-      initial_owner: account.address,
-      initial_vault: zeroAddress
+      initial_owner: account.address
     },
     //@ts-ignore
     initParams: {
@@ -61,13 +61,10 @@ async function main() {
   console.log(`Deploying DexVault...`);
   const {contract: dexVault} = await locklift.factory.deployContract({
     contract: options.vault_contract_name,
-    //@ts-ignore
     constructorParams: {
       owner_: account.address,
-      token_factory_: migration.getAddress('TokenFactory'),
       root_: dexRoot.address
     },
-    //@ts-ignore
     initParams: {
       _nonce: getRandomNonce(),
     },
@@ -77,40 +74,50 @@ async function main() {
   console.log(`DexVault address: ${dexVault.address}`);
 
   console.log(`DexVault: installing Platform code...`);
-  //@ts-ignore
   let tx = await dexVault.methods.installPlatformOnce({code: DexPlatform.code}).send({
     from: account.address,
     amount: toNano(2)
   });
   displayTx(tx);
 
-  if (options.vault_contract_name === 'DexVaultPrev') {
-    console.log(`DexVault: installing VaultLpTokenPending code...`);
-    //@ts-ignore
-    tx = await dexVault.methods.installOrUpdateLpTokenPendingCode({code: DexVaultLpTokenPending.code}).send({
-      from: account.address,
-      amount: toNano(2)
-    });
-  } else {
-    console.log(`DexVault: installing VaultLpTokenPendingV2 code...`);
-    //@ts-ignore
-    tx = await dexVault.methods.installOrUpdateLpTokenPendingCode({code: DexVaultLpTokenPendingV2.code}).send({
-      from: account.address,
-      amount: toNano(2)
-    });
-  }
-  displayTx(tx);
-
   console.log(`DexRoot: installing vault address...`);
-  //@ts-ignore
   tx = await dexRoot.methods.setVaultOnce({new_vault: dexVault.address}).send({
     from: account.address,
     amount: toNano(2)
   });
   displayTx(tx);
 
+  console.log('DexRoot: installing vault code...');
+  tx = await dexRoot.methods.installOrUpdateVaultCode({
+    _newCode: DexTokenVault.code,
+    _remainingGasTo: account.address
+  }).send({
+    from: account.address,
+    amount: toNano(2)
+  });
+  displayTx(tx);
+
+  console.log('DexRoot: installing lp pending code...');
+  tx = await dexRoot.methods.installOrUpdateLpTokenPendingCode({
+    _newCode: DexVaultLpTokenPendingV2.code,
+    _remainingGasTo: account.address,
+  }).send({
+    from: account.address,
+    amount: toNano(2)
+  });
+  displayTx(tx);
+
+  console.log('DexRoot: set token factory...');
+  tx = await dexRoot.methods.setTokenFactory({
+    _newTokenFactory: migration.getAddress('TokenFactory'),
+    _remainingGasTo: account.address,
+  }).send({
+    from: account.address,
+    amount: toNano(2)
+  });
+  displayTx(tx);
+
   console.log(`DexRoot: installing Platform code...`);
-  //@ts-ignore
   tx = await dexRoot.methods.installPlatformOnce({code: DexPlatform.code}).send({
     from: account.address,
     amount: toNano(2)
@@ -118,7 +125,6 @@ async function main() {
   displayTx(tx);
 
   console.log(`DexRoot: installing DexAccount code...`);
-  //@ts-ignore
   tx = await dexRoot.methods.installOrUpdateAccountCode({code: DexAccount.code}).send({
     from: account.address,
     amount: toNano(2)
@@ -126,7 +132,6 @@ async function main() {
   displayTx(tx);
 
   console.log(`DexRoot: installing DexPair CONSTANT_PRODUCT code...`);
-  //@ts-ignore
   tx = await dexRoot.methods.installOrUpdatePairCode({code: DexPair.code, pool_type: 1}).send({
     from: account.address,
     amount: toNano(2)
@@ -148,7 +153,6 @@ async function main() {
   // displayTx(tx);
 
   console.log(`DexRoot: set Dex is active...`);
-  //@ts-ignore
   tx = await dexRoot.methods.setActive( {new_active: true}).send({
     from: account.address,
     amount: toNano(2)

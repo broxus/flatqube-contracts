@@ -113,7 +113,7 @@ const loadPoolData = async (pool, contractName: string) => {
     };
 
     data.root = (await pool.methods.getRoot({answerId: 0}).call()).dex_root.toString();
-    data.vault = (await pool.methods.getVault({answerId: 0}).call()).dex_vault.toString();
+    // data.vault = (await pool.methods.getVault({answerId: 0}).call()).dex_vault.toString();
 
     data.current_version = (await pool.methods.getVersion({answerId: 0}).call()).version;
     data.platform_code = (await pool.methods.platform_code().call()).platform_code;
@@ -128,9 +128,9 @@ const loadPoolData = async (pool, contractName: string) => {
     data.lp_wallet = token_wallets.lp.toString();
     data.token_wallets = token_wallets.token_wallets.map(wallet => wallet.toString());
 
-    const vault_token_wallets = await pool.methods.getVaultWallets({answerId: 0}).call();
-    data.lp_vault_wallet = token_wallets.lp.toString();
-    data.vault_wallets = vault_token_wallets.token_vault_wallets.map(wallet => wallet.toString());
+    // const vault_token_wallets = await pool.methods.getVaultWallets({answerId: 0}).call();
+    // data.lp_vault_wallet = token_wallets.lp.toString();
+    // data.vault_wallets = vault_token_wallets.token_vault_wallets.map(wallet => wallet.toString());
 
     const balances = (await pool.methods.getBalances({answerId: 0}).call()).value0;
     data.lp_supply = balances.lp_supply.toString();
@@ -211,9 +211,9 @@ describe('Test Dex Pool contract upgrade', async function () {
             expect(newPoolData.root)
                 .to
                 .equal(oldPoolData.root, 'New root value incorrect');
-            expect(newPoolData.vault)
-                .to
-                .equal(oldPoolData.vault, 'New vault value incorrect');
+            // expect(newPoolData.vault)
+            //     .to
+            //     .equal(oldPoolData.vault, 'New vault value incorrect');
             expect(newPoolData.platform_code)
                 .to
                 .equal(oldPoolData.platform_code, 'New platform_code value incorrect');
@@ -242,11 +242,11 @@ describe('Test Dex Pool contract upgrade', async function () {
                     .to
                     .equal(oldPoolData.token_wallets[i], `New ${tokens[options.roots[i]].symbol} wallet value incorrect`);
             }
-            for (let i = 0; i < N_COINS; i++) {
-                expect(newPoolData.vault_wallets[i])
-                    .to
-                    .equal(oldPoolData.vault_wallets[i], `New ${tokens[options.roots[i]].symbol} vault wallet value incorrect`);
-            }
+            // for (let i = 0; i < N_COINS; i++) {
+            //     expect(newPoolData.vault_wallets[i])
+            //         .to
+            //         .equal(oldPoolData.vault_wallets[i], `New ${tokens[options.roots[i]].symbol} vault wallet value incorrect`);
+            // }
             expect(newPoolData.lp_supply)
                 .to
                 .equal(oldPoolData.lp_supply, 'New lp_supply value incorrect');

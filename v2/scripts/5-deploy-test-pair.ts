@@ -64,7 +64,7 @@ async function main() {
             }
         ).send({
             from: account2.address,
-            amount: toNano(10)
+            amount: toNano(15)
         });
 
         displayTx(tx);
@@ -81,7 +81,6 @@ async function main() {
         const dexPairFooBar = await locklift.factory.getDeployedContract(options.contract_name, dexPairFooBarAddress);
         migration.store(dexPairFooBar, 'DexPool' + pair.left + pair.right);
 
-        // @ts-ignore
         const version = (await dexPairFooBar.methods.getVersion({answerId: 0}).call()).version;
         console.log(`DexPool${pair.left}${pair.right} version = ${version}`);
 
@@ -89,7 +88,6 @@ async function main() {
         const active = (await dexPairFooBar.methods.isActive({answerId: 0}).call()).value0;
         console.log(`DexPool${pair.left}${pair.right} active = ${active}`);
 
-        // @ts-ignore
         const FooBarLpRoot = await locklift.factory.getDeployedContract('TokenRootUpgradeable', (await dexPairFooBar.methods.getTokenRoots({answerId: 0}).call()).lp);
 
         const FooPairWallet = await locklift.factory.getDeployedContract('TokenWalletUpgradeable',
@@ -113,24 +111,39 @@ async function main() {
             }).call()).value0
         );
 
+        const FooTokenVault = (await dexRoot.methods.getExpectedTokenVaultAddress({
+            answerId: 0,
+            _tokenRoot: tokenFoo.address
+        }).call()).value0;
+
         const FooVaultWallet = await locklift.factory.getDeployedContract('TokenWalletUpgradeable',
             (await tokenFoo.methods.walletOf({
                 answerId: 0,
-                walletOwner: dexVault.address,
+                walletOwner: FooTokenVault.toString(),
             }).call()).value0
         );
+
+        const BarTokenVault = (await dexRoot.methods.getExpectedTokenVaultAddress({
+            answerId: 0,
+            _tokenRoot: tokenBar.address
+        }).call()).value0;
 
         const BarVaultWallet = await locklift.factory.getDeployedContract('TokenWalletUpgradeable',
             (await tokenBar.methods.walletOf({
                 answerId: 0,
-                walletOwner: dexVault.address,
+                walletOwner: BarTokenVault.toString(),
             }).call()).value0
         );
+
+        const FooBarLpTokenVault = (await dexRoot.methods.getExpectedTokenVaultAddress({
+            answerId: 0,
+            _tokenRoot: FooBarLpRoot.address
+        }).call()).value0;
 
         const FooBarLpVaultWallet = await locklift.factory.getDeployedContract('TokenWalletUpgradeable',
             (await FooBarLpRoot.methods.walletOf({
                 answerId: 0,
-                walletOwner: dexVault.address,
+                walletOwner: FooBarLpTokenVault.toString(),
             }).call()).value0
         );
 

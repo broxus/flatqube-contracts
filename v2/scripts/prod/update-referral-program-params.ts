@@ -27,11 +27,13 @@ async function main() {
 
     if (options.project_id !== undefined && options.project_address !== undefined && options.ref_system_address !== undefined) {
         console.log(`Set referral program params:\n -project_id: ${options.project_id}\n -project_address: ${options.project_address}\n -ref_system_address: ${options.ref_system_address}`);
-        const tx = await dexVault.methods.updateReferralProgramParams(
+        const tx = await dexVault.methods.setReferralProgramParams(
             {
-                project_id: options.project_id,
-                project_address: options.project_address,
-                ref_system_address: options.ref_system_address
+                params: {
+                    projectId: options.project_id,
+                    projectAddress: options.project_address,
+                    systemAddress: options.ref_system_address
+                }
             }
         ).send({
             from: account.address,
