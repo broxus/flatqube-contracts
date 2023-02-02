@@ -60,12 +60,31 @@
 			]
 		},
 		{
+			"name": "getVault",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"dex_vault","type":"address"}
+			]
+		},
+		{
+			"name": "getVaultWallets",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"left","type":"address"},
+				{"name":"right","type":"address"}
+			]
+		},
+		{
 			"name": "getFeeParams",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"},{"name":"referrer_threshold","type":"map(address,uint128)"}],"name":"value0","type":"tuple"}
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"value0","type":"tuple"}
 			]
 		},
 		{
@@ -254,7 +273,7 @@
 		{"name":"lp_supply","type":"uint128"},
 		{"name":"left_balance","type":"uint128"},
 		{"name":"right_balance","type":"uint128"},
-		{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"},{"name":"referrer_threshold","type":"map(address,uint128)"}],"name":"fee","type":"tuple"},
+		{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"fee","type":"tuple"},
 		{"name":"_nonce","type":"uint64"},
 		{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_tmp_operations","type":"map(uint64,tuple)"},
 		{"name":"_tmp_send_gas_to","type":"map(uint64,address)"},

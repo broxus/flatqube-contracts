@@ -93,7 +93,7 @@
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"value0","type":"tuple"}
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"value0","type":"tuple"}
 			]
 		},
 		{
@@ -135,7 +135,7 @@
 		{
 			"name": "setFeeParams",
 			"inputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"params","type":"tuple"},
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"params","type":"tuple"},
 				{"name":"send_gas_to","type":"address"}
 			],
 			"outputs": [
@@ -161,40 +161,10 @@
 			]
 		},
 		{
-			"name": "buildExchangePayloadV2",
-			"inputs": [
-				{"name":"_id","type":"uint64"},
-				{"name":"_deployWalletGrams","type":"uint128"},
-				{"name":"_expectedAmount","type":"uint128"},
-				{"name":"_recipient","type":"address"},
-				{"name":"_referrer","type":"address"},
-				{"name":"_successPayload","type":"optional(cell)"},
-				{"name":"_cancelPayload","type":"optional(cell)"}
-			],
-			"outputs": [
-				{"name":"value0","type":"cell"}
-			]
-		},
-		{
 			"name": "buildDepositLiquidityPayload",
 			"inputs": [
 				{"name":"id","type":"uint64"},
 				{"name":"deploy_wallet_grams","type":"uint128"}
-			],
-			"outputs": [
-				{"name":"value0","type":"cell"}
-			]
-		},
-		{
-			"name": "buildDepositLiquidityPayloadV2",
-			"inputs": [
-				{"name":"_id","type":"uint64"},
-				{"name":"_deployWalletGrams","type":"uint128"},
-				{"name":"_expectedAmount","type":"uint128"},
-				{"name":"_recipient","type":"address"},
-				{"name":"_referrer","type":"address"},
-				{"name":"_successPayload","type":"optional(cell)"},
-				{"name":"_cancelPayload","type":"optional(cell)"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
@@ -211,46 +181,12 @@
 			]
 		},
 		{
-			"name": "buildWithdrawLiquidityPayloadV2",
-			"inputs": [
-				{"name":"_id","type":"uint64"},
-				{"name":"_deployWalletGrams","type":"uint128"},
-				{"name":"_expectedLeftAmount","type":"uint128"},
-				{"name":"_expectedRightAmount","type":"uint128"},
-				{"name":"_recipient","type":"address"},
-				{"name":"_referrer","type":"address"},
-				{"name":"_successPayload","type":"optional(cell)"},
-				{"name":"_cancelPayload","type":"optional(cell)"}
-			],
-			"outputs": [
-				{"name":"value0","type":"cell"}
-			]
-		},
-		{
 			"name": "buildCrossPairExchangePayload",
 			"inputs": [
 				{"name":"id","type":"uint64"},
 				{"name":"deploy_wallet_grams","type":"uint128"},
 				{"name":"expected_amount","type":"uint128"},
 				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"steps","type":"tuple[]"}
-			],
-			"outputs": [
-				{"name":"value0","type":"cell"}
-			]
-		},
-		{
-			"name": "buildCrossPairExchangePayloadV2",
-			"inputs": [
-				{"name":"_id","type":"uint64"},
-				{"name":"_deployWalletGrams","type":"uint128"},
-				{"name":"_expectedAmount","type":"uint128"},
-				{"name":"_outcoming","type":"address"},
-				{"name":"_nextStepIndices","type":"uint32[]"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"roots","type":"address[]"},{"name":"outcoming","type":"address"},{"name":"numerator","type":"uint128"},{"name":"nextStepIndices","type":"uint32[]"}],"name":"_steps","type":"tuple[]"},
-				{"name":"_recipient","type":"address"},
-				{"name":"_referrer","type":"address"},
-				{"name":"_successPayload","type":"optional(cell)"},
-				{"name":"_cancelPayload","type":"optional(cell)"}
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
@@ -283,11 +219,12 @@
 			"name": "depositLiquidity",
 			"inputs": [
 				{"name":"call_id","type":"uint64"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_operations","type":"tuple[]"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_expected","type":"tuple"},
+				{"name":"left_amount","type":"uint128"},
+				{"name":"right_amount","type":"uint128"},
+				{"name":"expected_lp_root","type":"address"},
 				{"name":"auto_change","type":"bool"},
 				{"name":"account_owner","type":"address"},
-				{"name":"value5","type":"uint32"},
+				{"name":"value6","type":"uint32"},
 				{"name":"send_gas_to","type":"address"}
 			],
 			"outputs": [
@@ -308,8 +245,8 @@
 			"name": "withdrawLiquidity",
 			"inputs": [
 				{"name":"call_id","type":"uint64"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_operation","type":"tuple"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_expected","type":"tuple[]"},
+				{"name":"lp_amount","type":"uint128"},
+				{"name":"expected_lp_root","type":"address"},
 				{"name":"account_owner","type":"address"},
 				{"name":"value4","type":"uint32"},
 				{"name":"send_gas_to","type":"address"}
@@ -345,10 +282,12 @@
 			"name": "exchange",
 			"inputs": [
 				{"name":"call_id","type":"uint64"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_operation","type":"tuple"},
-				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"_expected","type":"tuple"},
+				{"name":"spent_amount","type":"uint128"},
+				{"name":"spent_token_root","type":"address"},
+				{"name":"receive_token_root","type":"address"},
+				{"name":"expected_amount","type":"uint128"},
 				{"name":"account_owner","type":"address"},
-				{"name":"value4","type":"uint32"},
+				{"name":"value6","type":"uint32"},
 				{"name":"send_gas_to","type":"address"}
 			],
 			"outputs": [
@@ -361,11 +300,9 @@
 				{"name":"value1","type":"uint32"},
 				{"name":"value2","type":"uint8"},
 				{"name":"prev_pool_token_roots","type":"address[]"},
-				{"name":"op","type":"uint8"},
 				{"name":"spent_token_root","type":"address"},
 				{"name":"spent_amount","type":"uint128"},
 				{"name":"sender_address","type":"address"},
-				{"name":"recipient","type":"address"},
 				{"name":"original_gas_to","type":"address"},
 				{"name":"deploy_wallet_grams","type":"uint128"},
 				{"name":"payload","type":"cell"},
@@ -491,7 +428,7 @@
 		{
 			"name": "FeesParamsUpdated",
 			"inputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"params","type":"tuple"}
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"params","type":"tuple"}
 			],
 			"outputs": [
 			]
@@ -557,7 +494,7 @@
 		{"name":"lp_root","type":"address"},
 		{"name":"lp_wallet","type":"address"},
 		{"name":"lp_supply","type":"uint128"},
-		{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"fee","type":"tuple"},
+		{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"fee","type":"tuple"},
 		{"components":[{"name":"value","type":"uint128"},{"name":"precision","type":"uint128"}],"name":"A","type":"tuple"}
 	]
 }
