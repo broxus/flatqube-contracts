@@ -492,20 +492,12 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
     //  \____/_/   \_\_____|_____|____/_/   \_\____|_|\_\____/
 
     function onAcceptTokensMint(
-        address tokenRoot,
-        uint128 amount,
-        address remainingGasTo,
-        TvmCell payload
-    ) override external {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
-        TvmSlice payloadSlice = payload.toSlice();
+        address _mintedTokenRoot,
+        uint128 _amount,
+        address _remainingGasTo,
+        TvmCell _payload
+    ) external override reserve(_getTargetBalanceInternal()) {
+        TvmSlice payloadSlice = _payload.toSlice();
         uint8 op = DexOperationTypes.CROSS_PAIR_EXCHANGE_V2;
 
         TvmCell exchangeData = payloadSlice.loadRef();
@@ -588,7 +580,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
             for (uint32 i = 0; i < nextSteps.length; i++) {
                 NextExchangeData nextStep = nextSteps[i];
 
-                uint128 nextPoolAmount = uint128(math.muldiv(amount, nextStep.numerator, denominator));
+                uint128 nextPoolAmount = uint128(math.muldiv(_amount, nextStep.numerator, denominator));
                 uint128 currentExtraValue = math.muldiv(uint128(nextStep.leaves), extraValue, uint128(allLeaves));
 
                 IDexBasePool(nextStep.poolRoot)
@@ -604,14 +596,14 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
                         roots,
 
                         op,
-                        tokenRoot,
+                        _mintedTokenRoot,
                         nextPoolAmount,
 
                         senderAddress,
                         recipient,
                         referrer,
 
-                        remainingGasTo,
+                        _remainingGasTo,
                         deployWalletGrams,
 
                         nextStep.payload,
@@ -626,7 +618,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
 
             if (isLastStep) {
                 emit PairTransferTokens({
-                    amount: amount,
+                    amount: _amount,
                     poolTokenRoots: roots,
                     recipient: recipient
                 });
@@ -651,10 +643,10 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
             ITokenWallet(_tokenWallet)
                 .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                 (
-                    amount,
+                    _amount,
                     isLastStep ? recipient : senderAddress,
                     deployWalletGrams,
-                    remainingGasTo,
+                    _remainingGasTo,
                     isLastStep ? notifySuccess : notifyCancel,
                     isLastStep
                     ? PairPayload.buildSuccessPayload(op, successPayload, senderAddress)

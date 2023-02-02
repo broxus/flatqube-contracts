@@ -44,7 +44,8 @@ async function main() {
   const dexRoot = await locklift.giver.deployContract({
     contract: DexRoot,
     constructorParams: {
-      initial_owner: account.address
+      initial_owner: account.address,
+      initial_vault: locklift.ton.zero_address
     },
     initParams: {
       _nonce: getRandomNonce(),
@@ -89,7 +90,7 @@ async function main() {
   console.log('DexRoot: installing vault code...');
   tx = await account.runTarget({
     contract: dexRoot,
-    method: 'installOrUpdateVaultCode',
+    method: 'installOrUpdateTokenVaultCode',
     params: {
       _newCode: DexTokenVault.code,
       _remainingGasTo: account.address,

@@ -9,12 +9,10 @@ import "tip3/contracts/structures/ICallbackParamsStructure.sol";
 
 import "./interfaces/ITokenFactory.sol";
 import "./interfaces/ITokenRootDeployedCallback.sol";
+import "./interfaces/IDexRoot.sol";
 
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
-
-import "./DexPlatform.sol";
-import "./interfaces/IDexRoot.sol";
 
 contract DexVaultLpTokenPendingV2 is
     ITokenRootDeployedCallback,
@@ -26,7 +24,7 @@ contract DexVaultLpTokenPendingV2 is
 
     uint32 static _nonce;
 
-    address static vault;
+    address static root;
     address static pool;
     address[] static roots;
     mapping(address => uint8) token_index;
@@ -35,10 +33,8 @@ contract DexVaultLpTokenPendingV2 is
 
     address lp_token_root;
 
-    uint128 deploy_value;
     address send_gas_to;
 
-    bool need_to_terminate;
     uint8 pending_messages;
 
     string[] root_symbols;
@@ -47,10 +43,8 @@ contract DexVaultLpTokenPendingV2 is
 
     uint8 N_COINS;
 
-    address private _root;
-
-    modifier onlyVault {
-        require(msg.sender == vault, DexErrors.NOT_VAULT);
+    modifier onlyRoot {
+        require(msg.sender == root, DexErrors.NOT_ROOT);
         _;
     }
 
@@ -64,11 +58,9 @@ contract DexVaultLpTokenPendingV2 is
         _;
     }
 
-    constructor(address token_factory_, uint128 value_, address send_gas_to_) public {
+    constructor(address token_factory_, address send_gas_to_) public onlyRoot {
         token_factory = token_factory_;
         send_gas_to = send_gas_to_;
-        deploy_value = value_;
-        _root = msg.sender;
 
         N_COINS = uint8(roots.length);
 
@@ -117,7 +109,6 @@ contract DexVaultLpTokenPendingV2 is
         address token_root
     ) override public onlyTokenFactory {
         lp_token_root = token_root;
-        deployEmptyWallet(token_root, vault);
 
         TvmCell empty;
         mapping(address => ICallbackParamsStructure.CallbackParams) callbacks;
@@ -139,21 +130,25 @@ contract DexVaultLpTokenPendingV2 is
         pending_messages--;
 
         if (oldOwner == address(this) && newOwner == pool) {
-            roots.push(lp_token_root);
-
-            IDexRoot(_root)
+            IDexRoot(root)
                 .onLiquidityTokenDeployed{
                     value: 0,
                     flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO,
                     bounce: false
-                }(_nonce, pool, roots, lp_token_root, send_gas_to);
+                }(
+                    _nonce,
+                    pool,
+                    roots,
+                    lp_token_root,
+                    send_gas_to
+                );
         } else {
             _onLiquidityTokenNotDeployed();
         }
     }
 
     function _onLiquidityTokenNotDeployed() private inline view {
-        IDexRoot(_root)
+        IDexRoot(root)
             .onLiquidityTokenNotDeployed{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO,
@@ -170,9 +165,6 @@ contract DexVaultLpTokenPendingV2 is
     function createLpTokenAndWallets() private {
         string lp_token_symbol = lpTokenSymbol(root_symbols);
         deployLpToken(lp_token_symbol, LP_TOKEN_DECIMALS);
-        for (uint8 i = 0; i < N_COINS; i++) {
-            deployEmptyWallet(roots[i], vault);
-        }
     }
 
     function deployLpToken(bytes symbol, uint8 decimals) private {
@@ -193,23 +185,6 @@ contract DexVaultLpTokenPendingV2 is
             false,
             address(0)
         );
-    }
-
-    function deployEmptyWallet(address token_root, address wallet_owner) private {
-        pending_messages++;
-        ITokenRoot(token_root).deployWallet{
-            value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
-            flag: MsgFlag.SENDER_PAYS_FEES,
-            callback: DexVaultLpTokenPendingV2.onDeployWallet
-        }(
-            wallet_owner,                  /*owner_address*/
-            DexGas.DEPLOY_EMPTY_WALLET_GRAMS  /*deploy_grams*/
-        );
-    }
-
-    function onDeployWallet(address) external {
-        require(isSenderExpectedToken() || msg.sender == lp_token_root, DexErrors.NOT_EXPECTED_TOKEN);
-        pending_messages--;
     }
 
     function lpTokenSymbol(string[] symbols) private view returns (string) {

@@ -65,9 +65,11 @@ interface IDexRoot is IFeeParams, IOracleOptions {
 
     function isActive() external view responsible returns (bool);
 
-    function getVaultCode() external view responsible returns (TvmCell);
+    function getVault() external view responsible returns (address);
 
-    function getVaultVersion() external view responsible returns (uint32);
+    function getTokenVaultCode() external view responsible returns (TvmCell);
+
+    function getTokenVaultVersion() external view responsible returns (uint32);
 
     function getExpectedTokenVaultAddress(address _tokenRoot) external view responsible returns (address);
 
@@ -91,7 +93,7 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         address _remainingGasTo
     ) external;
 
-    function installOrUpdateVaultCode(
+    function installOrUpdateTokenVaultCode(
         TvmCell _newCode,
         address _remainingGasTo
     ) external;
@@ -106,18 +108,17 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         address _remainingGasTo
     ) external;
 
-    function deployVault(
-        address _tokenRoot,
-        address _callbackRecipient,
-        address _remainingGasTo
-    ) external;
-
-    function upgradeVault(
+    function deployTokenVault(
         address _tokenRoot,
         address _remainingGasTo
     ) external;
 
-    function upgradeVaults(
+    function upgradeTokenVault(
+        address _tokenRoot,
+        address _remainingGasTo
+    ) external;
+
+    function upgradeTokenVaults(
         address[] _tokenRoots,
         uint32 _offset,
         address _remainingGasTo
@@ -168,18 +169,13 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         address send_gas_to
     ) external;
 
-    struct PoolParam {
+    struct PairUpgradeParam {
         address[] tokenRoots;
         uint8 poolType;
     }
 
-    function upgradePool(
-        PoolParam _param,
-        address _remainingGasTo
-    ) external view;
-
-    function upgradePools(
-        PoolParam[] params,
+    function upgradePairs(
+        PairUpgradeParam[] _params,
         uint32 _offset,
         address _remainingGasTo
     ) external view;

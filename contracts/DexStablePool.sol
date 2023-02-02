@@ -162,7 +162,7 @@ contract DexStablePool is
     function setActive(
         bool _newActive,
         address _remainingGasTo
-    ) external override {
+    ) external override onlyRoot {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         active = _newActive;

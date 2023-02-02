@@ -639,7 +639,7 @@ abstract contract DexPairBase is
             // Deploy LP TokenRoot and vault for each token
             IDexRoot(_root)
                 .deployLpToken{
-                    value: DexGas.DEPLOY_LP_TOKEN_ROOT_VALUE + DexGas.DEPLOY_VAULT_MIN_VALUE + DexGas.CREATE_TOKEN_VALUE,
+                    value: DexGas.DEPLOY_VAULT_MIN_VALUE + DexGas.DEPLOY_LP_TOKEN_ROOT_VALUE,
                     flag: MsgFlag.SENDER_PAYS_FEES,
                     bounce: false
                 }(

@@ -44,7 +44,37 @@ abstract contract DexContractBase  {
         _;
     }
 
+    modifier onlyLpTokenPending(
+        uint32 _nonce,
+        address _pool,
+        address[] _roots,
+        TvmCell _code
+    ) {
+        address lpPending = _expectedLpTokenPendingAddress(_nonce, _pool, _roots, _code);
+
+        require(msg.sender == lpPending, DexErrors.NOT_LP_PENDING_CONTRACT);
+        _;
+    }
+
     function _dexRoot() virtual internal view returns (address);
+
+    function _expectedLpTokenPendingAddress(
+        uint32 _nonce,
+        address _pool,
+        address[] _roots,
+        TvmCell _code
+    ) internal pure returns (address) {
+        return address(
+            tvm.hash(
+                _buildLpTokenPendingInitData(
+                    _nonce,
+                    _pool,
+                    _roots,
+                    _code
+                )
+            )
+        );
+    }
 
     function _expectedAccountAddress(address _accountOwner) internal view returns (address) {
         return address(
@@ -145,7 +175,7 @@ abstract contract DexContractBase  {
             contr: DexVaultLpTokenPendingV2,
             varInit: {
                 _nonce: _nonce,
-                vault: address(this),
+                root: address(this),
                 pool: _pool,
                 roots: _roots
             },
