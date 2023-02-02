@@ -66,7 +66,7 @@ describe('Check for correct deployment', async function () {
         .to
         .equal(DexPair.code, 'Wrong Pair code in DexRoot');
     });
-    it.skip('Check Vault address', async function () {
+    it('Check Vault address', async function () {
       expect(await dexRoot.call({method: 'getVault', params: {}}))
         .to
         .equal(dexVault.address, 'Wrong DexVault address in DexRoot');
