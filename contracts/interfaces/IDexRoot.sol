@@ -16,7 +16,7 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         uint8 poolType
     );
 
-    event VaultCodeUpgraded(
+    event TokenVaultCodeUpgraded(
         uint32 version,
         uint codeHash
     );
@@ -44,11 +44,11 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         uint8 poolType
     );
 
-    event NewVaultCreated(
+    event NewTokenVaultCreated(
         address vault,
         address tokenRoot,
-        uint32 version,
-        uint codeHash
+        address tokenWallet,
+        uint32 version
     );
 
     function getAccountVersion() external view responsible returns (uint32);
@@ -117,6 +117,12 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         address _remainingGasTo
     ) external;
 
+    function upgradeVaults(
+        address[] _tokenRoots,
+        uint32 _offset,
+        address _remainingGasTo
+    ) external;
+
     function onLiquidityTokenDeployed(
         uint32 _nonce,
         address _pair,
@@ -130,6 +136,13 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         address _pair,
         address[] _roots,
         address _lpRoot,
+        address _remainingGasTo
+    ) external;
+
+    function onTokenVaultDeployed(
+        uint32 _version,
+        address _tokenRoot,
+        address _tokenWallet,
         address _remainingGasTo
     ) external;
 
@@ -155,6 +168,22 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         address send_gas_to
     ) external;
 
+    struct PoolParam {
+        address[] tokenRoots;
+        uint8 poolType;
+    }
+
+    function upgradePool(
+        PoolParam _param,
+        address _remainingGasTo
+    ) external view;
+
+    function upgradePools(
+        PoolParam[] params,
+        uint32 _offset,
+        address _remainingGasTo
+    ) external view;
+
     function onPoolCreated(
         address[] _roots,
         uint8 _poolType,
@@ -164,6 +193,22 @@ interface IDexRoot is IFeeParams, IOracleOptions {
     function setPairFeeParams(
         address[] _roots,
         FeeParams _params,
+        address _remainingGasTo
+    ) external view;
+
+    struct PoolActiveParam {
+        address[] tokenRoots;
+        bool newActive;
+    }
+
+    function setPoolActive(
+        PoolActiveParam _param,
+        address _remainingGasTo
+    ) external view;
+
+    function setPoolsActive(
+        PoolActiveParam[] _params,
+        uint32 _offset,
         address _remainingGasTo
     ) external view;
 

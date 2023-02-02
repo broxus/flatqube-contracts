@@ -12,37 +12,42 @@ import "tip3/contracts/interfaces/ITokenWallet.sol";
 import "./abstract/DexContractBase.sol";
 
 import "./interfaces/IDexAccount.sol";
-import "./interfaces/IDexBasePool.sol";
+import "./interfaces/IDexRoot.sol";
 import "./interfaces/IDexTokenVault.sol";
-import "./interfaces/IDexVault.sol";
 
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
 import "./libraries/DexOperationTypes.sol";
 
-contract DexTokenVault is
-    DexContractBase,
-    IDexTokenVault
-{
+contract DexTokenVault is DexContractBase, IDexTokenVault {
     address private _root;
     address private _legacyVault;
     uint32 private _version;
+
     address private _tokenRoot;
     address private _tokenWallet;
-    address private _firstCallbackRecipient;
-    address private _firstCallbackRemainingGasTo;
 
-    function _dexRoot() internal view override returns (address) {
-        return _root;
-    }
+    address private _remainingGasToAfterDeploy;
+
+    //  __  __  ___  ____ ___ _____ ___ _____ ____  ____
+    // |  \/  |/ _ \|  _ \_ _|  ___|_ _| ____|  _ \/ ___|
+    // | |\/| | | | | | | | || |_   | ||  _| | |_) \___ \
+    // | |  | | |_| | |_| | ||  _|  | || |___|  _ < ___) |
+    // |_|  |_|\___/|____/___|_|   |___|_____|_| \_\____/
 
     modifier onlyDexRoot() {
-        require(_root.value != 0 && msg.sender == _root, DexErrors.NOT_MY_OWNER);
+        require(
+            _root.value != 0 && msg.sender == _root,
+            DexErrors.NOT_ROOT
+        );
         _;
     }
 
     modifier onlyTokenRoot() {
-        require(_tokenRoot.value != 0 && msg.sender == _tokenRoot, DexErrors.WRONG_TOKEN_ROOT);
+        require(
+            _tokenRoot.value != 0 && msg.sender == _tokenRoot,
+            DexErrors.WRONG_TOKEN_ROOT
+        );
         _;
     }
 
@@ -51,13 +56,11 @@ contract DexTokenVault is
         _;
     }
 
-    function _getTargetBalanceInternal()
-        internal
-        view
-        returns (uint128)
-    {
-        return DexGas.VAULT_INITIAL_BALANCE;
-    }
+    //  ____  ____  _____ ____ ___    _    _
+    // / ___||  _ \| ____/ ___|_ _|  / \  | |
+    // \___ \| |_) |  _|| |    | |  / _ \ | |
+    //  ___) |  __/| |__| |___ | | / ___ \| |___
+    // |____/|_|   |_____\____|___/_/   \_\_____|
 
     receive() external pure { revert(); }
 
@@ -66,9 +69,9 @@ contract DexTokenVault is
     constructor() public { revert(); }
 
     function redeploy(
-        TvmCell /* _code */,
-        uint32 /* _vaultCodeVersionInRoot */,
-        address /* _callbackRecipient */,
+        TvmCell /* _tokenVaultCodeInRoot */,
+        uint32 /* _tokenVaultVersionInRoot */,
+        address /* _legacyVault */,
         address _remainingGasTo
     )
         external
@@ -79,10 +82,16 @@ contract DexTokenVault is
     {
         _remainingGasTo.transfer({
             value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
             bounce: false
         });
     }
+
+    //   ____ _____ _____ _____ _____ ____  ____
+    //  / ___| ____|_   _|_   _| ____|  _ \/ ___|
+    // | |  _|  _|   | |   | | |  _| | |_) \___ \
+    // | |_| | |___  | |   | | | |___|  _ < ___) |
+    //  \____|_____| |_|   |_| |_____|_| \_\____/
 
     function getDexRoot() external view override responsible returns (address) {
         return {
@@ -140,13 +149,19 @@ contract DexTokenVault is
         } _getTargetBalanceInternal();
     }
 
+    //   ___  ____  _____ ____      _  _____ ___ ___  _   _ ____
+    //  / _ \|  _ \| ____|  _ \    / \|_   _|_ _/ _ \| \ | / ___|
+    // | | | | |_) |  _| | |_) |  / _ \ | |  | | | | |  \| \___ \
+    // | |_| |  __/| |___|  _ <  / ___ \| |  | | |_| | |\  |___) |
+    //  \___/|_|   |_____|_| \_\/_/   \_\_| |___\___/|_| \_|____/
+
     function withdraw(
         uint64 _callId,
         uint128 _amount,
-        address _recipientAddress,
-        uint128 _deployWalletGrams,
+        address _recipient,
+        uint128 _deployRecipientWalletGrams,
         address _accountOwner,
-        uint32 /* _accountVersion */,
+        uint32  /* _accountVersion */,
         address _remainingGasTo
     )
         external
@@ -154,23 +169,17 @@ contract DexTokenVault is
         reserve(_getTargetBalanceInternal())
         onlyAccount(_accountOwner)
     {
-        emit WithdrawTokens({
-            amount: _amount,
-            accountOwner: _accountOwner,
-            recipientAddress: _recipientAddress
-        });
-
         TvmCell empty;
 
         ITokenWallet(_tokenWallet)
             .transfer{
-                value: DexGas.TRANSFER_TOKENS_VALUE + _deployWalletGrams,
+                value: DexGas.TRANSFER_TOKENS_VALUE + _deployRecipientWalletGrams,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 bounce: false
             }(
                 _amount,
-                _recipientAddress,
-                _deployWalletGrams,
+                _recipient,
+                _deployRecipientWalletGrams,
                 _remainingGasTo,
                 false,
                 empty
@@ -182,28 +191,29 @@ contract DexTokenVault is
                 flag: MsgFlag.ALL_NOT_RESERVED,
                 bounce: false
             }(_callId);
+
+        emit WithdrawTokens({
+            amount: _amount,
+            accountOwner: _accountOwner,
+            recipient: _recipient
+        });
     }
 
     function transfer(
         uint128 _amount,
-        address _recipientAddress,
-        uint128 _deployWalletGrams,
-        bool _notifyReceiver,
+        address _recipient,
+        uint128 _deployRecipientWalletGrams,
+        bool _notifyRecipient,
         TvmCell _payload,
-        address[] _roots,
-        uint32 /* _pairVersion */,
+        address[] _poolTokenRoots,
+        uint32 /* _poolVersion */,
         address _remainingGasTo
     )
         external
         override
         reserve(_getTargetBalanceInternal())
+        onlyPool(_poolTokenRoots)
     {
-        emit PairTransferTokens({
-            amount: _amount,
-            roots: _roots,
-            recipientAddress: _recipientAddress
-        });
-
         ITokenWallet(_tokenWallet)
             .transfer{
                 value: 0,
@@ -211,29 +221,35 @@ contract DexTokenVault is
                 bounce: false
             }(
                 _amount,
-                _recipientAddress,
-                _deployWalletGrams,
+                _recipient,
+                _deployRecipientWalletGrams,
                 _remainingGasTo,
-                _notifyReceiver,
+                _notifyRecipient,
                 _payload
             );
+
+        emit PairTransferTokens({
+            amount: _amount,
+            poolTokenRoots: _poolTokenRoots,
+            recipient: _recipient
+        });
     }
 
     function referralFeeTransfer(
         uint128 _amount,
         address _referrer,
         address _referral,
-        address[] _roots
+        address[] _poolTokenRoots
     )
         external
         override
         reserve(_getTargetBalanceInternal())
-        onlyPool(_roots)
+        onlyPool(_poolTokenRoots)
     {
         TvmBuilder builder;
 
         builder.store(DexOperationTypes.REFERRAL_FEE);
-        builder.storeRef(abi.encode(_roots, _referrer, _referral));
+        builder.storeRef(abi.encode(_poolTokenRoots, _referrer, _referral));
 
         ITokenWallet(_tokenWallet)
             .transfer{
@@ -248,12 +264,19 @@ contract DexTokenVault is
                 true,
                 builder.toCell()
             );
+
+        emit ReferralFeeTransfer({
+            amount: _amount,
+            poolTokenRoots: _poolTokenRoots,
+            referrer: _referrer,
+            referral: _referral
+        });
     }
 
     function resetGas(address _remainingGasTo)
         external
-        override
         view
+        override
         reserve(_getTargetBalanceInternal())
         onlyDexRoot
     {
@@ -264,20 +287,32 @@ contract DexTokenVault is
         });
     }
 
+    //  _   _ ____   ____ ____      _    ____  _____
+    // | | | |  _ \ / ___|  _ \    / \  |  _ \| ____|
+    // | | | | |_) | |  _| |_) |  / _ \ | | | |  _|
+    // | |_| |  __/| |_| |  _ <  / ___ \| |_| | |___
+    //  \___/|_|    \____|_| \_\/_/   \_\____/|_____|
+
     function upgrade(
         TvmCell _newCode,
         uint32 _newVersion,
         address _remainingGasTo
-    ) external override reserve(_getTargetBalanceInternal()) onlyDexRoot {
-        TvmBuilder builder;
+    )
+        external
+        override
+        reserve(_getTargetBalanceInternal())
+        onlyDexRoot
+    {
         TvmBuilder params;
 
         params.store(_tokenRoot);
         params.store(_tokenWallet);
-        params.store(_firstCallbackRemainingGasTo);
+        params.store(_remainingGasToAfterDeploy);
+
+        TvmBuilder builder;
 
         builder.store(_root);
-        builder.store(_firstCallbackRecipient);
+        builder.store(_legacyVault);
         builder.store(_version);
         builder.store(_newVersion);
         builder.store(_remainingGasTo);
@@ -291,7 +326,10 @@ contract DexTokenVault is
         onCodeUpgrade(builder.toCell());
     }
 
-    function onCodeUpgrade(TvmCell _data) private reserve(_getTargetBalanceInternal()) {
+    function onCodeUpgrade(TvmCell _data)
+        private
+        reserve(_getTargetBalanceInternal())
+    {
         tvm.resetStorage();
 
         TvmSlice slice = _data.toSlice();
@@ -316,12 +354,13 @@ contract DexTokenVault is
         }
     }
 
+    /// @notice Upgrade from platform code
     function _onPlatformUpgrade(TvmCell _data) private {
         TvmSlice slice = _data.toSlice();
 
         (
             /* address root */,
-            /* address firstCallbackRecipient */,
+            /* address legacyVault */,
             /* uint32 previousVersion */,
             uint32 currentVersion,
             address remainingGasTo
@@ -334,30 +373,35 @@ contract DexTokenVault is
         );
 
         _version = currentVersion;
-        _firstCallbackRemainingGasTo = remainingGasTo;
+        _remainingGasToAfterDeploy = remainingGasTo;
         platform_code = slice.loadRef();
         _tokenRoot = slice.loadRefAsSlice().decode(address);
 
-        emit TokenVaultCodeUpgraded({
-            currentVersion: currentVersion,
-            previousVersion: 0
-        });
+        if (_tokenRoot.value == 0) {
+            _destroySelf();
+        } else {
+            emit TokenVaultCodeUpgraded({
+                currentVersion: currentVersion,
+                previousVersion: 0
+            });
 
-        _deployTokenWallet();
+            _deployTokenWallet();
 
-        remainingGasTo.transfer({
-            value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
-            bounce: false
-        });
+            remainingGasTo.transfer({
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+                bounce: false
+            });
+        }
     }
 
+    /// @notice Upgrade already deployed contract
     function _onUpgrade(TvmCell _data) private {
         TvmSlice slice = _data.toSlice();
 
         (
             /* address root */,
-            /* address firstCallbackRecipient */,
+            /* address legacyVault */,
             uint32 previousVersion,
             uint32 currentVersion,
             address remainingGasTo
@@ -374,7 +418,7 @@ contract DexTokenVault is
         (
             _tokenRoot,
             _tokenWallet,
-            _firstCallbackRemainingGasTo
+            _remainingGasToAfterDeploy
         ) = slice.loadRefAsSlice().decode(
             address,
             address,
@@ -393,7 +437,33 @@ contract DexTokenVault is
         });
     }
 
-    function _deployTokenWallet() private {
+    //  ___ _   _ _____ _____ ____  _   _    _    _
+    // |_ _| \ | |_   _| ____|  _ \| \ | |  / \  | |
+    //  | ||  \| | | | |  _| | |_) |  \| | / _ \ | |
+    //  | || |\  | | | | |___|  _ <| |\  |/ ___ \| |___
+    // |___|_| \_| |_| |_____|_| \_\_| \_/_/   \_\_____|
+
+    function _dexRoot()
+        internal
+        view
+        override
+        returns (address)
+    {
+        return _root;
+    }
+
+    /// @notice Balance to keep for contract
+    function _getTargetBalanceInternal()
+        internal
+        pure
+        returns (uint128)
+    {
+        return DexGas.VAULT_INITIAL_BALANCE;
+    }
+
+    /// @notice Deploys and sets vault's wallet after deploy
+    /// @dev vault's _tokenRoot must be valid before call
+    function _deployTokenWallet() private view {
         ITokenRoot(_tokenRoot)
             .deployWallet{
                 value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
@@ -402,17 +472,72 @@ contract DexTokenVault is
             }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
     }
 
+    /// @notice Destroys vault and transfers all balance to gas recipient from initial deploy
+    function _destroySelf() private view reserve(0) {
+        _remainingGasToAfterDeploy.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO,
+            bounce: false
+        });
+    }
+
+    //   ____    _    _     _     ____    _    ____ _  ______
+    //  / ___|  / \  | |   | |   | __ )  / \  / ___| |/ / ___|
+    // | |     / _ \ | |   | |   |  _ \ / _ \| |   | ' /\___ \
+    // | |___ / ___ \| |___| |___| |_) / ___ \ |___| . \ ___) |
+    //  \____/_/   \_\_____|_____|____/_/   \_\____|_|\_\____/
+
+    /// @notice Saves the address of the deployed vault's wallet
+    /// @dev Will destroy contract if the first wallet is invalid
     function onTokenWallet(address _wallet)
         external
         reserve(_getTargetBalanceInternal())
         onlyTokenRoot
     {
-        _tokenWallet = _wallet;
+        if (_wallet.value == 0 && _tokenWallet.value == 0) {
+            _destroySelf();
+        } else {
+            if (_tokenWallet.value == 0) {
+                _tokenWallet = _wallet;
 
-        _firstCallbackRemainingGasTo.transfer({
-            value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED,
-            bounce: false
-        });
+                emit TokenWalletSet(_wallet);
+
+                IDexRoot(_root)
+                    .onTokenVaultDeployed{
+                        value: 0,
+                        flag: MsgFlag.ALL_NOT_RESERVED,
+                        bounce: false
+                    }(
+                        _version,
+                        _tokenRoot,
+                        _tokenWallet,
+                        _remainingGasToAfterDeploy
+                    );
+            } else {
+                _remainingGasToAfterDeploy.transfer({
+                    value: 0,
+                    flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
+                });
+            }
+        }
+    }
+
+    /// @notice Catches failed wallet deploy for vault
+    onBounce(TvmSlice _body)
+        external
+        view
+        reserve(_getTargetBalanceInternal())
+        onlyTokenRoot
+    {
+        uint32 functionId = _body.decode(uint32);
+
+        // Destroy vault if wallet wasn't deployed
+        if (
+            functionId == tvm.functionId(ITokenRoot.deployWallet) &&
+            _tokenWallet.value == 0
+        ) {
+            _destroySelf();
+        }
     }
 }

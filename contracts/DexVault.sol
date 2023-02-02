@@ -404,8 +404,15 @@ contract DexVault is
             _sender == _expectedTokenVaultAddress(_tokenRoot) &&
             payloadSlice.refs() >= 1
         ) {
-            (address[] _roots, address _referrer, address _referral) =
-                abi.decode(payloadSlice.loadRef(), (address[], address, address));
+            (
+                address[] _roots,
+                address _referrer,
+                address _referral
+            ) = abi.decode(payloadSlice.loadRef(), (
+                address[],
+                address,
+                address
+            ));
 
             emit ReferralFeeTransfer(
                 _tokenRoot,
@@ -417,24 +424,24 @@ contract DexVault is
             );
 
             IReferralProgramCallbacks(_refProgramParams.projectAddress)
-            .onRefLastUpdate{
-                value: DexGas.REFERRAL_PROGRAM_CALLBACK,
-                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                bounce: false
-            }(_referral, _referrer, _referral);
+                .onRefLastUpdate{
+                    value: DexGas.REFERRAL_PROGRAM_CALLBACK,
+                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
+                }(_referral, _referrer, _referral);
 
             TvmCell refPayload = abi.encode(_refProgramParams.projectId, _referrer, _referral);
 
             ITokenWallet(msg.sender)
-            .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (
-                _amount,
-                _refProgramParams.systemAddress,
-                DexGas.DEPLOY_REFERRER_FEE_EMPTY_WALLET,
-                _remainingGasTo,
-                true,
-                refPayload
-            );
+                .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
+                (
+                    _amount,
+                    _refProgramParams.systemAddress,
+                    DexGas.DEPLOY_REFERRER_FEE_EMPTY_WALLET,
+                    _remainingGasTo,
+                    true,
+                    refPayload
+                );
         }
     }
 }

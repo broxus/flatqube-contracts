@@ -159,6 +159,21 @@ contract DexStablePool is
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // Setters
 
+    function setActive(
+        bool _newActive,
+        address _remainingGasTo
+    ) external override {
+        tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
+
+        active = _newActive;
+
+        _remainingGasTo.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED,
+            bounce: false
+        });
+    }
+
     function setAmplificationCoefficient(AmplificationCoefficient _A, address send_gas_to) override external onlyRoot {
         require(msg.value >= DexGas.SET_FEE_PARAMS_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);

@@ -23,14 +23,16 @@ library DexGas {
 
     uint128 constant PLATFORM_DEPLOY_VALUE              = 0.1 ton;
     uint128 constant SET_PLATFORM_CODE_VALUE            = 0.1 ton;
+    uint128 constant SET_POOL_ACTIVE_VALUE              = 0.5 ton;
 
     uint128 constant ACCOUNT_INITIALIZE_VALUE           = 1 ton;
     uint128 constant PAIR_INITIALIZE_VALUE              = 1 ton;
 
     uint128 constant UPGRADE_ROOT_MIN_VALUE             = 10 ton;
     uint128 constant UPGRADE_ACCOUNT_MIN_VALUE          = 5 ton;
-    uint128 constant UPGRADE_PAIR_MIN_VALUE             = 5 ton;
+    uint128 constant UPGRADE_POOL_MIN_VALUE             = 3 ton;
     uint128 constant UPGRADE_VAULT_MIN_VALUE            = 5 ton;
+    uint128 constant UPGRADE_TOKEN_VAULT_MIN_VALUE      = 3 ton;
 
     uint128 constant WITHDRAW_MIN_VALUE_BASE            = 1 ton;
     uint128 constant TRANSFER_MIN_VALUE                 = 1 ton;

@@ -90,8 +90,8 @@
 			"inputs": [
 				{"name":"_callId","type":"uint64"},
 				{"name":"_amount","type":"uint128"},
-				{"name":"_recipientAddress","type":"address"},
-				{"name":"_deployWalletGrams","type":"uint128"},
+				{"name":"_recipient","type":"address"},
+				{"name":"_deployRecipientWalletGrams","type":"uint128"},
 				{"name":"_accountOwner","type":"address"},
 				{"name":"value5","type":"uint32"},
 				{"name":"_remainingGasTo","type":"address"}
@@ -103,11 +103,11 @@
 			"name": "transfer",
 			"inputs": [
 				{"name":"_amount","type":"uint128"},
-				{"name":"_recipientAddress","type":"address"},
-				{"name":"_deployWalletGrams","type":"uint128"},
-				{"name":"_notifyReceiver","type":"bool"},
+				{"name":"_recipient","type":"address"},
+				{"name":"_deployRecipientWalletGrams","type":"uint128"},
+				{"name":"_notifyRecipient","type":"bool"},
 				{"name":"_payload","type":"cell"},
-				{"name":"_roots","type":"address[]"},
+				{"name":"_poolTokenRoots","type":"address[]"},
 				{"name":"value6","type":"uint32"},
 				{"name":"_remainingGasTo","type":"address"}
 			],
@@ -120,7 +120,7 @@
 				{"name":"_amount","type":"uint128"},
 				{"name":"_referrer","type":"address"},
 				{"name":"_referral","type":"address"},
-				{"name":"_roots","type":"address[]"}
+				{"name":"_poolTokenRoots","type":"address[]"}
 			],
 			"outputs": [
 			]
@@ -173,11 +173,19 @@
 			]
 		},
 		{
+			"name": "TokenWalletSet",
+			"inputs": [
+				{"name":"wallet","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "WithdrawTokens",
 			"inputs": [
 				{"name":"amount","type":"uint128"},
 				{"name":"accountOwner","type":"address"},
-				{"name":"recipientAddress","type":"address"}
+				{"name":"recipient","type":"address"}
 			],
 			"outputs": [
 			]
@@ -186,8 +194,8 @@
 			"name": "PairTransferTokens",
 			"inputs": [
 				{"name":"amount","type":"uint128"},
-				{"name":"roots","type":"address[]"},
-				{"name":"recipientAddress","type":"address"}
+				{"name":"poolTokenRoots","type":"address[]"},
+				{"name":"recipient","type":"address"}
 			],
 			"outputs": [
 			]
@@ -196,7 +204,7 @@
 			"name": "ReferralFeeTransfer",
 			"inputs": [
 				{"name":"amount","type":"uint128"},
-				{"name":"roots","type":"address[]"},
+				{"name":"poolTokenRoots","type":"address[]"},
 				{"name":"referrer","type":"address"},
 				{"name":"referral","type":"address"}
 			],
@@ -214,7 +222,6 @@
 		{"name":"_version","type":"uint32"},
 		{"name":"_tokenRoot","type":"address"},
 		{"name":"_tokenWallet","type":"address"},
-		{"name":"_firstCallbackRecipient","type":"address"},
-		{"name":"_firstCallbackRemainingGasTo","type":"address"}
+		{"name":"_remainingGasToAfterDeploy","type":"address"}
 	]
 }

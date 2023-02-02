@@ -325,6 +325,17 @@
 			]
 		},
 		{
+			"name": "onTokenVaultDeployed",
+			"inputs": [
+				{"name":"_version","type":"uint32"},
+				{"name":"_tokenRoot","type":"address"},
+				{"name":"_tokenWallet","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "deployLpToken",
 			"inputs": [
 				{"name":"_tokenRoots","type":"address[]"},
@@ -367,6 +378,16 @@
 			]
 		},
 		{
+			"name": "upgradeVaults",
+			"inputs": [
+				{"name":"_tokenRoots","type":"address[]"},
+				{"name":"_offset","type":"uint32"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "deployAccount",
 			"inputs": [
 				{"name":"account_owner","type":"address"},
@@ -395,12 +416,11 @@
 			]
 		},
 		{
-			"name": "upgradePair",
+			"name": "upgradePools",
 			"inputs": [
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"},
-				{"name":"pool_type","type":"uint8"},
-				{"name":"send_gas_to","type":"address"}
+				{"components":[{"name":"tokenRoots","type":"address[]"},{"name":"poolType","type":"uint8"}],"name":"_params","type":"tuple[]"},
+				{"name":"_offset","type":"uint32"},
+				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -408,9 +428,27 @@
 		{
 			"name": "upgradePool",
 			"inputs": [
-				{"name":"roots","type":"address[]"},
-				{"name":"pool_type","type":"uint8"},
-				{"name":"send_gas_to","type":"address"}
+				{"components":[{"name":"tokenRoots","type":"address[]"},{"name":"poolType","type":"uint8"}],"name":"_param","type":"tuple"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setPoolActive",
+			"inputs": [
+				{"components":[{"name":"tokenRoots","type":"address[]"},{"name":"newActive","type":"bool"}],"name":"_param","type":"tuple"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setPoolsActive",
+			"inputs": [
+				{"components":[{"name":"tokenRoots","type":"address[]"},{"name":"newActive","type":"bool"}],"name":"_params","type":"tuple[]"},
+				{"name":"_offset","type":"uint32"},
+				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -535,7 +573,7 @@
 			]
 		},
 		{
-			"name": "VaultCodeUpgraded",
+			"name": "TokenVaultCodeUpgraded",
 			"inputs": [
 				{"name":"version","type":"uint32"},
 				{"name":"codeHash","type":"uint256"}
@@ -602,12 +640,12 @@
 			]
 		},
 		{
-			"name": "NewVaultCreated",
+			"name": "NewTokenVaultCreated",
 			"inputs": [
 				{"name":"vault","type":"address"},
 				{"name":"tokenRoot","type":"address"},
-				{"name":"version","type":"uint32"},
-				{"name":"codeHash","type":"uint256"}
+				{"name":"tokenWallet","type":"address"},
+				{"name":"version","type":"uint32"}
 			],
 			"outputs": [
 			]

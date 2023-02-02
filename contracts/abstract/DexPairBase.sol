@@ -555,6 +555,25 @@ abstract contract DexPairBase is
         }
     }
 
+    function setActive(
+        bool _newActive,
+        address _remainingGasTo
+    ) external override onlyRoot {
+        tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
+
+        if (_newActive) {
+            _tryToActivate();
+        } else {
+            _active = false;
+        }
+
+        _remainingGasTo.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
+    }
+
     /// @dev Will activate pair if all wallets' addresses are set
     function _tryToActivate() private {
         if (

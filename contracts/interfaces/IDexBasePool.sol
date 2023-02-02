@@ -219,6 +219,11 @@ interface IDexBasePool is
         address _remainingGasTo
     ) external;
 
+    function setActive(
+        bool _newActive,
+        address _remainingGasTo
+    ) external;
+
     /// @notice Check that pool exists from DEX account
     /// @dev Only the DEX account can perform
     /// @param _accountOwner Address of the DEX account owner
