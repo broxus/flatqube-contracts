@@ -1,10 +1,19 @@
 pragma ton-solidity >= 0.62.0;
 
+import "tip3/contracts/interfaces/IAcceptTokensMintCallback.sol";
+
+import "../structures/INextExchangeData.sol";
+
 import "./IResetGas.sol";
 import "./IUpgradableByRequest.sol";
 
 /// @title DEX Token Vault Interface
-interface IDexTokenVault is IResetGas, IUpgradableByRequest {
+interface IDexTokenVault is
+    IResetGas,
+    IUpgradableByRequest,
+    IAcceptTokensMintCallback,
+    INextExchangeData
+{
     event TokenVaultCodeUpgraded(
         uint32 currentVersion,
         uint32 previousVersion

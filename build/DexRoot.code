@@ -2962,7 +2962,7 @@ SETGLOB 15
 SETGLOB 16
 SETGLOB 17
 SETGLOB 25
-DROP
+SETGLOB 22
 SETGLOB 26
 .loc ../contracts/DexRoot.sol, 533
 PUSHREFSLICE {
@@ -4822,9 +4822,7 @@ CALLREF {
 	CALL $_deployVaultInternal_fb7323ae_internal_macro$
 }
 .loc ../contracts/DexRoot.sol, 1009
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
+GETGLOB 22
 PUSHINT 1
 GETGLOB 15
 PUSHINT 8
@@ -5059,9 +5057,38 @@ MAX
 PUSHINT 2
 RAWRESERVE
 .loc ../contracts/DexRoot.sol, 1047
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+OVER
+SECOND
+PUSHINT 0
+NULL
+PUSHCONT {
+	PUSH2 S1, S2
+	PUSHINT 32
+	DICTUGET
+	NULLSWAPIFNOT
+	DROP
+	DUP
+	POP S2
+	ISNULL
+	NOT
 }
+PUSHCONT {
+	.loc ../contracts/DexRoot.sol, 1048
+	DUP
+	MYADDR
+	PUSH S5
+	CALLREF {
+		CALL $_deployVaultInternal_fb7323ae_internal_macro$
+	}
+	.loc ../contracts/DexRoot.sol, 0
+	OVER
+	INC
+	POP S2
+}
+WHILE
+BLKDROP 3
+.loc ../contracts/DexRoot.sol, 1051
+GETGLOB 22
 PUSHINT 3
 GETGLOB 17
 PUSHINT 8
@@ -5148,7 +5175,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexRoot.sol, 1062
+.loc ../contracts/DexRoot.sol, 1066
 OVER
 PUSHCONT {
 	LDU 32
@@ -5211,7 +5238,7 @@ SDEQ
 OR
 AND
 THROWIFNOT 100
-.loc ../contracts/DexRoot.sol, 1067
+.loc ../contracts/DexRoot.sol, 1071
 OVER
 FIRST
 NEQINT 0
@@ -5276,7 +5303,7 @@ PUSHCONT {
 }
 IF
 THROWIFNOT 131
-.loc ../contracts/DexRoot.sol, 1076
+.loc ../contracts/DexRoot.sol, 1080
 PUSHINT 1000000000
 GETPARAM 7
 FIRST
@@ -5288,7 +5315,7 @@ UFITS 128
 MAX
 PUSHINT 2
 RAWRESERVE
-.loc ../contracts/DexRoot.sol, 1084
+.loc ../contracts/DexRoot.sol, 1088
 XCHG S2
 CALLREF {
 	CALL $_expectedPoolAddress_95044983_internal_macro$
@@ -5333,7 +5360,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexRoot.sol, 1089
+.loc ../contracts/DexRoot.sol, 1093
 OVER
 PUSHCONT {
 	LDU 32
@@ -5385,7 +5412,7 @@ SDEQ
 OR
 AND
 THROWIFNOT 100
-.loc ../contracts/DexRoot.sol, 1094
+.loc ../contracts/DexRoot.sol, 1098
 PUSHINT 1000000000
 GETPARAM 7
 FIRST
@@ -5397,7 +5424,7 @@ UFITS 128
 MAX
 PUSHINT 2
 RAWRESERVE
-.loc ../contracts/DexRoot.sol, 1102
+.loc ../contracts/DexRoot.sol, 1106
 XCHG S2
 CALLREF {
 	CALL $_expectedPoolAddress_95044983_internal_macro$
@@ -5431,7 +5458,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexRoot.sol, 1107
+.loc ../contracts/DexRoot.sol, 1111
 OVER
 PUSHCONT {
 	LDREF
@@ -5466,7 +5493,7 @@ GETGLOB 25
 SDEQ
 AND
 THROWIFNOT 100
-.loc ../contracts/DexRoot.sol, 1111
+.loc ../contracts/DexRoot.sol, 1115
 PUSHINT 1000000000
 GETPARAM 7
 FIRST
@@ -5478,7 +5505,7 @@ UFITS 128
 MAX
 PUSHINT 2
 RAWRESERVE
-.loc ../contracts/DexRoot.sol, 1119
+.loc ../contracts/DexRoot.sol, 1123
 SWAP
 NEWC
 STSLICECONST x62_
@@ -5504,7 +5531,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexRoot.sol, 1124
+.loc ../contracts/DexRoot.sol, 1128
 OVER
 PUSHCONT {
 	LDU 32
@@ -5539,7 +5566,7 @@ CALLREF {
 THROW 0
 
 .macro onPoolCreated_12f9a1e3_internal_macro
-.loc ../contracts/DexRoot.sol, 1124
+.loc ../contracts/DexRoot.sol, 1128
 GETGLOB 9
 PUSH S3
 .loc ../contracts/abstract/DexContractBase.sol, 38
@@ -5548,7 +5575,7 @@ CALLREF {
 }
 SDEQ
 THROWIFNOT 106
-.loc ../contracts/DexRoot.sol, 1129
+.loc ../contracts/DexRoot.sol, 1133
 PUSHINT 1000000000
 GETPARAM 7
 FIRST
@@ -5560,7 +5587,7 @@ UFITS 128
 MAX
 PUSHINT 2
 RAWRESERVE
-.loc ../contracts/DexRoot.sol, 1137
+.loc ../contracts/DexRoot.sol, 1141
 XCHG S2
 PUSHSLICE xc000000000000000000000000056c8dff7
 NEWC
@@ -5574,7 +5601,7 @@ STU 8
 ENDC
 PUSHINT 0
 SENDRAWMSG
-.loc ../contracts/DexRoot.sol, 1139
+.loc ../contracts/DexRoot.sol, 1143
 NEWC
 STSLICECONST x62_
 STSLICE
@@ -5596,7 +5623,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexRoot.sol, 1145
+.loc ../contracts/DexRoot.sol, 1149
 OVER
 PUSHCONT {
 	LDREF
@@ -5646,7 +5673,7 @@ SDEQ
 OR
 AND
 THROWIFNOT 100
-.loc ../contracts/DexRoot.sol, 1151
+.loc ../contracts/DexRoot.sol, 1155
 PUSHINT 1000000000
 GETPARAM 7
 FIRST
@@ -5658,7 +5685,7 @@ UFITS 128
 MAX
 PUSHINT 2
 RAWRESERVE
-.loc ../contracts/DexRoot.sol, 1153
+.loc ../contracts/DexRoot.sol, 1157
 REVERSE 4, 0
 PUSHINT 0
 NEWDICT
@@ -5708,7 +5735,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexRoot.sol, 1158
+.loc ../contracts/DexRoot.sol, 1162
 OVER
 PUSHCONT {
 	LDREF
@@ -5752,7 +5779,7 @@ SDEQ
 OR
 AND
 THROWIFNOT 100
-.loc ../contracts/DexRoot.sol, 1164
+.loc ../contracts/DexRoot.sol, 1168
 PUSHINT 1000000000
 GETPARAM 7
 FIRST
@@ -5764,7 +5791,7 @@ UFITS 128
 MAX
 PUSHINT 2
 RAWRESERVE
-.loc ../contracts/DexRoot.sol, 1166
+.loc ../contracts/DexRoot.sol, 1170
 REVERSE 4, 0
 PUSHINT 0
 NEWDICT
