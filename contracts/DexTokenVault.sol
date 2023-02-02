@@ -497,6 +497,8 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         address _remainingGasTo,
         TvmCell _payload
     ) external override reserve(_getTargetBalanceInternal()) {
+        require(msg.sender.value != 0 && msg.sender == _tokenWallet, DexErrors.NOT_TOKEN_VAULT_WALLET);
+
         TvmSlice payloadSlice = _payload.toSlice();
         uint8 op = DexOperationTypes.CROSS_PAIR_EXCHANGE_V2;
 
