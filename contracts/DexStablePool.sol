@@ -1852,6 +1852,8 @@ contract DexStablePool is
                 AmplificationCoefficient,
                 uint256
             ));
+
+            active = lp_wallet.value != 0 && tokenData[0].initialized && tokenData[1].initialized;
         } else if (old_pool_type == DexPoolTypes.STABLE_POOL) {
             active = false;
             TvmCell other_data = s.loadRef(); // ref 3
@@ -1861,7 +1863,7 @@ contract DexStablePool is
                 lp_root, lp_wallet, lp_supply,
 
                 fee,
-                /* tokenDataPrev */,
+                tokenData,
                 A,
                 PRECISION
             ) = abi.decode(other_data, (

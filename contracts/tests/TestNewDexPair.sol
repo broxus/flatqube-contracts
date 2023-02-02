@@ -201,9 +201,6 @@ contract TestNewDexPair is
         left_wallet = type_to_wallet_addresses[DexAddressType.RESERVE][0];
         right_wallet = type_to_wallet_addresses[DexAddressType.RESERVE][1];
 
-        vault_left_wallet = type_to_wallet_addresses[DexAddressType.VAULT][0];
-        vault_right_wallet = type_to_wallet_addresses[DexAddressType.VAULT][1];
-
         left_balance = type_to_reserves[DexReserveType.POOL][0];
         right_balance = type_to_reserves[DexReserveType.POOL][1];
 
