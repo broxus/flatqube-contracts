@@ -27,9 +27,77 @@ contract DexVault is DexContractBase, IDexVault {
     address private _manager;
 
     mapping(address => address) public _vaultWallets;
+    mapping(address => address) public _vaultWalletsToRoots;
+
 
     // referral program
     ReferralProgramParams _refProgramParams;
+
+
+    // migration START
+    uint8 constant MAX_ITERATIONS_PER_MSG = 10;
+
+    function migrateLiquidity() external onlyManagerOrOwner {
+        require(_vaultWallets.min().hasValue(), 404);
+        internalHelper(address(0));
+    }
+
+    function _migrateNext(address _startTokenRoot) external {
+        require(msg.sender == address(this), 503);
+        internalHelper(_startTokenRoot);
+    }
+
+    function onTokenBalance(uint128 _amount) external {
+        require(_vaultWalletsToRoots.exists(msg.sender));
+
+        address _tokenRoot = _vaultWalletsToRoots.at(msg.sender);
+
+        IDexRoot(_dexRoot()).deployTokenVault{value: DexGas.DEPLOY_VAULT_MIN_VALUE, flag: 1}(_tokenRoot, _owner);
+
+        if(_amount > 0) {
+            TvmCell empty;
+
+            ITokenWallet(msg.sender).transfer{
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED
+            }(
+                _amount,
+                _expectedTokenVaultAddress(_tokenRoot),
+                DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
+                _owner,
+                false,
+                empty
+            );
+        } else {
+            _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
+        }
+    }
+
+    function internalHelper(address _startTokenRoot) internal {
+        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
+        uint8 counter = 0;
+        optional(address, address) itemOpt = _vaultWallets.next(_startTokenRoot);
+
+        while (itemOpt.hasValue()) {
+            (address tokenRoot, address vaultTokenWallet) = itemOpt.get();
+            _vaultWalletsToRoots[vaultTokenWallet] = tokenRoot;
+            counter++;
+            ITokenWallet(vaultTokenWallet).balance{
+                value: DexGas.DEPLOY_VAULT_MIN_VALUE + DexGas.TRANSFER_TOKENS_VALUE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS + 0.5 ever,
+                flag: 1,
+                callback: DexVault.onTokenBalance
+            }();
+            if (counter < MAX_ITERATIONS_PER_MSG) {
+                itemOpt = _vaultWallets.next(tokenRoot);
+            } else {
+                itemOpt.reset();
+                this._migrateNext{ value: 0, flag: 128 }(tokenRoot);
+            }
+        }
+    }
+
+
+    //migration END
 
     modifier onlyOwner() {
         require(msg.sender == _owner, DexErrors.NOT_MY_OWNER);
@@ -55,11 +123,11 @@ contract DexVault is DexContractBase, IDexVault {
     function installPlatformOnce(TvmCell code) external onlyOwner {
         require(platform_code.toSlice().empty(), DexErrors.PLATFORM_CODE_NON_EMPTY);
 
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
+        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
 
         platform_code = code;
 
-        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
+        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
     }
 
     function _dexRoot() override internal view returns(address) {
@@ -67,13 +135,13 @@ contract DexVault is DexContractBase, IDexVault {
     }
 
     function transferOwner(address new_owner) public override onlyOwner {
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
+        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
 
         emit RequestedOwnerTransfer(_owner, new_owner);
 
         _pendingOwner = new_owner;
 
-        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
+        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
     }
 
     function acceptOwner() public override {
@@ -83,14 +151,14 @@ contract DexVault is DexContractBase, IDexVault {
             DexErrors.NOT_PENDING_OWNER
         );
 
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
+        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
 
         emit OwnerTransferAccepted(_owner, _pendingOwner);
 
         _owner = _pendingOwner;
         _pendingOwner = address(0);
 
-        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
+        _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
     }
 
     function getOwner() external view override responsible returns (address) {
@@ -225,7 +293,7 @@ contract DexVault is DexContractBase, IDexVault {
     function upgrade(TvmCell code) public override onlyOwner {
         require(msg.value > DexGas.UPGRADE_VAULT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
 
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 2);
+        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
 
         emit VaultCodeUpgraded();
 
