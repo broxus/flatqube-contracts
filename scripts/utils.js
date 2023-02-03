@@ -5,7 +5,6 @@ const logger = require('mocha-logger');
 const TOKEN_CONTRACTS_PATH = 'node_modules/tip3/build'
 const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
 const BigNumber = require('bignumber.js');
-// const { Address } = require('locklift');
 BigNumber.config({EXPONENTIAL_AT: 257});
 
 const getRandomNonce = () => Math.random() * 64000 | 0;
@@ -31,7 +30,7 @@ async function sleep(ms) {
 }
 
 const afterRun = async (tx) => {
-   await new Promise(resolve => setTimeout(resolve, 5000));
+   await new Promise(resolve => setTimeout(resolve, 3000));
 };
 
 const displayTx = (_tx) => {
@@ -145,6 +144,7 @@ class Migration {
 
   getAddress(alias) {
     if (this.migration_log[alias] !== undefined) {
+      const { Address } = require('locklift');
       return new Address(this.migration_log[alias].address);
     } else {
       throw new Error(`Contract ${alias} not found in the migration`);
