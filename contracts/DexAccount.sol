@@ -861,6 +861,7 @@ contract DexAccount is
             TvmBuilder builder;
 
             builder.store(_root);
+            builder.store(_vault);
             builder.store(_currentVersion);
             builder.store(_newVersion);
             builder.store(_sendGasTo);
@@ -933,12 +934,15 @@ contract DexAccount is
         TvmSlice data = dataSlice.loadRefAsSlice(); // ref 2
 
         _owner = data.decode(address);
-        _wallets = data.decode(mapping(address => address));
-        _balances = data.decode(mapping(address => uint128));
 
-        TvmSlice tmp = dataSlice.loadRefAsSlice(); // ref 3
-        _tmpOperations = tmp.decode(mapping(uint64 => Operation));
-        _tmpDeployingWallets = tmp.decode(mapping(address => address));
+        if (_oldVersion != 0) {
+            _wallets = data.decode(mapping(address => address));
+            _balances = data.decode(mapping(address => uint128));
+
+            TvmSlice tmp = dataSlice.loadRefAsSlice(); // ref 3
+            _tmpOperations = tmp.decode(mapping(uint64 => Operation));
+            _tmpDeployingWallets = tmp.decode(mapping(address => address));
+        }
 
         _sendGasTo.transfer({
             value: 0,

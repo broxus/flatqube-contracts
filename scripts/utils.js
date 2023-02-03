@@ -86,6 +86,15 @@ const Constants = {
   TESTS_TIMEOUT: 1200000
 }
 
+for (let i = 0; i < 20; i++) {
+  Constants.tokens['gen' + i] = {
+    name: 'Gen' + i,
+    symbol: 'GEN' + i,
+    decimals: 9,
+    upgradeable: true
+  };
+}
+
 class Migration {
   constructor(log_path = 'migration-log.json') {
     this.log_path = log_path;
@@ -122,6 +131,16 @@ class Migration {
       throw new Error(`Contract ${alias} not found in the migration`);
     }
     return contract;
+  }
+
+  getAddressesByName(name) {
+    const r = [];
+    for (let alias in this.migration_log) {
+      if (this.migration_log[alias].name === name) {
+        r.push(this.migration_log[alias].address);
+      }
+    }
+    return r;
   }
 
   getAddress(alias) {

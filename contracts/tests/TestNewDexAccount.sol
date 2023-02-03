@@ -41,8 +41,6 @@ contract TestNewDexAccount is ITokenOperationStructure {
     mapping(uint64 => Operation) _tmp_operations;
     // token_root -> send_gas_to
     mapping(address => address) _tmp_deploying_wallets;
-    // token_root -> (call_id, recipient_address, deploy_wallet_grams)
-    mapping(address => WithdrawalParams) _tmp_withdrawals;
 
     string newTestField;
 
@@ -93,7 +91,6 @@ contract TestNewDexAccount is ITokenOperationStructure {
         TvmSlice old_contract_tmp_data = s.loadRefAsSlice();
         _tmp_operations = old_contract_tmp_data.decode(mapping(uint64 => Operation));
         _tmp_deploying_wallets = old_contract_tmp_data.decode(mapping(address => address));
-        _tmp_withdrawals = old_contract_tmp_data.decode(mapping(address => WithdrawalParams));
 
         newTestField = "New Account";
 

@@ -18,13 +18,6 @@ interface IDexVault is
     event RequestedOwnerTransfer(address old_owner, address new_owner);
     event OwnerTransferAccepted(address old_owner, address new_owner);
 
-    event WithdrawTokens(
-        address vault_token_wallet,
-        uint128 amount,
-        address account_owner,
-        address recipient_address
-    );
-
     event ReferralFeeTransfer(
         address tokenRoot,
         address vaultWallet,
@@ -54,18 +47,6 @@ interface IDexVault is
     ) external view;
 
     function setReferralProgramParams(ReferralProgramParams params) external;
-
-    function withdraw(
-        uint64 call_id,
-        uint128 amount,
-        address token_root,
-        address vault_wallet,
-        address recipient_address,
-        uint128 deploy_wallet_grams,
-        address account_owner,
-        uint32  account_version,
-        address send_gas_to
-    ) external;
 
     function transferOwner(address new_owner) external;
 
