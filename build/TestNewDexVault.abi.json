@@ -1,13 +1,58 @@
 {
 	"ABI version": 2,
 	"version": "2.2",
-	"header": ["time"],
+	"header": ["pubkey", "time", "expire"],
 	"functions": [
 		{
 			"name": "constructor",
 			"inputs": [
 			],
 			"outputs": [
+			]
+		},
+		{
+			"name": "getOwner",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getPendingOwner",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getManager",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getRoot",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getReferralProgramParams",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"components":[{"name":"projectId","type":"uint256"},{"name":"projectAddress","type":"address"},{"name":"systemAddress","type":"address"}],"name":"value0","type":"tuple"}
 			]
 		},
 		{
@@ -25,46 +70,6 @@
 			"outputs": [
 				{"name":"platform_code","type":"cell"}
 			]
-		},
-		{
-			"name": "lp_token_pending_code",
-			"inputs": [
-			],
-			"outputs": [
-				{"name":"lp_token_pending_code","type":"cell"}
-			]
-		},
-		{
-			"name": "root",
-			"inputs": [
-			],
-			"outputs": [
-				{"name":"root","type":"address"}
-			]
-		},
-		{
-			"name": "owner",
-			"inputs": [
-			],
-			"outputs": [
-				{"name":"owner","type":"address"}
-			]
-		},
-		{
-			"name": "pending_owner",
-			"inputs": [
-			],
-			"outputs": [
-				{"name":"pending_owner","type":"address"}
-			]
-		},
-		{
-			"name": "token_factory",
-			"inputs": [
-			],
-			"outputs": [
-				{"name":"token_factory","type":"address"}
-			]
 		}
 	],
 	"data": [
@@ -78,11 +83,11 @@
 		{"name":"_constructorFlag","type":"bool"},
 		{"name":"_nonce","type":"uint32"},
 		{"name":"platform_code","type":"cell"},
-		{"name":"lp_token_pending_code","type":"cell"},
-		{"name":"root","type":"address"},
-		{"name":"owner","type":"address"},
-		{"name":"pending_owner","type":"address"},
-		{"name":"token_factory","type":"address"},
+		{"name":"_root","type":"address"},
+		{"name":"_owner","type":"address"},
+		{"name":"_pendingOwner","type":"address"},
+		{"name":"_manager","type":"address"},
+		{"components":[{"name":"projectId","type":"uint256"},{"name":"projectAddress","type":"address"},{"name":"systemAddress","type":"address"}],"name":"_refProgramParams","type":"tuple"},
 		{"name":"newTestField","type":"string"}
 	]
 }

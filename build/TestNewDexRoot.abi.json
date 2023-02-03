@@ -11,15 +11,6 @@
 			]
 		},
 		{
-			"name": "getVault",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"value0","type":"address"}
-			]
-		},
-		{
 			"name": "getOwner",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
@@ -35,6 +26,15 @@
 			],
 			"outputs": [
 				{"name":"dex_pending_owner","type":"address"}
+			]
+		},
+		{
+			"name": "getVault",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
 			]
 		},
 		{
@@ -64,6 +64,71 @@
 			],
 			"outputs": [
 				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "getPoolVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"pool_type","type":"uint8"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "getPoolCode",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"pool_type","type":"uint8"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "getTokenVaultCode",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "getTokenVaultVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "getLpTokenPendingCode",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "getLpTokenPendingVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "getTokenFactory",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
 			]
 		},
 		{
@@ -115,6 +180,22 @@
 			"outputs": [
 				{"name":"account_code","type":"cell"}
 			]
+		},
+		{
+			"name": "token_vault_code",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"token_vault_code","type":"cell"}
+			]
+		},
+		{
+			"name": "lp_token_pending_code",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"lp_token_pending_code","type":"cell"}
+			]
 		}
 	],
 	"data": [
@@ -130,6 +211,10 @@
 		{"name":"platform_code","type":"cell"},
 		{"name":"account_code","type":"cell"},
 		{"name":"account_version","type":"uint32"},
+		{"name":"token_vault_code","type":"cell"},
+		{"name":"token_vault_version","type":"uint32"},
+		{"name":"lp_token_pending_code","type":"cell"},
+		{"name":"lp_token_pending_version","type":"uint32"},
 		{"name":"pair_codes","type":"map(uint8,cell)"},
 		{"name":"pair_versions","type":"map(uint8,uint32)"},
 		{"name":"pool_codes","type":"map(uint8,cell)"},
@@ -138,6 +223,7 @@
 		{"name":"owner","type":"address"},
 		{"name":"vault","type":"address"},
 		{"name":"pending_owner","type":"address"},
+		{"name":"token_factory","type":"address"},
 		{"name":"newTestField","type":"string"}
 	]
 }

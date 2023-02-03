@@ -58,25 +58,6 @@
 			]
 		},
 		{
-			"name": "getVault",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"dex_vault","type":"address"}
-			]
-		},
-		{
-			"name": "getVaultWallets",
-			"inputs": [
-				{"name":"answerId","type":"uint32"}
-			],
-			"outputs": [
-				{"name":"token_vault_wallets","type":"address[]"},
-				{"name":"lp","type":"address"}
-			]
-		},
-		{
 			"name": "getAccumulatedFees",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
@@ -91,7 +72,7 @@
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"value0","type":"tuple"}
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"},{"name":"referrer_threshold","type":"map(address,uint128)"}],"name":"value0","type":"tuple"}
 			]
 		},
 		{
@@ -122,6 +103,15 @@
 			]
 		},
 		{
+			"name": "setActive",
+			"inputs": [
+				{"name":"_newActive","type":"bool"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "setAmplificationCoefficient",
 			"inputs": [
 				{"components":[{"name":"value","type":"uint128"},{"name":"precision","type":"uint128"}],"name":"_A","type":"tuple"},
@@ -133,7 +123,7 @@
 		{
 			"name": "setFeeParams",
 			"inputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"params","type":"tuple"},
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"},{"name":"referrer_threshold","type":"map(address,uint128)"}],"name":"params","type":"tuple"},
 				{"name":"send_gas_to","type":"address"}
 			],
 			"outputs": [
@@ -270,7 +260,8 @@
 				{"name":"auto_change","type":"bool"},
 				{"name":"account_owner","type":"address"},
 				{"name":"value5","type":"uint32"},
-				{"name":"send_gas_to","type":"address"}
+				{"name":"send_gas_to","type":"address"},
+				{"name":"referrer","type":"address"}
 			],
 			"outputs": [
 			]
@@ -283,7 +274,8 @@
 				{"name":"spent_token_root","type":"address"}
 			],
 			"outputs": [
-				{"name":"lp","type":"uint128"}
+				{"name":"tokens_amount","type":"uint128"},
+				{"name":"expected_fee","type":"uint128"}
 			]
 		},
 		{
@@ -304,7 +296,8 @@
 				{"name":"receive_token_root","type":"address"}
 			],
 			"outputs": [
-				{"name":"lp","type":"uint128"}
+				{"name":"lp","type":"uint128"},
+				{"name":"expected_fee","type":"uint128"}
 			]
 		},
 		{
@@ -382,6 +375,7 @@
 				{"name":"spent_amount","type":"uint128"},
 				{"name":"sender_address","type":"address"},
 				{"name":"recipient","type":"address"},
+				{"name":"referrer","type":"address"},
 				{"name":"original_gas_to","type":"address"},
 				{"name":"deploy_wallet_grams","type":"uint128"},
 				{"name":"payload","type":"cell"},
@@ -425,14 +419,6 @@
 			"name": "onTokenDecimals",
 			"inputs": [
 				{"name":"_decimals","type":"uint8"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "onVaultTokenWallet",
-			"inputs": [
-				{"name":"wallet","type":"address"}
 			],
 			"outputs": [
 			]
@@ -558,7 +544,7 @@
 		{
 			"name": "FeesParamsUpdated",
 			"inputs": [
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"params","type":"tuple"}
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"},{"name":"referrer_threshold","type":"map(address,uint128)"}],"name":"params","type":"tuple"}
 			],
 			"outputs": [
 			]
@@ -600,6 +586,14 @@
 			]
 		},
 		{
+			"name": "ReferrerFees",
+			"inputs": [
+				{"components":[{"name":"amount","type":"uint128"},{"name":"root","type":"address"}],"name":"fees","type":"tuple[]"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "Sync",
 			"inputs": [
 				{"name":"reserves","type":"uint128[]"},
@@ -618,14 +612,13 @@
 		{"name":"vault","type":"address"},
 		{"name":"active","type":"bool"},
 		{"name":"current_version","type":"uint32"},
-		{"components":[{"name":"root","type":"address"},{"name":"wallet","type":"address"},{"name":"vaultWallet","type":"address"},{"name":"balance","type":"uint128"},{"name":"decimals","type":"uint8"},{"name":"accumulatedFee","type":"uint128"},{"name":"rate","type":"uint256"},{"name":"precisionMul","type":"uint256"},{"name":"decimalsLoaded","type":"bool"},{"name":"initialized","type":"bool"}],"name":"tokenData","type":"tuple[]"},
+		{"components":[{"name":"root","type":"address"},{"name":"wallet","type":"address"},{"name":"balance","type":"uint128"},{"name":"decimals","type":"uint8"},{"name":"accumulatedFee","type":"uint128"},{"name":"rate","type":"uint256"},{"name":"precisionMul","type":"uint256"},{"name":"decimalsLoaded","type":"bool"},{"name":"initialized","type":"bool"}],"name":"tokenData","type":"tuple[]"},
 		{"name":"tokenIndex","type":"map(address,uint8)"},
 		{"name":"PRECISION","type":"uint256"},
 		{"name":"lp_root","type":"address"},
 		{"name":"lp_wallet","type":"address"},
-		{"name":"lp_vault_wallet","type":"address"},
 		{"name":"lp_supply","type":"uint128"},
-		{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"fee","type":"tuple"},
+		{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"},{"name":"referrer_threshold","type":"map(address,uint128)"}],"name":"fee","type":"tuple"},
 		{"components":[{"name":"value","type":"uint128"},{"name":"precision","type":"uint128"}],"name":"A","type":"tuple"},
 		{"name":"N_COINS","type":"uint8"}
 	]

@@ -55,6 +55,14 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         _;
     }
 
+    modifier onlyTokenWallet() {
+        require(
+            _tokenWallet.value != 0 && msg.sender == _tokenWallet,
+            DexErrors.NOT_TOKEN_VAULT_WALLET
+        );
+        _;
+    }
+
     modifier reserve(uint128 _reserve) {
         tvm.rawReserve(_reserve, 0);
         _;
@@ -66,7 +74,18 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
     //  ___) |  __/| |__| |___ | | / ___ \| |___
     // |____/|_|   |_____\____|___/_/   \_\_____|
 
-    receive() external pure { revert(); }
+    receive()
+        external
+        view
+        reserve(_getTargetBalanceInternal())
+        onlyTokenWallet
+    {
+        _remainingGasToAfterDeploy.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
+    }
 
     fallback() external pure { revert(); }
 
@@ -496,9 +515,12 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         uint128 _amount,
         address _remainingGasTo,
         TvmCell _payload
-    ) external override reserve(_getTargetBalanceInternal()) {
-        require(msg.sender.value != 0 && msg.sender == _tokenWallet, DexErrors.NOT_TOKEN_VAULT_WALLET);
-
+    )
+        external
+        override
+        reserve(_getTargetBalanceInternal())
+        onlyTokenWallet
+    {
         TvmSlice payloadSlice = _payload.toSlice();
         uint8 op = DexOperationTypes.CROSS_PAIR_EXCHANGE_V2;
 
