@@ -22,15 +22,14 @@ let newVaultData = {};
 const loadVaultData = async (vault) => {
   const data = {};
   data.platform_code = await vault.call({method: 'platform_code', params: {}});
-  data.lp_token_pending_code = await vault.call({method: 'getLpTokenPendingCode', params: {}});
   data.root = await vault.call({method: 'getRoot', params: {}});
   data.owner = await vault.call({method: 'getOwner', params: {}});
   data.pending_owner = await vault.call({method: 'getPendingOwner', params: {}});
-  data.token_factory = await vault.call({method: 'getTokenFactory', params: {}});
-  data.lpVaultWallets = await vault.call({method: '_lpVaultWallets'});
+  data.manager = await vault.call({method: 'getManager', params: {}});
   const referralProgramParams = await vault.call({method: 'getReferralProgramParams', params: {}});
-  data.projectId = referralProgramParams.value0.toString();
-  data.projectAddress = referralProgramParams.value1;
+  data.projectId = referralProgramParams.projectId.toString();
+  data.projectAddress = referralProgramParams.projectAddress;
+  data.refSystemAddress = referralProgramParams.systemAddress;
   return data;
 }
 
@@ -75,9 +74,6 @@ describe('Test Dex Vault contract upgrade', async function () {
       expect(newVaultData.platform_code)
         .to
         .equal(oldVaultData.platform_code, 'New platform_code value incorrect');
-      expect(newVaultData.lp_token_pending_code)
-        .to
-        .equal(oldVaultData.lp_token_pending_code, 'New lp_token_pending_code value incorrect');
       expect(newVaultData.root)
         .to
         .equal(oldVaultData.root, 'New root value incorrect');
@@ -87,13 +83,9 @@ describe('Test Dex Vault contract upgrade', async function () {
       expect(newVaultData.pending_owner)
         .to
         .equal(oldVaultData.pending_owner, 'New pending_owner value incorrect');
-      expect(newVaultData.token_factory)
-        .to
-        .equal(oldVaultData.token_factory, 'New token_factory value incorrect');
-
-      expect(JSON.stringify(newVaultData.lpVaultWallets))
+      expect(newVaultData.manager)
           .to
-          .equal(JSON.stringify(oldVaultData.lpVaultWallets), 'New lpVaultWallets value incorrect');
+          .equal(oldVaultData.manager, 'New manager value incorrect');
 
       expect(newVaultData.projectId)
           .to
@@ -102,6 +94,10 @@ describe('Test Dex Vault contract upgrade', async function () {
       expect(newVaultData.projectAddress)
           .to
           .equal(oldVaultData.projectAddress, 'New projectAddress value incorrect');
+
+      expect(newVaultData.refSystemAddress)
+          .to
+          .equal(oldVaultData.refSystemAddress, 'New refSystemAddress value incorrect');
     });
   });
 });

@@ -23,12 +23,19 @@ const loadRootData = async (root) => {
   data.platform_code = await root.call({method: 'platform_code'});
   data.account_code = await root.call({method: 'getAccountCode'});
   data.account_version = (await root.call({method: 'getAccountVersion'})).toString();
+  data.token_vault_code = await root.call({method: 'getTokenVaultCode'});
+  data.token_vault_version = (await root.call({method: 'getTokenVaultVersion'})).toString();
+  data.lp_token_pending_code = await root.call({method: 'getLpTokenPendingCode'});
+  data.lp_token_pending_version = (await root.call({method: 'getLpTokenPendingVersion'})).toString();
   data.pair_code = await root.call({method: 'getPairCode', params: { pool_type: 1}});
   data.pair_version = (await root.call({method: 'getPairVersion', params: { pool_type: 1}})).toString();
+  data.pool_code = await root.call({method: 'getPoolCode', params: { pool_type: 3}});
+  data.pool_version = (await root.call({method: 'getPoolVersion', params: { pool_type: 3}})).toString();
   data.active = await root.call({method: 'isActive'});
   data.owner = await root.call({method: 'getOwner'});
   data.vault = await root.call({method: 'getVault'});
   data.pending_owner = await root.call({method: 'getPendingOwner'});
+  data.token_factory = await root.call({method: 'getTokenFactory'});
   return data;
 }
 
@@ -81,12 +88,30 @@ describe('Test Dex Root contract upgrade', async function () {
       expect(newRootData.account_version)
         .to
         .equal(oldRootData.account_version, 'New account_version value incorrect');
+      expect(newRootData.token_vault_code)
+          .to
+          .equal(oldRootData.token_vault_code, 'New token_vault_code value incorrect');
+      expect(newRootData.token_vault_version)
+          .to
+          .equal(oldRootData.token_vault_version, 'New token_vault_version value incorrect');
+      expect(newRootData.lp_token_pending_code)
+          .to
+          .equal(oldRootData.lp_token_pending_code, 'New lp_token_pending_code value incorrect');
+      expect(newRootData.lp_token_pending_version)
+          .to
+          .equal(oldRootData.lp_token_pending_version, 'New lp_token_pending_version value incorrect');
       expect(newRootData.pair_code)
         .to
         .equal(oldRootData.pair_code, 'New pair_code value incorrect');
       expect(newRootData.pair_version)
         .to
         .equal(oldRootData.pair_version, 'New pair_version value incorrect');
+      expect(newRootData.pool_code)
+          .to
+          .equal(oldRootData.pool_code, 'New pool_code value incorrect');
+      expect(newRootData.pool_version)
+          .to
+          .equal(oldRootData.pool_version, 'New pool_version value incorrect');
       expect(newRootData.active)
         .to
         .equal(oldRootData.active, 'New active value incorrect');
@@ -99,7 +124,9 @@ describe('Test Dex Root contract upgrade', async function () {
       expect(newRootData.pending_owner)
         .to
         .equal(oldRootData.pending_owner, 'New pending_owner value incorrect');
-
+      expect(newRootData.token_factory)
+          .to
+          .equal(oldRootData.token_factory, 'New token_factory value incorrect');
     });
   });
 });

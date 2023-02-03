@@ -8,26 +8,21 @@ import "../libraries/DexErrors.sol";
 import "../libraries/DexGas.sol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
+import "../structures/IReferralProgramParams.sol";
+
 // This is just for test purposes, this is not a real contract!
-contract NewDexVault {
+contract NewDexVault is IReferralProgramParams{
     uint32 private static _nonce;
 
     TvmCell public platform_code;
 
-    TvmCell private _lpTokenPendingCode;
-
     address private _root;
     address private _owner;
     address private _pendingOwner;
-
-    address private _tokenFactory;
-
-    mapping(address => bool) public _lpVaultWallets;
+    address private _manager;
 
     // referral program
-    uint256 private _projectId;
-    address private _projectAddress;
-    address private _refSystemAddress;
+    ReferralProgramParams _refProgramParams;
 
     string newTestField;
 
@@ -49,20 +44,12 @@ contract NewDexVault {
         } _pendingOwner;
     }
 
-    function getLpTokenPendingCode() external view responsible returns (TvmCell) {
+    function getManager() external view responsible returns (address) {
         return {
         value: 0,
         bounce: false,
         flag: MsgFlag.REMAINING_GAS
-        } _lpTokenPendingCode;
-    }
-
-    function getTokenFactory() external view responsible returns (address) {
-        return {
-        value: 0,
-        bounce: false,
-        flag: MsgFlag.REMAINING_GAS
-        } _tokenFactory;
+        } _manager;
     }
 
     function getRoot() external view responsible returns (address) {
@@ -73,30 +60,28 @@ contract NewDexVault {
         } _root;
     }
 
-    function getReferralProgramParams() external view responsible returns (uint256, address, address) {
+    function getReferralProgramParams() external view responsible returns (ReferralProgramParams) {
         return {
         value: 0,
         bounce: false,
         flag: MsgFlag.REMAINING_GAS
-        } (_projectId, _projectAddress, _refSystemAddress);
+        } _refProgramParams;
     }
-
     function onCodeUpgrade(TvmCell _data) private {
         tvm.resetStorage();
 
         TvmSlice slice = _data.toSlice();
 
-        (_root, _tokenFactory) = slice.decode(address, address);
+        (_root) = slice.decode(address);
 
         TvmCell ownersData = slice.loadRef();
         TvmSlice ownersSlice = ownersData.toSlice();
-        (_owner, _pendingOwner) = ownersSlice.decode(address, address);
+        (_owner, _pendingOwner, _manager) = ownersSlice.decode(address, address, address);
 
         platform_code = slice.loadRef();
-        _lpTokenPendingCode = slice.loadRef();
 
         if (slice.refs() >= 1) {
-            (_lpVaultWallets, _projectId, _projectAddress, _refSystemAddress)  = abi.decode(slice.loadRef(), (mapping(address => bool), uint256, address, address));
+            _refProgramParams  = abi.decode(slice.loadRef(), ReferralProgramParams);
         }
 
         newTestField = "New Vault";

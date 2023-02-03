@@ -47,7 +47,8 @@ async function main() {
     contract: options.root_contract_name,
     //@ts-ignore
     constructorParams: {
-      initial_owner: account.address
+      initial_owner: account.address,
+      initial_vault: zeroAddress
     },
     //@ts-ignore
     initParams: {
@@ -88,7 +89,7 @@ async function main() {
   displayTx(tx);
 
   console.log('DexRoot: installing vault code...');
-  tx = await dexRoot.methods.installOrUpdateVaultCode({
+  tx = await dexRoot.methods.installOrUpdateTokenVaultCode({
     _newCode: DexTokenVault.code,
     _remainingGasTo: account.address
   }).send({
