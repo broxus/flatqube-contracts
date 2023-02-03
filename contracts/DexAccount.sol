@@ -37,6 +37,7 @@ contract DexAccount is
     // BASE DATA
 
     address private _root;
+    address private _vault;
     uint32 private _currentVersion;
     address private _owner;
 
@@ -123,6 +124,14 @@ contract DexAccount is
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } _currentVersion;
+    }
+
+    function getVault() override external view responsible returns (address) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _vault;
     }
 
     function getWalletData(address token_root) override external view responsible returns (
@@ -897,6 +906,7 @@ contract DexAccount is
     */
     function onCodeUpgrade(TvmCell _data) private {
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
+        tvm.resetStorage();
 
         TvmSlice dataSlice = _data.toSlice();
 
@@ -914,22 +924,21 @@ contract DexAccount is
             address
         );
 
-        if (_oldVersion == 0) {
-            tvm.resetStorage();
-        }
-
         _root = _rootAddress;
+        _vault = _vaultAddress;
         _currentVersion = _newVersion;
-        platform_code = dataSlice.loadRef();        // ref 1
-        TvmSlice data = dataSlice.loadRefAsSlice(); // ref 2
-        _owner = data.decode(address);
-        // TODO
-        //_wallets = data.decode(mapping(address => address));
-        //_balances = data.decode(mapping(address => uint128));
-        //TvmSlice tmp = dataSlice.loadRefAsSlice(); // ref 3
-        //_tmpOperations = data.decode(mapping(uint64 => Operation));
-        //_tmpDeployingWallets = data.decode(mapping(address => address));
 
+        platform_code = dataSlice.loadRef();        // ref 1
+
+        TvmSlice data = dataSlice.loadRefAsSlice(); // ref 2
+
+        _owner = data.decode(address);
+        _wallets = data.decode(mapping(address => address));
+        _balances = data.decode(mapping(address => uint128));
+
+        TvmSlice tmp = dataSlice.loadRefAsSlice(); // ref 3
+        _tmpOperations = tmp.decode(mapping(uint64 => Operation));
+        _tmpDeployingWallets = tmp.decode(mapping(address => address));
 
         _sendGasTo.transfer({
             value: 0,
