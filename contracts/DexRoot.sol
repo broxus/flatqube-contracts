@@ -8,7 +8,6 @@ import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
 import "./abstract/DexContractBase.sol";
 
-import "./interfaces/IUpgradable.sol";
 import "./interfaces/IUpgradableByRequest.sol";
 import "./interfaces/IDexRoot.sol";
 import "./interfaces/IDexBasePool.sol";
@@ -23,17 +22,9 @@ import "./libraries/DexErrors.sol";
 import "./libraries/DexPoolTypes.sol";
 import "./libraries/DexGas.sol";
 
-import "./structures/IAmplificationCoefficient.sol";
-
 import "./DexPlatform.sol";
 
-contract DexRoot is
-    DexContractBase,
-    IDexRoot,
-    IResetGas,
-    IUpgradable,
-    IAmplificationCoefficient
-{
+contract DexRoot is DexContractBase, IDexRoot {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // DATA
     uint32 static _nonce;
@@ -64,6 +55,17 @@ contract DexRoot is
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // MODIFIERS
 
+    modifier reserve(uint128 _reserve) {
+        tvm.rawReserve(
+            math.max(
+                _reserve,
+                address(this).balance - msg.value
+            ),
+            0
+        );
+        _;
+    }
+
     modifier onlyManagerOrOwner() {
         require(
             msg.sender.value != 0 &&
@@ -84,7 +86,7 @@ contract DexRoot is
     }
 
     constructor(address initial_owner, address initial_vault) public {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
+        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 0);
         tvm.accept();
 
         _owner = initial_owner;
@@ -266,7 +268,7 @@ contract DexRoot is
         } _expectedTokenVaultAddress(_tokenRoot);
     }
 
-    function getManager() external view responsible returns (address) {
+    function getManager() external view override responsible returns (address) {
         return {
             value: 0,
             bounce: false,
@@ -277,10 +279,12 @@ contract DexRoot is
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // SETTERS
 
-    function setVaultOnce(address new_vault) external onlyOwner {
+    function setVaultOnce(address new_vault)
+        external
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyOwner
+    {
         require(_vault.value == 0, DexErrors.VAULT_ALREADY_SET);
-
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
 
         _vault = new_vault;
 
@@ -291,9 +295,11 @@ contract DexRoot is
         });
     }
 
-    function setActive(bool new_active) external onlyOwner {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
-
+    function setActive(bool new_active)
+        external
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyOwner
+    {
         if (
             new_active &&
             !platform_code.toSlice().empty() &&
@@ -317,9 +323,11 @@ contract DexRoot is
         });
     }
 
-    function setManager(address _newManager) external onlyOwner {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
-
+    function setManager(address _newManager)
+        external
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyOwner
+    {
         _manager = _newManager;
 
         msg.sender.transfer(
@@ -329,9 +337,11 @@ contract DexRoot is
         );
     }
 
-    function revokeManager() external onlyOwner {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
-
+    function revokeManager()
+        external
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyOwner
+    {
         _manager = address(0);
 
         msg.sender.transfer(
@@ -363,9 +373,12 @@ contract DexRoot is
     function setTokenFactory(
         address _newTokenFactory,
         address _remainingGasTo
-    ) external override onlyOwner {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 0);
-
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyOwner
+    {
         _tokenFactory = _newTokenFactory;
 
         _remainingGasTo.transfer({
@@ -378,11 +391,14 @@ contract DexRoot is
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // INSTALL CODE
 
-    function installPlatformOnce(TvmCell code) external onlyOwner {
+    function installPlatformOnce(TvmCell code)
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyOwner
+    {
         // can be installed only once
         require(platform_code.toSlice().empty(), DexErrors.PLATFORM_CODE_NON_EMPTY);
-
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
 
         platform_code = code;
 
@@ -392,9 +408,12 @@ contract DexRoot is
         });
     }
 
-    function installOrUpdateAccountCode(TvmCell code) external onlyManagerOrOwner {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
-
+    function installOrUpdateAccountCode(TvmCell code)
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         _accountCode = code;
         _accountVersion++;
 
@@ -409,9 +428,12 @@ contract DexRoot is
     function installOrUpdatePairCode(
         TvmCell code,
         uint8 pool_type
-    ) external onlyManagerOrOwner {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
-
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         _pairCodes[pool_type] = code;
         _pairVersions[pool_type]++;
 
@@ -426,9 +448,12 @@ contract DexRoot is
     function installOrUpdatePoolCode(
         TvmCell code,
         uint8 pool_type
-    ) external onlyManagerOrOwner {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
-
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         _poolCodes[pool_type] = code;
         _poolVersions[pool_type]++;
 
@@ -443,9 +468,12 @@ contract DexRoot is
     function installOrUpdateTokenVaultCode(
         TvmCell _newCode,
         address _remainingGasTo
-    ) external override onlyManagerOrOwner {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
-
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         require(!_newCode.toSlice().empty(), DexErrors.VAULT_CODE_EMPTY);
 
         _vaultCode = _newCode;
@@ -466,9 +494,12 @@ contract DexRoot is
     function installOrUpdateLpTokenPendingCode(
         TvmCell _newCode,
         address _remainingGasTo
-    ) external override onlyManagerOrOwner {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
-
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         require(!_newCode.toSlice().empty(), DexErrors.LP_TOKEN_PENDING_CODE_EMPTY);
 
         _lpTokenPendingCode = _newCode;
@@ -484,10 +515,13 @@ contract DexRoot is
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // INTERNAL
 
-    function upgrade(TvmCell code) override external onlyOwner {
+    function upgrade(TvmCell code)
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyOwner
+    {
         require(msg.value > DexGas.UPGRADE_ACCOUNT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
-
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
 
         emit RootCodeUpgraded();
 
@@ -549,10 +583,19 @@ contract DexRoot is
     }
 
     // Reset balance to ROOT_INITIAL_BALANCE
-    function resetGas(address receiver) override external view onlyOwner {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 2);
+    function resetGas(address receiver)
+        external
+        view
+        override
+        onlyOwner
+    {
+        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 0);
 
-        receiver.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
+        receiver.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -561,17 +604,14 @@ contract DexRoot is
     function deployTokenVault(
         address _tokenRoot,
         address _remainingGasTo
-    ) override external onlyActive {
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyActive
+    {
         require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(_tokenRoot.value != 0 && _tokenRoot != address(this), DexErrors.WRONG_TOKEN_ROOT);
-
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
 
         _deployVaultInternal(
             _tokenRoot,
@@ -590,15 +630,12 @@ contract DexRoot is
         address _tokenRoot,
         address _tokenWallet,
         address _remainingGasTo
-    ) external override onlyTokenVault(_tokenRoot) {
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyTokenVault(_tokenRoot)
+    {
         emit NewTokenVaultCreated({
             vault: msg.sender,
             tokenRoot: _tokenRoot,
@@ -616,7 +653,7 @@ contract DexRoot is
     function _deployVaultInternal(
         address _tokenRoot,
         address _remainingGasTo
-    ) internal view {
+    ) private view {
         TvmCell data = _buildInitData(
             DexPlatformTypes.Vault,
             _buildTokenVaultParams(_tokenRoot)
@@ -637,16 +674,13 @@ contract DexRoot is
     function deployLpToken(
         address[] _tokenRoots,
         address _remainingGasTo
-    ) override external onlyPool(_tokenRoots) {
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyPool(_tokenRoots)
+    {
         require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
-
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
 
         TvmCell data = _buildLpTokenPendingInitData(
             now,
@@ -672,6 +706,7 @@ contract DexRoot is
     )
         external
         override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyLpTokenPending(
             _lpPendingNonce,
             _pool,
@@ -679,8 +714,6 @@ contract DexRoot is
             _lpTokenPendingCode
         )
     {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 0);
-
         _deployVaultInternal(_lpRoot, _remainingGasTo);
 
         ILiquidityTokenRootDeployedCallback(_pool)
@@ -700,6 +733,7 @@ contract DexRoot is
     )
         external
         override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyLpTokenPending(
             _lpPendingNonce,
             _pool,
@@ -707,8 +741,6 @@ contract DexRoot is
             _lpTokenPendingCode
         )
     {
-        tvm.rawReserve(DexGas.ROOT_INITIAL_BALANCE, 0);
-
         ILiquidityTokenRootNotDeployedCallback(_pool)
             .liquidityTokenRootNotDeployed{
                 value: 0,
@@ -723,16 +755,9 @@ contract DexRoot is
     )
         external
         override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyManagerOrOwner
     {
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
         _upgradeVaultInternal(_tokenRoot, _remainingGasTo);
 
         _remainingGasTo.transfer({
@@ -747,18 +772,11 @@ contract DexRoot is
         uint32 _offset,
         address _remainingGasTo
     )
-        override
         external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyManagerOrOwner
     {
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
         uint length = _tokenRoots.length;
 
         // 10, 20, 30 ... 45
@@ -805,17 +823,14 @@ contract DexRoot is
     function deployAccount(
         address account_owner,
         address send_gas_to
-    ) override external onlyActive {
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyActive
+    {
         require(msg.value >= DexGas.DEPLOY_ACCOUNT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(account_owner.value != 0, DexErrors.INVALID_ADDRESS);
-
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
 
         new DexPlatform{
             stateInit: _buildInitData(
@@ -836,15 +851,12 @@ contract DexRoot is
         uint32 current_version,
         address send_gas_to,
         address account_owner
-    ) override external onlyAccount(account_owner) {
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyAccount(account_owner)
+    {
         if (current_version == _accountVersion || !_active) {
             send_gas_to.transfer({
                 value: 0,
@@ -860,16 +872,14 @@ contract DexRoot is
     function forceUpgradeAccount(
         address account_owner,
         address send_gas_to
-    ) external view onlyManagerOrOwner {
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         require(msg.value >= DexGas.UPGRADE_ACCOUNT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
-
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
 
         emit RequestedForceAccountUpgrade(account_owner);
 
@@ -886,51 +896,47 @@ contract DexRoot is
         address right_root,
         uint8 pool_type,
         address send_gas_to
-    ) external view onlyManagerOrOwner {
-        require(
-            _pairVersions.exists(pool_type) &&
-            _pairCodes.exists(pool_type),
-            DexErrors.UNSUPPORTED_POOL_TYPE
-        );
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         require(msg.value >= DexGas.UPGRADE_POOL_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
 
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
+        _upgradePairInternal(
+            PairUpgradeParam({
+                tokenRoots: [left_root, right_root],
+                poolType: pool_type
+            }),
+            send_gas_to
         );
 
-        emit RequestedPoolUpgrade([left_root, right_root]);
-
-        TvmCell code = _pairCodes[pool_type];
-        uint32 version = _pairVersions[pool_type];
-
-        IDexBasePool(_expectedPoolAddress([left_root, right_root]))
-            .upgrade{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (code, version, pool_type, send_gas_to);
+        send_gas_to.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
     }
 
     function upgradePool(
         address[] roots,
         uint8 pool_type,
         address send_gas_to
-    ) external view onlyManagerOrOwner {
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         require(
             _poolVersions.exists(pool_type) &&
             _poolCodes.exists(pool_type),
             DexErrors.UNSUPPORTED_POOL_TYPE
         );
         require(msg.value >= DexGas.UPGRADE_POOL_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
-
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
 
         emit RequestedPoolUpgrade(roots);
 
@@ -946,15 +952,13 @@ contract DexRoot is
         PairUpgradeParam[] _params,
         uint32 _offset,
         address _remainingGasTo
-    ) external view override onlyManagerOrOwner {
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         uint length = _params.length;
 
         // 10, 20, 30 ... 45
@@ -1006,15 +1010,13 @@ contract DexRoot is
     function setPoolActive(
         PoolActiveParam _param,
         address _remainingGasTo
-    ) external view override onlyManagerOrOwner {
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         _setPoolActiveInternal(_param, _remainingGasTo);
 
         _remainingGasTo.transfer({
@@ -1028,15 +1030,13 @@ contract DexRoot is
         PoolActiveParam[] _params,
         uint32 _offset,
         address _remainingGasTo
-    ) external view override onlyManagerOrOwner {
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         uint length = _params.length;
 
         // 10, 20, 30 ... 45
@@ -1079,19 +1079,16 @@ contract DexRoot is
         address left_root,
         address right_root,
         address send_gas_to
-    ) override external onlyActive {
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyActive
+    {
         require(msg.value >= DexGas.DEPLOY_PAIR_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(left_root.value != right_root.value, DexErrors.WRONG_PAIR);
         require(left_root.value != 0, DexErrors.WRONG_PAIR);
         require(right_root.value != 0, DexErrors.WRONG_PAIR);
-
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
 
         _deployVaultInternal(left_root, send_gas_to);
         _deployVaultInternal(right_root, send_gas_to);
@@ -1114,7 +1111,12 @@ contract DexRoot is
     function deployStablePool(
         address[] roots,
         address send_gas_to
-    ) override external onlyManagerOrOwner {
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         require(msg.value >= DexGas.DEPLOY_PAIR_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(_poolCodes.exists(DexPoolTypes.STABLE_POOL), DexErrors.PAIR_CODE_EMPTY);
 
@@ -1125,14 +1127,6 @@ contract DexRoot is
 
             _roots[roots[i]] = true;
         }
-
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
 
         for (address root: roots) {
             _deployVaultInternal(root, send_gas_to);
@@ -1157,7 +1151,13 @@ contract DexRoot is
         address[] _roots,
         FeeParams _params,
         address _remainingGasTo
-    ) override external view onlyManagerOrOwner {
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         require(
             _params.denominator != 0 &&
             (_params.pool_numerator + _params.beneficiary_numerator + _params.referrer_numerator) < _params.denominator &&
@@ -1165,14 +1165,6 @@ contract DexRoot is
             ((_params.beneficiary.value != 0 && _params.beneficiary_numerator != 0) ||
             (_params.beneficiary.value == 0 && _params.beneficiary_numerator == 0)),
             DexErrors.WRONG_FEE_PARAMS
-        );
-
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
         );
 
         IDexBasePool(_expectedPoolAddress(_roots))
@@ -1184,15 +1176,13 @@ contract DexRoot is
         address[] _roots,
         AmplificationCoefficient _A,
         address _remainingGasTo
-    ) external view onlyManagerOrOwner {
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         IDexStablePair(_expectedPoolAddress(_roots))
             .setAmplificationCoefficient{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_A, _remainingGasTo);
@@ -1201,15 +1191,13 @@ contract DexRoot is
     function resetTargetGas(
         address target,
         address receiver
-    ) external view onlyOwner {
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyOwner
+    {
         IResetGas(target)
             .resetGas{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (receiver);
@@ -1219,20 +1207,18 @@ contract DexRoot is
         address[] _roots,
         uint8 _poolType,
         address _remainingGasTo
-    ) override external onlyPool(_roots) {
-        tvm.rawReserve(
-            math.max(
-                DexGas.ROOT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            2
-        );
-
+    )
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyPool(_roots)
+    {
         emit NewPoolCreated(_roots, _poolType);
 
         _remainingGasTo.transfer({
             value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
         });
     }
 
@@ -1241,9 +1227,13 @@ contract DexRoot is
         address _rightRoot,
         OracleOptions _options,
         address _remainingGasTo
-    ) override external view onlyManagerOrOwner {
-        tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
-
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         IDexConstantProductPair(_expectedPoolAddress([_leftRoot, _rightRoot]))
             .setOracleOptions{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_options, _remainingGasTo);
@@ -1254,9 +1244,13 @@ contract DexRoot is
         address _rightRoot,
         uint16 _count,
         address _remainingGasTo
-    ) override external view onlyManagerOrOwner {
-        tvm.rawReserve(math.max(DexGas.ROOT_INITIAL_BALANCE, address(this).balance - msg.value), 2);
-
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
         IDexConstantProductPair(_expectedPoolAddress([_leftRoot, _rightRoot]))
             .removeLastNPoints{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_count, _remainingGasTo);

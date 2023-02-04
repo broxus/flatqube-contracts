@@ -2,8 +2,18 @@ pragma ton-solidity >= 0.62.0;
 
 import "../structures/IFeeParams.sol";
 import "../structures/IOracleOptions.sol";
+import "../structures/IAmplificationCoefficient.sol";
 
-interface IDexRoot is IFeeParams, IOracleOptions {
+import "./IUpgradable.sol";
+import "./IResetGas.sol";
+
+interface IDexRoot is
+    IFeeParams,
+    IOracleOptions,
+    IAmplificationCoefficient,
+    IUpgradable,
+    IResetGas
+{
     event AccountCodeUpgraded(uint32 version);
 
     event PairCodeUpgraded(
@@ -51,6 +61,11 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         uint32 version
     );
 
+    function resetTargetGas(
+        address target,
+        address receiver
+    ) external view;
+
     function getAccountVersion() external view responsible returns (uint32);
 
     function getAccountCode() external view responsible returns (TvmCell);
@@ -88,6 +103,8 @@ interface IDexRoot is IFeeParams, IOracleOptions {
 
     function getExpectedAccountAddress(address account_owner) external view responsible returns (address);
 
+    function getManager() external view responsible returns (address);
+
     function setTokenFactory(
         address _newTokenFactory,
         address _remainingGasTo
@@ -102,6 +119,20 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         TvmCell _newCode,
         address _remainingGasTo
     ) external;
+
+    function installOrUpdatePoolCode(
+        TvmCell code,
+        uint8 pool_type
+    ) external;
+
+    function installOrUpdatePairCode(
+        TvmCell code,
+        uint8 pool_type
+    ) external;
+
+    function installOrUpdateAccountCode(TvmCell code) external;
+
+    function installPlatformOnce(TvmCell code) external;
 
     function deployLpToken(
         address[] _tokenRoots,
@@ -158,6 +189,11 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         address _owner
     ) external;
 
+    function forceUpgradeAccount(
+        address account_owner,
+        address send_gas_to
+    ) external view;
+
     function deployPair(
         address left_root,
         address right_root,
@@ -168,6 +204,19 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         address[] roots,
         address send_gas_to
     ) external;
+
+    function upgradePool(
+        address[] roots,
+        uint8 pool_type,
+        address send_gas_to
+    ) external view;
+
+    function upgradePair(
+        address left_root,
+        address right_root,
+        uint8 pool_type,
+        address send_gas_to
+    ) external view;
 
     struct PairUpgradeParam {
         address[] tokenRoots;
@@ -205,6 +254,12 @@ interface IDexRoot is IFeeParams, IOracleOptions {
     function setPoolsActive(
         PoolActiveParam[] _params,
         uint32 _offset,
+        address _remainingGasTo
+    ) external view;
+
+    function setPairAmplificationCoefficient(
+        address[] _roots,
+        AmplificationCoefficient _A,
         address _remainingGasTo
     ) external view;
 
