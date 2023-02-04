@@ -47,4 +47,8 @@ echo "prev vault ->  vault";
 npx locklift run $NO_TRACE --script scripts/update-dexVault.js --old_contract='DexVaultPrev' --new_contract='DexVault'
 
 echo "____________________________________________________________________";
-npx locklift run $NO_TRACE --script scripts/60-migrate-liquidity-to-multivault.js
+echo "Add manager";
+npx locklift run $NO_TRACE --script scripts/add-vault-manager.js
+#
+#echo "____________________________________________________________________";
+#npx locklift run $NO_TRACE --script scripts/60-migrate-liquidity-to-multivault.js

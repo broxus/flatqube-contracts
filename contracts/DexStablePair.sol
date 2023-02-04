@@ -163,7 +163,11 @@ contract DexStablePair is
     ) external override onlyRoot {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        active = _newActive;
+        if (_newActive) {
+            _tryToActivate();
+        } else {
+            active = false;
+        }
 
         _remainingGasTo.transfer({
             value: 0,
@@ -1539,7 +1543,7 @@ contract DexStablePair is
             tokenData.push(PoolTokenData(tokenDataPrev[0].root, tokenDataPrev[0].wallet, tokenDataPrev[0].balance, tokenDataPrev[0].decimals, tokenDataPrev[0].accumulatedFee, tokenDataPrev[0].rate, tokenDataPrev[0].precisionMul, tokenDataPrev[0].decimalsLoaded, tokenDataPrev[0].initialized));
             tokenData.push(PoolTokenData(tokenDataPrev[1].root, tokenDataPrev[1].wallet, tokenDataPrev[1].balance, tokenDataPrev[1].decimals, tokenDataPrev[1].accumulatedFee, tokenDataPrev[1].rate, tokenDataPrev[1].precisionMul, tokenDataPrev[1].decimalsLoaded, tokenDataPrev[1].initialized));
 
-            active = lp_wallet.value != 0 && tokenData[0].initialized && tokenData[1].initialized;
+            _tryToActivate();
         } else if (old_pool_type == DexPoolTypes.CONSTANT_PRODUCT) {
             active = false;
             A = AmplificationCoefficient(200, 1);
@@ -1604,10 +1608,14 @@ contract DexStablePair is
                 uint256
             ));
 
-            active = lp_wallet.value != 0 && tokenData[0].initialized && tokenData[1].initialized;
+            _tryToActivate();
         }
 
         send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS, bounce: false });
+    }
+
+    function _tryToActivate() private {
+        active = lp_wallet.value != 0 && tokenData[0].initialized && tokenData[1].initialized;
     }
 
     function _configureToken(address token_root) private view {
