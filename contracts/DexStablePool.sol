@@ -165,7 +165,11 @@ contract DexStablePool is
     ) external override onlyRoot {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        active = _newActive;
+        if (_newActive) {
+            _tryToActivate();
+        } else {
+            active = false;
+        }
 
         _remainingGasTo.transfer({
             value: 0,
@@ -1853,7 +1857,7 @@ contract DexStablePool is
                 uint256
             ));
 
-            active = lp_wallet.value != 0 && tokenData[0].initialized && tokenData[1].initialized;
+            _tryToActivate();
         } else if (old_pool_type == DexPoolTypes.STABLE_POOL) {
             active = false;
             TvmCell other_data = s.loadRef(); // ref 3
@@ -1874,17 +1878,21 @@ contract DexStablePool is
                 uint256
             ));
 
-            bool allTokensIsInit = true;
-            for (uint i = 0; i < N_COINS; i++) {
-                if (!tokenData[i].initialized) {
-                    allTokensIsInit = false;
-                    break;
-                }
-            }
-            active = lp_wallet.value != 0 && allTokensIsInit;
+            _tryToActivate();
         }
 
         send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS, bounce: false });
+    }
+
+    function _tryToActivate() private {
+        bool allTokensIsInit = true;
+        for (uint i = 0; i < N_COINS; i++) {
+            if (!tokenData[i].initialized) {
+                allTokensIsInit = false;
+                break;
+            }
+        }
+        active = lp_wallet.value != 0 && allTokensIsInit;
     }
 
     function _configureToken(address token_root) private view {

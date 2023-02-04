@@ -7,7 +7,7 @@ export NO_TRACE="--config locklift.config.js --disable-build --network local"
 
 npx locklift run $NO_TRACE --script scripts/0-reset-migration.js
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0' --balance='50'
-npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='1' --balance='50'
+npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='1' --balance='100'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='2' --balance='50'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='3' --balance='10'
 npx locklift run $NO_TRACE --script scripts/0-deploy-TokenFactory.js
