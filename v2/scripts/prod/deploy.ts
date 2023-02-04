@@ -84,6 +84,7 @@ async function main() {
   const DexPair = await locklift.factory.getContractArtifacts('DexPair');
   const DexStablePair = await locklift.factory.getContractArtifacts('DexStablePair');
   const DexStablePool = await locklift.factory.getContractArtifacts('DexStablePool');
+  const DexTokenVault = await locklift.factory.getContractArtifacts('DexTokenVault');
   const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts('DexVaultLpTokenPendingV2');
 
   console.log(`Deploying DexRoot...`);
@@ -145,12 +146,34 @@ async function main() {
   });
   displayTx(tx);
 
+  console.log(`DexRoot: installing VaultLpTokenPendingV2 code...`);
+
+  tx = await dexRoot.methods.installOrUpdateLpTokenPendingCode({
+    _newCode: DexVaultLpTokenPendingV2.code,
+    _remainingGasTo: account.address,
+  }).send({
+    from: account.address,
+    amount: toNano(2)
+  });
+  displayTx(tx);
+
+
+  console.log('DexRoot: installing token vault code...');
+
+  tx = await dexRoot.methods.installOrUpdateTokenVaultCode({
+    _newCode: DexTokenVault.code,
+    _remainingGasTo: account.address,
+  }).send({
+    from: account.address,
+    amount: toNano(2)
+  });
+  displayTx(tx);
+
   console.log(`Deploying DexVault...`);
   const {contract: dexVault} = await locklift.factory.deployContract({
     contract: 'DexVault',
     constructorParams: {
       owner_: account.address,
-      token_factory_: migration.getAddress('TokenFactory').toString(),
       root_: dexRoot.address
     },
     initParams: {
@@ -169,13 +192,6 @@ async function main() {
     amount: toNano(2)
   });
   displayTx(tx);
-
-  console.log(`DexVault: installing VaultLpTokenPendingV2 code...`);
-
-  tx = await dexVault.methods.installOrUpdateLpTokenPendingCode({code: DexVaultLpTokenPendingV2.code}).send({
-    from: account.address,
-    amount: toNano(2)
-  });
 
   console.log(`DexRoot: installing vault address...`);
 

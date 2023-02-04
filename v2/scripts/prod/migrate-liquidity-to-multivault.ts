@@ -1,4 +1,4 @@
-import {Address, Contract, toNano, WalletTypes} from "locklift";
+import {Contract, WalletTypes} from "locklift";
 import {DexTokenVaultAbi, TokenRootAbi, TokenWalletAbi} from "../../../build/factorySource";
 import {BigNumber} from "bignumber.js";
 
@@ -65,26 +65,40 @@ async function main() {
 
     async function balancesCheckpoint() {
         let tokens: any = {};
-        const managerBalance = new BigNumber(await locklift.provider.getBalance(manager.address)).shiftedBy(-9).toString();
-        const ownerBalance = new BigNumber(await locklift.provider.getBalance(dexOwnerAddress)).shiftedBy(-9).toString();
+        const managerBalance = new BigNumber(await locklift.provider.getBalance(manager.address))
+            .shiftedBy(-9)
+            .toString();
+        const ownerBalance = new BigNumber(await locklift.provider.getBalance(dexOwnerAddress))
+            .shiftedBy(-9)
+            .toString();
+        let notDeployedVaultsCount = 0;
         for(let item of items) {
-            let vaultBalance = new BigNumber((await item.dexVaultWallet.methods.balance({answerId: 0}).call()).value0).shiftedBy(-item.decimals);
-            let vaultTokenBalance = new BigNumber((await item.dexTokenVaultWallet.methods
-                .balance({answerId: 0})
-                .call()
-                .catch(e => { return { value0: '0'  } }))
-                .value0)
-                .shiftedBy(-item.decimals);
+            let vaultBalance = new BigNumber(
+                (await item.dexVaultWallet.methods.balance({answerId: 0}).call()).value0
+            ).shiftedBy(-item.decimals);
+            let vaultTokenBalance = new BigNumber(
+                (await item.dexTokenVaultWallet.methods.balance({answerId: 0})
+                    .call()
+                    .catch(e => { return { value0: '0'  } })
+                ).value0
+            ).shiftedBy(-item.decimals);
+            const vaultDeployed = (await item.dexTokenVault.getFullState()).state?.isDeployed;
+
             tokens[item.tokenRoot.address.toString()] = {
                 vaultBalance,
                 vaultTokenBalance,
-                symbol: item.symbol
+                symbol: item.symbol,
+                vaultDeployed
             };
+            if (!vaultDeployed) {
+                notDeployedVaultsCount++;
+            }
         }
         return {
             managerBalance,
             ownerBalance,
-            tokens
+            tokens,
+            notDeployedVaultsCount
         };
     }
 
@@ -110,6 +124,8 @@ async function main() {
              console.log(`${balances.tokens[tokenRoot].vaultTokenBalance} ${balances.tokens[tokenRoot].symbol} (${tokenRoot})`);
             }
         }
+        console.log(`----------------------------------------`);
+        console.log(`${balances.notDeployedVaultsCount} DexTokenVaults not deployed yet`);
         console.log(`########################################`);
     }
 

@@ -82,7 +82,7 @@ const Constants = {
   },
   LP_DECIMALS: 9,
 
-  TESTS_TIMEOUT: 1200000
+  TESTS_TIMEOUT: 120000
 }
 
 for (let i = 0; i < 20; i++) {
