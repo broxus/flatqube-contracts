@@ -80,6 +80,51 @@
 			]
 		},
 		{
+			"name": "getTokenVaultCode",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "getTokenVaultVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "getLpTokenPendingCode",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "getLpTokenPendingVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "getTokenFactory",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
 			"name": "isActive",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
@@ -132,6 +177,16 @@
 			"inputs": [
 				{"name":"answerId","type":"uint32"},
 				{"name":"_roots","type":"address[]"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getExpectedTokenVaultAddress",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"_tokenRoot","type":"address"}
 			],
 			"outputs": [
 				{"name":"value0","type":"address"}
@@ -193,6 +248,15 @@
 			]
 		},
 		{
+			"name": "setTokenFactory",
+			"inputs": [
+				{"name":"_newTokenFactory","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "installPlatformOnce",
 			"inputs": [
 				{"name":"code","type":"cell"}
@@ -227,6 +291,24 @@
 			]
 		},
 		{
+			"name": "installOrUpdateTokenVaultCode",
+			"inputs": [
+				{"name":"_newCode","type":"cell"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "installOrUpdateLpTokenPendingCode",
+			"inputs": [
+				{"name":"_newCode","type":"cell"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "upgrade",
 			"inputs": [
 				{"name":"code","type":"cell"}
@@ -238,6 +320,78 @@
 			"name": "resetGas",
 			"inputs": [
 				{"name":"receiver","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "deployTokenVault",
+			"inputs": [
+				{"name":"_tokenRoot","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onTokenVaultDeployed",
+			"inputs": [
+				{"name":"_version","type":"uint32"},
+				{"name":"_tokenRoot","type":"address"},
+				{"name":"_tokenWallet","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "deployLpToken",
+			"inputs": [
+				{"name":"_tokenRoots","type":"address[]"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onLiquidityTokenDeployed",
+			"inputs": [
+				{"name":"_lpPendingNonce","type":"uint32"},
+				{"name":"_pool","type":"address"},
+				{"name":"_roots","type":"address[]"},
+				{"name":"_lpRoot","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onLiquidityTokenNotDeployed",
+			"inputs": [
+				{"name":"_lpPendingNonce","type":"uint32"},
+				{"name":"_pool","type":"address"},
+				{"name":"_roots","type":"address[]"},
+				{"name":"_lpRoot","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "upgradeTokenVault",
+			"inputs": [
+				{"name":"_tokenRoot","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "upgradeTokenVaults",
+			"inputs": [
+				{"name":"_tokenRoots","type":"address[]"},
+				{"name":"_offset","type":"uint32"},
+				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -292,6 +446,35 @@
 			]
 		},
 		{
+			"name": "upgradePairs",
+			"inputs": [
+				{"components":[{"name":"tokenRoots","type":"address[]"},{"name":"poolType","type":"uint8"}],"name":"_params","type":"tuple[]"},
+				{"name":"_offset","type":"uint32"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setPoolActive",
+			"inputs": [
+				{"components":[{"name":"tokenRoots","type":"address[]"},{"name":"newActive","type":"bool"}],"name":"_param","type":"tuple"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setPoolsActive",
+			"inputs": [
+				{"components":[{"name":"tokenRoots","type":"address[]"},{"name":"newActive","type":"bool"}],"name":"_params","type":"tuple[]"},
+				{"name":"_offset","type":"uint32"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "deployPair",
 			"inputs": [
 				{"name":"left_root","type":"address"},
@@ -314,7 +497,7 @@
 			"name": "setPairFeeParams",
 			"inputs": [
 				{"name":"_roots","type":"address[]"},
-				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"}],"name":"_params","type":"tuple"},
+				{"components":[{"name":"denominator","type":"uint128"},{"name":"pool_numerator","type":"uint128"},{"name":"beneficiary_numerator","type":"uint128"},{"name":"referrer_numerator","type":"uint128"},{"name":"beneficiary","type":"address"},{"name":"threshold","type":"map(address,uint128)"},{"name":"referrer_threshold","type":"map(address,uint128)"}],"name":"_params","type":"tuple"},
 				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
@@ -325,7 +508,7 @@
 			"inputs": [
 				{"name":"_roots","type":"address[]"},
 				{"components":[{"name":"value","type":"uint128"},{"name":"precision","type":"uint128"}],"name":"_A","type":"tuple"},
-				{"name":"send_gas_to","type":"address"}
+				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -411,6 +594,15 @@
 			]
 		},
 		{
+			"name": "TokenVaultCodeUpgraded",
+			"inputs": [
+				{"name":"version","type":"uint32"},
+				{"name":"codeHash","type":"uint256"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "RootCodeUpgraded",
 			"inputs": [
 			],
@@ -467,6 +659,17 @@
 			],
 			"outputs": [
 			]
+		},
+		{
+			"name": "NewTokenVaultCreated",
+			"inputs": [
+				{"name":"vault","type":"address"},
+				{"name":"tokenRoot","type":"address"},
+				{"name":"tokenWallet","type":"address"},
+				{"name":"version","type":"uint32"}
+			],
+			"outputs": [
+			]
 		}
 	],
 	"fields": [
@@ -481,6 +684,11 @@
 		{"name":"_pairVersions","type":"map(uint8,uint32)"},
 		{"name":"_poolCodes","type":"map(uint8,cell)"},
 		{"name":"_poolVersions","type":"map(uint8,uint32)"},
+		{"name":"_vaultCode","type":"cell"},
+		{"name":"_vaultVersion","type":"uint32"},
+		{"name":"_lpTokenPendingCode","type":"cell"},
+		{"name":"_lpTokenPendingVersion","type":"uint32"},
+		{"name":"_tokenFactory","type":"address"},
 		{"name":"_active","type":"bool"},
 		{"name":"_owner","type":"address"},
 		{"name":"_vault","type":"address"},
