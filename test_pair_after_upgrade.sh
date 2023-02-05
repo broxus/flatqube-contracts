@@ -31,7 +31,6 @@ npx locklift test $NO_TRACE --tests test/31-install-account-code.js --contract_n
 npx locklift test $NO_TRACE --tests test/36-upgrade-account.js --owner_n=2 --old_contract_name="DexAccountPrev" --new_contract_name="DexAccount"
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=3 --contract_name='DexAccount'
 
-#todo
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPairTemp' --pool_type=1
 npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPairPrev' --new_contract_name='DexPairTemp' --pool_type=1
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPair' --pool_type=1

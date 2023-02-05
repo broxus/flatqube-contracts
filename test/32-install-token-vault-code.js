@@ -21,9 +21,9 @@ program.parse(process.argv);
 
 const options = program.opts();
 
-options.contract_name = options.contract_name || 'DexAccountV2';
+options.contract_name = options.contract_name || 'DexTokenVault';
 
-describe('Test DexAccount contract upgrade', async function () {
+describe('Test DexTokenVault contract upgrade', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
 
     before('Load contracts', async function () {
@@ -36,26 +36,26 @@ describe('Test DexAccount contract upgrade', async function () {
         [keyPair] = await locklift.keys.getKeyPairs();
 
     })
-    describe('Install DexAccount code', async function () {
+    describe('Install DexTokenVault code', async function () {
         it('Check code version', async function () {
-            const startVersion = await dexRoot.call({method: 'getAccountVersion', params: {}});
-            logger.log(`Start DexAccount code version: ${startVersion}`);
+            const startVersion = await dexRoot.call({method: 'getTokenVaultVersion', params: {}});
+            logger.log(`Start DexTokenVault code version: ${startVersion}`);
 
-            logger.log(`Installing new DexAccount contract in DexRoot: ${dexRoot.address}`);
+            logger.log(`Installing new DexTokenVault contract in DexRoot: ${dexRoot.address}`);
             await account.runTarget({
                 contract: dexRoot,
-                method: 'installOrUpdateAccountCode',
-                params: {code: NextVersionContract.code},
+                method: 'installOrUpdateTokenVaultCode',
+                params: {_newCode: NextVersionContract.code, _remainingGasTo: account.address},
                 value: locklift.utils.convertCrystal(5, 'nano'),
                 keyPair
             });
 
-            const endVersion = await dexRoot.call({method: 'getAccountVersion', params: {}});
-            logger.log(`End DexAccount code version: ${endVersion}`);
+            const endVersion = await dexRoot.call({method: 'getTokenVaultVersion', params: {}});
+            logger.log(`End DexTokenVault code version: ${endVersion}`);
 
             expect(new BigNumber(startVersion).plus(1).toString())
                 .to
-                .equal(new BigNumber(endVersion).toString(), 'DexAccount code version incorrect');
+                .equal(new BigNumber(endVersion).toString(), 'DexTokenVault code version incorrect');
         });
     });
 });

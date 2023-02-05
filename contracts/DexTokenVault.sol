@@ -341,7 +341,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         builder.store(_remainingGasTo);
 
         builder.store(platform_code);
-        builder.store(params);
+        builder.store(params.toCell());
 
         tvm.setcode(_newCode);
         tvm.setCurrentCode(_newCode);

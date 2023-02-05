@@ -8,7 +8,7 @@ export NO_TRACE="--config locklift.config.js --disable-build --network local"
 echo "____________________________________________________________________";
 echo "prepare dex";
 npx locklift run $NO_TRACE --script scripts/0-reset-migration.js
-npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0' --balance='60'
+npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0' --balance='100'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='1' --balance='50'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='2' --balance='50'
 npx locklift run $NO_TRACE --script scripts/0-deploy-TokenFactory.js
@@ -23,6 +23,9 @@ npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_n
 npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='foo' --right='bar' --account=2 --contract_name='DexPairPrev' --account_contract_name='DexAccountPrev' --ignore_already_added='true'
 npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits='[{ "tokenId": "bar", "amount": 100000000 }, { "tokenId": "foo", "amount": 100000000 }]'
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'foo' --right_token_id 'bar' --left_amount '100000' --right_amount '100000' --auto_change 'false' --contract_name='DexPairPrev' --account_contract_name='DexAccountPrev'
+
+echo "____________________________________________________________________";
+npx locklift run $NO_TRACE --script scripts/8-add-wallets-info-to-vault.js
 
 echo "____________________________________________________________________";
 echo "prev root ->  root";
@@ -125,12 +128,18 @@ echo "____________________________________________________________________";
 echo "pool -> next pool";
 npx locklift test $NO_TRACE --tests test/30-install-pool-code.js --contract_name='DexStablePool' --pool_type=3
 npx locklift test $NO_TRACE --tests test/35-upgrade-pool.js --roots='["foo", "bar", "qwe"]' --old_contract_name='DexStablePool' --new_contract_name='DexStablePool' --pool_type=3
+
 echo "____________________________________________________________________";
-echo "vault ->  next vault";
+echo "token vault -> next token vault";
+npx locklift test $NO_TRACE --tests test/32-install-token-vault-code.js --contract_name='DexTokenVault'
+npx locklift test $NO_TRACE --tests test/38-upgrade-token-vault.js --token="foo" --old_contract_name="DexTokenVault" --new_contract_name="DexTokenVault"
+
+echo "____________________________________________________________________";
+echo "vault -> next vault";
 npx locklift test $NO_TRACE --tests test/upgrade/3-vault-upgrade-test.js
 
 echo "____________________________________________________________________";
-echo "root ->  next root";
+echo "root -> next root";
 #npx locklift run $DEFAULT_PARAMS --script scripts/update-dexRoot.js --old_contract='DexRoot' --new_contract='TestNewDexRoot'
 npx locklift test $DEFAULT_PARAMS --tests test/upgrade/4-root-upgrade-test.js
 
