@@ -16,7 +16,7 @@ async function processTokenWallets() {
     method: 'migrateLiquidity',
     params: {},
     keyPair: keyPairs[0],
-    value: locklift.utils.convertCrystal(200, 'nano')
+    value: locklift.utils.convertCrystal(100, 'nano')
   });
   displayTx(tx);
 
