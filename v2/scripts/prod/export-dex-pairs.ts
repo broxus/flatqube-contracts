@@ -1,5 +1,6 @@
 import { writeFileSync } from 'fs';
 import { Address } from 'locklift';
+import { yellowBright } from 'chalk';
 
 const OLD_DEX_PAIR_CODE_HASH =
   'd7f137ee2123785ed7dd56fad374ab7c0e99343eb97e918aac1bbc6bd9bb827b';
@@ -34,7 +35,7 @@ async function exportDexPairs() {
     accounts.push(...result.accounts);
   }
 
-  const promises: Promise<PairEntity>[] = [];
+  const promises: Promise<PairEntity | null>[] = [];
 
   for (const dexPairAddress of accounts) {
     promises.push(
@@ -64,6 +65,11 @@ async function exportDexPairs() {
             right: roots.right,
             lp: roots.lp,
           });
+        } else {
+          console.log(
+            yellowBright(`DexPair ${dexPairAddress} has another root: ${root}`),
+          );
+          resolve(null);
         }
       }),
     );
@@ -75,7 +81,11 @@ async function exportDexPairs() {
 
   writeFileSync(
     './v2/scripts/prod/dex_pairs.json',
-    JSON.stringify(pairs, null, 2),
+    JSON.stringify(
+      pairs.filter((v) => !!v),
+      null,
+      2,
+    ),
   );
 }
 
