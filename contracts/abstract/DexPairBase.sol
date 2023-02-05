@@ -523,11 +523,18 @@ abstract contract DexPairBase is
     ) external override onlyRoot {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        bool previous = _active;
+
         if (_newActive) {
             _tryToActivate();
         } else {
             _active = false;
         }
+
+        emit ActiveStatusUpdated({
+            current: _active,
+            previous: previous
+        });
 
         _remainingGasTo.transfer({
             value: 0,

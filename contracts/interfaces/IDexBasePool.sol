@@ -24,6 +24,11 @@ interface IDexBasePool is
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // EVENTS
 
+    event ActiveStatusUpdated(
+        bool current,
+        bool previous
+    );
+
     /// @dev Emits when fees config was successfully updated
     event FeesParamsUpdated(FeeParams params);
 
