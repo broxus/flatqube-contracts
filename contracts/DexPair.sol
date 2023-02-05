@@ -1273,10 +1273,11 @@ contract DexPair is DexPairBase, INextExchangeData {
 
                         // Transfer incoming token to token vault
                         ITokenWallet(msg.sender)
-                            .transferToWallet{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+                            .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                             (
                                 _tokensAmount,
-                                _getVaultWallet(spentTokenIndex),
+                                _expectedTokenVaultAddress(_tokenRoot),
+                                0,
                                 _remainingGasTo,
                                 false,
                                 empty
@@ -1356,10 +1357,11 @@ contract DexPair is DexPairBase, INextExchangeData {
                         );
 
                         ITokenWallet(msg.sender)
-                            .transferToWallet{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+                            .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                             (
                                 _tokensAmount,
-                                _getVaultWallet(spentTokenIndex),
+                                _expectedTokenVaultAddress(_tokenRoot),
+                                0,
                                 _remainingGasTo,
                                 false,
                                 empty
@@ -1458,10 +1460,11 @@ contract DexPair is DexPairBase, INextExchangeData {
 
                         // Transfer incoming token to token vault
                         ITokenWallet(msg.sender)
-                            .transferToWallet{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+                            .transfer{ value: DexGas.TRANSFER_TOKENS_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                             (
                                 _tokensAmount,
-                                _getVaultWallet(spentTokenIndex),
+                                _expectedTokenVaultAddress(_tokenRoot),
+                                0,
                                 _remainingGasTo,
                                 false,
                                 empty
