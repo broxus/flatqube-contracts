@@ -62,7 +62,7 @@ async function main() {
 
         console.log(`Token ${tokenData.name}: ${tokenRoot.address}`)
         migration.store({
-            name: tokenData.symbol + 'Root',
+            name: 'TokenRootUpgradeable',
             address: tokenRoot.address,
         }, `${tokenData.symbol}Root`);
     }

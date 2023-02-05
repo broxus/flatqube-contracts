@@ -51,4 +51,4 @@ echo "Add manager";
 npx locklift run $NO_TRACE --script scripts/add-vault-manager.js
 #
 #echo "____________________________________________________________________";
-#npx locklift run $NO_TRACE --script scripts/60-migrate-liquidity-to-multivault.js
+npx locklift run $NO_TRACE --script scripts/60-migrate-liquidity-to-multivault.js

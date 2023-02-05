@@ -985,6 +985,15 @@ contract DexStablePool is
     ) override external onlyActive onlyAccount(account_owner) {
         require(_expected.root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
 
+        bool isValid = true;
+        if (lp_supply == 0) {
+            uint256 deposit = math.muldiv(tokenData[tokenIndex[_operations[0].root]].rate, _operations[0].amount, PRECISION);
+            for (TokenOperation op: _operations) {
+                isValid = isValid && math.muldiv(tokenData[tokenIndex[op.root]].rate, op.amount, PRECISION) == deposit;
+            }
+            isValid = isValid && deposit != 0;
+        }
+
         bool anyGreaterThanZero = false;
         bool allGreaterThanZero = true;
         for (TokenOperation op: _operations) {
@@ -995,7 +1004,7 @@ contract DexStablePool is
             }
         }
 
-        require(lp_supply != 0 || allGreaterThanZero, DexErrors.WRONG_LIQUIDITY);
+        require(isValid, DexErrors.WRONG_LIQUIDITY);
         require(allGreaterThanZero || (auto_change && anyGreaterThanZero), DexErrors.AMOUNT_TOO_LOW);
 
         uint128[] amounts = new uint128[](0);

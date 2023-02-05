@@ -602,7 +602,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             }));
 
-            migration.store(FooBarLpWallet2, 'FooBarLpWallet3');
+            migration.store(FooBarLpWallet2, 'FooBarLpWallet2');
 
             const dexEnd = await dexBalances();
             const accountEnd3 = await account3balances();

@@ -215,11 +215,11 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
         }
         poolLpRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
         let roots = [];
-        if (options.roots.length === 2) {
+        if (options.pool_contract_name === 'DexStablePool') {
+            roots = (await DexPool.call({method: 'getTokenRoots', params: {}})).roots;
+        } else {
             let data = await DexPool.call({method: 'getTokenRoots', params: {}});
             roots = [data.left, data.right];
-        } else {
-            roots = (await DexPool.call({method: 'getTokenRoots', params: {}})).roots;
         }
         let tokenData = {}; // address to symbol
         for (let i = 0; i < N_COINS; i++) {
@@ -969,19 +969,19 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             const TOKENS_TO_EXCHANGE = 100;
 
             let expected;
-            if (options.roots.length === 2) {
+            if (options.pool_contract_name === 'DexStablePool') {
                 expected = await DexPool.call({
                     method: 'expectedExchange', params: {
                         amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(tokens[1].decimals).toString(),
-                        spent_token_root: tokenRoots[1].address
+                        spent_token_root: tokenRoots[1].address,
+                        receive_token_root: tokenRoots[0].address
                     }
                 });
             } else {
                 expected = await DexPool.call({
                     method: 'expectedExchange', params: {
                         amount: new BigNumber(TOKENS_TO_EXCHANGE).shiftedBy(tokens[1].decimals).toString(),
-                        spent_token_root: tokenRoots[1].address,
-                        receive_token_root: tokenRoots[0].address
+                        spent_token_root: tokenRoots[1].address
                     }
                 });
             }
@@ -991,17 +991,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-tokens[0].decimals).toString()} ${tokens[0].symbol}`);
 
             let payload;
-            if (options.roots.length === 2) {
-                payload = await DexPool.call({
-                    method: 'buildExchangePayloadV2', params: {
-                        _id: 0,
-                        _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
-                        _expectedAmount: expected.expected_amount,
-                        _recipient: Account2.address,
-                        _referrer: Account2.address
-                    }
-                });
-            } else {
+            if (options.pool_contract_name === 'DexStablePool') {
                 payload = await DexPool.call({
                     method: 'buildExchangePayload', params: {
                         id: 0,
@@ -1010,6 +1000,16 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                         outcoming: tokenRoots[0].address,
                         recipient: Account2.address,
                         referrer: Account2.address
+                    }
+                });
+            } else {
+                payload = await DexPool.call({
+                    method: 'buildExchangePayloadV2', params: {
+                        _id: 0,
+                        _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
+                        _expectedAmount: expected.expected_amount,
+                        _recipient: Account2.address,
+                        _referrer: Account2.address
                     }
                 });
             }
@@ -1139,19 +1139,19 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             const TOKENS_TO_RECEIVE = 100;
 
             let expected;
-            if (options.roots.length === 2) {
+            if (options.pool_contract_name === 'DexStablePool') {
                 expected = await DexPool.call({
                     method: 'expectedSpendAmount', params: {
                         receive_amount: new BigNumber(TOKENS_TO_RECEIVE).shiftedBy(tokens[1].decimals).toString(),
-                        receive_token_root: tokenRoots[1].address
+                        receive_token_root: tokenRoots[1].address,
+                        spent_token_root: tokenRoots[0].address,
                     }
                 });
             } else {
                 expected = await DexPool.call({
                     method: 'expectedSpendAmount', params: {
                         receive_amount: new BigNumber(TOKENS_TO_RECEIVE).shiftedBy(tokens[1].decimals).toString(),
-                        receive_token_root: tokenRoots[1].address,
-                        spent_token_root: tokenRoots[0].address,
+                        receive_token_root: tokenRoots[1].address
                     }
                 });
             }
@@ -1161,17 +1161,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             logger.log(`Expected receive amount: ${TOKENS_TO_RECEIVE} ${tokens[1].symbol}`);
 
             let payload;
-            if (options.roots.length === 2) {
-                payload = await DexPool.call({
-                    method: 'buildExchangePayloadV2', params: {
-                        _id: 0,
-                        _deployWalletGrams: locklift.utils.convertCrystal('0.2', 'nano'),
-                        _expectedAmount: 0,
-                        _recipient: Account2.address,
-                        _referrer: Account2.address
-                    }
-                });
-            } else {
+            if (options.pool_contract_name === 'DexStablePool') {
                 payload = await DexPool.call({
                     method: 'buildExchangePayload', params: {
                         id: 0,
@@ -1180,6 +1170,16 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                         outcoming: tokenRoots[1].address,
                         recipient: Account2.address,
                         referrer: Account2.address
+                    }
+                });
+            } else {
+                payload = await DexPool.call({
+                    method: 'buildExchangePayloadV2', params: {
+                        _id: 0,
+                        _deployWalletGrams: locklift.utils.convertCrystal('0.2', 'nano'),
+                        _expectedAmount: 0,
+                        _recipient: Account2.address,
+                        _referrer: Account2.address
                     }
                 });
             }

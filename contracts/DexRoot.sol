@@ -610,7 +610,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyActive
     {
-        require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE +  0.1 ever, DexErrors.VALUE_TOO_LOW);
         require(_tokenRoot.value != 0 && _tokenRoot != address(this), DexErrors.WRONG_TOKEN_ROOT);
 
         _deployVaultInternal(
@@ -680,7 +680,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyPool(_tokenRoots)
     {
-        require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= DexGas.DEPLOY_LP_TOKEN_ROOT_VALUE, DexErrors.VALUE_TOO_LOW);
 
         TvmCell data = _buildLpTokenPendingInitData(
             now,
@@ -1141,7 +1141,13 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyActive
     {
-        require(msg.value >= DexGas.DEPLOY_PAIR_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(
+            msg.value >=  (
+                DexGas.DEPLOY_POOL_BASE_VALUE +
+                3 * (DexGas.DEPLOY_VAULT_MIN_VALUE + 0.1 ever)
+            ),
+            DexErrors.VALUE_TOO_LOW
+        );
         require(left_root.value != right_root.value, DexErrors.WRONG_PAIR);
         require(left_root.value != 0, DexErrors.WRONG_PAIR);
         require(right_root.value != 0, DexErrors.WRONG_PAIR);
@@ -1173,11 +1179,18 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyManagerOrOwner
     {
-        require(msg.value >= DexGas.DEPLOY_PAIR_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        uint256 rootsCount = roots.length;
+        require(
+            msg.value >=  (
+                DexGas.DEPLOY_POOL_BASE_VALUE +
+                (rootsCount + 1) * (DexGas.DEPLOY_VAULT_MIN_VALUE + 0.1 ever)
+            ),
+            DexErrors.VALUE_TOO_LOW
+        );
         require(_poolCodes.exists(DexPoolTypes.STABLE_POOL), DexErrors.PAIR_CODE_EMPTY);
 
         mapping(address => bool) _roots;
-        for (uint i = 0; i < roots.length; i++) {
+        for (uint i = 0; i < rootsCount; i++) {
             require(roots[i].value != 0, DexErrors.WRONG_PAIR);
             require(_roots[roots[i]] != true, DexErrors.WRONG_PAIR);
 
