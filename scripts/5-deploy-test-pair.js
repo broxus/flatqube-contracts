@@ -113,42 +113,45 @@ async function main() {
       }
     }));
 
-    const FooTokenVault = await dexRoot.call({
+    const FooTokenVault = await locklift.factory.getContract('DexTokenVault', TOKEN_CONTRACTS_PATH);
+    FooTokenVault.setAddress(await dexRoot.call({
       method: 'getExpectedTokenVaultAddress',
       params: { _tokenRoot: tokenFoo.address },
-    });
+    }));
 
     const FooVaultWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
     FooVaultWallet.setAddress(await tokenFoo.call({
       method: "walletOf",
       params: {
-        walletOwner: FooTokenVault,
+        walletOwner: FooTokenVault.address,
       }
     }));
 
-    const BarTokenVault = await dexRoot.call({
+    const BarTokenVault = await locklift.factory.getContract('DexTokenVault', TOKEN_CONTRACTS_PATH);
+    BarTokenVault.setAddress(await dexRoot.call({
       method: 'getExpectedTokenVaultAddress',
       params: { _tokenRoot: tokenBar.address },
-    });
+    }));
 
     const BarVaultWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
     BarVaultWallet.setAddress(await tokenBar.call({
       method: "walletOf",
       params: {
-        walletOwner: BarTokenVault,
+        walletOwner: BarTokenVault.address,
       }
     }));
 
-    const LpTokenVault = await dexRoot.call({
+    const LpTokenVault = await locklift.factory.getContract('DexTokenVault', TOKEN_CONTRACTS_PATH);
+    LpTokenVault.setAddress(await dexRoot.call({
       method: 'getExpectedTokenVaultAddress',
       params: { _tokenRoot: FooBarLpRoot.address },
-    });
+    }));
 
     const FooBarLpVaultWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
     FooBarLpVaultWallet.setAddress(await FooBarLpRoot.call({
       method: "walletOf",
       params: {
-        walletOwner: LpTokenVault,
+        walletOwner: LpTokenVault.address,
       }
     }));
 
@@ -156,8 +159,11 @@ async function main() {
     migration.store(FooPairWallet, pair.left + pair.right + 'Pool_' + pair.left + 'Wallet');
     migration.store(BarPairWallet, pair.left + pair.right + 'Pool_' + pair.right + 'Wallet');
     migration.store(FooBarLpPairWallet, pair.left + pair.right + 'Pool_LpWallet');
+    migration.store(FooTokenVault, pair.left + 'Vault');
+    migration.store(BarTokenVault, pair.right + 'Vault');
     migration.store(FooVaultWallet, pair.left + 'VaultWallet');
     migration.store(BarVaultWallet, pair.right + 'VaultWallet');
+    migration.store(LpTokenVault, pair.left + pair.right + 'LpVault');
     migration.store(FooBarLpVaultWallet, pair.left + pair.right + 'LpVaultWallet');
   }
 }

@@ -102,11 +102,17 @@ contract DexVault is DexContractBase, IDexVault {
                 flag: 1,
                 callback: DexVault.onTokenBalance
             }();
-            if (counter < MAX_ITERATIONS_PER_MSG) {
-                itemOpt = _vaultWallets.next(tokenRoot);
-            } else {
+
+            itemOpt = _vaultWallets.next(tokenRoot);
+
+            if (!itemOpt.hasValue()) {
+                itemOpt.reset();
+                _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
+                break;
+            } else if(counter >= MAX_ITERATIONS_PER_MSG) {
                 itemOpt.reset();
                 this._migrateNext{ value: 0, flag: 128 }(tokenRoot);
+                break;
             }
         }
     }
