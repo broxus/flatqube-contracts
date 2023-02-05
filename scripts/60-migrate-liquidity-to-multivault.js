@@ -40,7 +40,7 @@ async function processTokenWallets() {
         }
       }));
 
-      migration.store(TokenVault, symbol + 'Vault');
+      migration.store(TokenVault, symbol + 'TokenVault');
       migration.store(VaultWallet, symbol + 'VaultWallet');
     }
   }
