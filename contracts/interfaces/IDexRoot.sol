@@ -194,6 +194,12 @@ interface IDexRoot is
         address send_gas_to
     ) external view;
 
+    function upgradeAccounts(
+        address[] _accountOwners,
+        uint32 _offset,
+        address _remainingGasTo
+    ) external view;
+
     function deployPair(
         address left_root,
         address right_root,

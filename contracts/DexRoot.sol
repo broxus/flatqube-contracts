@@ -881,11 +881,67 @@ contract DexRoot is DexContractBase, IDexRoot {
     {
         require(msg.value >= DexGas.UPGRADE_ACCOUNT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
 
-        emit RequestedForceAccountUpgrade(account_owner);
+        _upgradeAccountInternal(
+            account_owner,
+            send_gas_to
+        );
 
-        IUpgradableByRequest(_expectedAccountAddress(account_owner))
-            .upgrade{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
-            (_accountCode, _accountVersion, send_gas_to);
+        send_gas_to.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
+    }
+
+    function upgradeAccounts(
+        address[] _accountsOwners,
+        uint32 _offset,
+        address _remainingGasTo
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
+        uint length = _accountsOwners.length;
+
+        // 10, 20, 30 ... 45
+        uint32 takeUntil = uint32(math.min(_offset + 10, length));
+
+        // [0, 9], [10, 19], [20, 29] ... [30, 44]
+        for (uint i = _offset; i < takeUntil; i++) {
+            _upgradeAccountInternal(_accountsOwners[i], _remainingGasTo);
+        }
+
+        if (takeUntil < length) {
+            IDexRoot(address(this))
+                .upgradeAccounts{
+                    value: 0,
+                    flag: MsgFlag.ALL_NOT_RESERVED,
+                    bounce: false
+                }(_accountsOwners, _offset, _remainingGasTo);
+        } else {
+            _remainingGasTo.transfer({
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED,
+                bounce: false
+            });
+        }
+    }
+
+    function _upgradeAccountInternal(
+        address _owner,
+        address _remainingGasTo
+    )
+        private
+        view
+    {
+        emit RequestedForceAccountUpgrade(_owner);
+
+        IUpgradableByRequest(_expectedAccountAddress(_owner))
+            .upgrade{ value: DexGas.UPGRADE_ACCOUNT_MIN_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+            (_accountCode, _accountVersion, _remainingGasTo);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////

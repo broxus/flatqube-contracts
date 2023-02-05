@@ -29,7 +29,7 @@ library DexGas {
     uint128 constant PAIR_INITIALIZE_VALUE              = 1 ever;
 
     uint128 constant UPGRADE_ROOT_MIN_VALUE             = 10 ever;
-    uint128 constant UPGRADE_ACCOUNT_MIN_VALUE          = 5 ever;
+    uint128 constant UPGRADE_ACCOUNT_MIN_VALUE          = 3 ever;
     uint128 constant UPGRADE_POOL_MIN_VALUE             = 3 ever;
     uint128 constant UPGRADE_VAULT_MIN_VALUE            = 5 ever;
     uint128 constant UPGRADE_TOKEN_VAULT_MIN_VALUE      = 3 ever;
