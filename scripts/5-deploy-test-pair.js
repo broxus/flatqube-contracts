@@ -113,7 +113,7 @@ async function main() {
       }
     }));
 
-    const FooTokenVault = await locklift.factory.getContract('DexTokenVault', TOKEN_CONTRACTS_PATH);
+    const FooTokenVault = await locklift.factory.getContract('DexTokenVault');
     FooTokenVault.setAddress(await dexRoot.call({
       method: 'getExpectedTokenVaultAddress',
       params: { _tokenRoot: tokenFoo.address },
@@ -127,7 +127,7 @@ async function main() {
       }
     }));
 
-    const BarTokenVault = await locklift.factory.getContract('DexTokenVault', TOKEN_CONTRACTS_PATH);
+    const BarTokenVault = await locklift.factory.getContract('DexTokenVault');
     BarTokenVault.setAddress(await dexRoot.call({
       method: 'getExpectedTokenVaultAddress',
       params: { _tokenRoot: tokenBar.address },
@@ -141,7 +141,7 @@ async function main() {
       }
     }));
 
-    const LpTokenVault = await locklift.factory.getContract('DexTokenVault', TOKEN_CONTRACTS_PATH);
+    const LpTokenVault = await locklift.factory.getContract('DexTokenVault');
     LpTokenVault.setAddress(await dexRoot.call({
       method: 'getExpectedTokenVaultAddress',
       params: { _tokenRoot: FooBarLpRoot.address },
