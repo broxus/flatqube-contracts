@@ -1,8 +1,7 @@
 import { Address, toNano } from 'locklift';
 import { Migration } from '../../utils/migration';
+import { yellowBright } from 'chalk';
 import pairs from './dex_pairs.json';
-
-const NewPoolType = 1;
 
 const main = async () => {
   const migration = new Migration();
@@ -12,28 +11,42 @@ const main = async () => {
 
   console.log(`Start force upgrade DexPairs. Count = ${pairs.length}`);
 
-  for (const indx in pairs) {
-    const pairData = pairs[indx];
-    console.log(
-      `${1 + +indx}/${pairs.length}: Upgrading DexPair(${
-        pairData.dexPair
-      }). left = ${pairData.left}, right = ${pairData.right}`,
-    );
-    console.log('');
+  const params = pairs.map((p) => ({
+    tokenRoots: [new Address(p.left), new Address(p.right)],
+    poolType: 1,
+  }));
 
-    await dexRoot.methods
-      .upgradePair({
-        left_root: new Address(pairData.left),
-        right_root: new Address(pairData.right),
-        pool_type: NewPoolType,
-        send_gas_to: owner.address,
+  const { traceTree } = await locklift.tracing.trace(
+    dexRoot.methods
+      .upgradePairs({
+        _params: params,
+        _offset: 0,
+        _remainingGasTo: owner.address,
       })
       .send({
         from: owner.address,
-        amount: toNano(6),
-      });
+        amount: toNano(pairs.length * 3.5),
+      }),
+  );
 
-    await new Promise((resolve) => setTimeout(resolve, 1100));
+  for (const pair of pairs) {
+    const DexPair = locklift.factory.getDeployedContract(
+      'DexPair',
+      new Address(pair.dexPair),
+    );
+
+    const events = traceTree.findEventsForContract({
+      contract: DexPair,
+      name: 'PairCodeUpgraded' as const,
+    });
+
+    if (events.length > 0) {
+      console.log(
+        `DexPair ${pair.dexPair} upgraded. Current version: ${events[0].version}`,
+      );
+    } else {
+      console.log(yellowBright(`DexPair ${pair.dexPair} wasn't upgraded`));
+    }
   }
 };
 
