@@ -118,6 +118,10 @@ contract DexStablePair is
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } current_version;
     }
 
+    function getVault() override external view responsible returns (address) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } vault;
+    }
+
     function getPoolType() override external view responsible returns (uint8) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } DexPoolTypes.STABLESWAP;
     }

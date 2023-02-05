@@ -33,6 +33,9 @@ abstract contract DexPairBase is
     /// @dev DexRoot address
     address private _root;
 
+    /// @dev DexRoot address
+    address private _vault;
+
     /// @dev Whether or not pair is active
     bool internal _active;
 
@@ -166,6 +169,15 @@ abstract contract DexPairBase is
             bounce: false,
             flag: MsgFlag.REMAINING_GAS
         } _currentVersion;
+    }
+
+    // Return DexVault address
+    function getVault() override external view responsible returns (address) {
+        return {
+            value: 0,
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
+        } _vault;
     }
 
     // Return type of the pair's pool
@@ -309,7 +321,7 @@ abstract contract DexPairBase is
             TvmBuilder builder;
 
             builder.store(_root);
-            builder.store(_typeToRootAddresses[DexAddressType.VAULT][0]);
+            builder.store(_vault);
             builder.store(_currentVersion);
             builder.store(_newVersion);
             builder.store(_remainingGasTo);
@@ -542,7 +554,6 @@ abstract contract DexPairBase is
 
         TvmSlice dataSlice = _data.toSlice();
 
-        address vault;
         address remainingGasTo;
         uint32 oldVersion;
         uint8 oldPoolType = DexPoolTypes.CONSTANT_PRODUCT;
@@ -550,7 +561,7 @@ abstract contract DexPairBase is
         // Unpack base data
         (
             _root,
-            vault,
+            _vault,
             oldVersion,
             _currentVersion,
             remainingGasTo
@@ -561,8 +572,6 @@ abstract contract DexPairBase is
             uint32,
             address
         );
-
-        _typeToRootAddresses[DexAddressType.VAULT].push(vault);
 
         if (dataSlice.bits() >= 8) {
             oldPoolType = dataSlice.decode(uint8);
@@ -618,7 +627,6 @@ abstract contract DexPairBase is
 
             // todo remove fees' slice hotfix after upgrade
             _typeToReserves[DexReserveType.FEE] = [_typeToReserves[DexReserveType.FEE][0], _typeToReserves[DexReserveType.FEE][1]];
-            _typeToWalletAddresses[DexAddressType.VAULT] = new address[](0);
 
             _fee = FeeParams(feePrev.denominator, feePrev.pool_numerator, feePrev.beneficiary_numerator, feePrev.referrer_numerator, feePrev.beneficiary, feePrev.threshold, emptyMap);
 
