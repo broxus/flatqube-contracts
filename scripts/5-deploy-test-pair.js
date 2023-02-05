@@ -159,8 +159,8 @@ async function main() {
     migration.store(FooPairWallet, pair.left + pair.right + 'Pool_' + pair.left + 'Wallet');
     migration.store(BarPairWallet, pair.left + pair.right + 'Pool_' + pair.right + 'Wallet');
     migration.store(FooBarLpPairWallet, pair.left + pair.right + 'Pool_LpWallet');
-    migration.store(FooTokenVault, pair.left + 'Vault');
-    migration.store(BarTokenVault, pair.right + 'Vault');
+    migration.store(FooTokenVault, pair.left + 'TokenVault');
+    migration.store(BarTokenVault, pair.right + 'TokenVault');
     migration.store(FooVaultWallet, pair.left + 'VaultWallet');
     migration.store(BarVaultWallet, pair.right + 'VaultWallet');
     migration.store(LpTokenVault, pair.left + pair.right + 'LpVault');
