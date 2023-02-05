@@ -997,8 +997,8 @@ contract DexRoot is DexContractBase, IDexRoot {
 
         emit RequestedPoolUpgrade(_param.tokenRoots);
 
-        TvmCell code = _poolCodes[_param.poolType];
-        uint32 version = _poolVersions[_param.poolType];
+        TvmCell code = _pairCodes[_param.poolType];
+        uint32 version = _pairVersions[_param.poolType];
 
         IDexBasePool(_expectedPoolAddress(_param.tokenRoots))
             .upgrade{
