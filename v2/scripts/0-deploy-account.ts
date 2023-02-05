@@ -1,19 +1,16 @@
-import * as ever from "everscale-inpage-provider";
+import { Migration } from '../utils/migration';
+import { Command } from 'commander';
+import { getRandomNonce, toNano, WalletTypes } from 'locklift';
 
-const {Migration} = require(process.cwd()+'/scripts/utils');
-const { Command } = require('commander');
 const program = new Command();
-
-import {getRandomNonce, toNano, WalletTypes} from "locklift";
 
 const migration = new Migration();
 
 async function main() {
-
   program
-      .allowUnknownOption()
-      .option('-n, --key_number <key_number>', 'count of accounts')
-      .option('-b, --balance <balance>', 'count of accounts');
+    .allowUnknownOption()
+    .option('-n, --key_number <key_number>', 'count of accounts')
+    .option('-b, --balance <balance>', 'count of accounts');
 
   program.parse(process.argv);
 
@@ -23,30 +20,30 @@ async function main() {
   const balance = +(options.balance || '10');
 
   const signer = await locklift.keystore.getSigner(key_number.toString());
-  const { account } = (await locklift.factory.accounts.addNewAccount({
+  const { account } = await locklift.factory.accounts.addNewAccount({
     type: WalletTypes.EverWallet, // or WalletTypes.HighLoadWallet,
     //Value which will send to the new account from a giver
     value: toNano(balance),
     //owner publicKey
-    publicKey: signer!.publicKey,
-    nonce: getRandomNonce()
-  }));
+    publicKey: signer.publicKey,
+    nonce: getRandomNonce(),
+  });
 
   await locklift.provider.sendMessage({
     sender: account.address,
     recipient: account.address,
     amount: toNano(1),
-    bounce: false
-  })
+    bounce: false,
+  });
 
-  const name = `Account${key_number+1}`;
+  const name = `Account${key_number + 1}`;
   migration.store(account, name);
   console.log(`${name}: ${account.address}`);
 }
 
 main()
   .then(() => process.exit(0))
-  .catch(e => {
+  .catch((e) => {
     console.log(e);
     process.exit(1);
   });
