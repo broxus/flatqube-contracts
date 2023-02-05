@@ -1,16 +1,21 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { Address, WalletTypes } from 'locklift';
+import { Address, WalletTypes, Transaction } from 'locklift';
 import { FactorySource } from '../../build/factorySource';
 
 export class Migration<T extends FactorySource> {
-  private migrationLog: Record<string, string>;
+  migrationLog: Record<string, string>;
   private readonly logPath: string;
 
   constructor(logPath = 'locklift.migration.json') {
     this.logPath = join(process.cwd(), logPath);
     this.migrationLog = {};
     this._loadMigrationLog();
+  }
+
+  reset() {
+    this.migrationLog = {};
+    this._saveMigrationLog();
   }
 
   private _loadMigrationLog = () => {
@@ -28,7 +33,6 @@ export class Migration<T extends FactorySource> {
     this._loadMigrationLog();
 
     if (this.migrationLog[name] !== undefined) {
-
       return locklift.factory.accounts.addExistingAccount({
         address: new Address(this.migrationLog[name]),
         type: WalletTypes.EverWallet,
@@ -66,3 +70,55 @@ export class Migration<T extends FactorySource> {
     this._saveMigrationLog();
   };
 }
+
+export const displayTx = (_tx: Transaction) => {
+  console.log(`txId: ${_tx.id.hash ? _tx.id.hash : _tx.id}`);
+};
+
+export const Constants: {
+  tokens: Record<string, any>;
+  LP_DECIMALS: number;
+  TESTS_TIMEOUT: number;
+} = {
+  tokens: {
+    foo: {
+      name: 'Foo',
+      symbol: 'Foo',
+      decimals: 18,
+      upgradeable: true,
+    },
+    bar: {
+      name: 'Bar',
+      symbol: 'Bar',
+      decimals: 18,
+      upgradeable: true,
+    },
+    qwe: {
+      name: 'QWE',
+      symbol: 'Qwe',
+      decimals: 18,
+      upgradeable: true,
+    },
+    tst: {
+      name: 'Tst',
+      symbol: 'Tst',
+      decimals: 18,
+      upgradeable: true,
+    },
+    coin: {
+      name: 'Coin',
+      symbol: 'Coin',
+      decimals: 9,
+      upgradeable: true,
+    },
+    wever: {
+      name: 'Wrapped EVER',
+      symbol: 'WEVER',
+      decimals: 9,
+      upgradeable: true,
+    },
+  },
+  LP_DECIMALS: 9,
+
+  TESTS_TIMEOUT: 120000,
+};
