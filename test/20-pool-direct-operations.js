@@ -210,7 +210,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
 
         if (migration.exists(poolName + 'LpWallet3')) {
             migration.load(poolLpWallet3, poolName + 'LpWallet3');
-            logger.log(poolName + `LpWallet3#3: ${poolLpWallet3.address}`);
+            logger.log(poolName + `LpWallet3: ${poolLpWallet3.address}`);
         } else {
             const expected = await poolLpRoot.call({
                 method: 'walletOf',
@@ -569,6 +569,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
             const poolStart = await dexPoolInfo();
             logBalances('start', dexStart, accountStart, poolStart);
 
+            console.log(accountStart);
+
             let amount = 2000 * Math.pow(10, Math.max(tokens[i].decimals - Constants.LP_DECIMALS, 0));
 
             const LP_REWARD = await expectedDepositLiquidityOneCoin(
@@ -619,6 +621,9 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
             const poolEnd = await dexPoolInfo();
             logBalances('end', dexEnd, accountEnd, poolEnd);
             await migration.logGas();
+
+            console.log(accountEnd);
+            console.log(LP_REWARD);
 
             const expectedDexCoin = new BigNumber(dexStart.token_balances[i]).plus(new BigNumber(amount).shiftedBy(-tokens[i].decimals)).toString();
             const expectedAccountCoin = new BigNumber(accountStart.token_balances[i]).minus(new BigNumber(amount).shiftedBy(-tokens[i].decimals)).toString();
