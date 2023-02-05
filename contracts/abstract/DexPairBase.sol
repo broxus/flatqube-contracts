@@ -177,10 +177,6 @@ abstract contract DexPairBase is
         } DexPoolTypes.CONSTANT_PRODUCT;
     }
 
-    function _getVaultWallet(uint8 _index) internal view returns (address) {
-        return _typeToWalletAddresses[DexAddressType.VAULT][_index];
-    }
-
     // Return fee options
     function getFeeParams() override external view responsible returns (FeeParams) {
         return {
@@ -440,42 +436,6 @@ abstract contract DexPairBase is
         _tryToActivate();
     }
 
-    /// @dev Callback after wallet deploy for vault's reserve
-    /// @param _wallet Address of the wallet with for vault's reserve
-    function onVaultTokenWallet(address _wallet) external onlyTokenRoot {
-        // Set vault wallets addresses
-        if (
-            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][0]
-        ) {
-            if (
-                _typeToWalletAddresses[DexAddressType.VAULT].length == 0
-            ) {
-                _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
-            } else if (
-                _typeToWalletAddresses[DexAddressType.VAULT].length == 2 &&
-                _typeToWalletAddresses[DexAddressType.VAULT][0].value == 0
-            ) {
-                _typeToWalletAddresses[DexAddressType.VAULT][0] = _wallet;
-            }
-        } else if (
-            msg.sender == _typeToRootAddresses[DexAddressType.RESERVE][1]
-        ) {
-            if (
-                _typeToWalletAddresses[DexAddressType.VAULT].length == 1 &&
-                _typeToWalletAddresses[DexAddressType.VAULT][0] != _wallet
-            ) {
-                _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
-            } else if (
-                _typeToWalletAddresses[DexAddressType.VAULT].length == 0
-            ) {
-                _typeToWalletAddresses[DexAddressType.VAULT].push(address(0));
-                _typeToWalletAddresses[DexAddressType.VAULT].push(_wallet);
-            }
-        }
-
-        _tryToActivate();
-    }
-
     /// @dev Returns DEX root address
     /// @return address DexRoot address
     function _dexRoot() override internal view returns (address) {
@@ -543,16 +503,6 @@ abstract contract DexPairBase is
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexPairBase.onTokenWallet
             }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
-
-        // Request wallet's address
-        if (_tokenRoot != _typeToRootAddresses[DexAddressType.LP][0]) {
-            ITokenRoot(_tokenRoot)
-                .walletOf{
-                    value: DexGas.SEND_EXPECTED_WALLET_VALUE,
-                    flag: MsgFlag.SENDER_PAYS_FEES,
-                    callback: DexPairBase.onVaultTokenWallet
-                }(_expectedTokenVaultAddress(_tokenRoot));
-        }
     }
 
     function setActive(
@@ -578,8 +528,7 @@ abstract contract DexPairBase is
     function _tryToActivate() private {
         if (
             _typeToWalletAddresses[DexAddressType.LP].length == 1 &&
-            _typeToWalletAddresses[DexAddressType.RESERVE].length == 2 &&
-            _typeToWalletAddresses[DexAddressType.VAULT].length == 2
+            _typeToWalletAddresses[DexAddressType.RESERVE].length == 2
         ) {
             _active = true;
         }
@@ -667,6 +616,7 @@ abstract contract DexPairBase is
                 mapping(uint8 => address[])
             ));
 
+            // todo remove fees' slice hotfix after upgrade
             _typeToReserves[DexReserveType.FEE] = [_typeToReserves[DexReserveType.FEE][0], _typeToReserves[DexReserveType.FEE][1]];
             _typeToWalletAddresses[DexAddressType.VAULT] = new address[](0);
 
