@@ -64,6 +64,7 @@ contract DexVault is DexContractBase, IDexVault {
 
     function onTokenBalance(uint128 _amount) external view {
         require(_vaultWalletsToRoots.exists(msg.sender));
+        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
 
         address _tokenRoot = _vaultWalletsToRoots.at(msg.sender);
 
