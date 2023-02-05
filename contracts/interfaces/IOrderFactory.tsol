@@ -3,13 +3,26 @@ pragma ever-solidity >=0.62.0;
 import "../structures/IOrderFeeParams.tsol";
 
 interface IOrderFactory is IOrderFeeParams {
+    function onOrderRootDeployedCallback(
+        address orderRoot,
+        address token,
+        address sendGasTo
+    ) external;
+
     function transferOwner(address newOwner) external responsible returns (address);
+
     function acceptOwner() external responsible returns (address);
+
     function getOwner() external view responsible returns (address);
+
     function getPendingOwner() external view responsible returns (address);
+
     function getVersion()  external view responsible returns (uint32);
+
     function getVersionRoot()  external view responsible returns (uint32);
+
     function getVersionOrder()  external view responsible returns (uint32);
+
     function getFeeParams() external view responsible returns (OrderFeeParams);
 
     function getExpectedAddressOrderRoot(address token)
@@ -25,9 +38,13 @@ interface IOrderFactory is IOrderFeeParams {
     ) external view;
 
     function setFeeParams(OrderFeeParams params) external;
+
     function setRootFeeParams(OrderFeeParams params, address root) external;
+
     function setOrderFeeParams(OrderFeeParams params, address order) external;
+
     function setOrderRootCode(TvmCell _orderRootCode) external;
+
     function setOrderCode(TvmCell _orderCode) external;
 
     function withdrawFee(
