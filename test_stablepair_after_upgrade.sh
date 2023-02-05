@@ -34,11 +34,12 @@ npx locklift test $NO_TRACE --tests test/31-install-account-code.js --contract_n
 npx locklift test $NO_TRACE --tests test/36-upgrade-account.js --owner_n=2 --old_contract_name="DexAccountPrev" --new_contract_name="DexAccount"
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=3 --contract_name='DexAccount'
 
-npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPairTemp' --pool_type=1
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexStablePairTemp' --pool_type=2
-npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexStablePairPrev' --new_contract_name='DexStablePairTemp' --pool_type=1
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexStablePairPrev' --new_contract_name='DexStablePairTemp' --pool_type=2
+npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexStablePair' --pool_type=2
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexStablePairTemp' --new_contract_name='DexStablePair' --pool_type=2
 npx locklift test $NO_TRACE --tests test/30-install-pool-code.js --contract_name='DexStablePool' --pool_type=3
-npx locklift test $NO_TRACE --tests test/35-upgrade-pool.js --roots='["foo", "bar"]' --old_contract_name='DexStablePairTemp' --new_contract_name='DexStablePool' --pool_type=3
+npx locklift test $NO_TRACE --tests test/35-upgrade-pool.js --roots='["foo", "bar"]' --old_contract_name='DexStablePair' --new_contract_name='DexStablePool' --pool_type=3
 
 #upgrade END
 #######################################################
