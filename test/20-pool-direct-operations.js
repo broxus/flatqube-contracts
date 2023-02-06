@@ -571,7 +571,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
 
             console.log(accountStart);
 
-            let amount = 2000 * Math.pow(10, Math.max(tokens[i].decimals - Constants.LP_DECIMALS, 0));
+            let amount = 300 * Math.pow(10, Math.max(tokens[i].decimals - Constants.LP_DECIMALS, 0));
 
             const LP_REWARD = await expectedDepositLiquidityOneCoin(
                 DexPool.address,

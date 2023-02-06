@@ -2616,7 +2616,7 @@ contract DexStablePool is
         }
 
         uint128 fee_numerator = fee.beneficiary_numerator + fee.pool_numerator + fee.referrer_numerator;
-        uint128 fees = math.muldiv(fee_numerator, _amount, fee.denominator);
+        uint128 fees = math.muldivc(fee_numerator, _amount, fee.denominator);
         uint128 referrer_fee = math.muldiv(fees, fee.referrer_numerator, fee_numerator);
 
         if (referrer.value != 0 && (
@@ -2846,7 +2846,8 @@ contract DexStablePool is
             return (result, referrer_fees);
         }
 
-        uint256 dy_0 = (xp_mem[i] - new_y0_opt.get()) / tokenData[i].precisionMul; // without fee
+        uint128 new_y0 = new_y0_opt.get();
+        uint256 dy_0 = (xp_mem[i] - new_y0) / tokenData[i].precisionMul; // without fee
 
         uint128 new_y = new_y_opt.get();
         uint256 dy = (xp_mem[i] - new_y) / tokenData[i].precisionMul;
@@ -2863,7 +2864,7 @@ contract DexStablePool is
             differences[j] = uint128(dx_expected);
         }
 
-        uint128 dy_fee = uint128(dy_0 - dy);
+        uint128 dy_fee = uint128(math.divc(new_y - new_y0, tokenData[i].precisionMul));
         uint128 fee_numerator = fee.pool_numerator + fee.beneficiary_numerator + fee.referrer_numerator;
         uint128 referrer_fee = math.muldiv(dy_fee, fee.referrer_numerator, fee_numerator);
 
