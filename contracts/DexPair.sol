@@ -235,7 +235,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         address[] tokenRoots = _tokenRoots();
         uint128[] tokenReserves = _reserves();
 
-        uint128 referrerValue = _referrer.value != 0 ? DexGas.TRANSFER_REFERRER_FEE_BASE + DexGas.DEPLOY_REFERRER_FEE_EMPTY_WALLET + DexGas.REFERRAL_PROGRAM_CALLBACK + 0.1 ever : 0;
+        uint128 referrerValue = _referrer.value != 0 ? DexGas.REFERRER_FEE_EXTRA_VALUE : 0;
 
         TokenOperation[] operations = _operations[0].root == tokenRoots[1] ? [_operations[1], _operations[0]] : _operations;
 
@@ -858,7 +858,7 @@ contract DexPair is DexPairBase, INextExchangeData {
             IDexTokenVault(_expectedTokenVaultAddress(_tokenRoots()[spentTokenIndex]))
                 .referralFeeTransfer{
                     value: _referrerValue,
-                    flag: MsgFlag.SENDER_PAYS_FEES
+                    flag: 0
                 }(
                     _referrerFee,
                     _referrer,
@@ -968,7 +968,7 @@ contract DexPair is DexPairBase, INextExchangeData {
             nextSteps[0].poolRoot = _expectedPoolAddress([_tokenRoots()[receiveTokenIndex], nextSteps[0].poolRoot]);
         }
 
-        uint128 referrerValue = _referrer.value != 0 ? DexGas.TRANSFER_REFERRER_FEE_BASE + DexGas.DEPLOY_REFERRER_FEE_EMPTY_WALLET + DexGas.REFERRAL_PROGRAM_CALLBACK + 0.1 ever : 0;
+        uint128 referrerValue = _referrer.value != 0 ? DexGas.REFERRER_FEE_EXTRA_VALUE : 0;
 
         if (
             _spentTokenRoot == _tokenRoots()[0] ||
@@ -1204,11 +1204,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         ) = PairPayload.decodeOnAcceptTokensTransferPayloads(_payload, op);
 
         TvmCell empty;
-        uint128 referrerValue = referrer.value != 0 ?
-            DexGas.TRANSFER_REFERRER_FEE_BASE +
-            DexGas.DEPLOY_REFERRER_FEE_EMPTY_WALLET +
-            DexGas.REFERRAL_PROGRAM_CALLBACK + 0.1 ever :
-            0;
+        uint128 referrerValue = referrer.value != 0 ? DexGas.REFERRER_FEE_EXTRA_VALUE : 0;
 
         uint16 errorCode = _checkOperationData(
             msg.sender,

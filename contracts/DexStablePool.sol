@@ -385,7 +385,7 @@ contract DexStablePool is
         ) = PairPayload.decodeOnAcceptTokensTransferPayloads(payload, op);
 
         TvmCell empty;
-        uint128 referrer_value = referrer.value != 0 ? DexGas.TRANSFER_REFERRER_FEE_BASE + DexGas.DEPLOY_REFERRER_FEE_EMPTY_WALLET + DexGas.REFERRAL_PROGRAM_CALLBACK + 0.1 ton : 0;
+        uint128 referrer_value = referrer.value != 0 ? DexGas.REFERRER_FEE_EXTRA_VALUE : 0;
 
         uint16 errorCode = _checkOperationData(msg.sender, msg.value, is_payload_valid, deploy_wallet_grams, op, token_root, outcoming, referrer_value);
 
@@ -516,7 +516,7 @@ contract DexStablePool is
                     if (referrer_fee > 0) {
                         IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
                             value: referrer_value,
-                            flag: MsgFlag.SENDER_PAYS_FEES
+                            flag: 0
                         }(
                             referrer_fee,
                             referrer,
@@ -735,7 +735,7 @@ contract DexStablePool is
                             if (referrer_fee > 0) {
                                 IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
                                     value: referrer_value,
-                                    flag: MsgFlag.SENDER_PAYS_FEES
+                                    flag: 0
                                 }(
                                     referrer_fee,
                                     referrer,
@@ -1018,7 +1018,7 @@ contract DexStablePool is
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        uint128 referrer_value = referrer.value != 0 ? DexGas.TRANSFER_REFERRER_FEE_BASE + DexGas.DEPLOY_REFERRER_FEE_EMPTY_WALLET + DexGas.REFERRAL_PROGRAM_CALLBACK + 0.1 ton : 0;
+        uint128 referrer_value = referrer.value != 0 ? DexGas.REFERRER_FEE_EXTRA_VALUE : 0;
 
         _applyAddLiquidity(
             result,
@@ -1367,7 +1367,7 @@ contract DexStablePool is
         ) = PairPayload.decodeCrossPoolExchangePayload(payload, op);
 
         TvmCell empty;
-        uint128 referrer_value = referrer.value != 0 ? DexGas.TRANSFER_REFERRER_FEE_BASE + DexGas.DEPLOY_REFERRER_FEE_EMPTY_WALLET + DexGas.REFERRAL_PROGRAM_CALLBACK + 0.1 ton : 0;
+        uint128 referrer_value = referrer.value != 0 ? DexGas.REFERRER_FEE_EXTRA_VALUE : 0;
 
         uint16 errorCode = !active ? DirectOperationErrors.NOT_ACTIVE
             : msg.sender == address(this) ? DirectOperationErrors.WRONG_PREVIOUS_POOL
@@ -1502,7 +1502,7 @@ contract DexStablePool is
                     if (referrer_fee > 0) {
                         IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
                             value: referrer_value,
-                            flag: MsgFlag.SENDER_PAYS_FEES
+                            flag: 0
                         }(
                             referrer_fee,
                             referrer,
@@ -2685,7 +2685,7 @@ contract DexStablePool is
 
                 IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
                     value: referrer_value,
-                    flag: MsgFlag.SENDER_PAYS_FEES
+                    flag: 0
                 }(
                     referrer_fees[i],
                     referrer,
@@ -2924,7 +2924,7 @@ contract DexStablePool is
 
                 IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
                     value: referrer_value,
-                    flag: MsgFlag.SENDER_PAYS_FEES
+                    flag: 0
                 }(
                     referrer_fees[i],
                     referrer,

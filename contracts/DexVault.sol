@@ -403,7 +403,7 @@ contract DexVault is DexContractBase, IDexVault {
                 }(
                     _amount,
                     _refProgramParams.systemAddress,
-                    DexGas.DEPLOY_REFERRER_FEE_EMPTY_WALLET,
+                    DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
                     _remainingGasTo,
                     true,
                     refPayload
