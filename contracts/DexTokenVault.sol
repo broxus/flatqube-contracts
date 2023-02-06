@@ -25,12 +25,12 @@ import "./libraries/DirectOperationErrors.sol";
 
 contract DexTokenVault is DexContractBase, IDexTokenVault {
     address private _root;
-    address private _legacyVault;
+    address private _vault;
     uint32 private _version;
 
     address private _tokenRoot;
     address private _tokenWallet;
-    address private _legacyVaultTokenWallet;
+    address private _vaultTokenWallet;
 
     address private _remainingGasToAfterDeploy;
 
@@ -95,7 +95,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
     function redeploy(
         TvmCell /* _tokenVaultCodeInRoot */,
         uint32 /* _tokenVaultVersionInRoot */,
-        address /* _legacyVault */,
+        address /* _vault */,
         address _remainingGasTo
     )
         external
@@ -157,20 +157,20 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         } _tokenWallet;
     }
 
-    function getLegacyVault() external view override responsible returns (address) {
+    function getVault() external view override responsible returns (address) {
         return {
             value: 0,
             flag: MsgFlag.REMAINING_GAS,
             bounce: false
-        } _legacyVault;
+        } _vault;
     }
 
-    function getLegacyVaultTokenWallet() external view override responsible returns (address) {
+    function getVaultTokenWallet() external view override responsible returns (address) {
         return {
             value: 0,
             flag: MsgFlag.REMAINING_GAS,
             bounce: false
-        } _legacyVaultTokenWallet;
+        } _vaultTokenWallet;
     }
 
     function getTargetBalance() external view override responsible returns (uint128) {
@@ -290,7 +290,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
                 bounce: false
             }(
                 _amount,
-                _legacyVaultTokenWallet,
+                _vaultTokenWallet,
                 _referral,
                 true,
                 builder.toCell()
@@ -337,14 +337,14 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         TvmCell params = abi.encode(
             _tokenRoot,
             _tokenWallet,
-            _legacyVaultTokenWallet,
+            _vaultTokenWallet,
             _remainingGasToAfterDeploy
         );
 
         TvmBuilder builder;
 
         builder.store(_root);
-        builder.store(_legacyVault);
+        builder.store(_vault);
         builder.store(_version);
         builder.store(_newVersion);
         builder.store(_remainingGasTo);
@@ -368,7 +368,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
 
         (
             address root,
-            address legacyVault,
+            address vault,
             uint32 previousVersion
         ) = slice.decode(
             address,
@@ -377,7 +377,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         );
 
         _root = root;
-        _legacyVault = legacyVault;
+        _vault = vault;
 
         if (previousVersion == 0) {
             _onPlatformUpgrade(_data);
@@ -392,7 +392,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
 
         (
             /* address root */,
-            /* address legacyVault */,
+            /* address vault */,
             /* uint32 previousVersion */,
             uint32 currentVersion,
             address remainingGasTo
@@ -433,7 +433,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
 
         (
             /* address root */,
-            /* address legacyVault */,
+            /* address vault */,
             uint32 previousVersion,
             uint32 currentVersion,
             address remainingGasTo
@@ -450,7 +450,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         (
             _tokenRoot,
             _tokenWallet,
-            _legacyVaultTokenWallet,
+            _vaultTokenWallet,
             _remainingGasToAfterDeploy
         ) = abi.decode(slice.loadRef(), (
             address,
@@ -506,14 +506,14 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
             }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
     }
 
-    /// @notice Deploys wallet for legacy vault after token vault wallet deploy
-    function _deployTokenWalletForLegacyVault() private view {
+    /// @notice Deploys wallet for vault after token vault wallet deploy
+    function _deployTokenWalletForVault() private view {
         ITokenRoot(_tokenRoot)
             .deployWallet{
                 value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: DexTokenVault.onLegacyVaultTokenWallet
-            }(_legacyVault, DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
+                callback: DexTokenVault.onVaultTokenWallet
+            }(_vault, DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
     }
 
     /// @notice Destroys vault and transfers all balance to gas recipient from initial deploy
@@ -715,7 +715,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
 
                 emit TokenWalletSet(_wallet);
 
-                _deployTokenWalletForLegacyVault();
+                _deployTokenWalletForVault();
 
                 IDexRoot(_root)
                     .onTokenVaultDeployed{
@@ -738,17 +738,17 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         }
     }
 
-    /// @notice Saves the address of the deployed legacy vault's wallet
+    /// @notice Saves the address of the deployed vault's wallet
     /// @dev Vault's token wallet must be deployed before
-    function onLegacyVaultTokenWallet(address _wallet)
+    function onVaultTokenWallet(address _wallet)
         external
         reserve(_getTargetBalanceInternal())
         onlyTokenRoot
     {
-        if (_legacyVaultTokenWallet.value == 0) {
-            _legacyVaultTokenWallet = _wallet;
+        if (_vaultTokenWallet.value == 0) {
+            _vaultTokenWallet = _wallet;
 
-            emit LegacyVaultTokenWalletSet(_wallet);
+            emit VaultTokenWalletSet(_wallet);
         }
 
         _remainingGasToAfterDeploy.transfer({
