@@ -30,7 +30,6 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
 
     address private _tokenRoot;
     address private _tokenWallet;
-    address private _vaultTokenWallet;
 
     address private _remainingGasToAfterDeploy;
 
@@ -75,13 +74,13 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
     //  ___) |  __/| |__| |___ | | / ___ \| |___
     // |____/|_|   |_____\____|___/_/   \_\_____|
 
+    /// @notice Refund incoming transfer to message sender
     receive()
         external
-        view
+        pure
         reserve(_getTargetBalanceInternal())
-        onlyTokenWallet
     {
-        _remainingGasToAfterDeploy.transfer({
+        msg.sender.transfer({
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
             bounce: false
@@ -163,14 +162,6 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
             flag: MsgFlag.REMAINING_GAS,
             bounce: false
         } _vault;
-    }
-
-    function getVaultTokenWallet() external view override responsible returns (address) {
-        return {
-            value: 0,
-            flag: MsgFlag.REMAINING_GAS,
-            bounce: false
-        } _vaultTokenWallet;
     }
 
     function getTargetBalance() external view override responsible returns (uint128) {
@@ -284,13 +275,14 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         builder.storeRef(abi.encode(_poolTokenRoots, _referrer, _referral));
 
         ITokenWallet(_tokenWallet)
-            .transferToWallet{
+            .transfer{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED,
                 bounce: false
             }(
                 _amount,
-                _vaultTokenWallet,
+                _vault,
+                0,
                 _referral,
                 true,
                 builder.toCell()
@@ -337,7 +329,6 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         TvmCell params = abi.encode(
             _tokenRoot,
             _tokenWallet,
-            _vaultTokenWallet,
             _remainingGasToAfterDeploy
         );
 
@@ -418,6 +409,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
             });
 
             _deployTokenWallet();
+            _deployTokenWalletForVault();
 
             remainingGasTo.transfer({
                 value: 0,
@@ -450,10 +442,8 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         (
             _tokenRoot,
             _tokenWallet,
-            _vaultTokenWallet,
             _remainingGasToAfterDeploy
         ) = abi.decode(slice.loadRef(), (
-            address,
             address,
             address,
             address
@@ -500,7 +490,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
     function _deployTokenWallet() private view {
         ITokenRoot(_tokenRoot)
             .deployWallet{
-                value: DexGas.DEPLOY_EMPTY_WALLET_VALUE * 2,
+                value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexTokenVault.onTokenWallet
             }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
@@ -715,8 +705,6 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
 
                 emit TokenWalletSet(_wallet);
 
-                _deployTokenWalletForVault();
-
                 IDexRoot(_root)
                     .onTokenVaultDeployed{
                         value: 0,
@@ -742,14 +730,11 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
     /// @dev Vault's token wallet must be deployed before
     function onVaultTokenWallet(address _wallet)
         external
+        view
         reserve(_getTargetBalanceInternal())
         onlyTokenRoot
     {
-        if (_vaultTokenWallet.value == 0) {
-            _vaultTokenWallet = _wallet;
-
-            emit VaultTokenWalletSet(_wallet);
-        }
+        emit VaultTokenWalletDeployed(_wallet);
 
         _remainingGasToAfterDeploy.transfer({
             value: 0,
