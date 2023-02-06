@@ -999,7 +999,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                     amount > _reserves()[receiveTokenIndex] ||
                     amount == 0 ||
                     poolFee == 0 && _fee.pool_numerator > 0 ||
-                    beneficiaryFee == 0 && _fee.beneficiary_numerator > 0
+                    beneficiaryFee == 0 && _fee.beneficiary_numerator > 0 && poolFee == 0
                 ) {
                     errorCode = DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
                 } else if (amount < expectedAmount) {
@@ -1242,7 +1242,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                         amount > _reserves()[receiveTokenIndex] ||
                         amount == 0 ||
                         poolFee == 0 && _fee.pool_numerator > 0 ||
-                        beneficiaryFee == 0 && _fee.beneficiary_numerator > 0
+                        beneficiaryFee == 0 && _fee.beneficiary_numerator > 0 && poolFee == 0
                     ) {
                         errorCode = DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
                     } else if (amount < expectedAmount) {
@@ -1427,7 +1427,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                         amount > _reserves()[receiveTokenIndex] ||
                         amount == 0 ||
                         poolFee == 0 && _fee.pool_numerator > 0 ||
-                        beneficiaryFee == 0 && _fee.beneficiary_numerator > 0
+                        beneficiaryFee == 0 && _fee.beneficiary_numerator > 0 && poolFee == 0
                     ) {
                         errorCode = DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
                     } else if (amount < expectedAmount) {

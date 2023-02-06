@@ -2302,12 +2302,12 @@ contract DexStablePool is
             !fee.referrer_threshold.exists(tokenData[i].root) ||
             fee.referrer_threshold[tokenData[i].root] <= x_referrer_fee
         )) {
-            x_beneficiary_fee = math.muldiv(x_fee, fee.beneficiary_numerator, fee_numerator);
-            x_pool_fee = x_fee - x_referrer_fee - x_beneficiary_fee;
+            x_pool_fee = math.muldivc(x_fee, fee.pool_numerator, fee_numerator);
+            x_beneficiary_fee = x_fee - x_referrer_fee - x_pool_fee;
         } else {
             x_referrer_fee = 0;
-            x_beneficiary_fee = math.muldiv(x_fee, fee.beneficiary_numerator, fee.beneficiary_numerator + fee.pool_numerator);
-            x_pool_fee = x_fee - x_beneficiary_fee;
+            x_pool_fee = math.muldivc(x_fee, fee.pool_numerator, fee.beneficiary_numerator + fee.pool_numerator);
+            x_beneficiary_fee = x_fee - x_pool_fee;
         }
 
         uint256 x = xp[i] + math.muldiv(_dx - x_fee, tokenData[i].rate, PRECISION);
@@ -2319,7 +2319,7 @@ contract DexStablePool is
                 dy <= tokenData[j].balance &&
                 dy > 0 &&
                 (x_pool_fee > 0 || fee.pool_numerator == 0) &&
-                (x_beneficiary_fee > 0 || fee.beneficiary_numerator == 0)
+                (x_beneficiary_fee > 0 || fee.beneficiary_numerator == 0 || x_pool_fee > 0)
             ) {
                 result.set(ExpectedExchangeResult(
                     dy,
@@ -2355,12 +2355,12 @@ contract DexStablePool is
 
             uint128 x_fee = math.muldivc(dx, fee.pool_numerator + fee.beneficiary_numerator + fee.referrer_numerator, fee.denominator);
 
-            uint128 x_beneficiary_fee = math.muldiv(x_fee, fee.beneficiary_numerator, fee.pool_numerator + fee.beneficiary_numerator);
-            uint128 x_pool_fee = x_fee - x_beneficiary_fee;
+            uint128 x_pool_fee = math.muldivc(x_fee, fee.pool_numerator, fee.beneficiary_numerator + fee.pool_numerator);
+            uint128 x_beneficiary_fee = x_fee - x_pool_fee;
 
             if (
                 (x_pool_fee > 0 || fee.pool_numerator == 0) &&
-                (x_beneficiary_fee > 0 || fee.beneficiary_numerator == 0)
+                (x_beneficiary_fee > 0 || fee.beneficiary_numerator == 0 || x_pool_fee > 0)
             ) {
                 result.set(ExpectedExchangeResult(
                     dx,
@@ -2537,11 +2537,11 @@ contract DexStablePool is
                     fee.referrer_threshold[tokenData[i].root] <= referrer_fee
                 )) {
                     referrer_fees[i] = referrer_fee;
-                    beneficiary_fees[i] = math.muldiv(fees, fee.beneficiary_numerator, fee.beneficiary_numerator + fee.pool_numerator + fee.referrer_numerator);
-                    pool_fees[i] = fees - referrer_fee - beneficiary_fees[i];
+                    pool_fees[i] = math.muldivc(fees, fee.pool_numerator, fee.beneficiary_numerator + fee.pool_numerator + fee.referrer_numerator);
+                    beneficiary_fees[i] =  fees - referrer_fee - pool_fees[i];
                 } else {
-                    beneficiary_fees[i] = math.muldiv(fees, fee.beneficiary_numerator, fee.beneficiary_numerator + fee.pool_numerator);
-                    pool_fees[i] = fees - beneficiary_fees[i];
+                    pool_fees[i] = math.muldivc(fees, fee.pool_numerator, fee.beneficiary_numerator + fee.pool_numerator);
+                    beneficiary_fees[i] = fees - pool_fees[i];
                 }
 
                 result_balances[i] = new_balance - beneficiary_fees[i] - referrer_fees[i];
@@ -2640,11 +2640,11 @@ contract DexStablePool is
             fee.referrer_threshold[tokenData[i].root] <= referrer_fee
         )) {
             referrer_fees[i] = referrer_fee;
-            beneficiary_fees[i] = math.muldiv(fees, fee.beneficiary_numerator, fee_numerator);
-            pool_fees[i] = fees - referrer_fee - beneficiary_fees[i];
+            pool_fees[i] = math.muldivc(fees, fee.pool_numerator, fee_numerator);
+            beneficiary_fees[i] = fees - referrer_fee - pool_fees[i];
         } else {
-            beneficiary_fees[i] = math.muldiv(fees, fee.beneficiary_numerator, fee.beneficiary_numerator + fee.pool_numerator);
-            pool_fees[i] = fees - beneficiary_fees[i];
+            pool_fees[i] = math.muldivc(fees, fee.pool_numerator, fee.beneficiary_numerator + fee.pool_numerator);
+            beneficiary_fees[i] = fees - pool_fees[i];
         }
 
         result_balances[i] = new_balances[i] - beneficiary_fees[i] - referrer_fees[i];
@@ -2889,11 +2889,11 @@ contract DexStablePool is
             fee.referrer_threshold[tokenData[i].root] <= referrer_fee
         )) {
             referrer_fees[i] = referrer_fee;
-            beneficiary_fees[i] = math.muldiv(dy_fee, fee.beneficiary_numerator, fee_numerator);
-            pool_fees[i] = dy_fee - referrer_fee - beneficiary_fees[i];
+            pool_fees[i] = math.muldivc(dy_fee, fee.pool_numerator, fee_numerator);
+            beneficiary_fees[i] = dy_fee - referrer_fee - pool_fees[i];
         } else {
-            beneficiary_fees[i] = math.muldiv(dy_fee, fee.beneficiary_numerator, fee.beneficiary_numerator + fee.pool_numerator);
-            pool_fees[i] = dy_fee - beneficiary_fees[i];
+            pool_fees[i] = math.muldivc(dy_fee, fee.pool_numerator, fee.beneficiary_numerator + fee.pool_numerator);
+            beneficiary_fees[i] = dy_fee - pool_fees[i];
         }
 
         amounts[i] = uint128(dy);
