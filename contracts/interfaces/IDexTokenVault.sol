@@ -21,6 +21,8 @@ interface IDexTokenVault is
 
     event TokenWalletSet(address wallet);
 
+    event LegacyVaultTokenWalletSet(address wallet);
+
     event WithdrawTokens(
         uint128 amount,
         address accountOwner,
@@ -51,6 +53,8 @@ interface IDexTokenVault is
     function getTokenWallet() external view responsible returns (address);
 
     function getLegacyVault() external view responsible returns (address);
+
+    function getLegacyVaultTokenWallet() external view responsible returns (address);
 
     function getTargetBalance() external view responsible returns (uint128);
 

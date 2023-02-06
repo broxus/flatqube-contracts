@@ -30,6 +30,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
 
     address private _tokenRoot;
     address private _tokenWallet;
+    address private _legacyVaultTokenWallet;
 
     address private _remainingGasToAfterDeploy;
 
@@ -164,6 +165,14 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         } _legacyVault;
     }
 
+    function getLegacyVaultTokenWallet() external view override responsible returns (address) {
+        return {
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS,
+            bounce: false
+        } _legacyVaultTokenWallet;
+    }
+
     function getTargetBalance() external view override responsible returns (uint128) {
         return {
             value: 0,
@@ -275,14 +284,13 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         builder.storeRef(abi.encode(_poolTokenRoots, _referrer, _referral));
 
         ITokenWallet(_tokenWallet)
-            .transfer{
+            .transferToWallet{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED,
                 bounce: false
             }(
                 _amount,
-                _legacyVault,
-                DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
+                _legacyVaultTokenWallet,
                 _referral,
                 true,
                 builder.toCell()
@@ -326,11 +334,12 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         reserve(_getTargetBalanceInternal())
         onlyDexRoot
     {
-        TvmBuilder params;
-
-        params.store(_tokenRoot);
-        params.store(_tokenWallet);
-        params.store(_remainingGasToAfterDeploy);
+        TvmCell params = abi.encode(
+            _tokenRoot,
+            _tokenWallet,
+            _legacyVaultTokenWallet,
+            _remainingGasToAfterDeploy
+        );
 
         TvmBuilder builder;
 
@@ -341,7 +350,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         builder.store(_remainingGasTo);
 
         builder.store(platform_code);
-        builder.store(params.toCell());
+        builder.store(params);
 
         tvm.setcode(_newCode);
         tvm.setCurrentCode(_newCode);
@@ -441,12 +450,14 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         (
             _tokenRoot,
             _tokenWallet,
+            _legacyVaultTokenWallet,
             _remainingGasToAfterDeploy
-        ) = slice.loadRefAsSlice().decode(
+        ) = abi.decode(slice.loadRef(), (
+            address,
             address,
             address,
             address
-        );
+        ));
 
         emit TokenVaultCodeUpgraded({
             currentVersion: currentVersion,
@@ -489,10 +500,20 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
     function _deployTokenWallet() private view {
         ITokenRoot(_tokenRoot)
             .deployWallet{
-                value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
+                value: DexGas.DEPLOY_EMPTY_WALLET_VALUE * 2,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexTokenVault.onTokenWallet
             }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
+    }
+
+    /// @notice Deploys wallet for legacy vault after token vault wallet deploy
+    function _deployTokenWalletForLegacyVault() private view {
+        ITokenRoot(_tokenRoot)
+            .deployWallet{
+                value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
+                flag: MsgFlag.SENDER_PAYS_FEES,
+                callback: DexTokenVault.onLegacyVaultTokenWallet
+            }(_legacyVault, DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
     }
 
     /// @notice Destroys vault and transfers all balance to gas recipient from initial deploy
@@ -694,6 +715,8 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
 
                 emit TokenWalletSet(_wallet);
 
+                _deployTokenWalletForLegacyVault();
+
                 IDexRoot(_root)
                     .onTokenVaultDeployed{
                         value: 0,
@@ -713,6 +736,26 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
                 });
             }
         }
+    }
+
+    /// @notice Saves the address of the deployed legacy vault's wallet
+    /// @dev Vault's token wallet must be deployed before
+    function onLegacyVaultTokenWallet(address _wallet)
+        external
+        reserve(_getTargetBalanceInternal())
+        onlyTokenRoot
+    {
+        if (_legacyVaultTokenWallet.value == 0) {
+            _legacyVaultTokenWallet = _wallet;
+
+            emit LegacyVaultTokenWalletSet(_wallet);
+        }
+
+        _remainingGasToAfterDeploy.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
     }
 
     /// @notice Catches failed wallet deploy for vault

@@ -12,7 +12,7 @@ library DexGas {
 
     uint128 constant DEPLOY_ACCOUNT_MIN_VALUE           = 2 ever;
     uint128 constant DEPLOY_POOL_BASE_VALUE             = 6 ever;
-    uint128 constant DEPLOY_VAULT_MIN_VALUE             = 2 ever;
+    uint128 constant DEPLOY_VAULT_MIN_VALUE             = 2.5 ever;
     uint128 constant DEPLOY_LP_TOKEN_ROOT_VALUE         = 5 ever;
 
     uint128 constant CREATE_TOKEN_VALUE                 = 3 ever;
