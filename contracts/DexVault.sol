@@ -41,18 +41,24 @@ contract DexVault is DexContractBase, IDexVault {
         internalHelper(address(0));
     }
 
+    function continueMigrateLiquidity(address _fromTokenRoot) external onlyManagerOrOwner {
+        require(_vaultWallets.exists(_fromTokenRoot), 404);
+        internalHelper(_fromTokenRoot);
+    }
+
     function migrateToken(address _tokenRoot) external onlyManagerOrOwner {
         require(_vaultWallets.exists(_tokenRoot), 404);
+        require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE + DexGas.TRANSFER_TOKENS_VALUE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS + 0.5 ever, 404);
 
-        address vaultTokenWallet = _vaultWallets[_tokenRoot];
+        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
 
-        IDexRoot(_dexRoot()).deployTokenVault{value: DexGas.DEPLOY_VAULT_MIN_VALUE, flag: 1}(_tokenRoot, _owner);
+        address vaultTokenWallet = _vaultWallets.at(_tokenRoot);
 
-        _vaultWalletsToRoots[_vaultWallets[_tokenRoot]] = _tokenRoot;
+        _vaultWalletsToRoots[vaultTokenWallet] = _tokenRoot;
 
         ITokenWallet(vaultTokenWallet).balance{
-            value: DexGas.DEPLOY_VAULT_MIN_VALUE + DexGas.TRANSFER_TOKENS_VALUE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS + 0.5 ever,
-            flag: 1,
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED,
             callback: DexVault.onTokenBalance
         }();
     }
@@ -68,7 +74,10 @@ contract DexVault is DexContractBase, IDexVault {
 
         address _tokenRoot = _vaultWalletsToRoots.at(msg.sender);
 
-        IDexRoot(_dexRoot()).deployTokenVault{value: DexGas.DEPLOY_VAULT_MIN_VALUE + 0.2 ever, flag: 1}(_tokenRoot, _owner);
+        IDexRoot(_dexRoot()).deployTokenVault{
+            value: DexGas.DEPLOY_VAULT_MIN_VALUE + 0.05 ever,
+            flag: MsgFlag.SENDER_PAYS_FEES
+        }(_tokenRoot, _owner);
 
         if(_amount > 0) {
             TvmCell empty;
@@ -99,8 +108,8 @@ contract DexVault is DexContractBase, IDexVault {
             _vaultWalletsToRoots[vaultTokenWallet] = tokenRoot;
             counter++;
             ITokenWallet(vaultTokenWallet).balance{
-                value: DexGas.DEPLOY_VAULT_MIN_VALUE + DexGas.TRANSFER_TOKENS_VALUE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS + 0.7 ever,
-                flag: 1,
+                value: DexGas.DEPLOY_VAULT_MIN_VALUE + DexGas.TRANSFER_TOKENS_VALUE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS + 0.5 ever,
+                flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexVault.onTokenBalance
             }();
 
@@ -112,7 +121,7 @@ contract DexVault is DexContractBase, IDexVault {
                 break;
             } else if(counter >= MAX_ITERATIONS_PER_MSG) {
                 itemOpt.reset();
-                this._migrateNext{ value: 0, flag: 128 }(tokenRoot);
+                this._migrateNext{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(tokenRoot);
                 break;
             }
         }

@@ -132,7 +132,7 @@ async function main() {
     const balancesStart = await balancesCheckpoint();
     await printBalances(balancesStart, 'Start balances:');
 
-    const requiredBalance = new BigNumber(items.length).times(3.2).plus(1);
+    const requiredBalance = new BigNumber(items.length).times(3.5).plus(1);
 
     if (requiredBalance.gt(balancesStart.managerBalance)) {
         console.error('Required ' + requiredBalance + ' EVER for this operation');

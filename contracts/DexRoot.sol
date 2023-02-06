@@ -610,7 +610,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyActive
     {
-        require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE +  0.1 ever, DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(_tokenRoot.value != 0 && _tokenRoot != address(this), DexErrors.WRONG_TOKEN_ROOT);
 
         _deployVaultInternal(
@@ -662,7 +662,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         new DexPlatform{
             stateInit: data,
             value: DexGas.DEPLOY_VAULT_MIN_VALUE,
-            flag: MsgFlag.SENDER_PAYS_FEES
+            flag: 0
         }(
             _vaultCode,
             _vaultVersion,

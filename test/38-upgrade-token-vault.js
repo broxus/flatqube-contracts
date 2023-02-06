@@ -40,7 +40,7 @@ const loadTokenVaultData = async (token_vault) => {
     data.platform_code = await token_vault.call({method: 'getPlatformCode'});
     data.token_root = await token_vault.call({method: 'getTokenRoot'});
     data.token_wallet = await token_vault.call({method: 'getTokenWallet'});
-    data.legacy_vault = await token_vault.call({method: 'getLegacyVault'});
+    data.vault = await token_vault.call({method: 'getVault'});
     data.target_balance = (await token_vault.call({method: 'getTargetBalance'})).toString();
 
     return data;
@@ -101,9 +101,9 @@ describe('Test DexTokenVault contract upgrade', async function () {
             expect(newTokenVaultData.token_wallet)
                 .to
                 .equal(oldTokenVaultData.token_wallet, 'New token_wallet value incorrect');
-            expect(newTokenVaultData.legacy_vault)
+            expect(newTokenVaultData.vault)
                 .to
-                .equal(oldTokenVaultData.legacy_vault, 'New legacy_vault value incorrect');
+                .equal(oldTokenVaultData.vault, 'New vault value incorrect');
             expect(newTokenVaultData.target_balance)
                 .to
                 .equal(oldTokenVaultData.target_balance, 'New target_balance value incorrect');
