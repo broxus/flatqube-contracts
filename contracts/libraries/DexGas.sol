@@ -54,7 +54,7 @@ library DexGas {
     uint128 constant DEPLOY_MINT_VALUE_BASE             = 0.5 ever;
     uint128 constant BURN_VALUE                         = 0.1 ever;
     uint128 constant DEPLOY_EMPTY_WALLET_VALUE          = 0.5 ever;
-    uint128 constant DEPLOY_EMPTY_WALLET_GRAMS          = 0.1 ever;
+    uint128 constant DEPLOY_EMPTY_WALLET_GRAMS          = 0.12 ever;
     uint128 constant SEND_EXPECTED_WALLET_VALUE         = 0.1 ever;
 
     uint128 constant ADD_PAIR_MIN_VALUE                 = 3 ever;
