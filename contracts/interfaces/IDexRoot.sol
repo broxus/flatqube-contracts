@@ -31,6 +31,16 @@ interface IDexRoot is
         uint codeHash
     );
 
+    event LpTokenPendingCodeUpgraded(
+        uint32 version,
+        uint codeHash
+    );
+
+    event TokenFactoryUpdated(
+        address current,
+        address previous
+    );
+
     event RootCodeUpgraded();
 
     event ActiveUpdated(bool newActive);
@@ -61,6 +71,13 @@ interface IDexRoot is
         uint32 version
     );
 
+    event NewLpTokenRootCreated(
+        address pool,
+        address[] poolTokenRoots,
+        address lpTokenRoot,
+        uint32 lpPendingNonce
+    );
+
     function resetTargetGas(
         address target,
         address receiver
@@ -81,6 +98,10 @@ interface IDexRoot is
     function isActive() external view responsible returns (bool);
 
     function getVault() external view responsible returns (address);
+
+    function getOwner() external view responsible returns (address dex_owner);
+
+    function getPendingOwner() external view responsible returns (address dex_pending_owner);
 
     function getTokenVaultCode() external view responsible returns (TvmCell);
 
@@ -104,6 +125,18 @@ interface IDexRoot is
     function getExpectedAccountAddress(address account_owner) external view responsible returns (address);
 
     function getManager() external view responsible returns (address);
+
+    function setVaultOnce(address new_vault) external;
+
+    function setActive(bool new_active) external;
+
+    function setManager(address _newManager) external;
+
+    function revokeManager() external;
+
+    function acceptOwner() external;
+
+    function transferOwner(address new_owner) external;
 
     function setTokenFactory(
         address _newTokenFactory,

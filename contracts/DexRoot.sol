@@ -75,6 +75,15 @@ contract DexRoot is DexContractBase, IDexRoot {
         _;
     }
 
+    modifier onlyManagerOwnerOrSelf() {
+        require(
+            msg.sender.value != 0 &&
+            (msg.sender == _owner || msg.sender == _manager || msg.sender == address(this)),
+            DexErrors.NOT_MY_OWNER
+        );
+        _;
+    }
+
     modifier onlyActive() {
         require(_active, DexErrors.NOT_ACTIVE);
         _;
@@ -217,7 +226,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         } _active;
     }
 
-    function getOwner() external view responsible returns (address dex_owner) {
+    function getOwner() override external view responsible returns (address dex_owner) {
         return {
             value: 0,
             bounce: false,
@@ -225,7 +234,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         } _owner;
     }
 
-    function getPendingOwner() external view responsible returns (address dex_pending_owner) {
+    function getPendingOwner() override external view responsible returns (address dex_pending_owner) {
         return {
             value: 0,
             bounce: false,
@@ -281,6 +290,7 @@ contract DexRoot is DexContractBase, IDexRoot {
 
     function setVaultOnce(address new_vault)
         external
+        override
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyOwner
     {
@@ -297,6 +307,7 @@ contract DexRoot is DexContractBase, IDexRoot {
 
     function setActive(bool new_active)
         external
+        override
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyOwner
     {
@@ -325,6 +336,7 @@ contract DexRoot is DexContractBase, IDexRoot {
 
     function setManager(address _newManager)
         external
+        override
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyOwner
     {
@@ -339,6 +351,7 @@ contract DexRoot is DexContractBase, IDexRoot {
 
     function revokeManager()
         external
+        override
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyOwner
     {
@@ -351,13 +364,22 @@ contract DexRoot is DexContractBase, IDexRoot {
         );
     }
 
-    function transferOwner(address new_owner) external onlyOwner {
+    function transferOwner(address new_owner)
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyOwner
+    {
         emit RequestedOwnerTransfer(_owner, new_owner);
 
         _pendingOwner = new_owner;
     }
 
-    function acceptOwner() external {
+    function acceptOwner()
+        external
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+    {
         require(
             msg.sender == _pendingOwner &&
             msg.sender.value != 0,
@@ -377,9 +399,15 @@ contract DexRoot is DexContractBase, IDexRoot {
         external
         override
         reserve(DexGas.ROOT_INITIAL_BALANCE)
-        onlyOwner
+        onlyManagerOrOwner
     {
+        address previous = _tokenFactory;
         _tokenFactory = _newTokenFactory;
+
+        emit TokenFactoryUpdated({
+            current: _newTokenFactory,
+            previous: previous
+        });
 
         _remainingGasTo.transfer({
             value: 0,
@@ -505,6 +533,11 @@ contract DexRoot is DexContractBase, IDexRoot {
         _lpTokenPendingCode = _newCode;
         _lpTokenPendingVersion += 1;
 
+        emit LpTokenPendingCodeUpgraded({
+            version: _lpTokenPendingVersion,
+            codeHash: tvm.hash(_newCode)
+        });
+
         _remainingGasTo.transfer({
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
@@ -521,7 +554,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyOwner
     {
-        require(msg.value > DexGas.UPGRADE_ACCOUNT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(msg.value > DexGas.UPGRADE_ROOT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
 
         emit RootCodeUpgraded();
 
@@ -714,6 +747,13 @@ contract DexRoot is DexContractBase, IDexRoot {
             _lpTokenPendingCode
         )
     {
+        emit NewLpTokenRootCreated({
+            pool: _pool,
+            poolTokenRoots: _roots,
+            lpTokenRoot: _lpRoot,
+            lpPendingNonce: _lpPendingNonce
+        });
+
         _deployVaultInternal(_lpRoot, _remainingGasTo);
 
         ILiquidityTokenRootDeployedCallback(_pool)
@@ -775,14 +815,14 @@ contract DexRoot is DexContractBase, IDexRoot {
         external
         override
         reserve(DexGas.ROOT_INITIAL_BALANCE)
-        onlyManagerOrOwner
+        onlyManagerOwnerOrSelf
     {
         uint length = _tokenRoots.length;
 
-        // 10, 20, 30 ... 45
-        uint32 takeUntil = uint32(math.min(_offset + 10, length));
+        // 20, 40, 60, 65
+        uint takeUntil = math.min(_offset + 20, length);
 
-        // [0, 9], [10, 19], [20, 29] ... [30, 44]
+        // [0, 19], [20, 39], [40, 59], [60, 64]
         for (uint i = _offset; i < takeUntil; i++) {
             _upgradeVaultInternal(_tokenRoots[i], _remainingGasTo);
         }
@@ -793,7 +833,7 @@ contract DexRoot is DexContractBase, IDexRoot {
                     value: 0,
                     flag: MsgFlag.ALL_NOT_RESERVED,
                     bounce: false
-                }(_tokenRoots, takeUntil, _remainingGasTo);
+                }(_tokenRoots, uint32(takeUntil), _remainingGasTo);
         } else {
             _remainingGasTo.transfer({
                 value: 0,
@@ -902,14 +942,14 @@ contract DexRoot is DexContractBase, IDexRoot {
         view
         override
         reserve(DexGas.ROOT_INITIAL_BALANCE)
-        onlyManagerOrOwner
+        onlyManagerOwnerOrSelf
     {
         uint length = _accountsOwners.length;
 
-        // 10, 20, 30 ... 45
-        uint32 takeUntil = uint32(math.min(_offset + 10, length));
+        // 20, 40, 60, 65
+        uint takeUntil = math.min(_offset + 20, length);
 
-        // [0, 9], [10, 19], [20, 29] ... [30, 44]
+        // [0, 19], [20, 39], [40, 59], [60, 64]
         for (uint i = _offset; i < takeUntil; i++) {
             _upgradeAccountInternal(_accountsOwners[i], _remainingGasTo);
         }
@@ -920,7 +960,7 @@ contract DexRoot is DexContractBase, IDexRoot {
                     value: 0,
                     flag: MsgFlag.ALL_NOT_RESERVED,
                     bounce: false
-                }(_accountsOwners, _offset, _remainingGasTo);
+                }(_accountsOwners, uint32(_offset), _remainingGasTo);
         } else {
             _remainingGasTo.transfer({
                 value: 0,
@@ -1013,14 +1053,14 @@ contract DexRoot is DexContractBase, IDexRoot {
         view
         override
         reserve(DexGas.ROOT_INITIAL_BALANCE)
-        onlyManagerOrOwner
+        onlyManagerOwnerOrSelf
     {
         uint length = _params.length;
 
-        // 10, 20, 30 ... 45
-        uint32 takeUntil = uint32(math.min(_offset + 10, length));
+        // 20, 40, 60, 65
+        uint takeUntil = math.min(_offset + 20, length);
 
-        // [0, 9], [10, 19], [20, 29] ... [30, 44]
+        // [0, 19], [20, 39], [40, 59], [60, 64]
         for (uint i = _offset; i < takeUntil; i++) {
             _upgradePairInternal(_params[i], _remainingGasTo);
         }
@@ -1031,7 +1071,7 @@ contract DexRoot is DexContractBase, IDexRoot {
                     value: 0,
                     flag: MsgFlag.ALL_NOT_RESERVED,
                     bounce: false
-                }(_params, takeUntil, _remainingGasTo);
+                }(_params, uint32(takeUntil), _remainingGasTo);
         } else {
             _remainingGasTo.transfer({
                 value: 0,
@@ -1091,14 +1131,14 @@ contract DexRoot is DexContractBase, IDexRoot {
         view
         override
         reserve(DexGas.ROOT_INITIAL_BALANCE)
-        onlyManagerOrOwner
+        onlyManagerOwnerOrSelf
     {
         uint length = _params.length;
 
-        // 10, 20, 30 ... 45
-        uint32 takeUntil = uint32(math.min(_offset + 10, length));
+        // 20, 40, 60, 65
+        uint takeUntil = math.min(_offset + 20, length);
 
-        // [0, 9], [10, 19], [20, 29] ... [30, 44]
+        // [0, 19], [20, 39], [40, 59], [60, 64]
         for (uint i = _offset; i < takeUntil; i++) {
             _setPoolActiveInternal(_params[i], _remainingGasTo);
         }
@@ -1109,7 +1149,7 @@ contract DexRoot is DexContractBase, IDexRoot {
                     value: 0,
                     flag: MsgFlag.ALL_NOT_RESERVED,
                     bounce: false
-                }(_params, takeUntil, _remainingGasTo);
+                }(_params, uint32(takeUntil), _remainingGasTo);
         } else {
             _remainingGasTo.transfer({
                 value: 0,
