@@ -412,7 +412,7 @@ contract DexVault is DexContractBase, IDexVault {
                 }(
                     _amount,
                     _refProgramParams.systemAddress,
-                    DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
+                    DexGas.REFERRAL_DEPLOY_EMPTY_WALLET_GRAMS,
                     _remainingGasTo,
                     true,
                     refPayload
