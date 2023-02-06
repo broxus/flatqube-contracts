@@ -492,7 +492,8 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
             .deployWallet{
                 value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: DexTokenVault.onTokenWallet
+                callback: DexTokenVault.onTokenWallet,
+                bounce: true
             }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
     }
 
@@ -502,7 +503,8 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
             .deployWallet{
                 value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: DexTokenVault.onVaultTokenWallet
+                callback: DexTokenVault.onVaultTokenWallet,
+                bounce: true
             }(_vault, DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
     }
 

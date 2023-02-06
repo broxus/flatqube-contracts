@@ -90,7 +90,14 @@ contract DexStablePool is
     }
 
     // Prevent manual transfers
-    receive() external pure { revert(); }
+    receive() external pure {
+        tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
+        msg.sender.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
+    }
 
     // Prevent undefined functions call, need for bounce future Account/Root functions calls, when not upgraded
     fallback() external pure { revert();  }
@@ -1941,6 +1948,12 @@ contract DexStablePool is
         } else {
             tokenData[tokenIndex[msg.sender]].wallet = wallet;
         }
+
+        wallet.transfer({
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
     }
 
     function onTokenDecimals(uint8 _decimals) external {

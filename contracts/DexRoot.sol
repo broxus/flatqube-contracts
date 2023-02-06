@@ -931,15 +931,15 @@ contract DexRoot is DexContractBase, IDexRoot {
     }
 
     function _upgradeAccountInternal(
-        address _owner,
+        address _accountOwner,
         address _remainingGasTo
     )
         private
         view
     {
-        emit RequestedForceAccountUpgrade(_owner);
+        emit RequestedForceAccountUpgrade(_accountOwner);
 
-        IUpgradableByRequest(_expectedAccountAddress(_owner))
+        IUpgradableByRequest(_expectedAccountAddress(_accountOwner))
             .upgrade{ value: DexGas.UPGRADE_ACCOUNT_MIN_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
             (_accountCode, _accountVersion, _remainingGasTo);
     }

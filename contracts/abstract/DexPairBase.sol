@@ -56,7 +56,12 @@ abstract contract DexPairBase is
 
     // Prevent manual transfers
     receive() external pure {
-        revert();
+        tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
+        msg.sender.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
     }
 
     // Prevent undefined functions call, need for bounce future Account/Root functions calls, when not upgraded
@@ -446,6 +451,12 @@ abstract contract DexPairBase is
         }
 
         _tryToActivate();
+
+        _wallet.transfer({
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
     }
 
     /// @dev Returns DEX root address
@@ -508,7 +519,7 @@ abstract contract DexPairBase is
 
     /// @dev Deploys wallet by TIP-3 token root and wait for callback
     /// @param _tokenRoot Address of the TIP-3 TokenRoot for a new wallet deploy
-    function _configureTokenRootWallets(address _tokenRoot) private view {
+    function _configureTokenRootWallets(address _tokenRoot) private pure {
         ITokenRoot(_tokenRoot)
             .deployWallet{
                 value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
