@@ -64,4 +64,5 @@ library DexGas {
 
     uint128 constant REFERRER_FEE_EXTRA_VALUE           = 1 ever;
     uint128 constant REFERRAL_PROGRAM_CALLBACK          = 0.2 ever;
+    uint128 constant REFERRAL_DEPLOY_EMPTY_WALLET_GRAMS = 0.05 ever;
 }
