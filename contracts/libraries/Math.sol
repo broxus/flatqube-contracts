@@ -356,11 +356,11 @@ library Math {
             !_fee.referrer_threshold.exists(_aTokenRoot) ||
             _fee.referrer_threshold[_aTokenRoot] <= aReferrerFee
         )) {
-            aPoolFee = math.muldiv(aFee, _fee.pool_numerator, _fee.pool_numerator + _fee.beneficiary_numerator + _fee.referrer_numerator);
+            aPoolFee = math.muldivc(aFee, _fee.pool_numerator, _fee.pool_numerator + _fee.beneficiary_numerator + _fee.referrer_numerator);
             aBeneficiaryFee = aFee - aReferrerFee - aPoolFee;
         } else {
             aReferrerFee = 0;
-            aPoolFee = math.muldiv(aFee, _fee.pool_numerator, _fee.beneficiary_numerator + _fee.pool_numerator);
+            aPoolFee = math.muldivc(aFee, _fee.pool_numerator, _fee.beneficiary_numerator + _fee.pool_numerator);
             aBeneficiaryFee = aFee - aPoolFee;
         }
 
