@@ -64,6 +64,7 @@ contract DexStablePool is
     PoolTokenData[] tokenData;
     mapping(address => uint8) tokenIndex;
     uint256 PRECISION;
+    uint8 MAX_DECIMALS;
 
     // Liquidity tokens
     address lp_root;
@@ -75,6 +76,7 @@ contract DexStablePool is
 
     AmplificationCoefficient A;
     uint8 N_COINS;
+    uint8 constant LP_DECIMALS = 9;
 
     // ####################################################
 
@@ -1877,6 +1879,12 @@ contract DexStablePool is
                 uint256
             ));
 
+            uint8 maxDecimals = 0;
+            for (uint8 _i = 0; _i < N_COINS; _i++) {
+                maxDecimals = math.max(maxDecimals, tokenData[_i].decimals);
+            }
+            MAX_DECIMALS = maxDecimals;
+
             _tryToActivate();
         } else if (old_pool_type == DexPoolTypes.STABLE_POOL) {
             active = false;
@@ -1897,6 +1905,12 @@ contract DexStablePool is
                 IAmplificationCoefficient.AmplificationCoefficient,
                 uint256
             ));
+
+            uint8 maxDecimals = 0;
+            for (uint8 _i = 0; _i < N_COINS; _i++) {
+                maxDecimals = math.max(maxDecimals, tokenData[_i].decimals);
+            }
+            MAX_DECIMALS = maxDecimals;
 
             _tryToActivate();
         }
@@ -1980,10 +1994,11 @@ contract DexStablePool is
             maxDecimals = math.max(maxDecimals, tokenData[_i].decimals);
         }
 
-        PRECISION = uint256(10) ** uint256(maxDecimals);
+        MAX_DECIMALS = maxDecimals;
+        PRECISION = uint256(10) ** uint256(MAX_DECIMALS);
 
         for (uint8 _i = 0; _i < N_COINS; _i++) {
-            tokenData[_i].precisionMul = uint256(10) ** uint256(maxDecimals - tokenData[_i].decimals);
+            tokenData[_i].precisionMul = uint256(10) ** uint256(MAX_DECIMALS - tokenData[_i].decimals);
             tokenData[_i].rate = tokenData[_i].precisionMul * PRECISION;
             tokenData[_i].initialized = true;
         }
@@ -2029,7 +2044,7 @@ contract DexStablePool is
 
             if (D_opt.hasValue()) {
                 uint256 value = uint256(math.muldiv(D_opt.get(), 10**18, lp_supply));
-                result.set(math.muldiv(value, 10**9, PRECISION));
+                result.set(math.muldiv(value, uint256(10)**LP_DECIMALS, PRECISION));
             }
         }
 
@@ -2387,11 +2402,12 @@ contract DexStablePool is
             if (!y_minus_fee_opt.hasValue()) {
                 return (result, dy_fee);
             }
-            uint256 dy_minus_fee = y_minus_fee_opt.get() - xp[i];
+            uint256 fee_precision_mul = math.max(uint256(10) ** (MAX_DECIMALS - LP_DECIMALS), tokenData[i].precisionMul);
+            uint256 dy_minus_fee = math.divc(y_minus_fee_opt.get() - xp[i], fee_precision_mul);
             uint256 dy = math.muldivc(dy_minus_fee, fee.denominator, fee.denominator - (fee.beneficiary_numerator + fee.pool_numerator + fee.referrer_numerator));
-            dy_fee = uint128(math.divc(dy - dy_minus_fee, tokenData[i].precisionMul));
+            dy_fee = uint128(math.muldivc(dy - dy_minus_fee, fee_precision_mul, tokenData[i].precisionMul));
 
-            result.set(uint128(math.divc(dy, tokenData[i].precisionMul)));
+            result.set(uint128(math.muldivc(dy, fee_precision_mul, tokenData[i].precisionMul)));
         }
 
         return (result, dy_fee);
@@ -2539,7 +2555,7 @@ contract DexStablePool is
         } else {
             D2_opt.set(D1);
             result_balances = new_balances;
-            uint256 lp_precision = uint256(10) ** 9;
+            uint256 lp_precision = uint256(10) ** LP_DECIMALS;
             if (PRECISION > lp_precision) {
                 lp_reward = uint128(math.muldiv(D1, lp_precision, PRECISION));
             } else {
@@ -2846,8 +2862,8 @@ contract DexStablePool is
             return (result, referrer_fees);
         }
 
-        uint128 new_y0 = new_y0_opt.get();
-        uint256 dy_0 = (xp_mem[i] - new_y0) / tokenData[i].precisionMul; // without fee
+        uint128 new_y0 = new_y0_opt.get(); // without fee
+        // uint256 dy_0 = (xp_mem[i] - new_y0) / tokenData[i].precisionMul; // without fee
 
         uint128 new_y = new_y_opt.get();
         uint256 dy = (xp_mem[i] - new_y) / tokenData[i].precisionMul;
