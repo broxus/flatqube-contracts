@@ -65,10 +65,13 @@ let keyPairs;
 
 locklift.tracing.allowCodes({compute: [51, 60]});
 
-function calculateFees(amount, token){
+function calculateFees(amount, token, fee_numerator){
+
+    fee_numerator = fee_numerator || new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator).plus(options.fee.referrer_numerator);
+
     let fee = new BigNumber(amount)
         .shiftedBy(-token.decimals)
-        .times(new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator).plus(options.fee.referrer_numerator))
+        .times(fee_numerator)
         .div(options.fee.denominator)
         .dp(token.decimals, BigNumber.ROUND_UP);
 
@@ -580,9 +583,18 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             let expectedReferrerBalance = [];
             if (options.pool_contract_name === 'DexStablePool' || options.pool_contract_name === 'DexStablePair') {
 
+                let fee_numerator = new BigNumber(options.fee.pool_numerator)
+                    .plus(options.fee.beneficiary_numerator)
+                    .plus(options.fee.referrer_numerator)
+                    .multipliedBy(N_COINS)
+                    .dividedBy(4 * (N_COINS - 1));
+
                 for (let i = 0; i < N_COINS; i++) {
 
-                    let {beneficiary: expectedBeneficiary, referrer: expectedReferrer} = calculateFees(expected.differences[i], tokens[i]);
+                    let {
+                        beneficiary: expectedBeneficiary,
+                        referrer: expectedReferrer
+                    } = calculateFees(new BigNumber(expected.differences[i]), tokens[i], fee_numerator);
 
                     logger.log(`Beneficiary fee ${tokens[i].symbol}: ${expectedBeneficiary.toString()}`);
                     logger.log(`Referrer fee ${tokens[i].symbol}: ${expectedReferrer.toString()}`);
@@ -817,11 +829,15 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             } else if (options.pool_contract_name === 'DexStablePair') {
                 expectedAccountLp = new BigNumber(accountStart.lp).plus(LP_REWARD).toString();
 
-                let fee_numerator = new BigNumber(options.fee.pool_numerator).plus(options.fee.beneficiary_numerator).plus(options.fee.referrer_numerator).multipliedBy(options.roots.length).dividedBy(4 * (options.roots.length - 1));
+                let fee_numerator = new BigNumber(options.fee.pool_numerator)
+                    .plus(options.fee.beneficiary_numerator)
+                    .plus(options.fee.referrer_numerator)
+                    .multipliedBy(N_COINS)
+                    .dividedBy(4 * (N_COINS - 1));
 
                 for (let i = 0; i < N_COINS; i++) {
 
-                    let {beneficiary: expectedBeneficiary, referrer: expectedReferrer} = calculateFees(expected.differences[i], tokens[i]);
+                    let {beneficiary: expectedBeneficiary, referrer: expectedReferrer} = calculateFees(expected.differences[i], tokens[i], fee_numerator);
 
                     logger.log(`Beneficiary fee ${tokens[i].symbol}: ${expectedBeneficiary.toString()}`);
                     logger.log(`Referrer fee ${tokens[i].symbol}: ${expectedReferrer.toString()}`);
@@ -837,7 +853,6 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                 }
             } else if (options.pool_contract_name === 'DexStablePool') {
                 expectedAccountLp = new BigNumber(accountStart.lp).plus(LP_REWARD).toString();
-
 
                 let {beneficiary: expectedBeneficiary, referrer: expectedReferrer} = calculateFees(amounts[1], tokens[1]);
 
