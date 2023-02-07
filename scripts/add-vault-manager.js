@@ -7,7 +7,7 @@ const { Command } = require('commander');
 const program = new Command();
 
 const MANAGER =
-  '0:a8f13ead2b40cad79f9aa735c53313480303261a611e13a7140bd7aab446b450';
+  '0:2746d46337aa25d790c97f1aefb01a5de48cc1315b41a4f32753146a1e1aeb7d';
 
 async function main() {
   const migration = new Migration();
@@ -55,7 +55,7 @@ async function main() {
     method: 'sendTransaction',
     params: {
       dest: MANAGER,
-      value: locklift.utils.convertCrystal(100, 'nano'),
+      value: locklift.utils.convertCrystal(1000, 'nano'),
       bounce: false,
       flags: 1,
       payload: EMPTY_TVM_CELL,

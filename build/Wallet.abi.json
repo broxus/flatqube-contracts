@@ -4,6 +4,134 @@
 	"header": ["time"],
 	"functions": [
 		{
+			"name": "dexPairDepositLiquiditySuccess",
+			"inputs": [
+				{"name":"id","type":"uint64"},
+				{"name":"via_account","type":"bool"},
+				{"components":[{"name":"step_1_left_deposit","type":"uint128"},{"name":"step_1_right_deposit","type":"uint128"},{"name":"step_1_lp_reward","type":"uint128"},{"name":"step_2_left_to_right","type":"bool"},{"name":"step_2_right_to_left","type":"bool"},{"name":"step_2_spent","type":"uint128"},{"name":"step_2_fee","type":"uint128"},{"name":"step_2_received","type":"uint128"},{"name":"step_3_left_deposit","type":"uint128"},{"name":"step_3_right_deposit","type":"uint128"},{"name":"step_3_lp_reward","type":"uint128"}],"name":"result","type":"tuple"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "dexPairDepositLiquiditySuccessV2",
+			"inputs": [
+				{"name":"id","type":"uint64"},
+				{"name":"via_account","type":"bool"},
+				{"components":[{"name":"old_balances","type":"uint128[]"},{"name":"amounts","type":"uint128[]"},{"name":"lp_reward","type":"uint128"},{"name":"result_balances","type":"uint128[]"},{"name":"invariant","type":"uint128"},{"name":"differences","type":"uint128[]"},{"name":"sell","type":"bool[]"},{"name":"pool_fees","type":"uint128[]"},{"name":"beneficiary_fees","type":"uint128[]"}],"name":"result","type":"tuple"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "dexPairExchangeSuccess",
+			"inputs": [
+				{"name":"id","type":"uint64"},
+				{"name":"via_account","type":"bool"},
+				{"components":[{"name":"left_to_right","type":"bool"},{"name":"spent","type":"uint128"},{"name":"fee","type":"uint128"},{"name":"received","type":"uint128"}],"name":"result","type":"tuple"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "dexPairExchangeSuccessV2",
+			"inputs": [
+				{"name":"id","type":"uint64"},
+				{"name":"via_account","type":"bool"},
+				{"components":[{"name":"spent_token","type":"address"},{"name":"received_token","type":"address"},{"name":"spent","type":"uint128"},{"name":"fee","type":"uint128"},{"name":"received","type":"uint128"}],"name":"result","type":"tuple"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "dexPairWithdrawSuccess",
+			"inputs": [
+				{"name":"id","type":"uint64"},
+				{"name":"via_account","type":"bool"},
+				{"components":[{"name":"lp","type":"uint128"},{"name":"left","type":"uint128"},{"name":"right","type":"uint128"}],"name":"result","type":"tuple"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "dexPairWithdrawSuccessV2",
+			"inputs": [
+				{"name":"id","type":"uint64"},
+				{"name":"via_account","type":"bool"},
+				{"components":[{"name":"lp_amount","type":"uint128"},{"name":"old_balances","type":"uint128[]"},{"name":"amounts","type":"uint128[]"},{"name":"result_balances","type":"uint128[]"},{"name":"invariant","type":"uint128"},{"name":"differences","type":"uint128[]"},{"name":"sell","type":"bool[]"},{"name":"pool_fees","type":"uint128[]"},{"name":"beneficiary_fees","type":"uint128[]"}],"name":"result","type":"tuple"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "dexPairOperationCancelled",
+			"inputs": [
+				{"name":"id","type":"uint64"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onAcceptTokensTransfer",
+			"inputs": [
+				{"name":"tokenRoot","type":"address"},
+				{"name":"amount","type":"uint128"},
+				{"name":"sender","type":"address"},
+				{"name":"senderWallet","type":"address"},
+				{"name":"remainingGasTo","type":"address"},
+				{"name":"payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onAcceptTokensMint",
+			"inputs": [
+				{"name":"tokenRoot","type":"address"},
+				{"name":"amount","type":"uint128"},
+				{"name":"remainingGasTo","type":"address"},
+				{"name":"payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onTokenRootDeployed",
+			"inputs": [
+				{"name":"callId","type":"uint32"},
+				{"name":"tokenRoot","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onRefLastUpdate",
+			"inputs": [
+				{"name":"referred","type":"address"},
+				{"name":"referrer","type":"address"},
+				{"name":"remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "dexAccountOnSuccess",
+			"inputs": [
+				{"name":"nonce","type":"uint64"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "dexAccountOnBounce",
+			"inputs": [
+				{"name":"nonce","type":"uint64"},
+				{"name":"functionId","type":"uint32"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "sendTransaction",
 			"inputs": [
 				{"name":"dest","type":"address"},

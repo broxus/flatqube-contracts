@@ -1,11 +1,15 @@
 import { writeFileSync } from 'fs';
-import { Address } from 'locklift';
+import { Address, WalletTypes } from 'locklift';
 import { yellowBright } from 'chalk';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { Migration } = require(process.cwd() + '/scripts/utils');
 
-const OLD_DEX_PAIR_CODE_HASH =
-  'd7f137ee2123785ed7dd56fad374ab7c0e99343eb97e918aac1bbc6bd9bb827b';
-const DEX_ROOT_ADDRESS =
-  '0:5eb5713ea9b4a0f3a13bc91b282cde809636eb1e68d2fcb6427b9ad78a5a9008';
+// FIXME:
+// const OLD_DEX_PAIR_CODE_HASH =
+//   'd7f137ee2123785ed7dd56fad374ab7c0e99343eb97e918aac1bbc6bd9bb827b';
+
+const OLD_DEX_PAIR_CODE_HASH = '9bffb97d8fcb584230bfa949b6c7e8fb9881f1ffb684e13f02d6fcd9ba3306c5';
+
 
 type PairEntity = {
   dexPair: Address;
@@ -15,6 +19,15 @@ type PairEntity = {
 };
 
 async function exportDexPairs() {
+  const migration = new Migration();
+
+  const dexRoot = await locklift.factory.getDeployedContract(
+    'DexRoot',
+    migration.getAddress('DexRoot'),
+  );
+
+  console.log('DexRoot: ' + dexRoot.address);
+
   let continuation = undefined;
   let hasResults = true;
   const accounts: Address[] = [];
@@ -50,7 +63,7 @@ async function exportDexPairs() {
           .call({})
           .then((r) => r.dex_root.toString());
 
-        if (root === DEX_ROOT_ADDRESS) {
+        if (root === dexRoot.address.toString()) {
           const roots = await DexPair.methods
             .getTokenRoots({ answerId: 0 })
             .call();

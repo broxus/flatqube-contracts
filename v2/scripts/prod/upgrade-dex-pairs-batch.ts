@@ -54,6 +54,8 @@ const main = async () => {
         }),
     );
 
+    await traceTree.beautyPrint();
+
     for (const pair of chunk) {
       const DexPair = locklift.factory.getDeployedContract(
         'DexPair',
