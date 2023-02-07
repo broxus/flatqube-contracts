@@ -344,7 +344,7 @@ library Math {
             _fee.denominator
         );
 
-        uint128 aReferrerFee = math.muldivc(
+        uint128 aReferrerFee = math.muldiv(
             aFee,
             _fee.referrer_numerator,
             _fee.pool_numerator + _fee.beneficiary_numerator + _fee.referrer_numerator
@@ -356,12 +356,12 @@ library Math {
             !_fee.referrer_threshold.exists(_aTokenRoot) ||
             _fee.referrer_threshold[_aTokenRoot] <= aReferrerFee
         )) {
-            aBeneficiaryFee = math.muldiv(aFee, _fee.beneficiary_numerator, _fee.pool_numerator + _fee.beneficiary_numerator + _fee.referrer_numerator);
-            aPoolFee = aFee - aReferrerFee - aBeneficiaryFee;
+            aPoolFee = math.muldivc(aFee, _fee.pool_numerator, _fee.pool_numerator + _fee.beneficiary_numerator + _fee.referrer_numerator);
+            aBeneficiaryFee = aFee - aReferrerFee - aPoolFee;
         } else {
             aReferrerFee = 0;
-            aBeneficiaryFee = math.muldiv(aFee, _fee.beneficiary_numerator, _fee.beneficiary_numerator + _fee.pool_numerator);
-            aPoolFee = aFee - aBeneficiaryFee;
+            aPoolFee = math.muldivc(aFee, _fee.pool_numerator, _fee.beneficiary_numerator + _fee.pool_numerator);
+            aBeneficiaryFee = aFee - aPoolFee;
         }
 
         uint128 newAPool = _aPool + _aAmount;
