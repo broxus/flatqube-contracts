@@ -1,4 +1,5 @@
-import { Migration, displayTx } from '../../utils/migration';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { Migration, displayTx } = require(process.cwd() + '/scripts/utils');
 import { Command } from 'commander';
 import {
   toNano,
@@ -315,8 +316,8 @@ async function main() {
   }
 
   console.log('='.repeat(64));
-  for (const alias in migration.migrationLog) {
-    console.log(`${alias}: ${migration.migrationLog[alias]}`);
+  for (const alias in migration.migration_log) {
+    console.log(`${alias}: ${migration.migration_log[alias].address}`);
   }
   console.log('='.repeat(64));
 }

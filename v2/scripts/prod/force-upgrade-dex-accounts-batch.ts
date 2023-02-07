@@ -1,48 +1,75 @@
-import { Address, toNano } from 'locklift';
-import { Migration } from '../../utils/migration';
+import { Address, toNano, WalletTypes } from 'locklift';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { Migration } = require(process.cwd() + '/scripts/utils');
 import { yellowBright } from 'chalk';
 import accounts from './dex_accounts.json';
+
+const chunkify = <T>(arr: T[], size: number): T[][] =>
+  Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+    arr.slice(i * size, i * size + size),
+  );
 
 const main = async () => {
   const migration = new Migration();
 
-  const owner = await migration.loadAccount('Account1', '0');
-  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+  const dexRoot = await locklift.factory.getDeployedContract(
+    'DexRoot',
+    migration.getAddress('DexRoot'),
+  );
+  const dexManagerAddress = await dexRoot.methods
+    .getManager({ answerId: 0 })
+    .call()
+    .then((m) => m.value0);
+
+  const manager = await locklift.factory.accounts.addExistingAccount({
+    type: WalletTypes.EverWallet,
+    address: dexManagerAddress,
+  });
+
+  console.log('DexRoot:' + dexRoot.address);
+  console.log('Manager:' + manager.address);
 
   console.log(`Start force upgrade DexAccounts. Count = ${accounts.length}`);
 
-  const { traceTree } = await locklift.tracing.trace(
-    dexRoot.methods
-      .upgradeAccounts({
-        _accountsOwners: accounts.map((a) => new Address(a.owner)),
-        _offset: 0,
-        _remainingGasTo: owner.address,
-      })
-      .send({
-        from: owner.address,
-        amount: toNano(accounts.length * 3.5),
-      }),
-  );
+  const params = accounts.map((a) => ({
+    owner: a.owner,
+    account: a.dexAccount,
+  }));
 
-  for (const account of accounts) {
-    const DexAccount = locklift.factory.getDeployedContract(
-      'DexAccount',
-      new Address(account.dexAccount),
+  for (const chunk of chunkify(params, 20)) {
+    const { traceTree } = await locklift.tracing.trace(
+      dexRoot.methods
+        .upgradeAccounts({
+          _accountsOwners: chunk.map((a) => new Address(a.owner)),
+          _offset: 0,
+          _remainingGasTo: manager.address,
+        })
+        .send({
+          from: manager.address,
+          amount: toNano(accounts.length * 5),
+        }),
     );
 
-    const events = traceTree.findEventsForContract({
-      contract: DexAccount,
-      name: 'AccountCodeUpgraded' as const,
-    });
+    for (const account of chunk) {
+      const DexAccount = locklift.factory.getDeployedContract(
+        'DexAccount',
+        new Address(account.account),
+      );
 
-    if (events.length > 0) {
-      console.log(
-        `DexAccount ${account.dexAccount} upgraded. Current version: ${events[0].version}`,
-      );
-    } else {
-      console.log(
-        yellowBright(`DexAccount ${account.dexAccount} wasn't upgraded`),
-      );
+      const events = traceTree.findEventsForContract({
+        contract: DexAccount,
+        name: 'AccountCodeUpgraded' as const,
+      });
+
+      if (events.length > 0) {
+        console.log(
+          `DexAccount ${account.account} upgraded. Current version: ${events[0].version}`,
+        );
+      } else {
+        console.log(
+          yellowBright(`DexAccount ${account.account} wasn't upgraded`),
+        );
+      }
     }
   }
 };

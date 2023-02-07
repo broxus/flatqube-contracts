@@ -819,10 +819,8 @@ contract DexRoot is DexContractBase, IDexRoot {
     {
         uint length = _tokenRoots.length;
 
-        // 20, 40, 60, 65
-        uint takeUntil = math.min(_offset + 20, length);
+        uint takeUntil = math.min(_offset + 5, length);
 
-        // [0, 19], [20, 39], [40, 59], [60, 64]
         for (uint i = _offset; i < takeUntil; i++) {
             _upgradeVaultInternal(_tokenRoots[i], _remainingGasTo);
         }
@@ -946,10 +944,8 @@ contract DexRoot is DexContractBase, IDexRoot {
     {
         uint length = _accountsOwners.length;
 
-        // 20, 40, 60, 65
-        uint takeUntil = math.min(_offset + 20, length);
+        uint takeUntil = math.min(_offset + 5, length);
 
-        // [0, 19], [20, 39], [40, 59], [60, 64]
         for (uint i = _offset; i < takeUntil; i++) {
             _upgradeAccountInternal(_accountsOwners[i], _remainingGasTo);
         }
@@ -1057,10 +1053,8 @@ contract DexRoot is DexContractBase, IDexRoot {
     {
         uint length = _params.length;
 
-        // 20, 40, 60, 65
-        uint takeUntil = math.min(_offset + 20, length);
+        uint takeUntil = math.min(_offset + 5, length);
 
-        // [0, 19], [20, 39], [40, 59], [60, 64]
         for (uint i = _offset; i < takeUntil; i++) {
             _upgradePairInternal(_params[i], _remainingGasTo);
         }
@@ -1135,10 +1129,8 @@ contract DexRoot is DexContractBase, IDexRoot {
     {
         uint length = _params.length;
 
-        // 20, 40, 60, 65
-        uint takeUntil = math.min(_offset + 20, length);
+        uint takeUntil = math.min(_offset + 5, length);
 
-        // [0, 19], [20, 39], [40, 59], [60, 64]
         for (uint i = _offset; i < takeUntil; i++) {
             _setPoolActiveInternal(_params[i], _remainingGasTo);
         }
