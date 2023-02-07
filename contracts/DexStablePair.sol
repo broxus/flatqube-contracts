@@ -1216,7 +1216,7 @@ contract DexStablePair is
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(id, false, IExchangeResult.ExchangeResult(
-                    true,
+                    i == 0 && j == 1,
                     spent_amount,
                     dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
                     dy_result.amount
@@ -1228,7 +1228,7 @@ contract DexStablePair is
                         flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                         bounce: false
                     }(id, false, IExchangeResult.ExchangeResult(
-                        true,
+                        i == 0 && j == 1,
                         spent_amount,
                         dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
                         dy_result.amount
