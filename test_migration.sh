@@ -16,6 +16,13 @@ npx locklift run $NO_TRACE --script scripts/2-deploy-test-tokens.js --tokens='["
 npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"account":2,"amount":200000000,"token":"foo"}, {"account":2,"amount":200000000,"token":"bar"}]'
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2 --contract_name='DexAccountPrev'
 
+for (( i=2; i < 20; i++ ))
+do
+  ii=$((i+1))
+  npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number="$i" --balance='5'
+  npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n="$ii" --contract_name='DexAccountPrev'
+done
+
 for (( i=0; i < 20; i++ ))
 do
   npx locklift run $NO_TRACE --script scripts/2-deploy-test-tokens.js --tokens="[\"gen$i\"]"
@@ -45,6 +52,11 @@ npx locklift run $NO_TRACE --script scripts/update-dexRoot.js --old_contract='De
 echo "____________________________________________________________________";
 echo "prev vault ->  vault";
 npx locklift run $NO_TRACE --script scripts/update-dexVault.js --old_contract='DexVaultPrev' --new_contract='DexVault'
+
+echo "____________________________________________________________________";
+echo "install codes";
+npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPair' --pool_type=1
+npx locklift test $NO_TRACE --tests test/31-install-account-code.js --contract_name='DexAccount'
 
 echo "____________________________________________________________________";
 echo "Add manager";
