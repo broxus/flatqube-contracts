@@ -19,9 +19,9 @@ export class TokenWallet {
         this.name = name ? name : undefined;
     }
 
-    static async from_addr(addr: Address, owner: Account | null) {
+    static async from_addr(addr: Address, owner: Account | null, name?: string) {
         const wallet = await locklift.factory.getDeployedContract('TokenWalletUpgradeable', addr);
-        return new TokenWallet(wallet, owner);
+        return new TokenWallet(wallet, owner, name);
     }
 
     async owner() {
@@ -36,7 +36,7 @@ export class TokenWallet {
         return (await this.contract.methods.balance({answerId: 0}).call()).value0;
     }
 
-    async transfer(amount: number, receiver: Address, payload = '', value: any, params?: any) {
+    async transfer(amount: number|string, receiver: Address, payload = '', value: any, params?: any) {
         let notify = payload !== '';
 
         logTestProcessing(`${this.name}(${this.address}).transfer()`,
