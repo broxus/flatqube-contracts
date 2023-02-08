@@ -1,0 +1,1322 @@
+pragma ton-solidity >= 0.62.0;
+
+pragma AbiHeader time;
+pragma AbiHeader expire;
+pragma AbiHeader pubkey;
+
+import "../libraries/OrderGas.tsol";
+import "../libraries/OrderErrors.tsol";
+import "../libraries/OrderStatus.tsol";
+import "../libraries/OrderOperationStatus.tsol";
+import "../libraries/DexOperationTypes.tsol";
+
+import "../structures/IOrderExchangeResult.tsol";
+import "../structures/IOrderSwapResult.tsol";
+
+import "../interfaces/IOrder.tsol";
+import "../interfaces/IHasEmergencyMode.tsol";
+import "../interfaces/IDexRoot.tsol";
+import "../interfaces/IOrderOperationCallback.tsol";
+
+import "../OrderPlatform.tsol";
+
+import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
+import "tip3/contracts/interfaces/ITokenRoot.tsol";
+import "tip3/contracts/interfaces/ITokenWallet.tsol";
+import "tip3/contracts/interfaces/TIP3TokenWallet.tsol";
+import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
+
+contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IHasEmergencyMode {
+	address static factory;
+	address static root;
+	address static owner;
+	address static spentToken;
+	address static receiveToken;
+	uint64 static timeTx;
+	uint64 static nowTx;
+
+	uint128 expectedAmount;
+	uint128 initialAmount;
+
+	uint128 currentAmountSpentToken;
+	uint128 currentAmountReceiveToken;
+
+	uint256 backPK;
+	uint256 backMatchingPK;
+
+	address dexRoot;
+	address dexPair;
+
+	address spentWallet;
+	address receiveWallet;
+
+	TvmCell orderPlatformCode;
+
+	uint8 state;
+	uint64 swapAttempt;
+
+	uint8 prevState;
+	uint256 emergencyManager;
+
+	bool autoExchange;
+	OrderFeeParams fee;
+	address matchingOrder;
+
+	uint32 version;
+
+	constructor(
+		uint128 _expectedAmount,
+		uint128 _initialAmount,
+		uint256 _backPK,
+		uint256 _backMatchingPK,
+		address _dexRoot,
+		OrderFeeParams _fee,
+		TvmCell _orderPlatformCode,
+		uint32 _version
+	) public {
+		changeState(OrderStatus.Initialize);
+		if (
+			msg.sender.value != 0 &&
+			msg.sender == root
+		) {
+			tvm.rawReserve(address(this).balance - msg.value, 0);
+
+			currentAmountReceiveToken = expectedAmount = _expectedAmount;
+			currentAmountSpentToken = initialAmount = _initialAmount;
+			backPK = _backPK;
+			backMatchingPK = _backMatchingPK;
+			dexRoot = _dexRoot;
+			fee = _fee;
+			orderPlatformCode = _orderPlatformCode;
+			version = _version;
+
+			IDexRoot(dexRoot).getExpectedPairAddress{
+				value: OrderGas.GET_DEX_PAIR,
+				flag: MsgFlag.SENDER_PAYS_FEES,
+				callback: TestNewOrderBad.onBeginData
+			}(spentToken, receiveToken);
+
+			ITokenRoot(spentToken).deployWallet{
+				value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
+				flag: MsgFlag.SENDER_PAYS_FEES,
+				callback: TestNewOrderBad.onBeginData
+			}(address(this), OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
+
+			ITokenRoot(receiveToken).deployWallet{
+				value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
+				flag: MsgFlag.SENDER_PAYS_FEES,
+				callback: TestNewOrderBad.onBeginData
+			}(address(this), OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
+		} else {
+			msg.sender.transfer(
+				0,
+				false,
+				MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO
+			);
+		}
+	}
+
+	modifier onlyFactory() {
+		require(
+			msg.sender.value != 0 && msg.sender == factory,
+			OrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT
+		);
+		_;
+	}
+
+	modifier onlyOwner() {
+		require(
+			(msg.sender.value != 0 && msg.sender == owner),
+			OrderErrors.NOT_LIMIT_ORDER_OWNER
+		);
+		_;
+	}
+
+	modifier onlyBackend(uint256 _backendPK) {
+		require(
+			msg.pubkey() == _backendPK,
+			OrderErrors.NOT_BACKEND_PUB_KEY
+		);
+		_;
+	}
+
+	modifier onlyEmergencyManager() {
+		require(
+			emergencyManager != 0 &&
+				((msg.sender.value != 0 &&
+					msg.sender.value == emergencyManager) ||
+					msg.pubkey() == emergencyManager),
+			OrderErrors.NOT_EMERGENCY_MANAGER
+		);
+		_;
+	}
+
+	function onTokenWalletReceive(address _wallet) external {}
+
+	function onBeginData(address inAddress) external {
+		require(
+			msg.sender.value != 0 &&
+			(msg.sender == dexRoot ||
+			msg.sender == spentToken ||
+			msg.sender == receiveToken),
+			OrderErrors.NOT_BEGIN_DATA
+		);
+
+		if (msg.sender == dexRoot) {
+			dexPair = inAddress;
+			autoExchange = true;
+		} else if (msg.sender == spentToken) {
+			spentWallet = inAddress;
+		} else if (msg.sender == receiveToken) {
+			receiveWallet = inAddress;
+		}
+
+		if (
+			spentWallet.value != 0 &&
+			receiveWallet.value != 0
+		) {
+			TIP3TokenWallet(receiveWallet).balance{
+				value: OrderGas.GET_BALANCE_WALLET,
+				flag: MsgFlag.SENDER_PAYS_FEES,
+				callback: TestNewOrderBad.onBalanceReceiveWallet
+			}();
+		}
+	}
+
+	function onBalanceReceiveWallet(uint128 _balance) external {
+		require(
+			msg.sender.value != 0 && msg.sender == receiveWallet,
+			OrderErrors.NOT_WALLET_TOKEN_2
+		);
+
+		if (state != OrderStatus.Active) {
+			if (_balance >= expectedAmount) {
+				changeState(OrderStatus.Active);
+			} else {
+				changeState(OrderStatus.AwaitTokens);
+			}
+		}
+	}
+
+	function currentStatus() external view responsible override returns (uint8){
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } state;
+	}
+
+	function initParams() external view responsible override returns (InitParams){
+		return
+			{
+				value: 0,
+				bounce: false,
+				flag: MsgFlag.REMAINING_GAS
+			} InitParams(
+				factory,
+				root,
+				owner,
+				spentToken,
+				receiveToken,
+				timeTx,
+				nowTx
+			);
+	}
+
+	function getDetails()
+	external
+	view
+	responsible
+	override
+	returns (Details)
+	{
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } buildDetails();
+	}
+
+	function getFeeParams() override external view responsible returns (OrderFeeParams params) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
+	}
+
+	function getExpectedSpendAmount(uint128 amount) override external view responsible returns(uint128, uint128) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} _expectedSpendAmount(amount);
+	}
+
+	function getExpectedSpendAmountOfMatching(uint128 amount) override external view responsible returns(uint128, uint128) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} _expectedSpendAmountOfMatching(amount);
+	}
+
+    function setFeeParams(OrderFeeParams params) override external onlyFactory {
+		tvm.rawReserve(address(this).balance - msg.value, 0);
+
+		fee = params;
+		factory.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
+	}
+
+	function buildPayload(uint64 callbackId, uint128 deployWalletValue)
+		external
+		pure
+		returns (TvmCell)
+	{
+		TvmBuilder builder;
+		builder.store(callbackId);
+		builder.store(deployWalletValue);
+
+		return builder.toCell();
+	}
+
+	function onAcceptTokensTransfer(
+		address tokenRoot,
+		uint128 amount,
+		address sender,
+		address, /*senderWallet*/
+		address originalGasTo,
+		TvmCell payload
+	) external override {
+		TvmCell emptyPayload;
+		bool needCancel = false;
+		bool makeReserve = false;
+		uint64 callbackId;
+		uint128 transferAmount;
+		uint128 expectedSenderAmount;
+		uint128 senderFee;
+		TvmSlice payloadSlice = payload.toSlice();
+		if (
+			sender == root &&
+			tokenRoot == spentToken &&
+			(state == OrderStatus.Initialize || state == OrderStatus.AwaitTokens) &&
+			amount >= initialAmount &&
+			msg.sender.value != 0 && msg.sender == spentWallet
+		) {
+			changeState(OrderStatus.Active);
+		} else {
+			if ((msg.sender.value != 0 && msg.sender == receiveWallet)
+				&& ((state == OrderStatus.Active && payloadSlice.bits() >= 192)
+				|| (sender == matchingOrder && state == OrderStatus.MatchInProgress && payloadSlice.bits() == 715)))
+			{
+				callbackId = payloadSlice.decode(uint64);
+				uint128 deployWalletValue = payloadSlice.decode(uint128);
+				(expectedSenderAmount, senderFee) = _expectedSpendAmount(amount);
+				TvmCell payloadForTransfer;
+				if (state == OrderStatus.MatchInProgress) {
+					(
+						uint128 amountForDeal,
+						uint128 reward,
+						address sendGasTo
+					)
+					= payloadSlice.decode(uint128, uint128, address);
+
+					TvmBuilder builder;
+					builder.store(callbackId);
+					builder.store(deployWalletValue);
+					builder.store(amountForDeal);
+					builder.store(reward);
+					builder.store(sendGasTo);
+
+					payloadForTransfer = builder.toCell();
+				}
+
+				if (msg.value >= OrderGas.FILL_ORDER_MIN_VALUE + deployWalletValue) {
+					if (expectedSenderAmount > currentAmountReceiveToken) {
+						ITokenWallet(msg.sender).transfer{
+							value: OrderGas.TRANSFER_MIN_VALUE,
+							flag: MsgFlag.SENDER_PAYS_FEES,
+							bounce: false
+						}(
+							expectedSenderAmount - currentAmountReceiveToken,
+							sender,
+							uint128(0),
+							originalGasTo,
+							true,
+							emptyPayload
+						);
+
+						ITokenWallet(spentWallet).transfer{
+							value: OrderGas.TRANSFER_MIN_VALUE,
+							flag: MsgFlag.SENDER_PAYS_FEES,
+							bounce: false
+						}(
+							currentAmountSpentToken,
+							sender,
+							deployWalletValue,
+							originalGasTo,
+							true,
+							(state != OrderStatus.MatchInProgress ? emptyPayload : payloadForTransfer)
+						);
+
+						ITokenWallet(receiveWallet).transfer{
+							value: OrderGas.TRANSFER_MIN_VALUE,
+							flag: MsgFlag.SENDER_PAYS_FEES,
+							bounce: false
+						}(
+							currentAmountReceiveToken,
+							owner,
+							uint128(0),
+							originalGasTo,
+							true,
+							emptyPayload
+						);
+
+						if (senderFee > 0) {
+							ITokenWallet(receiveWallet).transfer{
+								value : OrderGas.TRANSFER_MIN_VALUE,
+								flag : MsgFlag.SENDER_PAYS_FEES,
+								bounce : false
+							}(
+								senderFee,
+								fee.beneficiary,
+								uint128(0),
+								originalGasTo,
+								true,
+								emptyPayload
+							);
+						}
+
+						transferAmount = currentAmountSpentToken;
+
+						currentAmountReceiveToken = 0;
+						currentAmountSpentToken = 0;
+					} else {
+						makeReserve = true;
+						transferAmount = math.muldiv(
+							expectedSenderAmount,
+							initialAmount,
+							expectedAmount
+						);
+
+						if (transferAmount > 0) {
+							ITokenWallet(spentWallet).transfer{
+								value: OrderGas.TRANSFER_MIN_VALUE,
+								flag: MsgFlag.SENDER_PAYS_FEES,
+								bounce: false
+							}(
+								transferAmount,
+								sender,
+								deployWalletValue,
+								originalGasTo,
+								true,
+								(state != OrderStatus.MatchInProgress ? emptyPayload : payloadForTransfer)
+							);
+						}
+
+						currentAmountSpentToken -= transferAmount;
+						currentAmountReceiveToken -= expectedSenderAmount;
+
+						if (currentAmountSpentToken > 0) {
+							emit PartExchange(
+								spentToken,
+								transferAmount,
+								receiveToken,
+								expectedSenderAmount,
+								currentAmountSpentToken,
+								currentAmountReceiveToken,
+								senderFee
+							);
+
+							if (callbackId > 0) {
+								IOrderOperationCallback(sender).onOrderPartExchangeSuccess{
+									value: OrderGas.OPERATION_CALLBACK_BASE,
+									flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+									bounce: false
+								}(
+									callbackId,
+									owner,
+									uint128(0),
+									IOrderExchangeResult.OrderExchangeResult(
+										receiveToken,
+										expectedSenderAmount,
+										spentToken,
+										transferAmount,
+										currentAmountReceiveToken,
+										currentAmountSpentToken
+									)
+								);
+
+								IOrderOperationCallback(owner).onOrderPartExchangeSuccess{
+									value: OrderGas.OPERATION_CALLBACK_BASE,
+									flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+									bounce: false
+								}(
+									callbackId,
+									owner,
+									senderFee,
+									IOrderExchangeResult.OrderExchangeResult(
+										spentToken,
+										transferAmount,
+										receiveToken,
+										expectedSenderAmount,
+										currentAmountSpentToken,
+										currentAmountReceiveToken
+									)
+								);
+							}
+						}
+
+						ITokenWallet(receiveWallet).transfer{
+							value: OrderGas.TRANSFER_MIN_VALUE,
+							flag: MsgFlag.SENDER_PAYS_FEES,
+							bounce: false
+						}(
+							expectedSenderAmount,
+							owner,
+							uint128(0),
+							originalGasTo,
+							true,
+							emptyPayload
+						);
+
+						if (senderFee > 0){
+							ITokenWallet(receiveWallet).transfer{
+								value: OrderGas.TRANSFER_MIN_VALUE,
+								flag: MsgFlag.SENDER_PAYS_FEES,
+								bounce: false
+							}(
+								senderFee,
+								fee.beneficiary,
+								uint128(0),
+								originalGasTo,
+								true,
+								emptyPayload
+							);
+						}
+
+						if (state == OrderStatus.MatchInProgress) {
+
+						}
+					}
+				} else {
+					needCancel = true;
+				}
+			} else if (state == OrderStatus.SwapInProgress) {
+				address initiator;
+				if (payloadSlice.bits() >= 8) {
+					uint8 operationStatus = payloadSlice.decode(uint8);
+					if (
+						(msg.sender.value != 0 && msg.sender == receiveWallet && tokenRoot == receiveToken)
+						&& operationStatus == OrderOperationStatus.SUCCESS &&
+						amount >= currentAmountReceiveToken
+					) {
+						tvm.rawReserve(address(this).balance - msg.value, 0);
+						uint128 deployWalletValue;
+						(
+							callbackId,
+							initiator,
+							deployWalletValue
+						) = payloadSlice.decode(uint64, address, uint128);
+
+						// send owner
+						ITokenWallet(receiveWallet).transfer{
+							value: OrderGas.TRANSFER_MIN_VALUE,
+							flag: MsgFlag.SENDER_PAYS_FEES,
+							bounce: false
+						}(
+							currentAmountReceiveToken,
+							owner,
+							0,
+							originalGasTo,
+							true,
+							emptyPayload
+						);
+
+						if (amount - currentAmountReceiveToken > 0) {
+							// send the difference swap to initiator
+							ITokenWallet(receiveWallet).transfer{
+								value: OrderGas.TRANSFER_MIN_VALUE,
+								flag: MsgFlag.SENDER_PAYS_FEES,
+								bounce: false
+							}(
+								amount - currentAmountReceiveToken,
+								initiator,
+								deployWalletValue,
+								initiator,
+								true,
+								emptyPayload
+							);
+
+							if (callbackId > 0) {
+								IOrderOperationCallback(initiator).onOrderSwapSuccess{
+									value: OrderGas.OPERATION_CALLBACK_BASE,
+									flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+									bounce: false
+								}(
+									callbackId,
+									IOrderSwapResult.OrderSwapResult(
+									owner,
+									initiator,
+									amount - currentAmountReceiveToken
+									)
+								);
+							}
+						}
+
+						if (callbackId > 0) {
+							IOrderOperationCallback(owner).onOrderSwapSuccess{
+								value: OrderGas.OPERATION_CALLBACK_BASE,
+								flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+								bounce: false
+							}(
+								callbackId,
+								IOrderSwapResult.OrderSwapResult(
+									owner,
+									initiator,
+									amount - currentAmountReceiveToken
+								)
+							);
+						}
+
+						initiator.transfer(0, false, MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS);
+
+						currentAmountReceiveToken = 0;
+						currentAmountSpentToken = 0;
+					} else if (
+						(msg.sender.value != 0 && msg.sender == spentWallet && tokenRoot == spentToken) &&
+						operationStatus == OrderOperationStatus.CANCEL
+					) {
+						tvm.rawReserve(address(this).balance - msg.value, 0);
+						changeState(OrderStatus.Active);
+						(callbackId, initiator) = payloadSlice.decode(uint64, address );
+						if (callbackId > 0) {
+							IOrderOperationCallback(initiator).onOrderSwapCancel{
+								value: OrderGas.OPERATION_CALLBACK_BASE,
+								flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+								bounce: false
+							}(callbackId);
+						}
+
+						initiator.transfer(0, false, MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS);
+					}
+				}
+			} else if(
+				msg.sender.value != 0 && msg.sender == receiveWallet &&
+				sender == matchingOrder && state == OrderStatus.MatchInComplete &&
+				payloadSlice.bits() == 715
+			){
+				callbackId = payloadSlice.decode(uint64);
+				(
+					uint128 deployWalletValue,
+					uint128 amountForDeal,
+					uint128 reward,
+					address sendGasTo
+				) = payloadSlice.decode(uint128, uint128, uint128, address);
+
+				transferAmount = amountForDeal;
+				expectedSenderAmount = amount;
+
+				ITokenWallet(receiveWallet).transfer{
+					value: OrderGas.TRANSFER_MIN_VALUE,
+					flag: MsgFlag.SENDER_PAYS_FEES,
+					bounce: false
+				}(
+					amount,
+					owner,
+					uint128(0),
+					originalGasTo,
+					true,
+					emptyPayload
+				);
+
+				currentAmountReceiveToken -= amount;
+
+				uint128 expectedReward;
+				uint128 expectedFeeOnReward;
+
+				if (reward > 0) {
+					(expectedReward, expectedFeeOnReward) = _expectedSpendAmountOfMatching(reward);
+					currentAmountSpentToken -= reward;
+				}
+
+				matchingOrder = address(0);
+
+				if (currentAmountSpentToken > 0) {
+					emit PartExchange(
+						spentToken,
+						transferAmount,
+						receiveToken,
+						expectedSenderAmount,
+						currentAmountSpentToken,
+						currentAmountReceiveToken,
+						0
+					);
+
+					changeState(OrderStatus.Active);
+
+					if (callbackId > 0) {
+						IOrderOperationCallback(owner).onOrderPartExchangeSuccess{
+							value: OrderGas.OPERATION_CALLBACK_BASE,
+							flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+							bounce: false
+						}(
+							callbackId,
+							owner,
+							senderFee,
+							IOrderExchangeResult.OrderExchangeResult(
+								spentToken,
+								transferAmount,
+								receiveToken,
+								expectedSenderAmount,
+								currentAmountSpentToken,
+								currentAmountReceiveToken
+							)
+						);
+
+						IOrderOperationCallback(sendGasTo).onOrderPartExchangeSuccess{
+							value: OrderGas.OPERATION_CALLBACK_BASE,
+							flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+							bounce: false
+						}(
+							callbackId,
+							sendGasTo,
+							uint128(0),
+							IOrderExchangeResult.OrderExchangeResult(
+								receiveToken,
+								expectedSenderAmount,
+								spentToken,
+								transferAmount,
+								currentAmountReceiveToken,
+								currentAmountSpentToken
+							)
+						);
+					}
+				}
+
+				if (expectedFeeOnReward > 0) {
+					ITokenWallet(spentWallet).transfer{
+						value: OrderGas.TRANSFER_MIN_VALUE,
+						flag: MsgFlag.SENDER_PAYS_FEES,
+						bounce: false
+					}(
+						expectedFeeOnReward,
+						fee.beneficiary,
+						deployWalletValue,
+						originalGasTo,
+						true,
+						emptyPayload
+					);
+				}
+
+				if (expectedReward > 0) {
+					ITokenWallet(spentWallet).transfer{
+						value: OrderGas.TRANSFER_MIN_VALUE,
+						flag: MsgFlag.SENDER_PAYS_FEES,
+						bounce: false
+					}(
+						expectedReward,
+						sendGasTo,
+						deployWalletValue,
+						originalGasTo,
+						true,
+						emptyPayload
+					);
+				}
+			} else {
+				needCancel = true;
+			}
+		}
+
+		if (currentAmountReceiveToken == 0 && currentAmountSpentToken == 0) {
+			emit PartExchange(
+				spentToken,
+				transferAmount,
+				receiveToken,
+				expectedSenderAmount,
+				currentAmountSpentToken,
+				currentAmountReceiveToken,
+				senderFee
+			);
+			changeState(OrderStatus.Filled);
+
+			if (callbackId > 0) {
+				IOrderOperationCallback(sender).onOrderStateFilled{
+					value: OrderGas.OPERATION_CALLBACK_BASE,
+					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+					bounce: false
+				}(
+					callbackId,
+					owner,
+					uint128(0),
+					IOrderExchangeResult.OrderExchangeFilledResult(
+						receiveToken,
+						amount,
+						spentToken,
+						transferAmount
+					)
+				);
+
+				IOrderOperationCallback(owner).onOrderStateFilled{
+					value: OrderGas.OPERATION_CALLBACK_BASE,
+					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+					bounce: false
+				}(
+					callbackId,
+					owner,
+					senderFee,
+					IOrderExchangeResult.OrderExchangeFilledResult(
+						spentToken,
+						transferAmount,
+						receiveToken,
+						amount
+					)
+				);
+			}
+			close();
+		} else if (makeReserve) {
+			tvm.rawReserve(address(this).balance - msg.value, 0);
+			if (state == OrderStatus.MatchInProgress) {
+				matchingOrder = address(0);
+				changeState(OrderStatus.Active);
+			}
+
+			sender.transfer(
+				0,
+				false,
+				MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+			);
+		}
+
+		if (needCancel) {
+			tvm.rawReserve(address(this).balance - msg.value, 0);
+
+			if (callbackId > 0) {
+				IOrderOperationCallback(sender).onOrderReject{
+					value: OrderGas.OPERATION_CALLBACK_BASE,
+					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+					bounce: false
+				}(callbackId);
+			}
+
+			ITokenWallet(msg.sender).transfer{
+				value: 0,
+				flag: MsgFlag.ALL_NOT_RESERVED,
+				bounce: false
+			}(
+				amount,
+				sender,
+				uint128(0),
+				originalGasTo,
+				true,
+				emptyPayload
+			);
+		}
+	}
+
+	function cancel(uint64 callbackId) external onlyOwner {
+		require(
+			state == OrderStatus.Active,
+			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
+		);
+		tvm.accept();
+
+		changeState(OrderStatus.Cancelled);
+
+		if (callbackId > 0) {
+			IOrderOperationCallback(msg.sender).onOrderStateCancelled{
+				value: OrderGas.OPERATION_CALLBACK_BASE,
+				flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+				bounce: false
+			}(
+				callbackId,
+				IOrderExchangeResult.OrderExchangeCancelledResult(
+					spentToken,
+					currentAmountSpentToken
+				)
+			);
+		}
+
+		close();
+	}
+
+	function backendSwap(uint64 callbackId) external onlyBackend(backPK) {
+		require(
+			state == OrderStatus.Active,
+			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
+		);
+
+		require(
+			autoExchange == true,
+			OrderErrors.NOT_AUTO_EXCHANGE
+		);
+
+		require(
+			address(this).balance > OrderGas.SWAP_BACK_MIN_VALUE + 0.1 ever,
+			OrderErrors.VALUE_TOO_LOW
+		);
+
+		tvm.accept();
+
+		swapAttempt++;
+		changeState(OrderStatus.SwapInProgress);
+
+		TvmBuilder successBuilder;
+		successBuilder.store(OrderOperationStatus.SUCCESS);
+		successBuilder.store(callbackId);
+		successBuilder.store(owner);
+		successBuilder.store(uint128(0));
+
+		TvmBuilder cancelBuilder;
+		cancelBuilder.store(OrderOperationStatus.CANCEL);
+		cancelBuilder.store(callbackId);
+		cancelBuilder.store(msg.sender);
+
+		TvmBuilder builder;
+		builder.store(DexOperationTypes.EXCHANGE);
+		builder.store(callbackId);
+		builder.store(uint128(0));
+		builder.store(currentAmountReceiveToken);
+
+		builder.storeRef(successBuilder);
+		builder.storeRef(cancelBuilder);
+
+		ITokenWallet(spentWallet).transfer{
+			value: OrderGas.SWAP_BACK_MIN_VALUE,
+			flag: MsgFlag.SENDER_PAYS_FEES
+		}(
+			currentAmountSpentToken,
+			dexPair,
+			uint128(0),
+			address(this),
+			true,
+			builder.toCell()
+		);
+	}
+
+	function swap(uint64 callbackId, uint128 deployWalletValue) external {
+		require(
+			state == OrderStatus.Active,
+			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
+		);
+
+		require(
+			autoExchange == true,
+			OrderErrors.NOT_AUTO_EXCHANGE
+		);
+
+		require(
+			msg.value >= OrderGas.SWAP_MIN_VALUE + deployWalletValue,
+			OrderErrors.VALUE_TOO_LOW
+		);
+
+		tvm.rawReserve(address(this).balance - msg.value, 0);
+
+		swapAttempt++;
+		changeState(OrderStatus.SwapInProgress);
+
+		TvmBuilder successBuilder;
+		successBuilder.store(OrderOperationStatus.SUCCESS);
+		successBuilder.store(callbackId);
+		successBuilder.store(msg.sender);
+		successBuilder.store(deployWalletValue);
+
+		TvmBuilder cancelBuilder;
+		cancelBuilder.store(OrderOperationStatus.CANCEL);
+		cancelBuilder.store(callbackId);
+		cancelBuilder.store(msg.sender);
+
+		TvmBuilder builder;
+		builder.store(DexOperationTypes.EXCHANGE);
+		builder.store(callbackId);
+		builder.store(uint128(0));
+		builder.store(currentAmountReceiveToken);
+		builder.storeRef(successBuilder);
+		builder.storeRef(cancelBuilder);
+
+		ITokenWallet(spentWallet).transfer{
+			value: 0,
+			flag: MsgFlag.ALL_NOT_RESERVED
+		}(
+			currentAmountSpentToken,
+			dexPair,
+			uint128(0),
+			address(this),
+			true,
+			builder.toCell()
+		);
+	}
+
+	function backendMatching(uint64 callbackId, address limitOrder) external onlyBackend(backMatchingPK){
+		require(
+			state == OrderStatus.Active,
+			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
+		);
+
+		require(
+			address(this).balance > OrderGas.MATCHING_BACK_MIN_VALUE + 0.1 ever,
+			OrderErrors.VALUE_TOO_LOW
+		);
+
+		tvm.accept();
+		changeState(OrderStatus.MatchInProgress);
+		matchingOrder = limitOrder;
+
+		IOrder(limitOrder).matchingCheck{
+			value: OrderGas.MATCHING_BACK_MIN_VALUE,
+			flag: MsgFlag.SENDER_PAYS_FEES,
+			bounce: false
+		}(
+			callbackId,
+			uint128(0),
+			buildDetails()
+		);
+	}
+
+	function matching(uint64 callbackId, uint128 deployWalletValue, address limitOrder) external {
+		require(
+			state == OrderStatus.Active,
+			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
+		);
+
+		require(
+			msg.value >= OrderGas.MATCHING_MIN_VALUE + deployWalletValue,
+			OrderErrors.VALUE_TOO_LOW
+		);
+
+		tvm.rawReserve(math.max(address(this).balance - msg.value, OrderGas.MATCHING_MIN_VALUE), 0);
+
+		changeState(OrderStatus.MatchInProgress);
+		matchingOrder = limitOrder;
+
+		IOrder(limitOrder).matchingCheck{
+			value: 0,
+			flag: MsgFlag.ALL_NOT_RESERVED,
+			bounce: false
+		}(
+			callbackId,
+			deployWalletValue,
+			buildDetails()
+		);
+	}
+
+	function matchingCheck(uint64 callbackId, uint128 deployWalletValue, Details detailsLO) override external {
+		require(
+			factory == detailsLO.factory,
+			OrderErrors.NOT_EQUAL_FACTORY_FOR_MATCHING
+		);
+
+		require(
+			expectedOrderRoot(detailsLO.spentToken) == detailsLO.root,
+			OrderErrors.NOT_CORRECT_ORDER_ROOT_FOR_MATCHING
+		);
+
+		require(
+			expectedOrder(
+				factory,
+				detailsLO.root,
+				detailsLO.owner,
+				receiveToken,
+				spentToken,
+				detailsLO.timeTx,
+				detailsLO.nowTx) == msg.sender,
+			OrderErrors.NOT_CORRECT_ORDER_ADDRESS
+		);
+
+		tvm.rawReserve(address(this).balance - msg.value, 0);
+
+		uint128 expectedAmountReceive;
+		uint128 reward;
+
+		uint128 priceTokenLO1 = detailsLO.currentAmountSpentToken/detailsLO.currentAmountReceiveToken;
+		uint128 priceTokenLO2 = currentAmountReceiveToken/currentAmountSpentToken;
+		if (priceTokenLO1 >= priceTokenLO2) {
+			expectedAmountReceive = math.muldiv(detailsLO.currentAmountReceiveToken, currentAmountReceiveToken, currentAmountSpentToken);
+			reward = detailsLO.currentAmountSpentToken - expectedAmountReceive;
+		}
+
+		matchingOrder = msg.sender;
+
+		if (expectedAmountReceive != 0) {
+			changeState(OrderStatus.MatchInProgress);
+		}
+
+		IOrder(matchingOrder).matchingInProgress{
+				value: 0,
+				flag: MsgFlag.ALL_NOT_RESERVED,
+				bounce: false
+		}(
+			callbackId,
+			deployWalletValue,
+			expectedAmountReceive,
+			reward,
+			detailsLO.msgSender
+		);
+	}
+
+	function matchingInProgress(
+		uint64 callbackId,
+		uint128 deployWalletValue,
+		uint128 amount,
+		uint128 reward,
+		address sendGasTo
+	) override external {
+		require(msg.sender.value != 0 && msg.sender == matchingOrder, OrderErrors.NOT_ORDER_FOR_MATCHING);
+
+		tvm.rawReserve(
+			math.max(
+			address(this).balance - msg.value,
+			OrderGas.MATCHING_MIN_VALUE
+		), 0);
+
+		if (amount == 0) {
+			changeState(OrderStatus.Active);
+			matchingOrder = address(0);
+
+			IOrderOperationCallback(sendGasTo).onMatchingCancel{
+				value: OrderGas.OPERATION_CALLBACK_BASE,
+				flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+				bounce: false
+			}(callbackId);
+		} else {
+			changeState(OrderStatus.MatchInComplete);
+
+			TvmBuilder builder;
+			builder.store(callbackId);
+			builder.store(deployWalletValue);
+			builder.store(amount);
+			builder.store(reward);
+			builder.store(sendGasTo);
+
+			currentAmountSpentToken -= amount;
+
+			(uint128 calcAmount, uint128 calcAmountFee) = _expectedSpendAmount(amount);
+			(uint128 calcReward, uint128 calcRewardFee) = _expectedSpendAmountOfMatching(reward);
+
+			IOrderOperationCallback(sendGasTo).onMatchingInProgress{
+					value: OrderGas.OPERATION_CALLBACK_BASE,
+					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+					bounce: false
+			}(
+				callbackId,
+				calcAmount,
+				calcAmountFee,
+				calcReward,
+				calcRewardFee
+			);
+
+			ITokenWallet(spentWallet).transfer{
+				value: 0,
+				flag: MsgFlag.ALL_NOT_RESERVED,
+				bounce: false
+			}(
+				amount,
+				matchingOrder,
+				uint128(0),
+				matchingOrder,
+				true,
+				builder.toCell()
+			);
+		}
+	}
+
+	function expectedOrderRoot(address tokenRoot) internal view returns(address){
+		return address(tvm.hash(buildState(factory, tokenRoot, orderPlatformCode, buildParams())));
+	}
+
+	function buildState(address _factory, address token, TvmCell _code, TvmCell params) internal pure returns (TvmCell) {
+		return tvm.buildStateInit({
+				contr: OrderPlatform,
+				varInit: {
+					factory: _factory,
+					spentToken: token,
+					params: params
+				},
+				pubkey: 0,
+				code: _code
+		});
+	}
+
+	function buildParams() internal view returns (TvmCell) {
+		return abi.encode(dexRoot, tvm.code(), orderPlatformCode);
+	}
+
+	function expectedOrder(
+		address _factory,
+		address _root,
+		address _owner,
+		address _spentToken,
+		address _receiveToken,
+		uint64 _timeTx,
+		uint64 _nowTx
+	) internal pure returns(address) {
+		return address(tvm.hash(tvm.buildStateInit({
+			contr: TestNewOrderBad,
+			varInit : {
+				factory: _factory,
+				root: _root,
+				owner: _owner,
+				spentToken: _spentToken,
+				receiveToken: _receiveToken,
+				timeTx: _timeTx,
+				nowTx: _nowTx
+			},
+			code: tvm.code()
+		})));
+	}
+
+	function changeState(uint8 newState) private {
+		uint8 prevStateN = state;
+		state = newState;
+		emit StateChanged(prevStateN, newState, buildDetails());
+	}
+
+	function buildDetails() private view returns (Details) {
+		return
+			Details(
+				factory,
+				root,
+				owner,
+				backPK,
+				backMatchingPK,
+				dexRoot,
+				dexPair,
+				msg.sender,
+				swapAttempt,
+				state,
+				spentToken,
+				receiveToken,
+				spentWallet,
+				receiveWallet,
+				expectedAmount,
+				initialAmount,
+				currentAmountSpentToken,
+				currentAmountReceiveToken,
+				timeTx,
+				nowTx,
+				matchingOrder,
+				version
+			);
+	}
+
+	function _expectedSpendAmount(uint128 b_amount) internal view returns (uint128, uint128) {
+		if (fee.numerator == 0 || fee.denominator == 0){
+			return (b_amount, 0);
+		}
+		uint128 a_fee = math.muldivc(b_amount, fee.numerator, fee.denominator);
+		uint128 expected_a_amount = math.muldiv(b_amount, fee.denominator - fee.numerator, fee.denominator);
+		return (expected_a_amount, a_fee);
+	}
+
+	function _expectedSpendAmountOfMatching(uint128 b_amount) internal view returns (uint128, uint128) {
+		if (fee.matchingNumerator == 0 || fee.matchingDenominator == 0) {
+			return (b_amount, 0);
+		}
+		uint128 a_fee = math.muldivc(b_amount, fee.matchingNumerator, fee.matchingDenominator);
+		uint128 expected_a_amount = math.muldiv(b_amount, fee.matchingDenominator - fee.matchingNumerator, fee.matchingDenominator);
+		return (expected_a_amount, a_fee);
+	}
+
+	function close() internal view {
+		require(
+			state == OrderStatus.Filled ||
+				state == OrderStatus.Cancelled,
+			OrderErrors.NOT_FILLED_OR_CANCEL_STATUS_LIMIT_ORDER
+		);
+
+		if (state == OrderStatus.Cancelled) {
+		} else {
+			owner.transfer(0, false, MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS);
+		}
+
+	}
+
+	function enableEmergency(uint256 _emergencyManager) external override onlyFactory {
+		require(msg.sender.value != 0 && msg.sender == factory);
+		require(
+			state != OrderStatus.Emergency,
+			OrderErrors.EMERGENCY_STATUS_NOW
+		);
+
+		prevState = state;
+		state = OrderStatus.Emergency;
+		emergencyManager = _emergencyManager;
+
+		emit StateChanged(prevState, state, buildDetails());
+	}
+
+	function disableEmergency() external override onlyFactory {
+		require(msg.sender.value != 0 && msg.sender == factory);
+		require(
+			state == OrderStatus.Emergency,
+			OrderErrors.EMERGENCY_STATUS_NOW
+		);
+
+		state = prevState;
+		prevState = 0;
+		emergencyManager = 0;
+
+		emit StateChanged(
+			OrderStatus.Emergency,
+			state,
+			buildDetails()
+		);
+	}
+
+	function proxyTokensTransfer(
+		address _tokenWallet,
+		uint128 _gasValue,
+		uint128 _amount,
+		address _recipient,
+		uint128 _deployWalletValue,
+		address _remainingGasTo,
+		bool _notify,
+		TvmCell _payload
+	) public view onlyEmergencyManager {
+
+		require(
+			state == OrderStatus.Emergency,
+			OrderErrors.NOT_EMERGENCY_STATUS_NOW
+		);
+		tvm.accept();
+
+		ITokenWallet(_tokenWallet).transfer{
+			value: _gasValue,
+			flag: MsgFlag.SENDER_PAYS_FEES
+		}(
+			_amount,
+			_recipient,
+			_deployWalletValue,
+			_remainingGasTo,
+			_notify,
+			_payload
+		);
+	}
+
+	function sendGas(
+		address to,
+		uint128 _value,
+		uint16 _flag
+	) public view onlyEmergencyManager {
+		require(
+			state == OrderStatus.Emergency,
+			OrderErrors.NOT_EMERGENCY_STATUS_NOW
+		);
+		tvm.accept();
+		to.transfer({value: _value, flag: _flag, bounce: false});
+	}
+
+	function upgrade(
+		TvmCell _code,
+		uint32 _newVersion,
+		address _sendGasTo
+	) external override onlyFactory {
+		if (version == _newVersion) {
+			tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+			_sendGasTo.transfer({
+				value: 0,
+				flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+			});
+		} else {
+			emit OrderCodeUpgraded();
+
+			TvmCell data = abi.encode(
+				factory, root, owner, spentToken, receiveToken, timeTx, nowTx,
+				expectedAmount, initialAmount, currentAmountSpentToken, currentAmountReceiveToken,
+				backPK, backMatchingPK, dexRoot, dexPair, spentWallet, receiveWallet, orderPlatformCode,
+				state, swapAttempt, prevState, emergencyManager, autoExchange, fee, matchingOrder, version, _newVersion
+			);
+
+			tvm.setcode(_code);
+			tvm.setCurrentCode(_code);
+
+			onCodeUpgrade(data);
+		}
+	}
+
+	function onCodeUpgrade(TvmCell data) private {}
+}
