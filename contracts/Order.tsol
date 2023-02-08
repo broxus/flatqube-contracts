@@ -228,7 +228,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } state;
 	}
 
-	function initParams() external view responsible override returns (InitParams){ //TODO-???
+	function initParams() external view responsible override returns (InitParams){
 		return {
 				value: 0,
 				bounce: false,
@@ -286,13 +286,14 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 		TvmCell payload
 	) external override {
 		require(msg.sender.value != 0);
+
 		(
 			bool isPayloadValid,
 			uint8 op,
 			uint64 callbackId,
 			address sendGasTo,
 			uint128 deployWalletValue,
-			uint128 amountForDeal,
+			,
 			uint128 reward
 		) = OrderPayloads.decodeOnAcceptTokenTransferData(payload);
 
@@ -331,7 +332,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 					(expectedSenderAmount, senderFee) = _expectedSpendAmount(amount);
 					TvmCell payloadForTransfer;
 					if (state == OrderStatus.MatchInProgress && op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE) {
-						transferMatchingReward(reward, deployWalletValue, sendGasTo, originalGasTo);
+						transferMatchingReward(reward, deployWalletValue, sendGasTo);
 
 						payloadForTransfer = OrderPayloads.buildMatchTransferPayload(
 							OrderOperationTypes.MATCHING_ORDER_TRANSFER,
@@ -348,7 +349,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 							deployWalletValue,
 							sender,
 							originalGasTo,
-							sendGasTo,
 							payloadForTransfer
 						);
 					} else {
@@ -360,16 +360,12 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 							deployWalletValue,
 							sender,
 							originalGasTo,
-							sendGasTo,
 							payloadForTransfer
 						);
 					}
 
-					//TODO test
-					if (state != OrderStatus.MatchInProgress) {
+					if ((state != OrderStatus.MatchInProgress) || (op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE)){
 						sender.transfer({value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS});
-					} else if(op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE) {
-						sender.transfer({value : 0, bounce: false, flag : MsgFlag.REMAINING_GAS});
 					} else {
 						sendGasTo.transfer({value : 0, bounce: false, flag : MsgFlag.REMAINING_GAS});
 					}
@@ -404,9 +400,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 					currentAmountReceiveToken,
 					senderFee
 				);
-				changeState(OrderStatus.Filled);
 
-				if (callbackId > 0) {
+				if (callbackId > 0 && state != OrderStatus.MatchInProgress) {
 					IOrderCallbacks(sender).onOrderStateFilled{
 						value: OrderGas.OPERATION_CALLBACK_BASE,
 						flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -439,7 +434,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 						)
 					);
 				}
-
+				changeState(OrderStatus.Filled);
 				owner.transfer(0, false, MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS);
 			}
 		}
@@ -477,7 +472,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 		uint128 _deployWalletValue,
 		address _sender,
 		address _originalGasTo,
-		address sendGas,
 		TvmCell payloadForTransfer
 	) private returns(uint128){
 		TvmCell emptyPayload;
@@ -506,7 +500,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 			}(
 				currentAmountSpentToken,
 				_sender,
-				_deployWalletValue,
+				(state != OrderStatus.MatchInProgress ? _deployWalletValue : 0),
 				_originalGasTo,
 				true,
 				(state != OrderStatus.MatchInProgress ? emptyPayload : payloadForTransfer)
@@ -514,7 +508,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 
 			_transferAmount = currentAmountSpentToken;
 		} else {
-			matchingOrder = address(0); //TODO
+			matchingOrder = address(0);
 		}
 
 		ITokenWallet(receiveWallet).transfer{
@@ -559,7 +553,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 		uint128 _deployWalletValue,
 		address _sender,
 		address _originalGasTo,
-		address sendGas,
 		TvmCell payloadForTransfer
 	) private returns(uint128){
 		TvmCell emptyPayload;
@@ -580,7 +573,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 				}(
 					_transferAmount,
 					_sender,
-					_deployWalletValue,
+					(state != OrderStatus.MatchInProgress ? _deployWalletValue : uint128(0)),
 					_originalGasTo,
 					true,
 					(state != OrderStatus.MatchInProgress ? emptyPayload : payloadForTransfer)
@@ -606,7 +599,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 				_senderFee
 			);
 
-			if (_callbackId > 0) {
+			if (_callbackId > 0 && state != OrderStatus.MatchInProgress) {
 				IOrderCallbacks(_sender).onOrderPartExchangeSuccess{
 					value: OrderGas.OPERATION_CALLBACK_BASE,
 					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -744,7 +737,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 			}
 		}
 
-		_sendGasTo.transfer({value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS}); //TODO
+		_sendGasTo.transfer({value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS});
 
 		currentAmountReceiveToken = 0;
 		currentAmountSpentToken = 0;
@@ -998,7 +991,18 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 					value: OrderGas.OPERATION_CALLBACK_BASE,
 					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
 					bounce: false
-				}(callbackId);
+				}(
+					callbackId,
+					IOrderExchangeResult.OrderMatchingInProgress(
+						matchingOrder,
+						address(this),
+						receiveToken,
+						spentToken,
+						expectedAmountReceive,
+						alienAmountSpent,
+						reward
+					)
+				);
 			}
 
 			ITokenWallet(spentWallet).transfer{
@@ -1127,8 +1131,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 	function transferMatchingReward(
 		uint128 reward,
 		uint128 deployWalletValue,
-		address sendGasTo,
-		address originalGasTo
+		address sendGasTo
 	) private {
 		if (reward > 0) {
 			TvmCell emptyPayload;
@@ -1146,7 +1149,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 					expectedFeeOnReward,
 					fee.beneficiary,
 					deployWalletValue,
-					originalGasTo,
+					owner,
 					true,
 					emptyPayload
 				);
@@ -1161,7 +1164,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 					expectedReward,
 					sendGasTo,
 					deployWalletValue,
-					originalGasTo,
+					sendGasTo,
 					true,
 					emptyPayload
 				);

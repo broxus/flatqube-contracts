@@ -341,7 +341,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		}
 	}
 
-	function _createOrderRoot(address token) private {
+	function _createOrderRoot(address token) private view {
 		new OrderPlatform {
 			stateInit: buildState(token, orderPlatformCode, buildParams()),
 			value: OrderGas.DEPLOY_ORDERS_ROOT,
