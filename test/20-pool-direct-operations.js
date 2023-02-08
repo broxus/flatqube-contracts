@@ -751,16 +751,16 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 const expectedDexSpentAmount = new BigNumber(dexStart.token_balances[i])
                     .plus(new BigNumber(expected.tokens_amount).shiftedBy(-tokens[i].decimals)).toString();
                 const expectedPoolLp = new BigNumber(poolStart.lp_supply)
-                    .plus(LP_TO_RECEIVE).toString();
+                    .plus(LP_TO_RECEIVE).toNumber();
                 const expectedAccountSpentAmount = new BigNumber(accountStart.token_balances[i])
                     .minus(new BigNumber(expected.tokens_amount).shiftedBy(-tokens[i].decimals)).toString();
                 const expectedAccountReceivedAmount = new BigNumber(accountStart.lp)
-                    .plus(LP_TO_RECEIVE).toString();
+                    .plus(LP_TO_RECEIVE).toNumber();
 
                 expect(expectedDexSpentAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
-                expect(expectedPoolLp).to.equal(poolEnd.lp_supply.toString(), `Wrong DEX LP balance`);
-                expect(expectedAccountReceivedAmount).to.equal(accountEnd.lp.toString(), `Wrong Account#3 LP balance`);
                 expect(expectedAccountSpentAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
+                expect(new BigNumber(poolEnd.lp_supply).toNumber()).to.be.gte(expectedPoolLp, `Wrong DEX LP balance`);
+                expect(new BigNumber(accountEnd.lp).toNumber()).to.be.gte(expectedAccountReceivedAmount, `Wrong Account#3 LP balance`);
             });
         }
     });

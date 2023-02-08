@@ -8,8 +8,8 @@ const { Migration } = require(process.cwd() + '/scripts/utils');
 // const OLD_DEX_PAIR_CODE_HASH =
 //   'd7f137ee2123785ed7dd56fad374ab7c0e99343eb97e918aac1bbc6bd9bb827b';
 
-const OLD_DEX_PAIR_CODE_HASH = '9bffb97d8fcb584230bfa949b6c7e8fb9881f1ffb684e13f02d6fcd9ba3306c5';
-
+const OLD_DEX_PAIR_CODE_HASH =
+  '9bffb97d8fcb584230bfa949b6c7e8fb9881f1ffb684e13f02d6fcd9ba3306c5';
 
 type PairEntity = {
   dexPair: Address;
@@ -61,7 +61,11 @@ async function exportDexPairs() {
         const root = await DexPair.methods
           .getRoot({ answerId: 0 })
           .call({})
-          .then((r) => r.dex_root.toString());
+          .then((r) => r.dex_root.toString())
+          .catch((e) => {
+            console.error(e);
+            return '';
+          });
 
         if (root === dexRoot.address.toString()) {
           const roots = await DexPair.methods

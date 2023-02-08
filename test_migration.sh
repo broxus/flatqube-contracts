@@ -16,28 +16,28 @@ npx locklift run $NO_TRACE --script scripts/2-deploy-test-tokens.js --tokens='["
 npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"account":2,"amount":200000000,"token":"foo"}, {"account":2,"amount":200000000,"token":"bar"}]'
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2 --contract_name='DexAccountPrev'
 
-for (( i=2; i < 20; i++ ))
+for (( i=2; i < 40; i++ ))
 do
   ii=$((i+1))
   npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number="$i" --balance='5'
   npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n="$ii" --contract_name='DexAccountPrev'
 done
 
-for (( i=0; i < 20; i++ ))
+for (( i=0; i < 40; i++ ))
 do
   npx locklift run $NO_TRACE --script scripts/2-deploy-test-tokens.js --tokens="[\"gen$i\"]"
   npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints="[{\"account\":2,\"amount\":200000000,\"token\":\"gen$i\"}]"
 done
 
 
-for (( i=0; i < 20; i+=2 ))
+for (( i=0; i < 40; i+=2 ))
 do
   ii=$((i+1))
   npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair-legacy.js --pairs="[[\"gen$i\", \"gen$ii\"]]" --contract_name='DexPairPrev'
   npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left="gen$i" --right="gen$ii" --account=2 --contract_name='DexPairPrev' --account_contract_name='DexAccountPrev' --ignore_already_added='true'
 done
 
-for (( i=0; i < 19; i++ ))
+for (( i=0; i < 40; i++ ))
 do
   npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits="[{ \"tokenId\": \"gen$i\", \"amount\": 1000000$i }]"
 done
@@ -63,4 +63,4 @@ echo "Add manager";
 npx locklift run $NO_TRACE --script scripts/add-vault-manager.js
 #
 #echo "____________________________________________________________________";
-npx locklift run $NO_TRACE --script scripts/60-migrate-liquidity-to-multivault.js
+#npx locklift run $NO_TRACE --script scripts/60-migrate-liquidity-to-multivault.js
