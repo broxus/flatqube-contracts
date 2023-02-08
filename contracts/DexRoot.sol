@@ -956,7 +956,7 @@ contract DexRoot is DexContractBase, IDexRoot {
                     value: 0,
                     flag: MsgFlag.ALL_NOT_RESERVED,
                     bounce: false
-                }(_accountsOwners, uint32(_offset), _remainingGasTo);
+                }(_accountsOwners, uint32(takeUntil), _remainingGasTo);
         } else {
             _remainingGasTo.transfer({
                 value: 0,
