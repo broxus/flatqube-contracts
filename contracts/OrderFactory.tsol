@@ -69,7 +69,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 			msg.sender.value != 0 && msg.sender == expectedAddressOrderRoot(token), 
 			OrderErrors.NOT_LIMIT_ORDER_ROOT
 		);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		emit CreateOrderRoot(_orderRoot, token);
 		sendGasTo.transfer({
@@ -307,7 +307,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	function createOrderRoot(address token, uint64 callbackId) override external {
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		if (msg.value >= OrderGas.DEPLOY_ORDERS_ROOT + OrderGas.DEPLOY_EMPTY_WALLET_GRAMS) {
 
