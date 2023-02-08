@@ -8,18 +8,18 @@ const {toNano} = locklift.utils;
 
 export class TokenWallet {
     public contract: Contract<FactorySource["TokenWalletUpgradeable"]>;
-    public _owner: Account | null;
+    public _owner: Account | Address;
     public address: Address;
     public name: string | undefined;
 
-    constructor(wallet_contract: Contract<FactorySource["TokenWalletUpgradeable"]>, wallet_owner: Account | null, name?: string) {
+    constructor(wallet_contract: Contract<FactorySource["TokenWalletUpgradeable"]>, wallet_owner: Account | Address, name?: string) {
         this.contract = wallet_contract;
         this._owner = wallet_owner;
         this.address = this.contract.address;
         this.name = name ? name : undefined;
     }
 
-    static async from_addr(addr: Address, owner: Account | null, name?: string) {
+    static async from_addr(addr: Address, owner: Account | Address, name?: string) {
         const wallet = await locklift.factory.getDeployedContract('TokenWalletUpgradeable', addr);
         return new TokenWallet(wallet, owner, name);
     }
@@ -48,17 +48,16 @@ export class TokenWallet {
           payload: ${params ? JSON.stringify(params) : payload}
           )`)
 
-        const owner = this._owner as Account;
         return await this.contract.methods.transfer({
             amount: amount,
             recipient: receiver,
             deployWalletValue: 0,
-            remainingGasTo: owner.address,
+            remainingGasTo: !(this._owner instanceof Address) ? this._owner.address : this._owner,
             notify: notify,
             payload: payload
         }).send({
             amount: value || toNano(5),
-            from: owner.address
+            from: !(this._owner instanceof Address) ? this._owner.address : this._owner
         });
     }
 }
