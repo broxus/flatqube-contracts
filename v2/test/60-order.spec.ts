@@ -1,4 +1,4 @@
-import {Address, Contract, getRandomNonce, zeroAddress} from 'locklift';
+import {Address, Contract, getRandomNonce, WalletTypes, zeroAddress} from 'locklift';
 import {FactorySource} from '../../build/factorySource';
 //@ts-ignore
 import {Constants, sleep} from '../../scripts/utils';
@@ -341,7 +341,7 @@ describe('OrderTest', () => {
 
             const balanceBarAcc5Start = await accountTokenBalances(barWallet5, Constants.tokens.bar.decimals);
             const balanceTstAcc5Start = await accountTokenBalances(tstWallet5, Constants.tokens.tst.decimals);
-            await displayLog(balanceBarAcc5Start, balanceTstAcc5Start, true, "Account4");
+            await displayLog(balanceBarAcc5Start, balanceTstAcc5Start, true, "Account5");
 
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
@@ -389,6 +389,7 @@ describe('OrderTest', () => {
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
             Order = await locklift.factory.getDeployedContract("Order", orderAddress)
+
             const payloadLO = await Order.methods.buildPayload({
                 callbackId: 1,
                 deployWalletValue: locklift.utils.toNano(0.1),
@@ -2300,9 +2301,9 @@ describe('OrderTest', () => {
             await locklift.tracing.trace(factoryOrder.methods.withdrawFee({
                 amount: new BigNumber(fees).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 recipient: account2.address,
-                sendGasTo: account1.address,
+                deployWalletValue: locklift.utils.toNano(0.1),
                 tokenWallet: FactoryAddress,
-                deployWalletValue: locklift.utils.toNano(0.5)
+                sendGasTo: account1.address
             }).send({amount: locklift.utils.toNano(2), from: account1.address}),{allowedCodes: {compute: [60]}})
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);

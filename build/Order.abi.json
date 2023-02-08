@@ -35,11 +35,21 @@
 			]
 		},
 		{
-			"name": "onBalanceReceiveWallet",
+			"name": "onBalanceSpentWallet",
 			"inputs": [
 				{"name":"_balance","type":"uint128"}
 			],
 			"outputs": [
+			]
+		},
+		{
+			"name": "buildPayload",
+			"inputs": [
+				{"name":"callbackId","type":"uint64"},
+				{"name":"deployWalletValue","type":"uint128"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
 			]
 		},
 		{
@@ -109,19 +119,9 @@
 			]
 		},
 		{
-			"name": "buildPayload",
-			"inputs": [
-				{"name":"callbackId","type":"uint64"},
-				{"name":"deployWalletValue","type":"uint128"}
-			],
-			"outputs": [
-				{"name":"value0","type":"cell"}
-			]
-		},
-		{
 			"name": "onAcceptTokensTransfer",
 			"inputs": [
-				{"name":"tokenRoot","type":"address"},
+				{"name":"value0","type":"address"},
 				{"name":"amount","type":"uint128"},
 				{"name":"sender","type":"address"},
 				{"name":"value3","type":"address"},
@@ -186,13 +186,8 @@
 			]
 		},
 		{
-			"name": "matchingInProgress",
+			"name": "matchingCancel",
 			"inputs": [
-				{"name":"callbackId","type":"uint64"},
-				{"name":"deployWalletValue","type":"uint128"},
-				{"name":"amount","type":"uint128"},
-				{"name":"reward","type":"uint128"},
-				{"name":"sendGasTo","type":"address"}
 			],
 			"outputs": [
 			]
