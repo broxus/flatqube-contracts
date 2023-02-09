@@ -1954,25 +1954,14 @@ describe('OrderTest', () => {
                 backPK: 0,
                 backMatchingPK: 0
             }
-            console.log(`OrderRoot.buildPayload(${JSON.stringify(params)})`);
             const payload = await RootOrderBar.methods.buildPayload(params).call();
-            console.log(`Result payload = ${payload.value0}`);
 
-            console.log(`BarWallet3(${barWallet3.address}).transfer()
-                amount: ${new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString()},
-                recipient: ${RootOrderBar.address},
-                deployWalletValue: ${locklift.utils.toNano(0.1)},
-                remainingGasTo: ${account3.address},
-                notify: ${true},
-                payload: ${JSON.stringify(params)}
-            )`);
-            const newBeneficiaryAddress = (await rootTokenReceive.methods.walletOf({walletOwner: newBeneficiary.address, answerId: 0}).call()).value0
-            const newBeneficiaryWalletTst = await TokenWallet.from_addr(newBeneficiaryAddress, newBeneficiary, "newBeneficiaryWalletTst")
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 RootOrderBar.address,
                 payload.value0,
-                locklift.utils.toNano(5)
+                locklift.utils.toNano(5),
+                params
             )
             await sleep(1000);
 
@@ -2007,9 +1996,9 @@ describe('OrderTest', () => {
             await locklift.tracing.trace(factoryOrder.methods.withdrawFee({
                 amount: new BigNumber(fees).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 recipient: account2.address,
-                sendGasTo: account1.address,
+                deployWalletValue: locklift.utils.toNano(0.1),
                 tokenWallet: FactoryAddress,
-                deployWalletValue: locklift.utils.toNano(0.5)
+                sendGasTo: account1.address
             }).send({amount: locklift.utils.toNano(2), from: account1.address}),{allowedCodes: {compute: [60]}})
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -2048,6 +2037,7 @@ describe('OrderTest', () => {
             expect(expectedTstFactory).to.equal(balanceTstFactoryEnd.token.toFixed(9), 'Wrong Beneficiary balance');
             expect(expectedRecipientTst).to.equal(balanceTstRecipientEnd.token.toFixed(9), 'Wrong Recipient balance');
         });
+
         it('Check fee execution, case 1.4 (Set beneficiary)', async () => {
             console.log(`#############################\n`);
 
@@ -2215,7 +2205,7 @@ describe('OrderTest', () => {
             Order = await locklift.factory.getDeployedContract("Order", orderAddress)
 
             console.log(`Upgrade Order...`)
-            const NEW_VERSION = 2
+            const NEW_VERSION = 3
 
             const testOrderCode = (await locklift.factory.getContractArtifacts("TestNewOrder")).code
             await locklift.tracing.trace(factoryOrder.methods.setOrderCode({_orderCode: testOrderCode})
