@@ -46,14 +46,13 @@ const loadPairData = async (pair, contractName) => {
   const data = {};
 
   data.root = await pair.call({method: 'getRoot'});
-  data.vault = await pair.call({method: 'getVault'});
+  // data.vault = await pair.call({method: 'getVault'});
 
   data.current_version = (await pair.call({method: 'getVersion'})).toString();
   data.platform_code = await pair.call({method: 'platform_code'});
 
   const token_roots = await pair.call({method: 'getTokenRoots'});
   data.lp_root = token_roots.lp;
-  console.log(token_roots);
   if (contractName === 'DexStablePool') {
     data.left_root = token_roots.roots[0];
     data.right_root = token_roots.roots[1];
@@ -74,14 +73,14 @@ const loadPairData = async (pair, contractName) => {
     data.right_wallet = token_wallets.right;
   }
 
-  const vault_token_wallets = await pair.call({method: 'getVaultWallets'});
-  if (contractName === 'DexStablePool') {
-    data.vault_left_wallet = vault_token_wallets.token_vault_wallets[0];
-    data.vault_right_wallet = vault_token_wallets.token_vault_wallets[1];
-  } else {
-    data.vault_left_wallet = vault_token_wallets.left;
-    data.vault_right_wallet = vault_token_wallets.right;
-  }
+  // const vault_token_wallets = await pair.call({method: 'getVaultWallets'});
+  // if (contractName === 'DexStablePool') {
+  //   data.vault_left_wallet = vault_token_wallets.token_vault_wallets[0];
+  //   data.vault_right_wallet = vault_token_wallets.token_vault_wallets[1];
+  // } else {
+  //   data.vault_left_wallet = vault_token_wallets.left;
+  //   data.vault_right_wallet = vault_token_wallets.right;
+  // }
 
   const balances = await pair.call({method: 'getBalances'});
   data.lp_supply = balances.lp_supply.toString();
@@ -118,10 +117,10 @@ describe('Test Dex Pair contract upgrade', async function () {
     account = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
     account.afterRun = afterRun;
     dexRoot = migration.load(await locklift.factory.getContract('DexRoot'), 'DexRoot');
-    if (migration.exists('DexPair' + tokenLeft.symbol + tokenRight.symbol)) {
-      dexPairFooBar = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPair' + tokenLeft.symbol + tokenRight.symbol);
-    } else {
+    if (migration.exists('DexPool' + tokenLeft.symbol + tokenRight.symbol)) {
       dexPairFooBar = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPool' + tokenLeft.symbol + tokenRight.symbol);
+    } else {
+      dexPairFooBar = migration.load(await locklift.factory.getContract(options.old_contract_name), 'DexPool' + tokenRight.symbol + tokenLeft.symbol);
     }
 
     NewVersionContract = await locklift.factory.getContract(options.new_contract_name);
@@ -176,9 +175,9 @@ describe('Test Dex Pair contract upgrade', async function () {
       expect(newPairData.root)
         .to
         .equal(oldPairData.root, 'New root value incorrect');
-      expect(newPairData.vault)
-        .to
-        .equal(oldPairData.vault, 'New vault value incorrect');
+      // expect(newPairData.vault)
+      //   .to
+      //   .equal(oldPairData.vault, 'New vault value incorrect');
       expect(newPairData.platform_code)
         .to
         .equal(oldPairData.platform_code, 'New platform_code value incorrect');
@@ -209,12 +208,12 @@ describe('Test Dex Pair contract upgrade', async function () {
       expect(newPairData.right_wallet)
         .to
         .equal(oldPairData.right_wallet, 'New right_wallet value incorrect');
-      expect(newPairData.vault_left_wallet)
-        .to
-        .equal(oldPairData.vault_left_wallet, 'New vault_left_wallet value incorrect');
-      expect(newPairData.vault_right_wallet)
-        .to
-        .equal(oldPairData.vault_right_wallet, 'New vault_right_wallet value incorrect');
+      // expect(newPairData.vault_left_wallet)
+      //   .to
+      //   .equal(oldPairData.vault_left_wallet, 'New vault_left_wallet value incorrect');
+      // expect(newPairData.vault_right_wallet)
+      //   .to
+      //   .equal(oldPairData.vault_right_wallet, 'New vault_right_wallet value incorrect');
       expect(newPairData.lp_supply)
         .to
         .equal(oldPairData.lp_supply, 'New lp_supply value incorrect');

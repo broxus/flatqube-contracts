@@ -14,6 +14,39 @@
 			]
 		},
 		{
+			"name": "getManager",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "setManager",
+			"inputs": [
+				{"name":"_newManager","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "revokeManager",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "addVaultWallets",
+			"inputs": [
+				{"name":"_tokenRoots","type":"address[]"},
+				{"name":"_tokenWallets","type":"address[]"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "transferOwner",
 			"inputs": [
 				{"name":"new_owner","type":"address"}
@@ -39,6 +72,33 @@
 		},
 		{
 			"name": "getPendingOwner",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getLpTokenPendingCode",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "getTokenFactory",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getRoot",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
 			],
@@ -82,12 +142,21 @@
 			]
 		},
 		{
+			"name": "addLiquidityTokenV2",
+			"inputs": [
+				{"name":"pool","type":"address"},
+				{"name":"roots","type":"address[]"},
+				{"name":"send_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "onLiquidityTokenDeployed",
 			"inputs": [
 				{"name":"nonce","type":"uint32"},
-				{"name":"pair","type":"address"},
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"},
+				{"name":"pool","type":"address"},
+				{"name":"roots","type":"address[]"},
 				{"name":"lp_root","type":"address"},
 				{"name":"send_gas_to","type":"address"}
 			],
@@ -98,9 +167,8 @@
 			"name": "onLiquidityTokenNotDeployed",
 			"inputs": [
 				{"name":"nonce","type":"uint32"},
-				{"name":"pair","type":"address"},
-				{"name":"left_root","type":"address"},
-				{"name":"right_root","type":"address"},
+				{"name":"pool","type":"address"},
+				{"name":"roots","type":"address[]"},
 				{"name":"lp_root","type":"address"},
 				{"name":"send_gas_to","type":"address"}
 			],
@@ -112,7 +180,7 @@
 			"inputs": [
 				{"name":"call_id","type":"uint64"},
 				{"name":"amount","type":"uint128"},
-				{"name":"value2","type":"address"},
+				{"name":"token_root","type":"address"},
 				{"name":"vault_wallet","type":"address"},
 				{"name":"recipient_address","type":"address"},
 				{"name":"deploy_wallet_grams","type":"uint128"},
@@ -127,7 +195,7 @@
 			"name": "transfer",
 			"inputs": [
 				{"name":"amount","type":"uint128"},
-				{"name":"value1","type":"address"},
+				{"name":"token_root","type":"address"},
 				{"name":"vault_wallet","type":"address"},
 				{"name":"recipient_address","type":"address"},
 				{"name":"deploy_wallet_grams","type":"uint128"},
@@ -137,6 +205,23 @@
 				{"name":"right_root","type":"address"},
 				{"name":"value9","type":"uint32"},
 				{"name":"send_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "transferV2",
+			"inputs": [
+				{"name":"_amount","type":"uint128"},
+				{"name":"_tokenRoot","type":"address"},
+				{"name":"_vaultWallet","type":"address"},
+				{"name":"_recipientAddress","type":"address"},
+				{"name":"_deployWalletGrams","type":"uint128"},
+				{"name":"_notifyReceiver","type":"bool"},
+				{"name":"_payload","type":"cell"},
+				{"name":"_roots","type":"address[]"},
+				{"name":"value8","type":"uint32"},
+				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -167,6 +252,47 @@
 			]
 		},
 		{
+			"name": "onAcceptTokensMint",
+			"inputs": [
+				{"name":"tokenRoot","type":"address"},
+				{"name":"amount","type":"uint128"},
+				{"name":"remainingGasTo","type":"address"},
+				{"name":"payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "burn",
+			"inputs": [
+				{"name":"_roots","type":"address[]"},
+				{"name":"_lpVaultWallet","type":"address"},
+				{"name":"_amount","type":"uint128"},
+				{"name":"_remainingGasTo","type":"address"},
+				{"name":"_callbackTo","type":"address"},
+				{"name":"_payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "addLpWallet",
+			"inputs": [
+				{"name":"_roots","type":"address[]"},
+				{"name":"_lpVaultWallet","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "addLpWalletByOwner",
+			"inputs": [
+				{"name":"_lpVaultWallet","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "platform_code",
 			"inputs": [
 			],
@@ -175,43 +301,19 @@
 			]
 		},
 		{
-			"name": "lp_token_pending_code",
+			"name": "_lpVaultWallets",
 			"inputs": [
 			],
 			"outputs": [
-				{"name":"lp_token_pending_code","type":"cell"}
+				{"name":"_lpVaultWallets","type":"map(address,bool)"}
 			]
 		},
 		{
-			"name": "root",
+			"name": "_vaultWallets",
 			"inputs": [
 			],
 			"outputs": [
-				{"name":"root","type":"address"}
-			]
-		},
-		{
-			"name": "owner",
-			"inputs": [
-			],
-			"outputs": [
-				{"name":"owner","type":"address"}
-			]
-		},
-		{
-			"name": "pending_owner",
-			"inputs": [
-			],
-			"outputs": [
-				{"name":"pending_owner","type":"address"}
-			]
-		},
-		{
-			"name": "token_factory",
-			"inputs": [
-			],
-			"outputs": [
-				{"name":"token_factory","type":"address"}
+				{"name":"_vaultWallets","type":"map(address,address)"}
 			]
 		}
 	],
@@ -275,6 +377,17 @@
 			],
 			"outputs": [
 			]
+		},
+		{
+			"name": "PairTransferTokensV2",
+			"inputs": [
+				{"name":"vaultTokenWallet","type":"address"},
+				{"name":"amount","type":"uint128"},
+				{"name":"roots","type":"address[]"},
+				{"name":"recipientAddress","type":"address"}
+			],
+			"outputs": [
+			]
 		}
 	],
 	"fields": [
@@ -283,10 +396,13 @@
 		{"name":"_constructorFlag","type":"bool"},
 		{"name":"platform_code","type":"cell"},
 		{"name":"_nonce","type":"uint32"},
-		{"name":"lp_token_pending_code","type":"cell"},
-		{"name":"root","type":"address"},
-		{"name":"owner","type":"address"},
-		{"name":"pending_owner","type":"address"},
-		{"name":"token_factory","type":"address"}
+		{"name":"_lpTokenPendingCode","type":"cell"},
+		{"name":"_root","type":"address"},
+		{"name":"_owner","type":"address"},
+		{"name":"_pendingOwner","type":"address"},
+		{"name":"_tokenFactory","type":"address"},
+		{"name":"_lpVaultWallets","type":"map(address,bool)"},
+		{"name":"_manager","type":"address"},
+		{"name":"_vaultWallets","type":"map(address,address)"}
 	]
 }

@@ -49,7 +49,7 @@ describe('Check DexAccount add Pair', async function () {
     }
     account.afterRun = afterRun;
     dexAccount = migration.load(DexAccount, 'DexAccount' + options.account);
-    dexPair = migration.load(await locklift.factory.getContract(options.contract_name), 'DexPair' + tokenLeft.symbol + tokenRight.symbol);
+    dexPair = migration.load(await locklift.factory.getContract(options.contract_name), 'DexPool' + tokenLeft.symbol + tokenRight.symbol);
     let dexPairFooBarRoots = await dexPair.call({method: 'getTokenRoots'});
     left_root = dexPairFooBarRoots.left;
     right_root = dexPairFooBarRoots.right;

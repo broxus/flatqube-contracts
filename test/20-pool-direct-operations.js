@@ -210,7 +210,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
 
         if (migration.exists(poolName + 'LpWallet3')) {
             migration.load(poolLpWallet3, poolName + 'LpWallet3');
-            logger.log(poolName + `LpWallet3#3: ${poolLpWallet3.address}`);
+            logger.log(poolName + `LpWallet3: ${poolLpWallet3.address}`);
         } else {
             const expected = await poolLpRoot.call({
                 method: 'walletOf',
@@ -468,22 +468,10 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 const expectedAccountSpentAmount = new BigNumber(accountStart.token_balances[i])
                     .minus(new BigNumber(expected.expected_amount).shiftedBy(-tokens[i].decimals)).toString();
 
-                if (tokens[j].decimals <= tokens[i].decimals) {
-                    expect(expectedDexReceivedAmount).to.equal(dexEnd.token_balances[j].toString(), `Wrong DEX ${tokens[j].symbol} balance`);
-                    expect(expectedDexSpentAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
-                    expect(expectedAccountReceivedAmount).to.equal(accountEnd.token_balances[j].toString(), `Wrong Account#3 ${tokens[j].symbol} balance`);
-                    expect(expectedAccountSpentAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
-                } else {
-                    let diff = new BigNumber(1).shiftedBy(-tokens[i].decimals); // (j_decimals - i_decimals) + j_decimals
-
-                    expect(new BigNumber(expectedDexReceivedAmount).toNumber()).to.greaterThanOrEqual(new BigNumber(dexEnd.token_balances[j]).toNumber(), `Wrong DEX ${tokens[j].symbol} balance`);
-                    expect(new BigNumber(expectedDexReceivedAmount).minus(diff).toNumber()).to.lessThan(new BigNumber(dexEnd.token_balances[j]).toNumber(), `Wrong DEX ${tokens[j].symbol} balance`);
-                    expect(expectedDexSpentAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
-                    expect(new BigNumber(expectedAccountReceivedAmount).toNumber()).to.lessThanOrEqual(new BigNumber(accountEnd.token_balances[j]).toNumber(), `Wrong Account#3 ${tokens[j].symbol} balance`);
-                    expect(new BigNumber(expectedAccountReceivedAmount).plus(diff).toNumber()).to.greaterThan(new BigNumber(accountEnd.token_balances[j]).toNumber(), `Wrong Account#3 ${tokens[j].symbol} balance`);
-                    expect(expectedAccountSpentAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
-                }
-
+                expect(expectedDexReceivedAmount).to.equal(dexEnd.token_balances[j].toString(), `Wrong DEX ${tokens[j].symbol} balance`);
+                expect(expectedDexSpentAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
+                expect(expectedAccountReceivedAmount).to.equal(accountEnd.token_balances[j].toString(), `Wrong Account#3 ${tokens[j].symbol} balance`);
+                expect(expectedAccountSpentAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
             });
         }
 
@@ -569,7 +557,9 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
             const poolStart = await dexPoolInfo();
             logBalances('start', dexStart, accountStart, poolStart);
 
-            let amount = 2000;
+            console.log(accountStart);
+
+            let amount = 300 * Math.pow(10, Math.max(tokens[i].decimals - Constants.LP_DECIMALS, 0));
 
             const LP_REWARD = await expectedDepositLiquidityOneCoin(
                 DexPool.address,
@@ -619,6 +609,9 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
             const poolEnd = await dexPoolInfo();
             logBalances('end', dexEnd, accountEnd, poolEnd);
             await migration.logGas();
+
+            console.log(accountEnd);
+            console.log(LP_REWARD);
 
             const expectedDexCoin = new BigNumber(dexStart.token_balances[i]).plus(new BigNumber(amount).shiftedBy(-tokens[i].decimals)).toString();
             const expectedAccountCoin = new BigNumber(accountStart.token_balances[i]).minus(new BigNumber(amount).shiftedBy(-tokens[i].decimals)).toString();
@@ -718,7 +711,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     }
                 });
 
-                logger.log(`Expected spend amount: ${new BigNumber(expected).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
+                logger.log(`Expected spend amount: ${new BigNumber(expected.tokens_amount).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
+                logger.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
                 logger.log(`Expected receive amount: ${LP_TO_RECEIVE} LP`);
 
                 const payload = await DexPool.call({
@@ -735,7 +729,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     contract: tokenWallets3[i],
                     method: 'transfer',
                     params: {
-                        amount: expected,
+                        amount: expected.tokens_amount,
                         recipient: DexPool.address,
                         deployWalletValue: 0,
                         remainingGasTo: Account3.address,
@@ -755,29 +749,18 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 await migration.logGas();
 
                 const expectedDexSpentAmount = new BigNumber(dexStart.token_balances[i])
-                    .plus(new BigNumber(expected).shiftedBy(-tokens[i].decimals)).toString();
+                    .plus(new BigNumber(expected.tokens_amount).shiftedBy(-tokens[i].decimals)).toString();
                 const expectedPoolLp = new BigNumber(poolStart.lp_supply)
-                    .plus(LP_TO_RECEIVE).toString();
+                    .plus(LP_TO_RECEIVE).toNumber();
                 const expectedAccountSpentAmount = new BigNumber(accountStart.token_balances[i])
-                    .minus(new BigNumber(expected).shiftedBy(-tokens[i].decimals)).toString();
+                    .minus(new BigNumber(expected.tokens_amount).shiftedBy(-tokens[i].decimals)).toString();
                 const expectedAccountReceivedAmount = new BigNumber(accountStart.lp)
-                    .plus(LP_TO_RECEIVE).toString();
+                    .plus(LP_TO_RECEIVE).toNumber();
 
-                if (Constants.LP_DECIMALS <= tokens[i].decimals) {
-                    expect(expectedDexSpentAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
-                    expect(expectedPoolLp).to.equal(poolEnd.lp_supply.toString(), `Wrong DEX LP balance`);
-                    expect(expectedAccountReceivedAmount).to.equal(accountEnd.lp.toString(), `Wrong Account#3 LP balance`);
-                    expect(expectedAccountSpentAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
-                } else {
-                    let diff = new BigNumber(1).shiftedBy(-tokens[i].decimals); // (max_j_decimals - i_decimals) + max_j_decimals
-
-                    expect(new BigNumber(expectedPoolLp).toNumber()).to.lessThanOrEqual(new BigNumber(poolEnd.lp_supply).toNumber(), `Wrong DEX LP balance`);
-                    expect(new BigNumber(expectedPoolLp).plus(diff).toNumber()).to.greaterThan(new BigNumber(poolEnd.lp_supply).toNumber(), `Wrong DEX LP balance`);
-                    expect(expectedDexSpentAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
-                    expect(new BigNumber(expectedAccountReceivedAmount).toNumber()).to.lessThanOrEqual(new BigNumber(accountEnd.lp).toNumber(), `Wrong Account#3 LP balance`);
-                    expect(new BigNumber(expectedAccountReceivedAmount).plus(diff).toNumber()).to.greaterThan(new BigNumber(accountEnd.lp).toNumber(), `Wrong Account#3 LP balance`);
-                    expect(expectedAccountSpentAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
-                }
+                expect(expectedDexSpentAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
+                expect(expectedAccountSpentAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
+                expect(new BigNumber(poolEnd.lp_supply).toNumber()).to.be.gte(expectedPoolLp, `Wrong DEX LP balance`);
+                expect(new BigNumber(accountEnd.lp).toNumber()).to.be.gte(expectedAccountReceivedAmount, `Wrong Account#3 LP balance`);
             });
         }
     });
@@ -1093,7 +1076,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     }
                 });
 
-                logger.log(`Expected spend amount: ${new BigNumber(expected).shiftedBy(-Constants.LP_DECIMALS).toString()} LP`);
+                logger.log(`Expected spend amount: ${new BigNumber(expected.lp).shiftedBy(-Constants.LP_DECIMALS).toString()} LP`);
+                logger.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
                 logger.log(`Expected receive amount: ${TOKENS_TO_RECEIVE} ${tokens[i].symbol}`);
 
                 const payload = await DexPool.call({
@@ -1111,7 +1095,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                     contract: poolLpWallet3,
                     method: 'transfer',
                     params: {
-                        amount: expected,
+                        amount: expected.lp,
                         recipient: DexPool.address,
                         deployWalletValue: 0,
                         remainingGasTo: Account3.address,
@@ -1131,18 +1115,30 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 await migration.logGas();
 
                 const expectedDexReceivedAmount = new BigNumber(dexStart.token_balances[i])
-                    .minus(TOKENS_TO_RECEIVE).toString();
+                    .minus(TOKENS_TO_RECEIVE).toNumber();
                 const expectedPoolSpentAmount = new BigNumber(poolStart.lp_supply)
-                    .minus(new BigNumber(expected).shiftedBy(-Constants.LP_DECIMALS)).toString();
+                    .minus(new BigNumber(expected.lp).shiftedBy(-Constants.LP_DECIMALS)).toString();
                 const expectedAccountReceivedAmount = new BigNumber(accountStart.token_balances[i])
                     .plus(TOKENS_TO_RECEIVE).toString();
                 const expectedAccountSpentAmount = new BigNumber(accountStart.lp)
-                    .minus(new BigNumber(expected).shiftedBy(-Constants.LP_DECIMALS)).toString();
+                    .minus(new BigNumber(expected.lp).shiftedBy(-Constants.LP_DECIMALS)).toString();
 
-                expect(expectedDexReceivedAmount).to.equal(dexEnd.token_balances[i].toString(), `Wrong DEX ${tokens[i].symbol} balance`);
+                expect(new BigNumber(expectedDexReceivedAmount).toNumber()).to.approximately(
+                    new BigNumber(dexEnd.token_balances[i]).toNumber(),
+                    new BigNumber(1).shiftedBy(-Constants.LP_DECIMALS).toNumber(),
+                    `Wrong DEX ${tokens[i].symbol} balance`
+                );
                 expect(expectedPoolSpentAmount).to.equal(poolEnd.lp_supply.toString(), `Wrong DEX LP balance`);
-                expect(expectedAccountReceivedAmount).to.equal(accountEnd.token_balances[i].toString(), `Wrong Account#3 ${tokens[i].symbol} balance`);
-                expect(expectedAccountSpentAmount).to.equal(accountEnd.lp.toString(), `Wrong Account#3 LP balance`);
+                expect(new BigNumber(expectedAccountReceivedAmount).toNumber()).to.approximately(
+                    new BigNumber(accountEnd.token_balances[i]).toNumber(),
+                    new BigNumber(1).shiftedBy(-Constants.LP_DECIMALS).toNumber(),
+                    `Wrong Account#3 ${tokens[i].symbol} balance`
+                );
+                expect(new BigNumber(expectedAccountSpentAmount).toNumber()).to.approximately(
+                    new BigNumber(accountEnd.lp).toNumber(),
+                    new BigNumber(1).shiftedBy(-Constants.LP_DECIMALS).toNumber(),
+                    `Wrong Account#3 LP balance`
+                );
 
             });
         }

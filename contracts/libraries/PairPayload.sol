@@ -48,7 +48,7 @@ library PairPayload {
         uint128 _expectedAmount,
         address _recipient,
         address _outcoming,
-        address /*referrer*/,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -59,9 +59,13 @@ library PairPayload {
         builder.store(DexOperationTypes.EXCHANGE_V2);
         builder.store(_id);
         builder.store(_deployWalletGrams);
-        builder.store(_expectedAmount);
         builder.store(_recipient);
-        builder.store(_outcoming);
+        builder.store(_referrer);
+
+        TvmBuilder otherDataBuilder;
+        builder.store(otherDataBuilder.toCell()); // ref1
+
+        builder.store(abi.encode(_expectedAmount, _outcoming)); // ref2
 
         if (_successPayload.hasValue()) {
             builder.store(_successPayload.get());
@@ -105,7 +109,7 @@ library PairPayload {
         uint128 _deployWalletGrams,
         uint128 _expectedAmount,
         address _recipient,
-        address /*referrer*/,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -116,8 +120,13 @@ library PairPayload {
         builder.store(DexOperationTypes.DEPOSIT_LIQUIDITY_V2);
         builder.store(_id);
         builder.store(_deployWalletGrams);
-        builder.store(_expectedAmount);
         builder.store(_recipient);
+        builder.store(_referrer);
+
+        TvmBuilder otherDataBuilder;
+        builder.store(otherDataBuilder.toCell()); // ref1
+
+        builder.store(abi.encode(_expectedAmount)); // ref2
 
         if (_successPayload.hasValue()) {
             builder.store(_successPayload.get());
@@ -161,7 +170,7 @@ library PairPayload {
         uint128 _deployWalletGrams,
         uint128[] _expectedAmounts,
         address _recipient,
-        address /*referrer*/,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -173,7 +182,12 @@ library PairPayload {
         builder.store(_id);
         builder.store(_deployWalletGrams);
         builder.store(_recipient);
-        builder.store(abi.encode(_expectedAmounts));
+        builder.store(_referrer);
+
+        TvmBuilder otherDataBuilder;
+        builder.store(otherDataBuilder.toCell()); // ref1
+
+        builder.store(abi.encode(_expectedAmounts)); // ref2
 
         if (_successPayload.hasValue()) {
             builder.store(_successPayload.get());
@@ -196,7 +210,7 @@ library PairPayload {
         address _recipient,
         uint128 _expectedAmount,
         address _outcoming,
-        address /*referrer*/,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -207,9 +221,13 @@ library PairPayload {
         builder.store(DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN);
         builder.store(_id);
         builder.store(_deployWalletGrams);
-        builder.store(_expectedAmount);
         builder.store(_recipient);
-        builder.store(_outcoming);
+        builder.store(_referrer);
+
+        TvmBuilder otherDataBuilder;
+        builder.store(otherDataBuilder.toCell()); // ref1
+
+        builder.store(abi.encode(_expectedAmount, _outcoming)); // ref2
 
         if (_successPayload.hasValue()) {
             builder.store(_successPayload.get());
@@ -283,7 +301,7 @@ library PairPayload {
         uint32[] _nextStepIndices,
         IExchangeStepStructure.ExchangeStep[] _steps,
         address[] _pools,
-        address /*referrer*/,
+        address _referrer,
         optional(TvmCell) _successPayload,
         optional(TvmCell) _cancelPayload
     ) public returns (TvmCell) {
@@ -295,10 +313,8 @@ library PairPayload {
         builder.store(DexOperationTypes.CROSS_PAIR_EXCHANGE_V2);
         builder.store(_id);
         builder.store(_deployWalletGrams);
-
-        builder.store(_expectedAmount);
         builder.store(_recipient);
-        builder.store(_outcoming);
+        builder.store(_referrer);
 
         INextExchangeData.NextExchangeData[] nextSteps;
         for (uint32 idx : _nextStepIndices) {
@@ -314,8 +330,11 @@ library PairPayload {
             ));
         }
 
-        TvmCell nextStepsCell = abi.encode(nextSteps);
-        builder.store(nextStepsCell);
+        TvmBuilder otherDataBuilder;
+        builder.store(otherDataBuilder.toCell()); // ref1
+
+        TvmCell nextStepsCell = abi.encode(_expectedAmount, _outcoming, nextSteps);
+        builder.store(nextStepsCell); // ref2
 
         if (_successPayload.hasValue()) {
             builder.store(_successPayload.get());
@@ -377,7 +396,39 @@ library PairPayload {
         address,
         uint128[],
         address,
-        INextExchangeData.NextExchangeData[]
+        INextExchangeData.NextExchangeData[],
+        address
+    ) {
+        TvmSlice slice = _payload.toSlice();
+
+        uint8 op;
+
+        if (slice.bits() >= 8) {
+            op = slice.decode(uint8);
+        }
+
+        if (
+            op == DexOperationTypes.EXCHANGE
+            || op == DexOperationTypes.DEPOSIT_LIQUIDITY
+            || op == DexOperationTypes.WITHDRAW_LIQUIDITY
+            || op == DexOperationTypes.CROSS_PAIR_EXCHANGE
+        ) {
+            return _decodeOnAcceptTokensTransferDataV1(_payload);
+        } else {
+            return _decodeOnAcceptTokensTransferDataV2(_payload);
+        }
+    }
+
+    function _decodeOnAcceptTokensTransferDataV1(TvmCell _payload) private returns (
+        bool,
+        uint8,
+        uint64,
+        uint128,
+        address,
+        uint128[],
+        address,
+        INextExchangeData.NextExchangeData[],
+        address
     ) {
         TvmSlice slice = _payload.toSlice();
 
@@ -388,11 +439,8 @@ library PairPayload {
         uint8 op;
         uint64 id;
         uint128 deployWalletGrams;
-        optional(uint128) expectedAmount;
-        address recipient;
-        address nextTokenRoot;
-        address outcoming;
         uint128[] expectedAmounts;
+        address nextTokenRoot;
         INextExchangeData.NextExchangeData[] nextSteps;
 
         if (isValid) {
@@ -406,42 +454,102 @@ library PairPayload {
                 uint128
             );
 
-            if (slice.bits() >= 128 && op != DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
-                expectedAmount = slice.decode(uint128);
+            if (slice.bits() >= 128) {
+                uint128 expectedAmount = slice.decode(uint128);
+                expectedAmounts.push(expectedAmount);
             }
 
             if (slice.bits() >= 267 && op == DexOperationTypes.CROSS_PAIR_EXCHANGE) {
                 nextTokenRoot = slice.decode(address);
             }
 
-            if (slice.bits() >= 267) {
-                // prevent the possibility to set recipient at the same time as old operation type
-                recipient = op == DexOperationTypes.EXCHANGE
-                    || op == DexOperationTypes.DEPOSIT_LIQUIDITY
-                    || op == DexOperationTypes.WITHDRAW_LIQUIDITY
-                    || op == DexOperationTypes.CROSS_PAIR_EXCHANGE ? address(0) : slice.decode(address);
+            if (slice.refs() >= 1 && op == DexOperationTypes.CROSS_PAIR_EXCHANGE && nextTokenRoot.value != 0) {
+                TvmCell nextStepsData = slice.loadRef();
+                nextSteps.push(INextExchangeData.NextExchangeData(
+                    1,
+                    nextTokenRoot,
+                    nextStepsData,
+                    1,
+                    1
+                ));
             }
+        }
 
-            if (slice.bits() >= 267) {
-                outcoming = slice.decode(address);
+        return (
+            isValid,
+            op,
+            id,
+            deployWalletGrams,
+            address(0), // recipient
+            expectedAmounts,
+            address(0), //outcoming
+            nextSteps,
+            address(0) // referrer
+        );
+    }
+
+    function _decodeOnAcceptTokensTransferDataV2(TvmCell _payload) private returns (
+        bool,
+        uint8,
+        uint64,
+        uint128,
+        address,
+        uint128[],
+        address,
+        INextExchangeData.NextExchangeData[],
+        address
+    ) {
+        TvmSlice slice = _payload.toSlice();
+
+        // Check size
+        bool isValid = slice.bits() >= 734;
+
+        // Default empty params
+        uint8 op;
+        uint64 id;
+        uint128 deployWalletGrams;
+        optional(uint128) expectedAmount;
+        address recipient;
+        address outcoming;
+        uint128[] expectedAmounts;
+        INextExchangeData.NextExchangeData[] nextSteps;
+        address referrer;
+
+        if (isValid) {
+            (
+                op,
+                id,
+                deployWalletGrams,
+                recipient,
+                referrer
+            ) = slice.decode(
+                uint8,
+                uint64,
+                uint128,
+                address,
+                address
+            );
+
+            if (slice.refs() >= 1) {
+                slice.loadRef(); // ref1
             }
 
             if (slice.refs() >= 1) {
-                TvmCell dataCell = slice.loadRef();
+                TvmCell dataCell = slice.loadRef(); // ref2
+                if (op == DexOperationTypes.EXCHANGE_V2) {
+                    (expectedAmount, outcoming) = abi.decode(dataCell, (uint128, address));
+                }
+                if (op == DexOperationTypes.DEPOSIT_LIQUIDITY_V2) {
+                    expectedAmount = abi.decode(dataCell, uint128);
+                }
                 if (op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
                     expectedAmounts = abi.decode(dataCell, uint128[]);
                 }
-                if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
-                    nextSteps = abi.decode(dataCell, INextExchangeData.NextExchangeData[]);
+                if (op == DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN) {
+                    (expectedAmount, outcoming) = abi.decode(dataCell, (uint128, address));
                 }
-                if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE && nextTokenRoot.value != 0) {
-                    nextSteps.push(INextExchangeData.NextExchangeData(
-                            1,
-                            nextTokenRoot,
-                            dataCell,
-                            1,
-                            1
-                        ));
+                if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
+                    (expectedAmount, outcoming, nextSteps) = abi.decode(dataCell, (uint128, address, INextExchangeData.NextExchangeData[]));
                 }
             }
         }
@@ -454,7 +562,8 @@ library PairPayload {
             recipient,
             expectedAmount.hasValue() ? [expectedAmount.get()] : expectedAmounts,
             outcoming,
-            nextSteps
+            nextSteps,
+            referrer
         );
     }
 
@@ -465,12 +574,8 @@ library PairPayload {
      * @return TvmCell Payload for success
      * @return bool Whether or not cancel payload exists
      * @return TvmCell Payload for cancel
-     * @return bool Whether or not other data exists
-     * @return TvmCell Other data
      */
     function decodeOnAcceptTokensTransferPayloads(TvmCell _payload, uint8 op) public returns (
-        bool,
-        TvmCell,
         bool,
         TvmCell,
         bool,
@@ -482,40 +587,43 @@ library PairPayload {
         // Check size
         bool notifySuccess;
         bool notifyCancel;
-        bool hasRef3;
 
         TvmCell successPayload;
         TvmCell cancelPayload;
-        TvmCell ref3;
 
-        if (op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2 ||
-            op == DexOperationTypes.CROSS_PAIR_EXCHANGE ||
-            op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
+        if (refs == 0) {
+            return (notifySuccess, successPayload, notifyCancel, cancelPayload);
+        }
 
+        if (
+            op == DexOperationTypes.EXCHANGE ||
+            op == DexOperationTypes.DEPOSIT_LIQUIDITY ||
+            op == DexOperationTypes.WITHDRAW_LIQUIDITY
+        ) {
+            notifySuccess = refs >= 1;
+            notifyCancel = refs >= 2;
+        } else if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE) {
             notifySuccess = refs >= 2;
             notifyCancel = refs >= 3;
-            hasRef3 = refs == 4;
 
             slice.loadRef();
         } else {
-            notifySuccess = refs >= 1;
-            notifyCancel = refs >= 2;
-            hasRef3 = refs >= 3;
+            notifySuccess = refs >= 3;
+            notifyCancel = refs == 4;
+
+            slice.loadRef();
+            slice.loadRef();
         }
 
         if (notifySuccess) { successPayload = slice.loadRef(); }
 
         if (notifyCancel) { cancelPayload = slice.loadRef(); }
 
-        if (hasRef3) { ref3 = slice.loadRef(); }
-
         return (
             notifySuccess,
             successPayload,
             notifyCancel,
-            cancelPayload,
-            hasRef3,
-            ref3
+            cancelPayload
         );
     }
 

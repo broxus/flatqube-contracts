@@ -35,13 +35,6 @@ interface IDexPair is IDexPairBalances, IDexBasePool {
         address lp
     );
 
-    /// @notice Get TIP-3 tokens' wallets of the DEX vault
-    /// @return left Packed info response about TokenWallets addresses
-    function getVaultWallets() external view responsible returns (
-        address left,
-        address right
-    );
-
     /// @notice Get pair's reserves
     /// @return DexPairBalances Current reserves of the pair
     function getBalances() external view responsible returns (DexPairBalances);

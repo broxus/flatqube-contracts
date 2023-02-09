@@ -2,8 +2,18 @@ pragma ton-solidity >= 0.62.0;
 
 import "../structures/IFeeParams.sol";
 import "../structures/IOracleOptions.sol";
+import "../structures/IAmplificationCoefficient.sol";
 
-interface IDexRoot is IFeeParams, IOracleOptions {
+import "./IUpgradable.sol";
+import "./IResetGas.sol";
+
+interface IDexRoot is
+    IFeeParams,
+    IOracleOptions,
+    IAmplificationCoefficient,
+    IUpgradable,
+    IResetGas
+{
     event AccountCodeUpgraded(uint32 version);
 
     event PairCodeUpgraded(
@@ -14,6 +24,21 @@ interface IDexRoot is IFeeParams, IOracleOptions {
     event PoolCodeUpgraded(
         uint32 version,
         uint8 poolType
+    );
+
+    event TokenVaultCodeUpgraded(
+        uint32 version,
+        uint codeHash
+    );
+
+    event LpTokenPendingCodeUpgraded(
+        uint32 version,
+        uint codeHash
+    );
+
+    event TokenFactoryUpdated(
+        address current,
+        address previous
     );
 
     event RootCodeUpgraded();
@@ -39,6 +64,25 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         uint8 poolType
     );
 
+    event NewTokenVaultCreated(
+        address vault,
+        address tokenRoot,
+        address tokenWallet,
+        uint32 version
+    );
+
+    event NewLpTokenRootCreated(
+        address pool,
+        address[] poolTokenRoots,
+        address lpTokenRoot,
+        uint32 lpPendingNonce
+    );
+
+    function resetTargetGas(
+        address target,
+        address receiver
+    ) external view;
+
     function getAccountVersion() external view responsible returns (uint32);
 
     function getAccountCode() external view responsible returns (TvmCell);
@@ -55,6 +99,22 @@ interface IDexRoot is IFeeParams, IOracleOptions {
 
     function getVault() external view responsible returns (address);
 
+    function getOwner() external view responsible returns (address dex_owner);
+
+    function getPendingOwner() external view responsible returns (address dex_pending_owner);
+
+    function getTokenVaultCode() external view responsible returns (TvmCell);
+
+    function getTokenVaultVersion() external view responsible returns (uint32);
+
+    function getExpectedTokenVaultAddress(address _tokenRoot) external view responsible returns (address);
+
+    function getTokenFactory() external view responsible returns (address);
+
+    function getLpTokenPendingCode() external view responsible returns (TvmCell);
+
+    function getLpTokenPendingVersion() external view responsible returns (uint32);
+
     function getExpectedPairAddress(
         address left_root,
         address right_root
@@ -63,6 +123,93 @@ interface IDexRoot is IFeeParams, IOracleOptions {
     function getExpectedPoolAddress(address[] _roots) external view responsible returns (address);
 
     function getExpectedAccountAddress(address account_owner) external view responsible returns (address);
+
+    function getManager() external view responsible returns (address);
+
+    function setVaultOnce(address new_vault) external;
+
+    function setActive(bool new_active) external;
+
+    function setManager(address _newManager) external;
+
+    function revokeManager() external;
+
+    function acceptOwner() external;
+
+    function transferOwner(address new_owner) external;
+
+    function setTokenFactory(
+        address _newTokenFactory,
+        address _remainingGasTo
+    ) external;
+
+    function installOrUpdateTokenVaultCode(
+        TvmCell _newCode,
+        address _remainingGasTo
+    ) external;
+
+    function installOrUpdateLpTokenPendingCode(
+        TvmCell _newCode,
+        address _remainingGasTo
+    ) external;
+
+    function installOrUpdatePoolCode(
+        TvmCell code,
+        uint8 pool_type
+    ) external;
+
+    function installOrUpdatePairCode(
+        TvmCell code,
+        uint8 pool_type
+    ) external;
+
+    function installOrUpdateAccountCode(TvmCell code) external;
+
+    function installPlatformOnce(TvmCell code) external;
+
+    function deployLpToken(
+        address[] _tokenRoots,
+        address _remainingGasTo
+    ) external;
+
+    function deployTokenVault(
+        address _tokenRoot,
+        address _remainingGasTo
+    ) external;
+
+    function upgradeTokenVault(
+        address _tokenRoot,
+        address _remainingGasTo
+    ) external;
+
+    function upgradeTokenVaults(
+        address[] _tokenRoots,
+        uint32 _offset,
+        address _remainingGasTo
+    ) external;
+
+    function onLiquidityTokenDeployed(
+        uint32 _nonce,
+        address _pair,
+        address[] _roots,
+        address _lpRoot,
+        address _remainingGasTo
+    ) external;
+
+    function onLiquidityTokenNotDeployed(
+        uint32 _nonce,
+        address _pair,
+        address[] _roots,
+        address _lpRoot,
+        address _remainingGasTo
+    ) external;
+
+    function onTokenVaultDeployed(
+        uint32 _version,
+        address _tokenRoot,
+        address _tokenWallet,
+        address _remainingGasTo
+    ) external;
 
     function deployAccount(
         address account_owner,
@@ -75,6 +222,17 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         address _owner
     ) external;
 
+    function forceUpgradeAccount(
+        address account_owner,
+        address send_gas_to
+    ) external view;
+
+    function upgradeAccounts(
+        address[] _accountOwners,
+        uint32 _offset,
+        address _remainingGasTo
+    ) external view;
+
     function deployPair(
         address left_root,
         address right_root,
@@ -86,6 +244,30 @@ interface IDexRoot is IFeeParams, IOracleOptions {
         address send_gas_to
     ) external;
 
+    function upgradePool(
+        address[] roots,
+        uint8 pool_type,
+        address send_gas_to
+    ) external view;
+
+    function upgradePair(
+        address left_root,
+        address right_root,
+        uint8 pool_type,
+        address send_gas_to
+    ) external view;
+
+    struct PairUpgradeParam {
+        address[] tokenRoots;
+        uint8 poolType;
+    }
+
+    function upgradePairs(
+        PairUpgradeParam[] _params,
+        uint32 _offset,
+        address _remainingGasTo
+    ) external view;
+
     function onPoolCreated(
         address[] _roots,
         uint8 _poolType,
@@ -95,6 +277,28 @@ interface IDexRoot is IFeeParams, IOracleOptions {
     function setPairFeeParams(
         address[] _roots,
         FeeParams _params,
+        address _remainingGasTo
+    ) external view;
+
+    struct PoolActiveParam {
+        address[] tokenRoots;
+        bool newActive;
+    }
+
+    function setPoolActive(
+        PoolActiveParam _param,
+        address _remainingGasTo
+    ) external view;
+
+    function setPoolsActive(
+        PoolActiveParam[] _params,
+        uint32 _offset,
+        address _remainingGasTo
+    ) external view;
+
+    function setPairAmplificationCoefficient(
+        address[] _roots,
+        AmplificationCoefficient _A,
         address _remainingGasTo
     ) external view;
 

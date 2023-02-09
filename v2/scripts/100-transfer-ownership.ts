@@ -23,8 +23,10 @@ let tx;
 async function main() {
     if (options.new_owner) {
         const migration = new Migration();
-        const signer = await locklift.keystore.getSigner('0');
-        const account = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
+        const account = await locklift.factory.accounts.addExistingAccount({
+            type: WalletTypes.EverWallet,
+            address: migration.getAddress('Account1')
+        });
 
         const dexRoot = await locklift.factory.getDeployedContract( options.root_contract_name, migration.getAddress('DexRoot'));
 

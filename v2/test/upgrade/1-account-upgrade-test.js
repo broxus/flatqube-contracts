@@ -27,7 +27,7 @@ const loadAccountData = async (account) => {
   return data;
 }
 
-describe('Test Dex Pair contract upgrade', async function () {
+describe('Test Dex Account contract upgrade', async function () {
   this.timeout(Constants.TESTS_TIMEOUT);
   before('Load contracts', async function () {
     rootOwner = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');

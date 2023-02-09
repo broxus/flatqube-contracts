@@ -28,10 +28,9 @@ async function main() {
             contract: dexRoot,
             method: 'setPairFeeParams',
             params: {
-                left_root: pairData.left,
-                right_root: pairData.right,
-                params: pairData.fee,
-                send_gas_to: dexOwner.address
+                _roots: pairData.roots,
+                _params: pairData.fee,
+                _remainingGasTo: dexOwner.address
             },
             value: locklift.utils.convertCrystal(5, 'nano'),
             keyPair: DEX_OWNER_KEYS

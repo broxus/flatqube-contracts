@@ -56,7 +56,7 @@ async function main() {
         right_root: tokenBar.address,
         send_gas_to: account2.address,
       },
-      value: locklift.utils.convertCrystal(10, 'nano'),
+      value: locklift.utils.convertCrystal(15, 'nano'),
       keyPair: keyPairs[1]
     });
 
@@ -72,19 +72,19 @@ async function main() {
       }
     })
 
-    console.log(`DexPair${pair.left}${pair.right}: ${dexPairFooBarAddress}`);
+    console.log(`DexPool${pair.left}${pair.right}: ${dexPairFooBarAddress}`);
 
     const dexPairFooBar = await locklift.factory.getContract(options.contract_name);
     dexPairFooBar.address = dexPairFooBarAddress;
-    migration.store(dexPairFooBar, 'DexPair' + pair.left + pair.right);
+    migration.store(dexPairFooBar, 'DexPool' + pair.left + pair.right);
 
     const version = await dexPairFooBar.call({method: "getVersion", params: {}})
-    console.log(`DexPair${pair.left}${pair.right} version = ${version}`);
+    console.log(`DexPool${pair.left}${pair.right} version = ${version}`);
 
     // await new Promise(resolve => setTimeout(resolve, 10000));
 
     const active = await dexPairFooBar.call({method: "isActive", params: {}})
-    console.log(`DexPair${pair.left}${pair.right} active = ${active}`);
+    console.log(`DexPool${pair.left}${pair.right} active = ${active}`);
 
     const FooBarLpRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
     FooBarLpRoot.setAddress((await dexPairFooBar.call({method: "getTokenRoots"})).lp);
@@ -113,36 +113,57 @@ async function main() {
       }
     }));
 
+    const FooTokenVault = await locklift.factory.getContract('DexTokenVault');
+    FooTokenVault.setAddress(await dexRoot.call({
+      method: 'getExpectedTokenVaultAddress',
+      params: { _tokenRoot: tokenFoo.address },
+    }));
+
     const FooVaultWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
     FooVaultWallet.setAddress(await tokenFoo.call({
       method: "walletOf",
       params: {
-        walletOwner: dexVault.address,
+        walletOwner: FooTokenVault.address,
       }
+    }));
+
+    const BarTokenVault = await locklift.factory.getContract('DexTokenVault');
+    BarTokenVault.setAddress(await dexRoot.call({
+      method: 'getExpectedTokenVaultAddress',
+      params: { _tokenRoot: tokenBar.address },
     }));
 
     const BarVaultWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
     BarVaultWallet.setAddress(await tokenBar.call({
       method: "walletOf",
       params: {
-        walletOwner: dexVault.address,
+        walletOwner: BarTokenVault.address,
       }
+    }));
+
+    const LpTokenVault = await locklift.factory.getContract('DexTokenVault');
+    LpTokenVault.setAddress(await dexRoot.call({
+      method: 'getExpectedTokenVaultAddress',
+      params: { _tokenRoot: FooBarLpRoot.address },
     }));
 
     const FooBarLpVaultWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
     FooBarLpVaultWallet.setAddress(await FooBarLpRoot.call({
       method: "walletOf",
       params: {
-        walletOwner: dexVault.address,
+        walletOwner: LpTokenVault.address,
       }
     }));
 
     migration.store(FooBarLpRoot, pair.left + pair.right + 'LpRoot');
-    migration.store(FooPairWallet, pair.left + pair.right + 'Pair_' + pair.left + 'Wallet');
-    migration.store(BarPairWallet, pair.left + pair.right + 'Pair_' + pair.right + 'Wallet');
-    migration.store(FooBarLpPairWallet, pair.left + pair.right + 'Pair_LpWallet');
+    migration.store(FooPairWallet, pair.left + pair.right + 'Pool_' + pair.left + 'Wallet');
+    migration.store(BarPairWallet, pair.left + pair.right + 'Pool_' + pair.right + 'Wallet');
+    migration.store(FooBarLpPairWallet, pair.left + pair.right + 'Pool_LpWallet');
+    migration.store(FooTokenVault, pair.left + 'TokenVault');
+    migration.store(BarTokenVault, pair.right + 'TokenVault');
     migration.store(FooVaultWallet, pair.left + 'VaultWallet');
     migration.store(BarVaultWallet, pair.right + 'VaultWallet');
+    migration.store(LpTokenVault, pair.left + pair.right + 'LpVault');
     migration.store(FooBarLpVaultWallet, pair.left + pair.right + 'LpVaultWallet');
   }
 }

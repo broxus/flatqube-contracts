@@ -63,7 +63,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         uint64 id,
         uint128 deployWalletValue,
         uint128 expectedAmount,
-        address recipient,
+        address referrer,
         optional(address) outcoming
     ) external pure returns (TvmCell) {
         return EverToTip3Payloads.buildExchangePayload(
@@ -72,7 +72,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
             deployWalletValue,
             expectedAmount,
             0,
-            recipient,
+            referrer,
             outcoming.hasValue() ? outcoming.get() : address(0)
         );
     }
@@ -86,7 +86,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         address outcoming,
         uint32[] nextStepIndices,
         EverToTip3Payloads.EverToTip3ExchangeStep[] steps,
-        address recipient
+        address referrer
     ) external pure returns (TvmCell) {
         return EverToTip3Payloads.buildCrossPairExchangePayload(
             pool,
@@ -97,7 +97,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
             nextStepIndices,
             steps,
             0,
-            recipient
+            referrer
         );
     }
 
@@ -123,13 +123,9 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
 
                 if (
                     (
-                        (ref1Slice.bits() == (595 - 72) || (ref1Slice.bits() == (862 - 72))) && // 862 for pool (with outcoming)
-                        ref1Slice.refs() == 2 &&
-                        operationType == DexOperationTypes.EXCHANGE_V2
-                    ) || (
-                        ref1Slice.bits() == (862 - 72) &&
-                        ref1Slice.refs() == 3 &&
-                        operationType == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2
+                        (ref1Slice.bits() == (734 - 72)) &&
+                        ref1Slice.refs() == 4 &&
+                        (operationType == DexOperationTypes.EXCHANGE_V2 || operationType == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2)
                     )
                 ) {
                     result.set(DecodedMintPayload(
@@ -236,7 +232,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
             emit SwapEverToTip3Partial(user, id, amount, tokenRoot);
 
             IEverTip3SwapCallbacks(user).onSwapEverToTip3Partial{
-                value: 0,
+                value: EverToTip3Gas.OPERATION_CALLBACK_BASE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 bounce: false
             }(id, amount, tokenRoot);
@@ -251,7 +247,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
             );
         } else if (operationStatus == EverToTip3OperationStatus.SUCCESS) {
             IEverTip3SwapCallbacks(user).onSwapEverToTip3Success{
-                value: 0,
+                value: EverToTip3Gas.OPERATION_CALLBACK_BASE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 bounce: false
             }(id, amount, tokenRoot);
@@ -298,7 +294,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         }
 
         emit SwapEverToTip3Cancel(user, id, amount);
-        IEverTip3SwapCallbacks(user).onSwapEverToTip3Cancel{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(id, amount);
+        IEverTip3SwapCallbacks(user).onSwapEverToTip3Cancel{ value: EverToTip3Gas.OPERATION_CALLBACK_BASE, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(id, amount);
     }
 
     fallback() external pure {  }

@@ -1,41 +1,97 @@
 pragma ton-solidity >= 0.62.0;
 
+pragma AbiHeader time;
+pragma AbiHeader expire;
+pragma AbiHeader pubkey;
+
 import "../libraries/DexErrors.sol";
 import "../libraries/DexGas.sol";
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
+import "../structures/IReferralProgramParams.sol";
+
 // This is just for test purposes, this is not a real contract!
-contract NewDexVault {
-    uint32 static _nonce;
+contract NewDexVault is IReferralProgramParams{
+    uint32 private static _nonce;
 
     TvmCell public platform_code;
 
-    TvmCell public lp_token_pending_code;
+    address private _root;
+    address private _owner;
+    address private _pendingOwner;
+    address private _manager;
 
-    address public root;
-    address public owner;
-    address public pending_owner;
-
-    address public token_factory;
+    // referral program
+    ReferralProgramParams _refProgramParams;
 
     string newTestField;
 
     constructor() public {revert();}
 
-    function onCodeUpgrade(TvmCell data) private {
+    function getOwner() external view responsible returns (address) {
+        return {
+        value: 0,
+        bounce: false,
+        flag: MsgFlag.REMAINING_GAS
+        } _owner;
+    }
+
+    function getPendingOwner() external view responsible returns (address) {
+        return {
+        value: 0,
+        bounce: false,
+        flag: MsgFlag.REMAINING_GAS
+        } _pendingOwner;
+    }
+
+    function getManager() external view responsible returns (address) {
+        return {
+        value: 0,
+        bounce: false,
+        flag: MsgFlag.REMAINING_GAS
+        } _manager;
+    }
+
+    function getRoot() external view responsible returns (address) {
+        return {
+        value: 0,
+        bounce: false,
+        flag: MsgFlag.REMAINING_GAS
+        } _root;
+    }
+
+    function getReferralProgramParams() external view responsible returns (ReferralProgramParams) {
+        return {
+        value: 0,
+        bounce: false,
+        flag: MsgFlag.REMAINING_GAS
+        } _refProgramParams;
+    }
+    function onCodeUpgrade(TvmCell _data) private {
         tvm.resetStorage();
-        TvmSlice s = data.toSlice();
-        (root, token_factory) = s.decode(address, address);
 
-        TvmCell owners_data = s.loadRef();
-        (owner, pending_owner) = owners_data.toSlice().decode(address, address);
+        TvmSlice slice = _data.toSlice();
 
-        platform_code = s.loadRef();
-        lp_token_pending_code = s.loadRef();
+        (_root) = slice.decode(address);
+
+        TvmCell ownersData = slice.loadRef();
+        TvmSlice ownersSlice = ownersData.toSlice();
+        (_owner, _pendingOwner, _manager) = ownersSlice.decode(address, address, address);
+
+        platform_code = slice.loadRef();
+
+        if (slice.refs() >= 1) {
+            _refProgramParams  = abi.decode(slice.loadRef(), ReferralProgramParams);
+        }
 
         newTestField = "New Vault";
 
-        owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
+        // Refund remaining gas
+        _owner.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
     }
 
     function newFunc() public view returns (string) {

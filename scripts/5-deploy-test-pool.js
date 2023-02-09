@@ -107,11 +107,16 @@ async function main() {
 
             migration.store(tokenWallet, poolName + 'Pool_' + tokens[i].symbol + 'Wallet');
 
+            const coinTokenVault = await dexRoot.call({
+                method: 'getExpectedTokenVaultAddress',
+                params: { _tokenRoot: tokenAddresses[i] },
+            });
+
             const tokenVaultWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
             tokenVaultWallet.setAddress(await tokenContracts[i].call({
                 method: "walletOf",
                 params: {
-                    walletOwner: dexVault.address,
+                    walletOwner: coinTokenVault,
                 }
             }));
 
@@ -128,11 +133,16 @@ async function main() {
 
         migration.store(DexPoolLpPoolWallet, poolName + 'Pool_LpWallet');
 
+        const lpTokenVault = await dexRoot.call({
+            method: 'getExpectedTokenVaultAddress',
+            params: { _tokenRoot: DexPoolLpRoot.address },
+        });
+
         const DexPoolLpVaultWallet = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
         DexPoolLpVaultWallet.setAddress(await DexPoolLpRoot.call({
             method: "walletOf",
             params: {
-                walletOwner: dexVault.address,
+                walletOwner: lpTokenVault,
             }
         }));
 

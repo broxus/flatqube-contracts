@@ -35,6 +35,7 @@ async function main() {
   const DexStablePool = await locklift.factory.getContract('DexStablePool');
   const DexVaultLpTokenPending = await locklift.factory.getContract('DexVaultLpTokenPending');
   const DexVaultLpTokenPendingV2 = await locklift.factory.getContract('DexVaultLpTokenPendingV2');
+  const DexTokenVault = await locklift.factory.getContract('DexTokenVault');
 
   const [keyPair] = await locklift.keys.getKeyPairs();
 
@@ -59,7 +60,6 @@ async function main() {
     contract: DexVault,
     constructorParams: {
       owner_: account.address,
-      token_factory_: migration.load(await locklift.factory.getContract('TokenFactory'), 'TokenFactory').address,
       root_: dexRoot.address
     },
     initParams: {
@@ -78,31 +78,49 @@ async function main() {
   });
   displayTx(tx);
 
-  if (options.vault_contract_name === 'DexVaultPrev') {
-    console.log(`DexVault: installing VaultLpTokenPending code...`);
-    tx = await account.runTarget({
-      contract: dexVault,
-      method: 'installOrUpdateLpTokenPendingCode',
-      params: {code: DexVaultLpTokenPending.code},
-      keyPair
-    });
-  } else {
-    console.log(`DexVault: installing VaultLpTokenPendingV2 code...`);
-    tx = await account.runTarget({
-      contract: dexVault,
-      method: 'installOrUpdateLpTokenPendingCode',
-      params: {code: DexVaultLpTokenPendingV2.code},
-      keyPair
-    });
-  }
-  displayTx(tx);
-
   console.log(`DexRoot: installing vault address...`);
   tx = await account.runTarget({
     contract: dexRoot,
     method: 'setVaultOnce',
     params: {new_vault: dexVault.address},
     keyPair
+  });
+  displayTx(tx);
+
+  console.log('DexRoot: installing vault code...');
+  tx = await account.runTarget({
+    contract: dexRoot,
+    method: 'installOrUpdateTokenVaultCode',
+    params: {
+      _newCode: DexTokenVault.code,
+      _remainingGasTo: account.address,
+    },
+    keyPair,
+  });
+  displayTx(tx);
+
+  console.log('DexRoot: installing lp pending code...');
+  tx = await account.runTarget({
+    contract: dexRoot,
+    method: 'installOrUpdateLpTokenPendingCode',
+    params: {
+      _newCode: DexVaultLpTokenPendingV2.code,
+      _remainingGasTo: account.address,
+    },
+    keyPair,
+  });
+  displayTx(tx);
+
+  const TokenFactory = migration.load(await locklift.factory.getContract('TokenFactory'), 'TokenFactory').address;
+  console.log('DexRoot: set token factory...');
+  tx = await account.runTarget({
+    contract: dexRoot,
+    method: 'setTokenFactory',
+    params: {
+      _newTokenFactory: TokenFactory,
+      _remainingGasTo: account.address,
+    },
+    keyPair,
   });
   displayTx(tx);
 

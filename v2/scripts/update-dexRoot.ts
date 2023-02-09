@@ -1,42 +1,91 @@
 import {toNano, WalletTypes} from "locklift";
 
-const {Migration, afterRun} = require(process.cwd()+'/scripts/utils')
+const {Migration, displayTx} = require(process.cwd()+'/scripts/utils')
 const { Command } = require('commander');
 const program = new Command();
 const migration = new Migration();
 
+const isValidTonAddress = (address: any) => /^(?:-1|0):[0-9a-fA-F]{64}$/.test(address);
+
+const DEFAULT_TOKEN_FACTORY_ADDRESS = '0:d291ab784f3ce6958fad0e473bcd61891b303cfe7a96e2c7074f20eadd500f44';
+
 program
     .allowUnknownOption()
     .option('-old, --old_contract <old_contract>', 'Old contract name')
-    .option('-new, --new_contract <new_contract>', 'New contract name');
+    .option('-new, --new_contract <new_contract>', 'New contract name')
+    .option('-tf, --token_factory_addr <token_factory_addr>', 'TokenFactory address');
 
 program.parse(process.argv);
 
 const options = program.opts();
 options.old_contract = options.old_contract || 'DexRootPrev';
 options.new_contract = options.new_contract || 'DexRoot';
+options.token_factory_addr = options.token_factory_addr && isValidTonAddress(options.token_factory_addr) ? options.token_factory_addr : undefined;
 
 async function main() {
   console.log(``);
   console.log(`##############################################################################################`);
   console.log(`update-dexRoot.js`);
   console.log(`OPTIONS: `, options);
-  const signer = await locklift.keystore.getSigner('0');
-  const account = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
+  const account = await locklift.factory.accounts.addExistingAccount({
+    type: WalletTypes.EverWallet,
+    address: migration.getAddress('Account1')
+  });
 
+  const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts('DexVaultLpTokenPendingV2');
+  const DexTokenVault = await locklift.factory.getContractArtifacts('DexTokenVault');
   const dexRoot = await locklift.factory.getDeployedContract(options.old_contract, migration.getAddress('DexRoot'));
   const NewDexRoot = await locklift.factory.getContractArtifacts(options.new_contract);
+
+  let tokenFactoryAddress = '';
+
+  if (migration.exists('TokenFactory')) {
+    tokenFactoryAddress = migration.getAddress('TokenFactory').toString();
+  } else {
+    tokenFactoryAddress = DEFAULT_TOKEN_FACTORY_ADDRESS;
+  }
 
   console.log(`Upgrading DexRoot contract: ${dexRoot.address}`);
 
   await locklift.transactions.waitFinalized(
-     // @ts-ignore
       dexRoot.methods.upgrade(
       {code: NewDexRoot.code}
     ).send({
       from: account.address,
       amount: toNano(11)
     }));
+
+  const newDexRoot = await locklift.factory.getDeployedContract(options.new_contract, dexRoot.address);
+
+  console.log('DexRoot: installing vault code...');
+  let tx = await newDexRoot.methods.installOrUpdateVaultCode({
+    _newCode: DexTokenVault.code,
+    _remainingGasTo: account.address
+  }).send({
+    from: account.address,
+    amount: toNano(2)
+  });
+  displayTx(tx);
+
+  console.log('DexRoot: installing lp pending code...');
+  tx = await newDexRoot.methods.installOrUpdateLpTokenPendingCode({
+    _newCode: DexVaultLpTokenPendingV2.code,
+    _remainingGasTo: account.address,
+  }).send({
+    from: account.address,
+    amount: toNano(2)
+  });
+  displayTx(tx);
+
+  console.log('DexRoot: set token factory...');
+  tx = await newDexRoot.methods.setTokenFactory({
+    _newTokenFactory: tokenFactoryAddress,
+    _remainingGasTo: account.address,
+  }).send({
+    from: account.address,
+    amount: toNano(2)
+  });
+  displayTx(tx);
 }
 
 main()

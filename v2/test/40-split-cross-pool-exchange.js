@@ -14,9 +14,6 @@ program
     .option('-st, --start_token <start_token>', 'Spent token')
     .option('-r, --route <route>', 'Exchange route')
 
-    .option('-prcn, --pair_contract_name <pair_contract_name>', 'DexPair contract name')
-    .option('-plcn, --pool_contract_name <pool_contract_name>', 'DexPool contract name')
-
 program.parse(process.argv);
 
 const options = program.opts();
@@ -24,8 +21,6 @@ const options = program.opts();
 options.amount = options.amount ? +options.amount : 100;
 options.start_token = options.start_token ? options.start_token : 'foo';
 options.route = options.route ? JSON.parse(options.route) : [];
-options.pair_contract_name = options.pair_contract_name || 'DexPair';
-options.pool_contract_name = options.pool_contract_name || 'DexStablePool';
 
 console.log(options.route);
 
@@ -48,10 +43,10 @@ function isLpToken(token, pool_roots) {
     return token.slice(-2) === 'Lp' && !pool_roots.includes(token)
 }
 
-async function getPoolTokensRoots(poolName, pool_tokens) {
+async function getPoolTokensRoots(poolName, pool_tokens, contract_name) {
     const Pool = poolsContracts[poolName];
 
-    if (pool_tokens.length === 2) { // pairs
+    if (contract_name === 'DexPair' || contract_name === 'DexStablePair') { // pairs
         return Pool.call({method: 'getTokenRoots', params: {}});
     } else { // pools
         return (await Pool.call({method: 'getTokenRoots', params: {}})).roots;
@@ -103,16 +98,16 @@ async function account3balances() {
     return balances;
 }
 
-async function dexPoolInfo(pool_tokens) {
+async function dexPoolInfo(pool_tokens, contract_name) {
     let poolName = getPoolName(pool_tokens);
     const Pool = poolsContracts[poolName];
-    const poolRoots = await getPoolTokensRoots(poolName, pool_tokens);
+    const poolRoots = await getPoolTokensRoots(poolName, pool_tokens, contract_name);
 
     const balances = await Pool.call({method: 'getBalances', params: {}});
     let lp_supply = new BigNumber(balances.lp_supply).shiftedBy(-tokens[poolName + 'Lp'].decimals).toString();
 
     let token_symbols, token_balances;
-    if (pool_tokens.length === 2) { // pairs
+    if (contract_name === 'DexPair' || contract_name === 'DexStablePair') { // pairs
 
         token_symbols = [tokens[pool_tokens[0]].symbol, tokens[pool_tokens[1]].symbol];
         if (poolRoots.left === tokenRoots[pool_tokens[0]].address) {
@@ -201,24 +196,20 @@ describe('Check direct operations', async function () {
                 let poolName = getPoolName(pool_tokens);
                 tokens[poolName + 'Lp'] = {name: poolName + 'Lp', symbol: poolName + 'Lp', decimals: Constants.LP_DECIMALS, upgradeable: true};
 
-                let pool;
-                if (pool_tokens.length === 2) { // pair
-                    pool = await locklift.factory.getContract(options.pair_contract_name);
-
+                let pool = await locklift.factory.getContract(elem.contract_name);
+                if (elem.contract_name === 'DexPair' || elem.contract_name === 'DexStablePair') { // pair
                     const tokenLeft = tokens[pool_tokens[0]];
                     const tokenRight = tokens[pool_tokens[1]];
-                    if (migration.exists(`DexPair${tokenLeft.symbol}${tokenRight.symbol}`)) {
-                        migration.load(pool, `DexPair${tokenLeft.symbol}${tokenRight.symbol}`);
-                        logger.log(`DexPair${tokenLeft.symbol}${tokenRight.symbol}: ${pool.address}`);
-                    } else if (migration.exists(`DexPair${tokenRight.symbol}${tokenLeft.symbol}`)) {
-                        migration.load(pool, `DexPair${tokenRight.symbol}${tokenLeft.symbol}`);
-                        logger.log(`DexPair${tokenRight.symbol}${tokenLeft.symbol}: ${pool.address}`);
+                    if (migration.exists(`DexPool${tokenLeft.symbol}${tokenRight.symbol}`)) {
+                        migration.load(pool, `DexPool${tokenLeft.symbol}${tokenRight.symbol}`);
+                        logger.log(`DexPool${tokenLeft.symbol}${tokenRight.symbol}: ${pool.address}`);
+                    } else if (migration.exists(`DexPool${tokenRight.symbol}${tokenLeft.symbol}`)) {
+                        migration.load(pool, `DexPool${tokenRight.symbol}${tokenLeft.symbol}`);
+                        logger.log(`DexPool${tokenRight.symbol}${tokenLeft.symbol}: ${pool.address}`);
                     } else {
-                        logger.log(`DexPair${tokenLeft.symbol}${tokenRight.symbol} NOT EXISTS`);
+                        logger.log(`DexPool${tokenLeft.symbol}${tokenRight.symbol} NOT EXISTS`);
                     }
                 } else { // pool
-                    pool = await locklift.factory.getContract(options.pool_contract_name);
-
                     if (migration.exists(`DexPool${poolName}`)) {
                         migration.load(pool, `DexPool${poolName}`);
                         logger.log(`DexPool${poolName}: ${pool.address}`);
@@ -289,7 +280,7 @@ describe('Check direct operations', async function () {
             async function getRouteDexPoolsInfo(route, poolsMap) {
                 for (let elem of route) {
                     let poolName = getPoolName(elem.roots);
-                    poolsMap[poolName] = await dexPoolInfo(elem.roots);
+                    poolsMap[poolName] = await dexPoolInfo(elem.roots, elem.contract_name);
 
                     await getRouteDexPoolsInfo(elem.nextSteps, poolsMap);
                 }
@@ -324,7 +315,7 @@ describe('Check direct operations', async function () {
                 for (let elem of route) {
                     let pool_roots = elem.roots.map(token => tokenRoots[token].address);
                     let poolName = getPoolName(elem.roots);
-                    const poolRoots = await getPoolTokensRoots(poolName, elem.roots);
+                    const poolRoots = await getPoolTokensRoots(poolName, elem.roots, elem.contract_name);
 
                     let partial_spent_amount = (new BigNumber(spent_amount)).multipliedBy(elem.numerator).dividedToIntegerBy(denominator).toString();
 
@@ -349,7 +340,7 @@ describe('Check direct operations', async function () {
                         });
                         expected_amount = expected.lp_reward;
                     } else {
-                        if (elem.roots.length === 2) { // pair
+                        if (elem.contract_name === 'DexPair' || elem.contract_name === 'DexStablePair') { // pair
                             expected = await poolsContracts[poolName].call({
                                 method: 'expectedExchange', params: {
                                     amount: partial_spent_amount,
@@ -447,7 +438,7 @@ describe('Check direct operations', async function () {
             const firstPool = poolsContracts[poolName];
 
             let payload;
-            if (options.route[0].roots.length === 2) { // pair
+            if (options.route[0].contract_name === 'DexPair' || options.route[0].contract_name === 'DexStablePair') { // pair
                 const params = {
                     _id: 0,
                     _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
@@ -544,10 +535,10 @@ describe('Check direct operations', async function () {
             Object.entries(poolsEnd).filter((poolName, pool) => expectedPoolBalances[poolName]).forEach((poolName, pool) => {
                 expectedPoolBalances[poolName].balances.forEach((expected_balance, idx) =>
                     expect(new BigNumber(pool.balances[idx]).toString()).to.equal(expected_balance,
-                        `DexPair${poolName} wrong ${pool.symbols[idx]} balance`)
+                        `DexPool${poolName} wrong ${pool.symbols[idx]} balance`)
                 );
                 expect(new BigNumber(pool.lp_supply).toString()).to.equal(expectedPoolBalances[poolName].lp_supply,
-                    `DexPair${poolName} wrong ${pool.lp_symbol} balance`);
+                    `DexPool${poolName} wrong ${pool.lp_symbol} balance`);
             });
         });
     });

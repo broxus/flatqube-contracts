@@ -1,7 +1,6 @@
 import {WalletTypes} from "locklift";
 
 const fs = require('fs');
-const {Migration, afterRun} = require(process.cwd()+'/scripts/utils');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
 
@@ -9,8 +8,10 @@ BigNumber.config({EXPONENTIAL_AT: 257});
 async function main() {
     console.log(`hardcode-manager-address.js`);
 
-    const signer = await locklift.keystore.getSigner('0');
-    const account = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
+    const account = await locklift.factory.accounts.addExistingAccount({
+        type: WalletTypes.EverWallet,
+        address: migration.getAddress('Account1')
+    });
 
     const content = '' +
         `pragma ton-solidity >= 0.57.0;

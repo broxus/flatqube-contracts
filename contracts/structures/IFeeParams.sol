@@ -22,5 +22,8 @@ interface IFeeParams {
 
         /// @dev Minimum withdraw amounts for token fees
         mapping(address => uint128) threshold;
+
+        /// @dev Minimum withdraw amounts for referrer fees
+        mapping(address => uint128) referrer_threshold;
     }
 }

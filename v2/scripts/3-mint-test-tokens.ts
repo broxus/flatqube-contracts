@@ -1,6 +1,6 @@
 import {toNano, WalletTypes} from "locklift";
 
-const {Migration, TOKEN_CONTRACTS_PATH, Constants, EMPTY_TVM_CELL, afterRun} = require(process.cwd()+'/scripts/utils');
+const {Migration, Constants, EMPTY_TVM_CELL} = require(process.cwd()+'/scripts/utils');
 const { Command } = require('commander');
 const program = new Command();
 const BigNumber = require('bignumber.js');
@@ -9,8 +9,10 @@ BigNumber.config({EXPONENTIAL_AT: 257});
 async function main() {
   const migration = new Migration();
 
-  const signer = await locklift.keystore.getSigner('0');
-  const rootOwner = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
+  const rootOwner = await locklift.factory.accounts.addExistingAccount({
+    type: WalletTypes.EverWallet,
+    address: migration.getAddress('Account1')
+  });
 
   program
       .allowUnknownOption()
@@ -47,8 +49,10 @@ async function main() {
   for (const mint of mints) {
 
     const token = Constants.tokens[mint.token];
-    const signer_acc = await locklift.keystore.getSigner(String(mint.account));
-    const account = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer_acc!.publicKey});
+    const account = await locklift.factory.accounts.addExistingAccount({
+      type: WalletTypes.EverWallet,
+      address: migration.getAddress('Account' + String(mint.account + 1))
+    });
     const amount = new BigNumber(mint.amount).shiftedBy(token.decimals).toFixed();
 
     const tokenRoot = await locklift.factory.getDeployedContract( token.upgradeable ? 'TokenRootUpgradeable' : 'TokenRoot', migration.getAddress(token.symbol + 'Root'));

@@ -4,7 +4,6 @@ interface IPoolTokenData {
     struct PoolTokenData {
         address root;
         address wallet;
-        address vaultWallet;
         uint128 balance;
         uint8 decimals;
         uint128 accumulatedFee;

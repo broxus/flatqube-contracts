@@ -168,13 +168,13 @@ describe('Check direct DexPairFooBar operations', async function () {
 
         migration.load(DexRoot, 'DexRoot');
         migration.load(DexVault, 'DexVault');
-        migration.load(DexPairFooBar, 'DexPairFooBar');
+        migration.load(DexPairFooBar, 'DexPoolFooBar');
         migration.load(FooVaultWallet, 'FooVaultWallet');
         migration.load(BarVaultWallet, 'BarVaultWallet');
         migration.load(FooBarLpVaultWallet, 'FooBarLpVaultWallet');
-        migration.load(FooPairWallet, 'FooBarPair_FooWallet');
-        migration.load(BarPairWallet, 'FooBarPair_BarWallet');
-        migration.load(FooBarLpPairWallet, 'FooBarPair_LpWallet');
+        migration.load(FooPairWallet, 'FooBarPool_FooWallet');
+        migration.load(BarPairWallet, 'FooBarPool_BarWallet');
+        migration.load(FooBarLpPairWallet, 'FooBarPool_LpWallet');
         migration.load(FooRoot, 'FooRoot');
         migration.load(BarRoot, 'BarRoot');
         migration.load(FooBarLpRoot, 'FooBarLpRoot');
@@ -602,7 +602,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             }));
 
-            migration.store(FooBarLpWallet2, 'FooBarLpWallet3');
+            migration.store(FooBarLpWallet2, 'FooBarLpWallet2');
 
             const dexEnd = await dexBalances();
             const accountEnd3 = await account3balances();
