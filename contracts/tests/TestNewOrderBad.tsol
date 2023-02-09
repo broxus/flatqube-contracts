@@ -4,24 +4,24 @@ pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
-import "./libraries/OrderGas.tsol";
-import "./libraries/OrderErrors.tsol";
-import "./libraries/OrderStatus.tsol";
-import "./libraries/OrderPayloads.tsol";
-import "./libraries/OrderOperationTypes.tsol";
-import "./libraries/DexOperationTypes.tsol";
+import "../libraries/OrderGas.tsol";
+import "../libraries/OrderErrors.tsol";
+import "../libraries/OrderStatus.tsol";
+import "../libraries/OrderPayloads.tsol";
+import "../libraries/OrderOperationTypes.tsol";
+import "../libraries/DexOperationTypes.tsol";
 
-import "./structures/IOrderExchangeResult.tsol";
-import "./structures/IOrderSwapResult.tsol";
-import "./structures/IOrderStructures.tsol";
+import "../structures/IOrderExchangeResult.tsol";
+import "../structures/IOrderSwapResult.tsol";
+import "../structures/IOrderStructures.tsol";
 
-import "./interfaces/IOrder.tsol";
-import "./interfaces/IOrderEvents.tsol";
-import "./interfaces/IOrderCallbacks.tsol";
-import "./interfaces/IHasEmergencyMode.tsol";
-import "./interfaces/IDexRoot.tsol";
+import "../interfaces/IOrder.tsol";
+import "../interfaces/IOrderEvents.tsol";
+import "../interfaces/IOrderCallbacks.tsol";
+import "../interfaces/IHasEmergencyMode.tsol";
+import "../interfaces/IDexRoot.tsol";
 
-import "./OrderPlatform.tsol";
+import "../OrderPlatform.tsol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "tip3/contracts/interfaces/ITokenRoot.tsol";
@@ -29,7 +29,7 @@ import "tip3/contracts/interfaces/ITokenWallet.tsol";
 import "tip3/contracts/interfaces/TIP3TokenWallet.tsol";
 import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
 
-contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmergencyMode {
+contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmergencyMode {
 	address static factory;
 	address static root;
 	address static owner;
@@ -96,19 +96,19 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 			IDexRoot(dexRoot).getExpectedPairAddress{
 					value: OrderGas.GET_DEX_PAIR,
 					flag: MsgFlag.SENDER_PAYS_FEES,
-					callback: Order.onBeginData
+					callback: TestNewOrderBad.onBeginData
 			}(spentToken, receiveToken);
 
 			ITokenRoot(spentToken).deployWallet{
 					value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
 					flag: MsgFlag.SENDER_PAYS_FEES,
-					callback: Order.onBeginData
+					callback: TestNewOrderBad.onBeginData
 			}(address(this), OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
 			ITokenRoot(receiveToken).deployWallet{
 					value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
 					flag: MsgFlag.SENDER_PAYS_FEES,
-					callback: Order.onBeginData
+					callback: TestNewOrderBad.onBeginData
 			}(address(this), OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 		} else {
 			msg.sender.transfer(
@@ -181,7 +181,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 			TIP3TokenWallet(spentWallet).balance{
 				value: OrderGas.GET_BALANCE_WALLET,
 				flag: MsgFlag.SENDER_PAYS_FEES,
-				callback: Order.onBalanceSpentWallet
+				callback: TestNewOrderBad.onBalanceSpentWallet
 			}();
 		}
 	}
@@ -205,7 +205,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 		uint32 functionId = body.decode(uint32);
 
 		if (
-			functionId == tvm.functionId(Order.matchingCheck) &&
+			functionId == tvm.functionId(TestNewOrderBad.matchingCheck) &&
 			msg.sender == matchingOrder
 		){
 			changeState(OrderStatus.Active);
@@ -766,20 +766,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 				)
 			);
 		}
-
-		TvmCell emptyPayload;
-		ITokenWallet(spentWallet).transfer{
-				value: 0,
-				flag: MsgFlag.ALL_NOT_RESERVED,
-				bounce: false
-		}(
-			currentAmountSpentToken,
-			owner,
-			0,
-			owner,
-			true,
-			emptyPayload
-		);
 	}
 
 	function backendSwap(uint64 callbackId) external {
@@ -1061,7 +1047,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 		uint64 _nowTx
 	) internal pure returns(address) {
 		return address(tvm.hash(tvm.buildStateInit({
-				contr: Order,
+				contr: TestNewOrderBad,
 				varInit : {
 					factory: _factory,
 					root: _root,
