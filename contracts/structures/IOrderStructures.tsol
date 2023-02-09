@@ -1,0 +1,38 @@
+pragma ton-solidity >= 0.62.0;
+
+interface IOrderStructures {
+    struct InitParams {
+        address factory;
+        address root;
+        address owner;
+        address spentToken;
+        address receiveToken;
+        uint64 timeTx;
+        uint64 nowTx;
+    }
+
+    struct Details {
+        address factory;
+        address root;
+        address owner;
+        uint256 backPK;
+        uint256 backMatchingPK;
+        address dexRoot;
+        address dexPair;
+        address msgSender;
+        uint64 swapAttempt;
+        uint8 state;
+        address spentToken;
+        address receiveToken;
+        address spentWallet;
+        address receiveWallet;
+        uint128 expectedAmount;
+        uint128 initialAmount;
+        uint128 currentAmountSpentToken;
+        uint128 currentAmountReceiveToken;
+        uint64 timeTx;
+        uint64 nowTx;
+        address matchingOrder;
+        uint32 version;
+    }
+}

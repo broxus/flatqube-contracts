@@ -10,8 +10,9 @@ import "./libraries/OrderErrors.tsol";
 import "./structures/IOrderRootCreateResult.tsol";
 
 import "./interfaces/IOrderRoot.tsol";
-import "./interfaces/IOrderFactoryCallbacks.tsol";
-import "./interfaces/IOrderOperationCallback.tsol";
+import "./interfaces/IOrderFactory.tsol";
+import "./interfaces/IOrderRootCallbacks.tsol";
+import "./interfaces/IOrderRootEvents.tsol";
 
 import "./Order.tsol";
 
@@ -20,7 +21,7 @@ import "tip3/contracts/interfaces/ITokenRoot.tsol";
 import "tip3/contracts/interfaces/ITokenWallet.tsol";
 import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
 
-contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
+contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallback {
     address factory;
     address spentToken;
     
@@ -39,22 +40,22 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
     constructor() public { revert(); }
 
     modifier onlyFactory() {
-		require(
-			msg.sender.value != 0 && msg.sender == factory,
-			OrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT
-		);
-		_;
-	}
+        require(
+            msg.sender.value != 0 && msg.sender == factory,
+            OrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT
+        );
+        _;
+    }
 
     function onTokenWallet(address _wallet) external {
         require(
             msg.sender.value != 0 && msg.sender == spentToken,
             OrderErrors.NOT_TOKEN1_ROOT
         );
-        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+        tvm.rawReserve(address(this).balance - msg.value, 0);
         spentTokenWallet = _wallet;
 
-        IOrderFactoryCallbacks(factory).onOrderRootDeployedCallback{
+        IOrderFactory(factory).onOrderRootDeployedCallback{
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED
         }(address(this), spentToken, deployer);
@@ -95,6 +96,14 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (factory);
     }
 
+    function getDeployer() override external view responsible returns(address) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (deployer);
+    }
+
+    function getDex() override external view responsible returns(address) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (dexRoot);
+    }
+
     function expectedAddressOrder(
         address _factory,
         address _root,
@@ -107,8 +116,8 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
     {
         return {
             value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED,
-            bounce: false
+            bounce: false,
+            flag: MsgFlag.REMAINING_GAS
         } address(tvm.hash(tvm.buildStateInit({
             contr: Order,
             varInit: {
@@ -125,7 +134,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
         ));
     }
 
-    function setFeeParams(OrderFeeParams params) override external onlyFactory {
+    function setFeeParams(OrderFeeParams params) override external onlyFactory() {
         tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
         fee = params;
         factory.transfer(
@@ -143,10 +152,18 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
         uint256 backPK,
         uint256 backMatchingPK
     ) external pure returns (TvmCell) {
-        return abi.encode(
-            callbackId, tokenReceive, expectedTokenAmount, deployWalletValue,
-            backPK, backMatchingPK
-        );
+        TvmBuilder builderBackendPK;
+        builderBackendPK.store(backPK);
+        builderBackendPK.store(backMatchingPK);
+
+        TvmBuilder builder;
+        builder.store(callbackId);
+        builder.store(tokenReceive);
+        builder.store(expectedTokenAmount);
+        builder.store(deployWalletValue);
+        builder.storeRef(builderBackendPK);
+
+        return builder.toCell();
     }
 
     function onAcceptTokensTransfer(
@@ -157,7 +174,9 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
         address originalGasTo,
         TvmCell payload
     ) external override {
-        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+        require(msg.sender.value != 0);
+        tvm.rawReserve(address(this).balance - msg.value, 0);
+
         TvmSlice payloadSlice = payload.toSlice();
         uint64 callbackId;
         if (payloadSlice.bits() >= 64) {
@@ -166,42 +185,29 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
 
         TvmSlice dataPK = payloadSlice.loadRefAsSlice();
 
-        if (payloadSlice.bits() == 523 &&
-            dataPK.bits() == 512 &&
-            msg.sender.value != 0 &&
-            msg.sender.value >= OrderGas.DEPLOY_ORDER_MIN_VALUE &&
-            msg.sender == spentTokenWallet) 
-        {
+        if (
+            msg.sender.value >= OrderGas.DEPLOY_ORDER_MIN_VALUE + OrderGas.DEPLOY_ORDER_MIN_VALUE_IN_ROOT &&
+            msg.sender == spentTokenWallet &&
+            payloadSlice.bits() == 523 && dataPK.bits() == 512
+        ){
             (
                 address receiveToken,
                 uint128 expectedAmount,
                 uint128 deployWalletValue
             ) = payloadSlice.decode(address, uint128, uint128);
 
-            (
-                uint256 backPubKey,
-                uint256 backMatchingPK
-            ) = dataPK.decode(uint256, uint256);
-
-            TvmCell stateInit = buildState(sender, orderCode, receiveToken);
-            address orderAddress = new Order{
-                stateInit: stateInit,
-                value: OrderGas.DEPLOY_ORDER_MIN_VALUE
-            }(
+            address orderAddress = _createOrder(
                 expectedAmount,
-                amount, 
-                backPubKey,
-                backMatchingPK,
-                dexRoot, 
-                fee,
-                orderPlatformCode,
-                version
+                amount,
+                sender,
+                receiveToken,
+                dataPK
             );
 
             emit CreateOrder(orderAddress, tokenRoot, amount, receiveToken, expectedAmount);
 
             if (callbackId > 0) {
-                IOrderOperationCallback(sender).onOrderCreateOrderSuccess{
+                IOrderRootCallbacks(sender).onOrderCreateOrderSuccess{
                     value: OrderGas.OPERATION_CALLBACK_BASE,
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
@@ -234,7 +240,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
         } else {
             emit CreateOrderReject();
             if (callbackId > 0){
-                IOrderOperationCallback(sender).onOrderCreateOrderReject{
+                IOrderRootCallbacks(sender).onOrderCreateOrderReject{
                     value: OrderGas.OPERATION_CALLBACK_BASE,
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
@@ -244,7 +250,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
             TvmCell emptyPayload;
             ITokenWallet(msg.sender).transfer{
                 value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED,
+                flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
                 bounce: false
             }(
                 amount,
@@ -255,6 +261,33 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
                 emptyPayload
             );
         }
+    }
+
+    function _createOrder(
+        uint128 _expectedAmount,
+        uint128 _amount,
+        address _sender,
+        address _receiveToken,
+        TvmSlice _dataPK
+    ) private view returns(address){
+        (
+            uint256 backPubKey,
+            uint256 backMatchingPK
+        ) = _dataPK.decode(uint256, uint256);
+
+        return (new Order {
+            stateInit: buildState(_sender, orderCode, _receiveToken),
+            value: OrderGas.DEPLOY_ORDER_MIN_VALUE
+        }(
+            _expectedAmount,
+            _amount,
+            backPubKey,
+            backMatchingPK,
+            dexRoot,
+            fee,
+            orderPlatformCode,
+            version
+        ));
     }
 
     function buildState(
@@ -281,7 +314,7 @@ contract OrderRoot is IAcceptTokensTransferCallback, IOrderRoot {
         TvmCell _code, 
         uint32 _newVersion, 
         address _sendGasTo
-    ) external override onlyFactory {
+    ) external override onlyFactory() {
         if (version == _newVersion) {
             tvm.rawReserve(address(this).balance - msg.value, 0);
             _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });

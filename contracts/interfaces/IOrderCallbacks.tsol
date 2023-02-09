@@ -1,14 +1,9 @@
-pragma ton-solidity >= 0.62.0;
+pragma ever-solidity >= 0.62.0;
 
-import "../structures/IOrderRootCreateResult.tsol";
 import "../structures/IOrderExchangeResult.tsol";
 import "../structures/IOrderSwapResult.tsol";
 
-interface IOrderOperationCallback {
-    function onOrderRootCreateSuccess(uint64 id, IOrderRootCreateResult.OrderRootCreateResult result) external;
-    function onOrderRootCreateReject(uint64 id) external;
-    function onOrderCreateOrderSuccess(uint64 id) external;
-    function onOrderCreateOrderReject(uint64 id) external;
+interface IOrderCallbacks {
     function onOrderPartExchangeSuccess(uint64 id, address owner, uint128 fee, IOrderExchangeResult.OrderExchangeResult result) external;
     function onOrderStateFilled(uint64 id, address owner, uint128 fee, IOrderExchangeResult.OrderExchangeFilledResult result) external;
     function onOrderStateCancelled(uint64 id, IOrderExchangeResult.OrderExchangeCancelledResult result) external;
@@ -16,5 +11,5 @@ interface IOrderOperationCallback {
     function onOrderSwapSuccess(uint64 id, IOrderSwapResult.OrderSwapResult result) external;
     function onOrderSwapCancel(uint64 id) external;
     function onMatchingCancel(uint64 id) external;
-    function onMatchingInProgress(uint64 id, uint128 amount, uint128 feeAmount, uint128 reward, uint128 feeReward) external;
+    function onMatchingInProgress(uint64 id, IOrderExchangeResult.OrderMatchingInProgress result) external;
 }

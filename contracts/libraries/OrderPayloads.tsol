@@ -1,0 +1,113 @@
+pragma ever-solidity >= 0.62.0;
+
+import "../libraries/OrderOperationTypes.tsol";
+
+library OrderPayloads {
+
+    function buildOrderPayload(
+        uint8 op,
+        uint64 callbackId,
+        uint128 deployWalletValue
+    ) public returns(TvmCell) {
+        TvmBuilder builder;
+        builder.store(op);
+        builder.store(callbackId);
+        builder.store(deployWalletValue);
+
+        return builder.toCell();
+    }
+
+    function buildMatchExchangePayload(
+        uint8 op,
+        uint64 callbackId,
+        address sendGasTo,
+        uint128 deployWalletValue,
+        uint128 amount,
+        uint128 reward
+    ) public returns(TvmCell) {
+        TvmBuilder builder;
+        builder.store(op);
+        builder.store(callbackId);
+        builder.store(sendGasTo);
+        builder.store(deployWalletValue);
+        builder.store(amount);
+        builder.store(reward);
+
+        return builder.toCell();
+    }
+
+    function buildMatchTransferPayload(
+        uint8 op,
+        uint64 callbackId,
+        address sendGasTo
+    ) public returns(TvmCell) {
+        TvmBuilder builder;
+        builder.store(op);
+        builder.store(callbackId);
+        builder.store(sendGasTo);
+
+        return builder.toCell();
+    }
+
+    function decodeOnAcceptTokenTransferData (TvmCell _payload) public returns(
+        bool,
+        uint8,
+        uint64,
+        address,
+        uint128,
+        uint128,
+        uint128
+    ){
+        TvmSlice payloadSlice = _payload.toSlice();
+
+        bool isValid = payloadSlice.bits() >= 200;
+
+        uint8 op;
+        uint64 callbackId;
+        address sendGasTo;
+        uint128 deployWalletValue;
+        uint128 amountForDeal;
+        uint128 reward;
+
+        if (isValid) {
+            (
+                op,
+                callbackId
+            ) = payloadSlice.decode(uint8, uint64);
+
+            if (
+                payloadSlice.bits() >= 128 &&
+                (op == OrderOperationTypes.EXCHANGE)
+            ){
+                deployWalletValue = payloadSlice.decode(uint128);
+            }
+
+            if (payloadSlice.bits() >= 267 && op != OrderOperationTypes.EXCHANGE) {
+                sendGasTo = payloadSlice.decode(address);
+            }
+
+            if (payloadSlice.bits() >= 128 &&
+            (
+                op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE ||
+                op == OrderOperationTypes.SWAP_SUCCESS
+            )
+            ){
+                deployWalletValue = payloadSlice.decode(uint128);
+            }
+
+            if (payloadSlice.bits() >= 256 && op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE) {
+                (amountForDeal, reward) = payloadSlice.decode(uint128, uint128);
+            }
+        }
+
+        return (
+            isValid,
+            op,
+            callbackId,
+            sendGasTo,
+            deployWalletValue,
+            amountForDeal,
+            reward
+        );
+    }
+}

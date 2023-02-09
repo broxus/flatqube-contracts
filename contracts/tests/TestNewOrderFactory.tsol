@@ -12,17 +12,17 @@ import "../interfaces/IOrderFactoryEvents.tsol";
 import "../interfaces/IOrderFactoryCallbacks.tsol";
 
 import "../interfaces/IOrderRoot.tsol";
+import "../interfaces/IOrder.tsol";
 import "../interfaces/IHasEmergencyMode.tsol";
 
 import "../structures/IOrderFeeParams.tsol";
 
 import "../OrderPlatform.tsol";
-import "../OrderRoot.tsol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "tip3/contracts/interfaces/ITokenWallet.tsol";
 
-contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactoryCallbacks {
+contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 	uint32 static randomNonce;
 	address static dexRoot;
 
@@ -59,8 +59,8 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 
 	modifier onlyOwner() {
 		require(
-			msg.sender.value != 0 && msg.sender == owner,
-			OrderErrors.NOT_OWNER
+			(msg.sender.value != 0 && msg.sender == owner),
+			OrderErrors.NOT_LIMIT_ORDER_OWNER
 		);
 		_;
 	}
@@ -83,7 +83,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 		});
 	}
 
-	function transferOwner(address newOwner) override external responsible onlyOwner returns (address) {
+	function transferOwner(address newOwner) override external responsible onlyOwner() returns (address) {
 		pendingOwner = newOwner;
 		emit RequestedOwnerTransfer(owner, pendingOwner);
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pendingOwner;
@@ -133,7 +133,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 		bool enabled,
 		address orderAddress,
 		uint256 manager
-	) override external view onlyOwner {
+	) override external view onlyOwner() {
 		require(msg.value >= OrderGas.MANAGE_EMERGENCY_MODE_MIN_VALUE, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 		if (enabled) {
@@ -151,7 +151,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 		}
 	}
 
-	function upgradeOrderRoot(address orderAddress) external view onlyOwner {
+	function upgradeOrderRoot(address orderAddress) external view onlyOwner() {
 		require(msg.value >= OrderGas.UPDATE_ORDER_ROOT, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 		IOrderRoot(orderAddress).upgrade{
@@ -161,7 +161,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 		}(orderRootCode, versionOrderRoot, address(this));
 	}
 
-	function setPlatformCodeOnce(TvmCell _orderPlatform) public onlyOwner {
+	function setPlatformCodeOnce(TvmCell _orderPlatform) public onlyOwner() {
 		require(orderPlatformCode.toSlice().empty(), OrderErrors.PLATFORM_CODE_NON_EMPTY);
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		orderPlatformCode = _orderPlatform;
@@ -180,7 +180,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 		uint128 deployWalletValue,
 		address tokenWallet,
 		address sendGasTo
-	) override external onlyOwner {
+	) override external onlyOwner() {
 		require(
 			amount != 0 && recipient.value != 0 && sendGasTo.value != 0 && tokenWallet.value != 0,
 			OrderErrors.WRONG_WITHDRAW_FEE_PARAMS
@@ -201,8 +201,8 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
         );
 	}
 
-	function setRootFeeParams(OrderFeeParams params, address root) override external onlyOwner {
-		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
+	function setRootFeeParams(OrderFeeParams params, address root) override external onlyOwner() {
+		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
 		IOrderRoot(root).setFeeParams{
@@ -218,9 +218,9 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 		);
 	}
 
-	function setOrderFeeParams(OrderFeeParams params, address order) override external onlyOwner {
+	function setOrderFeeParams(OrderFeeParams params, address order) override external onlyOwner() {
 
-		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.AMOUNT_TOO_LOW);
+		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
 		IOrder(order).setFeeParams{
@@ -236,7 +236,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 		);
 	}
 
-	function setFeeParams(OrderFeeParams params) override external onlyOwner {
+	function setFeeParams(OrderFeeParams params) override external onlyOwner() {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		if (params.beneficiary.value == 0){
 			params.beneficiary = address(this);
@@ -255,7 +255,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
 	}
 
-	function setOrderRootCode(TvmCell _orderRootCode) override external  onlyOwner {
+	function setOrderRootCode(TvmCell _orderRootCode) override external  onlyOwner() {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		uint32 prevVersion = versionOrderRoot;
 		versionOrderRoot++;
@@ -269,7 +269,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 		);
 	}
 
-	function setOrderCode(TvmCell _orderCode) override external onlyOwner {
+	function setOrderCode(TvmCell _orderCode) override external onlyOwner() {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 		uint32 prevVersion = versionOrder;
 		versionOrder++;
@@ -298,7 +298,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 				msg.sender
 			);
 			if (callbackId > 0) {
-				IOrderOperationCallback(msg.sender).onOrderRootCreateSuccess{
+				IOrderFactoryCallbacks(msg.sender).onOrderRootCreateSuccess{
 					value: 0,
 					flag: MsgFlag.ALL_NOT_RESERVED,
 					bounce: false
@@ -316,7 +316,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 		} else {
 			emit CreateOrderRootReject(token);
 			if (callbackId > 0) {
-				IOrderOperationCallback(msg.sender).onOrderRootCreateReject{
+				IOrderFactoryCallbacks(msg.sender).onOrderRootCreateReject{
 					value: 0,
 					flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
 					bounce: false
@@ -370,7 +370,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents, IOrderFactor
 		TvmCell newCode,
 		uint32 newVersion,
 		address sendGasTo
-	) external override onlyOwner {
+	) external override onlyOwner() {
 		if (currentVersion == newVersion) {
 			tvm.rawReserve(address(this).balance - msg.value, 0);
 			sendGasTo.transfer({

@@ -1,54 +1,9 @@
 pragma ton-solidity >=0.62.0;
 
 import "../structures/IOrderFeeParams.tsol";
+import "../structures/IOrderStructures.tsol";
 
-interface IOrder is IOrderFeeParams {
-	struct InitParams {
-		address factory;
-		address root;
-		address owner;
-		address spentToken;
-		address receiveToken;
-		uint64 timeTx;
-		uint64 nowTx;
-	}
-
-	struct Details {
-		address factory;
-		address root;
-		address owner;
-		uint256 backPK;
-		uint256 backMatchingPK;
-		address dexRoot;
-		address dexPair;
-		address msgSender;
-		uint64 swapAttempt;
-		uint8 state;
-		address spentToken;
-		address receiveToken;
-		address spentWallet;
-		address receiveWallet;
-		uint128 expectedAmount;
-		uint128 initialAmount;
-		uint128 currentAmountSpentToken;
-		uint128 currentAmountReceiveToken;
-		uint64 timeTx;
-		uint64 nowTx;
-		address matchingOrder;
-		uint32 version;
-	}
-
-	event StateChanged(uint8 from, uint8 to, Details);
-	event PartExchange(
-		address spentToken,
-		uint128 spentAmount,
-		address receiveToken,
-		uint128 receiveAmount,
-		uint128 currentSpentTokenAmount,
-		uint128 currentReceiveTokenAmount,
-		uint128 fee
-	);
-	event OrderCodeUpgraded();
+interface IOrder is IOrderFeeParams, IOrderStructures {
 	function currentStatus() external view responsible returns(uint8);
 	function initParams() external view responsible returns (InitParams);
 	function getDetails() external view responsible returns (Details);
@@ -57,10 +12,6 @@ interface IOrder is IOrderFeeParams {
 	function getExpectedSpendAmountOfMatching(uint128 amount) external view responsible returns(uint128, uint128);
 	function setFeeParams(OrderFeeParams params) external;
 	function matchingCheck(uint64 callbackId, uint128 deployWalletValue, Details detailsLO) external;
-	function matchingInProgress(uint64 callbackId,
-		uint128 deployWalletValue,
-		uint128 amount,
-		uint128 reward,
-		address sendGasTo) external;
+	function matchingCancel() external;
 	function upgrade(TvmCell _code, uint32 _newVersion, address _sendGasTo) external;
 }

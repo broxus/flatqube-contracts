@@ -117,6 +117,31 @@ export class OrderCallbacks {
                 ],
                 outputs: []
             },
+            {
+                name: "onMatchingCancel",
+                inputs: [
+                    { name: 'id', type: 'uint64' },
+                ],
+                outputs: []
+            },
+            {
+                name: "onMatchingInProgress",
+                inputs: [
+                    { name: 'id', type: 'uint64' },
+                    { name: 'result',
+                        components: [
+                            { name: 'mainOrder', type: 'address' },
+                            { name: 'alienOrder', type: 'address' },
+                            { name: 'spentToken', type: 'address' },
+                            { name: 'receiveToken', type: 'address' },
+                            { name: 'spentAmount', type: 'uint128' },
+                            { name: 'receiveAmount', type: 'uint128' },
+                            { name: 'rewardInitiator', type: 'uint128' },
+                        ],
+                        type: 'tuple' },
+                ],
+                outputs: []
+            },
         ],
         data: [],
         events: [],
