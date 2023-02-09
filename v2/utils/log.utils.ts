@@ -43,6 +43,18 @@ export const logMigrationSuccess = (
     '\n',
   );
 
+export const logTestProcessing = (
+  functionName: string,
+  message: string,
+): void =>
+  console.log(
+    new Date().toLocaleTimeString(undefined, { hour12: false }),
+    '--',
+    `${chalk.bold.blue(`[LOG][${functionName}]`)}`,
+    chalk.green(message),
+    '\n',
+  );
+
 export const logSuccess = (
   contract: string,
   method: string,
