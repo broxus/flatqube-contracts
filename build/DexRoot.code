@@ -4635,14 +4635,14 @@ UFITS 32
 OVER
 MIN
 .loc ../contracts/DexRoot.sol, 949
-PUSH S3
+ROLL 3
 PUSHCONT {
 	PUSH2 S0, S1
 	LESS
 }
 PUSHCONT {
 	.loc ../contracts/DexRoot.sol, 950
-	PUSH2 S0, S5
+	PUSH2 S0, S4
 	SECOND
 	PUSHINT 32
 	DICTUGET
@@ -4658,11 +4658,14 @@ PUSHCONT {
 WHILE
 DROP
 .loc ../contracts/DexRoot.sol, 953
-SWAP
+DUP
+ROT
 LESS
 PUSHCONT {
 	.loc ../contracts/DexRoot.sol, 954
-	PUSH3 S0, S1, S2
+	DUP2
+	UFITS 32
+	PUSH S4
 	MYADDR
 	FALSE
 	NEWC
@@ -4686,7 +4689,7 @@ PUSHCONT {
 }
 PUSHCONT {
 	.loc ../contracts/DexRoot.sol, 961
-	DUP
+	OVER
 	NEWC
 	STSLICECONST x42_
 	STSLICE

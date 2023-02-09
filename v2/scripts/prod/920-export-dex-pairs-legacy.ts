@@ -2,7 +2,7 @@ import { writeFileSync } from 'fs';
 const { Migration } = require(process.cwd() + '/scripts/utils');
 
 const OLD_DEX_PAIR_CODE_HASH =
-  '9bffb97d8fcb584230bfa949b6c7e8fb9881f1ffb684e13f02d6fcd9ba3306c5';
+  'd7f137ee2123785ed7dd56fad374ab7c0e99343eb97e918aac1bbc6bd9bb827b';
 
 async function exportDexPairs() {
   const migration = new Migration();
@@ -49,7 +49,7 @@ async function exportDexPairs() {
   }
 
   writeFileSync(
-    './v2/scripts/prod/dex_pairs.json',
+    './dex_pairs.json',
     JSON.stringify(dexPairsToUpdate, null, 2),
   );
 }

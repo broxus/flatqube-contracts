@@ -2,7 +2,7 @@ import { Address, toNano, WalletTypes } from 'locklift';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { Migration } = require(process.cwd() + '/scripts/utils');
 import { yellowBright } from 'chalk';
-import pairs from './dex_pairs.json';
+import pairs from '../../../dex_pairs.json';
 
 const chunkify = <T>(arr: T[], size: number): T[][] =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>

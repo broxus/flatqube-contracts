@@ -1,6 +1,6 @@
 import { Address } from 'locklift';
 import { BigNumber } from 'bignumber.js';
-import pairs from './dex_pairs.json';
+import pairs from '../../../dex_pairs.json';
 
 BigNumber.config({ EXPONENTIAL_AT: 257 });
 
@@ -22,7 +22,7 @@ async function main() {
 
     if (active) {
       activeCount++;
-      console.log('Pair not active: ' + pairData.dexPair);
+      console.log('Pair active: ' + pairData.dexPair);
     }
   }
   console.log(`Active pairs count = ${activeCount}`);

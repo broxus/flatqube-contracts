@@ -49,7 +49,7 @@ async function main() {
     }
   }
   writeFileSync(
-    './v2/scripts/prod/dex_accounts.json',
+    './dex_accounts.json',
     JSON.stringify(dexAccountsToUpdate, null, 2),
   );
 }

@@ -1,18 +1,23 @@
 import { writeFileSync } from 'fs';
-import { Address } from 'locklift';
+import { Address, WalletTypes } from 'locklift';
 import { yellowBright } from 'chalk';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { Migration } = require(process.cwd() + '/scripts/utils');
 
-const OLD_DEX_ACCOUNT_CODE_HASH =
-  'ed649f47322294142e5cc1ae3387cc46e208eb480b5b7e8746b306e83a66cb6b';
+const OLD_DEX_PAIR_CODE_HASH =
+  'd7f137ee2123785ed7dd56fad374ab7c0e99343eb97e918aac1bbc6bd9bb827b';
 
-type AccountEntity = {
-  dexAccount: Address;
-  owner: Address;
+// const OLD_DEX_PAIR_CODE_HASH =
+//   '9bffb97d8fcb584230bfa949b6c7e8fb9881f1ffb684e13f02d6fcd9ba3306c5';
+
+type PairEntity = {
+  dexPair: Address;
+  left: Address;
+  right: Address;
+  lp: Address;
 };
 
-async function main() {
+async function exportDexPairs() {
   const migration = new Migration();
 
   const dexRoot = await locklift.factory.getDeployedContract(
@@ -31,7 +36,7 @@ async function main() {
   while (hasResults) {
     const result: { accounts: Address[]; continuation: string } =
       await locklift.provider.getAccountsByCodeHash({
-        codeHash: OLD_DEX_ACCOUNT_CODE_HASH,
+        codeHash: OLD_DEX_PAIR_CODE_HASH,
         continuation,
         limit: 50,
       });
@@ -42,38 +47,43 @@ async function main() {
     accounts.push(...result.accounts);
   }
 
-  const promises: Promise<AccountEntity | null>[] = [];
+  const promises: Promise<PairEntity | null>[] = [];
 
-  for (const dexAccountAddress of accounts) {
+  for (const dexPairAddress of accounts) {
     promises.push(
       new Promise(async (resolve) => {
-        const DexAccount = await locklift.factory.getDeployedContract(
-          'DexAccount',
-          dexAccountAddress,
+        const DexPair = await locklift.factory.getDeployedContract(
+          'DexPair',
+          dexPairAddress,
         );
 
-        const root = await DexAccount.methods
+        const root = await DexPair.methods
           .getRoot({ answerId: 0 })
           .call({})
-          .then((r) => r.value0.toString());
+          .then((r) => r.dex_root.toString())
+          .catch((e) => {
+            console.error(e);
+            return '';
+          });
 
         if (root === dexRoot.address.toString()) {
-          const owner = await DexAccount.methods
-            .getOwner({ answerId: 0 })
-            .call()
-            .then((r) => r.value0);
+          const roots = await DexPair.methods
+            .getTokenRoots({ answerId: 0 })
+            .call();
 
-          console.log(`DexAccount ${dexAccountAddress}, owner = ${owner}`);
+          console.log(
+            `DexPair ${dexPairAddress}, left = ${roots.left}, right = ${roots.right}, lp = ${roots.lp}`,
+          );
 
           resolve({
-            dexAccount: dexAccountAddress,
-            owner: owner,
+            dexPair: dexPairAddress,
+            left: roots.left,
+            right: roots.right,
+            lp: roots.lp,
           });
         } else {
           console.log(
-            yellowBright(
-              `DexAccount ${dexAccountAddress} has another root: ${root}`,
-            ),
+            yellowBright(`DexPair ${dexPairAddress} has another root: ${root}`),
           );
           resolve(null);
         }
@@ -81,21 +91,21 @@ async function main() {
     );
   }
 
-  const dexAccounts = await Promise.all(promises);
+  const pairs = await Promise.all(promises);
 
   console.log(`Export took ${(Date.now() - start) / 1000} seconds`);
 
   writeFileSync(
-    './v2/scripts/prod/dex_accounts.json',
+    './dex_pairs.json',
     JSON.stringify(
-      dexAccounts.filter((v) => !!v),
+      pairs.filter((v) => !!v),
       null,
       2,
     ),
   );
 }
 
-main()
+exportDexPairs()
   .then(() => process.exit(0))
   .catch((e) => {
     console.log(e);
