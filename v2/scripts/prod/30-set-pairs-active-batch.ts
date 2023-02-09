@@ -40,7 +40,7 @@ const main = async (isActive: boolean) => {
     const { traceTree } = await locklift.tracing.trace(
       dexRoot.methods
         .setPoolsActive({
-          _params: params.map((p) => ({
+          _params: chunk.map((p) => ({
             tokenRoots: p.tokenRoots,
             newActive: p.newActive,
           })),
@@ -49,7 +49,7 @@ const main = async (isActive: boolean) => {
         })
         .send({
           from: manager.address,
-          amount: toNano(pairs.length * 3),
+          amount: toNano(chunk.length * 3),
         }),
     );
 

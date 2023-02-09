@@ -50,7 +50,7 @@ const main = async () => {
         })
         .send({
           from: manager.address,
-          amount: toNano(pairs.length * 5),
+          amount: toNano(chunk.length * 5),
         }),
     );
 
