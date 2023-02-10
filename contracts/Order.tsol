@@ -1005,6 +1005,10 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 				);
 			}
 
+			if (sendGasTo == address(0)) {
+				sendGasTo = fee.beneficiary;
+			}
+
 			ITokenWallet(spentWallet).transfer{
 					value: 0,
 					flag: MsgFlag.ALL_NOT_RESERVED,
