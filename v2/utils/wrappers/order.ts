@@ -21,12 +21,15 @@ export class OrderWrapper {
         return new OrderWrapper(order, owner);
     }
 
+    async balance() {
+        return await locklift.provider.getBalance(this.address).then(balance => Number(balance));
+    }
     async feeParams() {
-        return await this.contract.methods.getFeeParams({answerId: 0}).call();
+        return this.contract.methods.getFeeParams({answerId: 0}).call();
     }
 
     async status() {
-        return await this.contract.methods.currentStatus({answerId: 0}).call();
+        return (await this.contract.methods.currentStatus({answerId: 0}).call()).value0;
     }
 
     async expectedSpendAmount(amount: string | number) {
@@ -41,7 +44,11 @@ export class OrderWrapper {
         callbackId: number,
         deployWalletValue: number
         ) {
-        return this.contract.methods.buildPayload({callbackId: callbackId, deployWalletValue: locklift.utils.toNano(deployWalletValue)}).call()
+        return (await this.contract.methods.buildPayload(
+            {
+                callbackId: callbackId,
+                deployWalletValue: locklift.utils.toNano(deployWalletValue)
+            }).call()).value0;
     }
 
     async swap(

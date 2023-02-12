@@ -1,7 +1,8 @@
-import {Address, Contract, Signer, zeroAddress} from "locklift";
+import {Address, Contract} from "locklift";
+// @ts-ignore
 import {FactorySource} from "../../../build/factorySource";
 import {Account} from 'locklift/everscale-client'
-import BigNumber from "bignumber.js";
+import {OrderWrapper} from "./order";
 const {toNano} = locklift.utils;
 
 
@@ -22,15 +23,15 @@ export class OrderRoot {
     }
 
     async feeParams() {
-        return await this.contract.methods.getFeeParams({answerId: 0}).call();
+        return (await this.contract.methods.getFeeParams({answerId: 0}).call()).value0;
     }
 
     async spentToken() {
-        return await this.contract.methods.getSpentToken({answerId: 0}).call();
+        return this.contract.methods.getSpentToken({answerId: 0}).call();
     }
 
     async factory() {
-        return await this.contract.methods.getFactory({answerId: 0}).call();
+        return this.contract.methods.getFactory({answerId: 0}).call();
     }
 
     async expectedAddressOrder(
@@ -54,22 +55,32 @@ export class OrderRoot {
         }).call();
     }
 
-    async buildPayload(
+    async buildPayloadRoot(
         callbackId: number | string,
         tokenReceive: Address,
         expectedTokenAmount: number | string,
         deployWalletValue: number | string,
         backPK: number | string,
-        backMatchingPK: number | string
+        backMatchingPK:  number | string
     ) {
-        return await this.contract.methods.buildPayload({
+        return (await this.contract.methods.buildPayload({
             callbackId: callbackId,
             tokenReceive: tokenReceive,
             expectedTokenAmount: expectedTokenAmount,
             deployWalletValue: deployWalletValue,
             backPK: backPK,
             backMatchingPK: backMatchingPK
-        }).call();
+        }).call()).value0;
+    }
+
+    async getEvents(event_name: string) {
+        // @ts-ignore
+        return (await this.contract.getPastEvents({filter: (event) => event.event === event_name})).events;
+    }
+
+    async getEventsCreateOrder(owner: Account) {
+        // @ts-ignore
+        return await OrderWrapper.from_addr((this.getEvents("CreateOrder"))[0].data.order, owner);
     }
 
 }

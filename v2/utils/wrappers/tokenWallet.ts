@@ -36,7 +36,7 @@ export class TokenWallet {
         return (await this.contract.methods.balance({answerId: 0}).call()).value0;
     }
 
-    async transfer(amount: number|string, receiver: Address, payload = '', value: any, params?: any) {
+    async transfer(amount: number|string, receiver: Address, payload = '', value: any) {
         let notify = payload !== '';
 
         logTestProcessing(`${this.name}(${this.address}).transfer()`,
@@ -45,7 +45,7 @@ export class TokenWallet {
           deployWalletValue: ${locklift.utils.toNano(0.2)},
           remainingGasTo: ${this.address},
           notify: ${true},
-          payload: ${params ? JSON.stringify(params) : payload}
+          payload: ${payload}
           )`)
 
         return await this.contract.methods.transfer({
