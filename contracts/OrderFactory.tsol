@@ -267,6 +267,17 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		}(orderRootCode, versionOrderRoot, address(this));
 	}
 
+	function upgradeOrderCodeInOrderRoot(address orderAddress) external view onlyOwner() {
+		require(msg.value >= OrderGas.UPDATE_ORDER_ROOT, OrderErrors.VALUE_TOO_LOW);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
+
+		IOrderRoot(orderAddress).setOrderCode {
+			value: 0,
+			flag: MsgFlag.ALL_NOT_RESERVED,
+			bounce: false
+		}(orderCode);
+	}
+
 	function upgradeOrder(address order) external view onlyOwner() {
 		require(msg.value >= OrderGas.UPDATE_ORDER, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);

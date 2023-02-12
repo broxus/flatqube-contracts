@@ -65,7 +65,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
     function onTokenWalletBeneficiary(address _wallet) external {}
 
     onBounce(TvmSlice body) external view {
-        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
         uint32 functionId = body.decode(uint32);
 
         if (
@@ -135,7 +135,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
     }
 
     function setFeeParams(OrderFeeParams params) override external onlyFactory() {
-        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
         fee = params;
         factory.transfer(
             0,
@@ -186,7 +186,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         TvmSlice dataPK = payloadSlice.loadRefAsSlice();
 
         if (
-            msg.sender.value >= OrderGas.DEPLOY_ORDER_MIN_VALUE + OrderGas.DEPLOY_ORDER_MIN_VALUE_IN_ROOT &&
+            msg.sender.value >= OrderGas.DEPLOY_ORDER_MIN_VALUE &&
             msg.sender == spentTokenWallet &&
             payloadSlice.bits() == 523 && dataPK.bits() == 512
         ){
@@ -310,11 +310,22 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         });
     }
 
+    function setOrderCode(TvmCell _code) override external onlyFactory() {
+        tvm.rawReserve(address(this).balance - msg.value, 0);
+
+        uint32 prevVersion = versionOrder;
+        versionOrder++;
+        orderCode = _code;
+
+        emit OrderCodeUpgraded(prevVersion, versionOrder);
+        factory.transfer(0, false, MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS);
+    }
+
     function upgrade(
         TvmCell _code, 
         uint32 _newVersion, 
         address _sendGasTo
-    ) external override onlyFactory() {
+    ) override external onlyFactory() {
         if (version == _newVersion) {
             tvm.rawReserve(address(this).balance - msg.value, 0);
             _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
@@ -335,30 +346,48 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
     }
 
     function onCodeUpgrade(TvmCell _data) private {
-        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
         tvm.resetStorage();
 
+        uint32 _oldVersion;
         TvmCell data;
         (
-            factory, spentToken, version,
-            versionOrder, deployer, fee, data
-        ) = abi.decode(_data, (address, address, uint32, uint32, address, OrderFeeParams, TvmCell));
+            factory,
+            spentToken,
+            _oldVersion,
+            version,
+            versionOrder,
+            deployer,
+            fee,
+            data
+        ) = abi.decode(_data, (
+            address, address, uint32, uint32,
+            uint32, address, OrderFeeParams, TvmCell
+        ));
 
         (dexRoot, orderCode, orderPlatformCode) = abi.decode(data, (address, TvmCell, TvmCell));
 
-        ITokenRoot(spentToken).deployWallet{
-            value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
-            flag: MsgFlag.SENDER_PAYS_FEES,
-            callback: OrderRoot.onTokenWallet
-        }(
-            address(this),
-            OrderGas.DEPLOY_EMPTY_WALLET_GRAMS
-        );
+        if (_oldVersion == 0){
+            ITokenRoot(spentToken).deployWallet{
+                    value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
+                    flag: MsgFlag.SENDER_PAYS_FEES,
+                    callback: OrderRoot.onTokenWallet
+            }(
+                address(this),
+                OrderGas.DEPLOY_EMPTY_WALLET_GRAMS
+            );
 
-        deployer.transfer({
-            value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
-            bounce: false
-        });
+            deployer.transfer({
+                    value: 0,
+                    flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
+            });
+        } else {
+            factory.transfer({
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+                bounce: false
+            });
+        }
     }
 }
