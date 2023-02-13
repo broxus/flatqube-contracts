@@ -43,7 +43,7 @@ describe('Test Dex Vault contract upgrade', async function () {
     DexPlatform = await locklift.factory.getContract('DexPlatform', 'precompiled');
     TokenFactory = await locklift.factory.getContract('TokenFactory');
 
-    DexVaultLpTokenPending = await locklift.factory.getContract('DexVaultLpTokenPending');
+    DexVaultLpTokenPending = await locklift.factory.getContract('DexVaultLpTokenPendingV2');
     NewDexVault = await locklift.factory.getContract('TestNewDexVault');
     dexRoot = migration.load(DexRoot, 'DexRoot');
     dexVault = migration.load(DexVault, 'DexVault');

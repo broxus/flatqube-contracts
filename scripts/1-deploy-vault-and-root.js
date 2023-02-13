@@ -33,7 +33,6 @@ async function main() {
   const DexPair = await locklift.factory.getContract(options.pair_contract_name);
   const DexStablePair = await locklift.factory.getContract('DexStablePair');
   const DexStablePool = await locklift.factory.getContract('DexStablePool');
-  const DexVaultLpTokenPending = await locklift.factory.getContract('DexVaultLpTokenPending');
   const DexVaultLpTokenPendingV2 = await locklift.factory.getContract('DexVaultLpTokenPendingV2');
   const DexTokenVault = await locklift.factory.getContract('DexTokenVault');
 

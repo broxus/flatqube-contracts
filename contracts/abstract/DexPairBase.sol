@@ -15,7 +15,6 @@ import "../libraries/DexReserveType.sol";
 import "../structures/IPoolTokenData.sol";
 import "../structures/IPoolTokenDataPrev.sol";
 import "../structures/IAmplificationCoefficient.sol";
-import "../structures/IFeeParamsPrev.sol";
 
 import "./DexContractBase.sol";
 import "./TWAPOracle.sol";
@@ -27,7 +26,6 @@ abstract contract DexPairBase is
     DexContractBase,
     IDexConstantProductPair,
     TWAPOracle,
-    IFeeParamsPrev,
     IPoolTokenDataPrev
 {
     /// @dev DexRoot address
@@ -628,25 +626,18 @@ abstract contract DexPairBase is
             _active = true;
             TvmCell otherData = dataSlice.loadRef(); // ref 2
 
-            FeeParamsPrev feePrev;
-
             // Decode reserves, wallets and fee options
             (
-                feePrev,
+                _fee,
                 _typeToReserves,
                 _typeToRootAddresses,
                 _typeToWalletAddresses
             ) = abi.decode(otherData, (
-                FeeParamsPrev,
+                FeeParams,
                 mapping(uint8 => uint128[]),
                 mapping(uint8 => address[]),
                 mapping(uint8 => address[])
             ));
-
-            // todo remove fees' slice hotfix after upgrade
-            _typeToReserves[DexReserveType.FEE] = [_typeToReserves[DexReserveType.FEE][0], _typeToReserves[DexReserveType.FEE][1]];
-
-            _fee = FeeParams(feePrev.denominator, feePrev.pool_numerator, feePrev.beneficiary_numerator, feePrev.referrer_numerator, feePrev.beneficiary, feePrev.threshold, emptyMap);
 
             if (dataSlice.refs() > 0) {
                 TvmSlice oracleDataSlice = dataSlice.loadRefAsSlice();  // ref 4
