@@ -51,6 +51,18 @@ export class OrderWrapper {
             }).call()).value0;
     }
 
+    async cancel(
+        callbackId: number,
+        amount: number,
+        account: Address
+    ) {
+        // @ts-ignore
+        await this.contract.methods.cancel({callbackId: 0}).send({
+           amount: locklift.utils.toNano(amount),
+           from: account
+        });
+    }
+
     async swap(
         callbackId: number,
         deployWalletValue: number,
@@ -66,7 +78,7 @@ export class OrderWrapper {
                 deployWalletValue: locklift.utils.toNano(0.1)
             }).send({
                 amount: locklift.utils.toNano(6), from: from
-            }), {allowedCodes: {compute: [60]}})
+            }), {allowedCodes: {compute: [60, 302, 100]}})
         } else {
             return await this.contract.methods.swap({
                 callbackId: 1,
@@ -76,6 +88,15 @@ export class OrderWrapper {
             })
         }
     }
+
+    async backendSwap(
+        callbackId: number,
+        publicKey: string
+    ) {
+        // @ts-ignore
+        await this.contract.methods.backendSwap({callbackId: callbackId}).sendExternal({publicKey: publicKey});
+    }
+
     async proxyTokensTransfer(
         _tokenWallet: Address,
         _gasValue: number,
@@ -127,8 +148,8 @@ export class OrderWrapper {
                 deployWalletValue: locklift.utils.toNano(deployWalletValue),
                 limitOrder: limitOrder
             }).send({
-                amount: locklift.utils.toNano(10), from: from
-            })
+                amount: locklift.utils.toNano(6), from: from
+            }), {allowedCodes:{compute:[60]}}
             )
         } else {
             return await
@@ -137,8 +158,19 @@ export class OrderWrapper {
                 deployWalletValue: locklift.utils.toNano(deployWalletValue),
                 limitOrder: limitOrder
             }).send({
-                amount: locklift.utils.toNano(10), from: from
+                amount: locklift.utils.toNano(6), from: from
             })
         }
+    }
+
+    async backendMatching(
+        callbackId: number,
+        limitOrder: Address,
+        publicKey: string
+    ) {
+        // @ts-ignore
+        await locklift.tracing.trace(
+            this.contract.methods.backendMatching({callbackId: callbackId, limitOrder: limitOrder}).
+            sendExternal({publicKey: publicKey}), {allowedCodes: {compute: [null,60]}});
     }
 }

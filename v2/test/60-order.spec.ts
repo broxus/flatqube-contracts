@@ -262,7 +262,7 @@ describe('OrderTest', () => {
     });
 
     describe('Direct execution Order', async () => {
-        it('Check full execution, case 1.1', async () => {
+        it('Check full execution with 2 buyer, case 1.1', async () => {
             console.log(`#############################\n`);
             let amount = await barWallet3.balance();
             console.log(`BALANCE _ ${amount}`)
@@ -286,6 +286,7 @@ describe('OrderTest', () => {
 
             TOKENS_TO_EXCHANGE2_ACC3 = 10;
             TOKENS_TO_EXCHANGE2_ACC4 = 10;
+
             const payload = (await RootOrderBar.methods.buildPayload({
                 callbackId: 0,
                 tokenReceive: rootTokenReceive.address,
@@ -299,7 +300,7 @@ describe('OrderTest', () => {
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 RootOrderBar.address,
                 payload,
-                locklift.utils.toNano(5),
+                locklift.utils.toNano(6),
             ), {allowedCodes: {compute: [60]}})
 
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
@@ -314,16 +315,15 @@ describe('OrderTest', () => {
                 new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 order.address,
                 payloadLO,
-                locklift.utils.toNano(6)
+                locklift.utils.toNano(5)
             ), {allowedCodes: {compute: [60]}})
 
             await locklift.tracing.trace(tstWallet5.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE2_ACC4).shiftedBy(Constants.tokens.tst.decimals).toString(),
                 order.address,
                 payloadLO,
-                locklift.utils.toNano(6)
+                locklift.utils.toNano(5)
             ), {allowedCodes: {compute: [60]}})
-
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -344,6 +344,9 @@ describe('OrderTest', () => {
             const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).toString();
             const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toString();
 
+            // @ts-ignore
+            expect(3).to.be.equal((Number(await order.status())), 'Wrong status Limit Order');
+            expect(0).to.be.equal(Number(await (locklift.provider.getBalance(orderAddress))), 'Wrong Balance Ever Limit Order');
             expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
             expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
@@ -351,7 +354,7 @@ describe('OrderTest', () => {
             expect(expectedAccount5Bar).to.equal(balanceBarAcc5End.token.toString(), 'Wrong Account5 Bar balance');
             expect(expectedAccount5Tst).to.equal(balanceTstAcc5End.token.toString(), 'Wrong Account5 Tst balance');
         });
-        it('Check partial execution Order, case 2.2', async () => {
+        it('Check partial execution Order, case 2.1', async () => {
             console.log(`#############################`);
             console.log(``);
             const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -388,6 +391,7 @@ describe('OrderTest', () => {
                 backPK: 0,
                 backMatchingPK: 0
             }).call()).value0;
+
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 RootOrderBar.address,
@@ -398,31 +402,29 @@ describe('OrderTest', () => {
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
-            const payloadLO = await Order.methods.buildPayload({
-                callbackId: "1",
-                deployWalletValue: locklift.utils.toNano(0.1)
-            }).call();
+
+            const order = await OrderWrapper.from_addr(orderAddress, account3)
+            const payloadLO = await order.buildPayload(1, 0.1)
 
             await locklift.tracing.trace(tstWallet4.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                Order.address,
-                payloadLO.value0,
-                locklift.utils.toNano(4)
+                order.address,
+                payloadLO,
+                locklift.utils.toNano(5)
             ), {allowedCodes: {compute: [60]}})
 
             await locklift.tracing.trace(tstWallet5.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE2_ACC4).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                Order.address,
-                payloadLO.value0,
-                locklift.utils.toNano(4)
+                order.address,
+                payloadLO,
+                locklift.utils.toNano(5)
             ), {allowedCodes: {compute: [60]}})
 
             await locklift.tracing.trace(tstWallet6.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE2_ACC5).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                Order.address,
-                payloadLO.value0,
-                locklift.utils.toNano(4)
+                order.address,
+                payloadLO,
+                locklift.utils.toNano(5)
             ), {allowedCodes: {compute: [60]}})
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -448,6 +450,8 @@ describe('OrderTest', () => {
             const expectedAccount6Bar = new BigNumber(balanceBarAcc6Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC5)).toString();
             const expectedAccount6Tst = new BigNumber(balanceTstAcc6Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC5)).toString();
 
+            expect(3).to.be.equal((Number(await order.status())), 'Wrong status Limit Order');
+            expect(0).to.be.equal(Number(await(locklift.provider.getBalance(orderAddress))), 'Wrong Balance Ever Limit Order')
             expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
             expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
             expect(expectedAccount5Bar).to.equal(balanceBarAcc5End.token.toString(), 'Wrong Account5 Bar balance');
@@ -455,7 +459,7 @@ describe('OrderTest', () => {
             expect(expectedAccount6Bar).to.equal(balanceBarAcc6End.token.toString(), 'Wrong Account6 Bar balance');
             expect(expectedAccount6Tst).to.equal(balanceTstAcc6End.token.toString(), 'Wrong Account6 Tst balance');
         });
-        it('Check partial execution Order, case 2.3', async () => {
+        it('Check partial execution Order, case 2.2', async () => {
             console.log(`#############################`);
             console.log(``);
             const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -503,31 +507,29 @@ describe('OrderTest', () => {
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
-            const payloadLO = await Order.methods.buildPayload({
-                callbackId: "1",
-                deployWalletValue: locklift.utils.toNano(0.1)
-            }).call();
+
+            const order = await OrderWrapper.from_addr(orderAddress, account3)
+            const payloadLO = await order.buildPayload(1, 0.1)
 
             await tstWallet4.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                Order.address,
-                payloadLO.value0,
-                locklift.utils.toNano(3)
+                order.address,
+                payloadLO,
+                locklift.utils.toNano(5)
             )
 
             await tstWallet5.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE2_ACC4).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                Order.address,
-                payloadLO.value0,
-                locklift.utils.toNano(3)
+                order.address,
+                payloadLO,
+                locklift.utils.toNano(5)
             )
 
             await tstWallet6.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE2_ACC5).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                Order.address,
-                payloadLO.value0,
-                locklift.utils.toNano(3)
+                order.address,
+                payloadLO,
+                locklift.utils.toNano(5)
             )
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -555,6 +557,8 @@ describe('OrderTest', () => {
             const expectedAccount6Bar = new BigNumber(balanceBarAcc6Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC5 - 5)).toString();
             const expectedAccount6Tst = new BigNumber(balanceTstAcc6Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC5 - 10)).toString();
 
+            expect(3).to.be.equal((Number(await order.status())), 'Wrong status Limit Order');
+            expect(0).to.be.equal(Number(await(locklift.provider.getBalance(orderAddress))), 'Wrong Balance Ever Limit Order')
             expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
             expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
@@ -593,25 +597,20 @@ describe('OrderTest', () => {
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
-            await Order.methods.cancel({callbackId: 0}).send({
-                amount: locklift.utils.toNano(1), from: account3.address
-            })
 
-            const stateL0 = await Order.methods.currentStatus({answerId: 1}).call()
+            const order = await OrderWrapper.from_addr(orderAddress, account3)
+            await order.cancel(0, 1, account3.address)
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
 
-            const orderBalance = await locklift.provider.getBalance(Order.address);
-
             expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
-            expect(stateL0.value0.toString()).to.equal(new BigNumber(5).toString(), 'Wrong status Limit order');
-            expect(orderBalance.toString()).to.equal("0", "Wrong Order Ever balance")
+            expect(5).to.equal((Number(await order.status())), 'Wrong status Limit order');
+            expect(0).to.equal(Number(await(locklift.provider.getBalance(order.address))), "Wrong Order Ever balance")
         });
-        it('Check create order and closed, case 3.2', async () => {
+        it('Check create order, part exhcange and closed, case 3.2', async () => {
             console.log(`#############################`);
             console.log(``);
             const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
@@ -645,25 +644,19 @@ describe('OrderTest', () => {
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
 
-            const payloadLO = await Order.methods.buildPayload({
-                callbackId: "1",
-                deployWalletValue: locklift.utils.toNano(0.1)
-            }).call();
+            const order = await OrderWrapper.from_addr(orderAddress, account3)
+            const payloadLO = await order.buildPayload(1, 0.1)
 
             await tstWallet4.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE2_ACC3).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                Order.address,
-                payloadLO.value0,
-                locklift.utils.toNano(3)
+                order.address,
+                payloadLO,
+                locklift.utils.toNano(5)
             )
 
-            await Order.methods.cancel({callbackId: 0}).send({
-                amount: locklift.utils.toNano(3), from: account3.address
-            })
+            await order.cancel(0, 1, account3.address)
 
-            const stateL0 = await Order.methods.currentStatus({answerId: 1}).call()
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
@@ -677,14 +670,12 @@ describe('OrderTest', () => {
             const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1 / 2)).toString();
             const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toString();
 
-            const orderBalance = await locklift.provider.getBalance(Order.address);
-
-            expect(stateL0.value0.toString()).to.equal(new BigNumber(5).toString(), 'Wrong status Limit order');
+            expect(5).to.be.equal((Number(await order.status())), 'Wrong status Limit Order');
+            expect(0).to.be.equal(Number(await(locklift.provider.getBalance(orderAddress))), 'Wrong Balance Ever Limit Order')
             expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
             expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
             expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
-            expect(orderBalance.toString()).to.equal("0", "Wrong Order Ever balance")
         });
         it('Check execution closed order, case 4.1', async () => {
             console.log(`#############################`);
@@ -708,38 +699,35 @@ describe('OrderTest', () => {
                 backPK: 0,
                 backMatchingPK: 0
             }).call()).value0;
+
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 RootOrderBar.address,
                 payload,
                 locklift.utils.toNano(6)
             )
+
             const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
+
             pastEvents.events.forEach(event => {
                 // @ts-ignore
                 console.log(`address - ${event.data.order}\ncreated_at - ${event.data.createdAt}`)
             })
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
 
-            const payloadLO = await Order.methods.buildPayload({
-                callbackId: "1",
-                deployWalletValue: locklift.utils.toNano(0.1)
-            }).call();
+            const order = await OrderWrapper.from_addr(orderAddress, account3);
+            await order.cancel(0, 1, account3.address);
 
-            await Order.methods.cancel({callbackId: 0}).send({
-                amount: locklift.utils.toNano(1), from: account3.address
-            })
+            const payloadLO = await order.buildPayload(1, 0.1)
 
             await tstWallet4.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                Order.address,
-                payloadLO.value0,
-                locklift.utils.toNano(3)
+                order.address,
+                payloadLO,
+                locklift.utils.toNano(5)
             )
-            const stateL0 = await Order.methods.currentStatus({answerId: 1}).call()
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -749,11 +737,12 @@ describe('OrderTest', () => {
             const balanceTstAcc4End = await accountTokenBalances(tstWallet4, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc4Start, balanceTstAcc4Start, false, 'Account4');
 
+            expect(5).to.be.equal((Number(await order.status())), 'Wrong status Limit Order');
+            expect(0).to.be.equal(Number(await(locklift.provider.getBalance(orderAddress))), 'Wrong Balance Ever Limit Order')
             expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
             expect(balanceBarAcc4Start.token.toString()).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
             expect(balanceTstAcc4Start.token.toString()).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
-            expect(stateL0.value0.toString()).to.equal(new BigNumber(5).toString(), 'Wrong status Limit order');
         });
     });
     describe('Execution order via DEX', async () => {
@@ -791,7 +780,8 @@ describe('OrderTest', () => {
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
+
+            const order = await OrderWrapper.from_addr(orderAddress, account3)
 
             const expected = await dexPair.methods.expectedExchange({
                 answerId: 1,
@@ -802,7 +792,8 @@ describe('OrderTest', () => {
             console.log(`Spent amount: ${TOKENS_TO_EXCHANGE1} BAR`);
             console.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
             console.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
-            await Order.methods.backendSwap({callbackId: 1}).sendExternal({publicKey: signer.publicKey})
+
+            await order.backendSwap(1, signer.publicKey);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -810,6 +801,8 @@ describe('OrderTest', () => {
 
             const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus((new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals))).toString();
 
+            expect(3).to.equal((Number(await order.status())), 'Wrong status Limit order');
+            expect(0).to.equal(Number(await(locklift.provider.getBalance(order.address))), "Wrong Order Ever balance")
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Bar balance');
         });
         it('Order from backend CANCEL', async () => {
@@ -846,7 +839,8 @@ describe('OrderTest', () => {
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
+
+            const order = await OrderWrapper.from_addr(orderAddress, account3)
 
             const expected = await dexPair.methods.expectedExchange({
                 answerId: 1,
@@ -858,18 +852,14 @@ describe('OrderTest', () => {
             console.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
             console.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
-            await Order.methods.backendSwap({callbackId: 1}).send({
-                amount: locklift.utils.toNano(2), from: account3.address
-            })
+            await order.backendSwap(1, signer.publicKey);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
 
-            const stateL0 = await Order.methods.currentStatus({answerId: 1}).call()
-
+            expect(2).to.equal((Number(await order.status())), 'Wrong status Limit order');
             expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Bar balance');
-            expect(stateL0.value0.toString()).to.equal(new BigNumber(2).toString(), 'Wrong status Limit order');
         });
         it('Order from user SUCCESS', async () => {
             console.log(`#############################`);
@@ -893,19 +883,20 @@ describe('OrderTest', () => {
                 backPK: 0,
                 backMatchingPK: 0
             }).call()).value0;
+
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 RootOrderBar.address,
                 payload,
                 locklift.utils.toNano(6)
             )
+
             const pastEvents = await RootOrderBar.getPastEvents({ filter: event => event.event === "CreateOrder" });
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
+
             const order = await OrderWrapper.from_addr(orderAddress, account3)
-            // const state = await order.status()
-            // console.log(state.value0);
 
             const expected = await dexPair.methods.expectedExchange({
                 answerId: 1,
@@ -917,9 +908,7 @@ describe('OrderTest', () => {
             console.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
             console.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
-            await locklift.tracing.trace(order.swap(1, 0.1, true, account4.address), {allowedCodes:{compute:[60]}});
-
-            const stateLO2 = await order.status()
+            await order.swap(1, 0.1, true, account4.address);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -933,7 +922,8 @@ describe('OrderTest', () => {
             const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE2)).toString();
             const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).plus((new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals)).minus(new BigNumber(TOKENS_TO_EXCHANGE2))).toString();
 
-            //expect(stateLO2.value0.toNumver()).to.equal(new BigNumber(3).toString(), 'Wrong status Limit order');
+            expect(3).to.equal((Number(await order.status())), 'Wrong status Limit order');
+            expect(0).to.be.equal(Number(await(locklift.provider.getBalance(orderAddress))), 'Wrong Balance Ever Limit Order')
             expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
             expect(balanceBarAcc4Start.token.toString()).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
@@ -972,7 +962,8 @@ describe('OrderTest', () => {
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
+
+            const order = await OrderWrapper.from_addr(orderAddress, account3);
 
             const expected = await dexPair.methods.expectedExchange({
                 answerId: 1,
@@ -984,14 +975,7 @@ describe('OrderTest', () => {
             console.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-Constants.tokens.bar.decimals).toString()} BAR`);
             console.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.tst.decimals).toString()} TST`);
 
-            await locklift.tracing.trace(Order.methods.swap({
-                callbackId: 1,
-                deployWalletValue: locklift.utils.toNano(0.1)
-            }).send({
-                amount: locklift.utils.toNano(5), from: account3.address
-            }), {allowedCodes:{compute:[60,302]}});
-
-            const stateLO2 = await Order.methods.currentStatus({answerId: 1}).call()
+            await order.swap(1, 0.1, true, account4.address);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -1003,9 +987,9 @@ describe('OrderTest', () => {
 
             const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE1)).toString();
 
+            expect(2).to.equal((Number(await order.status())), 'Wrong status Limit order');
             expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
-            expect(stateLO2.value0.toString()).to.equal(new BigNumber(2).toString(), 'Wrong status Limit order');
         });
     });
     describe('Emergency mode', async () => {
@@ -1027,6 +1011,7 @@ describe('OrderTest', () => {
                 backPK: 0,
                 backMatchingPK: 0
             }).call()).value0;
+
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 RootOrderBar.address,
@@ -1038,50 +1023,52 @@ describe('OrderTest', () => {
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress)
+
+            const order = await OrderWrapper.from_addr(orderAddress, account3);
+
             const signer1 = await locklift.keystore.getSigner("1");
             await factoryOrder.methods.setEmergency({
                 enabled: true,
-                orderAddress: Order.address,
+                orderAddress: order.address,
                 manager: `0x${signer1.publicKey}`
             }).send({
                 amount: locklift.utils.toNano(1),
                 from: account1.address
             });
 
-            const stateLO1 = await Order.methods.currentStatus({answerId: 1}).call()
-            expect(stateLO1.value0.toString()).to.equal(new BigNumber(6).toString(), 'Wrong status Limit order');
+            expect(6).to.equal(Number(await order.status()), 'Wrong status Limit order');
 
             const tokenWalletBarToken = await rootTokenBar.methods.walletOf({
-                walletOwner: Order.address,
+                walletOwner: order.address,
                 answerId: 1
             }).call()
-            await Order.methods.proxyTokensTransfer({
-                _tokenWallet: tokenWalletBarToken.value0,
-                _gasValue: locklift.utils.toNano(0.4),
-                _amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                _recipient: account3.address,
-                _deployWalletValue: 0,
-                _remainingGasTo: account1.address,
-                _notify: true,
-                _payload: EMPTY_TVM_CELL
-            }).sendExternal({publicKey: signer1.publicKey});
+
+            await order.proxyTokensTransfer(
+                tokenWalletBarToken.value0,
+                0.4,
+                new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                account3.address,
+                0,
+                account1.address,
+                true,
+                EMPTY_TVM_CELL,
+                true,
+                signer1
+            );
 
             await factoryOrder.methods.setEmergency({
                 enabled: false,
-                orderAddress: Order.address,
+                orderAddress: order.address,
                 manager: `0x${signer1.publicKey}`
             }).send({
                 amount: locklift.utils.toNano(1), from: account1.address
             })
 
-            const stateLO2 = await Order.methods.currentStatus({answerId: 1}).call()
-            expect(stateLO2.value0.toString()).to.equal(new BigNumber(2).toString(), 'Wrong status Limit order');
-
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
             displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
 
+            expect(2).to.equal(Number(await order.status()), 'Wrong status Limit order');
             // @ts-ignore
             expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
         });
@@ -1110,6 +1097,7 @@ describe('OrderTest', () => {
                 backPK: 0,
                 backMatchingPK: 0
             }).call()).value0;
+
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 RootOrderBar.address,
@@ -1121,52 +1109,55 @@ describe('OrderTest', () => {
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
+            //TODO
             await factoryOrder.methods.upgradeOrder({order: orderAddress}).send({
                 amount: locklift.utils.toNano(5),
                 from: account1.address
             });
-            Order = await locklift.factory.getDeployedContract("TestNewOrderBad", orderAddress)
-
-            await Order.methods.cancel({callbackId: 15}).send({
-                amount: locklift.utils.toNano(3),
-                from: account3.address
-            });
+            const order = await OrderWrapper.from_addr(orderAddress, account3);
+            await order.cancel(15, 3, account3.address);
 
             const balanceBarAcc3Proccess = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             expect(balanceBarAcc3Proccess.token.toString()).to.equal(balanceBarAcc3Start.token.minus(TOKENS_TO_EXCHANGE1).toString(), 'Wrong Account3 Bar balance');
             const signer1 = await locklift.keystore.getSigner("1");
+
+            //TODO
             await factoryOrder.methods.setEmergency({
                 enabled: true,
-                orderAddress: Order.address,
+                orderAddress: order.address,
                 manager: `0x${signer1.publicKey}`
             }).send({
                 amount: locklift.utils.toNano(1),
                 from: account1.address
             });
 
-            const stateLO1 = await Order.methods.currentStatus({answerId: 1}).call()
-            expect(stateLO1.value0.toString()).to.equal(new BigNumber(6).toString(), 'Wrong status Limit order');
+            expect(6).to.equal(Number(await order.status()), 'Wrong status Limit order');
 
+            // TODO make from orderRoot wrapper
             const tokenWalletBarToken = await rootTokenBar.methods.walletOf({
-                walletOwner: Order.address,
+                walletOwner: order.address,
                 answerId: 1
             }).call()
-            await Order.methods.proxyTokensTransfer({
-                _tokenWallet: tokenWalletBarToken.value0,
-                _gasValue: locklift.utils.toNano(0.4),
-                _amount: new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                _recipient: account3.address,
-                _deployWalletValue: 0,
-                _remainingGasTo: account1.address,
-                _notify: true,
-                _payload: EMPTY_TVM_CELL
-            }).sendExternal({publicKey: signer1.publicKey});
 
+            await order.proxyTokensTransfer(
+                tokenWalletBarToken.value0,
+                0.4,
+                new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                account3.address,
+                0,
+                account1.address,
+                true,
+                EMPTY_TVM_CELL,
+                true,
+                signer1
+            );
 
             const GasAccount3 = new BigNumber(await locklift.provider.getBalance(account3.address)).shiftedBy(-9)
-            const GasOrder = new BigNumber(await locklift.provider.getBalance(Order.address)).shiftedBy(-9)
+            const GasOrder = new BigNumber(await locklift.provider.getBalance(order.address)).shiftedBy(-9)
             console.log(`GasAccount3 - ${GasAccount3.toString()}\nGasOrder - ${GasOrder.toString()}`)
 
+            //TODO sendGas from wrapper
+            Order = await locklift.factory.getDeployedContract("Order", orderAddress);
             await locklift.tracing.trace(Order.methods.sendGas({
                 to: account3.address,
                 _value: locklift.utils.toNano(GasOrder.minus(1).toString()),
@@ -1174,9 +1165,10 @@ describe('OrderTest', () => {
 
             }).sendExternal({publicKey: signer1.publicKey}));
 
+            //TODO setEmergency from wrapper
             await factoryOrder.methods.setEmergency({
                 enabled: false,
-                orderAddress: Order.address,
+                orderAddress: order.address,
                 manager: `0x${signer1.publicKey}`
             }).send({
                 amount: locklift.utils.toNano(1), from: account1.address
@@ -1185,14 +1177,13 @@ describe('OrderTest', () => {
             const GasAccount3End = new BigNumber(await locklift.provider.getBalance(account3.address)).shiftedBy(-9)
             console.log(GasAccount3End.minus(GasAccount3).toString())
             console.log(GasOrder.minus(1).toString())
-            const stateLO2 = await Order.methods.currentStatus({answerId: 1}).call()
-            expect(stateLO2.value0.toString()).to.equal(new BigNumber(5).toString(), 'Wrong status Limit order');
-            expect(GasAccount3End.minus(GasAccount3).plus(0.3).isGreaterThanOrEqualTo(GasOrder.minus(1))).to.equal(true, 'Wrong gas Balance');
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
             displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
 
+            expect(5).to.equal(Number(await order.status()), 'Wrong status Limit order');
+            expect(GasAccount3End.minus(GasAccount3).plus(0.3).isGreaterThanOrEqualTo(GasOrder.minus(1))).to.equal(true, 'Wrong gas Balance');
             // @ts-ignore
             expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
         });
@@ -1201,6 +1192,7 @@ describe('OrderTest', () => {
         it('Matching on full filled order', async () => {
             console.log(`#############################\n`);
 
+            //TODO
             const factoryAddress = (await rootTokenReceive.methods.walletOf({walletOwner: factoryOrder.address, answerId: 0}).call()).value0;
             const factoryWalletTst = await TokenWallet.from_addr(factoryAddress, factoryOrder.address, "factoryWalletTst");
             const balanceFactoryTstStart = await accountTokenBalances(factoryWalletTst, Constants.tokens.tst.decimals);
@@ -1218,6 +1210,7 @@ describe('OrderTest', () => {
             const balanceTstAcc5Start = await accountTokenBalances(tstWallet5, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc5Start, balanceTstAcc5Start, true, "Account5");
 
+            //TODO
             await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({
                 root: RootOrderTst.address,
                 params: {
@@ -1251,7 +1244,6 @@ describe('OrderTest', () => {
                 backPK: 0,
                 backMatchingPK: 0
             }).call()).value0;
-
 
             await tstWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE_SPENT1).shiftedBy(Constants.tokens.tst.decimals).toString(),
@@ -1290,19 +1282,10 @@ describe('OrderTest', () => {
             console.log(`Order 2 - ${orderAddress2}`)
 
             // Call matching
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress1);
+            const order1 =  await OrderWrapper.from_addr(orderAddress1, account3);
+            const order2 =  await OrderWrapper.from_addr(orderAddress2, account4);
 
-            await locklift.tracing.trace(Order.methods.matching({
-                callbackId: 2,
-                deployWalletValue: locklift.utils.toNano(0.1),
-                limitOrder: orderAddress2
-            }).send({
-                amount: locklift.utils.toNano(10), from: account5.address
-            }), {allowedCodes:{compute:[60]}});
-            const stateLO1 = await Order.methods.currentStatus({answerId: 1}).call();
-
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress2);
-            const stateLO2 = await Order.methods.currentStatus({answerId: 2}).call();
+            await order1.matching(2, 0.1, orderAddress2, account5.address, true);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -1333,8 +1316,10 @@ describe('OrderTest', () => {
             const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).toString();
             const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).plus(new BigNumber(rewardAmount - comissionAmount)).toString();
 
-            expect(stateLO1.value0.toString()).to.eq(new BigNumber(3).toString(), 'Wrong status Limit Order 1');
-            expect(stateLO2.value0.toString()).to.eq(new BigNumber(3).toString(), 'Wrong status Limit Order 2');
+            expect(3).to.eq(Number(await order1.status()), 'Wrong status Limit Order 1');
+            expect(3).to.eq(Number(await order2.status()), 'Wrong status Limit Order 2');
+            expect(0).to.equal(Number(await(locklift.provider.getBalance(order1.address))), "Wrong Order 1 Ever balance")
+            expect(0).to.equal(Number(await(locklift.provider.getBalance(order2.address))), "Wrong Order 2 Ever balance")
             expect(expectedFactoryTstWallet).to.equal(balanceFactoryTstEnd.token.toString(), 'Wrong Factory Tst balance');
             expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
@@ -1346,6 +1331,7 @@ describe('OrderTest', () => {
         it('Matching on part filled order', async () => {
             console.log(`#############################\n`);
 
+            //TODO
             const factoryAddress = (await rootTokenReceive.methods.walletOf({walletOwner: factoryOrder.address, answerId: 0}).call()).value0;
             const factoryWalletTst = await TokenWallet.from_addr(factoryAddress, factoryOrder.address, "factoryWalletTst");
             const balanceFactoryTstStart = await accountTokenBalances(factoryWalletTst, Constants.tokens.tst.decimals);
@@ -1363,6 +1349,7 @@ describe('OrderTest', () => {
             const balanceTstAcc5Start = await accountTokenBalances(tstWallet5, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc5Start, balanceTstAcc5Start, true, "Account5");
 
+            //TODO
             await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({
                 root: RootOrderTst.address,
                 params: {
@@ -1434,19 +1421,10 @@ describe('OrderTest', () => {
             console.log(`Order 2 - ${orderAddress2}`)
 
             // Call matching
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress1);
+            const order1 =  await OrderWrapper.from_addr(orderAddress1, account3);
+            const order2 =  await OrderWrapper.from_addr(orderAddress2, account4);
 
-            await locklift.tracing.trace(Order.methods.matching({
-                callbackId: 2,
-                deployWalletValue: locklift.utils.toNano(0.1),
-                limitOrder: orderAddress2
-            }).send({
-                amount: locklift.utils.toNano(10), from: account5.address
-            }), {allowedCodes:{compute:[60]}});
-            const stateLO1 = await Order.methods.currentStatus({answerId: 1}).call();
-
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress2);
-            const stateLO2 = await Order.methods.currentStatus({answerId: 2}).call();
+            await order1.matching(2, 0.1, orderAddress2, account5.address,true);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -1478,8 +1456,10 @@ describe('OrderTest', () => {
             const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).toString();
             const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).plus(new BigNumber(rewardAmount - comissionAmount)).toString();
 
-            expect(stateLO1.value0.toString()).to.eq(new BigNumber(3).toString(), 'Wrong status Limit Order 1');
-            expect(stateLO2.value0.toString()).to.eq(new BigNumber(2).toString(), 'Wrong status Limit Order 2');
+            expect(3).to.eq(Number(await order1.status()), 'Wrong status Limit Order 1');
+            expect(2).to.eq(Number(await order2.status()), 'Wrong status Limit Order 2');
+            expect(0).to.equal(Number(await(locklift.provider.getBalance(order1.address))), "Wrong Order Ever balance 1");
+            expect(Number(await locklift.provider.getBalance(order2.address))).to.be.above(0, "Wrong Order Ever balance");
             expect(expectedFactoryTstWallet).to.equal(balanceFactoryTstEnd.token.toString(), 'Wrong Factory Tst balance');
             expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
@@ -1490,6 +1470,8 @@ describe('OrderTest', () => {
         });
         it('Matching on full filled order from backend', async () => {
             console.log(`#############################\n`);
+
+            //TODO
             const factoryAddress = (await rootTokenReceive.methods.walletOf({walletOwner: factoryOrder.address, answerId: 0}).call()).value0;
             const factoryWalletTst = await TokenWallet.from_addr(factoryAddress, factoryOrder.address, "factoryWalletTst");
             const balanceFactoryTstStart = await accountTokenBalances(factoryWalletTst, Constants.tokens.tst.decimals);
@@ -1576,17 +1558,10 @@ describe('OrderTest', () => {
             console.log(`Order 2 - ${orderAddress2}`)
 
             // Call matching
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress1);
-            await locklift.tracing.trace(Order.methods.backendMatching(
-                {
-                    callbackId: 1,
-                    limitOrder: orderAddress2
-                }).sendExternal({publicKey: signer.publicKey}), {allowedCodes:{compute: [null,60]}});
+            const order1 = await OrderWrapper.from_addr(orderAddress1, account3);
+            const order2 =  await OrderWrapper.from_addr(orderAddress2, account4);
 
-            const stateLO1 = await Order.methods.currentStatus({answerId: 1}).call();
-
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress2);
-            const stateLO2 = await Order.methods.currentStatus({answerId: 2}).call();
+            await order1.backendMatching(1, order2.address, signer.publicKey);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -1610,9 +1585,10 @@ describe('OrderTest', () => {
             const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).minus(new BigNumber(TOKENS_TO_EXCHANGE_SPENT2)).toString();
             const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).plus(new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE2)).toString();
 
-            expect(stateLO1.value0.toString()).to.eq(new BigNumber(3).toString(), 'Wrong status Limit Order 1');
-            expect(stateLO2.value0.toString()).to.eq(new BigNumber(3).toString(), 'Wrong status Limit Order 2');
-
+            expect(3).to.eq(Number(await order1.status()), 'Wrong status Limit Order 1');
+            expect(3).to.eq(Number(await order2.status()), 'Wrong status Limit Order 2');
+            expect(0).to.equal(Number(await(locklift.provider.getBalance(order1.address))), "Wrong Order Ever balance 1");
+            expect(0).to.equal(Number(await(locklift.provider.getBalance(order2.address))), "Wrong Order Ever balance 2");
             expect(expectedFactoryTstWallet).to.equal(balanceFactoryTstEnd.token.toString(), 'Wrong Factory Tst balance');
             expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
@@ -1621,12 +1597,6 @@ describe('OrderTest', () => {
         });
         it('Matching order failure', async () => {
             console.log(`#############################\n`);
-
-            const factoryAddress = (await rootTokenReceive.methods.walletOf({walletOwner: factoryOrder.address, answerId: 0}).call()).value0;
-            const factoryWalletTst = await TokenWallet.from_addr(factoryAddress, factoryOrder.address, "factoryWalletTst");
-            const balanceFactoryTstStart = await accountTokenBalances(factoryWalletTst, Constants.tokens.tst.decimals);
-
-            await displayLog(0, balanceFactoryTstStart, true, "Factory");
 
             const balanceBarAcc3Start = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3Start = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -1640,6 +1610,7 @@ describe('OrderTest', () => {
             const balanceTstAcc5Start = await accountTokenBalances(tstWallet5, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc5Start, balanceTstAcc5Start, true, "Account5");
 
+            // TODO
             await locklift.tracing.trace(factoryOrder.methods.setRootFeeParams({
                 root: RootOrderTst.address,
                 params: {
@@ -1710,19 +1681,10 @@ describe('OrderTest', () => {
             console.log(`Order 2 - ${orderAddress2}`)
 
             // Call matching
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress1);
+            const order1 =  await OrderWrapper.from_addr(orderAddress1, account3);
+            const order2 =  await OrderWrapper.from_addr(orderAddress2, account4);
 
-            await locklift.tracing.trace(Order.methods.matching({
-                callbackId: 2,
-                deployWalletValue: locklift.utils.toNano(0.1),
-                limitOrder: orderAddress2
-            }).send({
-                amount: locklift.utils.toNano(10), from: account5.address
-            }));
-            const stateLO1 = await Order.methods.currentStatus({answerId: 1}).call();
-
-            Order = await locklift.factory.getDeployedContract("Order", orderAddress2);
-            const stateLO2 = await Order.methods.currentStatus({answerId: 2}).call();
+            await order1.matching(2, 0.1, orderAddress2, account5.address, true);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, Constants.tokens.bar.decimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, Constants.tokens.tst.decimals);
@@ -1736,22 +1698,16 @@ describe('OrderTest', () => {
             const balanceTstAcc5End = await accountTokenBalances(tstWallet5, Constants.tokens.tst.decimals);
             await displayLog(balanceBarAcc5End, balanceTstAcc5End, false, "Account5");
 
-            const balanceFactoryTstEnd = await accountTokenBalances(factoryWalletTst, Constants.tokens.tst.decimals);
-            await displayLog(0, balanceFactoryTstEnd, false, "Factory");
-
             const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).minus(new BigNumber(TOKENS_TO_EXCHANGE_SPENT1)).toString();
             const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).minus(new BigNumber(TOKENS_TO_EXCHANGE_SPENT2)).toString();
 
-            expect(stateLO1.value0.toString()).to.eq(new BigNumber(2).toString(), 'Wrong status Limit Order 1');
-            expect(stateLO2.value0.toString()).to.eq(new BigNumber(2).toString(), 'Wrong status Limit Order 2');
-            expect(balanceFactoryTstStart.token.toString()).to.equal(balanceFactoryTstEnd.token.toString(), 'Wrong Factory Tst balance');
+            expect(2).to.eq(Number(await order1.status()), 'Wrong status Limit Order 1');
+            expect(2).to.eq(Number(await order2.status()), 'Wrong status Limit Order 2');
 
             expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
-
             expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
             expect(balanceTstAcc4Start.token.toString()).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
-
             expect(balanceBarAcc5Start.token.toString()).to.equal(balanceBarAcc5End.token.toString(), 'Wrong Account5 Bar balance');
             expect(balanceTstAcc5Start.token.toString()).to.equal(balanceTstAcc5End.token.toString(), 'Wrong Account5 Tst balance');
         });
