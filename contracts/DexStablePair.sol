@@ -36,7 +36,6 @@ import "./structures/INextExchangeData.sol";
 import "./structures/IWithdrawResult.sol";
 import "./structures/ITokenOperationStructure.sol";
 import "./structures/IPoolTokenData.sol";
-import "./structures/IPoolTokenDataPrev.sol";
 
 import "./DexPlatform.sol";
 import "./abstract/DexContractBase.sol";
@@ -45,7 +44,6 @@ contract DexStablePair is
     DexContractBase,
     IDexStablePair,
     IPoolTokenData,
-    IPoolTokenDataPrev,
     INextExchangeData
 {
 
@@ -1526,23 +1524,18 @@ contract DexStablePair is
 
             TvmCell otherData = s.loadRef(); // ref 3
 
-            PoolTokenDataPrev[] tokenDataPrev;
-
             (
                 lp_root, lp_wallet, lp_supply,
                 fee,
-                tokenDataPrev,
+                tokenData,
                 A, PRECISION
             ) = abi.decode(otherData, (
                 address, address, uint128,
                 FeeParams,
-                PoolTokenDataPrev[],
+                PoolTokenData[],
                 AmplificationCoefficient,
                 uint256
             ));
-
-            tokenData.push(PoolTokenData(tokenDataPrev[0].root, tokenDataPrev[0].wallet, tokenDataPrev[0].balance, tokenDataPrev[0].decimals, tokenDataPrev[0].accumulatedFee, tokenDataPrev[0].rate, tokenDataPrev[0].precisionMul, tokenDataPrev[0].decimalsLoaded, tokenDataPrev[0].initialized));
-            tokenData.push(PoolTokenData(tokenDataPrev[1].root, tokenDataPrev[1].wallet, tokenDataPrev[1].balance, tokenDataPrev[1].decimals, tokenDataPrev[1].accumulatedFee, tokenDataPrev[1].rate, tokenDataPrev[1].precisionMul, tokenDataPrev[1].decimalsLoaded, tokenDataPrev[1].initialized));
 
             _tryToActivate();
         } else if (old_pool_type == DexPoolTypes.CONSTANT_PRODUCT) {
