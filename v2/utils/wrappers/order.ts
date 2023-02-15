@@ -66,7 +66,7 @@ export class OrderWrapper {
                 deployWalletValue: locklift.utils.toNano(deployWalletValue)
             }).send({
                 amount: locklift.utils.toNano(6), from: from
-            }), {allowedCodes: {compute: [60, 302]}})
+            }), {allowedCodes: {compute: [60, 302, 100]}})
         } else {
             return await this.contract.methods.swap({
                 callbackId: callbackId,
@@ -178,7 +178,7 @@ export class OrderWrapper {
                 deployWalletValue: locklift.utils.toNano(deployWalletValue),
                 limitOrder: limitOrder
             }).send({
-                amount: locklift.utils.toNano(10), from: from
+                amount: locklift.utils.toNano(6), from: from
             }),  {allowedCodes:{compute:[60]}}
             )
         } else {
@@ -188,7 +188,7 @@ export class OrderWrapper {
                 deployWalletValue: locklift.utils.toNano(deployWalletValue),
                 limitOrder: limitOrder
             }).send({
-                amount: locklift.utils.toNano(10), from: from
+                amount: locklift.utils.toNano(6), from: from
             })
         }
     }

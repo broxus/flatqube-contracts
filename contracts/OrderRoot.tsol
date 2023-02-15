@@ -226,14 +226,14 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 callback: OrderRoot.onTokenWalletBeneficiary
             }(fee.beneficiary, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
-            ITokenWallet(msg.sender).transfer{
+            ITokenWallet(spentTokenWallet).transfer{
                 value: 0, flag: MsgFlag.ALL_NOT_RESERVED,
                 bounce: false
             }(
                 amount,
                 orderAddress,
                 (deployWalletValue <= OrderGas.DEPLOY_EMPTY_WALLET_GRAMS? deployWalletValue:OrderGas.DEPLOY_EMPTY_WALLET_GRAMS),
-                originalGasTo,
+                orderAddress,
                 true,
                 payload
             );
@@ -254,7 +254,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 bounce: false
             }(
                 amount,
-                sender, 
+                sender,
                 uint128(0),
                 originalGasTo,
                 true,
@@ -277,7 +277,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
 
         return (new Order {
             stateInit: buildState(_sender, orderCode, _receiveToken),
-            value: OrderGas.DEPLOY_ORDER_MIN_VALUE
+            value: OrderGas.DEPLOY_ORDER
         }(
             _expectedAmount,
             _amount,
