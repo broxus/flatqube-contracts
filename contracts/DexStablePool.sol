@@ -1016,9 +1016,9 @@ contract DexStablePool is
         require(isValid, DexErrors.WRONG_LIQUIDITY);
         require(allGreaterThanZero || (auto_change && anyGreaterThanZero), DexErrors.AMOUNT_TOO_LOW);
 
-        uint128[] amounts = new uint128[](0);
+        uint128[] amounts = new uint128[](N_COINS);
         for (TokenOperation op: _operations) {
-            amounts.push(op.amount);
+            amounts[tokenIndex[op.root]] = op.amount;
         }
         (optional(DepositLiquidityResultV2) resultOpt, uint128[] referrer_fees) = _expectedDepositLiquidity(amounts, _reserves(), lp_supply, referrer);
         require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
