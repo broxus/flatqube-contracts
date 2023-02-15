@@ -6,11 +6,11 @@ const {toNano} = locklift.utils;
 
 
 export class OrderWrapper {
-    public contract: Contract<FactorySource["Order"]>;
+    public contract: Contract<FactorySource["Order"]> | Contract<FactorySource["TestNewOrderBad"]>;
     public _owner: Account | null;
     public address: Address;
 
-    constructor(order_contract: Contract<FactorySource["Order"]>, order_owner: Account | null) {
+    constructor(order_contract: Contract<FactorySource["Order"]> | Contract<FactorySource["TestNewOrderBad"]>, order_owner: Account | null) {
         this.contract = order_contract;
         this._owner = order_owner;
         this.address = this.contract.address;
@@ -41,8 +41,8 @@ export class OrderWrapper {
     }
 
     async buildPayload(
-        callbackId: number,
-        deployWalletValue: number
+        callbackId: number | string,
+        deployWalletValue: number | string
         ) {
         return (await this.contract.methods.buildPayload(
             {
@@ -62,20 +62,49 @@ export class OrderWrapper {
         if (trace){
 
             return await locklift.tracing.trace(this.contract.methods.swap({
-                callbackId: 1,
-                deployWalletValue: locklift.utils.toNano(0.1)
+                callbackId: callbackId,
+                deployWalletValue: locklift.utils.toNano(deployWalletValue)
             }).send({
                 amount: locklift.utils.toNano(6), from: from
-            }), {allowedCodes: {compute: [60]}})
+            }), {allowedCodes: {compute: [60, 302]}})
         } else {
             return await this.contract.methods.swap({
-                callbackId: 1,
-                deployWalletValue: locklift.utils.toNano(0.1)
+                callbackId: callbackId,
+                deployWalletValue: locklift.utils.toNano(deployWalletValue)
             }).send({
                 amount: locklift.utils.toNano(6), from: from
             })
         }
     }
+
+    async cancel(
+        callbackId: number = 0
+    ){
+        return await this.contract.methods.cancel({callbackId: callbackId}).send({
+                amount: locklift.utils.toNano(3), from: this._owner.address
+            })
+    }
+
+    async backendSwap(
+        signer: any
+    ){
+            return await this.contract.methods.backendSwap({callbackId: 1}).sendExternal({publicKey: signer.publicKey})
+    }
+
+    async sendGas(
+        to: Address,
+        _value: string,
+        _flag: number,
+        signer: any
+    ){
+        return await this.contract.methods.sendGas({
+            to: to,
+            _value: _value,
+            _flag: _flag
+        }).sendExternal({publicKey: signer.publicKey})
+
+    }
+
     async proxyTokensTransfer(
         _tokenWallet: Address,
         _gasValue: number,
@@ -113,6 +142,28 @@ export class OrderWrapper {
         }
     }
 
+    async backendMatching(
+        callbackId: number,
+        limitOrder: Address,
+        trace: boolean = false,
+        signer: any
+    ) {
+        if (trace){
+           return await locklift.tracing.trace(
+                this.contract.methods.backendMatching({
+                callbackId: callbackId,
+                limitOrder: limitOrder
+            }).sendExternal({publicKey: signer.publicKey}),  {allowedCodes:{compute:[null, 60]}}
+            )
+        } else{
+           return await
+                this.contract.methods.backendMatching({
+                callbackId: callbackId,
+                limitOrder: limitOrder
+            }).sendExternal({publicKey: signer.publicKey})
+        }
+    }
+
     async matching(
         callbackId: number,
         deployWalletValue: number,
@@ -128,7 +179,7 @@ export class OrderWrapper {
                 limitOrder: limitOrder
             }).send({
                 amount: locklift.utils.toNano(10), from: from
-            })
+            }),  {allowedCodes:{compute:[60]}}
             )
         } else {
             return await

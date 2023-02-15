@@ -17,7 +17,7 @@ export class OrderFactory {
     }
 
     static async from_addr(addr: Address, owner: Account | null) {
-        const factory = await locklift.factory.getDeployedContract('Order', addr);
+        const factory = await locklift.factory.getDeployedContract('OrderFactory', addr);
         return new OrderFactory(factory, owner);
     }
 
@@ -112,6 +112,21 @@ export class OrderFactory {
             })
       }
 
+    }
+
+    async setEmergency(
+        enabled: boolean,
+        orderAddress: Address,
+        manager: string
+    ){
+          return await this.contract.methods.setEmergency({
+            enabled: enabled,
+            orderAddress  : orderAddress,
+            manager: manager
+          }).send({
+            amount: locklift.utils.toNano(1),
+            from: this._owner.address
+            })
     }
 
     async withdrawFee(
