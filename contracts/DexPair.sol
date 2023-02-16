@@ -1300,16 +1300,16 @@ contract DexPair is DexPairBase, INextExchangeData {
                         uint128 step2BeneficiaryFee,
                         uint128 step2ReferrerFee
                     ) = Math.calculateExpectedDepositLiquidity(
-                        _tokensAmount,
-                        0,
+                        _tokenRoot == _tokenRoots()[0] ? _tokensAmount : 0,
+                        _tokenRoot == _tokenRoots()[1] ? _tokensAmount : 0,
                         true,
-                        _reserves()[spentTokenIndex],
-                        _reserves()[receiveTokenIndex],
+                        _reserves()[0],
+                        _reserves()[1],
                         _lpReserve(),
                         _fee,
                         referrer,
-                        _tokenRoots()[spentTokenIndex],
-                        _tokenRoots()[receiveTokenIndex]
+                        _tokenRoots()[0],
+                        _tokenRoots()[1]
                     );
 
                     // Check reserves, fees and expected amount

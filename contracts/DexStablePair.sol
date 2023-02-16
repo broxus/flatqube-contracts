@@ -36,8 +36,6 @@ import "./structures/INextExchangeData.sol";
 import "./structures/IWithdrawResult.sol";
 import "./structures/ITokenOperationStructure.sol";
 import "./structures/IPoolTokenData.sol";
-import "./structures/IPoolTokenDataPrev.sol";
-import "./structures/IFeeParamsPrev.sol";
 
 import "./DexPlatform.sol";
 import "./abstract/DexContractBase.sol";
@@ -46,9 +44,7 @@ contract DexStablePair is
     DexContractBase,
     IDexStablePair,
     IPoolTokenData,
-    IPoolTokenDataPrev,
-    INextExchangeData,
-    IFeeParamsPrev
+    INextExchangeData
 {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -836,9 +832,11 @@ contract DexStablePair is
             DexErrors.AMOUNT_TOO_LOW
         );
 
+        TokenOperation[] operations = _operations[0].root == _tokenRoots()[1] ? [_operations[1], _operations[0]] : _operations;
+
         uint128[] amounts = new uint128[](0);
-        amounts.push(_operations[0].amount);
-        amounts.push(_operations[1].amount);
+        amounts.push(operations[0].amount);
+        amounts.push(operations[1].amount);
         (optional(DepositLiquidityResultV2) resultOpt, uint128[] referrer_fees) = _expectedDepositLiquidity(amounts, referrer);
         require(resultOpt.hasValue(), DexErrors.WRONG_LIQUIDITY);
         DepositLiquidityResultV2 result = resultOpt.get();
@@ -1526,26 +1524,18 @@ contract DexStablePair is
 
             TvmCell otherData = s.loadRef(); // ref 3
 
-            FeeParamsPrev fee_prev;
-            PoolTokenDataPrev[] tokenDataPrev;
-
             (
                 lp_root, lp_wallet, lp_supply,
-                fee_prev,
-                tokenDataPrev,
+                fee,
+                tokenData,
                 A, PRECISION
             ) = abi.decode(otherData, (
                 address, address, uint128,
-                FeeParamsPrev,
-                PoolTokenDataPrev[],
+                FeeParams,
+                PoolTokenData[],
                 AmplificationCoefficient,
                 uint256
             ));
-
-            fee = FeeParams(fee_prev.denominator, fee_prev.pool_numerator, fee_prev.beneficiary_numerator, 0, fee_prev.beneficiary, fee_prev.threshold, emptyMap);
-
-            tokenData.push(PoolTokenData(tokenDataPrev[0].root, tokenDataPrev[0].wallet, tokenDataPrev[0].balance, tokenDataPrev[0].decimals, tokenDataPrev[0].accumulatedFee, tokenDataPrev[0].rate, tokenDataPrev[0].precisionMul, tokenDataPrev[0].decimalsLoaded, tokenDataPrev[0].initialized));
-            tokenData.push(PoolTokenData(tokenDataPrev[1].root, tokenDataPrev[1].wallet, tokenDataPrev[1].balance, tokenDataPrev[1].decimals, tokenDataPrev[1].accumulatedFee, tokenDataPrev[1].rate, tokenDataPrev[1].precisionMul, tokenDataPrev[1].decimalsLoaded, tokenDataPrev[1].initialized));
 
             _tryToActivate();
         } else if (old_pool_type == DexPoolTypes.CONSTANT_PRODUCT) {

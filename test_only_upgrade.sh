@@ -12,11 +12,11 @@ npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='1' --balance='50'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='2' --balance='50'
 npx locklift run $NO_TRACE --script scripts/0-deploy-TokenFactory.js
-npx locklift run $NO_TRACE --script scripts/1-deploy-vault-and-root-legacy.js --pair_contract_name='DexPairPrev' --root_contract_name='DexRootPrev' --vault_contract_name='DexVaultPrev' --account_contract_name='DexAccountPrev'
+npx locklift run $NO_TRACE --script scripts/1-deploy-vault-and-root.js --pair_contract_name='DexPairPrev' --root_contract_name='DexRoot' --vault_contract_name='DexVault' --account_contract_name='DexAccount'
 npx locklift run $NO_TRACE --script scripts/2-deploy-test-tokens.js --tokens='["foo","bar","qwe"]'
 npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"account":2,"amount":200000000,"token":"bar"},{"account":2,"amount":200000000,"token":"foo"},{"account":2,"amount":200000000,"token":"qwe"}]'
-npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2 --contract_name='DexAccountPrev'
-npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair-legacy.js --pairs='[["foo", "bar"], ["bar", "qwe"]]' --contract_name='DexPairPrev'
+npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2 --contract_name='DexAccount'
+npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["foo", "bar"], ["bar", "qwe"]]' --contract_name='DexPairPrev'
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexStablePairPrev' --pool_type=2
 
 
@@ -24,28 +24,14 @@ npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='foo' --righ
 npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits='[{ "tokenId": "bar", "amount": 100000000 }, { "tokenId": "foo", "amount": 100000000 }]'
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'foo' --right_token_id 'bar' --left_amount '100000' --right_amount '100000' --auto_change 'false' --contract_name='DexPairPrev' --account_contract_name='DexAccountPrev'
 
-echo "____________________________________________________________________";
-npx locklift run $NO_TRACE --script scripts/8-add-wallets-info-to-vault.js
-
-echo "____________________________________________________________________";
-echo "prev root ->  root";
-npx locklift run $NO_TRACE --script scripts/update-dexRoot.js --old_contract='DexRootPrev' --new_contract='DexRoot'
-
-echo "____________________________________________________________________";
-echo "prev pair -> temp pair";
-npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPairTemp' --pool_type=1
-npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPairPrev' --new_contract_name='DexPairTemp' --pool_type=1
-
-echo "____________________________________________________________________";
-echo "prev stablepair -> temp stablepair";
-npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='bar' --right='qwe' --old_contract_name='DexPairPrev' --new_contract_name='DexStablePairPrev' --pool_type=2
-npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexStablePairTemp' --pool_type=2
-npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='bar' --right='qwe' --old_contract_name='DexStablePairPrev' --new_contract_name='DexStablePairTemp' --pool_type=2
-
-echo "____________________________________________________________________";
-echo "prev account ->  account";
-npx locklift test $NO_TRACE --tests test/31-install-account-code.js --contract_name='DexAccount'
-npx locklift test $NO_TRACE --tests test/36-upgrade-account.js --owner_n=2 --old_contract_name="DexAccountPrev" --new_contract_name="DexAccount"
+#echo "____________________________________________________________________";
+#echo "prev root ->  root";
+#npx locklift run $NO_TRACE --script scripts/update-dexRoot.js --old_contract='DexRootPrev' --new_contract='DexRoot'
+#
+#echo "____________________________________________________________________";
+#echo "prev account ->  account";
+#npx locklift test $NO_TRACE --tests test/31-install-account-code.js --contract_name='DexAccount'
+#npx locklift test $NO_TRACE --tests test/36-upgrade-account.js --owner_n=2 --old_contract_name="DexAccountPrev" --new_contract_name="DexAccount"
 
 echo "____________________________________________________________________";
 echo "deploy new account";
@@ -61,19 +47,19 @@ echo "account -> next account 2";
 npx locklift test $NO_TRACE --tests test/31-install-account-code.js --contract_name='TestNewDexAccount'
 npx locklift test $NO_TRACE --tests test/36-upgrade-account.js --owner_n=3 --old_contract_name="DexAccount" --new_contract_name="TestNewDexAccount"
 
-echo "____________________________________________________________________";
-echo "prev vault ->  vault";
-npx locklift run $DEFAULT_PARAMS --script scripts/update-dexVault.js --old_contract='DexVaultPrev' --new_contract='DexVault'
+#echo "____________________________________________________________________";
+#echo "prev vault ->  vault";
+#npx locklift run $DEFAULT_PARAMS --script scripts/update-dexVault.js --old_contract='DexVaultPrev' --new_contract='DexVault'
 
 echo "____________________________________________________________________";
-echo "temp pair -> pair";
+echo "prev pair -> pair";
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexPair' --pool_type=1
-npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPairTemp' --new_contract_name='DexPair' --pool_type=1
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPairPrev' --new_contract_name='DexPair' --pool_type=1
 
 echo "____________________________________________________________________";
-echo "temp stablepair -> stablepair";
+echo "prev stablepair -> stablepair";
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexStablePair' --pool_type=2
-npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='bar' --right='qwe' --old_contract_name='DexStablePairTemp' --new_contract_name='DexStablePair' --pool_type=2
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='bar' --right='qwe' --old_contract_name='DexStablePairPrev' --new_contract_name='DexStablePair' --pool_type=2
 
 echo "____________________________________________________________________";
 echo "prepare pools";
