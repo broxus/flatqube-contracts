@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { Migration } from './migration';
 import { Address, Contract, WalletTypes, zeroAddress } from 'locklift';
-import { FactorySource } from '../build/factorySource';
+import { FactorySource } from '../../build/factorySource';
 import { Account } from 'everscale-standalone-client/nodejs';
 
 import {
