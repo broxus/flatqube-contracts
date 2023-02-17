@@ -55,7 +55,7 @@ describe('Test DexAccount contract upgrade', async function () {
 
             expect(new BigNumber(startVersion).plus(1).toString())
                 .to
-                .equal(new BigNumber(endVersion).toString(), 'DexPair code version incorrect');
+                .equal(new BigNumber(endVersion).toString(), 'DexAccount code version incorrect');
         });
     });
 });

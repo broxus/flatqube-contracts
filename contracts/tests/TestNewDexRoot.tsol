@@ -15,6 +15,11 @@ contract NewDexRoot {
     TvmCell public platform_code;
     TvmCell public account_code;
     uint32 account_version;
+    TvmCell public token_vault_code;
+    uint32 token_vault_version;
+    TvmCell public lp_token_pending_code;
+    uint32 lp_token_pending_version;
+
     mapping(uint8 => TvmCell) pair_codes;
     mapping(uint8 => uint32) pair_versions;
     mapping(uint8 => TvmCell) pool_codes;
@@ -26,14 +31,11 @@ contract NewDexRoot {
     address owner;
     address vault;
     address pending_owner;
+    address token_factory;
 
     string newTestField;
 
     constructor() public {revert();}
-
-    function getVault() external view responsible returns (address) {
-        return {value : 0, bounce : false, flag : MsgFlag.REMAINING_GAS} vault;
-    }
 
     function getOwner() external view responsible returns (address dex_owner) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
@@ -43,20 +45,55 @@ contract NewDexRoot {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pending_owner;
     }
 
+    function getVault() external view responsible returns (address) {
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} vault;
+    }
+
     function getAccountVersion() external view responsible returns (uint32) {
         return{ value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } account_version;
     }
-    function getPairVersion(uint8 pool_type)  external view responsible returns (uint32) {
+
+    function getPairVersion(uint8 pool_type) external view responsible returns (uint32) {
         require(pair_versions.exists(pool_type), DexErrors.UNSUPPORTED_POOL_TYPE);
         return{ value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pair_versions[pool_type];
     }
 
-    function getPairCode(uint8 pool_type)  external view responsible returns (TvmCell) {
+    function getPairCode(uint8 pool_type) external view responsible returns (TvmCell) {
         require(pair_codes.exists(pool_type), DexErrors.UNSUPPORTED_POOL_TYPE);
         return{ value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pair_codes[pool_type];
     }
 
-    function getAccountCode()  external view responsible returns (TvmCell) {
+    function getPoolVersion(uint8 pool_type) external view responsible returns (uint32) {
+        require(pool_versions.exists(pool_type), DexErrors.UNSUPPORTED_POOL_TYPE);
+        return{ value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pool_versions[pool_type];
+    }
+
+    function getPoolCode(uint8 pool_type) external view responsible returns (TvmCell) {
+        require(pool_codes.exists(pool_type), DexErrors.UNSUPPORTED_POOL_TYPE);
+        return{ value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pool_codes[pool_type];
+    }
+
+    function getTokenVaultCode() external view responsible returns (TvmCell) {
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} token_vault_code;
+    }
+
+    function getTokenVaultVersion() external view responsible returns (uint32) {
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} token_vault_version;
+    }
+
+    function getLpTokenPendingCode() external view responsible returns (TvmCell) {
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} lp_token_pending_code;
+    }
+
+    function getLpTokenPendingVersion() external view responsible returns (uint32) {
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} lp_token_pending_version;
+    }
+
+    function getTokenFactory() external view responsible returns (address) {
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} token_factory;
+    }
+
+    function getAccountCode() external view responsible returns (TvmCell) {
         return{ value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } account_code;
     }
 
@@ -93,6 +130,11 @@ contract NewDexRoot {
             pool_versions,
             owner,
             vault,
+            token_vault_code,
+            token_vault_version,
+            lp_token_pending_code,
+            lp_token_pending_version,
+            token_factory,
             pending_owner
         ) = abi.decode(data, (
             TvmCell,
@@ -103,6 +145,11 @@ contract NewDexRoot {
             mapping(uint8 => TvmCell),
             mapping(uint8 => uint32),
             address,
+            address,
+            TvmCell,
+            uint32,
+            TvmCell,
+            uint32,
             address,
             address
         ));

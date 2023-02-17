@@ -24,6 +24,11 @@ interface IDexBasePool is
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // EVENTS
 
+    event ActiveStatusUpdated(
+        bool current,
+        bool previous
+    );
+
     /// @dev Emits when fees config was successfully updated
     event FeesParamsUpdated(FeeParams params);
 
@@ -52,6 +57,11 @@ interface IDexBasePool is
         address receiveTokenRoot,
         uint128 receiveAmount,
         ExchangeFee[] fees
+    );
+
+    /// @dev Emits when any operation was processed
+    event ReferrerFees(
+        TokenOperation[] fees
     );
 
     /// @dev Emits when pool's reserves was changed
@@ -140,6 +150,7 @@ interface IDexBasePool is
 
         address _senderAddress,
         address _recipient,
+        address _referrer,
 
         address _originalGasTo,
         uint128 _deployWalletGrams,
@@ -169,7 +180,8 @@ interface IDexBasePool is
         bool _autoChange,
         address _accountOwner,
         uint32 _accountVersion,
-        address _remainingGasTo
+        address _remainingGasTo,
+        address _referrer
     ) external;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,6 +225,11 @@ interface IDexBasePool is
     /// @param _remainingGasTo Receiver of the remaining gas
     function setFeeParams(
         FeeParams _params,
+        address _remainingGasTo
+    ) external;
+
+    function setActive(
+        bool _newActive,
         address _remainingGasTo
     ) external;
 

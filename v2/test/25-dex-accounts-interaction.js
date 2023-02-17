@@ -112,7 +112,7 @@ describe('Check DEX accounts interaction', async function () {
         FooBarLpWallet3 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
 
         migration.load(DexRoot, 'DexRoot');
-        migration.load(DexPairFooBar, 'DexPairFooBar');
+        migration.load(DexPairFooBar, 'DexPoolFooBar');
         migration.load(FooVaultWallet, 'FooVaultWallet');
         migration.load(BarVaultWallet, 'BarVaultWallet');
         migration.load(FooBarLpVaultWallet, 'FooBarLpVaultWallet');
@@ -209,7 +209,7 @@ describe('Check DEX accounts interaction', async function () {
             });
 
             displayTx(tx);
-            
+
             const dexAccount3 = await DexRoot.call({
                 method: 'getExpectedAccountAddress',
                 params: {
@@ -466,7 +466,7 @@ describe('Check DEX accounts interaction', async function () {
             });
 
             displayTx(tx);
-            
+
             const dexAccount3end = await dexAccountBalances(DexAccount3);
             logger.log(`DexAccount#3 balance end: ` +
                 `${dexAccount3end.foo} FOO, ${dexAccount3end.bar} BAR, ${dexAccount3end.lp} LP`);

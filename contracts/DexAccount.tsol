@@ -4,27 +4,27 @@ pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
-import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
+import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 
-import "tip3/contracts/interfaces/ITokenRoot.tsol";
-import "tip3/contracts/interfaces/ITokenWallet.tsol";
-import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
+import "tip3/contracts/interfaces/ITokenRoot.sol";
+import "tip3/contracts/interfaces/ITokenWallet.sol";
+import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 
-import "./interfaces/IUpgradableByRequest.tsol";
-import "./interfaces/IDexRoot.tsol";
-import "./interfaces/IDexAccount.tsol";
-import "./interfaces/IDexBasePool.tsol";
-import "./interfaces/IDexVault.tsol";
-import "./interfaces/IResetGas.tsol";
-import "./interfaces/IDexAccountOwner.tsol";
+import "./interfaces/IUpgradableByRequest.sol";
+import "./interfaces/IDexRoot.sol";
+import "./interfaces/IDexAccount.sol";
+import "./interfaces/IDexBasePool.sol";
+import "./interfaces/IDexTokenVault.sol";
+import "./interfaces/IResetGas.sol";
+import "./interfaces/IDexAccountOwner.sol";
 
-import "./libraries/DexPlatformTypes.tsol";
-import "./libraries/DexErrors.tsol";
-import "./libraries/DexGas.tsol";
+import "./libraries/DexPlatformTypes.sol";
+import "./libraries/DexErrors.sol";
+import "./libraries/DexGas.sol";
 
-import "./abstract/DexContractBase.tsol";
+import "./abstract/DexContractBase.sol";
 
-import "./DexPlatform.tsol";
+import "./DexPlatform.sol";
 
 contract DexAccount is
     DexContractBase,
@@ -56,8 +56,6 @@ contract DexAccount is
     mapping(uint64 => Operation) private _tmpOperations;
     // token_root -> send_gas_to
     mapping(address => address) private _tmpDeployingWallets;
-    // token_root -> (call_id, recipient_address, deploy_wallet_grams)
-    mapping(address => WithdrawalParams) private _tmpWithdrawals;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // MODIFIERS
@@ -198,14 +196,16 @@ contract DexAccount is
 
             TvmCell empty;
 
+            address tokenVault = _expectedTokenVaultAddress(_tokenRoot);
+
             ITokenWallet(msg.sender)
                 .transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
                 (
                     _tokensAmount,
-                    _vault,                     // recipient_address
-                    0,                          // deploy_grams
+                    tokenVault,
+                    0,
                     _originalGasTo,
-                    false,                      // notify_receiver
+                    false,
                     empty
                 );
         } else {
@@ -301,45 +301,6 @@ contract DexAccount is
         });
     }
 
-    function onVaultTokenWallet(address _wallet) external {
-        require(
-            _wallets.exists(msg.sender) &&
-            _tmpWithdrawals.exists(msg.sender),
-            DexErrors.TODO
-        );
-
-        tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
-
-        WithdrawalParams params = _tmpWithdrawals[msg.sender];
-        Operation operation = _tmpOperations[params.call_id];
-
-        if (
-            operation.expected_callback_sender == _vault &&
-            operation.token_operations[0].root == msg.sender
-        ) {
-            delete _tmpWithdrawals[msg.sender];
-
-            IDexVault(_vault)
-                .withdraw{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: true }
-                (
-                    params.call_id,
-                    operation.token_operations[0].amount,
-                    operation.token_operations[0].root,
-                    _wallet,
-                    params.recipient_address,
-                    params.deploy_wallet_grams,
-                    _owner,
-                    _currentVersion,
-                    operation.send_gas_to
-                );
-        } else {
-            operation.send_gas_to.transfer({
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
-            });
-        }
-    }
-
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // ACCOUNT OPERATIONS
 
@@ -352,7 +313,6 @@ contract DexAccount is
         address send_gas_to
     ) override external onlyOwner {
         require(!_tmpOperations.exists(call_id), DexErrors.OPERATION_ALREADY_IN_PROGRESS);
-        require(!_tmpWithdrawals.exists(token_root), DexErrors.ANOTHER_WITHDRAWAL_IN_PROGRESS);
         require(amount > 0, DexErrors.AMOUNT_TOO_LOW);
         require(recipient_address.value != 0, DexErrors.WRONG_RECIPIENT);
         require(msg.value >= DexGas.WITHDRAW_MIN_VALUE_BASE + deploy_wallet_grams, DexErrors.VALUE_TOO_LOW);
@@ -367,24 +327,25 @@ contract DexAccount is
 
         address send_gas_to_ = send_gas_to.value == 0 ? _owner : send_gas_to;
 
+        address tokenVault = _expectedTokenVaultAddress(token_root);
+
         _tmpOperations[call_id] = Operation(
             [TokenOperation(amount, token_root)],
             send_gas_to_,
-            _vault
+            tokenVault
         );
 
-        _tmpWithdrawals[token_root] = WithdrawalParams(
+        IDexTokenVault(tokenVault)
+        .withdraw{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: true }
+        (
             call_id,
+            amount,
             recipient_address,
-            deploy_wallet_grams
+            deploy_wallet_grams,
+            _owner,
+            _currentVersion,
+            send_gas_to
         );
-
-        ITokenRoot(token_root)
-            .walletOf{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED,
-                callback: DexAccount.onVaultTokenWallet
-            }(_vault);
     }
 
     function transfer(
@@ -619,7 +580,8 @@ contract DexAccount is
             [TokenOperation(left_amount, left_root), TokenOperation(right_amount, right_root)],
             TokenOperation(0, expected_lp_root),
             auto_change,
-            send_gas_to
+            send_gas_to,
+            address(0)
         );
     }
 
@@ -628,14 +590,16 @@ contract DexAccount is
         TokenOperation[] _operations,
         TokenOperation _expected,
         bool _autoChange,
-        address _remainingGasTo
+        address _remainingGasTo,
+        address _referrer
     ) override external onlyOwner {
         _depositLiquidityInternal(
             _callId,
             _operations,
             _expected,
             _autoChange,
-            _remainingGasTo
+            _remainingGasTo,
+            _referrer
         );
     }
 
@@ -644,7 +608,8 @@ contract DexAccount is
         TokenOperation[] _operations,
         TokenOperation _expected,
         bool _autoChange,
-        address _remainingGasTo
+        address _remainingGasTo,
+        address _referrer
     ) private {
         require(!_tmpOperations.exists(_callId), DexErrors.OPERATION_ALREADY_IN_PROGRESS);
         require(_operations.length > 1, DexErrors.WRONG_PAIR);
@@ -692,7 +657,8 @@ contract DexAccount is
                 _autoChange,
                 _owner,
                 _currentVersion,
-                remainingGasTo
+                remainingGasTo,
+                _referrer
             );
     }
 
@@ -910,7 +876,6 @@ contract DexAccount is
             TvmBuilder tmpBuilder;                      // ref3:
             tmpBuilder.store(_tmpOperations);          //   _tmp_operations
             tmpBuilder.store(_tmpDeployingWallets);   //   _tmp_deploying_wallets
-            tmpBuilder.store(_tmpWithdrawals);         //   _tmp_withdrawals
             builder.storeRef(tmpBuilder);
 
             // set code after complete this method
@@ -935,9 +900,14 @@ contract DexAccount is
                         address owner
                         [mapping(address => address) _wallets]
                         [mapping(address => uint128) _balances]
+                3: tmp
+                    bits:
+                        [mapping(uint64 => Operation) _tmpOperations]
+                        [mapping(address => address) _tmpDeployingWallets]
     */
     function onCodeUpgrade(TvmCell _data) private {
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
+        tvm.resetStorage();
 
         TvmSlice dataSlice = _data.toSlice();
 
@@ -955,16 +925,24 @@ contract DexAccount is
             address
         );
 
-        if (_oldVersion == 0) {
-            tvm.resetStorage();
-        }
-
         _root = _rootAddress;
         _vault = _vaultAddress;
         _currentVersion = _newVersion;
+
         platform_code = dataSlice.loadRef();        // ref 1
+
         TvmSlice data = dataSlice.loadRefAsSlice(); // ref 2
+
         _owner = data.decode(address);
+
+        if (_oldVersion != 0) {
+            _wallets = data.decode(mapping(address => address));
+            _balances = data.decode(mapping(address => uint128));
+
+            TvmSlice tmp = dataSlice.loadRefAsSlice(); // ref 3
+            _tmpOperations = tmp.decode(mapping(uint64 => Operation));
+            _tmpDeployingWallets = tmp.decode(mapping(address => address));
+        }
 
         _sendGasTo.transfer({
             value: 0,
@@ -987,7 +965,7 @@ contract DexAccount is
             functionId == tvm.functionId(IDexBasePool.depositLiquidity) ||
             functionId == tvm.functionId(IDexBasePool.withdrawLiquidity) ||
             functionId == tvm.functionId(IDexAccount.internalAccountTransfer) ||
-            functionId == tvm.functionId(IDexVault.withdraw)
+            functionId == tvm.functionId(IDexTokenVault.withdraw)
         ) {
             uint64 callId = _body.decode(uint64);
 

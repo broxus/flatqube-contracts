@@ -10,4 +10,5 @@ library DexOperationTypes {
     uint8 constant DEPOSIT_LIQUIDITY_V2 = 7;
     uint8 constant WITHDRAW_LIQUIDITY_V2 = 8;
     uint8 constant CROSS_PAIR_EXCHANGE_V2 = 9;
+    uint8 constant REFERRAL_FEE = 10;
 }

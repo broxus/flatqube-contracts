@@ -1,13 +1,13 @@
-import {toNano, WalletTypes} from "locklift";
+import { toNano } from 'locklift';
+import { Migration } from '../utils/migration';
+import { Command } from 'commander';
 
-const {Migration} = require(process.cwd()+'/scripts/utils')
-const { Command } = require('commander');
 const program = new Command();
 
 program
-    .allowUnknownOption()
-    .option('-o, --owner_n <owner_n>', 'owner number')
-    .option('-cn, --contract_name <contract_name>', 'DexAccount contract name');
+  .allowUnknownOption()
+  .option('-o, --owner_n <owner_n>', 'owner number')
+  .option('-cn, --contract_name <contract_name>', 'DexAccount contract name');
 
 program.parse(process.argv);
 
@@ -19,31 +19,48 @@ options.contract_name = options.contract_name || 'DexAccount';
 async function main() {
   const migration = new Migration();
 
-  const signer = await locklift.keystore.getSigner(String(options.owner_n));
-  const accountN = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
-  if (locklift.tracing) {
-    locklift.tracing.setAllowedCodesForAddress(accountN.address, {compute: [100]});
-  }
-  const dexRoot = await locklift.factory.getDeployedContract( 'DexRoot', migration.getAddress('DexRoot'));
-  await dexRoot.methods.deployAccount(
-      {
-        account_owner: accountN.address,
-        send_gas_to: accountN.address
-      }
-  ).send({
-    from: accountN.address,
-    amount: toNano(4)
-  });
+  const accountN = await migration.loadAccount(
+    'Account' + (options.owner_n + 1),
+    '0',
+  );
 
-  const dexAccountNAddress = (await dexRoot.methods.getExpectedAccountAddress({answerId:0, account_owner: accountN.address}).call()).value0;
+  if (locklift.tracing) {
+    locklift.tracing.setAllowedCodesForAddress(accountN.address, {
+      compute: [100],
+    });
+  }
+
+  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+
+  await dexRoot.methods
+    .deployAccount({
+      account_owner: accountN.address,
+      send_gas_to: accountN.address,
+    })
+    .send({
+      from: accountN.address,
+      amount: toNano(4),
+    });
+
+  const dexAccountNAddress = (
+    await dexRoot.methods
+      .getExpectedAccountAddress({
+        answerId: 0,
+        account_owner: accountN.address,
+      })
+      .call()
+  ).value0;
   console.log(`DexAccount${options.owner_n}: ${dexAccountNAddress}`);
-  const dexAccountN = await locklift.factory.getDeployedContract(options.contract_name, dexAccountNAddress);
+  const dexAccountN = await locklift.factory.getDeployedContract(
+    options.contract_name,
+    dexAccountNAddress,
+  );
   migration.store(dexAccountN, 'DexAccount' + options.owner_n);
 }
 
 main()
   .then(() => process.exit(0))
-  .catch(e => {
+  .catch((e) => {
     console.log(e);
     process.exit(1);
   });

@@ -194,7 +194,8 @@ interface IDexAccount is
         TokenOperation[] _operations,
         TokenOperation _expected,
         bool _autoChange,
-        address _remainingGasTo
+        address _remainingGasTo,
+        address _referrer
     ) external;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////

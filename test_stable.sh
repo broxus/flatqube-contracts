@@ -13,4 +13,4 @@ npx locklift test $NO_TRACE --tests test/40-cross-pair-exchange.js --amount=1000
 npx locklift test $NO_TRACE --tests test/40-cross-pair-exchange.js --amount=100 --route='["tst","qwe","coin","bar","foo"]' --contract_name='DexStablePair'
 npx locklift test $NO_TRACE --tests test/40-cross-pair-exchange.js --amount=10000 --route='["coin","foo","bar"]' --contract_name='DexStablePair'
 
-#npx locklift test $NO_TRACE --tests test/50-beneficiary-fee-stable.js
+npx locklift test $NO_TRACE --tests test/51-referrer-beneficiary-fee.js --roots='["foo", "bar"]' --pool_contract_name='DexStablePair' --fee='{"denominator": "1000000000", "pool_numerator": "0", "beneficiary_numerator": "1000000", "referrer_numerator": "2000000"}'

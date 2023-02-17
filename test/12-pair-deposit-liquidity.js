@@ -135,7 +135,7 @@ describe('DexAccount interact with DexPair', async function () {
         let symbols = left_token.symbol + right_token.symbol;
 
         migration.load(DexRoot, 'DexRoot');
-        migration.load(DexPairFooBar, 'DexPair' + symbols);
+        migration.load(DexPairFooBar, 'DexPool' + symbols);
         migration.load(FooRoot, left_token.symbol + 'Root');
         migration.load(BarRoot, right_token.symbol + 'Root');
         migration.load(FooBarLpRoot, symbols + 'LpRoot');
@@ -194,7 +194,7 @@ describe('DexAccount interact with DexPair', async function () {
         IS_FOO_LEFT = pairRoots.left === FooRoot.address;
 
         logger.log('DexRoot: ' + DexRoot.address);
-        logger.log(`DexPair${symbols}: ` + DexPairFooBar.address);
+        logger.log(`DexPool${symbols}: ` + DexPairFooBar.address);
         logger.log(`${left_token.symbol}Root: ` + FooRoot.address);
         logger.log(`${right_token.symbol}Root: ` + BarRoot.address);
         logger.log(`${symbols}LpRoot: ` + FooBarLpRoot.address);
@@ -235,15 +235,16 @@ describe('DexAccount interact with DexPair', async function () {
                 options.auto_change
             );
 
+            // swap tokens' order
             const tx = await Account2.runTarget({
                 contract: DexAccount2,
                 method: 'depositLiquidity',
                 params: {
                     call_id: getRandomNonce(),
-                    left_root: IS_FOO_LEFT ? FooRoot.address : BarRoot.address,
-                    left_amount: LEFT_AMOUNT,
-                    right_root: IS_FOO_LEFT ? BarRoot.address : FooRoot.address,
-                    right_amount: RIGHT_AMOUNT,
+                    left_root: IS_FOO_LEFT ? BarRoot.address : FooRoot.address,
+                    left_amount: RIGHT_AMOUNT,
+                    right_root: IS_FOO_LEFT ? FooRoot.address : BarRoot.address,
+                    right_amount: LEFT_AMOUNT,
                     expected_lp_root: FooBarLpRoot.address,
                     auto_change: options.auto_change,
                     send_gas_to: Account2.address

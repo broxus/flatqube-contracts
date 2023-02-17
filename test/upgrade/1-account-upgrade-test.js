@@ -9,6 +9,7 @@ let rootOwner;
 let account2;
 let dexAccount;
 let dexRoot;
+let targetVersion;
 
 let oldAccountData = {};
 let newAccountData = {};
@@ -27,7 +28,7 @@ const loadAccountData = async (account) => {
   return data;
 }
 
-describe('Test Dex Pair contract upgrade', async function () {
+describe('Test Dex Account contract upgrade', async function () {
   this.timeout(Constants.TESTS_TIMEOUT);
   before('Load contracts', async function () {
     rootOwner = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
@@ -36,6 +37,8 @@ describe('Test Dex Pair contract upgrade', async function () {
     dexRoot = migration.load(await locklift.factory.getContract('DexRoot'), 'DexRoot');
     dexAccount = migration.load(await locklift.factory.getContract('DexAccount'), 'DexAccount2');
     NewDexAccount = await locklift.factory.getContract('TestNewDexAccount');
+
+    targetVersion = await dexRoot.call({method: 'getAccountVersion', params: {}});
 
     const keyPairs = await locklift.keys.getKeyPairs();
 
@@ -83,7 +86,7 @@ describe('Test Dex Pair contract upgrade', async function () {
         .equal(oldAccountData.platform_code, 'New platform_code value incorrect');
       expect(newAccountData.current_version)
         .to
-        .equal((parseInt(oldAccountData.current_version) + 1).toString(), 'New current_version value incorrect');
+        .equal(targetVersion.toString(), 'New current_version value incorrect');
       expect(newAccountData.balances)
         .to
         .deep.equal(oldAccountData.balances, 'New balances value incorrect');

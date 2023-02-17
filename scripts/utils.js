@@ -2,9 +2,7 @@ const fs = require('fs');
 
 const logger = require('mocha-logger');
 
-const N_COINS = 2;
 const TOKEN_CONTRACTS_PATH = 'node_modules/tip3/build'
-const WEVER_CONTRACTS_PATH = 'node_modules/ever-wever/everscale/build'
 const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
@@ -32,7 +30,7 @@ async function sleep(ms) {
 }
 
 const afterRun = async (tx) => {
-   await new Promise(resolve => setTimeout(resolve, 5000));
+   await new Promise(resolve => setTimeout(resolve, 3000));
 };
 
 const displayTx = (_tx) => {
@@ -48,13 +46,13 @@ const Constants = {
     foo: {
       name: 'Foo',
       symbol: 'Foo',
-      decimals: 18,
+      decimals: 6,
       upgradeable: true
     },
     bar: {
       name: 'Bar',
       symbol: 'Bar',
-      decimals: 18,
+      decimals: 9,
       upgradeable: true
     },
     qwe: {
@@ -84,7 +82,16 @@ const Constants = {
   },
   LP_DECIMALS: 9,
 
-  TESTS_TIMEOUT: 1200000
+  TESTS_TIMEOUT: 120000
+}
+
+for (let i = 0; i < 20; i++) {
+  Constants.tokens['gen' + i] = {
+    name: 'Gen' + i,
+    symbol: 'GEN' + i,
+    decimals: 9,
+    upgradeable: true
+  };
 }
 
 class Migration {
@@ -125,14 +132,23 @@ class Migration {
     return contract;
   }
 
+  getAddressesByName(name) {
+    const r = [];
+    for (let alias in this.migration_log) {
+      if (this.migration_log[alias].name === name) {
+        r.push(this.migration_log[alias].address);
+      }
+    }
+    return r;
+  }
+
   getAddress(alias) {
     if (this.migration_log[alias] !== undefined) {
-      return this.migration_log[alias].address;
+      const { Address } = require('locklift');
+      return new Address(this.migration_log[alias].address);
     } else {
       throw new Error(`Contract ${alias} not found in the migration`);
     }
-
-    return undefined;
   }
 
   store(contract, alias) {
