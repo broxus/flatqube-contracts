@@ -14,7 +14,7 @@ async function main() {
     });
 
     const content = '' +
-        `pragma ton-solidity >= 0.62.0;
+        `pragma ever-solidity >= 0.62.0;
 abstract contract ManagerAddress {
     address constant MANAGER_ADDRESS = address.makeAddrStd(0, 0x${account.address.toString().substr(2).toLowerCase()});
 }`
