@@ -616,11 +616,7 @@ contract DexAccount is
         require(msg.value >= DexGas.DEPOSIT_LIQUIDITY_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(_wallets.exists(_expected.root) && _balances.exists(_expected.root), DexErrors.UNKNOWN_TOKEN_ROOT);
         for (TokenOperation operation : _operations) {
-
             require(_wallets.exists(operation.root) && _balances.exists(operation.root), DexErrors.UNKNOWN_TOKEN_ROOT);
-//            if (_balances[operation.root] >= 200000000000){
-//                revert(1234);
-//            }
             require(_balances[operation.root] >= operation.amount, DexErrors.NOT_ENOUGH_FUNDS);
         }
 
