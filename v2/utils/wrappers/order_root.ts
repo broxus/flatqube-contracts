@@ -18,12 +18,12 @@ export class OrderRoot {
     }
 
     static async from_addr(addr: Address, owner: Account | null) {
-        const factory = await locklift.factory.getDeployedContract('OrderFactory', addr);
+        const factory = await locklift.factory.getDeployedContract('OrderRoot', addr);
         return new OrderRoot(factory, owner);
     }
 
     async feeParams() {
-        return (await this.contract.methods.getFeeParams({answerId: 0}).call()).value0;
+        return (await this.contract.methods.getFeeParams({answerId: 0}).call());
     }
 
     async spentToken() {

@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import { Migration } from './migration';
-import { Address, Contract, WalletTypes, zeroAddress } from 'locklift';
+import {Address, Contract, toNano, WalletTypes, zeroAddress} from 'locklift';
 import { FactorySource } from '../../build/factorySource';
 import { Account } from 'everscale-standalone-client/nodejs';
 
@@ -67,7 +67,7 @@ export const dexPairMigration = async (
       right_root: rightTokenRoot.address,
       send_gas_to: account.address,
   }).send({
-    amount: locklift.utils.toNano(8),
+    amount: locklift.utils.toNano(14),
     from: account.address
   }), {allowedCodes: {compute: [60, 100]}});
 
@@ -151,6 +151,7 @@ export const dexVaultMigration = async (
   const signer = await locklift.keystore.getSigner('0');
 
   logMigrationProcess(
+    'DexVault',
     'dexVaultMigration',
     'Deploying DexVault...',
   );
@@ -162,34 +163,19 @@ export const dexVaultMigration = async (
       },
       constructorParams: {
         owner_: account.address,
-        token_factory_: token_factory.address,
         root_: dexRoot.address
       },
-      value: locklift.utils.toNano(7),
+      value: locklift.utils.toNano(3),
     });
 
   const platfromArtifacts = await locklift.factory.getContractArtifacts("DexPlatform")
+  const DexTokenVault = await  locklift.factory.getContractArtifacts("DexTokenVault")
+  const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts('DexVaultLpTokenPendingV2');
+  const DexAccount = await locklift.factory.getContractArtifacts('DexAccount');
+
 
   logMigrationProcess('dexVaultMigration', 'installPlatformOnce', 'installPlatformOnce...');
   await contract.methods.installPlatformOnce({code: platfromArtifacts.code}).send({
-    amount: locklift.utils.toNano(2),
-    from: account.address
-  })
-
-  logMigrationProcess('dexVaultMigration', 'setVaultOnce', 'setVaultOnce on DexRoot...');
-  await dexRoot.methods.setVaultOnce({new_vault: contract.address}).send({
-    amount: locklift.utils.toNano(2),
-    from: account.address
-  })
-
-  logMigrationProcess('dexVaultMigration', 'setActive', 'setActive on DexRoot...');
-  await dexRoot.methods.setActive({new_active: true}).send({
-    amount: locklift.utils.toNano(2),
-    from: account.address
-  })
-  const LpTokenPending = await locklift.factory.getContractArtifacts("DexVaultLpTokenPendingV2")
-  logMigrationProcess('dexVaultMigration', 'installOrUpdateLpTokenPendingCode', 'installOrUpdateLpTokenPendingCode...');
-  await contract.methods.installOrUpdateLpTokenPendingCode({code: LpTokenPending.code}).send({
     amount: locklift.utils.toNano(2),
     from: account.address
   })
@@ -490,13 +476,16 @@ export const tokenRootMigration = async (
 };
 
 export const dexRootMigration = async (
-  account: Account
-): Promise<Contract<FactorySource['DexRoot']>> => {
+  account: Account,
+  tokenFactory: Contract<FactorySource['TokenFactory']>
+): any => {
   // Load signer and account
   const signer = await locklift.keystore.getSigner('0');
   const DexPair = await locklift.factory.getContractArtifacts('DexPair');
   const DexPlatform = await locklift.factory.getContractArtifacts('DexPlatform');
   const DexAccount = await locklift.factory.getContractArtifacts('DexAccount');
+  const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts('DexVaultLpTokenPendingV2');
+  const DexTokenVault = await locklift.factory.getContractArtifacts('DexTokenVault');
 
   logMigrationProcess('DexRoot', 'constructor', 'Deploying DexRoot...');
 
@@ -512,6 +501,69 @@ export const dexRootMigration = async (
     },
     value: locklift.utils.toNano(7),
   });
+
+   logMigrationProcess(
+    'DexVault',
+    'dexVaultMigration',
+    'Deploying DexVault...',
+  );
+  const DexVault = (await locklift.factory.deployContract({
+      contract: 'DexVault',
+      publicKey: signer.publicKey,
+      initParams: {
+        _nonce: locklift.utils.getRandomNonce()
+      },
+      constructorParams: {
+        owner_: account.address,
+        root_: contract.address
+      },
+      value: locklift.utils.toNano(3),
+    })).contract;
+
+
+
+
+  logMigrationProcess('dexVaultMigration', 'installPlatformOnce', 'installPlatformOnce...');
+  await DexVault.methods.installPlatformOnce({code: DexPlatform.code}).send({
+    amount: locklift.utils.toNano(2),
+    from: account.address
+  })
+
+
+  logMigrationProcess('DexRoot', 'setVaultOnce', 'setVaultOnce...');
+  await contract.methods.setVaultOnce({new_vault: DexVault.address}).send({
+    from: account.address,
+    amount: toNano(2)
+  });
+
+  logMigrationProcess('DexRoot', 'installOrUpdateTokenVaultCode', 'installOrUpdateTokenVaultCode...');
+  await contract.methods.installOrUpdateTokenVaultCode({
+    _newCode: DexTokenVault.code,
+    _remainingGasTo: account.address
+  }).send({
+    from: account.address,
+    amount: toNano(2)
+  });
+
+  logMigrationProcess('DexRoot', 'installOrUpdateLpTokenPendingCode', 'installOrUpdateLpTokenPendingCode...');
+  await contract.methods.installOrUpdateLpTokenPendingCode({
+    _newCode: DexVaultLpTokenPendingV2.code,
+    _remainingGasTo: account.address,
+  }).send({
+    from: account.address,
+    amount: toNano(2)
+  });
+
+  logMigrationProcess('DexRoot', 'setTokenFactory', 'setTokenFactory...');
+  await contract.methods.setTokenFactory({
+    _newTokenFactory: tokenFactory.address,
+    _remainingGasTo: account.address,
+  }).send({
+    from: account.address,
+    amount: toNano(2)
+  });
+
+
   logMigrationProcess('DexRoot', 'installPlatformOnce', 'installPlatformOnce...');
   await contract.methods.installPlatformOnce({
     code: DexPlatform.code
@@ -552,5 +604,5 @@ export const dexRootMigration = async (
   );
   new Migration().store(contract, `DexRoot`);
 
-  return contract;
+  return [contract, DexVault] as const;
 };

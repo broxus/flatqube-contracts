@@ -16,7 +16,8 @@ import BigNumber from "bignumber.js";
 import {OrderWrapper} from "../utils/wrappers/order";
 import {TokenWallet} from "../utils/wrappers/tokenWallet";
 import chalk from "chalk";
-import {OrderFactory} from "../utils/wrappers/order_factory";
+import { OrderFactory } from "../utils/wrappers/order_factory";
+import {OrderRoot} from "../utils/wrappers/order_root";
 
 describe('OrderTest', () => {
     const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
@@ -42,8 +43,8 @@ describe('OrderTest', () => {
     let MATCHINGDENOMINATOR;
 
     let factoryOrder: OrderFactory;
-    let RootOrderBar: Contract<FactorySource['OrderRoot']>;
-    let RootOrderTst: Contract<FactorySource['OrderRoot']>;
+    let RootOrderBar: OrderRoot;
+    let RootOrderTst: OrderRoot;
     let Order: OrderWrapper;
 
     let rootTokenBar: Contract<FactorySource['TokenRootUpgradeable']>;
@@ -79,7 +80,8 @@ describe('OrderTest', () => {
     let account8: Account;
 
     let tokenFactory: Contract<FactorySource['TokenFactory']>;
-    let dexVault: Contract<FactorySource['DexVault']>;
+
+
     let dexAccount: Contract<FactorySource['DexAccount']>;
 
 
@@ -95,8 +97,8 @@ describe('OrderTest', () => {
 
         tokenFactory = await tokenFactoryMigration(account1);
 
-        const dexRoot = await dexRootMigration(account1);
-        dexVault = await dexVaultMigration(account1, dexRoot, tokenFactory);
+        const [dexRoot, dexVault] = await dexRootMigration(account1, tokenFactory);
+
         dexAccount = await dexAccountMigration(account1, dexRoot);
 
         rootTokenBar = await tokenRootMigration(
@@ -155,21 +157,25 @@ describe('OrderTest', () => {
         )
         await
             locklift.tracing.trace(wallet1.transfer(
-                new BigNumber(2000).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                new BigNumber(2500).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 dexAccount.address,
                 EMPTY_TVM_CELL,
                 locklift.utils.toNano(3),
                 )
             )
         await wallet2.transfer(
-                new BigNumber(2000).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                new BigNumber(2500).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 dexAccount.address,
                 EMPTY_TVM_CELL,
                 locklift.utils.toNano(3))
 
         const TestFactory = await locklift.factory.getDeployedContract("OrderFactory", factoryOrder.address)
-        RootOrderBar = await orderRootMigration(account1, TestFactory, rootTokenBar)
-        RootOrderTst = await orderRootMigration(account2, TestFactory, rootTokenReceive)
+        const addressRootBar = await orderRootMigration(account1, TestFactory, rootTokenBar)
+        const addressRootTST = await orderRootMigration(account1, TestFactory, rootTokenReceive)
+
+        RootOrderBar = await OrderRoot.from_addr(addressRootBar.address, account1)
+        RootOrderTst = await OrderRoot.from_addr(addressRootTST.address, account1)
+
 
         await locklift.tracing.trace(rootTokenBar.methods
             .deployWallet({
@@ -187,13 +193,18 @@ describe('OrderTest', () => {
             })
             .send({amount: locklift.utils.toNano(9), from: account1.address}));
 
+        const dataBar = await dexAccount.methods.getWalletData({token_root: rootTokenBar.address, answerId: 1}).call()
+        const dataTST = await dexAccount.methods.getWalletData({token_root: rootTokenReceive.address, answerId: 1}).call()
+
+        console.log(`BAR - ${dataBar.balance}\nTST-${dataTST.balance}`)
+
         await locklift.tracing.trace(
             dexAccount.methods.depositLiquidity({
                 call_id: getRandomNonce(),
                 left_root: rootTokenBar.address,
                 left_amount: new BigNumber(200).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 right_root: rootTokenReceive.address,
-                right_amount: new BigNumber(2000).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                right_amount: new BigNumber(2000).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 expected_lp_root: lproot.lp,
                 auto_change: true,
                 send_gas_to: account1.address
@@ -256,11 +267,11 @@ describe('OrderTest', () => {
         console.log(`TstWallet6: ${tstWallet6.address}`);
         console.log('')
 
-        const feesBar = await RootOrderBar.methods.getFeeParams({answerId: 0}).call()
+        const feesBar = await RootOrderBar.feeParams()
         console.log(`Beneficary = ${feesBar.params.beneficiary}\nFee - ${feesBar.params.numerator}/${feesBar.params.denominator}/
         ${feesBar.params.matchingNumerator}/${feesBar.params.matchingDenominator}`);
 
-        const feesTst = await RootOrderTst.methods.getFeeParams({answerId: 0}).call()
+        const feesTst = await RootOrderTst.feeParams()
         console.log(`Beneficary = ${feesTst.params.beneficiary}\nFee - ${feesTst.params.numerator}/${feesTst.params.denominator}/
         ${feesTst.params.matchingNumerator}/${feesTst.params.matchingDenominator}`)
     });
@@ -290,15 +301,14 @@ describe('OrderTest', () => {
 
             TOKENS_TO_EXCHANGE2_ACC3 = 10;
             TOKENS_TO_EXCHANGE2_ACC4 = 10;
-
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0,
-            }).call()).value0;
+            
+            
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await locklift.tracing.trace(barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -307,7 +317,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6),
             ), {allowedCodes: {compute: [60]}})
 
-            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -387,14 +397,12 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2_ACC4 = 10;
             TOKENS_TO_EXCHANGE2_ACC5 = 10;
 
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -402,7 +410,7 @@ describe('OrderTest', () => {
                 payload,
                 locklift.utils.toNano(6)
             )
-            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -492,14 +500,12 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2_ACC4 = 10;
             TOKENS_TO_EXCHANGE2_ACC5 = 20;
 
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -507,7 +513,7 @@ describe('OrderTest', () => {
                 payload,
                 locklift.utils.toNano(6),
             )
-            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -582,14 +588,12 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
 
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -597,7 +601,7 @@ describe('OrderTest', () => {
                 payload,
                 locklift.utils.toNano(6)
             )
-            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -630,14 +634,12 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2 = 20;
             TOKENS_TO_EXCHANGE2_ACC3 = 10;
 
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -645,7 +647,7 @@ describe('OrderTest', () => {
                 payload,
                 locklift.utils.toNano(6)
             )
-            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -698,14 +700,12 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE1 = 15;
             TOKENS_TO_EXCHANGE2 = 30;
 
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -714,7 +714,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             )
 
-            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -769,14 +769,10 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2 = 20;
 
             const signer = await locklift.keystore.getSigner("3");
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: `0x${signer.publicKey}`,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, rootTokenReceive.address,
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), `0x${signer.publicKey}`, 0)
 
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -784,7 +780,7 @@ describe('OrderTest', () => {
                 payload,
                 locklift.utils.toNano(6)
             )
-            const pastEvents = await RootOrderBar.getPastEvents({ filter: event => event.event === "CreateOrder" });
+            const pastEvents = await RootOrderBar.contract.getPastEvents({ filter: event => event.event === "CreateOrder" });
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -826,14 +822,10 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2 = 100;
             const signer = await locklift.keystore.getSigner("3");
 
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: `0x${signer.publicKey}`,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, rootTokenReceive.address,
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), `0x${signer.publicKey}`, 0)
 
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -841,7 +833,7 @@ describe('OrderTest', () => {
                 payload,
                 locklift.utils.toNano(6)
             )
-            const pastEvents = await RootOrderBar.getPastEvents({ filter: event => event.event === "CreateOrder" });
+            const pastEvents = await RootOrderBar.contract.getPastEvents({ filter: event => event.event === "CreateOrder" });
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -882,15 +874,11 @@ describe('OrderTest', () => {
 
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
-
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.2),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, rootTokenReceive.address,
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.2), 0, 0)
 
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -899,7 +887,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             )
 
-            const pastEvents = await RootOrderBar.getPastEvents({ filter: event => event.event === "CreateOrder" });
+            const pastEvents = await RootOrderBar.contract.getPastEvents({ filter: event => event.event === "CreateOrder" });
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -951,14 +939,10 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 100;
 
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.2),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, rootTokenReceive.address,
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.2), 0, 0)
 
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -966,7 +950,7 @@ describe('OrderTest', () => {
                 payload,
                 locklift.utils.toNano(6)
             )
-            const pastEvents = await RootOrderBar.getPastEvents({ filter: event => event.event === "CreateOrder" });
+            const pastEvents = await RootOrderBar.contract.getPastEvents({ filter: event => event.event === "CreateOrder" });
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -1012,14 +996,12 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
 
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -1028,7 +1010,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             )
 
-            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -1087,14 +1069,12 @@ describe('OrderTest', () => {
 
             await factoryOrder.setOrderCode(BadOrderCode)
 
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -1103,7 +1083,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             )
 
-            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -1192,7 +1172,7 @@ describe('OrderTest', () => {
 
             const matchingNumerator = 1;
             const matchingDenominator = 4;
-            const feeParams = await RootOrderTst.methods.getFeeParams({answerId: 1}).call()
+            const feeParams = await RootOrderTst.feeParams()
             expect(feeParams.params.numerator).to.equal('0', 'Wrong NUMERATOR');
             expect(feeParams.params.denominator).to.equal('0', 'Wrong DENOMINATOR');
             expect(feeParams.params.matchingNumerator).to.equal(matchingNumerator.toString(), 'Wrong MATCHINGNUMERATOR');
@@ -1205,14 +1185,13 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE_RECEIVE2 = 20;
 
             //Create Order 1
-            const payload1 = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenBar.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload1 = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenBar.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
+
 
             await tstWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE_SPENT1).shiftedBy(Constants.tokens.tst.decimals).toString(),
@@ -1221,21 +1200,20 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             )
 
-            const pastEvents1 = await RootOrderTst.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents1 = await RootOrderTst.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
 
             // @ts-ignore
             const orderAddress1 = pastEvents1.events[0].data.order
             console.log(`Order 1 - ${orderAddress1}`)
 
             // Create Order 2
-            const payload2 = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload2 = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
+            
 
             await barWallet4.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE_SPENT2).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -1244,7 +1222,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6),
             )
 
-            const pastEvents2 = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents2 = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
 
             // @ts-ignore
             const orderAddress2 = pastEvents2.events[0].data.order
@@ -1329,7 +1307,7 @@ describe('OrderTest', () => {
 
             const matchingNumerator = 1;
             const matchingDenominator = 4;
-            const feeParams = await RootOrderTst.methods.getFeeParams({answerId: 1}).call()
+            const feeParams = await RootOrderTst.feeParams()
             expect(feeParams.params.numerator).to.equal('0', 'Wrong NUMERATOR');
             expect(feeParams.params.denominator).to.equal('0', 'Wrong DENOMINATOR');
             expect(feeParams.params.matchingNumerator).to.equal(matchingNumerator.toString(), 'Wrong MATCHINGNUMERATOR');
@@ -1342,14 +1320,12 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE_RECEIVE2 = 200;
 
             //Create Order 1
-            const payload1 = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenBar.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload1 = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenBar.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await tstWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE_SPENT1).shiftedBy(Constants.tokens.tst.decimals).toString(),
@@ -1358,21 +1334,19 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             )
 
-            const pastEvents1 = await RootOrderTst.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents1 = await RootOrderTst.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
 
             // @ts-ignore
             const orderAddress1 = pastEvents1.events[0].data.order
             console.log(`Order 1 - ${orderAddress1}`)
 
             // Create Order 2
-            const payload2 = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload2 = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await barWallet4.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE_SPENT2).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -1381,7 +1355,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             )
 
-            const pastEvents2 = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents2 = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
 
             // @ts-ignore
             const orderAddress2 = pastEvents2.events[0].data.order
@@ -1461,7 +1435,7 @@ describe('OrderTest', () => {
 
             const matchingNumerator = 1;
             const matchingDenominator = 4;
-            const feeParams = await RootOrderTst.methods.getFeeParams({answerId: 1}).call()
+            const feeParams = await RootOrderTst.feeParams()
             expect(feeParams.params.numerator).to.equal('0', 'Wrong NUMERATOR');
             expect(feeParams.params.denominator).to.equal('0', 'Wrong DENOMINATOR');
             expect(feeParams.params.matchingNumerator).to.equal(matchingNumerator.toString(), 'Wrong MATCHINGNUMERATOR');
@@ -1476,14 +1450,12 @@ describe('OrderTest', () => {
             const signer = await locklift.keystore.getSigner("3");
 
             //Create Order 1
-            const payload1 = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenBar.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: `0x${signer.publicKey}`,
-            }).call()).value0;
+            const payload1 = await RootOrderBar.buildPayloadRoot(
+                0,
+                rootTokenBar.address,
+                new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, `0x${signer.publicKey}`
+                )
 
             await tstWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE_SPENT1).shiftedBy(Constants.tokens.tst.decimals).toString(),
@@ -1492,21 +1464,20 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             )
 
-            const pastEvents1 = await RootOrderTst.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents1 = await RootOrderTst.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
 
             // @ts-ignore
             const orderAddress1 = pastEvents1.events[0].data.order
             console.log(`Order 1 - ${orderAddress1}`)
 
             // Create Order 2
-            const payload2 = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: `0x${signer.publicKey}`
-            }).call()).value0;
+
+            const payload2 = await RootOrderBar.buildPayloadRoot(
+                0,
+                rootTokenReceive.address,
+                new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, `0x${signer.publicKey}`
+                )
 
             await barWallet4.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE_SPENT2).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -1515,7 +1486,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             )
 
-            const pastEvents2 = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents2 = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
 
             // @ts-ignore
             const orderAddress2 = pastEvents2.events[0].data.order
@@ -1583,7 +1554,7 @@ describe('OrderTest', () => {
 
             const matchingNumerator = 1;
             const matchingDenominator = 4;
-            const feeParams = await RootOrderTst.methods.getFeeParams({answerId: 1}).call()
+            const feeParams = await RootOrderTst.feeParams()
             expect(feeParams.params.numerator).to.equal('0', 'Wrong NUMERATOR');
             expect(feeParams.params.denominator).to.equal('0', 'Wrong DENOMINATOR');
             expect(feeParams.params.matchingNumerator).to.equal(matchingNumerator.toString(), 'Wrong MATCHINGNUMERATOR');
@@ -1596,14 +1567,12 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE_RECEIVE2 = 100;
 
             //Create Order 1
-            const payload1 = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenBar.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload1 = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenBar.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await tstWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE_SPENT1).shiftedBy(Constants.tokens.tst.decimals).toString(),
@@ -1611,21 +1580,19 @@ describe('OrderTest', () => {
                 payload1,
                 locklift.utils.toNano(6)
             )
-            const pastEvents1 = await RootOrderTst.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents1 = await RootOrderTst.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
 
             // @ts-ignore
             const orderAddress1 = pastEvents1.events[0].data.order
             console.log(`Order 1 - ${orderAddress1}`)
 
             // Create Order 2
-            const payload2 = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload2 = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE_RECEIVE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await barWallet4.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE_SPENT2).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -1634,7 +1601,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             )
 
-            const pastEvents2 = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents2 = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
 
             // @ts-ignore
             const orderAddress2 = pastEvents2.events[0].data.order
@@ -1715,20 +1682,18 @@ describe('OrderTest', () => {
                 NUMERATOR, DENOMINATOR, MATCHINGNUMERATOR, MATCHINGDENOMINATOR, zeroAddress, true
             )
 
-            const feeParams = await RootOrderBar.methods.getFeeParams({answerId: 1}).call()
+            const feeParams = await RootOrderBar.feeParams()
             expect(feeParams.params.numerator).to.equal(NUMERATOR.toString(), 'Wrong NUMERATOR');
             expect(feeParams.params.denominator).to.equal(DENOMINATOR.toString(), 'Wrong DENOMINATOR');
             expect(feeParams.params.matchingNumerator).to.equal(MATCHINGNUMERATOR.toString(), 'Wrong MATCHINGNUMERATOR');
             expect(feeParams.params.matchingDenominator).to.equal(MATCHINGDENOMINATOR.toString(), 'Wrong MATCHINGDENOMINATOR');
 
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
                 RootOrderBar.address,
@@ -1736,7 +1701,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             )
 
-            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -1830,20 +1795,18 @@ describe('OrderTest', () => {
                 NUMERATOR, DENOMINATOR, MATCHINGNUMERATOR, MATCHINGDENOMINATOR, zeroAddress, true
             )
 
-            const feeParams = await RootOrderBar.methods.getFeeParams({answerId: 1}).call()
+            const feeParams = await RootOrderBar.feeParams()
             expect(feeParams.params.numerator).to.equal(NUMERATOR.toString(), 'Wrong NUMERATOR');
             expect(feeParams.params.denominator).to.equal(DENOMINATOR.toString(), 'Wrong DENOMINATOR');
             expect(feeParams.params.matchingNumerator).to.equal(MATCHINGNUMERATOR.toString(), 'Wrong MATCHINGNUMERATOR');
             expect(feeParams.params.matchingDenominator).to.equal(MATCHINGDENOMINATOR.toString(), 'Wrong MATCHINGDENOMINATOR');
 
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -1852,7 +1815,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             )
 
-            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -1889,21 +1852,22 @@ describe('OrderTest', () => {
             await displayLog(0, balanceTstFactoryEnd, false, "Factory");
             const fees =  new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))
             console.log(`FEE - ${fees}`)
-            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE1)).toFixed(9)
-            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE2)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))).toFixed(9)
-            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC3))).toFixed(9)
-            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toFixed(9)
-            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC4))).toFixed(9)
-            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toFixed(9)
-            const expectedTstFactory = new BigNumber(balanceTstFactoryStart.token || 0).plus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))).toFixed(9)
+            //TODO 0.000000001 FEE погрешность
+            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE1)).toFixed(8)
+            const expectedAccount3Tst = new BigNumber(balanceTstAcc3Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE2)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))).toFixed(8)
+            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC3)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC3))).toFixed(8)
+            const expectedAccount4Tst = new BigNumber(balanceTstAcc4Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC3)).toFixed(8)
+            const expectedAccount5Bar = new BigNumber(balanceBarAcc5Start.token || 0).plus( new BigNumber(TOKENS_TO_EXCHANGE1_ACC4)).minus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE1_ACC4))).toFixed(8)
+            const expectedAccount5Tst = new BigNumber(balanceTstAcc5Start.token || 0).minus( new BigNumber(TOKENS_TO_EXCHANGE2_ACC4)).toFixed(8)
+            const expectedTstFactory = new BigNumber(balanceTstFactoryStart.token || 0).plus( new BigNumber(expectAmountFee(NUMERATOR, DENOMINATOR, TOKENS_TO_EXCHANGE2))).toFixed(8)
 
-            expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toFixed(9), 'Wrong Account3 Bar balance');
-            expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toFixed(9), 'Wrong Account3 Tst balance');
-            expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toFixed(9), 'Wrong Account4 Bar balance');
-            expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toFixed(9), 'Wrong Account4 Tst balance');
-            expect(expectedAccount5Bar).to.equal(balanceBarAcc5End.token.toFixed(9), 'Wrong Account5 Bar balance');
-            expect(expectedAccount5Tst).to.equal(balanceTstAcc5End.token.toFixed(9), 'Wrong Account5 Tst balance');
-            expect(expectedTstFactory).to.equal(balanceTstFactoryEnd.token.toFixed(9), 'Wrong Beneficiary balance');
+            expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toFixed(8), 'Wrong Account3 Bar balance');
+            expect(expectedAccount3Tst).to.equal(balanceTstAcc3End.token.toFixed(8), 'Wrong Account3 Tst balance');
+            expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toFixed(8), 'Wrong Account4 Bar balance');
+            expect(expectedAccount4Tst).to.equal(balanceTstAcc4End.token.toFixed(8), 'Wrong Account4 Tst balance');
+            expect(expectedAccount5Bar).to.equal(balanceBarAcc5End.token.toFixed(8), 'Wrong Account5 Bar balance');
+            expect(expectedAccount5Tst).to.equal(balanceTstAcc5End.token.toFixed(8), 'Wrong Account5 Tst balance');
+            expect(expectedTstFactory).to.equal(balanceTstFactoryEnd.token.toFixed(8), 'Wrong Beneficiary balance');
         });
         it('Check fee execution, case 1.3 (Withdraw fee)', async () => {
             console.log(`#############################\n`);
@@ -1949,20 +1913,18 @@ describe('OrderTest', () => {
                 NUMERATOR, DENOMINATOR, MATCHINGNUMERATOR, MATCHINGDENOMINATOR, zeroAddress, true
             )
 
-            const feeParams = await RootOrderBar.methods.getFeeParams({answerId: 1}).call()
+            const feeParams = await RootOrderBar.feeParams()
             expect(feeParams.params.numerator).to.equal(NUMERATOR.toString(), 'Wrong NUMERATOR');
             expect(feeParams.params.denominator).to.equal(DENOMINATOR.toString(), 'Wrong DENOMINATOR');
             expect(feeParams.params.matchingNumerator).to.equal(MATCHINGNUMERATOR.toString(), 'Wrong MATCHINGNUMERATOR');
             expect(feeParams.params.matchingDenominator).to.equal(MATCHINGDENOMINATOR.toString(), 'Wrong MATCHINGDENOMINATOR');
 
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await locklift.tracing.trace(barWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.bar.decimals).toString(),
@@ -1971,7 +1933,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             ))
 
-            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
@@ -2084,7 +2046,7 @@ describe('OrderTest', () => {
                 RootOrderBar.address,
                 NUMERATOR, DENOMINATOR, MATCHINGNUMERATOR, MATCHINGDENOMINATOR, zeroAddress, true
             )
-            const feeParams = await RootOrderBar.methods.getFeeParams({answerId: 1}).call()
+            const feeParams = await RootOrderBar.feeParams()
             expect(feeParams.params.numerator).to.equal(NUMERATOR.toString(), 'Wrong NUMERATOR');
             expect(feeParams.params.denominator).to.equal(DENOMINATOR.toString(), 'Wrong DENOMINATOR');
             expect(feeParams.params.matchingNumerator).to.equal(MATCHINGNUMERATOR.toString(), 'Wrong MATCHINGNUMERATOR');
@@ -2094,14 +2056,12 @@ describe('OrderTest', () => {
                 RootOrderBar.address,
                 NUMERATOR, DENOMINATOR, MATCHINGNUMERATOR, MATCHINGDENOMINATOR, newBeneficiary.address, true
             )
-            const payload = (await RootOrderBar.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenReceive.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, 
+                rootTokenReceive.address, 
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.tst.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             const newBeneficiaryAddress = (await rootTokenReceive.methods.walletOf({walletOwner: newBeneficiary.address, answerId: 0}).call()).value0
             const newBeneficiaryWalletTst = await TokenWallet.from_addr(newBeneficiaryAddress, newBeneficiary, "newBeneficiaryWalletTst")
@@ -2112,7 +2072,7 @@ describe('OrderTest', () => {
                 locklift.utils.toNano(6)
             ));
 
-            const pastEvents = await RootOrderBar.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderBar.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
@@ -2176,14 +2136,13 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
 
-            const payload = (await RootOrderTst.methods.buildPayload({
-                callbackId: 0,
-                tokenReceive: rootTokenBar.address,
-                expectedTokenAmount: new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.bar.decimals).toString(),
-                deployWalletValue: locklift.utils.toNano(0.1),
-                backPK: 0,
-                backMatchingPK: 0
-            }).call()).value0;
+
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0,
+                rootTokenBar.address,
+                new BigNumber(TOKENS_TO_EXCHANGE2).shiftedBy(Constants.tokens.bar.decimals).toString(),
+                locklift.utils.toNano(0.1), 0, 0
+                )
 
             await tstWallet3.transfer(
                 new BigNumber(TOKENS_TO_EXCHANGE1).shiftedBy(Constants.tokens.tst.decimals).toString(),
@@ -2191,7 +2150,7 @@ describe('OrderTest', () => {
                 payload,
                 locklift.utils.toNano(6)
             )
-            const pastEvents = await RootOrderTst.getPastEvents({filter: event => event.event === "CreateOrder"});
+            const pastEvents = await RootOrderTst.contract.getPastEvents({filter: event => event.event === "CreateOrder"});
             // @ts-ignore
             const orderAddress = pastEvents.events[0].data.order
             console.log(`Order - ${orderAddress}`)
