@@ -1,9 +1,6 @@
-import {Address, Contract, Signer} from "locklift";
+import {Address, Contract, Signer, toNano} from "locklift";
 import {FactorySource} from "../../../build/factorySource";
 import {Account} from 'locklift/everscale-client'
-import BigNumber from "bignumber.js";
-const {toNano} = locklift.utils;
-
 
 export class OrderWrapper {
     public contract: Contract<FactorySource["Order"]> | Contract<FactorySource["TestNewOrderBad"]>;
@@ -47,7 +44,7 @@ export class OrderWrapper {
         return (await this.contract.methods.buildPayload(
             {
                 callbackId: callbackId,
-                deployWalletValue: locklift.utils.toNano(deployWalletValue)
+                deployWalletValue: toNano(deployWalletValue)
             }).call()).value0;
     }
 
@@ -63,16 +60,16 @@ export class OrderWrapper {
 
             return await locklift.tracing.trace(this.contract.methods.swap({
                 callbackId: callbackId,
-                deployWalletValue: locklift.utils.toNano(deployWalletValue)
+                deployWalletValue: toNano(deployWalletValue)
             }).send({
-                amount: locklift.utils.toNano(6), from: from
+                amount: toNano(6), from: from
             }), {allowedCodes: {compute: [60, 302, 100]}})
         } else {
             return await this.contract.methods.swap({
                 callbackId: callbackId,
-                deployWalletValue: locklift.utils.toNano(deployWalletValue)
+                deployWalletValue: toNano(deployWalletValue)
             }).send({
-                amount: locklift.utils.toNano(6), from: from
+                amount: toNano(6), from: from
             })
         }
     }
@@ -81,7 +78,7 @@ export class OrderWrapper {
         callbackId: number = 0
     ){
         return await this.contract.methods.cancel({callbackId: callbackId}).send({
-                amount: locklift.utils.toNano(3), from: this._owner.address
+                amount: toNano(3), from: this._owner.address
             })
     }
 
@@ -120,10 +117,10 @@ export class OrderWrapper {
         if (trace){
             return await locklift.tracing.trace(this.contract.methods.proxyTokensTransfer({
                 _tokenWallet: _tokenWallet,
-                _gasValue: locklift.utils.toNano(_gasValue),
+                _gasValue: toNano(_gasValue),
                 _amount: _amount,
                 _recipient: _recipient,
-                _deployWalletValue: locklift.utils.toNano(_deployWalletValue),
+                _deployWalletValue: toNano(_deployWalletValue),
                 _remainingGasTo: _remainingGasTo,
                 _notify: _notify,
                 _payload: _payload
@@ -131,10 +128,10 @@ export class OrderWrapper {
         } else {
                 return await this.contract.methods.proxyTokensTransfer({
                 _tokenWallet: _tokenWallet,
-                _gasValue: locklift.utils.toNano(_gasValue),
+                _gasValue: toNano(_gasValue),
                 _amount: _amount,
                 _recipient: _recipient,
-                _deployWalletValue: locklift.utils.toNano(_deployWalletValue),
+                _deployWalletValue: toNano(_deployWalletValue),
                 _remainingGasTo: _remainingGasTo,
                 _notify: _notify,
                 _payload: _payload
@@ -175,20 +172,20 @@ export class OrderWrapper {
             return await locklift.tracing.trace(
                 this.contract.methods.matching({
                 callbackId: callbackId,
-                deployWalletValue: locklift.utils.toNano(deployWalletValue),
+                deployWalletValue: toNano(deployWalletValue),
                 limitOrder: limitOrder
             }).send({
-                amount: locklift.utils.toNano(6), from: from
+                amount: toNano(6), from: from
             }),  {allowedCodes:{compute:[60]}}
             )
         } else {
             return await
                 this.contract.methods.matching({
                 callbackId: callbackId,
-                deployWalletValue: locklift.utils.toNano(deployWalletValue),
+                deployWalletValue: toNano(deployWalletValue),
                 limitOrder: limitOrder
             }).send({
-                amount: locklift.utils.toNano(6), from: from
+                amount: toNano(6), from: from
             })
         }
     }

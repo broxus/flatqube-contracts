@@ -3,8 +3,6 @@ import {Address, Contract} from "locklift";
 import {FactorySource} from "../../../build/factorySource";
 import {Account} from 'locklift/everscale-client'
 import {OrderWrapper} from "./order";
-const {toNano} = locklift.utils;
-
 
 export class OrderRoot {
     public contract: Contract<FactorySource["OrderRoot"]>;
@@ -73,14 +71,10 @@ export class OrderRoot {
         }).call()).value0;
     }
 
-    async getEvents(event_name: string) {
+    async getEventCreateOrder(accountOwner: Account){
+        const pastEvents = await this.contract.getPastEvents({filter: (event) => event.event === "CreateOrder"});
         // @ts-ignore
-        return (await this.contract.getPastEvents({filter: (event) => event.event === event_name})).events;
+        const orderAddress = pastEvents.events[0].data.order;
+        return  await OrderWrapper.from_addr(orderAddress, accountOwner);
     }
-
-    async getEventsCreateOrder(owner: Account) {
-        // @ts-ignore
-        return await OrderWrapper.from_addr((this.getEvents("CreateOrder"))[0].data.order, owner);
-    }
-
 }

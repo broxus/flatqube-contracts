@@ -1,9 +1,6 @@
-import {Address, Contract, Signer, zeroAddress} from "locklift";
+import {Address, Contract, toNano, zeroAddress} from "locklift";
 import {FactorySource} from "../../../build/factorySource";
 import {Account} from 'locklift/everscale-client'
-import BigNumber from "bignumber.js";
-const {toNano} = locklift.utils;
-
 
 export class OrderFactory {
     public contract: Contract<FactorySource["OrderFactory"]>;
@@ -49,7 +46,7 @@ export class OrderFactory {
               beneficiary: beneficiary
             }
           }).send({
-            amount: locklift.utils.toNano(5),
+            amount: toNano(5),
             from: owner.address
             }))
       } else {
@@ -63,11 +60,10 @@ export class OrderFactory {
               beneficiary: beneficiary
             }
           }).send({
-            amount: locklift.utils.toNano(5),
+            amount: toNano(5),
             from: owner.address
             })
       }
-
     }
 
     async setRootFeeParams(
@@ -92,7 +88,7 @@ export class OrderFactory {
               beneficiary: beneficiary
             }
           }).send({
-            amount: locklift.utils.toNano(5),
+            amount: toNano(5),
             from: owner.address
             }))
       } else {
@@ -107,11 +103,10 @@ export class OrderFactory {
               beneficiary: beneficiary
             }
           }).send({
-            amount: locklift.utils.toNano(5),
+            amount: toNano(5),
             from: owner.address
             })
       }
-
     }
 
     async setEmergency(
@@ -124,7 +119,7 @@ export class OrderFactory {
             orderAddress  : orderAddress,
             manager: manager
           }).send({
-            amount: locklift.utils.toNano(1),
+            amount: toNano(1),
             from: this._owner.address
             })
     }
@@ -145,8 +140,8 @@ export class OrderFactory {
                 recipient: recipient,
                 sendGasTo: sendGasTo,
                 tokenWallet: tokenWallet,
-                deployWalletValue: locklift.utils.toNano(deployWalletValue)
-            }).send({amount: locklift.utils.toNano(2), from: owner.address}),{allowedCodes: {compute: [60]}})
+                deployWalletValue: toNano(deployWalletValue)
+            }).send({amount: toNano(2), from: owner.address}),{allowedCodes: {compute: [60]}})
 
         } else {
             return await this.contract.methods.withdrawFee({
@@ -154,11 +149,9 @@ export class OrderFactory {
                 recipient: recipient,
                 sendGasTo: sendGasTo,
                 tokenWallet: tokenWallet,
-                deployWalletValue: locklift.utils.toNano(deployWalletValue)
-            }).send({amount: locklift.utils.toNano(2), from: owner.address}),{allowedCodes: {compute: [60]}}
-
+                deployWalletValue: toNano(deployWalletValue)
+            }).send({amount: toNano(2), from: owner.address}),{allowedCodes: {compute: [60]}}
         }
-
     }
 
     async setOrderCode(
@@ -166,7 +159,7 @@ export class OrderFactory {
     ) {
         const owner = this._owner as Account;
         return await locklift.tracing.trace(this.contract.methods.setOrderCode({_orderCode: code})
-        .send({amount: locklift.utils.toNano(1.1), from: owner.address}))
+        .send({amount: toNano(1.1), from: owner.address}))
 
     }
     async updateOrder(
@@ -174,7 +167,7 @@ export class OrderFactory {
     ) {
         const owner = this._owner as Account;
         return await locklift.tracing.trace(this.contract.methods.upgradeOrder({order: order})
-        .send({amount: locklift.utils.toNano(1.1), from: owner.address}))
+        .send({amount: toNano(1.1), from: owner.address}))
     }
 
         async setOrderRootCode(
@@ -182,7 +175,7 @@ export class OrderFactory {
     ) {
         const owner = this._owner as Account;
         return await locklift.tracing.trace(this.contract.methods.setOrderRootCode({_orderRootCode: code})
-        .send({amount: locklift.utils.toNano(1.1), from: owner.address}))
+        .send({amount: toNano(1.1), from: owner.address}))
 
     }
     async upgradeOrderRoot(
@@ -190,7 +183,7 @@ export class OrderFactory {
     ) {
         const owner = this._owner as Account;
         return await locklift.tracing.trace(this.contract.methods.upgradeOrderRoot({orderAddress: root})
-        .send({amount: locklift.utils.toNano(1.1), from: owner.address}))
+        .send({amount: toNano(1.1), from: owner.address}))
     }
 
     async upgrade(
@@ -205,9 +198,6 @@ export class OrderFactory {
                 sendGasTo: sendGasTo,
                 newVersion: newVersion
             })
-        .send({amount: locklift.utils.toNano(1.1), from: owner.address}))
-
+        .send({amount: toNano(1.1), from: owner.address}))
     }
-
-
 }
