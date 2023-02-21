@@ -52,13 +52,13 @@ const Constants = {
     bar: {
       name: 'Bar',
       symbol: 'Bar',
-      decimals: 9,
+      decimals: 6,
       upgradeable: true
     },
     qwe: {
       name: 'QWE',
       symbol: 'Qwe',
-      decimals: 18,
+      decimals: 6,
       upgradeable: true
     },
     tst: {
@@ -289,7 +289,7 @@ async function expectedDepositLiquidity(pairAddress, contractName, tokens, amoun
 
   let LP_REWARD = "0";
 
-  if (contractName === "DexStablePair" || contractName === "DexStablePool") {
+  if (contractName === "DexStablePair" || contractName === "DexStablePool" || contractName === "DexStablePoolPrev") {
     const expected = await pair.call({
       method: 'expectedDepositLiquidityV2',
       params: {
