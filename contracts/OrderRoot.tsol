@@ -61,8 +61,15 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         }(address(this), spentToken, deployer);
     }
 
-    function onTokenWalletReceive(address _wallet) external {}
-    function onTokenWalletBeneficiary(address _wallet) external {}
+    function onTokenWalletReceive(address _wallet) external {
+        require(msg.sender.value != 0, OrderErrors.NOT_EMPTY_MSG_SENDER);
+        _wallet.transfer(0, false, MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS);
+    }
+
+    function onTokenWalletBeneficiary(address _wallet) external {
+        require(msg.sender.value != 0, OrderErrors.NOT_EMPTY_MSG_SENDER);
+        _wallet.transfer(0, false, MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS);
+    }
 
     onBounce(TvmSlice body) external view {
         tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
@@ -146,6 +153,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
 
     function buildPayload(
         uint64 callbackId,
+        address user,
         address tokenReceive,
         uint128 expectedTokenAmount,
         uint128 deployWalletValue,
@@ -158,6 +166,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
 
         TvmBuilder builder;
         builder.store(callbackId);
+        builder.store(user);
         builder.store(tokenReceive);
         builder.store(expectedTokenAmount);
         builder.store(deployWalletValue);
@@ -188,23 +197,27 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         if (
             msg.sender.value >= OrderGas.DEPLOY_ORDER_MIN_VALUE &&
             msg.sender == spentTokenWallet &&
-            payloadSlice.bits() == 523 && dataPK.bits() == 512
+            payloadSlice.bits() == 790 && dataPK.bits() == 512
         ){
-            (
+            (   address user,
                 address receiveToken,
                 uint128 expectedAmount,
                 uint128 deployWalletValue
-            ) = payloadSlice.decode(address, uint128, uint128);
+            ) = payloadSlice.decode(address, address, uint128, uint128);
+
+            if (user.value == 0) {
+                user = sender;
+            }
 
             address orderAddress = _createOrder(
                 expectedAmount,
                 amount,
-                sender,
+                user,
                 receiveToken,
                 dataPK
             );
 
-            emit CreateOrder(orderAddress, tokenRoot, amount, receiveToken, expectedAmount);
+            emit CreateOrder(orderAddress, user, tokenRoot, amount, receiveToken, expectedAmount);
 
             if (callbackId > 0) {
                 IOrderRootCallbacks(sender).onOrderCreateOrderSuccess{
@@ -218,7 +231,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: OrderRoot.onTokenWalletReceive
-            }(sender, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
+            }(user, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
             ITokenRoot(receiveToken).deployWallet {
                 value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
@@ -369,18 +382,18 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
 
         if (_oldVersion == 0){
             ITokenRoot(spentToken).deployWallet{
-                    value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
-                    flag: MsgFlag.SENDER_PAYS_FEES,
-                    callback: OrderRoot.onTokenWallet
+                value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
+                flag: MsgFlag.SENDER_PAYS_FEES,
+                callback: OrderRoot.onTokenWallet
             }(
                 address(this),
                 OrderGas.DEPLOY_EMPTY_WALLET_GRAMS
             );
 
             deployer.transfer({
-                    value: 0,
-                    flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
-                    bounce: false
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+                bounce: false
             });
         } else {
             factory.transfer({

@@ -55,6 +55,7 @@ export class OrderRoot {
 
     async buildPayloadRoot(
         callbackId: number | string,
+        user: Address,
         tokenReceive: Address,
         expectedTokenAmount: number | string,
         deployWalletValue: number | string,
@@ -63,6 +64,7 @@ export class OrderRoot {
     ) {
         return (await this.contract.methods.buildPayload({
             callbackId: callbackId,
+            user: user,
             tokenReceive: tokenReceive,
             expectedTokenAmount: expectedTokenAmount,
             deployWalletValue: deployWalletValue,
