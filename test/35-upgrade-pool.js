@@ -55,7 +55,7 @@ const loadPoolData = async (pool, contractName) => {
 
     const token_roots = await pool.call({method: 'getTokenRoots'});
     data.lp_root = token_roots.lp;
-    if (contractName === 'DexStablePool') {
+    if (contractName === 'DexStablePool' || contractName === 'DexStablePoolPrev') {
         data.roots = token_roots.roots;
     } else {
         data.roots = [token_roots.left, token_roots.right];
@@ -65,7 +65,7 @@ const loadPoolData = async (pool, contractName) => {
 
     const token_wallets = await pool.call({method: 'getTokenWallets'});
     data.lp_wallet = token_wallets.lp;
-    if (contractName === 'DexStablePool') {
+    if (contractName === 'DexStablePool' || contractName === 'DexStablePoolPrev') {
         data.token_wallets = token_wallets.token_wallets;
     } else {
         data.token_wallets = [token_wallets.left, token_wallets.right];
@@ -81,7 +81,7 @@ const loadPoolData = async (pool, contractName) => {
 
     const balances = await pool.call({method: 'getBalances'});
     data.lp_supply = balances.lp_supply.toString();
-    if (contractName === 'DexStablePool') {
+    if (contractName === 'DexStablePool' || contractName === 'DexStablePoolPrev') {
         data.balances = balances.balances.map((bal) => bal.toString());
     } else {
         data.balances = [balances.left_balance.toString(), balances.right_balance.toString()];
