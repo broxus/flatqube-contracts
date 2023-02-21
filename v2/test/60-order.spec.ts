@@ -59,6 +59,7 @@ describe('OrderTest', () => {
     let dexPair: Contract<FactorySource['DexPair']>;
 
     let account1: Account;
+
     let account2: Account;
     let barWallet2: TokenWallet;
     let tstWallet2: TokenWallet;
@@ -78,12 +79,12 @@ describe('OrderTest', () => {
     let account6: Account;
     let barWallet6: TokenWallet;
     let tstWallet6: TokenWallet;
-    
-    let FactoryWalletTst: TokenWallet;
 
     let account7: Account;
+
     let account8: Account;
 
+    let FactoryWalletTst: TokenWallet;
     let tokenFactory: Contract<FactorySource['TokenFactory']>;
     let dexAccount: Contract<FactorySource['DexAccount']>;
 
@@ -295,9 +296,9 @@ describe('OrderTest', () => {
 
             TOKENS_TO_EXCHANGE2_ACC3 = 10;
             TOKENS_TO_EXCHANGE2_ACC4 = 10;
-            
+
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -375,7 +376,7 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2_ACC5 = 10;
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -460,7 +461,7 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2_ACC5 = 20;
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), 0, 0
                 )
 
@@ -521,15 +522,20 @@ describe('OrderTest', () => {
         it('Check create order and closed, case 3.1', async () => {
             console.log(`#############################`);
             console.log(``);
+
             const balanceBarAcc3Start = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3Start = await accountTokenBalances(tstWallet3, tstDecimals);
             await displayLog(balanceBarAcc3Start, balanceTstAcc3Start, true, "Account3");
+
+            const balanceBarAcc4Start = await accountTokenBalances(barWallet4, barDecimals);
+            const balanceTstAcc4Start = await accountTokenBalances(tstWallet4, tstDecimals);
+            await displayLog(balanceBarAcc4Start, balanceTstAcc4Start, true, "Account4");
 
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, account4.address, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -537,15 +543,26 @@ describe('OrderTest', () => {
                 numberString(TOKENS_TO_EXCHANGE1, barDecimals), RootOrderBar.address, payload, toNano(6)
             )
 
-            const order = await RootOrderBar.getEventCreateOrder(account3);
+            const order = await RootOrderBar.getEventCreateOrder(account4);
             await order.cancel()
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
             await displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
 
-            expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
+            const balanceBarAcc4End = await accountTokenBalances(barWallet4, barDecimals);
+            const balanceTstAcc4End = await accountTokenBalances(tstWallet4, tstDecimals);
+            await displayLog(balanceBarAcc4End, balanceTstAcc4End, false, "Account4");
+
+            const expectedAccount3Bar = new BigNumber(balanceBarAcc3Start.token || 0).minus(new BigNumber(TOKENS_TO_EXCHANGE1)).toString()
+            const expectedAccount4Bar = new BigNumber(balanceBarAcc4Start.token || 0).plus(new BigNumber(TOKENS_TO_EXCHANGE1)).toString()
+
+            expect(expectedAccount3Bar).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
             expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
+
+            expect(expectedAccount4Bar).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
+            expect(balanceTstAcc4Start.token.toString()).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
+
             expect(5).to.equal((Number(await order.status())), 'Wrong status Limit order');
             expect(0).to.equal(Number(await(locklift.provider.getBalance(order.address))), "Wrong Order Ever balance")
         });
@@ -565,7 +582,7 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2_ACC3 = 10;
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), 0, 0
                 )
 
@@ -616,7 +633,7 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2 = 30;
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), 0, 0
                 )
 
@@ -657,22 +674,20 @@ describe('OrderTest', () => {
             const balanceTstAcc3Start = await accountTokenBalances(tstWallet3, tstDecimals);
             await displayLog(balanceBarAcc3Start, balanceTstAcc3Start, true, "Account3");
 
-            const balanceBarAcc4Start = await accountTokenBalances(barWallet4, barDecimals);
-            const balanceTstAcc4Start = await accountTokenBalances(tstWallet4, tstDecimals);
-            await displayLog(balanceBarAcc4Start, balanceTstAcc4Start, true, 'Account4');
-
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 20;
 
             const signer = await locklift.keystore.getSigner("3");
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), `0x${signer.publicKey}`, 0)
 
             await barWallet3.transfer(
                 numberString(TOKENS_TO_EXCHANGE1, barDecimals), RootOrderBar.address, payload, toNano(6)
             )
             const order = await RootOrderBar.getEventCreateOrder(account3);
+
+            console.log(`Limit order: ${order.address}`);
             const expected = await dexPair.methods.expectedExchange({
                 answerId: 1,
                 amount: numberString(TOKENS_TO_EXCHANGE1, barDecimals),
@@ -701,16 +716,12 @@ describe('OrderTest', () => {
             const balanceTstAcc3Start = await accountTokenBalances(tstWallet3, tstDecimals);
             await displayLog(balanceBarAcc3Start, balanceTstAcc3Start, true, "Account3");
 
-            const balanceBarAcc4Start = await accountTokenBalances(barWallet4, barDecimals);
-            const balanceTstAcc4Start = await accountTokenBalances(tstWallet4, tstDecimals);
-            await displayLog(balanceBarAcc4Start, balanceTstAcc4Start, true, 'Account4');
-
             TOKENS_TO_EXCHANGE1 = 10;
             TOKENS_TO_EXCHANGE2 = 100;
             const signer = await locklift.keystore.getSigner("3");
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), `0x${signer.publicKey}`, 0)
 
             await barWallet3.transfer(
@@ -751,7 +762,7 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2 = 20;
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.2), 0, 0
             )
 
@@ -806,7 +817,7 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2 = 100;
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.2), 0, 0
             )
 
@@ -853,7 +864,7 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2 = 20;
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -913,7 +924,7 @@ describe('OrderTest', () => {
             await factoryOrder.setOrderCode(BadOrderCode)
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -1019,7 +1030,7 @@ describe('OrderTest', () => {
 
             //Create Order 1
             const payload1 = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenBar.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE1, barDecimals),
+                0, zeroAddress, rootTokenBar.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE1, barDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -1031,7 +1042,7 @@ describe('OrderTest', () => {
 
             // Create Order 2
             const payload2 = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE2, tstDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -1126,7 +1137,7 @@ describe('OrderTest', () => {
 
             //Create Order 1
             const payload1 = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenBar.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE1, barDecimals),
+                0, zeroAddress, rootTokenBar.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE1, barDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -1138,7 +1149,7 @@ describe('OrderTest', () => {
 
             // Create Order 2
             const payload2 = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE2, tstDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -1231,7 +1242,7 @@ describe('OrderTest', () => {
 
             //Create Order 1
             const payload1 = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenBar.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE1, barDecimals),
+                0, zeroAddress, rootTokenBar.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE1, barDecimals),
                 toNano(0.1), 0, `0x${signer.publicKey}`
                 )
 
@@ -1243,7 +1254,7 @@ describe('OrderTest', () => {
 
             // Create Order 2
             const payload2 = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE2, tstDecimals),
                 toNano(0.1), 0, `0x${signer.publicKey}`
             )
 
@@ -1324,7 +1335,7 @@ describe('OrderTest', () => {
 
             //Create Order 1
             const payload1 = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenBar.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE1, barDecimals),
+                0, zeroAddress, rootTokenBar.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE1, barDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -1335,7 +1346,7 @@ describe('OrderTest', () => {
 
             // Create Order 2
             const payload2 = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE2, tstDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -1421,7 +1432,7 @@ describe('OrderTest', () => {
             expect(feeParams.params.matchingDenominator).to.equal(MATCHINGDENOMINATOR.toString(), 'Wrong MATCHINGDENOMINATOR');
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -1518,7 +1529,7 @@ describe('OrderTest', () => {
             expect(feeParams.params.matchingDenominator).to.equal(MATCHINGDENOMINATOR.toString(), 'Wrong MATCHINGDENOMINATOR');
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -1621,7 +1632,7 @@ describe('OrderTest', () => {
             expect(feeParams.params.matchingDenominator).to.equal(MATCHINGDENOMINATOR.toString(), 'Wrong MATCHINGDENOMINATOR');
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -1744,7 +1755,7 @@ describe('OrderTest', () => {
                 NUMERATOR, DENOMINATOR, MATCHINGNUMERATOR, MATCHINGDENOMINATOR, newBeneficiary.address, true
             )
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 toNano(0.1), 0, 0
             )
 
@@ -1807,7 +1818,7 @@ describe('OrderTest', () => {
             TOKENS_TO_EXCHANGE2 = 20;
 
             const payload = await RootOrderBar.buildPayloadRoot(
-                0, rootTokenBar.address, numberString(TOKENS_TO_EXCHANGE2, barDecimals),
+                0, zeroAddress, rootTokenBar.address, numberString(TOKENS_TO_EXCHANGE2, barDecimals),
                 toNano(0.1), 0, 0
             )
 

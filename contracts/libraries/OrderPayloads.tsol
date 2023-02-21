@@ -1,6 +1,10 @@
 pragma ever-solidity >= 0.62.0;
 
 import "../libraries/OrderOperationTypes.tsol";
+import "../libraries/OrderStatus.tsol";
+import "../libraries/DexOperationTypes.tsol";
+import "../libraries/DexOperationStatusV2.tsol";
+import "../libraries/PairPayload.tsol";
 
 library OrderPayloads {
 
@@ -15,6 +19,42 @@ library OrderPayloads {
         builder.store(deployWalletValue);
 
         return builder.toCell();
+    }
+
+    function buildSwapExchangePayload(
+        uint64 _callbackId,
+        uint128 _deployWalletValue,
+        uint128 _expectedAmount,
+        address _owner,
+        address _sender,
+        address _recipient,
+        address _outcoming,
+        address _referrer
+    ) public returns(TvmCell) {
+
+        TvmBuilder successBuilder;
+        successBuilder.store(OrderOperationTypes.SWAP_SUCCESS);
+        successBuilder.store(_callbackId);
+        successBuilder.store(_owner);
+        successBuilder.store(_deployWalletValue);
+
+        TvmBuilder cancelBuilder;
+        cancelBuilder.store(OrderOperationTypes.SWAP_CANCEL);
+        cancelBuilder.store(_callbackId);
+        cancelBuilder.store(_sender);
+
+        TvmCell pairPayload = PairPayload.buildExchangePayloadV2(
+            _callbackId,
+            _deployWalletValue,
+            _expectedAmount,
+            _recipient,
+            _outcoming,
+            _referrer,
+            successBuilder.toCell(),
+            cancelBuilder.toCell()
+        );
+
+        return pairPayload;
     }
 
     function buildMatchExchangePayload(
@@ -49,7 +89,7 @@ library OrderPayloads {
         return builder.toCell();
     }
 
-    function decodeOnAcceptTokenTransferData (TvmCell _payload) public returns(
+    function decodeOnAcceptTokenTransferData (TvmCell _payload, uint8 state) public returns (
         bool,
         uint8,
         uint64,
@@ -59,6 +99,18 @@ library OrderPayloads {
         uint128
     ){
         TvmSlice payloadSlice = _payload.toSlice();
+        if (state == OrderStatus.SwapInProgress && payloadSlice.bits() >= 16) {
+            (uint8 payloadOperationType, uint8 _op) = payloadSlice.decode(uint8, uint8);
+            if(
+                _op == DexOperationTypes.EXCHANGE_V2 && payloadSlice.refs() >= 1 &&
+                (
+                    payloadOperationType == DexOperationStatusV2.SUCCESS ||
+                    payloadOperationType == DexOperationStatusV2.CANCEL
+                )
+            ){
+                payloadSlice = payloadSlice.loadRefAsSlice();
+            }
+        }
 
         bool isValid = payloadSlice.bits() >= 200;
 
