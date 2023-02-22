@@ -1497,28 +1497,42 @@ PUSHCONT {
 			OR
 			PUSHCONT {
 				.loc ../contracts/Order.tsol, 331
-				PUSH S13
-				CALLREF {
-					CALL $_expectedSpendAmount_94832ad6_internal_macro$
+				GETGLOB 28
+				NEQINT 7
+				PUSHCONT {
+					.loc ../contracts/Order.tsol, 332
+					PUSH S13
+					CALLREF {
+						CALL $_expectedSpendAmount_94832ad6_internal_macro$
+					}
+					POP S3
+					POP S3
 				}
-				POP S3
-				POP S3
-				.loc ../contracts/Order.tsol, 332
+				PUSHCONT {
+					.loc ../contracts/Order.tsol, 334
+					PUSH S13
+					POP S3
+					.loc ../contracts/Order.tsol, 335
+					PUSHINT 0
+					POP S2
+				}
+				IFELSE
+				.loc ../contracts/Order.tsol, 338
 				PUSHREF {
 				}
-				.loc ../contracts/Order.tsol, 333
+				.loc ../contracts/Order.tsol, 339
 				GETGLOB 28
 				EQINT 7
 				PUSH S11
 				EQINT 3
 				AND
 				PUSHCONT {
-					.loc ../contracts/Order.tsol, 334
+					.loc ../contracts/Order.tsol, 340
 					PUSH3 S6, S7, S8
 					CALLREF {
 						CALL $transferMatchingReward_a99ed683_internal_macro$
 					}
-					.loc ../contracts/Order.tsol, 336
+					.loc ../contracts/Order.tsol, 342
 					PUSHINT 4
 					BLKPUSH 2, 10
 					CALLREF {
@@ -1528,12 +1542,12 @@ PUSHCONT {
 					.loc ../contracts/Order.tsol, 0
 				}
 				IF
-				.loc ../contracts/Order.tsol, 343
+				.loc ../contracts/Order.tsol, 349
 				PUSH S3
 				GETGLOB 20
 				GEQ
 				PUSHCONT {
-					.loc ../contracts/Order.tsol, 344
+					.loc ../contracts/Order.tsol, 350
 					PUSH3 S10, S3, S2
 					PUSH S10
 					PUSH S17
@@ -1544,7 +1558,7 @@ PUSHCONT {
 					}
 				}
 				PUSHCONT {
-					.loc ../contracts/Order.tsol, 355
+					.loc ../contracts/Order.tsol, 361
 					BLKPUSH 2, 10
 					BLKPUSH 2, 5
 					PUSH S11
@@ -1571,7 +1585,7 @@ PUSHCONT {
 				AND
 				AND
 				PUSHCONT {
-					.loc ../contracts/Order.tsol, 373
+					.loc ../contracts/Order.tsol, 379
 					PUSH3 S8, S13, S6
 					PUSH S10
 					CALLREF {
@@ -1579,7 +1593,7 @@ PUSHCONT {
 					}
 				}
 				PUSHCONT {
-					.loc ../contracts/Order.tsol, 380
+					.loc ../contracts/Order.tsol, 386
 					DROP
 					TRUE
 				}
@@ -1589,21 +1603,21 @@ PUSHCONT {
 			.loc ../contracts/Order.tsol, 0
 		}
 		PUSHCONT {
-			.loc ../contracts/Order.tsol, 383
+			.loc ../contracts/Order.tsol, 389
 			DROP
 			TRUE
 		}
 		IFELSE
 	}
 	IFELSE
-	.loc ../contracts/Order.tsol, 386
+	.loc ../contracts/Order.tsol, 392
 	GETGLOB 20
 	EQINT 0
 	GETGLOB 19
 	EQINT 0
 	AND
 	PUSHCONT {
-		.loc ../contracts/Order.tsol, 390
+		.loc ../contracts/Order.tsol, 396
 		OVER
 		GETGLOB 20
 		GETGLOB 19
@@ -1636,11 +1650,11 @@ PUSHCONT {
 		ENDC
 		PUSHINT 0
 		SENDRAWMSG
-		.loc ../contracts/Order.tsol, 400
+		.loc ../contracts/Order.tsol, 406
 		PUSH S8
 		GTINT 0
 		PUSHCONT {
-			.loc ../contracts/Order.tsol, 401
+			.loc ../contracts/Order.tsol, 407
 			GETGLOB 14
 			PUSH S14
 			GETGLOB 13
@@ -1690,7 +1704,7 @@ PUSHCONT {
 			ADDCONST 2
 			UFITS 8
 			SENDRAWMSG
-			.loc ../contracts/Order.tsol, 417
+			.loc ../contracts/Order.tsol, 423
 			GETGLOB 13
 			PUSH S4
 			GETGLOB 14
@@ -1735,12 +1749,12 @@ PUSHCONT {
 			.loc ../contracts/Order.tsol, 0
 		}
 		IF
-		.loc ../contracts/Order.tsol, 434
+		.loc ../contracts/Order.tsol, 440
 		PUSHINT 3
 		CALLREF {
 			CALL $changeState_268f1153_internal_macro$
 		}
-		.loc ../contracts/Order.tsol, 435
+		.loc ../contracts/Order.tsol, 441
 		GETGLOB 12
 		NEWC
 		STSLICECONST x42_
@@ -1754,7 +1768,7 @@ PUSHCONT {
 		SENDRAWMSG
 	}
 	PUSHCONT {
-		.loc ../contracts/Order.tsol, 437
+		.loc ../contracts/Order.tsol, 443
 		GETPARAM 7
 		FIRST
 		DEPTH
@@ -1764,15 +1778,15 @@ PUSHCONT {
 		UFITS 128
 		PUSHINT 0
 		RAWRESERVE
-		.loc ../contracts/Order.tsol, 438
+		.loc ../contracts/Order.tsol, 444
 		PUSH S9
 		EQINT 4
 		PUSHCONT {
-			.loc ../contracts/Order.tsol, 439
+			.loc ../contracts/Order.tsol, 445
 			PUSH S7
 		}
 		PUSHCONT {
-			.loc ../contracts/Order.tsol, 441
+			.loc ../contracts/Order.tsol, 447
 			PUSH S12
 		}
 		IFELSE
@@ -1792,9 +1806,9 @@ PUSHCONT {
 	.loc ../contracts/Order.tsol, 0
 }
 IFNOT
-.loc ../contracts/Order.tsol, 446
+.loc ../contracts/Order.tsol, 452
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 447
+	.loc ../contracts/Order.tsol, 453
 	GETPARAM 7
 	FIRST
 	DEPTH
@@ -1804,11 +1818,11 @@ PUSHCONT {
 	UFITS 128
 	PUSHINT 0
 	RAWRESERVE
-	.loc ../contracts/Order.tsol, 449
+	.loc ../contracts/Order.tsol, 455
 	PUSH S7
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/Order.tsol, 450
+		.loc ../contracts/Order.tsol, 456
 		PUSH2 S7, S11
 		FALSE
 		NEWC
@@ -1827,7 +1841,7 @@ PUSHCONT {
 		.loc ../contracts/Order.tsol, 0
 	}
 	IF
-	.loc ../contracts/Order.tsol, 457
+	.loc ../contracts/Order.tsol, 463
 	PUSH S3
 	TRUE
 	PUSH S11
@@ -1870,12 +1884,12 @@ BLKDROP 14
 CALL $_fullFilledOrder_cb7ceb27_internal_macro$
 
 .macro _fullFilledOrder_cb7ceb27_internal_macro
-.loc ../contracts/Order.tsol, 482
+.loc ../contracts/Order.tsol, 488
 PUSHREF {
 }
-.loc ../contracts/Order.tsol, 483
+.loc ../contracts/Order.tsol, 489
 PUSHINT 0
-.loc ../contracts/Order.tsol, 485
+.loc ../contracts/Order.tsol, 491
 OVER
 TRUE
 PUSH S6
@@ -1907,11 +1921,11 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/Order.tsol, 498
+.loc ../contracts/Order.tsol, 504
 PUSH S7
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 499
+	.loc ../contracts/Order.tsol, 505
 	OVER
 	TRUE
 	PUSH S6
@@ -1948,16 +1962,16 @@ PUSHCONT {
 	.loc ../contracts/Order.tsol, 0
 }
 IF
-.loc ../contracts/Order.tsol, 513
+.loc ../contracts/Order.tsol, 519
 PUSH S9
 NEQINT 4
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 514
+	.loc ../contracts/Order.tsol, 520
 	PUSH S8
 	GETGLOB 20
 	GREATER
 	PUSHCONT {
-		.loc ../contracts/Order.tsol, 515
+		.loc ../contracts/Order.tsol, 521
 		OVER
 		TRUE
 		PUSH S6
@@ -1994,7 +2008,7 @@ PUSHCONT {
 		.loc ../contracts/Order.tsol, 0
 	}
 	IF
-	.loc ../contracts/Order.tsol, 529
+	.loc ../contracts/Order.tsol, 535
 	GETGLOB 28
 	NEQINT 7
 	PUSHCONT {
@@ -2040,11 +2054,11 @@ PUSHCONT {
 	ENDC
 	PUSHINT 64
 	SENDRAWMSG
-	.loc ../contracts/Order.tsol, 542
+	.loc ../contracts/Order.tsol, 548
 	PUSH S9
 	EQINT 3
 	PUSHCONT {
-		.loc ../contracts/Order.tsol, 543
+		.loc ../contracts/Order.tsol, 549
 		PUSHREFSLICE {
 			.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 		}
@@ -2053,18 +2067,18 @@ PUSHCONT {
 		.loc ../contracts/Order.tsol, 0
 	}
 	IF
-	.loc ../contracts/Order.tsol, 546
+	.loc ../contracts/Order.tsol, 552
 	DROP
 	GETGLOB 19
 }
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 548
+	.loc ../contracts/Order.tsol, 554
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
 	PUSHINT 34
 	SETGLOBVAR
-	.loc ../contracts/Order.tsol, 549
+	.loc ../contracts/Order.tsol, 555
 	PUSH S2
 	NEWC
 	STSLICECONST x42_
@@ -2076,13 +2090,13 @@ PUSHCONT {
 	SENDRAWMSG
 }
 IFELSE
-.loc ../contracts/Order.tsol, 552
+.loc ../contracts/Order.tsol, 558
 PUSHINT 0
 SETGLOB 20
-.loc ../contracts/Order.tsol, 553
+.loc ../contracts/Order.tsol, 559
 PUSHINT 0
 SETGLOB 19
-.loc ../contracts/Order.tsol, 555
+.loc ../contracts/Order.tsol, 561
 BLKDROP2 9, 1
 .loc ../contracts/Order.tsol, 0
 
@@ -2091,27 +2105,27 @@ BLKDROP2 9, 1
 CALL $_partFilledOrder_59fed339_internal_macro$
 
 .macro _partFilledOrder_59fed339_internal_macro
-.loc ../contracts/Order.tsol, 569
+.loc ../contracts/Order.tsol, 575
 PUSHREF {
 }
-.loc ../contracts/Order.tsol, 570
+.loc ../contracts/Order.tsol, 576
 PUSHINT 0
-.loc ../contracts/Order.tsol, 572
+.loc ../contracts/Order.tsol, 578
 PUSH S10
 NEQINT 4
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 573
+	.loc ../contracts/Order.tsol, 579
 	PUSH S8
 	GETGLOB 18
 	GETGLOB 17
 	MULDIV
 	UFITS 128
 	NIP
-	.loc ../contracts/Order.tsol, 579
+	.loc ../contracts/Order.tsol, 585
 	DUP
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/Order.tsol, 580
+		.loc ../contracts/Order.tsol, 586
 		GETGLOB 28
 		NEQINT 7
 		PUSHCONT {
@@ -2159,7 +2173,7 @@ PUSHCONT {
 		.loc ../contracts/Order.tsol, 0
 	}
 	IF
-	.loc ../contracts/Order.tsol, 594
+	.loc ../contracts/Order.tsol, 600
 	GETGLOB 19
 	OVER
 	SUB
@@ -2168,17 +2182,17 @@ PUSHCONT {
 	.loc ../contracts/Order.tsol, 0
 }
 IF
-.loc ../contracts/Order.tsol, 597
+.loc ../contracts/Order.tsol, 603
 GETGLOB 20
 PUSH S9
 SUB
 UFITS 128
 SETGLOB 20
-.loc ../contracts/Order.tsol, 599
+.loc ../contracts/Order.tsol, 605
 GETGLOB 19
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 600
+	.loc ../contracts/Order.tsol, 606
 	PUSH S7
 	GETGLOB 20
 	GETGLOB 19
@@ -2211,11 +2225,11 @@ PUSHCONT {
 	ENDC
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/Order.tsol, 610
+	.loc ../contracts/Order.tsol, 616
 	PUSH S9
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/Order.tsol, 611
+		.loc ../contracts/Order.tsol, 617
 		GETGLOB 14
 		PUSH S9
 		GETGLOB 13
@@ -2269,7 +2283,7 @@ PUSHCONT {
 		ADDCONST 2
 		UFITS 8
 		SENDRAWMSG
-		.loc ../contracts/Order.tsol, 629
+		.loc ../contracts/Order.tsol, 635
 		GETGLOB 13
 		OVER
 		GETGLOB 14
@@ -2321,17 +2335,17 @@ PUSHCONT {
 	.loc ../contracts/Order.tsol, 0
 }
 IF
-.loc ../contracts/Order.tsol, 649
+.loc ../contracts/Order.tsol, 655
 ROLL 10
 EQINT 4
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 650
+	.loc ../contracts/Order.tsol, 656
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
 	PUSHINT 34
 	SETGLOBVAR
-	.loc ../contracts/Order.tsol, 651
+	.loc ../contracts/Order.tsol, 657
 	PUSHINT 2
 	CALLREF {
 		CALL $changeState_268f1153_internal_macro$
@@ -2339,7 +2353,7 @@ PUSHCONT {
 	.loc ../contracts/Order.tsol, 0
 }
 IF
-.loc ../contracts/Order.tsol, 654
+.loc ../contracts/Order.tsol, 660
 OVER
 TRUE
 PUSH S6
@@ -2371,11 +2385,11 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/Order.tsol, 667
+.loc ../contracts/Order.tsol, 673
 PUSH S7
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 668
+	.loc ../contracts/Order.tsol, 674
 	OVER
 	TRUE
 	PUSH S6
@@ -2412,7 +2426,7 @@ PUSHCONT {
 	.loc ../contracts/Order.tsol, 0
 }
 IF
-.loc ../contracts/Order.tsol, 682
+.loc ../contracts/Order.tsol, 688
 BLKDROP2 8, 1
 .loc ../contracts/Order.tsol, 0
 
@@ -2421,10 +2435,10 @@ BLKDROP2 8, 1
 CALL $_swapSuccess_fc6ab8bc_internal_macro$
 
 .macro _swapSuccess_fc6ab8bc_internal_macro
-.loc ../contracts/Order.tsol, 691
+.loc ../contracts/Order.tsol, 697
 PUSHREF {
 }
-.loc ../contracts/Order.tsol, 694
+.loc ../contracts/Order.tsol, 700
 DUP
 TRUE
 GETGLOB 12
@@ -2456,11 +2470,11 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/Order.tsol, 707
+.loc ../contracts/Order.tsol, 713
 PUSH S4
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 708
+	.loc ../contracts/Order.tsol, 714
 	GETGLOB 12
 	PUSH2 S2, S4
 	GETGLOB 20
@@ -2499,14 +2513,14 @@ PUSHCONT {
 	.loc ../contracts/Order.tsol, 0
 }
 IF
-.loc ../contracts/Order.tsol, 722
+.loc ../contracts/Order.tsol, 728
 PUSH S3
 GETGLOB 20
 SUB
 UFITS 128
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 724
+	.loc ../contracts/Order.tsol, 730
 	DUP
 	TRUE
 	PUSH3 S3, S4, S3
@@ -2539,11 +2553,11 @@ PUSHCONT {
 	ENDC
 	PUSHINT 1
 	SENDRAWMSG
-	.loc ../contracts/Order.tsol, 737
+	.loc ../contracts/Order.tsol, 743
 	PUSH S4
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/Order.tsol, 738
+		.loc ../contracts/Order.tsol, 744
 		GETGLOB 12
 		PUSH2 S2, S4
 		GETGLOB 20
@@ -2584,7 +2598,7 @@ PUSHCONT {
 	.loc ../contracts/Order.tsol, 0
 }
 IF
-.loc ../contracts/Order.tsol, 753
+.loc ../contracts/Order.tsol, 759
 DROP
 NEWC
 STSLICECONST x42_
@@ -2594,11 +2608,11 @@ STZEROES
 ENDC
 PUSHINT 64
 SENDRAWMSG
-.loc ../contracts/Order.tsol, 755
+.loc ../contracts/Order.tsol, 761
 BLKDROP 3
 PUSHINT 0
 SETGLOB 20
-.loc ../contracts/Order.tsol, 756
+.loc ../contracts/Order.tsol, 762
 PUSHINT 0
 SETGLOB 19
 .loc ../contracts/Order.tsol, 0
@@ -2612,7 +2626,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Order.tsol, 759
+.loc ../contracts/Order.tsol, 765
 LDU 64
 ENDS
 .loc ../contracts/Order.tsol, 0
@@ -2637,7 +2651,7 @@ GETGLOB 12
 SDEQ
 AND
 THROWIFNOT 304
-.loc ../contracts/Order.tsol, 760
+.loc ../contracts/Order.tsol, 766
 GETGLOB 28
 EQINT 2
 GETGLOB 28
@@ -2647,18 +2661,18 @@ EQINT 7
 OR
 OR
 THROWIFNOT 307
-.loc ../contracts/Order.tsol, 765
+.loc ../contracts/Order.tsol, 771
 ACCEPT
-.loc ../contracts/Order.tsol, 766
+.loc ../contracts/Order.tsol, 772
 PUSHINT 5
 CALLREF {
 	CALL $changeState_268f1153_internal_macro$
 }
-.loc ../contracts/Order.tsol, 767
+.loc ../contracts/Order.tsol, 773
 DUP
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 768
+	.loc ../contracts/Order.tsol, 774
 	GETGLOB 13
 	GETGLOB 19
 	PAIR
@@ -2690,11 +2704,11 @@ PUSHCONT {
 	.loc ../contracts/Order.tsol, 0
 }
 IF
-.loc ../contracts/Order.tsol, 781
+.loc ../contracts/Order.tsol, 787
 DROP
 PUSHREF {
 }
-.loc ../contracts/Order.tsol, 782
+.loc ../contracts/Order.tsol, 788
 TRUE
 GETGLOB 12
 PUSHINT 0
@@ -2736,7 +2750,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Order.tsol, 796
+.loc ../contracts/Order.tsol, 802
 LDU 64
 ENDS
 .loc ../contracts/Order.tsol, 0
@@ -2750,7 +2764,7 @@ CALLREF {
 THROW 0
 
 .macro backendSwap_beb18340_internal_macro
-.loc ../contracts/Order.tsol, 797
+.loc ../contracts/Order.tsol, 803
 GETGLOB 5
 DUP
 ISNULL
@@ -2762,29 +2776,29 @@ IF
 GETGLOB 21
 EQUAL
 THROWIFNOT 308
-.loc ../contracts/Order.tsol, 798
+.loc ../contracts/Order.tsol, 804
 GETGLOB 28
 EQINT 2
 THROWIFNOT 307
-.loc ../contracts/Order.tsol, 799
+.loc ../contracts/Order.tsol, 805
 PUSHINT 32
 GETGLOBVAR
 TRUE
 EQUAL
 THROWIFNOT 316
-.loc ../contracts/Order.tsol, 801
+.loc ../contracts/Order.tsol, 807
 ACCEPT
-.loc ../contracts/Order.tsol, 803
+.loc ../contracts/Order.tsol, 809
 GETGLOB 29
 INC
 UFITS 64
 SETGLOB 29
-.loc ../contracts/Order.tsol, 804
+.loc ../contracts/Order.tsol, 810
 PUSHINT 4
 CALLREF {
 	CALL $changeState_268f1153_internal_macro$
 }
-.loc ../contracts/Order.tsol, 806
+.loc ../contracts/Order.tsol, 812
 PUSHINT 0
 GETGLOB 20
 GETGLOB 12
@@ -2799,7 +2813,7 @@ PUSHREFSLICE {
 CALLREF {
 	CALL $OrderPayloads_no_obj_buildSwapExchangePayload_63976777_macro$
 }
-.loc ../contracts/Order.tsol, 817
+.loc ../contracts/Order.tsol, 823
 TRUE
 MYADDR
 PUSHINT 0
@@ -2838,7 +2852,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Order.tsol, 830
+.loc ../contracts/Order.tsol, 836
 OVER
 PUSHCONT {
 	LDU 64
@@ -2863,17 +2877,17 @@ CALLREF {
 THROW 0
 
 .macro swap_95c939ac_internal_macro
-.loc ../contracts/Order.tsol, 831
+.loc ../contracts/Order.tsol, 837
 GETGLOB 28
 EQINT 2
 THROWIFNOT 307
-.loc ../contracts/Order.tsol, 832
+.loc ../contracts/Order.tsol, 838
 PUSHINT 32
 GETGLOBVAR
 TRUE
 EQUAL
 THROWIFNOT 316
-.loc ../contracts/Order.tsol, 833
+.loc ../contracts/Order.tsol, 839
 DEPTH
 ADDCONST -2
 PICK
@@ -2883,7 +2897,7 @@ ADD
 UFITS 128
 GEQ
 THROWIFNOT 302
-.loc ../contracts/Order.tsol, 835
+.loc ../contracts/Order.tsol, 841
 GETPARAM 7
 FIRST
 DEPTH
@@ -2893,17 +2907,17 @@ SUB
 UFITS 128
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/Order.tsol, 837
+.loc ../contracts/Order.tsol, 843
 GETGLOB 29
 INC
 UFITS 64
 SETGLOB 29
-.loc ../contracts/Order.tsol, 838
+.loc ../contracts/Order.tsol, 844
 PUSHINT 4
 CALLREF {
 	CALL $changeState_268f1153_internal_macro$
 }
-.loc ../contracts/Order.tsol, 840
+.loc ../contracts/Order.tsol, 846
 GETGLOB 20
 GETGLOB 9
 DUP
@@ -2917,7 +2931,7 @@ PUSHREFSLICE {
 CALLREF {
 	CALL $OrderPayloads_no_obj_buildSwapExchangePayload_63976777_macro$
 }
-.loc ../contracts/Order.tsol, 851
+.loc ../contracts/Order.tsol, 857
 TRUE
 MYADDR
 PUSHINT 0
@@ -2956,7 +2970,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Order.tsol, 864
+.loc ../contracts/Order.tsol, 870
 OVER
 PUSHCONT {
 	LDU 64
@@ -2981,7 +2995,7 @@ CALLREF {
 THROW 0
 
 .macro backendMatching_ae31c208_internal_macro
-.loc ../contracts/Order.tsol, 865
+.loc ../contracts/Order.tsol, 871
 GETGLOB 5
 DUP
 ISNULL
@@ -2993,22 +3007,22 @@ IF
 GETGLOB 22
 EQUAL
 THROWIFNOT 308
-.loc ../contracts/Order.tsol, 866
+.loc ../contracts/Order.tsol, 872
 GETGLOB 28
 EQINT 2
 THROWIFNOT 307
-.loc ../contracts/Order.tsol, 868
+.loc ../contracts/Order.tsol, 874
 ACCEPT
-.loc ../contracts/Order.tsol, 869
+.loc ../contracts/Order.tsol, 875
 PUSHINT 7
 CALLREF {
 	CALL $changeState_268f1153_internal_macro$
 }
-.loc ../contracts/Order.tsol, 870
+.loc ../contracts/Order.tsol, 876
 DUP
 PUSHINT 34
 SETGLOBVAR
-.loc ../contracts/Order.tsol, 872
+.loc ../contracts/Order.tsol, 878
 CALLREF {
 	CALL $buildDetails_03265ec2_internal_macro$
 }
@@ -3103,7 +3117,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Order.tsol, 883
+.loc ../contracts/Order.tsol, 889
 OVER
 PUSHCONT {
 	LDU 64
@@ -3117,10 +3131,16 @@ PUSHCONT {
 IFELSE
 LDU 128
 LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 64
+LDU 64
 ENDS
 .loc ../contracts/Order.tsol, 0
 CALLREF {
-	CALL $matching_fa07e6f4_internal_macro$
+	CALL $matching_dd9931cc_internal_macro$
 }
 DROP
 CALLREF {
@@ -3128,22 +3148,31 @@ CALLREF {
 }
 THROW 0
 
-.macro matching_fa07e6f4_internal_macro
-.loc ../contracts/Order.tsol, 884
+.macro matching_dd9931cc_internal_macro
+.loc ../contracts/Order.tsol, 897
 GETGLOB 28
 EQINT 2
 THROWIFNOT 307
-.loc ../contracts/Order.tsol, 885
+.loc ../contracts/Order.tsol, 898
 DEPTH
 ADDCONST -2
 PICK
 PUSHINT 5000000000
-PUSH S3
+PUSH S6
 ADD
 UFITS 128
 GEQ
 THROWIFNOT 302
-.loc ../contracts/Order.tsol, 887
+.loc ../contracts/Order.tsol, 900
+GETGLOB 10
+BLKSWAP 2, 3
+GETGLOB 14
+GETGLOB 13
+BLKSWAP 2, 5
+CALLREF {
+	CALL $expectedOrder_000c864c_internal_macro$
+}
+.loc ../contracts/Order.tsol, 910
 GETPARAM 7
 FIRST
 DEPTH
@@ -3153,16 +3182,16 @@ SUB
 UFITS 128
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/Order.tsol, 889
+.loc ../contracts/Order.tsol, 912
 PUSHINT 7
 CALLREF {
 	CALL $changeState_268f1153_internal_macro$
 }
-.loc ../contracts/Order.tsol, 890
+.loc ../contracts/Order.tsol, 913
 DUP
 PUSHINT 34
 SETGLOBVAR
-.loc ../contracts/Order.tsol, 892
+.loc ../contracts/Order.tsol, 915
 CALLREF {
 	CALL $buildDetails_03265ec2_internal_macro$
 }
@@ -3254,7 +3283,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Order.tsol, 902
+.loc ../contracts/Order.tsol, 925
 OVER
 PUSHCONT {
 	LDU 64
@@ -3336,7 +3365,7 @@ CALLREF {
 THROW 0
 
 .macro matchingCheck_7bbc4bb5_internal_macro
-.loc ../contracts/Order.tsol, 903
+.loc ../contracts/Order.tsol, 926
 GETGLOB 10
 OVER
 SECOND
@@ -3356,7 +3385,7 @@ CALLREF {
 GETGLOB 9
 SDEQ
 THROWIFNOT 321
-.loc ../contracts/Order.tsol, 915
+.loc ../contracts/Order.tsol, 938
 GETPARAM 7
 FIRST
 DEPTH
@@ -3366,22 +3395,17 @@ SUB
 UFITS 128
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/Order.tsol, 917
+.loc ../contracts/Order.tsol, 939
 GETGLOB 9
 PUSHINT 34
 SETGLOBVAR
-.loc ../contracts/Order.tsol, 918
-PUSHINT 7
-CALLREF {
-	CALL $changeState_268f1153_internal_macro$
-}
-.loc ../contracts/Order.tsol, 920
+.loc ../contracts/Order.tsol, 941
 PUSHINT 0
 BLKPUSH 2, 0
-.loc ../contracts/Order.tsol, 923
+.loc ../contracts/Order.tsol, 944
 PUSH S3
 INDEX 7
-.loc ../contracts/Order.tsol, 925
+.loc ../contracts/Order.tsol, 946
 PUSH S4
 PUSHINT 16
 INDEXVAR
@@ -3389,63 +3413,97 @@ PUSH S5
 PUSHINT 17
 INDEXVAR
 DIV
-.loc ../contracts/Order.tsol, 926
+.loc ../contracts/Order.tsol, 947
 GETGLOB 20
 GETGLOB 19
 DIV
-.loc ../contracts/Order.tsol, 927
+.loc ../contracts/Order.tsol, 948
+DUP2
 GEQ
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 928
-	PUSH S4
+	.loc ../contracts/Order.tsol, 949
+	PUSH S6
 	PUSHINT 17
 	INDEXVAR
-	GETGLOB 20
 	GETGLOB 19
-	MULDIV
+	MIN
+	POP S6
+	.loc ../contracts/Order.tsol, 950
+	PUSH2 S5, S0
+	MUL
 	UFITS 128
-	POP S3
-	.loc ../contracts/Order.tsol, 929
-	GETGLOB 19
+	POP S5
+	.loc ../contracts/Order.tsol, 951
+	PUSH2 S5, S1
+	MUL
+	UFITS 128
 	PUSH S5
-	PUSHINT 17
-	INDEXVAR
-	GEQ
-	PUSHCONT {
-		PUSH S4
-		PUSHINT 17
-		INDEXVAR
-	}
-	PUSHCONT {
-		GETGLOB 19
-	}
-	IFELSE
-	POP S4
-	.loc ../contracts/Order.tsol, 930
-	PUSH S4
-	PUSHINT 16
-	INDEXVAR
-	PUSH S3
 	SUB
 	UFITS 128
-	POP S2
+	POP S4
 	.loc ../contracts/Order.tsol, 0
 }
 IF
-.loc ../contracts/Order.tsol, 933
+.loc ../contracts/Order.tsol, 954
+DROP2
 PUSH S2
+EQINT 0
+GETGLOB 28
+NEQINT 2
+OR
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 953
-	GETGLOB 19
-	PUSH S4
-	SUB
-	UFITS 128
-	SETGLOB 19
 	.loc ../contracts/Order.tsol, 955
 	PUSH S6
 	GTINT 0
 	PUSHCONT {
 		.loc ../contracts/Order.tsol, 956
+		PUSH2 S6, S0
+		FALSE
+		NEWC
+		STSLICECONST x6_
+		STI 1
+		STSLICECONST x1_
+		STSLICE
+		PUSHINT 12042311241760164903241885269213816626727588439334411
+		STUR 175
+		STU 64
+		ENDC
+		PUSHINT 1
+		ADDCONST 2
+		UFITS 8
+		SENDRAWMSG
+		.loc ../contracts/Order.tsol, 0
+	}
+	IF
+	.loc ../contracts/Order.tsol, 963
+	PUSHINT 34
+	GETGLOBVAR
+	FALSE
+	NEWC
+	STSLICECONST x6_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	PUSHINT 278618294
+	STUR 143
+}
+PUSHCONT {
+	.loc ../contracts/Order.tsol, 969
+	PUSHINT 7
+	CALLREF {
+		CALL $changeState_268f1153_internal_macro$
+	}
+	.loc ../contracts/Order.tsol, 970
+	GETGLOB 19
+	PUSH S4
+	SUB
+	UFITS 128
+	SETGLOB 19
+	.loc ../contracts/Order.tsol, 972
+	PUSH S6
+	GTINT 0
+	PUSHCONT {
+		.loc ../contracts/Order.tsol, 973
 		PUSHINT 34
 		GETGLOBVAR
 		MYADDR
@@ -3494,14 +3552,14 @@ PUSHCONT {
 		.loc ../contracts/Order.tsol, 0
 	}
 	IF
-	.loc ../contracts/Order.tsol, 974
+	.loc ../contracts/Order.tsol, 991
 	DUP
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
 	SDEQ
 	PUSHCONT {
-		.loc ../contracts/Order.tsol, 975
+		.loc ../contracts/Order.tsol, 992
 		PUSHINT 33
 		GETGLOBVAR
 		INDEX 4
@@ -3509,7 +3567,7 @@ PUSHCONT {
 		.loc ../contracts/Order.tsol, 0
 	}
 	IF
-	.loc ../contracts/Order.tsol, 978
+	.loc ../contracts/Order.tsol, 995
 	PUSHINT 3
 	PUSH3 S7, S1, S6
 	BLKPUSH 2, 6
@@ -3546,54 +3604,6 @@ PUSHCONT {
 	STBREFR
 	STBREFR
 }
-PUSHCONT {
-	.loc ../contracts/Order.tsol, 934
-	PUSHINT 2
-	CALLREF {
-		CALL $changeState_268f1153_internal_macro$
-	}
-	.loc ../contracts/Order.tsol, 936
-	PUSHINT 34
-	GETGLOBVAR
-	.loc ../contracts/Order.tsol, 937
-	PUSHREFSLICE {
-		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-	}
-	PUSHINT 34
-	SETGLOBVAR
-	.loc ../contracts/Order.tsol, 939
-	PUSH S7
-	GTINT 0
-	PUSHCONT {
-		.loc ../contracts/Order.tsol, 940
-		PUSH2 S7, S1
-		FALSE
-		NEWC
-		STSLICECONST x6_
-		STI 1
-		STSLICECONST x1_
-		STSLICE
-		PUSHINT 12042311241760164903241885269213816626727588439334411
-		STUR 175
-		STU 64
-		ENDC
-		PUSHINT 1
-		ADDCONST 2
-		UFITS 8
-		SENDRAWMSG
-		.loc ../contracts/Order.tsol, 0
-	}
-	IF
-	.loc ../contracts/Order.tsol, 947
-	FALSE
-	NEWC
-	STSLICECONST x6_
-	STI 1
-	STSLICECONST x1_
-	STSLICE
-	PUSHINT 278618294
-	STUR 143
-}
 IFELSE
 ENDC
 PUSHPOW2 7
@@ -3610,7 +3620,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Order.tsol, 997
+.loc ../contracts/Order.tsol, 1014
 ENDS
 .loc ../contracts/Order.tsol, 0
 CALLREF {
@@ -3623,18 +3633,18 @@ CALLREF {
 THROW 0
 
 .macro matchingCancel_5f4b298b_internal_macro
-.loc ../contracts/Order.tsol, 998
+.loc ../contracts/Order.tsol, 1015
 GETGLOB 9
 PUSHINT 34
 GETGLOBVAR
 SDEQ
 THROWIFNOT 322
-.loc ../contracts/Order.tsol, 999
+.loc ../contracts/Order.tsol, 1016
 GETGLOB 30
 CALLREF {
 	CALL $changeState_268f1153_internal_macro$
 }
-.loc ../contracts/Order.tsol, 1000
+.loc ../contracts/Order.tsol, 1017
 PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
@@ -3647,7 +3657,7 @@ SETGLOBVAR
 CALL $expectedOrderRoot_2fda74e9_internal_macro$
 
 .macro expectedOrderRoot_2fda74e9_internal_macro
-.loc ../contracts/Order.tsol, 1004
+.loc ../contracts/Order.tsol, 1021
 GETGLOB 10
 SWAP
 GETGLOB 27
@@ -3670,7 +3680,7 @@ CTOS
 CALL $buildState_a6158885_internal_macro$
 
 .macro buildState_a6158885_internal_macro
-.loc ../contracts/Order.tsol, 1008
+.loc ../contracts/Order.tsol, 1025
 PUSHINT 0
 NEWC
 STU 256
@@ -3710,7 +3720,7 @@ ENDC
 CALL $buildParams_c863cf6a_internal_macro$
 
 .macro buildParams_c863cf6a_internal_macro
-.loc ../contracts/Order.tsol, 1021
+.loc ../contracts/Order.tsol, 1038
 GETGLOB 27
 MYCODE
 GETGLOB 23
@@ -3726,7 +3736,7 @@ ENDC
 CALL $expectedOrder_000c864c_internal_macro$
 
 .macro expectedOrder_000c864c_internal_macro
-.loc ../contracts/Order.tsol, 1033
+.loc ../contracts/Order.tsol, 1050
 PUSHINT 0
 NEWC
 STU 256
@@ -3796,13 +3806,13 @@ CTOS
 CALL $changeState_268f1153_internal_macro$
 
 .macro changeState_268f1153_internal_macro
-.loc ../contracts/Order.tsol, 1049
+.loc ../contracts/Order.tsol, 1066
 GETGLOB 28
 SETGLOB 30
-.loc ../contracts/Order.tsol, 1050
+.loc ../contracts/Order.tsol, 1067
 DUP
 SETGLOB 28
-.loc ../contracts/Order.tsol, 1051
+.loc ../contracts/Order.tsol, 1068
 CALLREF {
 	CALL $buildDetails_03265ec2_internal_macro$
 }
@@ -3890,7 +3900,7 @@ SENDRAWMSG
 CALL $buildDetails_03265ec2_internal_macro$
 
 .macro buildDetails_03265ec2_internal_macro
-.loc ../contracts/Order.tsol, 1056
+.loc ../contracts/Order.tsol, 1073
 GETGLOB 10
 GETGLOB 11
 GETGLOB 12
@@ -3924,7 +3934,7 @@ TUPLEVAR
 CALL $_expectedSpendAmount_94832ad6_internal_macro$
 
 .macro _expectedSpendAmount_94832ad6_internal_macro
-.loc ../contracts/Order.tsol, 1083
+.loc ../contracts/Order.tsol, 1100
 PUSHINT 33
 GETGLOBVAR
 FIRST
@@ -3935,12 +3945,12 @@ SECOND
 EQINT 0
 OR
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 1084
+	.loc ../contracts/Order.tsol, 1101
 	PUSHINT 0
 	.loc ../contracts/Order.tsol, 0
 }
 IFJMP
-.loc ../contracts/Order.tsol, 1086
+.loc ../contracts/Order.tsol, 1103
 DUP
 PUSHINT 33
 GETGLOBVAR
@@ -3950,7 +3960,7 @@ GETGLOBVAR
 SECOND
 MULDIVC
 UFITS 128
-.loc ../contracts/Order.tsol, 1087
+.loc ../contracts/Order.tsol, 1104
 SWAP
 PUSHINT 33
 GETGLOBVAR
@@ -3965,7 +3975,7 @@ GETGLOBVAR
 SECOND
 MULDIV
 UFITS 128
-.loc ../contracts/Order.tsol, 1088
+.loc ../contracts/Order.tsol, 1105
 SWAP
 .loc ../contracts/Order.tsol, 0
 
@@ -3974,7 +3984,7 @@ SWAP
 CALL $_expectedSpendAmountOfMatching_4b89f31b_internal_macro$
 
 .macro _expectedSpendAmountOfMatching_4b89f31b_internal_macro
-.loc ../contracts/Order.tsol, 1092
+.loc ../contracts/Order.tsol, 1109
 PUSHINT 33
 GETGLOBVAR
 THIRD
@@ -3985,12 +3995,12 @@ INDEX 3
 EQINT 0
 OR
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 1093
+	.loc ../contracts/Order.tsol, 1110
 	PUSHINT 0
 	.loc ../contracts/Order.tsol, 0
 }
 IFJMP
-.loc ../contracts/Order.tsol, 1096
+.loc ../contracts/Order.tsol, 1113
 DUP
 PUSHINT 33
 GETGLOBVAR
@@ -4000,7 +4010,7 @@ GETGLOBVAR
 INDEX 3
 MULDIVC
 UFITS 128
-.loc ../contracts/Order.tsol, 1097
+.loc ../contracts/Order.tsol, 1114
 SWAP
 PUSHINT 33
 GETGLOBVAR
@@ -4015,7 +4025,7 @@ GETGLOBVAR
 INDEX 3
 MULDIV
 UFITS 128
-.loc ../contracts/Order.tsol, 1098
+.loc ../contracts/Order.tsol, 1115
 SWAP
 .loc ../contracts/Order.tsol, 0
 
@@ -4024,23 +4034,23 @@ SWAP
 CALL $transferMatchingReward_a99ed683_internal_macro$
 
 .macro transferMatchingReward_a99ed683_internal_macro
-.loc ../contracts/Order.tsol, 1106
+.loc ../contracts/Order.tsol, 1123
 PUSH S2
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 1107
+	.loc ../contracts/Order.tsol, 1124
 	PUSHREF {
 	}
-	.loc ../contracts/Order.tsol, 1108
+	.loc ../contracts/Order.tsol, 1125
 	PUSH S3
 	CALLREF {
 		CALL $_expectedSpendAmountOfMatching_4b89f31b_internal_macro$
 	}
-	.loc ../contracts/Order.tsol, 1113
+	.loc ../contracts/Order.tsol, 1130
 	DUP
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/Order.tsol, 1114
+		.loc ../contracts/Order.tsol, 1131
 		PUSH S2
 		TRUE
 		GETGLOB 12
@@ -4077,12 +4087,12 @@ PUSHCONT {
 		.loc ../contracts/Order.tsol, 0
 	}
 	IF
-	.loc ../contracts/Order.tsol, 1128
+	.loc ../contracts/Order.tsol, 1145
 	DROP
 	DUP
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/Order.tsol, 1129
+		.loc ../contracts/Order.tsol, 1146
 		OVER
 		TRUE
 		PUSH3 S4, S5, S4
@@ -4115,7 +4125,7 @@ PUSHCONT {
 		.loc ../contracts/Order.tsol, 0
 	}
 	IF
-	.loc ../contracts/Order.tsol, 1143
+	.loc ../contracts/Order.tsol, 1160
 	DROP2
 	GETGLOB 19
 	PUSH S3
@@ -4137,7 +4147,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Order.tsol, 1147
+.loc ../contracts/Order.tsol, 1164
 OVER
 PUSHCONT {
 	LDREF
@@ -4169,7 +4179,7 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 311
-.loc ../contracts/Order.tsol, 1148
+.loc ../contracts/Order.tsol, 1165
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -4180,19 +4190,19 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 100
-.loc ../contracts/Order.tsol, 1149
+.loc ../contracts/Order.tsol, 1166
 GETGLOB 28
 NEQINT 6
 THROWIFNOT 314
-.loc ../contracts/Order.tsol, 1154
+.loc ../contracts/Order.tsol, 1171
 GETGLOB 28
 SETGLOB 30
-.loc ../contracts/Order.tsol, 1155
+.loc ../contracts/Order.tsol, 1172
 PUSHINT 6
 SETGLOB 28
-.loc ../contracts/Order.tsol, 1156
+.loc ../contracts/Order.tsol, 1173
 SETGLOB 31
-.loc ../contracts/Order.tsol, 1158
+.loc ../contracts/Order.tsol, 1175
 CALLREF {
 	CALL $buildDetails_03265ec2_internal_macro$
 }
@@ -4284,7 +4294,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Order.tsol, 1161
+.loc ../contracts/Order.tsol, 1178
 ENDS
 .loc ../contracts/Order.tsol, 0
 CALLREF {
@@ -4308,7 +4318,7 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 311
-.loc ../contracts/Order.tsol, 1162
+.loc ../contracts/Order.tsol, 1179
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -4319,20 +4329,20 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 100
-.loc ../contracts/Order.tsol, 1163
+.loc ../contracts/Order.tsol, 1180
 GETGLOB 28
 EQINT 6
 THROWIFNOT 314
-.loc ../contracts/Order.tsol, 1168
+.loc ../contracts/Order.tsol, 1185
 GETGLOB 30
 SETGLOB 28
-.loc ../contracts/Order.tsol, 1169
+.loc ../contracts/Order.tsol, 1186
 PUSHINT 0
 SETGLOB 30
-.loc ../contracts/Order.tsol, 1170
+.loc ../contracts/Order.tsol, 1187
 PUSHINT 0
 SETGLOB 31
-.loc ../contracts/Order.tsol, 1172
+.loc ../contracts/Order.tsol, 1189
 CALLREF {
 	CALL $buildDetails_03265ec2_internal_macro$
 }
@@ -4424,7 +4434,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Order.tsol, 1179
+.loc ../contracts/Order.tsol, 1196
 OVER
 PUSHCONT {
 	LDREF
@@ -4497,13 +4507,13 @@ PUSHCONT {
 }
 IF
 THROWIFNOT 313
-.loc ../contracts/Order.tsol, 1190
+.loc ../contracts/Order.tsol, 1207
 GETGLOB 28
 EQINT 6
 THROWIFNOT 315
-.loc ../contracts/Order.tsol, 1194
+.loc ../contracts/Order.tsol, 1211
 ACCEPT
-.loc ../contracts/Order.tsol, 1196
+.loc ../contracts/Order.tsol, 1213
 REVERSE 8, 0
 NEWC
 STSLICECONST x62_
@@ -4539,7 +4549,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Order.tsol, 1209
+.loc ../contracts/Order.tsol, 1226
 OVER
 PUSHCONT {
 	LDREF
@@ -4601,13 +4611,13 @@ PUSHCONT {
 }
 IF
 THROWIFNOT 313
-.loc ../contracts/Order.tsol, 1214
+.loc ../contracts/Order.tsol, 1231
 GETGLOB 28
 EQINT 6
 THROWIFNOT 315
-.loc ../contracts/Order.tsol, 1218
+.loc ../contracts/Order.tsol, 1235
 ACCEPT
-.loc ../contracts/Order.tsol, 1219
+.loc ../contracts/Order.tsol, 1236
 XCHG S2
 NEWC
 STSLICECONST x42_
@@ -4630,7 +4640,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Order.tsol, 1222
+.loc ../contracts/Order.tsol, 1239
 OVER
 PUSHCONT {
 	LDREF
@@ -4668,17 +4678,17 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 311
-.loc ../contracts/Order.tsol, 1227
+.loc ../contracts/Order.tsol, 1244
 PUSHINT 35
 GETGLOBVAR
 PUSH S2
 EQUAL
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 1228
+	.loc ../contracts/Order.tsol, 1245
 	PUSHINT 1000000000
 	PUSHINT 0
 	RAWRESERVE
-	.loc ../contracts/Order.tsol, 1229
+	.loc ../contracts/Order.tsol, 1246
 	DUP
 	NEWC
 	STSLICECONST x62_
@@ -4692,13 +4702,13 @@ PUSHCONT {
 	SENDRAWMSG
 }
 PUSHCONT {
-	.loc ../contracts/Order.tsol, 1234
+	.loc ../contracts/Order.tsol, 1251
 	PUSHREF {
 		.blob xc000000000000000000000000064874be9
 	}
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/Order.tsol, 1236
+	.loc ../contracts/Order.tsol, 1253
 	OVER
 	PUSHINT 35
 	GETGLOBVAR
@@ -4807,10 +4817,10 @@ PUSHCONT {
 	STBREFR
 	STBREFR
 	ENDC
-	.loc ../contracts/Order.tsol, 1243
+	.loc ../contracts/Order.tsol, 1260
 	PUSH S3
 	SETCODE
-	.loc ../contracts/Order.tsol, 1244
+	.loc ../contracts/Order.tsol, 1261
 	PUSH S3
 	CTOS
 	DUP
@@ -4825,7 +4835,7 @@ PUSHCONT {
 	CTOS
 	BLESS
 	POP C3
-	.loc ../contracts/Order.tsol, 1246
+	.loc ../contracts/Order.tsol, 1263
 	CALLREF {
 		CALL $:onCodeUpgrade$
 	}
@@ -5925,7 +5935,7 @@ BLKDROP2 2, 1
 
 .macro public_function_selector
 DUP
-PUSHINT 1330127360
+PUSHINT 1429374416
 LEQ
 IFJMPREF {
 	DUP
@@ -5987,7 +5997,7 @@ IFJMPREF {
 		}
 	}
 	DUP
-	PUSHINT 1144198229
+	PUSHINT 1147733178
 	LEQ
 	IFJMPREF {
 		DUP
@@ -6009,22 +6019,16 @@ IFJMPREF {
 			CALL $backendSwap$
 		}
 		DUP
-		PUSHINT 1144198229
-		EQUAL
-		IFJMPREF {
-			CALL $matching$
-		}
-	}
-	DUP
-	PUSHINT 1330127360
-	LEQ
-	IFJMPREF {
-		DUP
 		PUSHINT 1147733178
 		EQUAL
 		IFJMPREF {
 			CALL $enableEmergency$
 		}
+	}
+	DUP
+	PUSHINT 1429374416
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1192816516
 		EQUAL
@@ -6043,6 +6047,12 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $matchingCheck$
 		}
+		DUP
+		PUSHINT 1429374416
+		EQUAL
+		IFJMPREF {
+			CALL $onTokenWalletReceive$
+		}
 	}
 }
 DUP
@@ -6050,15 +6060,9 @@ PUSHINT 1955478501
 LEQ
 IFJMPREF {
 	DUP
-	PUSHINT 1601949745
+	PUSHINT 1688565960
 	LEQ
 	IFJMPREF {
-		DUP
-		PUSHINT 1429374416
-		EQUAL
-		IFJMPREF {
-			CALL $onTokenWalletReceive$
-		}
 		DUP
 		PUSHINT 1536809146
 		EQUAL
@@ -6077,17 +6081,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $setFeeParams$
 		}
-	}
-	DUP
-	PUSHINT 1923342633
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1688565960
 		EQUAL
 		IFJMPREF {
 			CALL $upgrade$
 		}
+	}
+	DUP
+	PUSHINT 1949318962
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1689523898
 		EQUAL
@@ -6105,6 +6109,12 @@ IFJMPREF {
 		EQUAL
 		IFJMPREF {
 			CALL $getExpectedSpendAmount$
+		}
+		DUP
+		PUSHINT 1949318962
+		EQUAL
+		IFJMPREF {
+			CALL $matching$
 		}
 	}
 	DUP

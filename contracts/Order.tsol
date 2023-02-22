@@ -328,7 +328,13 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 					(state == OrderStatus.Active && op == OrderOperationTypes.EXCHANGE && msg.value >= OrderGas.FILL_ORDER_MIN_VALUE + deployWalletValue) ||
 					(sender == matchingOrder && state == OrderStatus.MatchInProgress)
 				){
-					(expectedSenderAmount, senderFee) = _expectedSpendAmount(amount);
+					if (state != OrderStatus.MatchInProgress) {
+						(expectedSenderAmount, senderFee) = _expectedSpendAmount(amount);
+					} else {
+						expectedSenderAmount = amount;
+						senderFee = 0;
+					}
+
 					TvmCell payloadForTransfer;
 					if (state == OrderStatus.MatchInProgress && op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE) {
 						transferMatchingReward(reward, deployWalletValue, sendGasTo);
@@ -880,9 +886,26 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 		);
 	}
 
-	function matching(uint64 callbackId, uint128 deployWalletValue, address limitOrder) external {
+	function matching(
+		uint64 callbackId,
+		uint128 deployWalletValue,
+		address orderRoot,
+		address _owner,
+		uint64 _timeTx,
+		uint64 _nowTx
+	) external {
 		require(state == OrderStatus.Active, OrderErrors.NOT_ACTIVE_LIMIT_ORDER);
 		require(msg.value >= OrderGas.MATCHING_MIN_VALUE + deployWalletValue, OrderErrors.VALUE_TOO_LOW);
+
+		address limitOrder = expectedOrder(
+			factory,
+			orderRoot,
+			_owner,
+			receiveToken,
+			spentToken,
+			_timeTx,
+			_nowTx
+		);
 
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 
@@ -913,9 +936,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 		);
 
 		tvm.rawReserve(address(this).balance - msg.value, 0);
-
 		matchingOrder = msg.sender;
-		changeState(OrderStatus.MatchInProgress);
 
 		uint128 alienAmountSpent;
 		uint128 expectedAmountReceive;
@@ -925,17 +946,12 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 		uint128 priceToken = detailsLO.currentAmountSpentToken/detailsLO.currentAmountReceiveToken;
 		uint128 alienPriceToken = currentAmountReceiveToken/currentAmountSpentToken;
 		if (priceToken >= alienPriceToken) {
-			expectedAmountReceive = math.muldiv(detailsLO.currentAmountReceiveToken, currentAmountReceiveToken, currentAmountSpentToken);
-			alienAmountSpent = currentAmountSpentToken >= detailsLO.currentAmountReceiveToken ? detailsLO.currentAmountReceiveToken : currentAmountSpentToken;
-			reward = detailsLO.currentAmountSpentToken - expectedAmountReceive;
+			alienAmountSpent = math.min(detailsLO.currentAmountReceiveToken, currentAmountSpentToken);
+			expectedAmountReceive = alienAmountSpent * alienPriceToken;
+			reward = (alienAmountSpent * priceToken) - expectedAmountReceive;
 		}
 
-		if (expectedAmountReceive == 0) {
-			changeState(OrderStatus.Active);
-
-			address prevMatchingAddress = matchingOrder;
-			matchingOrder = address(0);
-
+		if (expectedAmountReceive == 0 || state != OrderStatus.Active) {
 			if (callbackId > 0) {
 				IOrderCallbacks(sendGasTo).onMatchingCancel{
 					value: OrderGas.OPERATION_CALLBACK_BASE,
@@ -944,12 +960,13 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 				}(callbackId);
 			}
 
-			IOrder(prevMatchingAddress).matchingCancel{
+			IOrder(matchingOrder).matchingCancel{
 				value: 0,
 				flag: MsgFlag.ALL_NOT_RESERVED,
 				bounce: false
 			}();
 		} else {
+			changeState(OrderStatus.MatchInProgress);
 			currentAmountSpentToken -= alienAmountSpent;
 
 			if (callbackId > 0) {

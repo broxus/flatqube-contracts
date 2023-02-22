@@ -1051,9 +1051,13 @@ describe('OrderTest', () => {
             )
 
             const order2 = await RootOrderBar.getEventCreateOrder(account4);
+            let detailsOrder2 = await order2.getDetails();
 
             // Call matching
-            await order1.matching(2, 0.1, order2.address, account5.address, true)
+            await order1.matching(
+                2, 0.1, RootOrderBar.address,
+                detailsOrder2.owner, detailsOrder2.timeTx, detailsOrder2.nowTx,
+                account5.address, true);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -1158,9 +1162,13 @@ describe('OrderTest', () => {
             )
 
             const order2 = await RootOrderBar.getEventCreateOrder(account4);
+            let detailsOrder2 = await order2.getDetails();
 
             // Call matching
-            await order1.matching(2, 0.1, order2.address, account5.address, true)
+            await order1.matching(
+                2, 0.1, RootOrderBar.address,
+                detailsOrder2.owner, detailsOrder2.timeTx, detailsOrder2.nowTx,
+                account5.address, true);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -1344,6 +1352,8 @@ describe('OrderTest', () => {
             )
             const order1 = await RootOrderTst.getEventCreateOrder(account3);
 
+            console.log(order1.address);
+
             // Create Order 2
             const payload2 = await RootOrderBar.buildPayloadRoot(
                 0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE_RECEIVE2, tstDecimals),
@@ -1355,9 +1365,15 @@ describe('OrderTest', () => {
             )
 
             const order2 = await RootOrderBar.getEventCreateOrder(account4);
+            let detailsOrder2 = await order2.getDetails();
+
+            console.log(order2.address);
 
             // Call matching
-            await order1.matching(2, 0.1, order2.address, account5.address, true)
+            await order1.matching(
+                2, 0.1, RootOrderBar.address,
+                detailsOrder2.owner, detailsOrder2.timeTx, detailsOrder2.nowTx,
+                account5.address, true);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);

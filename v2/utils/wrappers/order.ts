@@ -18,11 +18,12 @@ export class OrderWrapper {
         return new OrderWrapper(order, owner);
     }
 
+    async getDetails() {
+        return (await this.contract.methods.getDetails({answerId: 0}).call()).value0;
+    }
+
     async balance() {
         return await locklift.provider.getBalance(this.address).then(balance => Number(balance));
-    }
-    async feeParams() {
-        return this.contract.methods.getFeeParams({answerId: 0}).call();
     }
 
     async status() {
@@ -31,10 +32,6 @@ export class OrderWrapper {
 
     async expectedSpendAmount(amount: string | number) {
         return (await this.contract.methods.getExpectedSpendAmount({answerId: 0, amount: amount}).call()).value0;
-    }
-
-    async expectedSpendAmountOfMatching(amount: string | number) {
-        return (await this.contract.methods.getExpectedSpendAmountOfMatching({answerId: 0, amount: amount}).call()).value0;
     }
 
     async buildPayload(
@@ -164,26 +161,35 @@ export class OrderWrapper {
     async matching(
         callbackId: number,
         deployWalletValue: number,
-        limitOrder: Address,
+        orderRoot: Address,
+        owner: Address,
+        timeTx: string,
+        nowTx: string,
         from: Address,
         trace: boolean
     ) {
         if (trace){
             return await locklift.tracing.trace(
                 this.contract.methods.matching({
-                callbackId: callbackId,
-                deployWalletValue: toNano(deployWalletValue),
-                limitOrder: limitOrder
+                    callbackId: callbackId,
+                    deployWalletValue: toNano(deployWalletValue),
+                    orderRoot: orderRoot,
+                    _owner: owner,
+                    _timeTx: timeTx,
+                    _nowTx: nowTx
             }).send({
                 amount: toNano(6), from: from
-            }),  {allowedCodes:{compute:[60]}}
+            }),  {allowedCodes:{compute:[60, null]}}
             )
         } else {
             return await
                 this.contract.methods.matching({
-                callbackId: callbackId,
-                deployWalletValue: toNano(deployWalletValue),
-                limitOrder: limitOrder
+                    callbackId: callbackId,
+                    deployWalletValue: toNano(deployWalletValue),
+                    orderRoot: orderRoot,
+                    _owner: owner,
+                    _timeTx: timeTx,
+                    _nowTx: nowTx
             }).send({
                 amount: toNano(6), from: from
             })
