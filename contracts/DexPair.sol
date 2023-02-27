@@ -1591,8 +1591,10 @@ contract DexPair is DexPairBase, INextExchangeData {
 
         if (_tokenRoot == _lpRoot() && _msgSender != _typeToWalletAddresses[DexAddressType.LP][0]) return DirectOperationErrors.NOT_LP_TOKEN_WALLET;
         if (_tokenRoot != _lpRoot()) {
-            if (_tokenRoot != _tokenRoots()[0] && _tokenRoot != _tokenRoots()[1]) return DirectOperationErrors.NOT_TOKEN_ROOT;
-            if (_msgSender != _typeToWalletAddresses[DexAddressType.RESERVE][0] && _msgSender != _typeToWalletAddresses[DexAddressType.RESERVE][1]) return DirectOperationErrors.NOT_TOKEN_WALLET;
+            address[] roots = _tokenRoots();
+            address[] wallets = _typeToWalletAddresses[DexAddressType.RESERVE];
+            if (_tokenRoot != roots[0] && _tokenRoot != roots[1]) return DirectOperationErrors.NOT_TOKEN_ROOT;
+            if (_tokenRoot == roots[0] && _msgSender != wallets[0] || _tokenRoot == roots[1] && _msgSender != wallets[1]) return DirectOperationErrors.NOT_TOKEN_WALLET;
         }
 
         if (!(_msgSender == _typeToWalletAddresses[DexAddressType.LP][0] && (op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) ||
