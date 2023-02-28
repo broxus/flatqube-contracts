@@ -61,12 +61,12 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         }(address(this), spentToken, deployer);
     }
 
-    function onTokenWalletReceive(address _wallet) external {
+    function onTokenWalletReceive(address _wallet) external pure {
         require(msg.sender.value != 0, OrderErrors.NOT_EMPTY_MSG_SENDER);
         _wallet.transfer(0, false, MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS);
     }
 
-    function onTokenWalletBeneficiary(address _wallet) external {
+    function onTokenWalletBeneficiary(address _wallet) external pure {
         require(msg.sender.value != 0, OrderErrors.NOT_EMPTY_MSG_SENDER);
         _wallet.transfer(0, false, MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS);
     }

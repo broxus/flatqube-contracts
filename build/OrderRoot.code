@@ -99,11 +99,6 @@ SENDRAWMSG
 DROP
 GETGLOB 6
 THROWIFNOT 76
-GETGLOB 2
-ISNULL
-IFREF {
-	CALL $c4_to_c7$
-}
 .loc ../contracts/OrderRoot.tsol, 64
 OVER
 PUSHCONT {
@@ -118,9 +113,8 @@ ENDS
 CALLREF {
 	CALL $onTokenWalletReceive_aebd8150_internal_macro$
 }
-DROP
-CALLREF {
-	CALL $c7_to_c4$
+IFREF {
+	CALL $upd_only_time_in_c4$
 }
 THROW 0
 
@@ -148,11 +142,6 @@ SENDRAWMSG
 DROP
 GETGLOB 6
 THROWIFNOT 76
-GETGLOB 2
-ISNULL
-IFREF {
-	CALL $c4_to_c7$
-}
 .loc ../contracts/OrderRoot.tsol, 69
 OVER
 PUSHCONT {
@@ -167,9 +156,8 @@ ENDS
 CALLREF {
 	CALL $onTokenWalletBeneficiary_3ec6cd0a_internal_macro$
 }
-DROP
-CALLREF {
-	CALL $c7_to_c4$
+IFREF {
+	CALL $upd_only_time_in_c4$
 }
 THROW 0
 

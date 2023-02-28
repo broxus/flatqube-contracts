@@ -170,10 +170,11 @@ export class OrderWrapper {
         timeTx: string,
         nowTx: string,
         from: Address,
-        trace: boolean
+        trace: boolean,
+        beautyPrint: boolean = false
     ) {
         if (trace){
-            return await locklift.tracing.trace(
+            const {traceTree} = await locklift.tracing.trace(
                 this.contract.methods.matching({
                     callbackId: callbackId,
                     deployWalletValue: toNano(deployWalletValue),
@@ -184,7 +185,17 @@ export class OrderWrapper {
             }).send({
                 amount: toNano(6), from: from
             }),  {allowedCodes:{compute:[60, null]}}
-            )
+            );
+
+            if (beautyPrint) {
+                for(let addr in traceTree?.balanceChangeInfo) {
+                    console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+                }
+
+                await traceTree?.beautyPrint();
+            }
+
+            return
         } else {
             return await
                 this.contract.methods.matching({

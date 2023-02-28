@@ -1053,11 +1053,10 @@ describe('OrderTest', () => {
             console.log(`Limit order 2: ${order2.address}`);
             let detailsOrder2 = await order2.getDetails();
 
-            // Call matching
             await order1.matching(
                 2, 0.1, RootOrderBar.address,
                 detailsOrder2.owner, detailsOrder2.timeTx, detailsOrder2.nowTx,
-                account5.address, true);
+                account5.address, true, false);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -1804,7 +1803,6 @@ describe('OrderTest', () => {
             await displayLog(balanceBarAcc3Start, balanceTstAcc3Start, true, "Account3");
 
             await displayLog((await accountTokenBalances(barWallet3, barDecimals)), (await accountTokenBalances(tstWallet3, tstDecimals)), true, "Account3");
-
 
             const balanceBarAcc4Start = await accountTokenBalances(barWallet4, barDecimals);
             const balanceTstAcc4Start = await accountTokenBalances(tstWallet4, tstDecimals);
