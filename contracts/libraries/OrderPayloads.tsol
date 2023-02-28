@@ -1,22 +1,35 @@
 pragma ever-solidity >= 0.62.0;
 
-import "../libraries/OrderOperationTypes.tsol";
 import "../libraries/OrderStatus.tsol";
-import "../libraries/DexOperationTypes.tsol";
-import "../libraries/DexOperationStatusV2.tsol";
 import "../libraries/PairPayload.tsol";
+import "../libraries/DexOperationTypes.tsol";
+import "../libraries/OrderOperationTypes.tsol";
+import "../libraries/OrderOperationStatus.tsol";
+import "../libraries/DexOperationStatusV2.tsol";
 
 library OrderPayloads {
 
     function buildOrderPayload(
         uint8 op,
         uint64 callbackId,
-        uint128 deployWalletValue
+        uint128 deployWalletValue,
+        address recipient,
+        optional(TvmCell) successPayload,
+        optional(TvmCell) cancelPayload
     ) public returns(TvmCell) {
         TvmBuilder builder;
         builder.store(op);
         builder.store(callbackId);
         builder.store(deployWalletValue);
+        builder.store(recipient);
+
+        if (successPayload.hasValue()) {
+            builder.store(successPayload.get());
+        }
+
+        if (cancelPayload.hasValue()) {
+            builder.store(cancelPayload.get());
+        }
 
         return builder.toCell();
     }
@@ -33,13 +46,13 @@ library OrderPayloads {
     ) public returns(TvmCell) {
 
         TvmBuilder successBuilder;
-        successBuilder.store(OrderOperationTypes.SWAP_SUCCESS);
+        successBuilder.store(DexOperationStatusV2.SUCCESS);
         successBuilder.store(_callbackId);
         successBuilder.store(_owner);
         successBuilder.store(_deployWalletValue);
 
         TvmBuilder cancelBuilder;
-        cancelBuilder.store(OrderOperationTypes.SWAP_CANCEL);
+        cancelBuilder.store(DexOperationStatusV2.CANCEL);
         cancelBuilder.store(_callbackId);
         cancelBuilder.store(_sender);
 
@@ -94,6 +107,7 @@ library OrderPayloads {
         uint8,
         uint64,
         address,
+        address,
         uint128,
         uint128,
         uint128
@@ -117,6 +131,7 @@ library OrderPayloads {
         uint8 op;
         uint64 callbackId;
         address sendGasTo;
+        address recipient;
         uint128 deployWalletValue;
         uint128 amountForDeal;
         uint128 reward;
@@ -134,14 +149,18 @@ library OrderPayloads {
                 deployWalletValue = payloadSlice.decode(uint128);
             }
 
-            if (payloadSlice.bits() >= 267 && op != OrderOperationTypes.EXCHANGE) {
-                sendGasTo = payloadSlice.decode(address);
+            if (payloadSlice.bits() >= 267) {
+                if (op != OrderOperationTypes.EXCHANGE) {
+                    sendGasTo = payloadSlice.decode(address);
+                } else {
+                    recipient = payloadSlice.decode(address);
+                }
             }
 
             if (payloadSlice.bits() >= 128 &&
             (
                 op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE ||
-                op == OrderOperationTypes.SWAP_SUCCESS
+                op == DexOperationStatusV2.SUCCESS
             )
             ){
                 deployWalletValue = payloadSlice.decode(uint128);
@@ -156,10 +175,70 @@ library OrderPayloads {
             isValid,
             op,
             callbackId,
+            recipient,
             sendGasTo,
             deployWalletValue,
             amountForDeal,
             reward
         );
+    }
+
+    function decodeOnAcceptTokensTransferPayloads(TvmCell _payload, uint8 op) public returns (
+    bool,
+    TvmCell,
+    bool,
+    TvmCell
+    ){
+        TvmSlice slice = _payload.toSlice();
+        uint8 refs = slice.refs();
+
+        bool notifySuccess;
+        bool notifyCancel;
+
+        TvmCell successPayload;
+        TvmCell cancelPayload;
+
+        if (op != OrderOperationTypes.EXCHANGE || refs == 0) {
+            return (notifySuccess, successPayload, notifyCancel, cancelPayload);
+        }
+
+        notifySuccess = refs >= 1;
+        notifyCancel = refs >= 2;
+
+        if (notifySuccess) { successPayload = slice.loadRef(); }
+        if (notifyCancel) { cancelPayload = slice.loadRef(); }
+
+        return (
+            notifySuccess,
+            successPayload,
+            notifyCancel,
+            cancelPayload
+        );
+    }
+
+    function buildSuccessPayload(uint8 op, TvmCell originalPayload, address senderAddress) public returns (TvmCell) {
+
+        TvmBuilder builder;
+
+        builder.store(OrderOperationStatus.SUCCESS);
+        builder.store(op);
+        builder.store(originalPayload);
+
+        TvmBuilder data;
+        data.store(senderAddress);
+
+        builder.store(data.toCell());
+
+        return builder.toCell();
+    }
+
+    function buildCancelPayload(uint8 op, TvmCell originalPayload) public returns (TvmCell) {
+
+        TvmBuilder builder;
+        builder.store(OrderOperationStatus.CANCEL);
+        builder.store(op);
+        builder.store(originalPayload);
+
+        return builder.toCell();
     }
 }

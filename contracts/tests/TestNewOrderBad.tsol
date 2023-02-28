@@ -10,6 +10,7 @@ import "../libraries/OrderStatus.tsol";
 import "../libraries/OrderPayloads.tsol";
 import "../libraries/OrderOperationTypes.tsol";
 import "../libraries/DexOperationTypes.tsol";
+import "../libraries/DexOperationStatusV2.tsol";
 
 import "../structures/IOrderExchangeResult.tsol";
 import "../structures/IOrderSwapResult.tsol";
@@ -215,12 +216,18 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 
 	function buildPayload(
 		uint64 callbackId,
-		uint128 deployWalletValue
+		uint128 deployWalletValue,
+		address recipient,
+		optional(TvmCell) successPayload,
+		optional(TvmCell) cancelPayload
 	) external pure returns (TvmCell) {
 		return OrderPayloads.buildOrderPayload(
 			OrderOperationTypes.EXCHANGE,
 			callbackId,
-			deployWalletValue
+			deployWalletValue,
+			recipient,
+			successPayload,
+			cancelPayload
 		);
 	}
 
@@ -291,6 +298,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 			bool isPayloadValid,
 			uint8 op,
 			uint64 callbackId,
+			,
 			address sendGasTo,
 			uint128 deployWalletValue,
 			,
@@ -312,11 +320,11 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 				if (
 					(sender == root && amount >= initialAmount &&
 					(state == OrderStatus.Initialize || state == OrderStatus.AwaitTokens)) ||
-					(state == OrderStatus.SwapInProgress && op == OrderOperationTypes.SWAP_CANCEL)
+					(state == OrderStatus.SwapInProgress && op == DexOperationStatusV2.CANCEL)
 				){
 					changeState(OrderStatus.Active);
 
-					if (callbackId > 0 && state == OrderStatus.SwapInProgress && op == OrderOperationTypes.SWAP_CANCEL) {
+					if (callbackId > 0 && state == OrderStatus.SwapInProgress && op == DexOperationStatusV2.CANCEL) {
 						IOrderCallbacks(sendGasTo).onOrderSwapCancel{
 							value: OrderGas.OPERATION_CALLBACK_BASE,
 							flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -371,7 +379,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 					}
 				} else if (
 					state == OrderStatus.SwapInProgress &&
-					op == OrderOperationTypes.SWAP_SUCCESS &&
+					op == DexOperationStatusV2.SUCCESS &&
 					amount >= currentAmountReceiveToken
 				){
 					_swapSuccess(
@@ -770,104 +778,60 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 
 	function backendSwap(uint64 callbackId) external {
 		require(msg.pubkey() == backPK, OrderErrors.NOT_BACKEND_PUB_KEY);
-		require(
-			state == OrderStatus.Active,
-			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
-		);
+		require(state == OrderStatus.Active, OrderErrors.NOT_ACTIVE_LIMIT_ORDER);
+		require(autoExchange == true, OrderErrors.NOT_AUTO_EXCHANGE);
 
-		require(
-			autoExchange == true,
-			OrderErrors.NOT_AUTO_EXCHANGE
-		);
-
-		tvm.accept();
-
-		swapAttempt++;
-		changeState(OrderStatus.SwapInProgress);
-
-		TvmBuilder successBuilder;
-		successBuilder.store(OrderOperationTypes.SWAP_SUCCESS);
-		successBuilder.store(callbackId);
-		successBuilder.store(owner);
-		successBuilder.store(uint128(0));
-
-		TvmBuilder cancelBuilder;
-		cancelBuilder.store(OrderOperationTypes.SWAP_CANCEL);
-		cancelBuilder.store(callbackId);
-		cancelBuilder.store(msg.sender);
-
-		TvmBuilder builder;
-		builder.store(DexOperationTypes.EXCHANGE);
-		builder.store(callbackId);
-		builder.store(uint128(0));
-		builder.store(currentAmountReceiveToken);
-
-		builder.storeRef(successBuilder);
-		builder.storeRef(cancelBuilder);
-
-		ITokenWallet(spentWallet).transfer{
-			value: OrderGas.SWAP_BACK_MIN_VALUE,
-			flag: MsgFlag.SENDER_PAYS_FEES
-		}(
-			currentAmountSpentToken,
-			dexPair,
-			uint128(0),
-			address(this),
-			true,
-			builder.toCell()
-		);
+		_swap(callbackId, 0, owner, msg.sender, address(0), address(0), true);
 	}
 
 	function swap(uint64 callbackId, uint128 deployWalletValue) external {
-		require(
-			state == OrderStatus.Active,
-			OrderErrors.NOT_ACTIVE_LIMIT_ORDER
-		);
+		require(state == OrderStatus.Active, OrderErrors.NOT_ACTIVE_LIMIT_ORDER);
+		require(autoExchange == true, OrderErrors.NOT_AUTO_EXCHANGE);
+		require(msg.value >= OrderGas.SWAP_MIN_VALUE + deployWalletValue, OrderErrors.VALUE_TOO_LOW);
 
-		require(
-			autoExchange == true,
-			OrderErrors.NOT_AUTO_EXCHANGE
-		);
+		_swap(callbackId, deployWalletValue, msg.sender, msg.sender, address(0), address(0), true);
+	}
 
-		require(
-			msg.value >= OrderGas.SWAP_MIN_VALUE + deployWalletValue,
-			OrderErrors.VALUE_TOO_LOW
-		);
+	function _swap(
+		uint64 callbackId,
+		uint128 _deployWalletValue,
+		address _owner,
+		address _sender,
+		address _recipient,
+		address _referrer,
+		bool backend
+	) private {
 
-		tvm.rawReserve(address(this).balance - msg.value, 0);
+		if (backend) {
+			tvm.accept();
+		} else {
+			tvm.rawReserve(address(this).balance - msg.value, 0);
+		}
 
 		swapAttempt++;
 		changeState(OrderStatus.SwapInProgress);
 
-		TvmBuilder successBuilder;
-		successBuilder.store(OrderOperationTypes.SWAP_SUCCESS);
-		successBuilder.store(callbackId);
-		successBuilder.store(msg.sender);
-		successBuilder.store(deployWalletValue);
-
-		TvmBuilder cancelBuilder;
-		cancelBuilder.store(OrderOperationTypes.SWAP_CANCEL);
-		cancelBuilder.store(callbackId);
-		cancelBuilder.store(msg.sender);
-
-		TvmBuilder builder;
-		builder.store(DexOperationTypes.EXCHANGE);
-		builder.store(callbackId);
-		builder.store(uint128(0));
-		builder.store(currentAmountReceiveToken);
-		builder.storeRef(successBuilder);
-		builder.storeRef(cancelBuilder);
+		TvmCell payload = OrderPayloads.buildSwapExchangePayload(
+			callbackId,
+			_deployWalletValue,
+			currentAmountReceiveToken,
+			_owner,
+			_sender,
+			_recipient,
+			receiveToken,
+			_referrer
+		);
 
 		ITokenWallet(spentWallet).transfer{
-				value: 0,
-				flag: MsgFlag.ALL_NOT_RESERVED
+				value: (backend ? OrderGas.SWAP_BACK_MIN_VALUE : 0),
+				flag: (backend ? MsgFlag.SENDER_PAYS_FEES : MsgFlag.ALL_NOT_RESERVED)
 		}(
 			currentAmountSpentToken,
 			dexPair,
 			uint128(0),
 			address(this),
 			true,
-			builder.toCell()
+			payload
 		);
 	}
 

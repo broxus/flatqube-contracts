@@ -1,4 +1,4 @@
-import {Address, Contract, Signer, toNano} from "locklift";
+import {Address, Contract, Signer, toNano, zeroAddress} from "locklift";
 import {FactorySource} from "../../../build/factorySource";
 import {Account} from 'locklift/everscale-client'
 
@@ -36,12 +36,18 @@ export class OrderWrapper {
 
     async buildPayload(
         callbackId: number | string,
-        deployWalletValue: number | string
+        deployWalletValue: number | string,
+        recipient: Address = zeroAddress,
+        successPayload: string = '',
+        cancelPayload: string = '',
         ) {
         return (await this.contract.methods.buildPayload(
             {
                 callbackId: callbackId,
-                deployWalletValue: toNano(deployWalletValue)
+                deployWalletValue: toNano(deployWalletValue),
+                recipient: recipient,
+                successPayload: successPayload,
+                cancelPayload: cancelPayload
             }).call()).value0;
     }
 
@@ -51,8 +57,6 @@ export class OrderWrapper {
         trace: boolean = false,
         from: Address
     ) {
-
-        const owner = this._owner as Account;
         if (trace){
 
             return await locklift.tracing.trace(this.contract.methods.swap({
@@ -173,7 +177,7 @@ export class OrderWrapper {
                 this.contract.methods.matching({
                     callbackId: callbackId,
                     deployWalletValue: toNano(deployWalletValue),
-                    orderRoot: orderRoot,
+                    _orderRoot: orderRoot,
                     _owner: owner,
                     _timeTx: timeTx,
                     _nowTx: nowTx
@@ -186,7 +190,7 @@ export class OrderWrapper {
                 this.contract.methods.matching({
                     callbackId: callbackId,
                     deployWalletValue: toNano(deployWalletValue),
-                    orderRoot: orderRoot,
+                    _orderRoot: orderRoot,
                     _owner: owner,
                     _timeTx: timeTx,
                     _nowTx: nowTx
