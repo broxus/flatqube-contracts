@@ -241,4 +241,13 @@ library OrderPayloads {
 
         return builder.toCell();
     }
+
+    function buildCancelPayloadOrderRoot(TvmCell originalPayload) public returns (TvmCell) {
+
+        TvmBuilder builder;
+        builder.store(OrderOperationStatus.CANCEL_ORDER_ROOT);
+        builder.store(originalPayload);
+
+        return builder.toCell();
+    }
 }

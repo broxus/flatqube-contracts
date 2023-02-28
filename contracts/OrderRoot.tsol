@@ -6,6 +6,8 @@ pragma AbiHeader pubkey;
 
 import "./libraries/OrderGas.tsol";
 import "./libraries/OrderErrors.tsol";
+import "./libraries/OrderPayloads.tsol";
+import "./libraries/OrderRootOperationErrors.tsol";
 
 import "./structures/IOrderRootCreateResult.tsol";
 
@@ -194,12 +196,16 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
 
         TvmSlice dataPK = payloadSlice.loadRefAsSlice();
 
-        if (
-            msg.sender.value >= OrderGas.DEPLOY_ORDER_MIN_VALUE &&
-            msg.sender == spentTokenWallet &&
-            payloadSlice.bits() == 790 && dataPK.bits() == 512
-        ){
-            (   address user,
+        uint16 errorCode = _checkOperationData(
+            msg.sender,
+            msg.sender.value,
+            payloadSlice,
+            dataPK
+        );
+
+        if (errorCode == 0) {
+            (
+                address user,
                 address receiveToken,
                 uint128 expectedAmount,
                 uint128 deployWalletValue
@@ -220,14 +226,22 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             emit CreateOrder(orderAddress, user, tokenRoot, amount, receiveToken, expectedAmount);
 
             if (callbackId > 0) {
-                IOrderRootCallbacks(user).onOrderCreateOrderSuccess{
+                IOrderRootCallbacks(user).onOrderCreateOrderSuccess {
                     value: OrderGas.OPERATION_CALLBACK_BASE,
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
-                }(callbackId);
+                }(callbackId, orderAddress);
+
+                if (user != sender) {
+                    IOrderRootCallbacks(sender).onOrderCreateOrderSuccess {
+                        value: OrderGas.OPERATION_CALLBACK_BASE,
+                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                        bounce: false
+                    }(callbackId, orderAddress);
+                }
             }
 
-            ITokenRoot(receiveToken).deployWallet { 
+            ITokenRoot(receiveToken).deployWallet {
                 value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: OrderRoot.onTokenWalletReceive
@@ -250,7 +264,9 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 true,
                 payload
             );
-        } else {
+        }
+
+        if (errorCode != 0) {
             emit CreateOrderReject();
             if (callbackId > 0){
                 IOrderRootCallbacks(sender).onOrderCreateOrderReject{
@@ -260,7 +276,6 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 }(callbackId);
             }
 
-            TvmCell emptyPayload;
             ITokenWallet(msg.sender).transfer{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
@@ -271,9 +286,22 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 uint128(0),
                 originalGasTo,
                 true,
-                emptyPayload
+                OrderPayloads.buildCancelPayloadOrderRoot(payload)
             );
         }
+    }
+
+    function _checkOperationData(
+        address msgSender,
+        uint256 msgValue,
+        TvmSlice payloadSlice,
+        TvmSlice dataPkSlice
+    ) private view returns(uint16){
+        if (msgValue < OrderGas.DEPLOY_ORDER_MIN_VALUE) return OrderRootOperationErrors.VALUE_TOO_LOW;
+        if (msgSender != spentTokenWallet) return OrderRootOperationErrors.NOT_SPENT_TOKEN_ROOT;
+        if (payloadSlice.bits() != 790 || dataPkSlice.bits() != 512) return OrderRootOperationErrors.INVALID_PAYLOAD;
+
+        return 0;
     }
 
     function _createOrder(

@@ -30,6 +30,7 @@ export class OrderCallbacks {
                 name: "onOrderCreateOrderSuccess",
                 inputs: [
                     { name: 'id', type: 'uint64' },
+                    { name: 'order', type: 'address'}
                 ],
                 outputs: []
             },

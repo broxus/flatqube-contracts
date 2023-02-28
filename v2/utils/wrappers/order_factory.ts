@@ -114,14 +114,14 @@ export class OrderFactory {
         orderAddress: Address,
         manager: string
     ){
-          return await this.contract.methods.setEmergency({
+          return await locklift.tracing.trace(this.contract.methods.setEmergency({
             enabled: enabled,
             orderAddress  : orderAddress,
             manager: manager
           }).send({
             amount: toNano(1),
             from: this._owner.address
-            })
+            }), {allowedCodes: {compute: [60]}});
     }
 
     async withdrawFee(

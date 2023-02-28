@@ -78,9 +78,9 @@ export class OrderWrapper {
     async cancel(
         callbackId: number = 0
     ){
-        return await this.contract.methods.cancel({callbackId: callbackId}).send({
+        return await locklift.tracing.trace(this.contract.methods.cancel({callbackId: callbackId}).send({
                 amount: toNano(3), from: this._owner.address
-            })
+            }), {allowedCodes:{compute:[60]}});
     }
 
     async backendSwap(
@@ -184,8 +184,7 @@ export class OrderWrapper {
                     _nowTx: nowTx
             }).send({
                 amount: toNano(6), from: from
-            }),  {allowedCodes:{compute:[60, null]}}
-            );
+            }),  {allowedCodes:{compute:[60, null]}});
 
             if (beautyPrint) {
                 for(let addr in traceTree?.balanceChangeInfo) {
