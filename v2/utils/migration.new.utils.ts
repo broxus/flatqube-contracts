@@ -173,13 +173,11 @@ export const dexVaultMigration = async (
   const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts('DexVaultLpTokenPendingV2');
   const DexAccount = await locklift.factory.getContractArtifacts('DexAccount');
 
-
   logMigrationProcess('dexVaultMigration', 'installPlatformOnce', 'installPlatformOnce...');
   await contract.methods.installPlatformOnce({code: platfromArtifacts.code}).send({
     amount: locklift.utils.toNano(2),
     from: account.address
   })
-
 
   logMigrationSuccess(
     'dexVaultMigration',
@@ -520,15 +518,11 @@ export const dexRootMigration = async (
       value: locklift.utils.toNano(3),
     })).contract;
 
-
-
-
   logMigrationProcess('dexVaultMigration', 'installPlatformOnce', 'installPlatformOnce...');
   await DexVault.methods.installPlatformOnce({code: DexPlatform.code}).send({
     amount: locklift.utils.toNano(2),
     from: account.address
   })
-
 
   logMigrationProcess('DexRoot', 'setVaultOnce', 'setVaultOnce...');
   await contract.methods.setVaultOnce({new_vault: DexVault.address}).send({
@@ -562,7 +556,6 @@ export const dexRootMigration = async (
     from: account.address,
     amount: toNano(2)
   });
-
 
   logMigrationProcess('DexRoot', 'installPlatformOnce', 'installPlatformOnce...');
   await contract.methods.installPlatformOnce({
