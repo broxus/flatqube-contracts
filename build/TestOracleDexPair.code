@@ -7008,42 +7008,10 @@ CALLREF {
 SDEQ
 PUSHCONT {
 	.loc ../contracts/DexPair.sol, 1594
-	PUSH S2
-	PUSHINT 0
 	CALLREF {
 		CALL $_tokenRoots_475f7f72_internal_macro$
 	}
-	SECOND
-	PUSHINT 32
-	DICTUGET
-	THROWIFNOT 50
-	SDEQ
-	NOT
-	DUP
-	PUSHCONT {
-		DROP
-		PUSH S2
-		PUSHINT 1
-		CALLREF {
-			CALL $_tokenRoots_475f7f72_internal_macro$
-		}
-		SECOND
-		PUSHINT 32
-		DICTUGET
-		THROWIFNOT 50
-		SDEQ
-		NOT
-	}
-	IF
-	PUSHCONT {
-		BLKDROP 7
-		PUSHINT 107
-		PUSHINT 4
-	}
-	IFJMP
 	.loc ../contracts/DexPair.sol, 1595
-	PUSH S6
-	PUSHINT 0
 	PUSHINT 1
 	GETGLOB 20
 	PUSHINT 8
@@ -7058,6 +7026,10 @@ PUSHCONT {
 	}
 	IFELSE
 	PAIR
+	.loc ../contracts/DexPair.sol, 1596
+	PUSH S4
+	PUSHINT 0
+	PUSH S3
 	SECOND
 	PUSHINT 32
 	DICTUGET
@@ -7067,22 +7039,9 @@ PUSHCONT {
 	DUP
 	PUSHCONT {
 		DROP
-		PUSH S6
+		PUSH S4
 		PUSHINT 1
-		DUP
-		GETGLOB 20
-		PUSHINT 8
-		DICTUGET
-		PUSHCONT {
-			LDU 32
-			PLDDICT
-		}
-		PUSHCONT {
-			PUSHINT 0
-			NEWDICT
-		}
-		IFELSE
-		PAIR
+		PUSH S3
 		SECOND
 		PUSHINT 32
 		DICTUGET
@@ -7092,17 +7051,74 @@ PUSHCONT {
 	}
 	IF
 	PUSHCONT {
-		BLKDROP 7
+		BLKDROP 9
+		PUSHINT 107
+		PUSHINT 4
+	}
+	IFJMP
+	.loc ../contracts/DexPair.sol, 1597
+	PUSH S4
+	PUSHINT 0
+	PUSH S3
+	SECOND
+	PUSHINT 32
+	DICTUGET
+	THROWIFNOT 50
+	SDEQ
+	DUP
+	PUSHCONT {
+		DROP
+		PUSH S8
+		PUSHINT 0
+		PUSH S2
+		SECOND
+		PUSHINT 32
+		DICTUGET
+		THROWIFNOT 50
+		SDEQ
+		NOT
+	}
+	IF
+	DUP
+	PUSHCONT {
+		DROP
+		PUSH S4
+		PUSHINT 1
+		PUSH S3
+		SECOND
+		PUSHINT 32
+		DICTUGET
+		THROWIFNOT 50
+		SDEQ
+		DUP
+		PUSHCONT {
+			DROP
+			PUSH S8
+			PUSHINT 1
+			PUSH S2
+			SECOND
+			PUSHINT 32
+			DICTUGET
+			THROWIFNOT 50
+			SDEQ
+			NOT
+		}
+		IF
+	}
+	IFNOT
+	PUSHCONT {
+		BLKDROP 9
 		PUSHINT 106
 		PUSHINT 4
 	}
 	IFJMP
 	.loc ../contracts/DexPair.sol, 0
+	DROP2
 }
 IFNOT
 .loc ../contracts/DexPair.sol, 0
 IFRET
-.loc ../contracts/DexPair.sol, 1598
+.loc ../contracts/DexPair.sol, 1600
 PUSH S5
 PUSHINT 0
 PUSHINT 2
@@ -7180,7 +7196,7 @@ PUSHCONT {
 	PUSHINT 108
 }
 IFNOTJMP
-.loc ../contracts/DexPair.sol, 1606
+.loc ../contracts/DexPair.sol, 1608
 PUSH S2
 EQINT 3
 ROLL 3
@@ -7204,13 +7220,13 @@ PUSHCONT {
 }
 IF
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 1607
+	.loc ../contracts/DexPair.sol, 1609
 	BLKDROP 5
 	PUSHINT 103
 	.loc ../contracts/DexPair.sol, 0
 }
 IFJMP
-.loc ../contracts/DexPair.sol, 1610
+.loc ../contracts/DexPair.sol, 1612
 BLKDROP 5
 PUSHINT 0
 .loc ../contracts/DexPair.sol, 0
@@ -11001,7 +11017,7 @@ PUSHCONT {
 			.loc ../contracts/abstract/DexPairBase.sol, 664
 			PUSHINT 2
 			PUSHREF
-			.compute $new_array_line_663_column_56_ast_id_6099$
+			.compute $new_array_line_663_column_56_ast_id_6121$
 			PAIR
 			.loc ../contracts/abstract/DexPairBase.sol, 666
 			TRUE
@@ -11582,7 +11598,7 @@ PUSHCONT {
 				.loc ../contracts/abstract/DexPairBase.sol, 708
 				PUSHINT 2
 				PUSHREF
-				.compute $new_array_line_707_column_56_ast_id_6274$
+				.compute $new_array_line_707_column_56_ast_id_6296$
 				PAIR
 				.loc ../contracts/abstract/DexPairBase.sol, 710
 				TRUE
@@ -19198,7 +19214,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_663_column_56_ast_id_6099
+.macro new_array_line_663_column_56_ast_id_6121
 PUSHREF
 .compute $default_tuple_builder_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool$
 PUSHINT 0
@@ -19215,7 +19231,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_707_column_56_ast_id_6274
+.macro new_array_line_707_column_56_ast_id_6296
 PUSHREF
 .compute $default_tuple_builder_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool$
 PUSHINT 0
