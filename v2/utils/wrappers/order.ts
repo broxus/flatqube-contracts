@@ -54,17 +54,27 @@ export class OrderWrapper {
     async swap(
         callbackId: number,
         deployWalletValue: number,
+        from: Address,
         trace: boolean = false,
-        from: Address
+        beautyPrint: boolean = false
     ) {
         if (trace){
-
-            return await locklift.tracing.trace(this.contract.methods.swap({
+            const {traceTree} = await locklift.tracing.trace(this.contract.methods.swap({
                 callbackId: callbackId,
                 deployWalletValue: toNano(deployWalletValue)
             }).send({
                 amount: toNano(6), from: from
             }), {allowedCodes: {compute: [60, 302, 100]}})
+
+            if (beautyPrint) {
+                for(let addr in traceTree?.balanceChangeInfo) {
+                    console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+                }
+
+                await traceTree?.beautyPrint();
+            }
+
+            return
         } else {
             return await this.contract.methods.swap({
                 callbackId: callbackId,
@@ -84,9 +94,26 @@ export class OrderWrapper {
     }
 
     async backendSwap(
-        signer: any
+        signer: any,
+        trace: boolean = false,
+        beautyPrint : boolean = false
     ){
-        return await this.contract.methods.backendSwap({callbackId: 1}).sendExternal({publicKey: signer.publicKey})
+        if (trace) {
+            const {traceTree} = await locklift.tracing.trace(this.contract.methods.backendSwap({callbackId: 1}).sendExternal({publicKey: signer.publicKey}),
+                {allowedCodes: {compute: [60]}});
+
+            if (beautyPrint) {
+                for(let addr in traceTree?.balanceChangeInfo) {
+                    console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+                }
+
+                await traceTree?.beautyPrint();
+            }
+        } else {
+            await this.contract.methods.backendSwap({callbackId: 1}).sendExternal({publicKey: signer.publicKey})
+        }
+
+        return
     }
 
     async sendGas(
@@ -144,15 +171,26 @@ export class OrderWrapper {
         callbackId: number,
         limitOrder: Address,
         trace: boolean = false,
+        beautyPrint: boolean = false,
         signer: any
     ) {
         if (trace){
-           return await locklift.tracing.trace(
+            const {traceTree} = await locklift.tracing.trace( locklift.tracing.trace(
                 this.contract.methods.backendMatching({
                 callbackId: callbackId,
                 limitOrder: limitOrder
             }).sendExternal({publicKey: signer.publicKey}),  {allowedCodes:{compute:[null, 60]}}
-            )
+            ), {allowedCodes:{compute:[60, null]}});
+
+            if (beautyPrint) {
+                for(let addr in traceTree?.balanceChangeInfo) {
+                    console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+                }
+
+                await traceTree?.beautyPrint();
+            }
+
+            return
         } else{
            return await
                 this.contract.methods.backendMatching({

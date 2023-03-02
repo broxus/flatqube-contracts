@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import { Migration } from './migration';
-import {Address, Contract, toNano, WalletTypes, zeroAddress} from 'locklift';
+import {Address, Contract, getRandomNonce, toNano, WalletTypes, zeroAddress} from 'locklift';
 import { FactorySource } from '../../build/factorySource';
 import { Account } from 'everscale-standalone-client/nodejs';
 
@@ -30,7 +30,8 @@ export const accountMigration = async (
   const { account } = await locklift.factory.accounts.addNewAccount({
     value: locklift.utils.toNano(amount.toString()),
     publicKey: signer.publicKey,
-    type: WalletTypes.WalletV3,
+    type: WalletTypes.EverWallet,
+    nonce: getRandomNonce()
   });
 
   // Log and save address

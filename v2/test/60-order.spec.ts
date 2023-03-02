@@ -698,7 +698,8 @@ describe('OrderTest', () => {
             console.log(`Spent amount: ${TOKENS_TO_EXCHANGE1} BAR`);
             console.log(`Expected fee: ${numberString(Number(expected.expected_fee), -barDecimals)} BAR`);
             console.log(`Expected receive amount: ${numberString(Number(expected.expected_amount), -tstDecimals)} TST`);
-            await order.backendSwap(signer)
+
+            await order.backendSwap(signer, true, true)
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -740,7 +741,7 @@ describe('OrderTest', () => {
             console.log(`Expected fee: ${numberString(Number(expected.expected_fee), -barDecimals)} BAR`);
             console.log(`Expected receive amount: ${numberString(Number(expected.expected_amount), -tstDecimals)} TST`);
 
-            await order.backendSwap(signer)
+            await order.backendSwap(signer, true, true)
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -783,7 +784,7 @@ describe('OrderTest', () => {
             console.log(`Expected fee: ${numberString(Number(expected.expected_fee), -barDecimals)} BAR`);
             console.log(`Expected receive amount: ${numberString(Number(expected.expected_amount), -tstDecimals)} TST`);
 
-            await order.swap(1, 0.1, true, account4.address);
+            await order.swap(1, 0.1, account4.address, true, true);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -838,7 +839,7 @@ describe('OrderTest', () => {
             console.log(`Expected fee: ${numberString(Number(expected.expected_fee), -barDecimals)} BAR`);
             console.log(`Expected receive amount: ${numberString(Number(expected.expected_amount), -tstDecimals)} TST`);
 
-            await order.swap(1, 0.1, true, account3.address)
+            await order.swap(1, 0.1, account3.address, true, true)
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -1040,6 +1041,7 @@ describe('OrderTest', () => {
 
             const order1 = await RootOrderTst.getEventCreateOrder(account3);
             console.log(`Limit order 1: ${order1.address}`);
+            console.log(``);
 
             // Create Order 2
             const payload2 = await RootOrderTst.buildPayloadRoot(
@@ -1053,12 +1055,14 @@ describe('OrderTest', () => {
 
             const order2 = await RootOrderBar.getEventCreateOrder(account4);
             console.log(`Limit order 2: ${order2.address}`);
+            console.log(``);
+
             let detailsOrder2 = await order2.getDetails();
 
             await order1.matching(
                 2, 0.1, RootOrderBar.address,
                 detailsOrder2.owner, detailsOrder2.timeTx, detailsOrder2.nowTx,
-                account5.address, true, false);
+                account5.address, true, true);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -1138,6 +1142,7 @@ describe('OrderTest', () => {
 
             const order1 = await RootOrderTst.getEventCreateOrder(account3);
             console.log(`Limit order 1: ${order1.address}`);
+            console.log(``);
 
             // Create Order 2
             const payload2 = await RootOrderTst.buildPayloadRoot(
@@ -1152,12 +1157,13 @@ describe('OrderTest', () => {
             const order2 = await RootOrderBar.getEventCreateOrder(account4);
             let detailsOrder2 = await order2.getDetails();
             console.log(`Limit order 2: ${order2.address}`);
+            console.log(``);
 
             // Call matching
             await order1.matching(
                 2, 0.1, RootOrderBar.address,
                 detailsOrder2.owner, detailsOrder2.timeTx, detailsOrder2.nowTx,
-                account5.address, true);
+                account5.address, true, true);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -1243,6 +1249,7 @@ describe('OrderTest', () => {
 
             const order1 = await RootOrderTst.getEventCreateOrder(account3);
             console.log(`Limit order 1: ${order1.address}`);
+            console.log(``);
             let detailsOrder1 = await order1.getDetails();
 
             // Create Order 2
@@ -1257,13 +1264,15 @@ describe('OrderTest', () => {
 
             const order2 = await RootOrderBar.getEventCreateOrder(account4);
             console.log(`Limit order 2: ${order2.address}`);
+            console.log(``);
+
             let detailsOrder2 = await order2.getDetails();
 
             // Call matching
             await order1.matching(
                 2, 0.1, RootOrderBar.address,
                 detailsOrder2.owner, detailsOrder2.timeTx, detailsOrder2.nowTx,
-                account5.address, true);
+                account5.address, true, true);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -1350,6 +1359,8 @@ describe('OrderTest', () => {
             ));
 
             const order1 = await RootOrderTst.getEventCreateOrder(account3);
+            console.log(`Limit order 1: ${order1.address}`);
+            console.log(``);
 
             // Create Order 2
             const payload2 = await RootOrderBar.buildPayloadRoot(
@@ -1362,9 +1373,11 @@ describe('OrderTest', () => {
             ));
 
             const order2 = await RootOrderBar.getEventCreateOrder(account4);
+            console.log(`Limit order 2: ${order2.address}`);
+            console.log(``);
 
             // Call matching
-            await order1.backendMatching(1, order2.address, true, signer)
+            await order1.backendMatching(1, order2.address, true, true, signer)
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -1452,7 +1465,7 @@ describe('OrderTest', () => {
             await order1.matching(
                 2, 0.1, RootOrderBar.address,
                 detailsOrder2.owner, detailsOrder2.timeTx, detailsOrder2.nowTx,
-                account5.address, true);
+                account5.address, true, false);
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -1920,8 +1933,9 @@ describe('OrderTest', () => {
             await locklift.tracing.trace(tstWallet3.transfer(
                 numberString(TOKENS_TO_EXCHANGE1, tstDecimals), RootOrderTst.address, payload, toNano(6)
             ));
-            const order = await RootOrderBar.getEventCreateOrder(account3);
-
+            const order = await RootOrderTst.getEventCreateOrder(account3);
+            console.log(`Limit order: ${order.address}`);
+            console.log(``);
             console.log(`Upgrade Order...`)
             const NEW_VERSION = 3
 
@@ -1930,8 +1944,8 @@ describe('OrderTest', () => {
             await factoryOrder.setOrderCode(testOrderCode)
             await factoryOrder.updateOrder(order.address)
 
-            const newOrder = await locklift.factory.getDeployedContract("TestNewOrder", order.address)
-            const testMessage = (await newOrder.methods.newFunc().call()).value0
+            const newOrder = await locklift.factory.getDeployedContract("TestNewOrder", order.address);
+            const testMessage = (await newOrder.methods.newFunc().call()).value0;
             const newVersion = (await newOrder.methods.getDetails({answerId: 1}).call()).value0.version
 
             expect(testMessage).to.equal("New Order", "Wrong Upgrade OrderFactory")
