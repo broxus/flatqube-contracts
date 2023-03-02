@@ -259,7 +259,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             }(
                 amount,
                 orderAddress,
-                (deployWalletValue <= OrderGas.DEPLOY_EMPTY_WALLET_GRAMS? deployWalletValue:OrderGas.DEPLOY_EMPTY_WALLET_GRAMS),
+                math.max(deployWalletValue, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS),
+//                (deployWalletValue <= OrderGas.DEPLOY_EMPTY_WALLET_GRAMS? deployWalletValue:OrderGas.DEPLOY_EMPTY_WALLET_GRAMS),
                 orderAddress,
                 true,
                 payload
