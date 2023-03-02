@@ -51,10 +51,16 @@ library OrderPayloads {
         successBuilder.store(_owner);
         successBuilder.store(_deployWalletValue);
 
+        optional(TvmCell) successPayload;
+        successPayload.set(successBuilder.toCell());
+
         TvmBuilder cancelBuilder;
         cancelBuilder.store(DexOperationStatusV2.CANCEL);
         cancelBuilder.store(_callbackId);
         cancelBuilder.store(_sender);
+
+        optional(TvmCell) cancelPayload;
+        cancelPayload.set(cancelBuilder.toCell());
 
         TvmCell pairPayload = PairPayload.buildExchangePayloadV2(
             _callbackId,
@@ -63,8 +69,8 @@ library OrderPayloads {
             _recipient,
             _outcoming,
             _referrer,
-            successBuilder.toCell(),
-            cancelBuilder.toCell()
+            successPayload,
+            cancelPayload
         );
 
         return pairPayload;
@@ -92,12 +98,14 @@ library OrderPayloads {
     function buildMatchTransferPayload(
         uint8 op,
         uint64 callbackId,
-        address sendGasTo
+        address sendGasTo,
+        address owner
     ) public returns(TvmCell) {
         TvmBuilder builder;
         builder.store(op);
         builder.store(callbackId);
         builder.store(sendGasTo);
+        builder.store(owner);
 
         return builder.toCell();
     }
@@ -106,6 +114,7 @@ library OrderPayloads {
         bool,
         uint8,
         uint64,
+        address,
         address,
         address,
         uint128,
@@ -131,6 +140,7 @@ library OrderPayloads {
         uint8 op;
         uint64 callbackId;
         address sendGasTo;
+        address sendGasInMatching;
         address recipient;
         uint128 deployWalletValue;
         uint128 amountForDeal;
@@ -166,8 +176,12 @@ library OrderPayloads {
                 deployWalletValue = payloadSlice.decode(uint128);
             }
 
-            if (payloadSlice.bits() >= 256 && op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE) {
-                (amountForDeal, reward) = payloadSlice.decode(uint128, uint128);
+            if (payloadSlice.bits() >= 256) {
+                if (op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE) {
+                    (amountForDeal, reward) = payloadSlice.decode(uint128, uint128);
+                } else if (op == OrderOperationTypes.MATCHING_ORDER_TRANSFER){
+                    sendGasInMatching = payloadSlice.decode(address);
+                }
             }
         }
 
@@ -177,6 +191,7 @@ library OrderPayloads {
             callbackId,
             recipient,
             sendGasTo,
+            sendGasInMatching,
             deployWalletValue,
             amountForDeal,
             reward
