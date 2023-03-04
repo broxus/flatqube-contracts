@@ -2,10 +2,13 @@ pragma ever-solidity >= 0.62.0;
 
 import "../libraries/OrderStatus.tsol";
 import "../libraries/PairPayload.tsol";
+import "../libraries/OrderClosureType.tsol";
 import "../libraries/DexOperationTypes.tsol";
 import "../libraries/OrderOperationTypes.tsol";
 import "../libraries/OrderOperationStatus.tsol";
 import "../libraries/DexOperationStatusV2.tsol";
+
+import "../structures/IOrderStructures.tsol";
 
 library OrderPayloads {
 
@@ -250,19 +253,99 @@ library OrderPayloads {
     function buildCancelPayload(uint8 op, TvmCell originalPayload) public returns (TvmCell) {
 
         TvmBuilder builder;
+
         builder.store(OrderOperationStatus.CANCEL);
         builder.store(op);
         builder.store(originalPayload);
 
         return builder.toCell();
+
     }
 
     function buildCancelPayloadOrderRoot(TvmCell originalPayload) public returns (TvmCell) {
 
         TvmBuilder builder;
+
         builder.store(OrderOperationStatus.CANCEL_ORDER_ROOT);
         builder.store(originalPayload);
 
         return builder.toCell();
+
+    }
+
+    // Order operations payloads
+    function buildOrderOperation(uint8 op, IOrderStructures.Details details, optional(uint128) amount) private returns (TvmCell){
+
+        TvmBuilder builder;
+        builder.store(op);
+
+        optional(uint128) amount_opt;
+
+        builder.storeRef(infoOrderBlock((amount.hasValue()? amount_opt : amount), details));
+        builder.storeRef(initDataOrderBlock(details));
+
+        return builder.toCell();
+    }
+
+    function buildOrderOperationFullExchange(IOrderStructures.Details details) public returns(TvmCell) {
+        optional(uint128) amount;
+        return buildOrderOperation(OrderClosureType.FULL_EXCHANGE, details, amount);
+    }
+
+    function buildOrderOperationChange(uint128 amount, IOrderStructures.Details details) public returns(TvmCell) {
+        return buildOrderOperation(OrderClosureType.CHANGE, details, amount);
+    }
+
+    function buildOrderOperationPartExchange(uint128 amount, IOrderStructures.Details details) public returns(TvmCell) {
+        return buildOrderOperation(OrderClosureType.PART_EXCHANGE, details, amount);
+    }
+
+    function buildOrderOperationAMM(uint128 amount, IOrderStructures.Details details) public returns(TvmCell) {
+        return buildOrderOperation(OrderClosureType.AMM, details, amount);
+    }
+
+    function buildOrderOperationMatchingFull(IOrderStructures.Details details) public returns(TvmCell) {
+        optional(uint128) amount;
+        return buildOrderOperation(OrderClosureType.FULL_MATCHING, details, amount);
+    }
+
+    function buildOrderOperationMatchingPart(uint128 amount, IOrderStructures.Details details) public returns(TvmCell) {
+        return buildOrderOperation(OrderClosureType.PART_EXCHANGE, details, amount);
+    }
+
+    function buildOrderOperationCancel(IOrderStructures.Details details) public returns(TvmCell) {
+        optional(uint128) amount;
+        return buildOrderOperation(OrderClosureType.CANCEL, details, amount);
+    }
+
+    function infoOrderBlock(optional(uint128) amount, IOrderStructures.Details details) private returns(TvmCell) {
+        if (amount.hasValue()) {
+            return abi.encode(
+                amount.get(),
+                details.initialAmount,
+                details.expectedAmount,
+                details.currentAmountSpentToken,
+                details.currentAmountReceiveToken
+            );
+        } else {
+            return abi.encode(
+                details.initialAmount,
+                details.expectedAmount,
+                details.currentAmountSpentToken,
+                details.currentAmountReceiveToken
+            );
+        }
+    }
+
+    function initDataOrderBlock(IOrderStructures.Details details) private returns(TvmCell) {
+        return abi.encode(
+            details.factory,
+            details.root,
+            details.owner,
+            details.spentToken,
+            details.receiveToken,
+            details.timeTx,
+            details.nowTx
+        );
     }
 }
