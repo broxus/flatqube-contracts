@@ -6,6 +6,8 @@ pragma AbiHeader pubkey;
 
 import "../libraries/DexPlatformTypes.sol";
 
+import "../structures/IGasValueStructure.sol";
+
 import "../DexPlatform.sol";
 import "../DexVaultLpTokenPendingV2.sol";
 
@@ -57,6 +59,10 @@ abstract contract DexContractBase  {
     }
 
     function _dexRoot() virtual internal view returns (address);
+
+    function _calcValue(GasValue.GasValues value) internal pure returns(uint128) {
+        return value.fixedValue + gasToValue(value.dynamicGas, address(this).wid);
+    }
 
     function _expectedLpTokenPendingAddress(
         uint32 _nonce,

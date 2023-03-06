@@ -20,8 +20,8 @@ async function main() {
   const migration = new Migration();
 
   const accountN = await migration.loadAccount(
-    'Account' + (options.owner_n + 1),
-    '0',
+    'Account' + options.owner_n,
+      String(options.owner_n - 1)
   );
 
   if (locklift.tracing) {

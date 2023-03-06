@@ -21,6 +21,7 @@ import "./libraries/DexPlatformTypes.sol";
 import "./libraries/DexErrors.sol";
 import "./libraries/DexPoolTypes.sol";
 import "./libraries/DexGas.sol";
+import "./libraries/GasValues.sol";
 
 import "./DexPlatform.sol";
 
@@ -643,7 +644,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyActive
     {
-        require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= _calcValue(GasValues.getDeployTokenVaultGas()), DexErrors.VALUE_TOO_LOW);
         require(_tokenRoot.value != 0 && _tokenRoot != address(this), DexErrors.WRONG_TOKEN_ROOT);
 
         _deployVaultInternal(

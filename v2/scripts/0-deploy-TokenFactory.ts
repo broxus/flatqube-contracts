@@ -1,14 +1,11 @@
-const {Migration} = require(process.cwd()+'/scripts/utils')
-import {toNano, WalletTypes, getRandomNonce} from "locklift";
+import { Migration } from '../utils/migration';
+import {toNano, getRandomNonce} from "locklift";
 
 async function main() {
   const migration = new Migration();
 
   const signer = await locklift.keystore.getSigner('0');
-  const account = await locklift.factory.accounts.addExistingAccount({
-    type: WalletTypes.EverWallet,
-    address: migration.getAddress('Account1')
-  });
+  const account = await migration.loadAccount('Account1', '0');
 
   if (locklift.tracing) {
     locklift.tracing.setAllowedCodesForAddress(account.address, {compute: [100]});

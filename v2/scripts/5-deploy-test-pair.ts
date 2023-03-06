@@ -16,10 +16,6 @@ async function main() {
     });
   }
 
-  // const dexVault = await locklift.factory.getDeployedContract(
-  //   'DexVault',
-  //   migration.getAddress('DexVault'),
-  // );
   const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
 
   program

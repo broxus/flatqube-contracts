@@ -235,7 +235,7 @@ describe('DexAccount interact with DexPair', async function () {
                 options.auto_change
             );
 
-            // swap tokens' order
+            // swap tokens
             const tx = await Account2.runTarget({
                 contract: DexAccount2,
                 method: 'depositLiquidity',

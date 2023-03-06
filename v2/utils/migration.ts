@@ -122,3 +122,5 @@ export const Constants: {
 
   TESTS_TIMEOUT: 120000,
 };
+
+export const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';

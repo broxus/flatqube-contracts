@@ -1,6 +1,6 @@
-import {toNano, WalletTypes} from "locklift";
+import {toNano} from "locklift";
+import { Migration, Constants, displayTx } from '../utils/migration';
 
-const {Migration, TOKEN_CONTRACTS_PATH, Constants, afterRun, displayTx} = require(process.cwd()+'/scripts/utils')
 const { Command } = require('commander');
 const program = new Command();
 
@@ -8,17 +8,13 @@ async function main() {
     console.log('5-deploy-test-pool.js');
     const migration = new Migration();
 
-    const account = await locklift.factory.accounts.addExistingAccount({
-        type: WalletTypes.EverWallet,
-        address: migration.getAddress('Account1')
-    });
+    const account = await migration.loadAccount('Account1', '0');
 
     if (locklift.tracing) {
         locklift.tracing.setAllowedCodesForAddress(account.address, {compute: [100]});
     }
 
-    const dexVault = await locklift.factory.getDeployedContract( 'DexVault', migration.getAddress('DexVault'));
-    const dexRoot = await locklift.factory.getDeployedContract( 'DexRoot', migration.getAddress('DexRoot'));
+    const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
 
     program
         .allowUnknownOption()
@@ -49,8 +45,8 @@ async function main() {
         const tokenAddresses = [];
 
         for (let token of tokens) {
-            const tokenContract = await locklift.factory.getDeployedContract(
-                token.upgradeable ? 'TokenRootUpgradeable' : 'TokenRoot', migration.getAddress(token.symbol + 'Root'));
+            const tokenContract = await migration.loadContract(
+                token.upgradeable ? 'TokenRootUpgradeable' : 'TokenRoot', token.symbol + 'Root');
             tokenContracts.push(tokenContract);
             tokenAddresses.push(tokenContract.address);
         }

@@ -1,6 +1,6 @@
 import {toNano, WalletTypes, getRandomNonce, zeroAddress} from "locklift";
+import {Migration, displayTx} from '../utils/migration';
 
-const {Migration, displayTx} = require(process.cwd()+'/scripts/utils')
 const { Command } = require('commander');
 const program = new Command();
 
@@ -24,10 +24,7 @@ async function main() {
   const migration = new Migration();
 
   const signer = await locklift.keystore.getSigner('0');
-  const account = await locklift.factory.accounts.addExistingAccount({
-    type: WalletTypes.EverWallet,
-    address: migration.getAddress('Account1')
-  });
+  const account = await migration.loadAccount('Account1', '0');
 
   if (locklift.tracing) {
     locklift.tracing.setAllowedCodesForAddress(account.address, {compute: [100]});
@@ -38,7 +35,6 @@ async function main() {
   const DexPair = await locklift.factory.getContractArtifacts(options.pair_contract_name);
   const DexStablePair = await locklift.factory.getContractArtifacts('DexStablePair');
   const DexStablePool = await locklift.factory.getContractArtifacts('DexStablePool');
-  const DexVaultLpTokenPending = await locklift.factory.getContractArtifacts('DexVaultLpTokenPending');
   const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts('DexVaultLpTokenPendingV2');
   const DexTokenVault = await locklift.factory.getContractArtifacts('DexTokenVault');
 
@@ -108,9 +104,9 @@ async function main() {
   });
   displayTx(tx);
 
-  console.log('DexRoot: set token factory...');
+  console.log('DexRoot: set Token Factory...');
   tx = await dexRoot.methods.setTokenFactory({
-    _newTokenFactory: migration.getAddress('TokenFactory'),
+    _newTokenFactory: migration.loadContract('TokenFactory', 'TokenFactory').address,
     _remainingGasTo: account.address,
   }).send({
     from: account.address,
