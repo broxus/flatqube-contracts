@@ -227,7 +227,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 			functionId == tvm.functionId(IDexPair.getTokenRoots) &&
 			msg.sender == dexPair
 		){
-			dexPair = address(0);
 			autoExchange = false;
 		}
 	}
@@ -1009,17 +1008,28 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 		uint128 reward;
 		address sendGasTo = detailsLO.msgSender;
 
-		uint128 priceToken = detailsLO.currentAmountSpentToken/detailsLO.currentAmountReceiveToken;
-		uint128 alienPriceToken = currentAmountReceiveToken/currentAmountSpentToken;
+		if (sendGasTo == address(0)) {
+			sendGasTo = fee.beneficiary;
+		}
 
-		if (priceToken >= alienPriceToken) {
+		uint128 priceToken;
+		uint128 alienPriceToken;
+		if(detailsLO.currentAmountSpentToken >= detailsLO.currentAmountReceiveToken) {
+			priceToken = detailsLO.currentAmountSpentToken/detailsLO.currentAmountReceiveToken;
+			alienPriceToken = currentAmountReceiveToken/currentAmountSpentToken;
+		} else {
+			priceToken = detailsLO.currentAmountReceiveToken/detailsLO.currentAmountSpentToken;
+			alienPriceToken = currentAmountSpentToken/currentAmountReceiveToken;
+		}
+
+		if (priceToken != 0 && alienPriceToken != 0 && priceToken >= alienPriceToken) {
 			alienAmountSpent = math.min(detailsLO.currentAmountReceiveToken, currentAmountSpentToken);
-			expectedAmountReceive = alienAmountSpent * alienPriceToken;
-			reward = (alienAmountSpent * priceToken) - expectedAmountReceive;
+			expectedAmountReceive = math.min(detailsLO.currentAmountSpentToken, currentAmountReceiveToken);
+			reward = (priceToken > alienPriceToken && detailsLO.currentAmountSpentToken > detailsLO.currentAmountReceiveToken ? (alienAmountSpent * priceToken) - expectedAmountReceive : 0);
 		}
 
 		if (expectedAmountReceive == 0 || state != OrderStatus.Active) {
-			if (callbackId > 0) {
+			if (callbackId > 0 && sendGasTo.value != 0) {
 				IOrderCallbacks(sendGasTo).onMatchingCancel{
 					value: OrderGas.OPERATION_CALLBACK_BASE,
 					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -1054,10 +1064,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 						reward
 					)
 				);
-			}
-
-			if (sendGasTo == address(0)) {
-				sendGasTo = fee.beneficiary;
 			}
 
 			ITokenWallet(spentWallet).transfer{
