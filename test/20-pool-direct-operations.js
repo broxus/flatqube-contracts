@@ -939,14 +939,16 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
             const poolStart = await dexPoolInfo();
             logBalances('start', dexStart, accountStart, poolStart);
 
+            const LP_AMOUNT = 1000 * Math.pow(10, Math.max(0, Constants.LP_DECIMALS - tokens[i].decimals));
+
             const expected = await DexPool.call({
                 method: 'expectedWithdrawLiquidityOneCoin', params: {
-                    lp_amount: 1000,
+                    lp_amount: LP_AMOUNT,
                     outcoming: tokenRoots[i].address
                 }
             });
 
-            logger.log('Lp amount: ', new BigNumber(1000).shiftedBy(-Constants.LP_DECIMALS).toString());
+            logger.log('Lp amount: ', new BigNumber(LP_AMOUNT).shiftedBy(-Constants.LP_DECIMALS).toString());
             logger.log(`Expected amount: ${new BigNumber(expected.amounts[i]).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
 
             const payload = await DexPool.call({
@@ -964,7 +966,7 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 contract: poolLpWallet3,
                 method: 'transfer',
                 params: {
-                    amount: 1000,
+                    amount: LP_AMOUNT,
                     recipient: DexPool.address,
                     deployWalletValue: 0,
                     remainingGasTo: Account3.address,

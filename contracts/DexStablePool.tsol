@@ -2402,12 +2402,20 @@ contract DexStablePool is
             if (!y_minus_fee_opt.hasValue()) {
                 return (result, dy_fee);
             }
-            uint256 fee_precision_mul = math.max(uint256(10) ** (MAX_DECIMALS - LP_DECIMALS), tokenData[i].precisionMul);
-            uint256 dy_minus_fee = math.divc(y_minus_fee_opt.get() - xp[i], fee_precision_mul);
-            uint256 dy = math.muldivc(dy_minus_fee, fee.denominator, fee.denominator - (fee.beneficiary_numerator + fee.pool_numerator + fee.referrer_numerator));
-            dy_fee = uint128(math.muldivc(dy - dy_minus_fee, fee_precision_mul, tokenData[i].precisionMul));
+            if (MAX_DECIMALS >= LP_DECIMALS) {
+                uint256 fee_precision_mul = math.max(uint256(10) ** (MAX_DECIMALS - LP_DECIMALS), tokenData[i].precisionMul);
+                uint256 dy_minus_fee = math.divc(y_minus_fee_opt.get() - xp[i], fee_precision_mul);
+                uint256 dy = math.muldivc(dy_minus_fee, fee.denominator, fee.denominator - (fee.beneficiary_numerator + fee.pool_numerator + fee.referrer_numerator));
+                dy_fee = uint128(math.muldivc(dy - dy_minus_fee, fee_precision_mul, tokenData[i].precisionMul));
 
-            result.set(uint128(math.muldivc(dy, fee_precision_mul, tokenData[i].precisionMul)));
+                result.set(uint128(math.muldivc(dy, fee_precision_mul, tokenData[i].precisionMul)));
+            } else {
+                uint256 dy_minus_fee = y_minus_fee_opt.get() - xp[i] + 1; // prevent rounding errors
+                uint256 dy = math.muldivc(dy_minus_fee, fee.denominator, fee.denominator - (fee.beneficiary_numerator + fee.pool_numerator + fee.referrer_numerator));
+                dy_fee = uint128(dy - dy_minus_fee);
+
+                result.set(uint128(dy));
+            }
         }
 
         return (result, dy_fee);
@@ -2559,7 +2567,7 @@ contract DexStablePool is
             if (PRECISION > lp_precision) {
                 lp_reward = uint128(math.muldiv(D1, lp_precision, PRECISION));
             } else {
-                lp_reward = uint128(D1);
+                lp_reward = uint128(D1 * uint256(10) ** (LP_DECIMALS - MAX_DECIMALS));
             }
         }
 
