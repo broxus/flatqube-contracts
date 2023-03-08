@@ -259,8 +259,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             }(
                 amount,
                 orderAddress,
-                math.max(deployWalletValue, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS),
-//                (deployWalletValue <= OrderGas.DEPLOY_EMPTY_WALLET_GRAMS? deployWalletValue:OrderGas.DEPLOY_EMPTY_WALLET_GRAMS),
+//                math.max(deployWalletValue, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS), //TODO ??????? maybe DEPLOY_EMPTY_WALLET_GRAMS = 0.2 small?
+                (deployWalletValue <= OrderGas.DEPLOY_EMPTY_WALLET_GRAMS? deployWalletValue:OrderGas.DEPLOY_EMPTY_WALLET_GRAMS),
                 orderAddress,
                 true,
                 payload
@@ -396,18 +396,20 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         (
             factory,
             spentToken,
+            spentTokenWallet,
             _oldVersion,
             version,
             versionOrder,
             deployer,
             fee,
+            orderCode,
             data
         ) = abi.decode(_data, (
-            address, address, uint32, uint32,
-            uint32, address, OrderFeeParams, TvmCell
+            address, address, address, uint32, uint32,
+            uint32, address, OrderFeeParams, TvmCell, TvmCell
         ));
 
-        (dexRoot, orderCode, orderPlatformCode) = abi.decode(data, (address, TvmCell, TvmCell));
+        (dexRoot, orderPlatformCode) = abi.decode(data, (address, TvmCell));
 
         if (_oldVersion == 0){
             ITokenRoot(spentToken).deployWallet{

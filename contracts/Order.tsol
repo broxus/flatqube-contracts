@@ -8,6 +8,7 @@ import "./libraries/OrderGas.tsol";
 import "./libraries/OrderErrors.tsol";
 import "./libraries/OrderStatus.tsol";
 import "./libraries/OrderPayloads.tsol";
+import "./libraries/FixedPoint128.tsol";
 import "./libraries/OrderOperationTypes.tsol";
 
 import "./structures/IOrderExchangeResult.tsol";
@@ -988,100 +989,94 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 	}
 
 	function matchingCheck(uint64 callbackId, uint128 deployWalletValue, Details detailsLO) override external {
-		require(
-			expectedOrder(
-				factory,
-				detailsLO.root,
-				detailsLO.owner,
-				receiveToken,
-				spentToken,
-				detailsLO.timeTx,
-				detailsLO.nowTx) == msg.sender,
-			OrderErrors.NOT_CORRECT_ORDER_ADDRESS
-		);
-
 		tvm.rawReserve(address(this).balance - msg.value, 0);
-		matchingOrder = msg.sender;
+		bool needCancel = false;
 
-		uint128 alienAmountSpent;
-		uint128 expectedAmountReceive;
-		uint128 reward;
-		address sendGasTo = detailsLO.msgSender;
+		if (expectedOrder(factory, detailsLO.root, detailsLO.owner, receiveToken, spentToken,
+		detailsLO.timeTx, detailsLO.nowTx) == msg.sender)
+		{
+			matchingOrder = msg.sender;
 
-		if (sendGasTo == address(0)) {
-			sendGasTo = fee.beneficiary;
-		}
+			uint128 alienAmountSpent;
+			uint128 expectedAmountReceive;
+			uint128 reward;
+			address sendGasTo = detailsLO.msgSender;
 
-		uint128 priceToken;
-		uint128 alienPriceToken;
-		if(detailsLO.currentAmountSpentToken >= detailsLO.currentAmountReceiveToken) {
-			priceToken = detailsLO.currentAmountSpentToken/detailsLO.currentAmountReceiveToken;
-			alienPriceToken = currentAmountReceiveToken/currentAmountSpentToken;
-		} else {
-			priceToken = detailsLO.currentAmountReceiveToken/detailsLO.currentAmountSpentToken;
-			alienPriceToken = currentAmountSpentToken/currentAmountReceiveToken;
-		}
-
-		if (priceToken != 0 && alienPriceToken != 0 && priceToken >= alienPriceToken) {
-			alienAmountSpent = math.min(detailsLO.currentAmountReceiveToken, currentAmountSpentToken);
-			expectedAmountReceive = math.min(detailsLO.currentAmountSpentToken, currentAmountReceiveToken);
-			reward = (priceToken > alienPriceToken && detailsLO.currentAmountSpentToken > detailsLO.currentAmountReceiveToken ? (alienAmountSpent * priceToken) - expectedAmountReceive : 0);
-		}
-
-		if (expectedAmountReceive == 0 || state != OrderStatus.Active) {
-			if (callbackId > 0 && sendGasTo.value != 0) {
-				IOrderCallbacks(sendGasTo).onMatchingCancel{
-					value: OrderGas.OPERATION_CALLBACK_BASE,
-					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-					bounce: false
-				}(callbackId);
+			if (sendGasTo == address(0)) {
+				sendGasTo = fee.beneficiary;
 			}
 
+			uint priceToken;
+			uint alienPriceToken;
+
+			priceToken = FixedPoint128.encodeFromNumeratorAndDenominator(detailsLO.currentAmountSpentToken, detailsLO.currentAmountReceiveToken);
+			alienPriceToken = FixedPoint128.encodeFromNumeratorAndDenominator(currentAmountReceiveToken, currentAmountSpentToken);
+			if (priceToken >= alienPriceToken) {
+				alienAmountSpent = math.min(detailsLO.currentAmountReceiveToken, currentAmountSpentToken);
+				expectedAmountReceive = FixedPoint128.calculateExpectedAmountByRate(alienAmountSpent, alienPriceToken);
+				reward = (priceToken > alienPriceToken ? (FixedPoint128.calculateExpectedAmountByRate(alienAmountSpent, priceToken) - expectedAmountReceive) : 0);
+			}
+
+			if (expectedAmountReceive == 0 || state != OrderStatus.Active) {
+				if (callbackId > 0 && sendGasTo.value != 0) {
+					IOrderCallbacks(sendGasTo).onMatchingCancel{
+						value: OrderGas.OPERATION_CALLBACK_BASE,
+						flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+						bounce: false
+					}(callbackId);
+				}
+
+				needCancel = true;
+			} else {
+				changeState(OrderStatus.MatchInProgress);
+				currentAmountSpentToken -= alienAmountSpent;
+
+				if (callbackId > 0 && sendGasTo.value != 0) {
+					IOrderCallbacks(sendGasTo).onMatchingInProgress{
+						value: OrderGas.OPERATION_CALLBACK_BASE,
+						flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+						bounce: false
+					}(
+						callbackId,
+						IOrderExchangeResult.OrderMatchingInProgress(
+							matchingOrder,
+							address(this),
+							receiveToken,
+							spentToken,
+							expectedAmountReceive,
+							alienAmountSpent,
+							reward
+						)
+					);
+				}
+
+				ITokenWallet(spentWallet).transfer{
+					value: 0,
+					flag: MsgFlag.ALL_NOT_RESERVED,
+					bounce: false
+				}(
+					alienAmountSpent,
+					matchingOrder,
+					uint128(0),
+					matchingOrder,
+					true,
+					OrderPayloads.buildMatchExchangePayload(
+						OrderOperationTypes.MATCHING_ORDER_EXCHANGE,
+						callbackId, sendGasTo, deployWalletValue,
+						expectedAmountReceive, reward
+					)
+				);
+			}
+		} else {
+			needCancel = true;
+		}
+
+		if (needCancel) {
 			IOrder(matchingOrder).matchingCancel{
 				value: 0,
 				flag: MsgFlag.ALL_NOT_RESERVED,
 				bounce: false
 			}();
-		} else {
-			changeState(OrderStatus.MatchInProgress);
-			currentAmountSpentToken -= alienAmountSpent;
-
-
-			if (callbackId > 0 && sendGasTo.value != 0) {
-				IOrderCallbacks(sendGasTo).onMatchingInProgress{
-					value: OrderGas.OPERATION_CALLBACK_BASE,
-					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-					bounce: false
-				}(
-					callbackId,
-					IOrderExchangeResult.OrderMatchingInProgress(
-						matchingOrder,
-						address(this),
-						receiveToken,
-						spentToken,
-						expectedAmountReceive,
-						alienAmountSpent,
-						reward
-					)
-				);
-			}
-
-			ITokenWallet(spentWallet).transfer{
-				value: 0,
-				flag: MsgFlag.ALL_NOT_RESERVED,
-				bounce: false
-			}(
-				alienAmountSpent,
-				matchingOrder,
-				uint128(0),
-				matchingOrder,
-				true,
-				OrderPayloads.buildMatchExchangePayload(
-					OrderOperationTypes.MATCHING_ORDER_EXCHANGE,
-					callbackId, sendGasTo, deployWalletValue,
-					expectedAmountReceive, reward
-				)
-			);
 		}
 	}
 
@@ -1109,7 +1104,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 	}
 
 	function buildParams() internal view returns (TvmCell) {
-		return abi.encode(dexRoot, tvm.code(), orderPlatformCode);
+		return abi.encode(dexRoot, orderPlatformCode);
 	}
 
 	function expectedOrder(

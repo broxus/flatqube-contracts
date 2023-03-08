@@ -358,11 +358,12 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 			value: OrderGas.DEPLOY_ORDERS_ROOT,
 			flag: MsgFlag.SENDER_PAYS_FEES
 		}(
-			orderRootCode,
 			versionOrderRoot,
 			versionOrder,
-			fee,
-			msg.sender
+			orderRootCode,
+			orderCode,
+			msg.sender,
+			fee
 		);
 	}
 
@@ -384,7 +385,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	function buildParams() internal view returns (TvmCell) {
-		return abi.encode(dexRoot, orderCode, orderPlatformCode);
+		return abi.encode(dexRoot, orderPlatformCode);
 	}
 
 	function upgrade(

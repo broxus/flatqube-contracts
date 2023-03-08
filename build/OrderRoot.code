@@ -1369,12 +1369,18 @@ PUSHCONT {
 	.loc ../contracts/OrderRoot.tsol, 256
 	PUSH S6
 	TRUE
-	PUSH S2
-	ROLL 4
+	PUSH2 S2, S3
 	PUSHINT 200000000
-	MAX
+	LEQ
+	PUSHCONT {
+		PUSH S4
+	}
+	PUSHCONT {
+		PUSHINT 200000000
+	}
+	IFELSE
 	ROLL 4
-	PUSH S13
+	PUSH S14
 	GETGLOB 16
 	FALSE
 	NEWC
@@ -1401,6 +1407,7 @@ PUSHCONT {
 	PUSHPOW2 7
 	SENDRAWMSG
 	.loc ../contracts/OrderRoot.tsol, 0
+	DROP
 }
 IFNOT
 .loc ../contracts/OrderRoot.tsol, 270
@@ -1965,6 +1972,10 @@ LDREF
 ENDS
 CTOS
 LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
 LDU 32
 LDU 32
 LDU 32
@@ -1984,32 +1995,33 @@ ROLLREV 5
 TUPLE 5
 SWAP
 LDREF
+LDREF
 ENDS
-REVERSE 8, 0
+REVERSE 10, 0
 SETGLOB 10
 SETGLOB 11
-POP S6
+SETGLOB 16
+POP S7
 SETGLOB 12
 SETGLOB 13
 SETGLOB 17
 SETGLOB 19
-.loc ../contracts/OrderRoot.tsol, 410
+SETGLOB 14
+.loc ../contracts/OrderRoot.tsol, 412
 CTOS
 LDMSGADDR
 LDREF
-LDREF
 ENDS
-XCHG S2
+SWAP
 SETGLOB 18
-SETGLOB 14
 SETGLOB 15
-.loc ../contracts/OrderRoot.tsol, 412
+.loc ../contracts/OrderRoot.tsol, 414
 PUSHCONT {
-	.loc ../contracts/OrderRoot.tsol, 428
+	.loc ../contracts/OrderRoot.tsol, 430
 	GETGLOB 10
 }
 PUSHCONT {
-	.loc ../contracts/OrderRoot.tsol, 413
+	.loc ../contracts/OrderRoot.tsol, 415
 	PUSHINT 200000000
 	MYADDR
 	GETGLOB 11
@@ -2028,7 +2040,7 @@ PUSHCONT {
 	ENDC
 	PUSHINT 1
 	SENDRAWMSG
-	.loc ../contracts/OrderRoot.tsol, 422
+	.loc ../contracts/OrderRoot.tsol, 424
 	GETGLOB 17
 }
 IFELSE

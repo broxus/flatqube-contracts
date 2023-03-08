@@ -34,9 +34,6 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 	address pendingOwner;
 	OrderFeeParams fee;
 
-	// token_root -> send_gas_to
-    mapping(address => address) _tmp_deploying_wallets;
-
 	TvmCell orderRootCode;
 	TvmCell orderPlatformCode;
 	TvmCell orderCode;
@@ -291,11 +288,12 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 				value: OrderGas.DEPLOY_ORDERS_ROOT,
 				flag: MsgFlag.SENDER_PAYS_FEES
 			}(
-				orderRootCode,
 				versionOrderRoot,
 				versionOrder,
-				fee,
-				msg.sender
+				orderRootCode,
+				orderCode,
+				msg.sender,
+				fee
 			);
 			if (callbackId > 0) {
 				IOrderFactoryCallbacks(msg.sender).onOrderRootCreateSuccess{
@@ -363,7 +361,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	function buildParams() internal view returns (TvmCell) {
-		return abi.encode(dexRoot, orderCode);
+		return abi.encode(dexRoot, orderPlatformCode);
 	}
 
 	function upgrade(
