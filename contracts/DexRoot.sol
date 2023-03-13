@@ -585,7 +585,6 @@ contract DexRoot is DexContractBase, IDexRoot {
     function onCodeUpgrade(TvmCell _data) private {
         tvm.resetStorage();
 
-        // TODO: add vault code and version after upgrade
         (
             platform_code,
             _accountCode,
@@ -596,6 +595,11 @@ contract DexRoot is DexContractBase, IDexRoot {
             _poolVersions,
             _owner,
             _vault,
+            _vaultCode,
+            _vaultVersion,
+            _lpTokenPendingCode,
+            _lpTokenPendingVersion,
+            _tokenFactory,
             _pendingOwner
         ) = abi.decode(_data, (
             TvmCell,
@@ -606,6 +610,11 @@ contract DexRoot is DexContractBase, IDexRoot {
             mapping(uint8 => TvmCell),
             mapping(uint8 => uint32),
             address,
+            address,
+            TvmCell,
+            uint32,
+            TvmCell,
+            uint32,
             address,
             address
         ));
