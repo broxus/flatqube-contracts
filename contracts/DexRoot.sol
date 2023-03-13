@@ -597,6 +597,11 @@ contract DexRoot is DexContractBase, IDexRoot {
             _poolVersions,
             _owner,
             _vault,
+//        _vaultCode,
+//        _vaultVersion,
+//        _lpTokenPendingCode,
+//        _lpTokenPendingVersion,
+//        _tokenFactory,
             _pendingOwner
         ) = abi.decode(_data, (
             TvmCell,
@@ -608,6 +613,11 @@ contract DexRoot is DexContractBase, IDexRoot {
             mapping(uint8 => uint32),
             address,
             address,
+//        TvmCell,
+//        uint32,
+//        TvmCell,
+//        uint32,
+//        address,
             address
         ));
 
@@ -695,7 +705,7 @@ contract DexRoot is DexContractBase, IDexRoot {
 
         new DexPlatform{
             stateInit: data,
-            value: DexGas.DEPLOY_VAULT_MIN_VALUE,
+            value: _calcValue(GasValues.getDeployTokenVaultGas()),
             flag: 0
         }(
             _vaultCode,
@@ -714,7 +724,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyPool(_tokenRoots)
     {
-        require(msg.value >= DexGas.DEPLOY_LP_TOKEN_ROOT_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= _calcValue(GasValues.getDeployLpTokenGas(uint8(_tokenRoots.length))), DexErrors.VALUE_TOO_LOW);
 
         TvmCell data = _buildLpTokenPendingInitData(
             now,
@@ -850,7 +860,7 @@ contract DexRoot is DexContractBase, IDexRoot {
 
         IUpgradableByRequest(vault)
             .upgrade{
-                value: DexGas.UPGRADE_TOKEN_VAULT_MIN_VALUE,
+                value: _calcValue(GasValues.getUpgradeTokenVaultGas()),
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 bounce: false
             }(_vaultCode, _vaultVersion, _remainingGasTo);
@@ -868,7 +878,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyActive
     {
-        require(msg.value >= DexGas.DEPLOY_ACCOUNT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= _calcValue(GasValues.getDeployAccountGas()), DexErrors.VALUE_TOO_LOW);
         require(account_owner.value != 0, DexErrors.INVALID_ADDRESS);
 
         new DexPlatform{
@@ -918,7 +928,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyManagerOrOwner
     {
-        require(msg.value >= DexGas.UPGRADE_ACCOUNT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= _calcValue(GasValues.getUpgradeAccountGas()), DexErrors.VALUE_TOO_LOW);
 
         _upgradeAccountInternal(
             account_owner,
@@ -977,7 +987,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         emit RequestedForceAccountUpgrade(_accountOwner);
 
         IUpgradableByRequest(_expectedAccountAddress(_accountOwner))
-            .upgrade{ value: DexGas.UPGRADE_ACCOUNT_MIN_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+            .upgrade{ value: _calcValue(GasValues.getUpgradeAccountGas()), flag: MsgFlag.SENDER_PAYS_FEES }
             (_accountCode, _accountVersion, _remainingGasTo);
     }
 
@@ -996,7 +1006,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyManagerOrOwner
     {
-        require(msg.value >= DexGas.UPGRADE_POOL_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= _calcValue(GasValues.getUpgradePoolGas()), DexErrors.VALUE_TOO_LOW);
 
         _upgradePairInternal(
             PairUpgradeParam({
@@ -1029,7 +1039,7 @@ contract DexRoot is DexContractBase, IDexRoot {
             _poolCodes.exists(pool_type),
             DexErrors.UNSUPPORTED_POOL_TYPE
         );
-        require(msg.value >= DexGas.UPGRADE_POOL_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= _calcValue(GasValues.getUpgradePoolGas()), DexErrors.VALUE_TOO_LOW);
 
         emit RequestedPoolUpgrade(roots);
 
@@ -1093,7 +1103,7 @@ contract DexRoot is DexContractBase, IDexRoot {
 
         IDexBasePool(_expectedPoolAddress(_param.tokenRoots))
             .upgrade{
-                value: DexGas.UPGRADE_POOL_MIN_VALUE,
+                value: _calcValue(GasValues.getUpgradePoolGas()),
                 flag: MsgFlag.SENDER_PAYS_FEES
             }(code, version, _param.poolType, _remainingGasTo);
     }
@@ -1158,7 +1168,7 @@ contract DexRoot is DexContractBase, IDexRoot {
     ) private view {
         IDexBasePool(_expectedPoolAddress(_param.tokenRoots))
             .setActive{
-                value: DexGas.SET_POOL_ACTIVE_VALUE,
+                value: _calcValue(GasValues.getSetPoolActiveGas()),
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 bounce: false
             }(_param.newActive, _remainingGasTo);
@@ -1175,10 +1185,7 @@ contract DexRoot is DexContractBase, IDexRoot {
         onlyActive
     {
         require(
-            msg.value >=  (
-                DexGas.DEPLOY_POOL_BASE_VALUE +
-                3 * (DexGas.DEPLOY_VAULT_MIN_VALUE + 0.1 ever)
-            ),
+            msg.value >= _calcValue(GasValues.getDeployPoolGas(2)),
             DexErrors.VALUE_TOO_LOW
         );
         require(left_root.value != right_root.value, DexErrors.WRONG_PAIR);
@@ -1212,12 +1219,9 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyManagerOrOwner
     {
-        uint256 rootsCount = roots.length;
+        uint8 rootsCount = uint8(roots.length);
         require(
-            msg.value >=  (
-                DexGas.DEPLOY_POOL_BASE_VALUE +
-                (rootsCount + 1) * (DexGas.DEPLOY_VAULT_MIN_VALUE + 0.1 ever)
-            ),
+            msg.value >= _calcValue(GasValues.getDeployPoolGas(rootsCount)),
             DexErrors.VALUE_TOO_LOW
         );
         require(_poolCodes.exists(DexPoolTypes.STABLE_POOL), DexErrors.PAIR_CODE_EMPTY);
@@ -1268,6 +1272,7 @@ contract DexRoot is DexContractBase, IDexRoot {
             (_params.beneficiary.value == 0 && _params.beneficiary_numerator == 0)),
             DexErrors.WRONG_FEE_PARAMS
         );
+        require(msg.value >= _calcValue(GasValues.getSetFeeParamsGas()), DexErrors.VALUE_TOO_LOW);
 
         IDexBasePool(_expectedPoolAddress(_roots))
             .setFeeParams{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
@@ -1285,6 +1290,8 @@ contract DexRoot is DexContractBase, IDexRoot {
         reserve(DexGas.ROOT_INITIAL_BALANCE)
         onlyManagerOrOwner
     {
+        require(msg.value >= _calcValue(GasValues.getSetAmplificationCoefficientGas()), DexErrors.VALUE_TOO_LOW);
+
         IDexStablePair(_expectedPoolAddress(_roots))
             .setAmplificationCoefficient{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_A, _remainingGasTo);

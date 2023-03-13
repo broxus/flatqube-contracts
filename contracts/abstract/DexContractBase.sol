@@ -60,7 +60,7 @@ abstract contract DexContractBase  {
 
     function _dexRoot() virtual internal view returns (address);
 
-    function _calcValue(GasValue.GasValues value) internal pure returns(uint128) {
+    function _calcValue(IGasValueStructure.GasValue value) internal pure returns(uint128) {
         return value.fixedValue + gasToValue(value.dynamicGas, address(this).wid);
     }
 

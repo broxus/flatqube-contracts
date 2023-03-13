@@ -1,7 +1,7 @@
 import {toNano, WalletTypes} from "locklift";
 import { Migration, Constants, EMPTY_TVM_CELL } from '../utils/migration';
+import { Command } from 'commander';
 
-const { Command } = require('commander');
 const program = new Command();
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});

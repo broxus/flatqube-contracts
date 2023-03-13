@@ -1,6 +1,6 @@
 pragma ton-solidity >= 0.62.0;
 
-import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
+import "./structures/IGasValueStructure.sol";
 
 import "tip3/contracts/interfaces/ITokenRoot.sol";
 import "tip3/contracts/interfaces/ITransferableOwnership.sol";
@@ -11,12 +11,15 @@ import "./interfaces/ITokenFactory.sol";
 import "./interfaces/ITokenRootDeployedCallback.sol";
 import "./interfaces/IDexRoot.sol";
 
+import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
+import "./libraries/GasValues.sol";
 
 contract DexVaultLpTokenPendingV2 is
     ITokenRootDeployedCallback,
-    ITransferTokenRootOwnershipCallback
+    ITransferTokenRootOwnershipCallback,
+    IGasValueStructure
 {
     string LP_TOKEN_SYMBOL_PREFIX = "FlatQube-LP-";
     string LP_TOKEN_SYMBOL_SEPARATOR = "-";
@@ -73,7 +76,7 @@ contract DexVaultLpTokenPendingV2 is
 
         for (uint8 i = 0; i < N_COINS; i++) {
             ITokenRoot(roots[i]).symbol{
-                value: DexGas.GET_TOKEN_DETAILS_VALUE,
+                value: _calcValue(GasValues.getTokenDataGas()),
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: onSymbol
             }();
@@ -114,7 +117,7 @@ contract DexVaultLpTokenPendingV2 is
         mapping(address => ICallbackParamsStructure.CallbackParams) callbacks;
         callbacks[address(this)] = ICallbackParamsStructure.CallbackParams(0, empty);
         ITransferableOwnership(token_root).transferOwnership{
-            value: DexGas.TRANSFER_ROOT_OWNERSHIP_VALUE,
+            value: _calcValue(GasValue(0, DexGas.TRANSFER_ROOT_OWNERSHIP)),
             flag: MsgFlag.SENDER_PAYS_FEES
         }(pool, address(this), callbacks);
     }
@@ -216,6 +219,10 @@ contract DexVaultLpTokenPendingV2 is
             pending_messages--;
             terminateIfEmptyQueue();
         }
+    }
+
+    function _calcValue(IGasValueStructure.GasValue value) internal pure returns(uint128) {
+        return value.fixedValue + gasToValue(value.dynamicGas, address(this).wid);
     }
 
     receive() external pure {}

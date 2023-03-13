@@ -11,6 +11,7 @@ import "../libraries/DexPoolTypes.sol";
 import "../libraries/DexGas.sol";
 import "../libraries/DexAddressType.sol";
 import "../libraries/DexReserveType.sol";
+import "../libraries/GasValues.sol";
 
 import "../structures/IPoolTokenData.sol";
 import "../structures/IPoolTokenDataPrev.sol";
@@ -247,7 +248,7 @@ abstract contract DexPairBase is
             (_params.beneficiary.value == 0 && _params.beneficiary_numerator == 0)),
             DexErrors.WRONG_FEE_PARAMS
         );
-        require(msg.value >= DexGas.SET_FEE_PARAMS_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         // Flush all fees from pair
@@ -477,7 +478,7 @@ abstract contract DexPairBase is
                 _typeToReserves[DexReserveType.FEE][i] >= _fee.threshold.at(_typeToRootAddresses[DexAddressType.RESERVE][i])
             ) {
                 IDexAccount(_expectedAccountAddress(_fee.beneficiary))
-                    .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+                    .internalPoolTransfer{ value: _calcValue(GasValues.getInternalPairTransferGas()), flag: MsgFlag.SENDER_PAYS_FEES }
                     (
                         _typeToReserves[DexReserveType.FEE][i],
                         _typeToRootAddresses[DexAddressType.RESERVE][i],
@@ -520,7 +521,7 @@ abstract contract DexPairBase is
     function _configureTokenRootWallets(address _tokenRoot) private pure {
         ITokenRoot(_tokenRoot)
             .deployWallet{
-                value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
+                value: _calcValue(GasValues.getDeployWalletGas()),
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexPairBase.onTokenWallet
             }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);

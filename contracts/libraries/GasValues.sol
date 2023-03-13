@@ -5,141 +5,224 @@ import "../libraries/DexGas.sol";
 import "../structures/IGasValueStructure.sol";
 
 library GasValues {
-    function _getDeployWalletGas() private returns(IGasValueStructure.GasValue) {
+    // 0.32 ever
+    function getDeployWalletGas() public returns(IGasValueStructure.GasValue) {
         return IGasValueStructure.GasValue(
             DexGas.DEPLOY_EMPTY_WALLET_GRAMS + DexGas.TOKEN_ROOT_COMPENSATION,
             DexGas.DEPLOY_WALLET_EXTRA_GAS
         );
     }
 
+    // 0.1 ever
+    function getTransferTokensGas(uint128 _deployWalletValue) public returns(IGasValueStructure.GasValue) {
+        return IGasValueStructure.GasValue(
+            _deployWalletValue,
+            DexGas.TRANSFER_TOKENS_GAS
+        );
+    }
+
     // GENERAL
 
-    function getMintTokensGas() private returns(IGasValueStructure.GasValue) {
+    // 0.2 ever
+    function getMintTokensGas(uint128 _deployWalletValue) public returns(IGasValueStructure.GasValue) {
         return IGasValueStructure.GasValue(
-            DexGas.TOKEN_ROOT_COMPENSATION,
+            DexGas.TOKEN_ROOT_COMPENSATION + _deployWalletValue,
             DexGas.MINT_TOKENS_EXTRA_GAS
         );
     }
 
-    function getTokenDataGas() private returns(IGasValueStructure.GasValue) {
+    // 0.2 ever
+    function getBurnTokensGas() public returns(IGasValueStructure.GasValue) {
+        return IGasValueStructure.GasValue(
+            0,
+            DexGas.BURN_GAS
+        );
+    }
+
+    // 0.15 ever
+    function getTokenDataGas() public returns(IGasValueStructure.GasValue) {
         return IGasValueStructure.GasValue(
             DexGas.TOKEN_ROOT_COMPENSATION,
             DexGas.GET_TOKEN_DATA_EXTRA_GAS
         );
     }
 
-    function getCreateTokenGas() private returns(IGasValueStructure.GasValue) {
+    // 1.9 ever
+    function getDeployLpTokenGas(uint8 N) public returns(IGasValueStructure.GasValue) {
+        IGasValueStructure.GasValue tokenData = getTokenDataGas();
         return IGasValueStructure.GasValue(
-            DexGas.TOKEN_ROOT_INITIAL_BALANCE,
-            DexGas.DEPLOY_TOKEN_ROOT_EXTRA_GAS + DexGas.TRANSFER_ROOT_OWNERSHIP_VALUE + DexGas.CREATE_TOKEN_EXTRA_GAS
+            DexGas.CREATE_TOKEN_VALUE +
+            N * tokenData.fixedValue, // token_symbols
+
+            DexGas.DEPLOY_LP_TOKEN_EXTRA_GAS +
+            DexGas.TRANSFER_ROOT_OWNERSHIP +
+            N * tokenData.dynamicGas
         );
     }
 
-    function getReferralProgramGas() private returns(IGasValueStructure.GasValue) {
+    // 1.05 ever
+    function getReferralProgramGas() public returns(IGasValueStructure.GasValue) {
         return IGasValueStructure.GasValue(
             DexGas.REFERRAL_DEPLOY_EMPTY_WALLET_GRAMS,
-            DexGas.REFERRAL_PROGRAM_CALLBACK + DexGas.REFERRER_FEE_EXTRA_GAS
+            DexGas.REFERRAL_PROGRAM_CALLBACK_GAS + DexGas.REFERRER_FEE_EXTRA_GAS
         );
     }
 
     // ROOT
 
-    function getSetFeeParamsGas() internal pure returns(IGasValueStructure.GasValue) {
-        return GasValue(
+    // 0.3 ever
+    function getSetFeeParamsGas() public returns(IGasValueStructure.GasValue) {
+        return IGasValueStructure.GasValue(
             DexGas.DEX_POOL_COMPENSATION + DexGas.DEX_ROOT_COMPENSATION,
             DexGas.SET_FEE_PARAMS_EXTRA_GAS
         );
     }
 
-    function getDeployTokenVaultGas() internal pure returns(IGasValueStructure.GasValue) {
-        IGasValueStructure.GasValue deployWallet = _getDeployWalletGas();
-        return GasValue(
-            DexGas.VAULT_INITIAL_VALUE + DexGas.DEX_ROOT_COMPENSATION + 2 * deployWallet.fixedValue,
+    // 0.3 ever
+    function getSetAmplificationCoefficientGas() public returns(IGasValueStructure.GasValue) {
+        return IGasValueStructure.GasValue(
+            DexGas.DEX_POOL_COMPENSATION + DexGas.DEX_ROOT_COMPENSATION,
+            DexGas.SET_AMP_COEFFICIENT_EXTRA_GAS
+        );
+    }
+
+    // 0.3 ever
+    function getSetPoolActiveGas() public returns(IGasValueStructure.GasValue) {
+        return IGasValueStructure.GasValue(
+            DexGas.DEX_POOL_COMPENSATION + DexGas.DEX_ROOT_COMPENSATION,
+            DexGas.SET_POOL_ACTIVE_EXTRA_GAS
+        );
+    }
+
+    // 1.89 ever
+    function getDeployTokenVaultGas() public returns(IGasValueStructure.GasValue) {
+        IGasValueStructure.GasValue deployWallet = getDeployWalletGas();
+        return IGasValueStructure.GasValue(
+            DexGas.VAULT_INITIAL_BALANCE + DexGas.DEX_ROOT_COMPENSATION + 2 * deployWallet.fixedValue,
             DexGas.DEPLOY_TOKEN_VAULT_EXTRA_GAS + 2 * deployWallet.dynamicGas
         );
     }
 
-    function getDeployTokenVaultGas() internal pure returns(IGasValueStructure.GasValue) {
-        IGasValueStructure.GasValue deployWallet = _getDeployWalletGas();
-        return GasValue(
-            DexGas.VAULT_INITIAL_VALUE + DexGas.DEX_ROOT_COMPENSATION + 2 * deployWallet.fixedValue,
-            DexGas.DEPLOY_TOKEN_VAULT_EXTRA_GAS + 2 * deployWallet.dynamicGas
+    // 0.35 ever + 1 ever (???)
+    function getUpgradeTokenVaultGas() public returns(IGasValueStructure.GasValue) {
+        return IGasValueStructure.GasValue(
+            DexGas.DEX_TOKEN_VAULT_COMPENSATION + DexGas.DEX_ROOT_COMPENSATION,
+            DexGas.UPGRADE_TOKEN_VAULT_EXTRA_GAS
         );
     }
 
-    function getDeployPoolGas(uint8 N) internal pure returns(IGasValueStructure.GasValue) {
-        IGasValueStructure.GasValue deployWallet = _getDeployWalletGas();
-        IGasValueStructure.GasValue createToken = getCreateTokenGas();
+    function getDeployPoolGas(uint8 N) public returns(IGasValueStructure.GasValue) {
+        IGasValueStructure.GasValue deployWallet = getDeployWalletGas();
+        IGasValueStructure.GasValue deployLpToken = getDeployLpTokenGas(N);
         IGasValueStructure.GasValue tokenData = getTokenDataGas();
         IGasValueStructure.GasValue deployDexTokenVault = getDeployTokenVaultGas();
 
-        return GasValue(
+        return IGasValueStructure.GasValue(
             DexGas.PAIR_INITIAL_BALANCE +
             DexGas.DEX_ROOT_COMPENSATION +
-            createToken.fixedValue +
-            2 * N * tokenData.fixedValue + // token_symbols + token_decimals
+            deployLpToken.fixedValue +
+            N * tokenData.fixedValue + // token_decimals
             (N + 1) * deployDexTokenVault.fixedValue +
             (N + 1) * deployWallet.fixedValue,
 
-            DexGas.DEPLOY_LP_TOKEN_EXTRA_GAS +
             DexGas.DEPLOY_POOL_EXTRA_GAS +
-            createToken.dynamicGas +
+            deployLpToken.dynamicGas +
             2 * N * tokenData.dynamicGas + // token_symbols + token_decimals
             (N + 1) * deployDexTokenVault.dynamicGas +
             (N + 1) * deployWallet.dynamicGas
         );
     }
 
-    function getDeployAccountGas() internal pure returns(IGasValueStructure.GasValue) {
-        IGasValueStructure.GasValue deployWallet = _getDeployWalletGas();
-        return GasValue(
+    // 1.24 ever
+    function getUpgradePoolGas() public returns(IGasValueStructure.GasValue) {
+        IGasValueStructure.GasValue tokenData = getTokenDataGas(); // only for pairs upgrade
+        return IGasValueStructure.GasValue(
+            DexGas.DEX_POOL_COMPENSATION + DexGas.DEX_ROOT_COMPENSATION + 2 * tokenData.fixedValue,
+            DexGas.UPGRADE_POOL_EXTRA_GAS + 2 * tokenData.dynamicGas
+        );
+    }
+
+    // 1.25 ever
+    function getDeployAccountGas() public returns(IGasValueStructure.GasValue) {
+        return IGasValueStructure.GasValue(
             DexGas.ACCOUNT_INITIAL_BALANCE + DexGas.DEX_ROOT_COMPENSATION,
             DexGas.DEPLOY_ACCOUNT_EXTRA_GAS
         );
     }
 
+    // 0.35 ever
+    function getUpgradeAccountGas() public returns(IGasValueStructure.GasValue) {
+        return IGasValueStructure.GasValue(
+            DexGas.DEX_ACCOUNT_COMPENSATION + DexGas.DEX_ROOT_COMPENSATION,
+            DexGas.UPGRADE_ACCOUNT_EXTRA_GAS
+        );
+    }
+
+    // 0.5 ever
+    function getUpgradeRootGas() public returns(IGasValueStructure.GasValue) {
+        return IGasValueStructure.GasValue(
+            DexGas.DEX_ROOT_COMPENSATION,
+            DexGas.UPGRADE_ROOT_EXTRA_GAS
+        );
+    }
+
     // ACCOUNT
 
-    function getAddPoolGas(uint8 N) internal pure returns(IGasValueStructure.GasValue) {
-        IGasValueStructure.GasValue deployWallet = _getDeployWalletGas();
-        return GasValue(
+    function getDepositToAccountGas() public returns(IGasValueStructure.GasValue) {
+        IGasValueStructure.GasValue transferTokens = getTransferTokensGas(0);
+        return IGasValueStructure.GasValue(
+            DexGas.DEX_ACCOUNT_COMPENSATION + transferTokens.fixedValue,
+            DexGas.DEPOSIT_TO_ACCOUNT_EXTRA_GAS + transferTokens.dynamicGas
+        );
+    }
+
+    function getAddPoolGas(uint8 N) public returns(IGasValueStructure.GasValue) {
+        IGasValueStructure.GasValue deployWallet = getDeployWalletGas();
+        return IGasValueStructure.GasValue(
             DexGas.DEX_ACCOUNT_COMPENSATION + N * deployWallet.fixedValue,
             DexGas.ADD_POOL_EXTRA_GAS + N * deployWallet.dynamicGas
         );
     }
 
-    function getAccountWithdrawGas(uint128 _deployWalletValue) internal pure returns(IGasValueStructure.GasValue) {
-        return GasValue(
-            DexGas.DEX_ACCOUNT_COMPENSATION + DexGas.DEX_TOKEN_VAULT_COMPENSATION + _deployWalletValue,
-            DexGas.TRANSFER_TOKENS_VALUE + DexGas.ACCOUNT_WITHDRAW_EXTRA_GAS
+    function getAccountWithdrawGas(uint128 _deployWalletValue) public returns(IGasValueStructure.GasValue) {
+        IGasValueStructure.GasValue transferTokens = getTransferTokensGas(_deployWalletValue);
+        return IGasValueStructure.GasValue(
+            DexGas.DEX_ACCOUNT_COMPENSATION + DexGas.DEX_TOKEN_VAULT_COMPENSATION + transferTokens.fixedValue,
+            DexGas.ACCOUNT_WITHDRAW_EXTRA_GAS + transferTokens.dynamicGas
         );
     }
 
-    function getAccountTransferGas() internal pure returns(IGasValueStructure.GasValue) {
-        IGasValueStructure.GasValue deployWallet = _getDeployWalletGas();
-        return GasValue(
+    // 1.4801
+    function getAccountTransferGas() public returns(IGasValueStructure.GasValue) {
+        IGasValueStructure.GasValue deployWallet = getDeployWalletGas();
+        return IGasValueStructure.GasValue(
             2 * DexGas.DEX_ACCOUNT_COMPENSATION + DexGas.OPERATION_CALLBACK + deployWallet.fixedValue,
             DexGas.ACCOUNT_TRANSFER_EXTRA_GAS + deployWallet.dynamicGas
         );
     }
 
-    function getAccountExchangeGas() internal pure returns(IGasValueStructure.GasValue) {
-        return GasValue(
-            DexGas.DEX_ACCOUNT_COMPENSATION + DexGas.OPERATION_CALLBACK + DexGas.DEX_POOL_COMPENSATION,
-            2 * DexGas.INTERNAL_PAIR_TRANSFER_VALUE + // receive_token transfer + beneficiary_fee transfer
+    // 0.7101
+    function getAccountExchangeGas() public returns(IGasValueStructure.GasValue) {
+        IGasValueStructure.GasValue internalPairTransfer = getInternalPairTransferGas();
+        return IGasValueStructure.GasValue(
+            DexGas.DEX_ACCOUNT_COMPENSATION +
+            DexGas.OPERATION_CALLBACK +
+            DexGas.DEX_POOL_COMPENSATION +
+            2 * internalPairTransfer.fixedValue,
+
+            2 * internalPairTransfer.dynamicGas + // receive_token transfer + beneficiary_fee transfer
             DexGas.ACCOUNT_EXCHANGE_EXTRA_GAS
         );
     }
 
-    function getAccountDepositGas(uint8 N, address referrer) internal pure returns(IGasValueStructure.GasValue) {
-        IGasValueStructure.GasValue mintToken = getMintTokensGas();
+    function getAccountDepositGas(uint8 N, address referrer) public returns(IGasValueStructure.GasValue) {
+        IGasValueStructure.GasValue mintToken = getMintTokensGas(DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
         IGasValueStructure.GasValue referralProgram = getReferralProgramGas();
 
-        return GasValue(
+        return IGasValueStructure.GasValue(
             DexGas.DEX_ACCOUNT_COMPENSATION +
             DexGas.DEX_POOL_COMPENSATION +
             DexGas.OPERATION_CALLBACK +
-            DexGas.DEPLOY_EMPTY_WALLET_GRAMS +
             mintToken.fixedValue +
             referrer.value != 0 ? N * referralProgram.fixedValue : 0,
 
@@ -149,75 +232,101 @@ library GasValues {
         );
     }
 
-    function getAccountWithdrawLiquidityGas(uint8 N) internal pure returns(IGasValueStructure.GasValue) {
-        return GasValue(
-            DexGas.DEX_ACCOUNT_COMPENSATION + DexGas.OPERATION_CALLBACK + DexGas.DEX_POOL_COMPENSATION,
-            N * DexGas.INTERNAL_PAIR_TRANSFER_VALUE + DexGas.BURN_VALUE + DexGas.ACCOUNT_WITHDRAW_LP_EXTRA_GAS
+    function getAccountWithdrawLiquidityGas(uint8 N) public returns(IGasValueStructure.GasValue) {
+        IGasValueStructure.GasValue internalPairTransfer = getInternalPairTransferGas();
+        IGasValueStructure.GasValue burnTokens = getBurnTokensGas();
+        return IGasValueStructure.GasValue(
+            DexGas.DEX_ACCOUNT_COMPENSATION +
+            DexGas.OPERATION_CALLBACK +
+            DexGas.DEX_POOL_COMPENSATION +
+            N * internalPairTransfer.fixedValue +
+            burnTokens.fixedValue,
+
+            DexGas.ACCOUNT_WITHDRAW_LP_EXTRA_GAS +
+            N * internalPairTransfer.dynamicGas +
+            burnTokens.dynamicGas
         );
     }
 
     // POOL
 
-    function getPoolDirectExchangeGas(uint128 _deployWalletValue, address referrer) internal pure returns(IGasValueStructure.GasValue) {
+    // 0.1 ever
+    function getInternalPairTransferGas() public returns(IGasValueStructure.GasValue) {
+        return IGasValueStructure.GasValue(
+            0,
+            DexGas.INTERNAL_PAIR_TRANSFER_GAS
+        );
+    }
+
+    function getPoolDirectExchangeGas(uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
         IGasValueStructure.GasValue referralProgram = getReferralProgramGas();
-        return GasValue(
-            2 * DexGas.OPERATION_CALLBACK +
+        IGasValueStructure.GasValue internalPairTransfer = getInternalPairTransferGas();
+        IGasValueStructure.GasValue transferTokens = getTransferTokensGas(_deployWalletValue);
+        return IGasValueStructure.GasValue(
             DexGas.DEX_POOL_COMPENSATION +
-            _deployWalletValue +
+            2 * DexGas.OPERATION_CALLBACK +
+            internalPairTransfer.fixedValue +
+            transferTokens.fixedValue +
             referrer.value != 0 ? referralProgram.fixedValue : 0,
 
-            DexGas.INTERNAL_PAIR_TRANSFER_VALUE + // beneficiary_fee transfer
-            DexGas.TRANSFER_TOKENS_VALUE +
+            internalPairTransfer.dynamicGas + // beneficiary_fee transfer
+            transferTokens.dynamicGas +
             DexGas.DIRECT_EXCHANGE_EXTRA_GAS +
             referrer.value != 0 ? referralProgram.dynamicGas : 0
         );
     }
 
-    function getPoolDirectDepositGas(uint128 _deployWalletValue, address referrer) internal pure returns(IGasValueStructure.GasValue) {
+    function getPoolDirectDepositGas(uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
         IGasValueStructure.GasValue referralProgram = getReferralProgramGas();
-        return GasValue(
-            2 * DexGas.OPERATION_CALLBACK +
+        IGasValueStructure.GasValue mintTokens = getMintTokensGas(_deployWalletValue);
+        IGasValueStructure.GasValue transferTokens = getTransferTokensGas(0);
+        return IGasValueStructure.GasValue(
             DexGas.DEX_POOL_COMPENSATION +
-            _deployWalletValue +
+            2 * DexGas.OPERATION_CALLBACK +
+            transferTokens.fixedValue +
+            mintTokens.fixedValue +
             referrer.value != 0 ? referralProgram.fixedValue : 0,
 
-            DexGas.TRANSFER_TOKENS_VALUE +
             DexGas.DIRECT_DEPOSIT_EXTRA_GAS +
+            transferTokens.dynamicGas +
+            mintTokens.dynamicGas +
             referrer.value != 0 ? referralProgram.dynamicGas : 0
         );
     }
 
-    function getPoolDirectWithdrawGas(uint8 N, uint128 _deployWalletValue, address referrer) internal pure returns(IGasValueStructure.GasValue) {
+    function getPoolDirectWithdrawGas(uint8 N, uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
         IGasValueStructure.GasValue referralProgram = getReferralProgramGas();
-        return GasValue(
+        IGasValueStructure.GasValue tokenVaultTransfer = getTokenVaultTransferGas(_deployWalletValue);
+        return IGasValueStructure.GasValue(
             2 * DexGas.OPERATION_CALLBACK +
             DexGas.DEX_POOL_COMPENSATION +
-            N * _deployWalletValue +
+            N * tokenVaultTransfer.fixedValue +
             referrer.value != 0 ? N * referralProgram.fixedValue : 0,
 
-            N * DexGas.TOKEN_VAULT_TRANSFER +
             DexGas.DIRECT_WITHDRAW_EXTRA_GAS +
+            N * tokenVaultTransfer.dynamicGas +
             referrer.value != 0 ? N * referralProgram.dynamicGas : 0
         );
     }
 
-    function getPoolDirectWithdrawOneCoinGas(uint128 _deployWalletValue, address referrer) internal pure returns(IGasValueStructure.GasValue) {
+    function getPoolDirectWithdrawOneCoinGas(uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
         IGasValueStructure.GasValue referralProgram = getReferralProgramGas();
-        return GasValue(
+        IGasValueStructure.GasValue tokenVaultTransfer = getTokenVaultTransferGas(_deployWalletValue);
+        return IGasValueStructure.GasValue(
             2 * DexGas.OPERATION_CALLBACK +
             DexGas.DEX_POOL_COMPENSATION +
-            _deployWalletValue +
+            tokenVaultTransfer.fixedValue +
             referrer.value != 0 ? referralProgram.fixedValue : 0,
 
-            DexGas.TOKEN_VAULT_TRANSFER +
             DexGas.DIRECT_WITHDRAW_EXTRA_GAS +
+            tokenVaultTransfer.dynamicGas +
             referrer.value != 0 ? referralProgram.dynamicGas : 0
         );
     }
 
-    function getPoolCrossExchangeStepGas(uint128 _deployWalletValue, address referrer) internal pure returns(IGasValueStructure.GasValue) {
+    function getPoolCrossExchangeStepGas(uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
         IGasValueStructure.GasValue referralProgram = getReferralProgramGas();
-        return GasValue(
+        return IGasValueStructure.GasValue(
             2 * DexGas.OPERATION_CALLBACK +
             DexGas.DEX_POOL_COMPENSATION +
             _deployWalletValue +
@@ -227,4 +336,28 @@ library GasValues {
             referrer.value != 0 ? referralProgram.dynamicGas : 0
         );
     }
+
+    // TOKEN_VAULT
+
+    // 0.35 ever
+    function getTokenVaultTransferGas(uint128 _deployWalletValue) public returns(IGasValueStructure.GasValue) {
+        return IGasValueStructure.GasValue(
+            DexGas.DEX_TOKEN_VAULT_COMPENSATION + _deployWalletValue,
+            DexGas.TOKEN_VAULT_TRANSFER_GAS
+        );
+    }
+
+    // VAULT
+
+    // 0.35 ever
+    function getUpgradeVaultGas() public returns(IGasValueStructure.GasValue) {
+        return IGasValueStructure.GasValue(
+            DexGas.DEX_VAULT_COMPENSATION,
+            DexGas.UPGRADE_VAULT_EXTRA_GAS
+        );
+    }
+
+    // EVER TO TIP3
+
+
 }

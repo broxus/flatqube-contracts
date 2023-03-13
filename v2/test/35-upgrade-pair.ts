@@ -1,11 +1,11 @@
-import {Contract, toNano, WalletTypes} from "locklift";
-import {TestNewDexPairAbi} from "../../build/factorySource";
+import { Contract, toNano } from "locklift";
+import { TestNewDexPairAbi } from "../../build/factorySource";
+import { Migration, Constants, displayTx } from '../utils/migration';
 
 const {expect} = require('chai');
 const logger = require('mocha-logger');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
-const {Migration, Constants, displayTx} = require(process.cwd() + '/scripts/utils');
 const { Command } = require('commander');
 const program = new Command();
 
@@ -124,17 +124,14 @@ describe('Test Dex Pair contract upgrade', async function () {
   this.timeout(Constants.TESTS_TIMEOUT);
 
   before('Load contracts', async function () {
-    account = await locklift.factory.accounts.addExistingAccount({
-      type: WalletTypes.EverWallet,
-      address: migration.getAddress('Account1')
-    });
-    dexRoot = await locklift.factory.getDeployedContract( 'DexRoot', migration.getAddress('DexRoot'));
-    dexPairFooBar = await locklift.factory.getDeployedContract(options.old_contract_name, migration.getAddress('DexPool' + tokenLeft.symbol + tokenRight.symbol));
+    account = await migration.loadAccount('Account1', '0');
+    dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+    dexPairFooBar = migration.loadContract(options.old_contract_name, 'DexPool' + tokenLeft.symbol + tokenRight.symbol);
 
     targetVersion = (await dexRoot.methods.getPairVersion({ answerId: 0, pool_type: options.pool_type }).call()).value0;
 
-    tokenFoo = await locklift.factory.getDeployedContract('TokenRootUpgradeable', migration.getAddress(tokenLeft.symbol + 'Root'));
-    tokenBar = await locklift.factory.getDeployedContract('TokenRootUpgradeable', migration.getAddress(tokenRight.symbol + 'Root'));
+    tokenFoo = migration.loadContract('TokenRootUpgradeable', tokenLeft.symbol + 'Root');
+    tokenBar = migration.loadContract('TokenRootUpgradeable', tokenRight.symbol + 'Root');
 
     oldPairData = await loadPairData(dexPairFooBar, options.old_contract_name);
     logger.log(`Old Pair(${dexPairFooBar.address}) data:\n${JSON.stringify(oldPairData, null, 4)}`);

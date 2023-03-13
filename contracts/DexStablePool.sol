@@ -1,4 +1,4 @@
-pragma ton -solidity >= 0.57.0;
+pragma ton-solidity >= 0.57.0;
 
 pragma AbiHeader time;
 pragma AbiHeader expire;
@@ -20,6 +20,7 @@ import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "./libraries/DexOperationTypes.sol";
 import "./libraries/PairPayload.sol";
 import "./libraries/DirectOperationErrors.sol";
+import "./libraries/GasValues.sol";
 
 import "./interfaces/IUpgradableByRequest.sol";
 import "./interfaces/IDexRoot.sol";
@@ -192,7 +193,6 @@ contract DexStablePool is
     }
 
     function setAmplificationCoefficient(AmplificationCoefficient _A, address send_gas_to) override external onlyRoot {
-        require(msg.value >= DexGas.SET_FEE_PARAMS_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         A = _A;
@@ -209,7 +209,7 @@ contract DexStablePool is
             ((params.beneficiary.value != 0 && params.beneficiary_numerator != 0) ||
             (params.beneficiary.value == 0 && params.beneficiary_numerator == 0)),
             DexErrors.WRONG_FEE_PARAMS);
-        require(msg.value >= DexGas.SET_FEE_PARAMS_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         if (fee.beneficiary.value != 0) {
@@ -394,9 +394,8 @@ contract DexStablePool is
         ) = PairPayload.decodeOnAcceptTokensTransferPayloads(payload, op);
 
         TvmCell empty;
-        uint128 referrer_value = referrer.value != 0 ? DexGas.REFERRER_FEE_EXTRA_VALUE : 0;
 
-        uint16 errorCode = _checkOperationData(msg.sender, msg.value, is_payload_valid, deploy_wallet_grams, op, token_root, outcoming, referrer_value);
+        uint16 errorCode = _checkOperationData(msg.sender, msg.value, is_payload_valid, deploy_wallet_grams, op, token_root, outcoming, referrer);
 
         if (errorCode == 0) {
             if (op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
@@ -415,14 +414,13 @@ contract DexStablePool is
                         sender_address,
                         recipient,
                         referrer,
-                        referrer_value,
                         original_gas_to
                     );
 
                     for (uint8 ii = 0; ii < N_COINS; ii++) {
                         if (result.amounts[ii] >= 0) {
                             IDexTokenVault(_expectedTokenVaultAddress(tokenData[ii].root)).transfer{
-                                value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
+                                value: _calcValue(GasValues.getTokenVaultTransferGas(deploy_wallet_grams)),
                                 flag: MsgFlag.SENDER_PAYS_FEES
                             }(
                                 result.amounts[ii],
@@ -461,12 +459,11 @@ contract DexStablePool is
                         sender_address,
                         recipient,
                         referrer,
-                        referrer_value,
                         original_gas_to
                     );
 
                     IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).transfer{
-                        value: DexGas.VAULT_TRANSFER_BASE_VALUE_V2 + deploy_wallet_grams,
+                        value: _calcValue(GasValues.getTokenVaultTransferGas(deploy_wallet_grams)),
                         flag: MsgFlag.SENDER_PAYS_FEES
                     }(
                         result.amounts[i],
@@ -524,7 +521,7 @@ contract DexStablePool is
 
                     if (referrer_fee > 0) {
                         IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
-                            value: referrer_value,
+                            value: _calcValue(GasValues.getReferralProgramGas()),
                             flag: 0
                         }(
                             referrer_fee,
@@ -563,7 +560,7 @@ contract DexStablePool is
                     }
 
                     ITokenWallet(msg.sender).transfer{
-                        value: DexGas.TRANSFER_TOKENS_VALUE,
+                        value: _calcValue(GasValues.getTransferTokensGas(0)),
                         flag: MsgFlag.SENDER_PAYS_FEES
                     }(
                         tokens_amount,
@@ -614,7 +611,7 @@ contract DexStablePool is
                     all_leaves += next_step.leaves;
                 }
 
-                if (errorCode == 0 && msg.value < (DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + referrer_value) * (1 + all_nested_nodes)) {
+                if (errorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(deploy_wallet_grams, referrer)) * (1 + all_nested_nodes)) {
                     errorCode = DirectOperationErrors.VALUE_TOO_LOW;
                 }
 
@@ -636,7 +633,6 @@ contract DexStablePool is
                                 sender_address,
                                 recipient,
                                 referrer,
-                                referrer_value,
                                 original_gas_to
                             );
 
@@ -687,14 +683,13 @@ contract DexStablePool is
                                 sender_address,
                                 recipient,
                                 referrer,
-                                referrer_value,
                                 original_gas_to
                             );
 
                             operation = TokenOperation(result.amounts[j], tokenData[j].root);
 
                             IBurnableTokenWallet(msg.sender).burn{
-                                value: DexGas.BURN_VALUE,
+                                value: _calcValue(GasValues.getBurnTokensGas()),
                                 flag: MsgFlag.SENDER_PAYS_FEES
                             }(
                                 tokens_amount,
@@ -743,7 +738,7 @@ contract DexStablePool is
 
                             if (referrer_fee > 0) {
                                 IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
-                                    value: referrer_value,
+                                    value: _calcValue(GasValues.getReferralProgramGas()),
                                     flag: 0
                                 }(
                                     referrer_fee,
@@ -761,7 +756,7 @@ contract DexStablePool is
                 if (errorCode == 0) {
                     if (token_root != lp_root) { // deposit or exchange
                         ITokenWallet(msg.sender).transfer{
-                            value: DexGas.TRANSFER_TOKENS_VALUE,
+                            value: _calcValue(GasValues.getTransferTokensGas(0)),
                             flag: MsgFlag.SENDER_PAYS_FEES
                         }(
                             tokens_amount,
@@ -774,7 +769,7 @@ contract DexStablePool is
                     }
 
                     if (outcoming != lp_root) { // withdraw or exchange
-                        uint128 extraValue = msg.value - (DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + referrer_value) * (1 + all_nested_nodes);
+                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(deploy_wallet_grams, referrer)) * (1 + all_nested_nodes);
 
                         for (uint32 i = 0; i < next_steps.length; i++) {
                             NextExchangeData next_step = next_steps[i];
@@ -783,7 +778,7 @@ contract DexStablePool is
                             uint128 current_extra_value = math.muldiv(uint128(next_step.leaves), extraValue, uint128(all_leaves));
 
                             IDexBasePool(next_step.poolRoot).crossPoolExchange{
-                                value: i == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * (DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + referrer_value) + current_extra_value,
+                                value: i == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(deploy_wallet_grams, referrer)) + current_extra_value,
                                 flag: i == max_nested_nodes_idx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
                             }(
                                 id,
@@ -828,12 +823,11 @@ contract DexStablePool is
                         sender_address,
                         recipient,
                         referrer,
-                        referrer_value,
                         original_gas_to
                     );
 
                     ITokenWallet(msg.sender).transfer{
-                        value: DexGas.TRANSFER_TOKENS_VALUE,
+                        value: _calcValue(GasValues.getTransferTokensGas(0)),
                         flag: MsgFlag.SENDER_PAYS_FEES
                     }(
                         tokens_amount,
@@ -896,13 +890,12 @@ contract DexStablePool is
         uint8 op,
         address token_root,
         address outcoming,
-        uint128 referrer_value
+        address referrer
     ) private view returns (uint16) {
 
         if (!active) return DirectOperationErrors.NOT_ACTIVE;
         if (!is_payload_valid) return DirectOperationErrors.INVALID_PAYLOAD;
         if (lp_supply == 0) return DirectOperationErrors.NON_POSITIVE_LP_SUPPLY;
-        if (msg_value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + deploy_wallet_grams + referrer_value) return DirectOperationErrors.VALUE_TOO_LOW;
 
         if (token_root == lp_root && msg_sender != lp_wallet) return DirectOperationErrors.NOT_LP_TOKEN_WALLET;
         if (token_root != lp_root) {
@@ -914,7 +907,7 @@ contract DexStablePool is
             || msg_sender != lp_wallet && (op == DexOperationTypes.DEPOSIT_LIQUIDITY_V2 || op == DexOperationTypes.EXCHANGE_V2)
             || op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2)) return DirectOperationErrors.WRONG_OPERATION_TYPE;
 
-        if (op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2 && msg_value < DexGas.DIRECT_PAIR_OP_MIN_VALUE_V2 + N_COINS * deploy_wallet_grams + referrer_value) {
+        if (msg_value < _getOperationMinValue(op, deploy_wallet_grams, referrer)) {
             return DirectOperationErrors.VALUE_TOO_LOW;
         }
 
@@ -925,6 +918,23 @@ contract DexStablePool is
         }
 
         return 0;
+    }
+
+    function _getOperationMinValue(uint8 _op, uint128 _deployWalletGrams, address _referrer) private pure returns (uint128) {
+        if (_op == DexOperationTypes.EXCHANGE_V2) {
+            return _calcValue(GasValues.getPoolDirectExchangeGas(_deployWalletGrams, _referrer));
+        }
+        if (_op == DexOperationTypes.DEPOSIT_LIQUIDITY_V2) {
+            return _calcValue(GasValues.getPoolDirectDepositGas(_deployWalletGrams, _referrer));
+        }
+        if (_op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
+            return _calcValue(GasValues.getPoolDirectWithdrawGas(2, _deployWalletGrams, _referrer));
+        }
+        if (_op == DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN) {
+            return _calcValue(GasValues.getPoolDirectWithdrawOneCoinGas(_deployWalletGrams, _referrer));
+        }
+
+        return 2 * _calcValue(GasValues.getPoolCrossExchangeStepGas(_deployWalletGrams, _referrer));
     }
 
     function _checkExchangeReceivedAmount(optional(ExpectedExchangeResult) dy_result_opt, uint128 expected_amount) private pure returns (uint16) {
@@ -1027,8 +1037,6 @@ contract DexStablePool is
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
-        uint128 referrer_value = referrer.value != 0 ? DexGas.REFERRER_FEE_EXTRA_VALUE : 0;
-
         _applyAddLiquidity(
             result,
             referrer_fees,
@@ -1037,7 +1045,6 @@ contract DexStablePool is
             account_owner,
             account_owner,
             referrer,
-            referrer_value,
             send_gas_to
         );
 
@@ -1046,7 +1053,7 @@ contract DexStablePool is
         TvmCell empty;
         ITokenRoot(lp_root)
         .mint{
-            value: DexGas.DEPLOY_MINT_VALUE_BASE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
+            value: _calcValue(GasValues.getMintTokensGas(DexGas.DEPLOY_EMPTY_WALLET_GRAMS)),
             flag: MsgFlag.SENDER_PAYS_FEES
         }(
             result.lp_reward,
@@ -1157,7 +1164,6 @@ contract DexStablePool is
             account_owner,
             account_owner,
             address(0),
-            0,
             send_gas_to
         );
 
@@ -1166,7 +1172,7 @@ contract DexStablePool is
         for (uint8 i = 0; i < N_COINS; i++) {
             if (result.amounts[i] > 0) {
                 IDexAccount(msg.sender)
-                    .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+                    .internalPoolTransfer{ value: _calcValue(GasValues.getInternalPairTransferGas()), flag: MsgFlag.SENDER_PAYS_FEES }
                 (
                     result.amounts[i],
                     tokenData[i].root,
@@ -1178,7 +1184,7 @@ contract DexStablePool is
 
         TvmCell empty;
         IBurnableByRootTokenRoot(lp_root).burnTokens{
-            value: DexGas.BURN_VALUE,
+            value: _calcValue(GasValues.getBurnTokensGas()),
             flag: MsgFlag.SENDER_PAYS_FEES
         }(
             _operation.amount,
@@ -1298,7 +1304,7 @@ contract DexStablePool is
         ));
 
         IDexAccount(msg.sender)
-            .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+            .internalPoolTransfer{ value: _calcValue(GasValues.getInternalPairTransferGas()), flag: MsgFlag.SENDER_PAYS_FEES }
         (
             dy_result.amount,
             _expected.root,
@@ -1323,7 +1329,7 @@ contract DexStablePool is
                 tokenData[i].accumulatedFee >= fee.threshold[_root]
             ) {
                 IDexAccount(beneficiaryAccount).internalPoolTransfer{
-                    value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE,
+                    value: _calcValue(GasValues.getInternalPairTransferGas()),
                     flag: MsgFlag.SENDER_PAYS_FEES
                 }(
                     tokenData[i].accumulatedFee,
@@ -1376,7 +1382,6 @@ contract DexStablePool is
         ) = PairPayload.decodeCrossPoolExchangePayload(payload, op);
 
         TvmCell empty;
-        uint128 referrer_value = referrer.value != 0 ? DexGas.REFERRER_FEE_EXTRA_VALUE : 0;
 
         uint16 errorCode = !active ? DirectOperationErrors.NOT_ACTIVE
             : msg.sender == address(this) ? DirectOperationErrors.WRONG_PREVIOUS_POOL
@@ -1401,7 +1406,6 @@ contract DexStablePool is
                         sender_address,
                         recipient,
                         referrer,
-                        referrer_value,
                         original_gas_to
                     );
 
@@ -1452,14 +1456,13 @@ contract DexStablePool is
                         sender_address,
                         recipient,
                         referrer,
-                        referrer_value,
                         original_gas_to
                     );
 
                     operation = TokenOperation(result.amounts[j], tokenData[j].root);
 
                     IBurnableByRootTokenRoot(lp_root).burnTokens{
-                        value: DexGas.BURN_VALUE,
+                        value: _calcValue(GasValues.getBurnTokensGas()),
                         flag: MsgFlag.SENDER_PAYS_FEES
                     }(
                         spent_amount,
@@ -1510,7 +1513,7 @@ contract DexStablePool is
 
                     if (referrer_fee > 0) {
                         IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
-                            value: referrer_value,
+                            value: _calcValue(GasValues.getReferralProgramGas()),
                             flag: 0
                         }(
                             referrer_fee,
@@ -1552,12 +1555,12 @@ contract DexStablePool is
                         all_leaves += next_step.leaves;
                     }
 
-                    if (post_swap_error_code == 0 && msg.value < (DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + referrer_value) * (1 + all_nested_nodes)) {
+                    if (post_swap_error_code == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(deploy_wallet_grams, referrer)) * (1 + all_nested_nodes)) {
                         post_swap_error_code = DirectOperationErrors.VALUE_TOO_LOW;
                     }
 
                     if (post_swap_error_code == 0 && next_steps.length > 0) {
-                        uint128 extraValue = msg.value - (DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + referrer_value) * (1 + all_nested_nodes);
+                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(deploy_wallet_grams, referrer)) * (1 + all_nested_nodes);
 
                         for (uint32 i = 0; i < next_steps.length; i++) {
                             NextExchangeData next_step = next_steps[i];
@@ -1566,7 +1569,7 @@ contract DexStablePool is
                             uint128 current_extra_value = math.muldiv(uint128(next_step.leaves), extraValue, uint128(all_leaves));
 
                             IDexBasePool(next_step.poolRoot).crossPoolExchange{
-                                value: i == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * (DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + referrer_value) + current_extra_value,
+                                value: i == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(deploy_wallet_grams, referrer)) + current_extra_value,
                                 flag: i == max_nested_nodes_idx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
                             }(
                                 id,
@@ -1853,12 +1856,12 @@ contract DexStablePool is
             tokenData[1] = PoolTokenData(type_to_root_addresses[DexAddressType.RESERVE][1], type_to_wallet_addresses[DexAddressType.RESERVE][1], type_to_reserves[DexReserveType.POOL][1], 0, type_to_reserves[DexReserveType.FEE][1], 0, 0, false, false);
 
             ITokenRoot(type_to_root_addresses[DexAddressType.RESERVE][0]).decimals{
-                value: DexGas.GET_TOKEN_DECIMALS_VALUE,
+                value: _calcValue(GasValues.getTokenDataGas()),
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexStablePool.onTokenDecimals
             }();
                 ITokenRoot(type_to_root_addresses[DexAddressType.RESERVE][1]).decimals{
-                value: DexGas.GET_TOKEN_DECIMALS_VALUE,
+                value: _calcValue(GasValues.getTokenDataGas()),
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexStablePool.onTokenDecimals
             }();
@@ -1931,14 +1934,14 @@ contract DexStablePool is
 
     function _configureToken(address token_root) private view {
         ITokenRoot(token_root).deployWallet {
-            value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
+            value: _calcValue(GasValues.getDeployWalletGas()),
             flag: MsgFlag.SENDER_PAYS_FEES,
             callback: DexStablePool.onTokenWallet
         }(address(this), DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
         if (token_root != lp_root) {
             ITokenRoot(token_root).decimals{
-                value: DexGas.GET_TOKEN_DECIMALS_VALUE,
+                value: _calcValue(GasValues.getTokenDataGas()),
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexStablePool.onTokenDecimals
             }();
@@ -2690,7 +2693,6 @@ contract DexStablePool is
         address sender_address,
         address recipient,
         address referrer,
-        uint128 referrer_value,
         address original_gas_to
     ) private {
 
@@ -2721,7 +2723,7 @@ contract DexStablePool is
                 is_zero_referrer_fees = false;
 
                 IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
-                    value: referrer_value,
+                    value: _calcValue(GasValues.getReferralProgramGas()),
                     flag: 0
                 }(
                     referrer_fees[i],
@@ -2930,7 +2932,6 @@ contract DexStablePool is
         address sender_address,
         address recipient,
         address referrer,
-        uint128 referrer_value,
         address original_gas_to
     ) private {
 
@@ -2961,7 +2962,7 @@ contract DexStablePool is
                 is_zero_referrer_fees = false;
 
                 IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).referralFeeTransfer{
-                    value: referrer_value,
+                    value: _calcValue(GasValues.getReferralProgramGas()),
                     flag: 0
                 }(
                     referrer_fees[i],

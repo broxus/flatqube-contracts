@@ -49,7 +49,7 @@ async function main() {
     //     expected_amount: 0,
     //     outcoming: token_roots[1].address,
     //     recipient: owner.address,
-    //     referrer: zeroAddress,
+    //     referrer: additionalAccount.address,
     //     success_payload: null,
     //     cancel_payload: null
     // }).call()).value0;
@@ -64,7 +64,7 @@ async function main() {
     //     // @ts-ignore
     // }).send({
     //     from: owner.address,
-    //     amount: toNano(3),
+    //     amount: toNano(4),
     // }));
 
     // let payload = (await dexPool.methods.buildDepositLiquidityPayload({
@@ -203,40 +203,40 @@ async function main() {
         }
     ];
 
-    const dexPair = migration.loadContract('DexPair', 'DexPoolTstFoo');
-    let payload = (await dexPair.methods.buildCrossPairExchangePayloadV2({
-        _id: 0,
-        _deployWalletGrams: 0,
-        _expectedAmount: 0,
-        _outcoming: zeroAddress,
-        _nextStepIndices: [0],
-        _steps: steps,
-        _recipient: owner.address,
-        _referrer: zeroAddress,
-        _successPayload: null,
-        _cancelPayload: null
-    }).call()).value0;
-
-    let { traceTree } = await locklift.tracing.trace(accountWalletFoo.methods.transfer({
-        amount: '100000000000',
-        recipient: dexPair.address,
-        deployWalletValue: 0,
-        remainingGasTo: owner.address,
-        notify: true,
-        payload: payload,
-        // @ts-ignore
-    }).send({
-        from: owner.address,
-        amount: toNano(10),
-    }));
-
-    await traceTree?.beautyPrint();
-
-    console.log("balanceChangeInfo");
-
-    for(let addr in traceTree?.balanceChangeInfo) {
-        console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
-    }
+    // const dexPair = migration.loadContract('DexPair', 'DexPoolTstFoo');
+    // let payload = (await dexPair.methods.buildCrossPairExchangePayloadV2({
+    //     _id: 0,
+    //     _deployWalletGrams: 0,
+    //     _expectedAmount: 0,
+    //     _outcoming: zeroAddress,
+    //     _nextStepIndices: [0],
+    //     _steps: steps,
+    //     _recipient: owner.address,
+    //     _referrer: zeroAddress,
+    //     _successPayload: null,
+    //     _cancelPayload: null
+    // }).call()).value0;
+    //
+    // let { traceTree } = await locklift.tracing.trace(accountWalletFoo.methods.transfer({
+    //     amount: '100000000000',
+    //     recipient: dexPair.address,
+    //     deployWalletValue: 0,
+    //     remainingGasTo: owner.address,
+    //     notify: true,
+    //     payload: payload,
+    //     // @ts-ignore
+    // }).send({
+    //     from: owner.address,
+    //     amount: toNano(10),
+    // }));
+    //
+    // await traceTree?.beautyPrint();
+    //
+    // console.log("balanceChangeInfo");
+    //
+    // for(let addr in traceTree?.balanceChangeInfo) {
+    //     console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+    // }
 }
 
 main()

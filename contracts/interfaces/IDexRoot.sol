@@ -13,8 +13,7 @@ interface IDexRoot is
     IOracleOptions,
     IAmplificationCoefficient,
     IUpgradable,
-    IResetGas,
-    GasValues
+    IResetGas
 {
     event AccountCodeUpgraded(uint32 version);
 

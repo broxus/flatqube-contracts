@@ -3,8 +3,8 @@ export NO_TRACE="--config ./locklift-v2.config.ts --disable-build --network loca
 
 #prepare pool
 npx locklift run $NO_TRACE --script v2/scripts/0-reset-migration.ts
-npx locklift run $NO_TRACE --script v2/scripts/0-deploy-account.ts --key_number='0' --balance='50'
-npx locklift run $NO_TRACE --script v2/scripts/0-deploy-account.ts --key_number='1' --balance='50'
+npx locklift run $NO_TRACE --script v2/scripts/0-deploy-account.ts --key_number='0' --balance='150'
+npx locklift run $NO_TRACE --script v2/scripts/0-deploy-account.ts --key_number='1' --balance='1000'
 npx locklift run $NO_TRACE --script v2/scripts/0-deploy-account.ts --key_number='2' --balance='75'
 npx locklift run $NO_TRACE --script v2/scripts/0-deploy-account.ts --key_number='3' --balance='75'
 npx locklift run $NO_TRACE --script v2/scripts/0-deploy-TokenFactory.ts
@@ -23,5 +23,12 @@ npx locklift run $NO_TRACE --script v2/scripts/5-deploy-test-pair.ts --pairs='[[
 npx locklift run $NO_TRACE --script v2/scripts/5-deploy-test-pool.ts --pools='[["foo", "bar", "qwe"]]' --contract_name='DexStablePool'
 npx locklift run $NO_TRACE --script v2/scripts/dynamic-gas-test-account.ts
 npx locklift run $NO_TRACE --script v2/scripts/dynamic-gas-test.ts
+
+npx locklift run $NO_TRACE --script v2/scripts/6-wton-setup.ts --wrap_amount=900
+npx locklift run $NO_TRACE --script v2/scripts/7-deploy-test-swap-ever-wever-tip3-contracts.ts
+npx locklift run $NO_TRACE --script v2/scripts/5-deploy-test-pair.ts --pairs='[["tst","wever"]]' --contract_name='DexPair'
+npx locklift run $NO_TRACE --script v2/scripts/dynamic-gas-ever-wever-tip3.ts
+
+#npx locklift test $NO_TRACE --tests v2/test/35-upgrade-pair.ts --left='tst' --right='foo' --old_contract_name='DexPair' --new_contract_name='DexStablePair' --pool_type=2
 #
 #npx locklift test $NO_TRACE --tests v2/test/35-upgrade-pool.ts --roots='["foo", "bar", "qwe"]' --old_contract_name='DexStablePool' --new_contract_name='DexStablePool' --pool_type=3

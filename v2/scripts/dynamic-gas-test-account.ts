@@ -1,5 +1,5 @@
 import {Migration, displayTx, EMPTY_TVM_CELL, Constants} from '../utils/migration';
-import {toNano, zeroAddress} from "locklift";
+import {Address, toNano, zeroAddress} from "locklift";
 
 const deposits = [
     { tokenId: 'foo', amount: '100000000000000000000000' },
@@ -57,9 +57,9 @@ async function main() {
     }
 
     await dexVault.methods.setReferralProgramParams({params: {
-            projectId: 2,
-            projectAddress: additionalAccount.address,
-            systemAddress: additionalAccount.address
+            projectId: 0,
+            projectAddress: new Address('0:262c8f1f919c7b7c23dfd6afc419e83be84b90689631b63e9bada61624789df0'),
+            systemAddress: new Address('0:887e8e9d03d3d8d9769aebcdb58c7966f83511d663fef014891215d37f89a200')
         }}).send({
         from: mainAccount.address,
         amount: toNano(1),
@@ -114,7 +114,7 @@ async function main() {
     // initial deposit
     let tx = await dexAccountN.methods.depositLiquidityV2({
         _callId: 123,
-        _operations: [{amount: '100000000000000000000', root: token_roots[0]},{amount: '100000000000000000000', root: token_roots[1]},{amount: '100000000000000000000', root: token_roots[2]}],
+        _operations: [{amount: '1000000000000000000000', root: token_roots[0]},{amount: '1000000000000000000000', root: token_roots[1]},{amount: '1000000000000000000000', root: token_roots[2]}],
         _expected: {amount: '0', root: poolLpRoot.address},
         _autoChange: false,
         _remainingGasTo: owner.address,
@@ -127,7 +127,7 @@ async function main() {
 
     tx = await dexAccountN.methods.depositLiquidityV2({
         _callId: 123,
-        _operations: [{amount: '100000000000000000000', root: token_roots[0]},{amount: '100000000000000000000', root: token_roots[3]}],
+        _operations: [{amount: '10000000000000000000000', root: token_roots[0]},{amount: '10000000000000000000000', root: token_roots[3]}],
         _expected: {amount: '0', root: pairTstFooLpRoot.address},
         _autoChange: false,
         _remainingGasTo: owner.address,
@@ -140,7 +140,7 @@ async function main() {
 
     tx = await dexAccountN.methods.depositLiquidityV2({
         _callId: 123,
-        _operations: [{amount: '100000000000000000000', root: token_roots[1]},{amount: '100000000000000000000', root: token_roots[3]}],
+        _operations: [{amount: '1000000000000000000000', root: token_roots[1]},{amount: '1000000000000000000000', root: token_roots[3]}],
         _expected: {amount: '0', root: pairTstBarLpRoot.address},
         _autoChange: false,
         _remainingGasTo: owner.address,
@@ -245,6 +245,41 @@ async function main() {
     //         amount: toNano(4),
     //     })
     // );
+
+    // let { traceTree } = await locklift.tracing.trace(dexRoot.methods.forceUpgradeAccount({
+    //         account_owner: additionalAccount.address,
+    //         send_gas_to: mainAccount.address
+    //     }).send({
+    //         from: mainAccount.address,
+    //         amount: toNano(6),
+    //     })
+    // );
+    //
+    // let { traceTree } = await locklift.tracing.trace(dexRoot.methods.upgradeTokenVault({
+    //         _tokenRoot: token_roots[0],
+    //         _remainingGasTo: mainAccount.address
+    //     }).send({
+    //         from: mainAccount.address,
+    //         amount: toNano(6),
+    //     })
+    // );
+
+    // let { traceTree } = await locklift.tracing.trace(dexRoot.methods.upgrade({
+    //         code: await locklift.factory.getContractArtifacts('DexRoot').code,
+    //     }).send({
+    //         from: mainAccount.address,
+    //         amount: toNano(6),
+    //     })
+    // );
+
+    // let { traceTree } = await locklift.tracing.trace(dexVault.methods.upgrade({
+    //         code: await locklift.factory.getContractArtifacts('DexVault').code,
+    //     }).send({
+    //         from: mainAccount.address,
+    //         amount: toNano(6),
+    //     })
+    // );
+    //
     // await traceTree?.beautyPrint();
     //
     // console.log("balanceChangeInfo");

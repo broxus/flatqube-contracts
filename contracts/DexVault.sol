@@ -4,21 +4,22 @@ pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
-import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
-
-import "tip3/contracts/interfaces/ITokenWallet.sol";
+import "./structures/IGasValueStructure.sol";
 
 import "./abstract/DexContractBase.sol";
 
+import "tip3/contracts/interfaces/ITokenWallet.sol";
 import "./interfaces/IDexVault.sol";
 import "./interfaces/IDexAccount.sol";
 import "./interfaces/IReferralProgramCallbacks.sol";
 
+import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
 import "./libraries/DexOperationTypes.sol";
+import "./libraries/GasValues.sol";
 
-contract DexVault is DexContractBase, IDexVault {
+contract DexVault is DexContractBase, IDexVault, IGasValueStructure {
     uint32 private static _nonce;
 
     address private _root;
@@ -48,7 +49,7 @@ contract DexVault is DexContractBase, IDexVault {
 
     function migrateToken(address _tokenRoot) external onlyManagerOrOwner {
         require(_vaultWallets.exists(_tokenRoot), 404);
-        require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE + DexGas.TRANSFER_TOKENS_VALUE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS + 0.5 ever, 404);
+        require(msg.value >= _calcValue(GasValues.getDeployTokenVaultGas()) + _calcValue(GasValues.getTransferTokensGas(DexGas.DEPLOY_EMPTY_WALLET_GRAMS)) + 0.5 ever, 404);
 
         tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
 
@@ -75,7 +76,7 @@ contract DexVault is DexContractBase, IDexVault {
         address _tokenRoot = _vaultWalletsToRoots.at(msg.sender);
 
         IDexRoot(_dexRoot()).deployTokenVault{
-            value: DexGas.DEPLOY_VAULT_MIN_VALUE + 0.05 ever,
+            value: _calcValue(GasValues.getDeployTokenVaultGas()) + 0.05 ever,
             flag: MsgFlag.SENDER_PAYS_FEES
         }(_tokenRoot, _owner);
 
@@ -108,7 +109,7 @@ contract DexVault is DexContractBase, IDexVault {
             _vaultWalletsToRoots[vaultTokenWallet] = tokenRoot;
             counter++;
             ITokenWallet(vaultTokenWallet).balance{
-                value: DexGas.DEPLOY_VAULT_MIN_VALUE + DexGas.TRANSFER_TOKENS_VALUE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS + 0.5 ever,
+                value: _calcValue(GasValues.getDeployTokenVaultGas()) + _calcValue(GasValues.getTransferTokensGas(DexGas.DEPLOY_EMPTY_WALLET_GRAMS)) + 0.5 ever,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexVault.onTokenBalance
             }();
@@ -273,7 +274,7 @@ contract DexVault is DexContractBase, IDexVault {
     }
 
     function upgrade(TvmCell code) public override onlyOwner {
-        require(msg.value > DexGas.UPGRADE_VAULT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(msg.value > _calcValue(GasValues.getUpgradeVaultGas()), DexErrors.VALUE_TOO_LOW);
 
         tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
 
@@ -304,7 +305,7 @@ contract DexVault is DexContractBase, IDexVault {
 
         TvmSlice slice = _data.toSlice();
 
-        (_root,) = slice.decode(address, address);
+        (_root) = slice.decode(address);
 
         TvmCell ownersData = slice.loadRef();
         TvmSlice ownersSlice = ownersData.toSlice();
@@ -312,13 +313,9 @@ contract DexVault is DexContractBase, IDexVault {
 
         platform_code = slice.loadRef();
 
-        //ignore _lpTokenPendingCode
-        slice.loadRef();
-
-        (, _vaultWallets)  = abi.decode(slice.loadRef(), (
-            mapping(address => bool),
-            mapping(address => address)
-        ));
+        if (slice.refs() >= 1) {
+            _refProgramParams  = abi.decode(slice.loadRef(), ReferralProgramParams);
+        }
 
         // Refund remaining gas
         _owner.transfer({
@@ -397,7 +394,7 @@ contract DexVault is DexContractBase, IDexVault {
 
             IReferralProgramCallbacks(_refProgramParams.projectAddress)
                 .onRefLastUpdate{
-                    value: DexGas.REFERRAL_PROGRAM_CALLBACK,
+                    value: _calcValue(GasValue(0, DexGas.REFERRAL_PROGRAM_CALLBACK)),
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(_referral, _referrer, _referral);
