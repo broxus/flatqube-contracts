@@ -21,7 +21,6 @@ import "./interfaces/IDexAccountOwner.sol";
 import "./libraries/DexPlatformTypes.sol";
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
-import "./libraries/GasValues.sol";
 
 import "./abstract/DexContractBase.sol";
 
@@ -168,7 +167,7 @@ contract DexAccount is
         address _originalGasTo,
         TvmCell _payload
     ) override external {
-        require(msg.value >= _calcValue(GasValues.getDepositToAccountGas()), DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= DexGas.DEPOSIT_TO_ACCOUNT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
 
         TvmSlice payloadSlice = _payload.toSlice();
@@ -317,7 +316,7 @@ contract DexAccount is
         require(!_tmpOperations.exists(call_id), DexErrors.OPERATION_ALREADY_IN_PROGRESS);
         require(amount > 0, DexErrors.AMOUNT_TOO_LOW);
         require(recipient_address.value != 0, DexErrors.WRONG_RECIPIENT);
-        require(msg.value >= _calcValue(GasValues.getAccountWithdrawGas(deploy_wallet_grams)), DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= DexGas.WITHDRAW_MIN_VALUE_BASE + deploy_wallet_grams, DexErrors.VALUE_TOO_LOW);
         require(_wallets.exists(token_root) && _balances.exists(token_root), DexErrors.UNKNOWN_TOKEN_ROOT);
         require(_balances[token_root] >= amount, DexErrors.NOT_ENOUGH_FUNDS);
 
@@ -360,7 +359,7 @@ contract DexAccount is
     ) override external onlyOwner {
         require(!_tmpOperations.exists(call_id), DexErrors.OPERATION_ALREADY_IN_PROGRESS);
         require(amount > 0, DexErrors.AMOUNT_TOO_LOW);
-        require(msg.value >= _calcValue(GasValues.getAccountTransferGas()), DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= DexGas.TRANSFER_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(_wallets.exists(token_root) && _balances.exists(token_root), DexErrors.UNKNOWN_TOKEN_ROOT);
         require(_balances[token_root] >= amount, DexErrors.NOT_ENOUGH_FUNDS);
 
@@ -518,7 +517,7 @@ contract DexAccount is
     ) private {
         require(!_tmpOperations.exists(_callId), DexErrors.OPERATION_ALREADY_IN_PROGRESS);
         require(_operation.amount > 0, DexErrors.AMOUNT_TOO_LOW);
-        require(msg.value >= _calcValue(GasValues.getAccountExchangeGas()), DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= DexGas.EXCHANGE_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(_wallets.exists(_operation.root) && _balances.exists(_operation.root), DexErrors.UNKNOWN_TOKEN_ROOT);
         require(_wallets.exists(_expected.root), DexErrors.UNKNOWN_TOKEN_ROOT);
         require(_balances[_operation.root] >= _operation.amount, DexErrors.NOT_ENOUGH_FUNDS);
@@ -615,7 +614,7 @@ contract DexAccount is
     ) private {
         require(!_tmpOperations.exists(_callId), DexErrors.OPERATION_ALREADY_IN_PROGRESS);
         require(_operations.length > 1, DexErrors.WRONG_PAIR);
-        require(msg.value >= _calcValue(GasValues.getAccountDepositGas(uint8(_operations.length), _referrer)), DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= DexGas.DEPOSIT_LIQUIDITY_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(_wallets.exists(_expected.root) && _balances.exists(_expected.root), DexErrors.UNKNOWN_TOKEN_ROOT);
         for (TokenOperation operation : _operations) {
             require(_wallets.exists(operation.root) && _balances.exists(operation.root), DexErrors.UNKNOWN_TOKEN_ROOT);
@@ -733,7 +732,7 @@ contract DexAccount is
     ) private {
         require(!_tmpOperations.exists(_callId), DexErrors.OPERATION_ALREADY_IN_PROGRESS);
         require(_operation.amount > 0, DexErrors.AMOUNT_TOO_LOW);
-        require(msg.value >= _calcValue(GasValues.getAccountWithdrawLiquidityGas(uint8(_roots.length))), DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= DexGas.WITHDRAW_LIQUIDITY_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         require(_wallets.exists(_operation.root) && _balances.exists(_operation.root), DexErrors.UNKNOWN_TOKEN_ROOT);
         require(_balances[_operation.root] >= _operation.amount, DexErrors.NOT_ENOUGH_FUNDS);
 
@@ -792,9 +791,8 @@ contract DexAccount is
     }
 
     function _addPoolInternal(address[] _roots) private view {
-        uint8 N = uint8(_roots.length);
-        require(N > 1, DexErrors.WRONG_PAIR);
-        require(msg.value >= _calcValue(GasValues.getAddPoolGas(N)), DexErrors.VALUE_TOO_LOW);
+        require(_roots.length > 1, DexErrors.WRONG_PAIR);
+        require(msg.value >= DexGas.ADD_PAIR_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
 
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
 
@@ -822,7 +820,7 @@ contract DexAccount is
 
         ITokenRoot(_tokenRoot)
             .deployWallet{
-                value: _calcValue(GasValues.getDeployWalletGas()),
+                value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexAccount.onTokenWallet
             }(
@@ -835,7 +833,7 @@ contract DexAccount is
     // CODE UPGRADE
 
     function requestUpgrade(address send_gas_to) external view onlyOwner {
-        require(msg.value >= _calcValue(GasValues.getUpgradeAccountGas()), DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= DexGas.UPGRADE_ACCOUNT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
 
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
 

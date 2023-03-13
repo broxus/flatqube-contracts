@@ -135,6 +135,7 @@ abstract contract DexContractBase  {
         mapping(address => uint8) sorted;
 
         for (address root : _roots) {
+            require(!sorted.exists(root), DexErrors.INVALID_TOKEN_ROOTS);
             sorted[root] = 0;
         }
 

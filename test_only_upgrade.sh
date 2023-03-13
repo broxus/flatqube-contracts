@@ -12,10 +12,10 @@ npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='1' --balance='50'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='2' --balance='50'
 npx locklift run $NO_TRACE --script scripts/0-deploy-TokenFactory.js
-npx locklift run $NO_TRACE --script scripts/1-deploy-vault-and-root.js --pair_contract_name='DexPairPrev' --root_contract_name='DexRoot' --vault_contract_name='DexVault' --account_contract_name='DexAccount'
+npx locklift run $NO_TRACE --script scripts/1-deploy-vault-and-root.js --pair_contract_name='DexPairPrev' --root_contract_name='DexRootPrev' --vault_contract_name='DexVault' --account_contract_name='DexAccountPrev'
 npx locklift run $NO_TRACE --script scripts/2-deploy-test-tokens.js --tokens='["foo","bar","qwe"]'
 npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"account":2,"amount":200000000,"token":"bar"},{"account":2,"amount":200000000,"token":"foo"},{"account":2,"amount":200000000,"token":"qwe"}]'
-npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2 --contract_name='DexAccount'
+npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2 --contract_name='DexAccountPrev'
 npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["foo", "bar"], ["bar", "qwe"]]' --contract_name='DexPairPrev'
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexStablePairPrev' --pool_type=2
 
@@ -24,14 +24,14 @@ npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='foo' --righ
 npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits='[{ "tokenId": "bar", "amount": 100000000 }, { "tokenId": "foo", "amount": 100000000 }]'
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'foo' --right_token_id 'bar' --left_amount '100000' --right_amount '100000' --auto_change 'false' --contract_name='DexPairPrev' --account_contract_name='DexAccountPrev'
 
-#echo "____________________________________________________________________";
-#echo "prev root ->  root";
-#npx locklift run $NO_TRACE --script scripts/update-dexRoot.js --old_contract='DexRootPrev' --new_contract='DexRoot'
-#
-#echo "____________________________________________________________________";
-#echo "prev account ->  account";
-#npx locklift test $NO_TRACE --tests test/31-install-account-code.js --contract_name='DexAccount'
-#npx locklift test $NO_TRACE --tests test/36-upgrade-account.js --owner_n=2 --old_contract_name="DexAccountPrev" --new_contract_name="DexAccount"
+echo "____________________________________________________________________";
+echo "prev root ->  root";
+npx locklift run $NO_TRACE --script scripts/update-dexRoot.js --old_contract='DexRootPrev' --new_contract='DexRoot'
+
+echo "____________________________________________________________________";
+echo "prev account ->  account";
+npx locklift test $NO_TRACE --tests test/31-install-account-code.js --contract_name='DexAccount'
+npx locklift test $NO_TRACE --tests test/36-upgrade-account.js --owner_n=2 --old_contract_name="DexAccountPrev" --new_contract_name="DexAccount"
 
 echo "____________________________________________________________________";
 echo "deploy new account";

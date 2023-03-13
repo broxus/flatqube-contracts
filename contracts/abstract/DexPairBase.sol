@@ -14,7 +14,6 @@ import "../libraries/DexReserveType.sol";
 import "../libraries/GasValues.sol";
 
 import "../structures/IPoolTokenData.sol";
-import "../structures/IPoolTokenDataPrev.sol";
 import "../structures/IAmplificationCoefficient.sol";
 
 import "./DexContractBase.sol";
@@ -26,8 +25,7 @@ import "./TWAPOracle.sol";
 abstract contract DexPairBase is
     DexContractBase,
     IDexConstantProductPair,
-    TWAPOracle,
-    IPoolTokenDataPrev
+    TWAPOracle
 {
     /// @dev DexRoot address
     address private _root;
