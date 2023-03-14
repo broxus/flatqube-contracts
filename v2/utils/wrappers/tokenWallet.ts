@@ -42,7 +42,7 @@ export class TokenWallet {
         logTestProcessing(`${this.name}(${this.address}).transfer()`,
   `amount: ${amount},
           recipient: ${receiver},
-          deployWalletValue: ${locklift.utils.toNano(0.2)},
+          deployWalletValue: ${locklift.utils.toNano(0.4)},
           remainingGasTo: ${this.address},
           notify: ${true},
           payload: ${payload}
@@ -51,7 +51,7 @@ export class TokenWallet {
         return await this.contract.methods.transfer({
             amount: amount,
             recipient: receiver,
-            deployWalletValue: 0,
+            deployWalletValue: toNano(0.4),
             remainingGasTo: !(this._owner instanceof Address) ? this._owner.address : this._owner,
             notify: notify,
             payload: payload

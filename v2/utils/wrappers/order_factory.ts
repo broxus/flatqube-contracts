@@ -170,7 +170,7 @@ export class OrderFactory {
         .send({amount: toNano(1.1), from: owner.address}))
     }
 
-        async setOrderRootCode(
+    async setOrderRootCode(
         code: string
     ) {
         const owner = this._owner as Account;
@@ -178,6 +178,16 @@ export class OrderFactory {
         .send({amount: toNano(1.1), from: owner.address}))
 
     }
+
+    async transferOwner(
+        _newOwner: Address
+    ) {
+        const owner = this._owner as Account;
+        return await locklift.tracing.trace(this.contract.methods.transferOwner({
+            answerId: 0, newOwner: _newOwner,
+        }).send({amount: toNano(1.1), from: owner.address}))
+    }
+
     async upgradeOrderRoot(
         root: Address
     ) {
