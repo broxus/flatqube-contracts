@@ -52,9 +52,8 @@ contract TestNewOrderRoot is  IOrderFeeParams {
             _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
         } else {
             TvmCell data = abi.encode(
-                factory, spentToken, version, _newVersion, versionOrder,
-                orderCode, orderPlatformCode, spentTokenWallet, deployer,
-                dexRoot, fee
+                factory, spentToken, spentTokenWallet, version, _newVersion, versionOrder,
+                deployer, fee, orderCode, abi.encode(dexRoot, orderPlatformCode)
             );
 
             tvm.setcode(_code);
@@ -65,17 +64,29 @@ contract TestNewOrderRoot is  IOrderFeeParams {
     }
 
     function onCodeUpgrade(TvmCell _data) private {
-        tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
         tvm.resetStorage();
 
-        uint32 oldVersion;
+        uint32 _oldVersion;
+        TvmCell data;
         (
-            factory, spentToken, oldVersion, version, versionOrder, orderCode,
-            orderPlatformCode, spentTokenWallet, deployer, dexRoot, fee
+        factory,
+        spentToken,
+        spentTokenWallet,
+        _oldVersion,
+        version,
+        versionOrder,
+        deployer,
+        fee,
+        orderCode,
+        data
         ) = abi.decode(_data, (
-            address, address, uint32, uint32, uint32,
-            TvmCell, TvmCell, address, address, address, OrderFeeParams
+            address, address, address, uint32, uint32,
+            uint32, address, OrderFeeParams, TvmCell, TvmCell
             ));
+
+        (dexRoot, orderPlatformCode) = abi.decode(data, (address, TvmCell));
+
         newTestField = "New Order Root";
 
         factory.transfer({

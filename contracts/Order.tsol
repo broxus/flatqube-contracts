@@ -8,7 +8,6 @@ import "./libraries/OrderGas.tsol";
 import "./libraries/OrderErrors.tsol";
 import "./libraries/OrderStatus.tsol";
 import "./libraries/OrderPayloads.tsol";
-import "./libraries/FixedPoint128.tsol";
 import "./libraries/OrderOperationTypes.tsol";
 
 import "./structures/IOrderExchangeResult.tsol";
@@ -67,6 +66,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 	address matchingOrder;
 
 	uint32 version;
+
+	uint256 constant FIXED_POINT_18_MULTIPLIER = 10 ** 18;
 
 	constructor(
 		uint128 _expectedAmount,
@@ -505,6 +506,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 				}(callbackId);
 			}
 
+			TvmCell emptyPayload;
 			ITokenWallet(msg.sender).transfer{
 				value: 0,
 				flag: MsgFlag.ALL_NOT_RESERVED,
@@ -515,7 +517,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 				uint128(0),
 				originalGasTo,
 				notifyCancel,
-				OrderPayloads.buildCancelPayload(op, cancelPayload)
+				(notifyCancel ? OrderPayloads.buildCancelPayload(op, cancelPayload) : emptyPayload)
 			);
 		}
 	}
@@ -596,7 +598,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 				(state != OrderStatus.MatchInProgress ? _deployWalletValue : 0),
 				_originalGasTo,
 				(state != OrderStatus.MatchInProgress ? _notifySuccess : true),
-				(state != OrderStatus.MatchInProgress ? _successPayload : payloadForTransfer)
+				(state != OrderStatus.MatchInProgress ? (_notifySuccess ? OrderPayloads.buildSuccessPayload(_op, _successPayload, _sender): emptyPayload) : payloadForTransfer)
 			);
 
 			_transferAmount = currentAmountSpentToken;
@@ -694,7 +696,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 					(state != OrderStatus.MatchInProgress ? _deployWalletValue : uint128(0)),
 					_originalGasTo,
 					(state != OrderStatus.MatchInProgress ? _notifySuccess : true),
-					(state != OrderStatus.MatchInProgress ? _successPayload : payloadForTransfer)
+					(state != OrderStatus.MatchInProgress ? (_notifySuccess ? OrderPayloads.buildSuccessPayload(_op, _successPayload, _sender): emptyPayload) : payloadForTransfer)
 				);
 			}
 
@@ -733,25 +735,25 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 					)
 				);
 
-				if(_sendGasTo != factory && _sendGasTo != fee.beneficiary) {
-					IOrderCallbacks(state != OrderStatus.MatchInProgress ? _sender : _sendGasTo).onOrderPartExchangeSuccess{
-						value: OrderGas.OPERATION_CALLBACK_BASE,
-						flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-						bounce: false
-					}(
-						_callbackId,
-						owner,
-						uint128(0),
-						IOrderExchangeResult.OrderExchangeResult(
-							receiveToken,
-							_expectedSenderAmount,
-							spentToken,
-							_transferAmount,
-							currentAmountReceiveToken,
-							currentAmountSpentToken
-						)
-					);
-				}
+				IOrderCallbacks(
+					state == OrderStatus.MatchInProgress && _sendGasTo != factory && _sendGasTo != fee.beneficiary ?
+					_sendGasTo : _sender).onOrderPartExchangeSuccess {
+					value: OrderGas.OPERATION_CALLBACK_BASE,
+					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+					bounce: false
+				}(
+					_callbackId,
+					owner,
+					uint128(0),
+					IOrderExchangeResult.OrderExchangeResult(
+						receiveToken,
+						_expectedSenderAmount,
+						spentToken,
+						_transferAmount,
+						currentAmountReceiveToken,
+						currentAmountSpentToken
+					)
+				);
 			}
 		}
 
@@ -838,10 +840,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 	}
 
 	function cancel(uint64 callbackId) external onlyOwner {
-		require(state == OrderStatus.Active ||
-				state == OrderStatus.SwapInProgress ||
-				state == OrderStatus.MatchInProgress,
-				OrderErrors.NOT_ACTIVE_LIMIT_ORDER);
+		require(state == OrderStatus.Active, OrderErrors.NOT_ACTIVE_LIMIT_ORDER);
 
 		changeState(OrderStatus.Cancelled);
 		if (callbackId > 0) {
@@ -992,8 +991,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 		bool needCancel = false;
 
-		if (expectedOrder(factory, detailsLO.root, detailsLO.owner, receiveToken, spentToken,
-		detailsLO.timeTx, detailsLO.nowTx) == msg.sender)
+		if ((expectedOrder(factory, detailsLO.root, detailsLO.owner, receiveToken, spentToken,
+		detailsLO.timeTx, detailsLO.nowTx) == msg.sender) && state == OrderStatus.Active)
 		{
 			matchingOrder = msg.sender;
 
@@ -1002,19 +1001,19 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 			uint128 reward;
 			address sendGasTo = detailsLO.msgSender;
 
-			if (sendGasTo == address(0)) {
-				sendGasTo = fee.beneficiary;
+			if (sendGasTo.value == 0) {
+				sendGasTo = (fee.beneficiary.value != 0 ? fee.beneficiary: factory);
 			}
 
-			uint priceToken;
-			uint alienPriceToken;
+			uint256 priceToken;
+			uint256 alienPriceToken;
 
-			priceToken = FixedPoint128.encodeFromNumeratorAndDenominator(detailsLO.currentAmountSpentToken, detailsLO.currentAmountReceiveToken);
-			alienPriceToken = FixedPoint128.encodeFromNumeratorAndDenominator(currentAmountReceiveToken, currentAmountSpentToken);
+			priceToken = math.muldiv(detailsLO.currentAmountSpentToken, FIXED_POINT_18_MULTIPLIER, detailsLO.currentAmountReceiveToken);
+			alienPriceToken = math.muldiv(currentAmountReceiveToken, FIXED_POINT_18_MULTIPLIER, currentAmountSpentToken);
 			if (priceToken >= alienPriceToken) {
 				alienAmountSpent = math.min(detailsLO.currentAmountReceiveToken, currentAmountSpentToken);
-				expectedAmountReceive = FixedPoint128.calculateExpectedAmountByRate(alienAmountSpent, alienPriceToken);
-				reward = (priceToken > alienPriceToken ? (FixedPoint128.calculateExpectedAmountByRate(alienAmountSpent, priceToken) - expectedAmountReceive) : 0);
+				expectedAmountReceive = math.muldiv(detailsLO.currentAmountReceiveToken, currentAmountReceiveToken, currentAmountSpentToken);
+				reward = (priceToken > alienPriceToken ? (uint128(math.muldiv(alienAmountSpent, priceToken, FIXED_POINT_18_MULTIPLIER)) - expectedAmountReceive) : 0);
 			}
 
 			if (expectedAmountReceive == 0 || state != OrderStatus.Active) {
@@ -1072,7 +1071,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 		}
 
 		if (needCancel) {
-			IOrder(matchingOrder).matchingCancel{
+			IOrder(msg.sender).matchingCancel{
 				value: 0,
 				flag: MsgFlag.ALL_NOT_RESERVED,
 				bounce: false

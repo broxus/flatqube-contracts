@@ -101,6 +101,10 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (spentToken);
     }
 
+    function getSpentWallet() override external view responsible returns (address) {
+        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (spentTokenWallet);
+    }
+
     function getFactory() override external view responsible returns(address) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (factory);
     }
@@ -259,8 +263,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             }(
                 amount,
                 orderAddress,
-//                math.max(deployWalletValue, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS), //TODO ??????? maybe DEPLOY_EMPTY_WALLET_GRAMS = 0.2 small?
-                (deployWalletValue <= OrderGas.DEPLOY_EMPTY_WALLET_GRAMS? deployWalletValue:OrderGas.DEPLOY_EMPTY_WALLET_GRAMS),
+                (deployWalletValue <= OrderGas.DEPLOY_EMPTY_WALLET_GRAMS? deployWalletValue : OrderGas.DEPLOY_EMPTY_WALLET_GRAMS),
                 orderAddress,
                 true,
                 payload
@@ -375,9 +378,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             emit OrderRootCodeUpgraded(_newVersion);
 
             TvmCell data = abi.encode(
-                factory, spentToken, version, _newVersion, versionOrder,
-                orderCode, orderPlatformCode, spentTokenWallet, deployer,
-                dexRoot, fee
+                factory, spentToken, spentTokenWallet, version, _newVersion, versionOrder,
+                deployer, fee, orderCode, abi.encode(dexRoot, orderPlatformCode)
             );
 
             tvm.setcode(_code);
@@ -389,7 +391,6 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
 
     function onCodeUpgrade(TvmCell _data) private {
         tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
-        tvm.resetStorage();
 
         uint32 _oldVersion;
         TvmCell data;
@@ -421,12 +422,17 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 OrderGas.DEPLOY_EMPTY_WALLET_GRAMS
             );
 
+            if (fee.beneficiary.value == 0) {
+                fee.beneficiary = factory;
+            }
+
             deployer.transfer({
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
                 bounce: false
             });
         } else {
+
             factory.transfer({
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
