@@ -1,5 +1,5 @@
 import {Command} from "commander";
-import {toNano, WalletTypes,getRandomNonce} from "locklift";
+import {toNano, WalletTypes, getRandomNonce, zeroAddress} from "locklift";
 
 const prompts = require('prompts');
 const {Migration} = require(process.cwd()+'/scripts/utils')
@@ -67,6 +67,22 @@ async function main() {
         from: account.address,
         amount: toNano(0.1)
     })
+
+    console.log(`Set FeeParams`)
+    //@ts-ignore
+    await factoryOrder.methods.setFeeParams({
+        params:
+            {
+                numerator: 0,
+                denominator: 0,
+                matchingNumerator: 0,
+                matchingDenominator: 0,
+                beneficiary: factoryOrder.address
+            }
+    }).send({
+        from: account.address,
+        amount: toNano(0.1)
+    });
 
     console.log(`Set newOwner`)
     //@ts-ignore
