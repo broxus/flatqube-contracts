@@ -60,7 +60,8 @@ export class OrderRoot {
         expectedTokenAmount: number | string,
         deployWalletValue: number | string,
         backPK: number | string,
-        backMatchingPK:  number | string
+        backMatchingPK:  number | string,
+        cancelPayload: string = '',
     ) {
         return (await this.contract.methods.buildPayload({
             callbackId: callbackId,
@@ -69,8 +70,49 @@ export class OrderRoot {
             expectedTokenAmount: expectedTokenAmount,
             deployWalletValue: deployWalletValue,
             backPK: backPK,
-            backMatchingPK: backMatchingPK
+            backMatchingPK: backMatchingPK,
+            cancelPayload: cancelPayload
         }).call()).value0;
+    }
+
+    async originalPayloadCancel(
+        op: number,
+        callbackId: number,
+        sender: Address
+    ){
+        const dataT = await locklift.provider.packIntoCell(({
+            structure: [
+                { name: 'op', type: 'uint8' },
+                { name: 'callbackId', type: 'uint64' },
+                { name: 'sender', type: 'address' },
+            ],
+            data: {
+                op: op,
+                callbackId: callbackId,
+                sender: sender,
+            }
+        }));
+
+        return dataT.boc;
+    }
+
+    async buildCancelPayload(
+        operation: number,
+        originalPayload: string
+    ) {
+        const cancelPayload = await locklift.provider.packIntoCell({
+            structure: [
+                { name: 'orderStatus', type: 'uint8' },
+                { name:'op', type: 'uint8' },
+                { name: 'originalPayload', type: 'cell' },
+            ] as const,
+            data: {
+                orderStatus: 205,
+                op: operation,
+                originalPayload: originalPayload
+            }
+        });
+        return cancelPayload.boc;
     }
 
     async getEventCreateOrder(accountOwner: Account){

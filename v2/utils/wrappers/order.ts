@@ -51,6 +51,93 @@ export class OrderWrapper {
             }).call()).value0;
     }
 
+    async originalPayloadSuccess(
+        op: number,
+        callbackId: number,
+        owner: Address
+    ) {
+        const dataT = await locklift.provider.packIntoCell(({
+            structure: [
+                { name: 'op', type: 'uint8' },
+                { name: 'callbackId', type: 'uint64' },
+                { name: 'owner', type: 'address' },
+            ],
+            data: {
+                op: op,
+                callbackId: callbackId,
+                owner: owner,
+            }
+        }));
+
+        return dataT.boc;
+    }
+
+    async originalPayloadCancel(
+        op: number,
+        callbackId: number,
+        sender: Address
+    ) {
+        const dataT = await locklift.provider.packIntoCell(({
+            structure: [
+                { name: 'op', type: 'uint8' },
+                { name: 'callbackId', type: 'uint64' },
+                { name: 'sender', type: 'address' },
+            ],
+            data: {
+                op: op,
+                callbackId: callbackId,
+                sender: sender,
+            }
+        }));
+
+        return dataT.boc;
+    }
+
+    async buildSuccessPayload(
+        operation: number,
+        originalPayload: string,
+        senderAddress: Address,
+    ) {
+        const data = await locklift.provider.packIntoCell({
+            structure: [ {name: 'data', type: 'address'} ] as const,
+            data: {data: senderAddress}
+        });
+        const successPayload = await locklift.provider.packIntoCell({
+            structure: [
+                { name:'orderStatus', type: 'uint8' },
+                { name:'op', type: 'uint8' },
+                { name:'originalPayload', type: 'cell' },
+                { name: 'data', type: 'cell' },
+            ] as const,
+            data: {
+                orderStatus: 203,
+                op: operation,
+                originalPayload: originalPayload,
+                data: data.boc,
+            }
+        });
+        return successPayload.boc;
+    }
+
+    async buildCancelPayload(
+        operation: number,
+        originalPayload: string
+    ) {
+        const cancelPayload = await locklift.provider.packIntoCell({
+            structure: [
+                { name:'orderStatus', type: 'uint8' },
+                { name:'op', type: 'uint8' },
+                { name:'originalPayload', type: 'cell' },
+            ] as const,
+            data: {
+                orderStatus: 204,
+                op: operation,
+                originalPayload: originalPayload
+            }
+        });
+        return cancelPayload.boc;
+    }
+
     async swap(
         callbackId: number,
         deployWalletValue: number,
