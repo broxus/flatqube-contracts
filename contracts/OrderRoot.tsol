@@ -164,7 +164,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         uint128 expectedTokenAmount,
         uint128 deployWalletValue,
         uint256 backPK,
-        uint256 backMatchingPK
+        uint256 backMatchingPK,
+        optional(TvmCell) cancelPayload
     ) external pure returns (TvmCell) {
         TvmBuilder builderBackendPK;
         builderBackendPK.store(backPK);
@@ -178,6 +179,10 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         builder.store(deployWalletValue);
         builder.storeRef(builderBackendPK);
 
+        if (cancelPayload.hasValue()) {
+            builder.store(cancelPayload.get());
+        }
+
         return builder.toCell();
     }
 
@@ -190,7 +195,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         TvmCell payload
     ) external override {
         require(msg.sender.value != 0);
-        tvm.rawReserve(address(this).balance - msg.value, 0);
+
+        uint8 op = OrderOperationTypes.CREATE_ORDER_IN_ORDER_ROOT;
 
         TvmSlice payloadSlice = payload.toSlice();
         uint64 callbackId;
@@ -199,6 +205,13 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         }
 
         TvmSlice dataPK = payloadSlice.loadRefAsSlice();
+
+        bool notifyCancel;
+        TvmCell cancelPayload;
+        if (payloadSlice.refs() >= 1) {
+            notifyCancel = true;
+            cancelPayload = payloadSlice.loadRef();
+        }
 
         uint16 errorCode = _checkOperationData(
             msg.sender,
@@ -257,8 +270,10 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 callback: OrderRoot.onTokenWalletBeneficiary
             }(fee.beneficiary, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
+            tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
             ITokenWallet(spentTokenWallet).transfer{
-                value: 0, flag: MsgFlag.ALL_NOT_RESERVED,
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED,
                 bounce: false
             }(
                 amount,
@@ -280,6 +295,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 }(callbackId);
             }
 
+            tvm.rawReserve(address(this).balance - msg.value, 0);
+
             ITokenWallet(msg.sender).transfer{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
@@ -289,8 +306,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 sender,
                 uint128(0),
                 originalGasTo,
-                true,
-                OrderPayloads.buildCancelPayloadOrderRoot(payload)
+                notifyCancel,
+                OrderPayloads.buildCancelPayloadOrderRoot(op, cancelPayload)
             );
         }
     }
