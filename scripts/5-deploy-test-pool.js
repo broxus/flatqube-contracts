@@ -1,4 +1,4 @@
-const {Migration, TOKEN_CONTRACTS_PATH, Constants, afterRun, displayTx} = require(process.cwd()+'/scripts/utils')
+const {Migration, TOKEN_CONTRACTS_PATH, Constants, afterRun, displayTx, calcValue} = require(process.cwd()+'/scripts/utils')
 const { Command } = require('commander');
 const program = new Command();
 
@@ -13,8 +13,8 @@ async function main() {
         locklift.tracing.allowCodes({compute: [100]});
     }
 
-    const dexVault = migration.load(await locklift.factory.getContract('DexVault'), 'DexVault');
     const dexRoot = migration.load(await locklift.factory.getContract('DexRoot'), 'DexRoot');
+    const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
 
     account.afterRun = afterRun;
 
@@ -55,6 +55,11 @@ async function main() {
             tokenAddresses.push(tokenContract.address);
         }
 
+        const gas = await gasValues.call({
+            method: 'getDeployPoolGas',
+            params: {N: N_COINS}
+        });
+
         const tx = await account.runTarget({
             contract: dexRoot,
             method: 'deployStablePool',
@@ -62,7 +67,7 @@ async function main() {
                 roots: tokenAddresses,
                 send_gas_to: account.address,
             },
-            value: locklift.utils.convertCrystal(20, 'nano'),
+            value: calcValue(gas),
             keyPair: keyPair
         });
 

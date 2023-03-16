@@ -41,6 +41,11 @@ const displayTx = (_tx) => {
   }
 };
 
+const gasPrice = 1000;
+const calcValue = (gas) => {
+  return Number(gas.fixedValue) + gasPrice * Number(gas.dynamicGas)
+}
+
 const Constants = {
   tokens: {
     foo: {
@@ -345,6 +350,7 @@ async function expectedDepositLiquidityOneCoin(poolAddress, tokens, amount, spen
 module.exports = {
   Migration,
   Constants,
+  calcValue,
   getRandomNonce,
   stringToBytesArray,
   sleep,

@@ -10,11 +10,13 @@ import "./libraries/DexOperationTypes.sol";
 import "./libraries/EverToTip3OperationStatus.sol";
 import "./libraries/DexOperationStatusV2.sol";
 import "./libraries/PairPayload.sol";
+import "./libraries/GasValues.sol";
 
 import "./interfaces/IEverTip3SwapEvents.sol";
 import "./interfaces/IEverTip3SwapCallbacks.sol";
 
 import "./structures/IExchangeStepStructure.sol";
+import "./structures/IGasValueStructure.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "tip3/contracts/interfaces/ITokenRoot.sol";
@@ -22,7 +24,7 @@ import "tip3/contracts/interfaces/ITokenWallet.sol";
 import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 import "tip3/contracts/interfaces/IAcceptTokensBurnCallback.sol";
 
-contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTip3SwapEvents {
+contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTip3SwapEvents, IGasValueStructure {
 
     uint32 static randomNonce_;
 
@@ -37,7 +39,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
 
         ITokenRoot(weverRoot).deployWallet{
-            value: EverToTip3Gas.DEPLOY_EMPTY_WALLET_VALUE,
+            value: _calcValue(GasValues.getDeployWalletGas()),
             flag: MsgFlag.SENDER_PAYS_FEES,
             callback: Tip3ToEver.onWeverWallet
         }(
@@ -175,7 +177,7 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
         if (
             payloadSlice.bits() == 267 && payloadSlice.refs() == 1 &&
             operationStatus == EverToTip3OperationStatus.SWAP &&
-            msg.value >= EverToTip3Gas.SWAP_TIP3_TO_EVER_MIN_VALUE
+            msg.value >= _calcValue(GasValues.getTip3ToEverCrossExchangeGas(0, 1))
         ) {
             address pair = payloadSlice.decode(address);
             TvmCell ref1 = payloadSlice.loadRef();
@@ -276,6 +278,10 @@ contract Tip3ToEver is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback,
 
         emit SwapTip3EverSuccessTransfer(user, id, amount);
         IEverTip3SwapCallbacks(user).onSwapTip3ToEverSuccess{ value: EverToTip3Gas.OPERATION_CALLBACK_BASE, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(id, amount);
+    }
+
+    function _calcValue(IGasValueStructure.GasValue value) internal pure returns(uint128) {
+        return value.fixedValue + gasToValue(value.dynamicGas, address(this).wid);
     }
 
     fallback() external pure {  }

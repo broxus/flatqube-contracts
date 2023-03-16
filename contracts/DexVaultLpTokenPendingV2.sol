@@ -117,7 +117,7 @@ contract DexVaultLpTokenPendingV2 is
         mapping(address => ICallbackParamsStructure.CallbackParams) callbacks;
         callbacks[address(this)] = ICallbackParamsStructure.CallbackParams(0, empty);
         ITransferableOwnership(token_root).transferOwnership{
-            value: _calcValue(GasValue(0, DexGas.TRANSFER_ROOT_OWNERSHIP)),
+            value: _calcValue(GasValues.getTransferOwnershipGas()),
             flag: MsgFlag.SENDER_PAYS_FEES
         }(pool, address(this), callbacks);
     }

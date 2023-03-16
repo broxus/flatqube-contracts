@@ -2,7 +2,7 @@ const {expect} = require('chai');
 const logger = require('mocha-logger');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
-const {Migration, TOKEN_CONTRACTS_PATH, afterRun, EMPTY_TVM_CELL, Constants} = require(process.cwd() + '/scripts/utils');
+const {Migration, TOKEN_CONTRACTS_PATH, afterRun, EMPTY_TVM_CELL, Constants, calcValue} = require(process.cwd() + '/scripts/utils');
 const { Command } = require('commander');
 const program = new Command();
 
@@ -123,6 +123,12 @@ describe('Check Deposit to Dex Account', async function () {
       before(`Make ${tokenData.symbol} deposit`, async function () {
         logger.log('#################################################');
         logger.log(`# Make ${tokenData.symbol} deposit`);
+
+        const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
+        const gas = await gasValues.call({
+          method: 'getDepositToAccountGas',
+          params: {}
+        });
         await accountN.runTarget({
           contract: deposit.accountWallet,
           method: 'transferToWallet',
@@ -133,7 +139,7 @@ describe('Check Deposit to Dex Account', async function () {
             notify: true,
             payload: EMPTY_TVM_CELL
           },
-          value: locklift.utils.convertCrystal('0.5', 'nano'),
+          value: calcValue(gas),
           keyPair: keyPairs[options.owner_n - 1]
         });
         logger.log(tokenData.symbol + ' balance changes:');

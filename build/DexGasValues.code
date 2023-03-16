@@ -1,0 +1,4204 @@
+.version sol 0.62.0
+
+.macro constructor
+DROP
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7_with_init_storage$
+}
+GETGLOB 6
+THROWIF 51
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 18
+ACCEPT
+.loc ../contracts/DexGasValues.sol, 20
+SETGLOB 11
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro transferOwner
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexGasValues.sol, 23
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $transferOwner_4fb2e45d_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.globl	transferOwner_4fb2e45d_internal
+.type	transferOwner_4fb2e45d_internal, @function
+CALL $transferOwner_4fb2e45d_internal_macro$
+
+.macro transferOwner_4fb2e45d_internal_macro
+.loc ../contracts/DexGasValues.sol, 24
+GETGLOB 9
+GETGLOB 11
+SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
+THROWIFNOT 100
+.loc ../contracts/DexGasValues.sol, 25
+PUSHINT 100000000
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexGasValues.sol, 27
+SETGLOB 12
+.loc ../contracts/DexGasValues.sol, 29
+GETGLOB 11
+NEWC
+STSLICECONST x62_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro acceptOwner
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexGasValues.sol, 32
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $acceptOwner_ebbc4965_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.globl	acceptOwner_ebbc4965_internal
+.type	acceptOwner_ebbc4965_internal, @function
+CALL $acceptOwner_ebbc4965_internal_macro$
+
+.macro acceptOwner_ebbc4965_internal_macro
+.loc ../contracts/DexGasValues.sol, 33
+GETGLOB 9
+GETGLOB 12
+SDEQ
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 9
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+}
+IF
+THROWIFNOT 102
+.loc ../contracts/DexGasValues.sol, 35
+PUSHINT 100000000
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexGasValues.sol, 37
+GETGLOB 12
+SETGLOB 11
+.loc ../contracts/DexGasValues.sol, 38
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+SETGLOB 12
+.loc ../contracts/DexGasValues.sol, 40
+GETGLOB 11
+NEWC
+STSLICECONST x62_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getSetFeeParamsGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 43
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getSetFeeParamsGas_55d379d6_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2493257803
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getSetFeeParamsGas_55d379d6_internal_macro
+.loc ../contracts/DexGasValues.sol, 44
+CALLREF {
+	CALL $GasValues_no_obj_getSetFeeParamsGas_55d379d6_macro$
+}
+.loc ../contracts/DexGasValues.sol, 45
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getSetAmplificationCoefficientGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 50
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getSetAmplificationCoefficientGas_1b35dd3b_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2960503269
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getSetAmplificationCoefficientGas_1b35dd3b_internal_macro
+.loc ../contracts/DexGasValues.sol, 51
+CALLREF {
+	CALL $GasValues_no_obj_getSetAmplificationCoefficientGas_1b35dd3b_macro$
+}
+.loc ../contracts/DexGasValues.sol, 52
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getDeployTokenVaultGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 57
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getDeployTokenVaultGas_474c1893_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2290746637
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getDeployTokenVaultGas_474c1893_internal_macro
+.loc ../contracts/DexGasValues.sol, 58
+CALLREF {
+	CALL $GasValues_no_obj_getDeployTokenVaultGas_474c1893_macro$
+}
+.loc ../contracts/DexGasValues.sol, 59
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getUpgradeTokenVaultGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 64
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getUpgradeTokenVaultGas_1f1ab5d4_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 3272632393
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getUpgradeTokenVaultGas_1f1ab5d4_internal_macro
+.loc ../contracts/DexGasValues.sol, 65
+CALLREF {
+	CALL $GasValues_no_obj_getUpgradeTokenVaultGas_1f1ab5d4_macro$
+}
+.loc ../contracts/DexGasValues.sol, 66
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getDeployPoolGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 71
+LDU 8
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getDeployPoolGas_d012d87c_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 3566815976
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getDeployPoolGas_d012d87c_internal_macro
+.loc ../contracts/DexGasValues.sol, 72
+CALLREF {
+	CALL $GasValues_no_obj_getDeployPoolGas_d012d87c_macro$
+}
+.loc ../contracts/DexGasValues.sol, 73
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getUpgradePoolGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 78
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getUpgradePoolGas_283c418c_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2647682580
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getUpgradePoolGas_283c418c_internal_macro
+.loc ../contracts/DexGasValues.sol, 79
+CALLREF {
+	CALL $GasValues_no_obj_getUpgradePoolGas_283c418c_macro$
+}
+.loc ../contracts/DexGasValues.sol, 80
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getDeployAccountGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 85
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getDeployAccountGas_7571c691_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2159581193
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getDeployAccountGas_7571c691_internal_macro
+.loc ../contracts/DexGasValues.sol, 86
+CALLREF {
+	CALL $GasValues_no_obj_getDeployAccountGas_7571c691_macro$
+}
+.loc ../contracts/DexGasValues.sol, 87
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getUpgradeAccountGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 92
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getUpgradeAccountGas_c98ab35d_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2675072250
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getUpgradeAccountGas_c98ab35d_internal_macro
+.loc ../contracts/DexGasValues.sol, 93
+CALLREF {
+	CALL $GasValues_no_obj_getUpgradeAccountGas_c98ab35d_macro$
+}
+.loc ../contracts/DexGasValues.sol, 94
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getUpgradeRootGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 99
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getUpgradeRootGas_11c565f8_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 3454060087
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getUpgradeRootGas_11c565f8_internal_macro
+.loc ../contracts/DexGasValues.sol, 100
+CALLREF {
+	CALL $GasValues_no_obj_getUpgradeRootGas_11c565f8_macro$
+}
+.loc ../contracts/DexGasValues.sol, 101
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getDepositToAccountGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 106
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getDepositToAccountGas_63570a6b_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 4109306087
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getDepositToAccountGas_63570a6b_internal_macro
+.loc ../contracts/DexGasValues.sol, 107
+CALLREF {
+	CALL $GasValues_no_obj_getDepositToAccountGas_63570a6b_macro$
+}
+.loc ../contracts/DexGasValues.sol, 108
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getAddPoolGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 113
+LDU 8
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getAddPoolGas_f9a08600_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2979844963
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getAddPoolGas_f9a08600_internal_macro
+.loc ../contracts/DexGasValues.sol, 114
+CALLREF {
+	CALL $GasValues_no_obj_getAddPoolGas_f9a08600_macro$
+}
+.loc ../contracts/DexGasValues.sol, 115
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getAccountWithdrawGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 120
+LDU 128
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getAccountWithdrawGas_ccbc7117_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 3294439515
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getAccountWithdrawGas_ccbc7117_internal_macro
+.loc ../contracts/DexGasValues.sol, 121
+CALLREF {
+	CALL $GasValues_no_obj_getAccountWithdrawGas_ccbc7117_macro$
+}
+.loc ../contracts/DexGasValues.sol, 122
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getAccountTransferGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 127
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getAccountTransferGas_e2b2dc07_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 4082538454
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getAccountTransferGas_e2b2dc07_internal_macro
+.loc ../contracts/DexGasValues.sol, 128
+CALLREF {
+	CALL $GasValues_no_obj_getAccountTransferGas_e2b2dc07_macro$
+}
+.loc ../contracts/DexGasValues.sol, 129
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getAccountExchangeGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 134
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getAccountExchangeGas_7314d781_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 3170085896
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getAccountExchangeGas_7314d781_internal_macro
+.loc ../contracts/DexGasValues.sol, 135
+CALLREF {
+	CALL $GasValues_no_obj_getAccountExchangeGas_7314d781_macro$
+}
+.loc ../contracts/DexGasValues.sol, 136
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getAccountDepositGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 141
+OVER
+PUSHCONT {
+	LDU 8
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 8
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getAccountDepositGas_52b0195c_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 3417993279
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getAccountDepositGas_52b0195c_internal_macro
+.loc ../contracts/DexGasValues.sol, 142
+CALLREF {
+	CALL $GasValues_no_obj_getAccountDepositGas_52b0195c_macro$
+}
+.loc ../contracts/DexGasValues.sol, 143
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getAccountWithdrawLiquidityGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 148
+LDU 8
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getAccountWithdrawLiquidityGas_e053af7f_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 4216084973
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getAccountWithdrawLiquidityGas_e053af7f_internal_macro
+.loc ../contracts/DexGasValues.sol, 149
+CALLREF {
+	CALL $GasValues_no_obj_getAccountWithdrawLiquidityGas_e053af7f_macro$
+}
+.loc ../contracts/DexGasValues.sol, 150
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getPoolDirectExchangeGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 155
+OVER
+PUSHCONT {
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 128
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getPoolDirectExchangeGas_47b146c5_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 3972937735
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getPoolDirectExchangeGas_47b146c5_internal_macro
+.loc ../contracts/DexGasValues.sol, 156
+CALLREF {
+	CALL $GasValues_no_obj_getPoolDirectExchangeGas_47b146c5_macro$
+}
+.loc ../contracts/DexGasValues.sol, 157
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getPoolDirectDepositGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 162
+OVER
+PUSHCONT {
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 128
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getPoolDirectDepositGas_1098939c_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2210636931
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getPoolDirectDepositGas_1098939c_internal_macro
+.loc ../contracts/DexGasValues.sol, 163
+CALLREF {
+	CALL $GasValues_no_obj_getPoolDirectDepositGas_1098939c_macro$
+}
+.loc ../contracts/DexGasValues.sol, 164
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getPoolDirectWithdrawGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 169
+OVER
+PUSHCONT {
+	LDU 8
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 8
+	LDU 128
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getPoolDirectWithdrawGas_f6c7e87a_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2253777856
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getPoolDirectWithdrawGas_f6c7e87a_internal_macro
+.loc ../contracts/DexGasValues.sol, 170
+CALLREF {
+	CALL $GasValues_no_obj_getPoolDirectWithdrawGas_f6c7e87a_macro$
+}
+.loc ../contracts/DexGasValues.sol, 171
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getPoolDirectWithdrawOneCoinGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 176
+OVER
+PUSHCONT {
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 128
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getPoolDirectWithdrawOneCoinGas_64a065de_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2621212879
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getPoolDirectWithdrawOneCoinGas_64a065de_internal_macro
+.loc ../contracts/DexGasValues.sol, 177
+DUP2
+CALLREF {
+	CALL $GasValues_no_obj_getPoolDirectWithdrawOneCoinGas_64a065de_macro$
+}
+.loc ../contracts/DexGasValues.sol, 178
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 180
+DROP
+CALLREF {
+	CALL $GasValues_no_obj_getPoolDirectWithdrawOneCoinGas_64a065de_macro$
+}
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getPoolCrossExchangeGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 183
+OVER
+PUSHCONT {
+	LDU 32
+	LDU 32
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 32
+	LDU 32
+	LDU 128
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getPoolCrossExchangeGas_16496752_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2590466404
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getPoolCrossExchangeGas_16496752_internal_macro
+.loc ../contracts/DexGasValues.sol, 184
+CALLREF {
+	CALL $GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
+}
+.loc ../contracts/DexGasValues.sol, 186
+DUP
+FIRST
+PUSH S4
+MUL
+UFITS 128
+SWAP2
+MUL
+UFITS 128
+ADD
+UFITS 128
+SWAP
+SECOND
+ROT
+MUL
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getUpgradeVaultGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 192
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getUpgradeVaultGas_34721fff_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 4147514239
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getUpgradeVaultGas_34721fff_internal_macro
+.loc ../contracts/DexGasValues.sol, 193
+CALLREF {
+	CALL $GasValues_no_obj_getUpgradeVaultGas_34721fff_macro$
+}
+.loc ../contracts/DexGasValues.sol, 194
+DUP
+FIRST
+PUSHINT 100000000
+ADD
+UFITS 128
+SETINDEX 0
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getEverToTip3ExchangeGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 199
+OVER
+PUSHCONT {
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 128
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getEverToTip3ExchangeGas_69b08820_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2972559828
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getEverToTip3ExchangeGas_69b08820_internal_macro
+.loc ../contracts/DexGasValues.sol, 200
+OVER
+CALLREF {
+	CALL $GasValues_no_obj_getEverToTip3ExchangeGas_5e3ba5f2_macro$
+}
+.loc ../contracts/DexGasValues.sol, 201
+ROTREV
+CALLREF {
+	CALL $GasValues_no_obj_getPoolDirectExchangeGas_47b146c5_macro$
+}
+.loc ../contracts/DexGasValues.sol, 203
+OVER
+FIRST
+OVER
+FIRST
+ADD
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+ROT
+SECOND
+ROT
+SECOND
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getEverToTip3CrossExchangeGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 209
+OVER
+PUSHCONT {
+	LDU 32
+	LDU 32
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 32
+	LDU 32
+	LDU 128
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getEverToTip3CrossExchangeGas_4ce670a4_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 3172847332
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getEverToTip3CrossExchangeGas_4ce670a4_internal_macro
+.loc ../contracts/DexGasValues.sol, 210
+PUSH2 S1, S2
+CALLREF {
+	CALL $GasValues_no_obj_getEverToTip3CrossExchangeGas_d2b70951_macro$
+}
+.loc ../contracts/DexGasValues.sol, 211
+SWAP
+CALLREF {
+	CALL $GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
+}
+.loc ../contracts/DexGasValues.sol, 213
+OVER
+FIRST
+PUSH2 S5, S1
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+BLKSWAP 2, 3
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+ROT
+SECOND
+SWAP2
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getTip3ToEverExchangeGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 221
+OVER
+PUSHCONT {
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 128
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getTip3ToEverExchangeGas_c4baeef6_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2354051225
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getTip3ToEverExchangeGas_c4baeef6_internal_macro
+.loc ../contracts/DexGasValues.sol, 222
+OVER
+CALLREF {
+	CALL $GasValues_no_obj_getTip3ToEverExchangeGas_aaa13858_macro$
+}
+.loc ../contracts/DexGasValues.sol, 223
+ROTREV
+CALLREF {
+	CALL $GasValues_no_obj_getPoolDirectExchangeGas_47b146c5_macro$
+}
+.loc ../contracts/DexGasValues.sol, 225
+OVER
+FIRST
+OVER
+FIRST
+ADD
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+ROT
+SECOND
+ROT
+SECOND
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getTip3ToEverCrossExchangeGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 231
+OVER
+PUSHCONT {
+	LDU 32
+	LDU 32
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 32
+	LDU 32
+	LDU 128
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getTip3ToEverCrossExchangeGas_c0b1e7e6_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 3761187441
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getTip3ToEverCrossExchangeGas_c0b1e7e6_internal_macro
+.loc ../contracts/DexGasValues.sol, 232
+XCHG S2
+CALLREF {
+	CALL $GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro$
+}
+.loc ../contracts/DexGasValues.sol, 233
+SWAP
+CALLREF {
+	CALL $GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
+}
+.loc ../contracts/DexGasValues.sol, 235
+OVER
+FIRST
+PUSH2 S3, S1
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+ROT
+SECOND
+SWAP2
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getEverWeverToTip3ExchangeGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 241
+OVER
+PUSHCONT {
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 128
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getEverWeverToTip3ExchangeGas_ab46d6aa_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 3211780528
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getEverWeverToTip3ExchangeGas_ab46d6aa_internal_macro
+.loc ../contracts/DexGasValues.sol, 242
+OVER
+CALLREF {
+	CALL $GasValues_no_obj_getEverWeverToTip3ExchangeGas_5f5dc15e_macro$
+}
+.loc ../contracts/DexGasValues.sol, 243
+ROTREV
+CALLREF {
+	CALL $GasValues_no_obj_getPoolDirectExchangeGas_47b146c5_macro$
+}
+.loc ../contracts/DexGasValues.sol, 245
+OVER
+FIRST
+OVER
+FIRST
+ADD
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+ROT
+SECOND
+ROT
+SECOND
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro getEverWeverToTip3CrossExchangeGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexGasValues.sol, 251
+OVER
+PUSHCONT {
+	LDU 32
+	LDU 32
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 32
+	LDU 32
+	LDU 128
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexGasValues.sol, 0
+CALLREF {
+	CALL $getEverWeverToTip3CrossExchangeGas_1c7a8547_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2859960022
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getEverWeverToTip3CrossExchangeGas_1c7a8547_internal_macro
+.loc ../contracts/DexGasValues.sol, 252
+PUSH2 S1, S2
+CALLREF {
+	CALL $GasValues_no_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb_macro$
+}
+.loc ../contracts/DexGasValues.sol, 253
+SWAP
+CALLREF {
+	CALL $GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
+}
+.loc ../contracts/DexGasValues.sol, 255
+OVER
+FIRST
+PUSH2 S5, S1
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+BLKSWAP 2, 3
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+ROT
+SECOND
+SWAP2
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/DexGasValues.sol, 0
+
+.macro c4_to_c7
+PUSHROOT
+CTOS
+LDU 256 ; pubkey c4
+LDU 64 ; pubkey timestamp c4
+LDU 1 ; ctor flag
+NIP
+LDU 32
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+ENDS
+SETGLOB 12
+SETGLOB 11
+SETGLOB 10
+SETGLOB 3
+SETGLOB 2
+
+.macro c4_to_c7_with_init_storage
+PUSHROOT
+CTOS
+SBITS
+GTINT 1
+PUSHCONT {
+	PUSHINT 0
+	PUSHROOT
+	CTOS
+	PLDDICT ; D
+	PUSHINT 1
+	OVER
+	PUSHINT 64
+	DICTUGET
+	ZEROSWAPIFNOT
+	PUSHCONT {
+		PLDU 32
+	}
+	IF
+	PUSHREFSLICE {
+		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+	}
+	DUP
+	SETGLOB 12
+	SETGLOB 11
+	SETGLOB 10
+	PUSHINT 64
+	DICTUGET
+	THROWIFNOT 61
+	PLDU 256
+	SETGLOB 2
+	PUSHINT 0 ; timestamp
+	SETGLOB 3
+}
+IFREFELSE {
+	CALL $c4_to_c7$
+}
+
+.macro c7_to_c4
+GETGLOB 11
+GETGLOB 10
+GETGLOB 3
+GETGLOB 2
+NEWC
+STU 256
+STU 64
+STONE
+STU 32
+STSLICE
+GETGLOB 12
+NEWC
+STSLICE
+STBREFR
+ENDC
+POPROOT
+
+.macro upd_only_time_in_c4
+PUSHROOT
+CTOS
+LDU 256
+LDU 64
+NIP
+GETGLOB 3
+ROT
+NEWC
+STU 256
+STU 64
+STSLICE
+ENDC
+POPROOT
+
+.internal-alias :main_internal, 0
+.internal :main_internal
+PUSHROOT
+CTOS
+SBITS
+NEQINT 1
+SETGLOB 6
+PUSH S2
+CTOS
+LDU 4 ; bounced tail
+LDMSGADDR ; bounced src tail
+DROP
+SETGLOB 9
+MODPOW2 1
+IFRET
+OVER
+SEMPTY ; isEmpty
+IFJMPREF {
+	GETGLOB 6
+	THROWIFNOT 76
+}
+OVER
+LDUQ 32  ; [funcId] body' ok
+THROWIFNOT 60
+OVER
+IFNOTJMPREF {
+	GETGLOB 6
+	THROWIFNOT 76
+}
+SWAP
+CALLREF {
+	CALL $public_function_selector$
+}
+THROW 60
+
+.internal-alias :main_external, -1
+.internal :main_external
+PUSHROOT
+CTOS
+SBITS
+NEQINT 1
+SETGLOB 6
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+SETGLOB 9
+OVER
+CALLREF {
+	CALL $c4_to_c7_with_init_storage$
+}
+LDU 1 ; haveSign msgSlice
+SWAP
+PUSHCONT {
+	PUSHPOW2 9
+	LDSLICEX ; signatureSlice msgSlice
+	DUP
+	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	ROT
+	GETGLOB 2
+	CHKSIGNU ; msgSlice isSigned
+	THROWIFNOT 40
+}
+IF
+LDU 64 ; timestamp msgSlice
+SWAP
+CALL $replay_protection_macro$
+LDU 32 ; funcId body
+SWAP
+CALLREF {
+	CALL $public_function_selector$
+}
+THROW 60
+
+.globl	GasValues_no_obj_getSetFeeParamsGas_55d379d6
+.type	GasValues_no_obj_getSetFeeParamsGas_55d379d6, @function
+CALL $GasValues_no_obj_getSetFeeParamsGas_55d379d6_macro$
+
+.macro GasValues_no_obj_getSetFeeParamsGas_55d379d6_macro
+.loc ../contracts/libraries/GasValues.sol, 85
+PUSHINT 100000000
+PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getSetAmplificationCoefficientGas_1b35dd3b
+.type	GasValues_no_obj_getSetAmplificationCoefficientGas_1b35dd3b, @function
+CALL $GasValues_no_obj_getSetAmplificationCoefficientGas_1b35dd3b_macro$
+
+.macro GasValues_no_obj_getSetAmplificationCoefficientGas_1b35dd3b_macro
+.loc ../contracts/libraries/GasValues.sol, 93
+PUSHINT 100000000
+PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getDeployTokenVaultGas_474c1893
+.type	GasValues_no_obj_getDeployTokenVaultGas_474c1893, @function
+CALL $GasValues_no_obj_getDeployTokenVaultGas_474c1893_macro$
+
+.macro GasValues_no_obj_getDeployTokenVaultGas_474c1893_macro
+.loc ../contracts/libraries/GasValues.sol, 109
+CALLREF {
+	CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 110
+PUSHINT 1000000000
+PUSHINT 2
+PUSH S2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 150000
+PUSHINT 2
+ROLL 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getDeployWalletGas_38991eb4
+.type	GasValues_no_obj_getDeployWalletGas_38991eb4, @function
+CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+
+.macro GasValues_no_obj_getDeployWalletGas_38991eb4_macro
+.loc ../contracts/libraries/GasValues.sol, 11
+PUSHINT 120000000
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getUpgradeTokenVaultGas_1f1ab5d4
+.type	GasValues_no_obj_getUpgradeTokenVaultGas_1f1ab5d4, @function
+CALL $GasValues_no_obj_getUpgradeTokenVaultGas_1f1ab5d4_macro$
+
+.macro GasValues_no_obj_getUpgradeTokenVaultGas_1f1ab5d4_macro
+.loc ../contracts/libraries/GasValues.sol, 118
+PUSHINT 100000000
+PUSHINT 150000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getDeployPoolGas_d012d87c
+.type	GasValues_with_obj_getDeployPoolGas_d012d87c, @function
+CALL $GasValues_with_obj_getDeployPoolGas_d012d87c_macro$
+
+.macro GasValues_with_obj_getDeployPoolGas_d012d87c_macro
+.loc ../contracts/libraries/GasValues.sol, 125
+CALLREF {
+	CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 126
+OVER
+CALLREF {
+	CALL $GasValues_no_obj_getDeployLpTokenGas_ad791e1f_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 127
+CALLREF {
+	CALL $GasValues_no_obj_getTokenDataGas_304799e7_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 128
+CALLREF {
+	CALL $GasValues_no_obj_getDeployTokenVaultGas_474c1893_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 130
+PUSHINT 1000000000
+PUSH S3
+FIRST
+ADD
+UFITS 128
+PUSH2 S5, S2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSH S5
+INC
+UFITS 8
+PUSH S2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSH S5
+INC
+UFITS 8
+PUSH S5
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 150000
+ROLL 4
+SECOND
+ADD
+UFITS 128
+PUSHINT 2
+PUSH S6
+MUL
+UFITS 8
+ROLL 4
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSH S4
+INC
+UFITS 8
+ROLL 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSH S3
+INC
+UFITS 8
+ROLL 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getDeployPoolGas_d012d87c
+.type	GasValues_no_obj_getDeployPoolGas_d012d87c, @function
+CALL $GasValues_no_obj_getDeployPoolGas_d012d87c_macro$
+
+.macro GasValues_no_obj_getDeployPoolGas_d012d87c_macro
+.loc ../contracts/libraries/GasValues.sol, 125
+CALLREF {
+	CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 126
+OVER
+CALLREF {
+	CALL $GasValues_no_obj_getDeployLpTokenGas_ad791e1f_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 127
+CALLREF {
+	CALL $GasValues_no_obj_getTokenDataGas_304799e7_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 128
+CALLREF {
+	CALL $GasValues_no_obj_getDeployTokenVaultGas_474c1893_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 130
+PUSHINT 1000000000
+PUSH S3
+FIRST
+ADD
+UFITS 128
+PUSH2 S5, S2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSH S5
+INC
+UFITS 8
+PUSH S2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSH S5
+INC
+UFITS 8
+PUSH S5
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 150000
+ROLL 4
+SECOND
+ADD
+UFITS 128
+PUSHINT 2
+PUSH S6
+MUL
+UFITS 8
+ROLL 4
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSH S4
+INC
+UFITS 8
+ROLL 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+ROLL 3
+INC
+UFITS 8
+ROLL 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getTokenDataGas_304799e7
+.type	GasValues_no_obj_getTokenDataGas_304799e7, @function
+CALL $GasValues_no_obj_getTokenDataGas_304799e7_macro$
+
+.macro GasValues_no_obj_getTokenDataGas_304799e7_macro
+.loc ../contracts/libraries/GasValues.sol, 45
+PUSHINT 100000000
+PUSHINT 50000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getDeployLpTokenGas_ad791e1f
+.type	GasValues_with_obj_getDeployLpTokenGas_ad791e1f, @function
+CALL $GasValues_with_obj_getDeployLpTokenGas_ad791e1f_macro$
+
+.macro GasValues_with_obj_getDeployLpTokenGas_ad791e1f_macro
+.loc ../contracts/libraries/GasValues.sol, 60
+CALLREF {
+	CALL $GasValues_no_obj_getTokenDataGas_304799e7_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 61
+CALLREF {
+	CALL $GasValues_no_obj_getTransferOwnershipGas_77a4dfa4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 62
+PUSHINT 3000000000
+OVER
+FIRST
+ADD
+UFITS 128
+OVER2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 150000
+ROT
+SECOND
+ADD
+UFITS 128
+PUSH S3
+ROLL 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getDeployLpTokenGas_ad791e1f
+.type	GasValues_no_obj_getDeployLpTokenGas_ad791e1f, @function
+CALL $GasValues_no_obj_getDeployLpTokenGas_ad791e1f_macro$
+
+.macro GasValues_no_obj_getDeployLpTokenGas_ad791e1f_macro
+.loc ../contracts/libraries/GasValues.sol, 60
+CALLREF {
+	CALL $GasValues_no_obj_getTokenDataGas_304799e7_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 61
+CALLREF {
+	CALL $GasValues_no_obj_getTransferOwnershipGas_77a4dfa4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 62
+PUSHINT 3000000000
+OVER
+FIRST
+ADD
+UFITS 128
+OVER2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 150000
+ROT
+SECOND
+ADD
+UFITS 128
+SWAP2
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getTransferOwnershipGas_77a4dfa4
+.type	GasValues_no_obj_getTransferOwnershipGas_77a4dfa4, @function
+CALL $GasValues_no_obj_getTransferOwnershipGas_77a4dfa4_macro$
+
+.macro GasValues_no_obj_getTransferOwnershipGas_77a4dfa4_macro
+.loc ../contracts/libraries/GasValues.sol, 52
+PUSHINT 0
+PUSHINT 80000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getUpgradePoolGas_283c418c
+.type	GasValues_no_obj_getUpgradePoolGas_283c418c, @function
+CALL $GasValues_no_obj_getUpgradePoolGas_283c418c_macro$
+
+.macro GasValues_no_obj_getUpgradePoolGas_283c418c_macro
+.loc ../contracts/libraries/GasValues.sol, 147
+CALLREF {
+	CALL $GasValues_no_obj_getTokenDataGas_304799e7_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 148
+PUSHINT 100000000
+DUP
+ADD
+UFITS 128
+PUSHINT 2
+PUSH S2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 400000
+PUSHINT 2
+ROLL 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getDeployAccountGas_7571c691
+.type	GasValues_no_obj_getDeployAccountGas_7571c691, @function
+CALL $GasValues_no_obj_getDeployAccountGas_7571c691_macro$
+
+.macro GasValues_no_obj_getDeployAccountGas_7571c691_macro
+.loc ../contracts/libraries/GasValues.sol, 156
+PUSHINT 1000000000
+PUSHINT 150000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getUpgradeAccountGas_c98ab35d
+.type	GasValues_no_obj_getUpgradeAccountGas_c98ab35d, @function
+CALL $GasValues_no_obj_getUpgradeAccountGas_c98ab35d_macro$
+
+.macro GasValues_no_obj_getUpgradeAccountGas_c98ab35d_macro
+.loc ../contracts/libraries/GasValues.sol, 164
+PUSHINT 100000000
+DUP
+ADD
+UFITS 128
+PUSHINT 150000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getEverToTip3ExchangeGas_5e3ba5f2
+.type	GasValues_with_obj_getEverToTip3ExchangeGas_5e3ba5f2, @function
+CALL $GasValues_with_obj_getEverToTip3ExchangeGas_5e3ba5f2_macro$
+
+.macro GasValues_with_obj_getEverToTip3ExchangeGas_5e3ba5f2_macro
+.loc ../contracts/libraries/GasValues.sol, 368
+PUSHINT 100000000
+PUSHINT 10000000
+ADD
+UFITS 128
+OVER
+ADD
+UFITS 128
+PUSHINT 200000
+PUSHINT 150000
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getEverToTip3ExchangeGas_5e3ba5f2
+.type	GasValues_no_obj_getEverToTip3ExchangeGas_5e3ba5f2, @function
+CALL $GasValues_no_obj_getEverToTip3ExchangeGas_5e3ba5f2_macro$
+
+.macro GasValues_no_obj_getEverToTip3ExchangeGas_5e3ba5f2_macro
+.loc ../contracts/libraries/GasValues.sol, 368
+PUSHINT 100000000
+PUSHINT 10000000
+ADD
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 200000
+PUSHINT 150000
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getUpgradeRootGas_11c565f8
+.type	GasValues_no_obj_getUpgradeRootGas_11c565f8, @function
+CALL $GasValues_no_obj_getUpgradeRootGas_11c565f8_macro$
+
+.macro GasValues_no_obj_getUpgradeRootGas_11c565f8_macro
+.loc ../contracts/libraries/GasValues.sol, 172
+PUSHINT 100000000
+PUSHINT 400000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getDepositToAccountGas_63570a6b
+.type	GasValues_no_obj_getDepositToAccountGas_63570a6b, @function
+CALL $GasValues_no_obj_getDepositToAccountGas_63570a6b_macro$
+
+.macro GasValues_no_obj_getDepositToAccountGas_63570a6b_macro
+.loc ../contracts/libraries/GasValues.sol, 181
+PUSHINT 0
+CALLREF {
+	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 182
+DUP
+FIRST
+PUSHINT 100000
+ROT
+SECOND
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getTransferTokensGas_9b3e08c4
+.type	GasValues_with_obj_getTransferTokensGas_9b3e08c4, @function
+CALL $GasValues_with_obj_getTransferTokensGas_9b3e08c4_macro$
+
+.macro GasValues_with_obj_getTransferTokensGas_9b3e08c4_macro
+.loc ../contracts/libraries/GasValues.sol, 19
+DUP
+PUSHINT 200000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getTransferTokensGas_9b3e08c4
+.type	GasValues_no_obj_getTransferTokensGas_9b3e08c4, @function
+CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
+
+.macro GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro
+.loc ../contracts/libraries/GasValues.sol, 19
+PUSHINT 200000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getAddPoolGas_f9a08600
+.type	GasValues_with_obj_getAddPoolGas_f9a08600, @function
+CALL $GasValues_with_obj_getAddPoolGas_f9a08600_macro$
+
+.macro GasValues_with_obj_getAddPoolGas_f9a08600_macro
+.loc ../contracts/libraries/GasValues.sol, 189
+CALLREF {
+	CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 190
+OVER
+INC
+UFITS 8
+OVER
+FIRST
+MUL
+UFITS 128
+PUSHINT 150000
+PUSH S3
+INC
+UFITS 8
+ROLL 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getAddPoolGas_f9a08600
+.type	GasValues_no_obj_getAddPoolGas_f9a08600, @function
+CALL $GasValues_no_obj_getAddPoolGas_f9a08600_macro$
+
+.macro GasValues_no_obj_getAddPoolGas_f9a08600_macro
+.loc ../contracts/libraries/GasValues.sol, 189
+CALLREF {
+	CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 190
+OVER
+INC
+UFITS 8
+OVER
+FIRST
+MUL
+UFITS 128
+PUSHINT 150000
+ROLL 3
+INC
+UFITS 8
+ROLL 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getAccountWithdrawGas_ccbc7117
+.type	GasValues_with_obj_getAccountWithdrawGas_ccbc7117, @function
+CALL $GasValues_with_obj_getAccountWithdrawGas_ccbc7117_macro$
+
+.macro GasValues_with_obj_getAccountWithdrawGas_ccbc7117_macro
+.loc ../contracts/libraries/GasValues.sol, 197
+DUP
+CALLREF {
+	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 198
+PUSHINT 100000000
+OVER
+FIRST
+ADD
+UFITS 128
+PUSHINT 150000
+ROT
+SECOND
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getAccountWithdrawGas_ccbc7117
+.type	GasValues_no_obj_getAccountWithdrawGas_ccbc7117, @function
+CALL $GasValues_no_obj_getAccountWithdrawGas_ccbc7117_macro$
+
+.macro GasValues_no_obj_getAccountWithdrawGas_ccbc7117_macro
+.loc ../contracts/libraries/GasValues.sol, 197
+CALLREF {
+	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 198
+PUSHINT 100000000
+OVER
+FIRST
+ADD
+UFITS 128
+PUSHINT 150000
+ROT
+SECOND
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getAccountTransferGas_e2b2dc07
+.type	GasValues_no_obj_getAccountTransferGas_e2b2dc07, @function
+CALL $GasValues_no_obj_getAccountTransferGas_e2b2dc07_macro$
+
+.macro GasValues_no_obj_getAccountTransferGas_e2b2dc07_macro
+.loc ../contracts/libraries/GasValues.sol, 206
+CALLREF {
+	CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 207
+PUSHINT 100000000
+PUSHINT 10100000
+ADD
+UFITS 128
+OVER
+FIRST
+ADD
+UFITS 128
+PUSHINT 150000
+ROT
+SECOND
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getAccountExchangeGas_7314d781
+.type	GasValues_no_obj_getAccountExchangeGas_7314d781, @function
+CALL $GasValues_no_obj_getAccountExchangeGas_7314d781_macro$
+
+.macro GasValues_no_obj_getAccountExchangeGas_7314d781_macro
+.loc ../contracts/libraries/GasValues.sol, 215
+CALLREF {
+	CALL $GasValues_no_obj_getInternalPairTransferGas_73dc250d_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 216
+PUSHINT 10100000
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSHINT 2
+PUSH S2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 2
+ROT
+SECOND
+MUL
+UFITS 128
+PUSHINT 300000
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getAccountDepositGas_52b0195c
+.type	GasValues_with_obj_getAccountDepositGas_52b0195c, @function
+CALL $GasValues_with_obj_getAccountDepositGas_52b0195c_macro$
+
+.macro GasValues_with_obj_getAccountDepositGas_52b0195c_macro
+.loc ../contracts/libraries/GasValues.sol, 227
+PUSHINT 120000000
+CALLREF {
+	CALL $GasValues_no_obj_getMintTokensGas_1c3cea29_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 228
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 230
+PUSHINT 100000000
+PUSHINT 10100000
+ADD
+UFITS 128
+PUSH S2
+FIRST
+ADD
+UFITS 128
+PUSH S3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH2 S3, S0
+	FIRST
+	MUL
+	UFITS 128
+}
+IF
+PUSHINT 400000
+ROLL 3
+SECOND
+ADD
+UFITS 128
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	BLKPUSH 2, 2
+	SECOND
+	MUL
+	UFITS 128
+}
+IF
+PAIR
+NIP
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getAccountDepositGas_52b0195c
+.type	GasValues_no_obj_getAccountDepositGas_52b0195c, @function
+CALL $GasValues_no_obj_getAccountDepositGas_52b0195c_macro$
+
+.macro GasValues_no_obj_getAccountDepositGas_52b0195c_macro
+.loc ../contracts/libraries/GasValues.sol, 227
+PUSHINT 120000000
+CALLREF {
+	CALL $GasValues_no_obj_getMintTokensGas_1c3cea29_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 228
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 230
+PUSHINT 100000000
+PUSHINT 10100000
+ADD
+UFITS 128
+PUSH S2
+FIRST
+ADD
+UFITS 128
+PUSH S3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH2 S3, S0
+	FIRST
+	MUL
+	UFITS 128
+}
+IF
+PUSHINT 400000
+ROLL 3
+SECOND
+ADD
+UFITS 128
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	BLKPUSH 2, 2
+	SECOND
+	MUL
+	UFITS 128
+}
+IF
+PAIR
+BLKDROP2 2, 1
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getMintTokensGas_1c3cea29
+.type	GasValues_with_obj_getMintTokensGas_1c3cea29, @function
+CALL $GasValues_with_obj_getMintTokensGas_1c3cea29_macro$
+
+.macro GasValues_with_obj_getMintTokensGas_1c3cea29_macro
+.loc ../contracts/libraries/GasValues.sol, 29
+PUSHINT 100000000
+OVER
+ADD
+UFITS 128
+PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getMintTokensGas_1c3cea29
+.type	GasValues_no_obj_getMintTokensGas_1c3cea29, @function
+CALL $GasValues_no_obj_getMintTokensGas_1c3cea29_macro$
+
+.macro GasValues_no_obj_getMintTokensGas_1c3cea29_macro
+.loc ../contracts/libraries/GasValues.sol, 29
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getReferralProgramGas_2421acc1
+.type	GasValues_no_obj_getReferralProgramGas_2421acc1, @function
+CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+
+.macro GasValues_no_obj_getReferralProgramGas_2421acc1_macro
+.loc ../contracts/libraries/GasValues.sol, 75
+PUSHINT 50000000
+PUSHINT 200000
+PUSHINT 800000
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getAccountWithdrawLiquidityGas_e053af7f
+.type	GasValues_with_obj_getAccountWithdrawLiquidityGas_e053af7f, @function
+CALL $GasValues_with_obj_getAccountWithdrawLiquidityGas_e053af7f_macro$
+
+.macro GasValues_with_obj_getAccountWithdrawLiquidityGas_e053af7f_macro
+.loc ../contracts/libraries/GasValues.sol, 243
+CALLREF {
+	CALL $GasValues_no_obj_getInternalPairTransferGas_73dc250d_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 244
+CALLREF {
+	CALL $GasValues_no_obj_getBurnTokensGas_6c7ce007_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 245
+PUSHINT 10100000
+PUSHINT 100000000
+ADD
+UFITS 128
+OVER2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+OVER
+FIRST
+ADD
+UFITS 128
+PUSHINT 400000
+PUSH S4
+ROLL 4
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+ROT
+SECOND
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getAccountWithdrawLiquidityGas_e053af7f
+.type	GasValues_no_obj_getAccountWithdrawLiquidityGas_e053af7f, @function
+CALL $GasValues_no_obj_getAccountWithdrawLiquidityGas_e053af7f_macro$
+
+.macro GasValues_no_obj_getAccountWithdrawLiquidityGas_e053af7f_macro
+.loc ../contracts/libraries/GasValues.sol, 243
+CALLREF {
+	CALL $GasValues_no_obj_getInternalPairTransferGas_73dc250d_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 244
+CALLREF {
+	CALL $GasValues_no_obj_getBurnTokensGas_6c7ce007_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 245
+PUSHINT 10100000
+PUSHINT 100000000
+ADD
+UFITS 128
+OVER2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+OVER
+FIRST
+ADD
+UFITS 128
+PUSHINT 400000
+BLKSWAP 2, 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+ROT
+SECOND
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getBurnTokensGas_6c7ce007
+.type	GasValues_no_obj_getBurnTokensGas_6c7ce007, @function
+CALL $GasValues_no_obj_getBurnTokensGas_6c7ce007_macro$
+
+.macro GasValues_no_obj_getBurnTokensGas_6c7ce007_macro
+.loc ../contracts/libraries/GasValues.sol, 37
+PUSHINT 0
+PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getInternalPairTransferGas_73dc250d
+.type	GasValues_no_obj_getInternalPairTransferGas_73dc250d, @function
+CALL $GasValues_no_obj_getInternalPairTransferGas_73dc250d_macro$
+
+.macro GasValues_no_obj_getInternalPairTransferGas_73dc250d_macro
+.loc ../contracts/libraries/GasValues.sol, 261
+PUSHINT 0
+PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getPoolDirectExchangeGas_47b146c5
+.type	GasValues_with_obj_getPoolDirectExchangeGas_47b146c5, @function
+CALL $GasValues_with_obj_getPoolDirectExchangeGas_47b146c5_macro$
+
+.macro GasValues_with_obj_getPoolDirectExchangeGas_47b146c5_macro
+.loc ../contracts/libraries/GasValues.sol, 268
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 269
+CALLREF {
+	CALL $GasValues_no_obj_getInternalPairTransferGas_73dc250d_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 270
+PUSH S3
+CALLREF {
+	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 271
+PUSHINT 100000000
+PUSHINT 20200000
+UFITS 128
+ADD
+UFITS 128
+PUSH S2
+FIRST
+ADD
+UFITS 128
+OVER
+FIRST
+ADD
+UFITS 128
+PUSH S4
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH S2
+	FIRST
+}
+IF
+ROT
+SECOND
+ROT
+SECOND
+ADD
+UFITS 128
+PUSHINT 350000
+ADD
+UFITS 128
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	OVER
+	SECOND
+}
+IF
+PAIR
+NIP
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getPoolDirectExchangeGas_47b146c5
+.type	GasValues_no_obj_getPoolDirectExchangeGas_47b146c5, @function
+CALL $GasValues_no_obj_getPoolDirectExchangeGas_47b146c5_macro$
+
+.macro GasValues_no_obj_getPoolDirectExchangeGas_47b146c5_macro
+.loc ../contracts/libraries/GasValues.sol, 268
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 269
+CALLREF {
+	CALL $GasValues_no_obj_getInternalPairTransferGas_73dc250d_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 270
+ROLL 3
+CALLREF {
+	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 271
+PUSHINT 100000000
+PUSHINT 20200000
+UFITS 128
+ADD
+UFITS 128
+PUSH S2
+FIRST
+ADD
+UFITS 128
+OVER
+FIRST
+ADD
+UFITS 128
+PUSH S4
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH S2
+	FIRST
+}
+IF
+ROT
+SECOND
+ROT
+SECOND
+ADD
+UFITS 128
+PUSHINT 350000
+ADD
+UFITS 128
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	OVER
+	SECOND
+}
+IF
+PAIR
+NIP
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getPoolDirectDepositGas_1098939c
+.type	GasValues_with_obj_getPoolDirectDepositGas_1098939c, @function
+CALL $GasValues_with_obj_getPoolDirectDepositGas_1098939c_macro$
+
+.macro GasValues_with_obj_getPoolDirectDepositGas_1098939c_macro
+.loc ../contracts/libraries/GasValues.sol, 286
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 287
+PUSH S2
+CALLREF {
+	CALL $GasValues_no_obj_getMintTokensGas_1c3cea29_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 288
+PUSHINT 0
+CALLREF {
+	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 289
+PUSHINT 100000000
+PUSHINT 20200000
+UFITS 128
+ADD
+UFITS 128
+OVER
+FIRST
+ADD
+UFITS 128
+PUSH S2
+FIRST
+ADD
+UFITS 128
+PUSH S4
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH S2
+	FIRST
+}
+IF
+PUSHINT 350000
+ROT
+SECOND
+ADD
+UFITS 128
+ROT
+SECOND
+ADD
+UFITS 128
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	OVER
+	SECOND
+}
+IF
+PAIR
+NIP
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getPoolDirectDepositGas_1098939c
+.type	GasValues_no_obj_getPoolDirectDepositGas_1098939c, @function
+CALL $GasValues_no_obj_getPoolDirectDepositGas_1098939c_macro$
+
+.macro GasValues_no_obj_getPoolDirectDepositGas_1098939c_macro
+.loc ../contracts/libraries/GasValues.sol, 286
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 287
+ROT
+CALLREF {
+	CALL $GasValues_no_obj_getMintTokensGas_1c3cea29_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 288
+PUSHINT 0
+CALLREF {
+	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 289
+PUSHINT 100000000
+PUSHINT 20200000
+UFITS 128
+ADD
+UFITS 128
+OVER
+FIRST
+ADD
+UFITS 128
+PUSH S2
+FIRST
+ADD
+UFITS 128
+PUSH S4
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH S2
+	FIRST
+}
+IF
+PUSHINT 350000
+ROT
+SECOND
+ADD
+UFITS 128
+ROT
+SECOND
+ADD
+UFITS 128
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	OVER
+	SECOND
+}
+IF
+PAIR
+NIP
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getPoolDirectWithdrawGas_f6c7e87a
+.type	GasValues_with_obj_getPoolDirectWithdrawGas_f6c7e87a, @function
+CALL $GasValues_with_obj_getPoolDirectWithdrawGas_f6c7e87a_macro$
+
+.macro GasValues_with_obj_getPoolDirectWithdrawGas_f6c7e87a_macro
+.loc ../contracts/libraries/GasValues.sol, 304
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 305
+ROT
+CALLREF {
+	CALL $GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 306
+PUSHINT 20200000
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSH2 S4, S1
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSH S3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH2 S3, S1
+	FIRST
+	MUL
+	UFITS 128
+}
+IF
+PUSHINT 350000
+PUSH S5
+ROLL 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	BLKPUSH 2, 2
+	SECOND
+	MUL
+	UFITS 128
+}
+IF
+PAIR
+NIP
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getPoolDirectWithdrawGas_f6c7e87a
+.type	GasValues_no_obj_getPoolDirectWithdrawGas_f6c7e87a, @function
+CALL $GasValues_no_obj_getPoolDirectWithdrawGas_f6c7e87a_macro$
+
+.macro GasValues_no_obj_getPoolDirectWithdrawGas_f6c7e87a_macro
+.loc ../contracts/libraries/GasValues.sol, 304
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 305
+ROT
+CALLREF {
+	CALL $GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 306
+PUSHINT 20200000
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSH2 S4, S1
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSH S3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH2 S3, S1
+	FIRST
+	MUL
+	UFITS 128
+}
+IF
+PUSHINT 350000
+PUSH S5
+ROLL 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	BLKPUSH 2, 2
+	SECOND
+	MUL
+	UFITS 128
+}
+IF
+PAIR
+BLKDROP2 2, 1
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getPoolDirectWithdrawOneCoinGas_64a065de
+.type	GasValues_with_obj_getPoolDirectWithdrawOneCoinGas_64a065de, @function
+CALL $GasValues_with_obj_getPoolDirectWithdrawOneCoinGas_64a065de_macro$
+
+.macro GasValues_with_obj_getPoolDirectWithdrawOneCoinGas_64a065de_macro
+.loc ../contracts/libraries/GasValues.sol, 319
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 320
+PUSH S2
+CALLREF {
+	CALL $GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 321
+PUSHINT 20200000
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+OVER
+FIRST
+ADD
+UFITS 128
+PUSH S3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	OVER
+	FIRST
+}
+IF
+PUSHINT 350000
+ROT
+SECOND
+ADD
+UFITS 128
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	OVER
+	SECOND
+}
+IF
+PAIR
+NIP
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getPoolDirectWithdrawOneCoinGas_64a065de
+.type	GasValues_no_obj_getPoolDirectWithdrawOneCoinGas_64a065de, @function
+CALL $GasValues_no_obj_getPoolDirectWithdrawOneCoinGas_64a065de_macro$
+
+.macro GasValues_no_obj_getPoolDirectWithdrawOneCoinGas_64a065de_macro
+.loc ../contracts/libraries/GasValues.sol, 319
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 320
+ROT
+CALLREF {
+	CALL $GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 321
+PUSHINT 20200000
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+OVER
+FIRST
+ADD
+UFITS 128
+PUSH S3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	OVER
+	FIRST
+}
+IF
+PUSHINT 350000
+ROT
+SECOND
+ADD
+UFITS 128
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	OVER
+	SECOND
+}
+IF
+PAIR
+NIP
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getPoolCrossExchangeStepGas_d2e7be7e
+.type	GasValues_with_obj_getPoolCrossExchangeStepGas_d2e7be7e, @function
+CALL $GasValues_with_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
+
+.macro GasValues_with_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro
+.loc ../contracts/libraries/GasValues.sol, 334
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 335
+PUSHINT 20200000
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSH S2
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	DUP
+	FIRST
+}
+IF
+PUSHINT 300000
+PUSH S3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	OVER
+	SECOND
+}
+IF
+PAIR
+NIP
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e
+.type	GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e, @function
+CALL $GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
+
+.macro GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro
+.loc ../contracts/libraries/GasValues.sol, 334
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 335
+PUSHINT 20200000
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSH S2
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	DUP
+	FIRST
+}
+IF
+PUSHINT 300000
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ADD
+ZEROSWAPIFNOT
+PUSHCONT {
+	OVER
+	SECOND
+}
+IF
+PAIR
+NIP
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getTokenVaultTransferGas_6edfcd15
+.type	GasValues_with_obj_getTokenVaultTransferGas_6edfcd15, @function
+CALL $GasValues_with_obj_getTokenVaultTransferGas_6edfcd15_macro$
+
+.macro GasValues_with_obj_getTokenVaultTransferGas_6edfcd15_macro
+.loc ../contracts/libraries/GasValues.sol, 349
+PUSHINT 100000000
+OVER
+ADD
+UFITS 128
+PUSHINT 200000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getTokenVaultTransferGas_6edfcd15
+.type	GasValues_no_obj_getTokenVaultTransferGas_6edfcd15, @function
+CALL $GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro$
+
+.macro GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro
+.loc ../contracts/libraries/GasValues.sol, 349
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSHINT 200000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getUpgradeVaultGas_34721fff
+.type	GasValues_no_obj_getUpgradeVaultGas_34721fff, @function
+CALL $GasValues_no_obj_getUpgradeVaultGas_34721fff_macro$
+
+.macro GasValues_no_obj_getUpgradeVaultGas_34721fff_macro
+.loc ../contracts/libraries/GasValues.sol, 359
+PUSHINT 100000000
+PUSHINT 250000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getEverToTip3CrossExchangeGas_d2b70951
+.type	GasValues_with_obj_getEverToTip3CrossExchangeGas_d2b70951, @function
+CALL $GasValues_with_obj_getEverToTip3CrossExchangeGas_d2b70951_macro$
+
+.macro GasValues_with_obj_getEverToTip3CrossExchangeGas_d2b70951_macro
+.loc ../contracts/libraries/GasValues.sol, 375
+PUSHINT 100000000
+OVER
+PUSHINT 10000000
+PUSH S4
+ADD
+UFITS 128
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 300000
+ROT
+PUSHINT 150000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getEverToTip3CrossExchangeGas_d2b70951
+.type	GasValues_no_obj_getEverToTip3CrossExchangeGas_d2b70951, @function
+CALL $GasValues_no_obj_getEverToTip3CrossExchangeGas_d2b70951_macro$
+
+.macro GasValues_no_obj_getEverToTip3CrossExchangeGas_d2b70951_macro
+.loc ../contracts/libraries/GasValues.sol, 375
+PUSHINT 100000000
+OVER
+PUSHINT 10000000
+ROLL 4
+ADD
+UFITS 128
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 300000
+ROT
+PUSHINT 150000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getTip3ToEverExchangeGas_aaa13858
+.type	GasValues_with_obj_getTip3ToEverExchangeGas_aaa13858, @function
+CALL $GasValues_with_obj_getTip3ToEverExchangeGas_aaa13858_macro$
+
+.macro GasValues_with_obj_getTip3ToEverExchangeGas_aaa13858_macro
+.loc ../contracts/libraries/GasValues.sol, 382
+DUP
+PUSHINT 10000000
+ADD
+UFITS 128
+PUSHINT 200000
+PUSHINT 150000
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getTip3ToEverExchangeGas_aaa13858
+.type	GasValues_no_obj_getTip3ToEverExchangeGas_aaa13858, @function
+CALL $GasValues_no_obj_getTip3ToEverExchangeGas_aaa13858_macro$
+
+.macro GasValues_no_obj_getTip3ToEverExchangeGas_aaa13858_macro
+.loc ../contracts/libraries/GasValues.sol, 382
+PUSHINT 10000000
+ADD
+UFITS 128
+PUSHINT 200000
+PUSHINT 150000
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d
+.type	GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d, @function
+CALL $GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro$
+
+.macro GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro
+.loc ../contracts/libraries/GasValues.sol, 389
+DUP2
+PUSHINT 10000000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 300000
+ROT
+PUSHINT 150000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d
+.type	GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d, @function
+CALL $GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro$
+
+.macro GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro
+.loc ../contracts/libraries/GasValues.sol, 389
+TUCK
+PUSHINT 10000000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 300000
+ROT
+PUSHINT 150000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getEverWeverToTip3ExchangeGas_5f5dc15e
+.type	GasValues_with_obj_getEverWeverToTip3ExchangeGas_5f5dc15e, @function
+CALL $GasValues_with_obj_getEverWeverToTip3ExchangeGas_5f5dc15e_macro$
+
+.macro GasValues_with_obj_getEverWeverToTip3ExchangeGas_5f5dc15e_macro
+.loc ../contracts/libraries/GasValues.sol, 396
+PUSHINT 100000000
+PUSHINT 10000000
+ADD
+UFITS 128
+OVER
+ADD
+UFITS 128
+PUSHINT 200000
+PUSHINT 300000
+ADD
+UFITS 128
+PUSHINT 150000
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getEverWeverToTip3ExchangeGas_5f5dc15e
+.type	GasValues_no_obj_getEverWeverToTip3ExchangeGas_5f5dc15e, @function
+CALL $GasValues_no_obj_getEverWeverToTip3ExchangeGas_5f5dc15e_macro$
+
+.macro GasValues_no_obj_getEverWeverToTip3ExchangeGas_5f5dc15e_macro
+.loc ../contracts/libraries/GasValues.sol, 396
+PUSHINT 100000000
+PUSHINT 10000000
+ADD
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 200000
+PUSHINT 300000
+ADD
+UFITS 128
+PUSHINT 150000
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb
+.type	GasValues_with_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb, @function
+CALL $GasValues_with_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb_macro$
+
+.macro GasValues_with_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb_macro
+.loc ../contracts/libraries/GasValues.sol, 403
+PUSHINT 100000000
+OVER
+PUSHINT 10000000
+PUSH S4
+ADD
+UFITS 128
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 300000
+DUP
+ADD
+UFITS 128
+ROT
+PUSHINT 150000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb
+.type	GasValues_no_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb, @function
+CALL $GasValues_no_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb_macro$
+
+.macro GasValues_no_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb_macro
+.loc ../contracts/libraries/GasValues.sol, 403
+PUSHINT 100000000
+OVER
+PUSHINT 10000000
+ROLL 4
+ADD
+UFITS 128
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 300000
+DUP
+ADD
+UFITS 128
+ROT
+PUSHINT 150000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.macro public_function_selector
+DUP
+PUSHINT 1022602248
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 143262989
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 12097545
+		EQUAL
+		IFJMPREF {
+			CALL $getDeployAccountGas$
+		}
+		DUP
+		PUSHINT 63153283
+		EQUAL
+		IFJMPREF {
+			CALL $getPoolDirectDepositGas$
+		}
+		DUP
+		PUSHINT 106294208
+		EQUAL
+		IFJMPREF {
+			CALL $getPoolDirectWithdrawGas$
+		}
+		DUP
+		PUSHINT 143262989
+		EQUAL
+		IFJMPREF {
+			CALL $getDeployTokenVaultGas$
+		}
+	}
+	DUP
+	PUSHINT 453826860
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 206567577
+		EQUAL
+		IFJMPREF {
+			CALL $getTip3ToEverExchangeGas$
+		}
+		DUP
+		PUSHINT 345774155
+		EQUAL
+		IFJMPREF {
+			CALL $getSetFeeParamsGas$
+		}
+		DUP
+		PUSHINT 442982756
+		EQUAL
+		IFJMPREF {
+			CALL $getPoolCrossExchangeGas$
+		}
+		DUP
+		PUSHINT 453826860
+		EQUAL
+		IFJMPREF {
+			CALL $transferOwner$
+		}
+	}
+	DUP
+	PUSHINT 712476374
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 473729231
+		EQUAL
+		IFJMPREF {
+			CALL $getPoolDirectWithdrawOneCoinGas$
+		}
+		DUP
+		PUSHINT 500198932
+		EQUAL
+		IFJMPREF {
+			CALL $getUpgradePoolGas$
+		}
+		DUP
+		PUSHINT 527588602
+		EQUAL
+		IFJMPREF {
+			CALL $getUpgradeAccountGas$
+		}
+		DUP
+		PUSHINT 712476374
+		EQUAL
+		IFJMPREF {
+			CALL $getEverWeverToTip3CrossExchangeGas$
+		}
+	}
+	DUP
+	PUSHINT 1022602248
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 813019621
+		EQUAL
+		IFJMPREF {
+			CALL $getSetAmplificationCoefficientGas$
+		}
+		DUP
+		PUSHINT 825076180
+		EQUAL
+		IFJMPREF {
+			CALL $getEverToTip3ExchangeGas$
+		}
+		DUP
+		PUSHINT 832361315
+		EQUAL
+		IFJMPREF {
+			CALL $getAddPoolGas$
+		}
+		DUP
+		PUSHINT 1022602248
+		EQUAL
+		IFJMPREF {
+			CALL $getAccountExchangeGas$
+		}
+	}
+}
+DUP
+PUSHINT 2068601325
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 1146955867
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 1025363684
+		EQUAL
+		IFJMPREF {
+			CALL $getEverToTip3CrossExchangeGas$
+		}
+		DUP
+		PUSHINT 1064296880
+		EQUAL
+		IFJMPREF {
+			CALL $getEverWeverToTip3ExchangeGas$
+		}
+		DUP
+		PUSHINT 1125148745
+		EQUAL
+		IFJMPREF {
+			CALL $getUpgradeTokenVaultGas$
+		}
+		DUP
+		PUSHINT 1146955867
+		EQUAL
+		IFJMPREF {
+			CALL $getAccountWithdrawGas$
+		}
+	}
+	DUP
+	PUSHINT 1419332328
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 1196840156
+		EQUAL
+		IFJMPREF {
+			CALL $constructor$
+		}
+		DUP
+		PUSHINT 1270509631
+		EQUAL
+		IFJMPREF {
+			CALL $getAccountDepositGas$
+		}
+		DUP
+		PUSHINT 1306576439
+		EQUAL
+		IFJMPREF {
+			CALL $getUpgradeRootGas$
+		}
+		DUP
+		PUSHINT 1419332328
+		EQUAL
+		IFJMPREF {
+			CALL $getDeployPoolGas$
+		}
+	}
+	DUP
+	PUSHINT 1935054806
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 1613703793
+		EQUAL
+		IFJMPREF {
+			CALL $getTip3ToEverCrossExchangeGas$
+		}
+		DUP
+		PUSHINT 1809145905
+		EQUAL
+		IFJMPREF {
+			CALL $acceptOwner$
+		}
+		DUP
+		PUSHINT 1825454087
+		EQUAL
+		IFJMPREF {
+			CALL $getPoolDirectExchangeGas$
+		}
+		DUP
+		PUSHINT 1935054806
+		EQUAL
+		IFJMPREF {
+			CALL $getAccountTransferGas$
+		}
+	}
+	DUP
+	PUSHINT 2068601325
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 1961822439
+		EQUAL
+		IFJMPREF {
+			CALL $getDepositToAccountGas$
+		}
+		DUP
+		PUSHINT 2000030591
+		EQUAL
+		IFJMPREF {
+			CALL $getUpgradeVaultGas$
+		}
+		DUP
+		PUSHINT 2068601325
+		EQUAL
+		IFJMPREF {
+			CALL $getAccountWithdrawLiquidityGas$
+		}
+	}
+}
+

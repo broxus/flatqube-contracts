@@ -606,12 +606,12 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
             allLeaves += nextStep.leaves;
         }
 
-        if (errorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(deployWalletGrams, referrer)) * allNestedNodes) {
+        if (errorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * allNestedNodes) {
             errorCode = DirectOperationErrors.VALUE_TOO_LOW;
         }
 
         if (errorCode == 0 && nextSteps.length > 0) {
-            uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(deployWalletGrams, referrer)) * allNestedNodes;
+            uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * allNestedNodes;
 
             for (uint32 i = 0; i < nextSteps.length; i++) {
                 NextExchangeData nextStep = nextSteps[i];
@@ -621,7 +621,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
 
                 IDexBasePool(nextStep.poolRoot)
                     .crossPoolExchange{
-                        value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(deployWalletGrams, referrer)) + currentExtraValue,
+                        value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) + currentExtraValue,
                         flag: i == maxNestedNodesIdx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
                     }(
                         id,

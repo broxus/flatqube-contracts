@@ -443,9 +443,9 @@ DICTSETB
 .loc ../contracts/DexVaultLpTokenPendingV2.sol, 119
 MYADDR
 GETGLOB 15
-PUSHINT 0
-PUSHINT 20000
-PAIR
+CALLREF {
+	CALL $GasValues_no_obj_getTransferOwnershipGas_77a4dfa4_macro$
+}
 CALLREF {
 	CALL $_calcValue_2fb4263c_internal_macro$
 }
@@ -1207,9 +1207,20 @@ THROW 60
 CALL $GasValues_no_obj_getTokenDataGas_304799e7_macro$
 
 .macro GasValues_no_obj_getTokenDataGas_304799e7_macro
-.loc ../contracts/libraries/GasValues.sol, 44
+.loc ../contracts/libraries/GasValues.sol, 45
 PUSHINT 100000000
 PUSHINT 50000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getTransferOwnershipGas_77a4dfa4
+.type	GasValues_no_obj_getTransferOwnershipGas_77a4dfa4, @function
+CALL $GasValues_no_obj_getTransferOwnershipGas_77a4dfa4_macro$
+
+.macro GasValues_no_obj_getTransferOwnershipGas_77a4dfa4_macro
+.loc ../contracts/libraries/GasValues.sol, 52
+PUSHINT 0
+PUSHINT 80000
 PAIR
 .loc ../contracts/libraries/GasValues.sol, 0
 

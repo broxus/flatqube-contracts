@@ -7,9 +7,11 @@ pragma AbiHeader pubkey;
 import "./libraries/EverToTip3Gas.sol";
 import "./libraries/EverToTip3Errors.sol";
 import "./libraries/EverToTip3Payloads.sol";
+import "./libraries/GasValues.sol";
 
 import "./interfaces/IEverVault.sol";
 import "./structures/INextExchangeData.sol";
+import "./structures/IGasValueStructure.sol";
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "tip3/contracts/interfaces/ITokenRoot.sol";
@@ -17,7 +19,7 @@ import "tip3/contracts/interfaces/ITokenWallet.sol";
 import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.sol";
 import "tip3/contracts/interfaces/IAcceptTokensBurnCallback.sol";
 
-contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback {
+contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IGasValueStructure {
 
     uint32 static randomNonce_;
 
@@ -33,7 +35,7 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
 
         ITokenRoot(weverRoot).deployWallet{
-            value: EverToTip3Gas.DEPLOY_EMPTY_WALLET_VALUE,
+            value: _calcValue(GasValues.getDeployWalletGas()),
             flag: MsgFlag.SENDER_PAYS_FEES,
             callback: EverWeverToTip3.onWeverWallet
         }(
@@ -116,7 +118,7 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
         tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
         if (payloadSlice.bits() == 395 && msg.sender == weverWallet) {
             (, uint128 amount_) = payloadSlice.decode(address, uint128);
-            if ((amount + msg.value - EverToTip3Gas.SWAP_EVER_TO_TIP3_MIN_VALUE) >= amount_) {
+            if ((amount + msg.value - _calcValue(GasValues.getEverWeverToTip3CrossExchangeGas(0, 1))) >= amount_) {
                 ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
                     amount,
                     weverVault,
@@ -168,5 +170,9 @@ contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCall
             user,
             payload
         );
+    }
+
+    function _calcValue(IGasValueStructure.GasValue value) internal pure returns(uint128) {
+        return value.fixedValue + gasToValue(value.dynamicGas, address(this).wid);
     }
 }

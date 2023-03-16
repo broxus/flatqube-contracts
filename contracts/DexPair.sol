@@ -1046,13 +1046,13 @@ contract DexPair is DexPairBase, INextExchangeData {
                         allLeaves += nextStep.leaves;
                     }
 
-                    if (postSwapErrorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(_deployWalletGrams, _referrer)) * (1 + allNestedNodes)) {
+                    if (postSwapErrorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(_referrer)) * (1 + allNestedNodes)) {
                         postSwapErrorCode = DirectOperationErrors.VALUE_TOO_LOW;
                     }
 
                     if (postSwapErrorCode == 0 && nextSteps.length > 0) {
                         // Continue cross-pair exchange
-                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(_deployWalletGrams, _referrer)) * (1 + allNestedNodes);
+                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(_referrer)) * (1 + allNestedNodes);
 
                         for (uint32 i = 0; i < nextSteps.length; i++) {
                             NextExchangeData nextStep = nextSteps[i];
@@ -1061,7 +1061,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                             uint128 currentExtraValue = math.muldiv(uint128(nextStep.leaves), extraValue, uint128(allLeaves));
 
                             IDexBasePool(nextStep.poolRoot).crossPoolExchange{
-                                value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(_deployWalletGrams, _referrer)) + currentExtraValue,
+                                value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(_referrer)) + currentExtraValue,
                                 flag: i == maxNestedNodesIdx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
                             }(
                                 _id,
@@ -1416,7 +1416,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                     }
 
                     // Check reserves, fees, msg.value and expected amount
-                    if (errorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(deployWalletGrams, referrer)) * (1 + allNestedNodes)) {
+                    if (errorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + allNestedNodes)) {
                         errorCode = DirectOperationErrors.VALUE_TOO_LOW;
                     } else if (
                         amount > _reserves()[receiveTokenIndex] ||
@@ -1461,7 +1461,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                             );
 
                         // Continue cross-pair exchange
-                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(deployWalletGrams, referrer)) * (1 + allNestedNodes);
+                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + allNestedNodes);
 
                         for (uint32 i = 0; i < nextSteps.length; i++) {
                             NextExchangeData nextStep = nextSteps[i];
@@ -1470,7 +1470,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                             uint128 currentExtraValue = math.muldiv(uint128(nextStep.leaves), extraValue, uint128(allLeaves));
 
                             IDexBasePool(nextStep.poolRoot).crossPoolExchange{
-                                value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(deployWalletGrams, referrer)) + currentExtraValue,
+                                value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) + currentExtraValue,
                                 flag: i == maxNestedNodesIdx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
                             }(
                                 id,
@@ -1619,6 +1619,6 @@ contract DexPair is DexPairBase, INextExchangeData {
             return _calcValue(GasValues.getPoolDirectWithdrawOneCoinGas(_deployWalletGrams, _referrer));
         }
 
-        return 2 * _calcValue(GasValues.getPoolCrossExchangeStepGas(_deployWalletGrams, _referrer));
+        return 2 * _calcValue(GasValues.getPoolCrossExchangeStepGas(_referrer));
     }
 }

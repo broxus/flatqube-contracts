@@ -10,6 +10,7 @@ library DexGas {
     uint128 constant VAULT_INITIAL_BALANCE              = 1 ever;
     uint128 constant TOKEN_FACTORY_INITIAL_BALANCE      = 1 ever;
     uint128 constant TOKEN_ROOT_INITIAL_BALANCE         = 1 ever;
+    uint128 constant GAS_VALUES_INITIAL_BALANCE         = 0.1 ever;
 
     uint128 constant DEPLOY_ACCOUNT_MIN_VALUE           = 2 ever;
     uint128 constant DEPLOY_POOL_BASE_VALUE             = 6 ever;
@@ -96,7 +97,7 @@ library DexGas {
     uint128 constant ADD_POOL_EXTRA_GAS                 = 150000;
     uint128 constant DEPLOY_TOKEN_VAULT_EXTRA_GAS       = 150000;
     uint128 constant DEPLOY_TOKEN_ROOT_EXTRA_GAS        =  20000;
-    uint128 constant TRANSFER_ROOT_OWNERSHIP            =  20000;
+    uint128 constant TRANSFER_ROOT_OWNERSHIP            =  80000;
     uint128 constant CREATE_TOKEN_EXTRA_GAS             =  50000;
     uint128 constant DEPLOY_LP_TOKEN_EXTRA_GAS          = 150000;
     uint128 constant DEPLOY_POOL_EXTRA_GAS              = 150000;
@@ -114,8 +115,8 @@ library DexGas {
     uint128 constant ACCOUNT_DEPOSIT_EXTRA_GAS          = 400000;
     uint128 constant ACCOUNT_WITHDRAW_LP_EXTRA_GAS      = 400000;
 
-    uint128 constant DIRECT_EXCHANGE_EXTRA_GAS          = 400000;
-    uint128 constant DIRECT_DEPOSIT_EXTRA_GAS           = 400000;
-    uint128 constant DIRECT_WITHDRAW_EXTRA_GAS          = 400000;
+    uint128 constant DIRECT_EXCHANGE_EXTRA_GAS          = 350000;
+    uint128 constant DIRECT_DEPOSIT_EXTRA_GAS           = 350000;
+    uint128 constant DIRECT_WITHDRAW_EXTRA_GAS          = 350000;
     uint128 constant CROSS_EXCHANGE_STEP_EXTRA_GAS      = 300000;
 }

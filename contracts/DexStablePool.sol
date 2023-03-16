@@ -611,7 +611,7 @@ contract DexStablePool is
                     all_leaves += next_step.leaves;
                 }
 
-                if (errorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(deploy_wallet_grams, referrer)) * (1 + all_nested_nodes)) {
+                if (errorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + all_nested_nodes)) {
                     errorCode = DirectOperationErrors.VALUE_TOO_LOW;
                 }
 
@@ -769,7 +769,7 @@ contract DexStablePool is
                     }
 
                     if (outcoming != lp_root) { // withdraw or exchange
-                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(deploy_wallet_grams, referrer)) * (1 + all_nested_nodes);
+                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + all_nested_nodes);
 
                         for (uint32 i = 0; i < next_steps.length; i++) {
                             NextExchangeData next_step = next_steps[i];
@@ -778,7 +778,7 @@ contract DexStablePool is
                             uint128 current_extra_value = math.muldiv(uint128(next_step.leaves), extraValue, uint128(all_leaves));
 
                             IDexBasePool(next_step.poolRoot).crossPoolExchange{
-                                value: i == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(deploy_wallet_grams, referrer)) + current_extra_value,
+                                value: i == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) + current_extra_value,
                                 flag: i == max_nested_nodes_idx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
                             }(
                                 id,
@@ -934,7 +934,7 @@ contract DexStablePool is
             return _calcValue(GasValues.getPoolDirectWithdrawOneCoinGas(_deployWalletGrams, _referrer));
         }
 
-        return 2 * _calcValue(GasValues.getPoolCrossExchangeStepGas(_deployWalletGrams, _referrer));
+        return 2 * _calcValue(GasValues.getPoolCrossExchangeStepGas(_referrer));
     }
 
     function _checkExchangeReceivedAmount(optional(ExpectedExchangeResult) dy_result_opt, uint128 expected_amount) private pure returns (uint16) {
@@ -1555,12 +1555,12 @@ contract DexStablePool is
                         all_leaves += next_step.leaves;
                     }
 
-                    if (post_swap_error_code == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(deploy_wallet_grams, referrer)) * (1 + all_nested_nodes)) {
+                    if (post_swap_error_code == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + all_nested_nodes)) {
                         post_swap_error_code = DirectOperationErrors.VALUE_TOO_LOW;
                     }
 
                     if (post_swap_error_code == 0 && next_steps.length > 0) {
-                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(deploy_wallet_grams, referrer)) * (1 + all_nested_nodes);
+                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + all_nested_nodes);
 
                         for (uint32 i = 0; i < next_steps.length; i++) {
                             NextExchangeData next_step = next_steps[i];
@@ -1569,7 +1569,7 @@ contract DexStablePool is
                             uint128 current_extra_value = math.muldiv(uint128(next_step.leaves), extraValue, uint128(all_leaves));
 
                             IDexBasePool(next_step.poolRoot).crossPoolExchange{
-                                value: i == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(deploy_wallet_grams, referrer)) + current_extra_value,
+                                value: i == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) + current_extra_value,
                                 flag: i == max_nested_nodes_idx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
                             }(
                                 id,

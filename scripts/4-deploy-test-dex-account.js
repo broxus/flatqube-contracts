@@ -1,4 +1,4 @@
-const {Migration} = require(process.cwd()+'/scripts/utils')
+const {Migration, calcValue} = require(process.cwd()+'/scripts/utils')
 const { Command } = require('commander');
 const program = new Command();
 
@@ -23,6 +23,12 @@ async function main() {
     locklift.tracing.allowCodesForAddress(accountN.address, {compute: [100]});
   }
   const dexRoot = migration.load(await locklift.factory.getContract('DexRoot'), 'DexRoot');
+  const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
+  const gas = await gasValues.call({
+    method: 'getDeployAccountGas',
+    params: {}
+  });
+
   await accountN.runTarget({
     contract: dexRoot,
     method: 'deployAccount',
@@ -31,7 +37,7 @@ async function main() {
       'send_gas_to': accountN.address
     },
     keyPair: keyPairs[options.owner_n - 1],
-    value: locklift.utils.convertCrystal(4, 'nano')
+    value: calcValue(gas)
   });
   const dexAccountNAddress = await dexRoot.call({
     method: 'getExpectedAccountAddress',

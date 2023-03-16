@@ -2181,6 +2181,13 @@ PUSHCONT {
 PUSHCONT {
 	.loc ../contracts/abstract/DexContractBase.sol, 138
 	PUSH2 S0, S3
+	PUSHINT 267
+	DICTGET
+	NULLSWAPIFNOT
+	NIP
+	THROWIF 153
+	.loc ../contracts/abstract/DexContractBase.sol, 139
+	PUSH2 S0, S3
 	NEWC
 	STSLICECONST x00
 	ROTREV
@@ -2194,14 +2201,14 @@ PUSHCONT {
 }
 WHILE
 BLKDROP 3
-.loc ../contracts/abstract/DexContractBase.sol, 141
+.loc ../contracts/abstract/DexContractBase.sol, 142
 SWAP
 FIRST
 LESSINT 3
 PUSHCONT {
-	.loc ../contracts/abstract/DexContractBase.sol, 142
+	.loc ../contracts/abstract/DexContractBase.sol, 143
 	NEWC
-	.loc ../contracts/abstract/DexContractBase.sol, 144
+	.loc ../contracts/abstract/DexContractBase.sol, 145
 	XCPU S1, S0
 	PUSHINT 267
 	DICTMIN
@@ -2221,7 +2228,7 @@ PUSHCONT {
 		NOT
 	}
 	PUSHCONT {
-		.loc ../contracts/abstract/DexContractBase.sol, 145
+		.loc ../contracts/abstract/DexContractBase.sol, 146
 		PUSH2 S1, S4
 		STSLICE
 		POP S5
@@ -2243,16 +2250,16 @@ PUSHCONT {
 	}
 	WHILE
 	BLKDROP 4
-	.loc ../contracts/abstract/DexContractBase.sol, 148
+	.loc ../contracts/abstract/DexContractBase.sol, 149
 	ENDC
 	.loc ../contracts/abstract/DexContractBase.sol, 0
 }
 PUSHCONT {
-	.loc ../contracts/abstract/DexContractBase.sol, 150
+	.loc ../contracts/abstract/DexContractBase.sol, 151
 	PUSHINT 0
 	NEWDICT
 	PAIR
-	.loc ../contracts/abstract/DexContractBase.sol, 151
+	.loc ../contracts/abstract/DexContractBase.sol, 152
 	XCPU S1, S0
 	PUSHINT 267
 	DICTMIN
@@ -2272,7 +2279,7 @@ PUSHCONT {
 		NOT
 	}
 	PUSHCONT {
-		.loc ../contracts/abstract/DexContractBase.sol, 152
+		.loc ../contracts/abstract/DexContractBase.sol, 153
 		PUSH2 S1, S4
 		UNPAIR
 		OVER
@@ -2300,7 +2307,7 @@ PUSHCONT {
 	}
 	WHILE
 	BLKDROP 4
-	.loc ../contracts/abstract/DexContractBase.sol, 154
+	.loc ../contracts/abstract/DexContractBase.sol, 155
 	NEWC
 	SWAP
 	UNPAIR
@@ -2318,7 +2325,7 @@ IFELSE
 CALL $_buildInitData_65db94e9_internal_macro$
 
 .macro _buildInitData_65db94e9_internal_macro
-.loc ../contracts/abstract/DexContractBase.sol, 162
+.loc ../contracts/abstract/DexContractBase.sol, 163
 PUSHINT 0
 NEWC
 STU 256
@@ -2362,7 +2369,7 @@ ENDC
 CALL $_buildLpTokenPendingInitData_6415a6cd_internal_macro$
 
 .macro _buildLpTokenPendingInitData_6415a6cd_internal_macro
-.loc ../contracts/abstract/DexContractBase.sol, 180
+.loc ../contracts/abstract/DexContractBase.sol, 181
 PUSHINT 0
 NEWC
 STU 256
@@ -2744,7 +2751,7 @@ THROW 0
 CALL $GasValues_with_obj_getTransferTokensGas_9b3e08c4_macro$
 
 .macro GasValues_with_obj_getTransferTokensGas_9b3e08c4_macro
-.loc ../contracts/libraries/GasValues.sol, 18
+.loc ../contracts/libraries/GasValues.sol, 19
 DUP
 PUSHINT 200000
 PAIR
@@ -2755,7 +2762,7 @@ PAIR
 CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
 
 .macro GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro
-.loc ../contracts/libraries/GasValues.sol, 18
+.loc ../contracts/libraries/GasValues.sol, 19
 PUSHINT 200000
 PAIR
 .loc ../contracts/libraries/GasValues.sol, 0
@@ -2765,15 +2772,12 @@ PAIR
 CALL $GasValues_no_obj_getDeployTokenVaultGas_474c1893_macro$
 
 .macro GasValues_no_obj_getDeployTokenVaultGas_474c1893_macro
-.loc ../contracts/libraries/GasValues.sol, 99
+.loc ../contracts/libraries/GasValues.sol, 109
 CALLREF {
 	CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 100
+.loc ../contracts/libraries/GasValues.sol, 110
 PUSHINT 1000000000
-PUSHINT 100000000
-ADD
-UFITS 128
 PUSHINT 2
 PUSH S2
 FIRST
@@ -2797,7 +2801,7 @@ PAIR
 CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
 
 .macro GasValues_no_obj_getDeployWalletGas_38991eb4_macro
-.loc ../contracts/libraries/GasValues.sol, 10
+.loc ../contracts/libraries/GasValues.sol, 11
 PUSHINT 120000000
 PUSHINT 100000000
 ADD
@@ -2811,7 +2815,7 @@ PAIR
 CALL $GasValues_no_obj_getUpgradeVaultGas_34721fff_macro$
 
 .macro GasValues_no_obj_getUpgradeVaultGas_34721fff_macro
-.loc ../contracts/libraries/GasValues.sol, 354
+.loc ../contracts/libraries/GasValues.sol, 359
 PUSHINT 100000000
 PUSHINT 250000
 PAIR
