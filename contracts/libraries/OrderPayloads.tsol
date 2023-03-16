@@ -84,7 +84,8 @@ library OrderPayloads {
         uint64 callbackId,
         address sendGasTo,
         uint128 deployWalletValue,
-        uint128 amount,
+        uint128 alienSpentAmount,
+        uint128 expectedAmount,
         uint128 reward
     ) public returns(TvmCell) {
         TvmBuilder builder;
@@ -92,7 +93,8 @@ library OrderPayloads {
         builder.store(callbackId);
         builder.store(sendGasTo);
         builder.store(deployWalletValue);
-        builder.store(amount);
+        builder.store(alienSpentAmount);
+        builder.store(expectedAmount);
         builder.store(reward);
 
         return builder.toCell();
@@ -102,17 +104,22 @@ library OrderPayloads {
         uint8 op,
         uint64 callbackId,
         address sendGasTo,
+        uint128 alienSpentAmount,
+        uint128 expectedAmount,
         address owner
     ) public returns(TvmCell) {
         TvmBuilder builder;
         builder.store(op);
         builder.store(callbackId);
         builder.store(sendGasTo);
+        builder.store(alienSpentAmount);
+        builder.store(expectedAmount);
         builder.store(owner);
 
         return builder.toCell();
     }
 
+    //TODO check payloads
     function decodeOnAcceptTokenTransferData (TvmCell _payload, uint8 state) public returns (
         bool,
         uint8,
@@ -120,6 +127,7 @@ library OrderPayloads {
         address,
         address,
         address,
+        uint128,
         uint128,
         uint128,
         uint128
@@ -146,14 +154,21 @@ library OrderPayloads {
         address sendGasInMatching;
         address recipient;
         uint128 deployWalletValue;
-        uint128 amountForDeal;
+        uint128 alienSpentAmount; //TODO
+        uint128 expectedAmount;
         uint128 reward;
 
+        //TODO check decode
         if (isValid) {
-            (
-                op,
-                callbackId
-            ) = payloadSlice.decode(uint8, uint64);
+            if (state == OrderStatus.Initialize || state == OrderStatus.AwaitTokens) {
+                op = OrderOperationTypes.CREATE_ORDER_IN_ORDER_ROOT;
+                callbackId = payloadSlice.decode(uint64);
+            } else {
+                (
+                    op,
+                    callbackId
+                ) = payloadSlice.decode(uint8, uint64);
+            }
 
             if (
                 payloadSlice.bits() >= 128 &&
@@ -170,18 +185,29 @@ library OrderPayloads {
                 }
             }
 
-            if (payloadSlice.bits() >= 128 &&
-            (
-                op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE ||
-                op == DexOperationStatusV2.SUCCESS
-            )
-            ){
-                deployWalletValue = payloadSlice.decode(uint128);
+            if (payloadSlice.bits() >= 128) {
+                if (
+                    op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE ||
+                    op == DexOperationStatusV2.SUCCESS
+                ){
+                    deployWalletValue = payloadSlice.decode(uint128);
+                } else if (op == OrderOperationTypes.MATCHING_ORDER_TRANSFER) {
+                    alienSpentAmount = payloadSlice.decode(uint128);
+                }
+            }
+
+            if (payloadSlice.bits() >= 128) {
+                if (op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE)
+                {
+                    alienSpentAmount = payloadSlice.decode(uint128);
+                } else if (op == OrderOperationTypes.MATCHING_ORDER_TRANSFER) {
+                    expectedAmount = payloadSlice.decode(uint128);
+                }
             }
 
             if (payloadSlice.bits() >= 256) {
                 if (op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE) {
-                    (amountForDeal, reward) = payloadSlice.decode(uint128, uint128);
+                    (expectedAmount, reward) = payloadSlice.decode(uint128, uint128);
                 } else if (op == OrderOperationTypes.MATCHING_ORDER_TRANSFER){
                     sendGasInMatching = payloadSlice.decode(address);
                 }
@@ -196,7 +222,8 @@ library OrderPayloads {
             sendGasTo,
             sendGasInMatching,
             deployWalletValue,
-            amountForDeal,
+            alienSpentAmount,
+            expectedAmount,
             reward
         );
     }
