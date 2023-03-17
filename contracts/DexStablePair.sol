@@ -594,7 +594,7 @@ contract DexStablePair is
                     }
 
                     if (errorCode == 0) {
-                        if (msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + all_nested_nodes)) {
+                        if (msg.value < (_calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + all_nested_nodes) + _calcValue(GasValues.getTransferTokensGas(0)))) {
                             errorCode = DirectOperationErrors.VALUE_TOO_LOW;
                         } else if (!dy_result_opt.hasValue()) {
                             errorCode = DirectOperationErrors.INVALID_RECEIVED_AMOUNT;
@@ -664,7 +664,9 @@ contract DexStablePair is
                             empty
                         );
 
-                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + all_nested_nodes);
+                        uint128 extraValue = msg.value
+                            - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + all_nested_nodes)
+                            - _calcValue(GasValues.getTransferTokensGas(0));
 
                         for (uint32 idx = 0; idx < next_steps.length; idx++) {
                             NextExchangeData next_step = next_steps[idx];

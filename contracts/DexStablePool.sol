@@ -611,7 +611,7 @@ contract DexStablePool is
                     all_leaves += next_step.leaves;
                 }
 
-                if (errorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + all_nested_nodes)) {
+                if (errorCode == 0 && msg.value < (_calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + all_nested_nodes) + _calcValue(GasValues.getTransferTokensGas(0)))) {
                     errorCode = DirectOperationErrors.VALUE_TOO_LOW;
                 }
 
@@ -769,7 +769,9 @@ contract DexStablePool is
                     }
 
                     if (outcoming != lp_root) { // withdraw or exchange
-                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + all_nested_nodes);
+                        uint128 extraValue = msg.value
+                            - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + all_nested_nodes)
+                            - _calcValue(GasValues.getTransferTokensGas(0));
 
                         for (uint32 i = 0; i < next_steps.length; i++) {
                             NextExchangeData next_step = next_steps[i];

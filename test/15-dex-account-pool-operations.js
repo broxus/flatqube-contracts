@@ -6,7 +6,8 @@ const {
     getRandomNonce,
     TOKEN_CONTRACTS_PATH,
     displayTx,
-    expectedDepositLiquidity
+    expectedDepositLiquidity,
+    calcValue
 } = require(process.cwd() + '/scripts/utils');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
@@ -48,6 +49,7 @@ let Account2;
 let DexAccount2;
 let poolLpWallet2;
 let tokenWallets2;
+let gasValues
 
 let keyPairs;
 
@@ -113,6 +115,8 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
     this.timeout(Constants.TESTS_TIMEOUT);
     before('Load contracts', async function () {
         keyPairs = await locklift.keys.getKeyPairs();
+
+        gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
 
         DexRoot = await locklift.factory.getContract('DexRoot');
         DexPool = await locklift.factory.getContract(options.pool_contract_name);
@@ -252,6 +256,11 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
                     false
                 );
 
+                const gas = await gasValues.call({
+                    method: 'getAccountDepositGas',
+                    params: {N: N_COINS, referrer: locklift.utils.zeroAddress}
+                });
+
                 const tx = await Account2.runTarget({
                     contract: DexAccount2,
                     method: 'depositLiquidityV2',
@@ -265,7 +274,7 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
                         _remainingGasTo: Account2.address,
                         _referrer: locklift.utils.zeroAddress
                     },
-                    value: locklift.utils.convertCrystal('1.1', 'nano'),
+                    value: calcValue(gas),
                     keyPair: keyPairs[1]
                 });
 
@@ -368,6 +377,11 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
                     true
                 );
 
+                const gas = await gasValues.call({
+                    method: 'getAccountDepositGas',
+                    params: {N: N_COINS, referrer: locklift.utils.zeroAddress}
+                });
+
                 const tx = await Account2.runTarget({
                     contract: DexAccount2,
                     method: 'depositLiquidityV2',
@@ -382,7 +396,7 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
                         _remainingGasTo: Account2.address,
                         _referrer: locklift.utils.zeroAddress
                     },
-                    value: locklift.utils.convertCrystal('2', 'nano'),
+                    value: calcValue(gas),
                     keyPair: keyPairs[1]
                 });
 
@@ -481,6 +495,11 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
                 true
             );
 
+            const gas = await gasValues.call({
+                method: 'getAccountDepositGas',
+                params: {N: N_COINS, referrer: locklift.utils.zeroAddress}
+            });
+
             const tx = await Account2.runTarget({
                 contract: DexAccount2,
                 method: 'depositLiquidityV2',
@@ -495,7 +514,7 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
                     _remainingGasTo: Account2.address,
                     _referrer: locklift.utils.zeroAddress
                 },
-                value: locklift.utils.convertCrystal('2', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[1]
             });
 
@@ -577,6 +596,11 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
                     logger.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
                     logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-tokens[j].decimals).toString()} ${tokens[j].symbol}`);
 
+                    const gas = await gasValues.call({
+                        method: 'getAccountExchangeGas',
+                        params: {}
+                    });
+
                     tx = await Account2.runTarget({
                         contract: DexAccount2,
                         method: 'exchangeV2',
@@ -593,7 +617,7 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
                             _roots: roots,
                             _remainingGasTo: Account2.address
                         },
-                        value: locklift.utils.convertCrystal('2', 'nano'),
+                        value: calcValue(gas),
                         keyPair: keyPairs[1]
                     });
 
@@ -649,6 +673,11 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
             logger.log(`Expected fee: ${new BigNumber(expected.expected_fee).shiftedBy(-tokens[i].decimals).toString()} ${tokens[i].symbol}`);
             logger.log(`Expected receive amount: ${new BigNumber(expected.expected_amount).shiftedBy(-tokens[j].decimals).toString()} ${tokens[j].symbol}`);
 
+            const gas = await gasValues.call({
+                method: 'getAccountExchangeGas',
+                params: {}
+            });
+
             tx = await Account2.runTarget({
                 contract: DexAccount2,
                 method: 'exchangeV2',
@@ -665,7 +694,7 @@ describe(`DexAccount interact with ${options.pool_contract_name}`, async functio
                     _roots: roots,
                     _remainingGasTo: Account2.address
                 },
-                value: locklift.utils.convertCrystal('1.1', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[1]
             });
 

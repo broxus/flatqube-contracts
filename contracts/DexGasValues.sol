@@ -78,6 +78,7 @@ contract DexGasValues is IGasValueStructure {
     function getUpgradePoolGas() external pure returns (GasValue) {
         GasValue upgradePool = GasValues.getUpgradePoolGas();
         upgradePool.fixedValue += DexGas.DEX_ROOT_COMPENSATION;
+        upgradePool.dynamicGas += 100000;
 
         return upgradePool;
     }
@@ -117,8 +118,8 @@ contract DexGasValues is IGasValueStructure {
         return addPool;
     }
 
-    function getAccountWithdrawGas(uint128 _deployWalletValue) external pure returns (GasValue) {
-        GasValue accountWithdraw = GasValues.getAccountWithdrawGas(_deployWalletValue);
+    function getAccountWithdrawGas(uint128 deployWalletValue) external pure returns (GasValue) {
+        GasValue accountWithdraw = GasValues.getAccountWithdrawGas(deployWalletValue);
         accountWithdraw.fixedValue += DexGas.DEX_ACCOUNT_COMPENSATION;
 
         return accountWithdraw;
@@ -152,40 +153,46 @@ contract DexGasValues is IGasValueStructure {
         return accountWithdrawLiquidity;
     }
 
-    function getPoolDirectExchangeGas(uint128 _deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue poolDirectExchange = GasValues.getPoolDirectExchangeGas(_deployWalletValue, referrer);
+    function getPoolDirectExchangeGas(uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue poolDirectExchange = GasValues.getPoolDirectExchangeGas(deployWalletValue, referrer);
         poolDirectExchange.fixedValue += DexGas.DEX_POOL_COMPENSATION;
 
         return poolDirectExchange;
     }
 
-    function getPoolDirectDepositGas(uint128 _deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue poolDirectDeposit = GasValues.getPoolDirectDepositGas(_deployWalletValue, referrer);
+    function getPoolDirectDepositGas(uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue poolDirectDeposit = GasValues.getPoolDirectDepositGas(deployWalletValue, referrer);
         poolDirectDeposit.fixedValue += DexGas.DEX_POOL_COMPENSATION;
 
         return poolDirectDeposit;
     }
 
-    function getPoolDirectWithdrawGas(uint8 N, uint128 _deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue poolDirectWithdraw = GasValues.getPoolDirectWithdrawGas(N, _deployWalletValue, referrer);
+    function getPoolDirectWithdrawGas(uint8 N, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue poolDirectWithdraw = GasValues.getPoolDirectWithdrawGas(N, deployWalletValue, referrer);
         poolDirectWithdraw.fixedValue += DexGas.DEX_POOL_COMPENSATION;
 
         return poolDirectWithdraw;
     }
 
-    function getPoolDirectWithdrawOneCoinGas(uint128 _deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue poolDirectWithdraw = GasValues.getPoolDirectWithdrawOneCoinGas(_deployWalletValue, referrer);
-        poolDirectWithdraw.fixedValue += DexGas.DEX_POOL_COMPENSATION;
+    function getPoolDirectWithdrawOneCoinGas(uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue poolDirectWithdrawOneCoin = GasValues.getPoolDirectWithdrawOneCoinGas(deployWalletValue, referrer);
+        poolDirectWithdrawOneCoin.fixedValue += DexGas.DEX_POOL_COMPENSATION;
 
-        return GasValues.getPoolDirectWithdrawOneCoinGas(_deployWalletValue, referrer);
+        return poolDirectWithdrawOneCoin;
     }
 
-    function getPoolCrossExchangeGas(uint32 steps, uint32 leaves, uint128 _deployWalletValue, address referrer) external pure returns (GasValue) {
+    function getPoolCrossExchangeGas(uint32 steps, uint32 leaves, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
         GasValue poolCrossExchangeStep = GasValues.getPoolCrossExchangeStepGas(referrer);
+        GasValue transferTokens = GasValues.getTransferTokensGas(0); // spent token transfer
 
         return GasValue(
-            poolCrossExchangeStep.fixedValue * steps + _deployWalletValue * leaves,
-            poolCrossExchangeStep.dynamicGas * steps + DexGas.DEX_POOL_COMPENSATION
+            poolCrossExchangeStep.fixedValue * steps +
+            deployWalletValue * leaves +
+            transferTokens.fixedValue +
+            DexGas.DEX_POOL_COMPENSATION,
+
+            poolCrossExchangeStep.dynamicGas * steps +
+            transferTokens.dynamicGas
         );
     }
 
@@ -196,9 +203,9 @@ contract DexGasValues is IGasValueStructure {
         return upgradeVault;
     }
 
-    function getEverToTip3ExchangeGas(uint128 _deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue everToTip3 = GasValues.getEverToTip3ExchangeGas(_deployWalletValue);
-        GasValue poolDirectExchange = GasValues.getPoolDirectExchangeGas(_deployWalletValue, referrer);
+    function getEverToTip3ExchangeGas(uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue everToTip3 = GasValues.getEverToTip3ExchangeGas(deployWalletValue);
+        GasValue poolDirectExchange = GasValues.getPoolDirectExchangeGas(deployWalletValue, referrer);
 
         return GasValue(
             everToTip3.fixedValue + poolDirectExchange.fixedValue + EverToTip3Gas.EVER_WEVER_TIP3_COMPENSATION,
@@ -206,21 +213,21 @@ contract DexGasValues is IGasValueStructure {
         );
     }
 
-    function getEverToTip3CrossExchangeGas(uint32 steps, uint32 leaves, uint128 _deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue everToTip3 = GasValues.getEverToTip3CrossExchangeGas(_deployWalletValue, leaves);
+    function getEverToTip3CrossExchangeGas(uint32 steps, uint32 leaves, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue everToTip3 = GasValues.getEverToTip3CrossExchangeGas(deployWalletValue, leaves);
         GasValue poolCrossExchangeStep = GasValues.getPoolCrossExchangeStepGas(referrer);
 
         return GasValue(
-            everToTip3.fixedValue + steps * poolCrossExchangeStep.fixedValue + _deployWalletValue * leaves +
+            everToTip3.fixedValue + steps * poolCrossExchangeStep.fixedValue + deployWalletValue * leaves +
             EverToTip3Gas.EVER_WEVER_TIP3_COMPENSATION,
 
             everToTip3.dynamicGas + steps * poolCrossExchangeStep.dynamicGas
         );
     }
 
-    function getTip3ToEverExchangeGas(uint128 _deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue tip3ToEver = GasValues.getTip3ToEverExchangeGas(_deployWalletValue);
-        GasValue poolDirectExchange = GasValues.getPoolDirectExchangeGas(_deployWalletValue, referrer);
+    function getTip3ToEverExchangeGas(uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue tip3ToEver = GasValues.getTip3ToEverExchangeGas(deployWalletValue);
+        GasValue poolDirectExchange = GasValues.getPoolDirectExchangeGas(deployWalletValue, referrer);
 
         return GasValue(
             tip3ToEver.fixedValue + poolDirectExchange.fixedValue + EverToTip3Gas.EVER_WEVER_TIP3_COMPENSATION,
@@ -228,8 +235,8 @@ contract DexGasValues is IGasValueStructure {
         );
     }
 
-    function getTip3ToEverCrossExchangeGas(uint32 steps, uint32 leaves, uint128 _deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue tip3ToEver = GasValues.getTip3ToEverCrossExchangeGas(_deployWalletValue, leaves);
+    function getTip3ToEverCrossExchangeGas(uint32 steps, uint32 leaves, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue tip3ToEver = GasValues.getTip3ToEverCrossExchangeGas(deployWalletValue, leaves);
         GasValue poolCrossExchangeStep = GasValues.getPoolCrossExchangeStepGas(referrer);
 
         return GasValue(
@@ -238,9 +245,9 @@ contract DexGasValues is IGasValueStructure {
         );
     }
 
-    function getEverWeverToTip3ExchangeGas(uint128 _deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue everWeverToTip3 = GasValues.getEverWeverToTip3ExchangeGas(_deployWalletValue);
-        GasValue poolDirectExchange = GasValues.getPoolDirectExchangeGas(_deployWalletValue, referrer);
+    function getEverWeverToTip3ExchangeGas(uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue everWeverToTip3 = GasValues.getEverWeverToTip3ExchangeGas(deployWalletValue);
+        GasValue poolDirectExchange = GasValues.getPoolDirectExchangeGas(deployWalletValue, referrer);
 
         return GasValue(
             everWeverToTip3.fixedValue + poolDirectExchange.fixedValue + EverToTip3Gas.EVER_WEVER_TIP3_COMPENSATION,
@@ -248,12 +255,12 @@ contract DexGasValues is IGasValueStructure {
         );
     }
 
-    function getEverWeverToTip3CrossExchangeGas(uint32 steps, uint32 leaves, uint128 _deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue everWeverToTip3 = GasValues.getEverWeverToTip3CrossExchangeGas(_deployWalletValue, leaves);
+    function getEverWeverToTip3CrossExchangeGas(uint32 steps, uint32 leaves, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue everWeverToTip3 = GasValues.getEverWeverToTip3CrossExchangeGas(deployWalletValue, leaves);
         GasValue poolCrossExchangeStep = GasValues.getPoolCrossExchangeStepGas(referrer);
 
         return GasValue(
-            everWeverToTip3.fixedValue + steps * poolCrossExchangeStep.fixedValue + _deployWalletValue * leaves +
+            everWeverToTip3.fixedValue + steps * poolCrossExchangeStep.fixedValue + deployWalletValue * leaves +
             EverToTip3Gas.EVER_WEVER_TIP3_COMPENSATION,
 
             everWeverToTip3.dynamicGas + steps * poolCrossExchangeStep.dynamicGas

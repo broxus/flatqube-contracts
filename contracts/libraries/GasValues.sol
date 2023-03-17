@@ -24,10 +24,10 @@ library GasValues {
 
     // GENERAL
 
-    // 0.2 ever
-    function getMintTokensGas(uint128 _deployWalletValue) public returns(IGasValueStructure.GasValue) {
+    // 0.2 ever + _deployWalletValue
+    function getMintTokensGas(uint128 deployWalletValue) public returns(IGasValueStructure.GasValue) {
         return IGasValueStructure.GasValue(
-            DexGas.TOKEN_ROOT_COMPENSATION + _deployWalletValue,
+            DexGas.TOKEN_ROOT_COMPENSATION + deployWalletValue,
             DexGas.MINT_TOKENS_EXTRA_GAS
         );
     }
@@ -231,11 +231,11 @@ library GasValues {
             DexGas.DEX_POOL_COMPENSATION +
             DexGas.OPERATION_CALLBACK +
             mintToken.fixedValue +
-            referrer.value != 0 ? N * referralProgram.fixedValue : 0,
+            (referrer.value != 0 ? N * referralProgram.fixedValue : 0),
 
             DexGas.ACCOUNT_DEPOSIT_EXTRA_GAS +
             mintToken.dynamicGas +
-            referrer.value != 0 ? N * referralProgram.dynamicGas : 0
+            (referrer.value != 0 ? N * referralProgram.dynamicGas : 0)
         );
     }
 
@@ -273,12 +273,12 @@ library GasValues {
             2 * DexGas.OPERATION_CALLBACK +
             internalPairTransfer.fixedValue +
             transferTokens.fixedValue +
-            referrer.value != 0 ? referralProgram.fixedValue : 0,
+            (referrer.value != 0 ? referralProgram.fixedValue : 0),
 
             internalPairTransfer.dynamicGas + // beneficiary_fee transfer
             transferTokens.dynamicGas +
             DexGas.DIRECT_EXCHANGE_EXTRA_GAS +
-            referrer.value != 0 ? referralProgram.dynamicGas : 0
+            (referrer.value != 0 ? referralProgram.dynamicGas : 0)
         );
     }
 
@@ -291,12 +291,12 @@ library GasValues {
             2 * DexGas.OPERATION_CALLBACK +
             transferTokens.fixedValue +
             mintTokens.fixedValue +
-            referrer.value != 0 ? referralProgram.fixedValue : 0,
+            (referrer.value != 0 ? referralProgram.fixedValue : 0),
 
             DexGas.DIRECT_DEPOSIT_EXTRA_GAS +
             transferTokens.dynamicGas +
             mintTokens.dynamicGas +
-            referrer.value != 0 ? referralProgram.dynamicGas : 0
+            (referrer.value != 0 ? referralProgram.dynamicGas : 0)
         );
     }
 
@@ -307,11 +307,11 @@ library GasValues {
             2 * DexGas.OPERATION_CALLBACK +
             DexGas.DEX_POOL_COMPENSATION +
             N * tokenVaultTransfer.fixedValue +
-            referrer.value != 0 ? N * referralProgram.fixedValue : 0,
+            (referrer.value != 0 ? N * referralProgram.fixedValue : 0),
 
             DexGas.DIRECT_WITHDRAW_EXTRA_GAS +
             N * tokenVaultTransfer.dynamicGas +
-            referrer.value != 0 ? N * referralProgram.dynamicGas : 0
+            (referrer.value != 0 ? N * referralProgram.dynamicGas : 0)
         );
     }
 
@@ -322,11 +322,11 @@ library GasValues {
             2 * DexGas.OPERATION_CALLBACK +
             DexGas.DEX_POOL_COMPENSATION +
             tokenVaultTransfer.fixedValue +
-            referrer.value != 0 ? referralProgram.fixedValue : 0,
+            (referrer.value != 0 ? referralProgram.fixedValue : 0),
 
             DexGas.DIRECT_WITHDRAW_EXTRA_GAS +
             tokenVaultTransfer.dynamicGas +
-            referrer.value != 0 ? referralProgram.dynamicGas : 0
+            (referrer.value != 0 ? referralProgram.dynamicGas : 0)
         );
     }
 
@@ -335,10 +335,10 @@ library GasValues {
         return IGasValueStructure.GasValue(
             2 * DexGas.OPERATION_CALLBACK +
             DexGas.DEX_POOL_COMPENSATION +
-            referrer.value != 0 ? referralProgram.fixedValue : 0,
+            (referrer.value != 0 ? referralProgram.fixedValue : 0),
 
             DexGas.CROSS_EXCHANGE_STEP_EXTRA_GAS +
-            referrer.value != 0 ? referralProgram.dynamicGas : 0
+            (referrer.value != 0 ? referralProgram.dynamicGas : 0)
         );
     }
 

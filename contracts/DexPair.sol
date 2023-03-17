@@ -1416,7 +1416,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                     }
 
                     // Check reserves, fees, msg.value and expected amount
-                    if (errorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + allNestedNodes)) {
+                    if (errorCode == 0 && msg.value < (_calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + allNestedNodes) + _calcValue(GasValues.getTransferTokensGas(0)))) {
                         errorCode = DirectOperationErrors.VALUE_TOO_LOW;
                     } else if (
                         amount > _reserves()[receiveTokenIndex] ||
@@ -1461,7 +1461,9 @@ contract DexPair is DexPairBase, INextExchangeData {
                             );
 
                         // Continue cross-pair exchange
-                        uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + allNestedNodes);
+                        uint128 extraValue = msg.value
+                            - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * (1 + allNestedNodes)
+                            - _calcValue(GasValues.getTransferTokensGas(0));
 
                         for (uint32 i = 0; i < nextSteps.length; i++) {
                             NextExchangeData nextStep = nextSteps[i];

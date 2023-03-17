@@ -632,7 +632,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
                         roots,
 
                         op,
-                        _root,
+                        _tokenRoot,
                         nextPoolAmount,
 
                         senderAddress,

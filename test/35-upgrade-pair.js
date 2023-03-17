@@ -2,7 +2,7 @@ const {expect} = require('chai');
 const logger = require('mocha-logger');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
-const {Migration, TOKEN_CONTRACTS_PATH, afterRun, Constants, displayTx} = require(process.cwd() + '/scripts/utils');
+const {Migration, TOKEN_CONTRACTS_PATH, afterRun, Constants, displayTx, calcValue} = require(process.cwd() + '/scripts/utils');
 const { Command } = require('commander');
 const program = new Command();
 
@@ -142,6 +142,12 @@ describe('Test Dex Pair contract upgrade', async function () {
         - target version = ${targetVersion}
         - target pool_type = ${options.pool_type}`);
 
+    const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
+    const gas = await gasValues.call({
+      method: 'getUpgradePoolGas',
+      params: {}
+    });
+
     const tx = await account.runTarget({
       contract: dexRoot,
       method: 'upgradePair',
@@ -151,7 +157,7 @@ describe('Test Dex Pair contract upgrade', async function () {
         send_gas_to: account.address,
         pool_type: options.pool_type
       },
-      value: locklift.utils.convertCrystal(6, 'nano'),
+      value: calcValue(gas),
       keyPair
     });
 
