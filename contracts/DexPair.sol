@@ -301,7 +301,7 @@ contract DexPair is DexPairBase, INextExchangeData {
 
                 if (result.step_1_left_deposit < operations[0].amount) {
                     IDexAccount(msg.sender)
-                        .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+                        .internalPoolTransfer{ value: _calcValue(GasValues.getInternalPairTransferGas()), flag: MsgFlag.SENDER_PAYS_FEES }
                         (
                             operations[0].amount - result.step_1_left_deposit,
                             tokenRoots[0],
@@ -312,7 +312,7 @@ contract DexPair is DexPairBase, INextExchangeData {
 
                 if (result.step_1_right_deposit < operations[1].amount) {
                     IDexAccount(msg.sender)
-                        .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
+                        .internalPoolTransfer{ value: _calcValue(GasValues.getInternalPairTransferGas()), flag: MsgFlag.SENDER_PAYS_FEES }
                         (
                             operations[1].amount - result.step_1_right_deposit,
                             tokenRoots[1],
@@ -1042,7 +1042,9 @@ contract DexPair is DexPairBase, INextExchangeData {
                             maxNestedNodesIdx = i;
                         }
                         denominator += nextStep.numerator;
-                        allNestedNodes += nextStep.nestedNodes;
+                        if (_op != DexOperationTypes.CROSS_PAIR_EXCHANGE) { // consider only next swap in case of cross_swap_v1
+                            allNestedNodes += nextStep.nestedNodes;
+                        }
                         allLeaves += nextStep.leaves;
                     }
 
@@ -1411,7 +1413,9 @@ contract DexPair is DexPairBase, INextExchangeData {
                             maxNestedNodesIdx = i;
                         }
                         denominator += nextStep.numerator;
-                        allNestedNodes += nextStep.nestedNodes;
+                        if (op != DexOperationTypes.CROSS_PAIR_EXCHANGE) { // consider only next swap in case of cross_swap_v1
+                            allNestedNodes += nextStep.nestedNodes;
+                        }
                         allLeaves += nextStep.leaves;
                     }
 

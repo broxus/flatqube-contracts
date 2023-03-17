@@ -1,5 +1,15 @@
 const {expect} = require('chai');
-const {Migration, afterRun, Constants, getRandomNonce, TOKEN_CONTRACTS_PATH, displayTx, logExpectedDeposit, logExpectedDepositV2} = require(process.cwd() + '/scripts/utils');
+const {
+    Migration,
+    afterRun,
+    Constants,
+    getRandomNonce,
+    TOKEN_CONTRACTS_PATH,
+    displayTx,
+    logExpectedDeposit,
+    logExpectedDepositV2,
+    calcValue
+} = require(process.cwd() + '/scripts/utils');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
 const logger = require('mocha-logger');
@@ -60,6 +70,7 @@ let tokenVaultWallets;
 let poolLpVaultWallet;
 let poolTokenWallets;
 let poolLpPoolWallet;
+let gasValues;
 
 let keyPairs;
 
@@ -223,6 +234,8 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
     this.timeout(Constants.TESTS_TIMEOUT);
     before('Load contracts', async function () {
         keyPairs = await locklift.keys.getKeyPairs();
+
+        gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
 
         DexRoot = await locklift.factory.getContract('DexRoot');
         DexVault = await locklift.factory.getContract('DexVault');
@@ -407,6 +420,11 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             const feeParamsStart = await DexPool.call({method: 'getFeeParams', params: {}});
             logger.log(`# Fee params start:`, JSON.stringify(feeParamsStart, null, 2));
 
+            const gas = await gasValues.call({
+                method: 'getSetFeeParamsGas',
+                params: {}
+            });
+
             const roots = Object.values(tokenRoots).map((elem) => elem.address);
             await Account1.runTarget({
                 contract: DexRoot,
@@ -416,6 +434,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                     _params: options.fee,
                     _remainingGasTo: Account1.address
                 },
+                value: calcValue(gas),
                 keyPair: keyPairs[0]
             });
 
@@ -513,6 +532,11 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                 logExpectedDeposit(expected, tokens);
             }
 
+            const gas = await gasValues.call({
+                method: 'getAccountDepositGas',
+                params: {N: N_COINS, referrer: Account2.address}
+            });
+
             const tx = await Account2.runTarget({
                 contract: DexAccount2,
                 method: 'depositLiquidityV2',
@@ -526,7 +550,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                     _remainingGasTo: Account2.address,
                     _referrer: Account2.address
                 },
-                value: locklift.utils.convertCrystal('5', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[1]
             });
 
@@ -748,13 +772,21 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                 payload = await DexPool.call({
                     method: 'buildDepositLiquidityPayloadV2', params: {
                         _id: 0,
-                        _deployWalletGrams: locklift.utils.convertCrystal('0.2', 'nano'),
+                        _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
                         _expectedAmount: new BigNumber(LP_REWARD).shiftedBy(Constants.LP_DECIMALS),
                         _recipient: Account2.address,
                         _referrer: Account2.address
                     }
                 });
             }
+
+            const gas = await gasValues.call({
+                method: 'getPoolDirectDepositGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
+                    referrer: Account2.address
+                }
+            });
 
             tx = await Account2.runTarget({
                 contract: tokenWallets2[1],
@@ -767,7 +799,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('3.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[1]
             });
 
@@ -983,6 +1015,14 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                 });
             }
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectExchangeGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
+                    referrer: Account2.address
+                }
+            });
+
             tx = await Account2.runTarget({
                 contract: tokenWallets2[1],
                 method: 'transfer',
@@ -994,7 +1034,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('3.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[1]
             });
 
@@ -1118,7 +1158,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                 payload = await DexPool.call({
                     method: 'buildExchangePayload', params: {
                         id: 0,
-                        deploy_wallet_grams: 0,
+                        deploy_wallet_grams: locklift.utils.convertCrystal('0.05', 'nano'),
                         expected_amount: 0,
                         outcoming: tokenRoots[1].address,
                         recipient: Account2.address,
@@ -1129,13 +1169,21 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                 payload = await DexPool.call({
                     method: 'buildExchangePayloadV2', params: {
                         _id: 0,
-                        _deployWalletGrams: locklift.utils.convertCrystal('0.2', 'nano'),
+                        _deployWalletGrams: locklift.utils.convertCrystal('0.05', 'nano'),
                         _expectedAmount: 0,
                         _recipient: Account2.address,
                         _referrer: Account2.address
                     }
                 });
             }
+
+            const gas = await gasValues.call({
+                method: 'getPoolDirectExchangeGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
+                    referrer: Account2.address
+                }
+            });
 
             tx = await Account2.runTarget({
                 contract: tokenWallets2[0],
@@ -1148,7 +1196,7 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('3.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[1]
             });
 

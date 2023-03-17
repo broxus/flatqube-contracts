@@ -6,11 +6,10 @@ library EverToTip3Gas {
     uint128 constant OPERATION_CALLBACK_BASE            = 0.01 ever;
     uint128 constant MINT_DEPLOY_EMPTY_WALLET_GRAMS     = 0.1 ever;
 
-    // comment out later
-    uint128 constant DEPLOY_EMPTY_WALLET_VALUE      = 0.5 ever;
+//    uint128 constant DEPLOY_EMPTY_WALLET_VALUE      = 0.5 ever;
 //    uint128 constant DEPLOY_EMPTY_WALLET_GRAMS      = 0.1 ever;
-    uint128 constant SWAP_TIP3_TO_EVER_MIN_VALUE    = 3 ever;
-    uint128 constant SWAP_EVER_TO_TIP3_MIN_VALUE    = 4 ever;
+//    uint128 constant SWAP_TIP3_TO_EVER_MIN_VALUE    = 3 ever;
+//    uint128 constant SWAP_EVER_TO_TIP3_MIN_VALUE    = 4 ever;
 
     uint128 constant EVER_WEVER_TIP3_COMPENSATION       = 0.1 ever;
     uint128 constant TOKEN_ROOT_COMPENSATION            = 0.1 ever;

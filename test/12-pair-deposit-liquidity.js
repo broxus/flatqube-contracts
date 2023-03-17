@@ -256,7 +256,7 @@ describe('DexAccount interact with DexPair', async function () {
                     auto_change: options.auto_change,
                     send_gas_to: Account2.address
                 },
-                value: calcValue(gas),
+                value: options.account_contract_name === 'DexAccountPrev' ? locklift.utils.convertCrystal('1.1', 'nano') : calcValue(gas),
                 keyPair: keyPairs[1]
             });
 

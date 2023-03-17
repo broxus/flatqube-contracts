@@ -61,7 +61,7 @@ async function main() {
         right_root: tokenBar.address,
         send_gas_to: account2.address,
       },
-      value: calcValue(gas),
+      value: options.contract_name === 'DexPairPrev' ? locklift.utils.convertCrystal(15, 'nano') : calcValue(gas),
       keyPair: keyPairs[1]
     });
 

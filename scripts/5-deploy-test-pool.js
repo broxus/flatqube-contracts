@@ -67,7 +67,7 @@ async function main() {
                 roots: tokenAddresses,
                 send_gas_to: account.address,
             },
-            value: calcValue(gas),
+            value: options.contract_name === 'DexStablePoolPrev' ? locklift.utils.convertCrystal(20, 'nano') : calcValue(gas),
             keyPair: keyPair
         });
 

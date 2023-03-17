@@ -394,7 +394,7 @@ contract DexVault is DexContractBase, IDexVault, IGasValueStructure {
 
             IReferralProgramCallbacks(_refProgramParams.projectAddress)
                 .onRefLastUpdate{
-                    value: _calcValue(GasValue(0, DexGas.REFERRAL_PROGRAM_CALLBACK)),
+                    value: _calcValue(GasValue(DexGas.REFERRAL_PROGRAM_CALLBACK_FIXED, DexGas.REFERRAL_PROGRAM_CALLBACK_GAS)),
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(_referral, _referrer, _referral);

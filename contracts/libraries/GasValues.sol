@@ -73,8 +73,8 @@ library GasValues {
     // 1.05 ever
     function getReferralProgramGas() public returns(IGasValueStructure.GasValue) {
         return IGasValueStructure.GasValue(
-            DexGas.REFERRAL_DEPLOY_EMPTY_WALLET_GRAMS,
-            DexGas.REFERRAL_PROGRAM_CALLBACK_GAS + DexGas.REFERRER_FEE_EXTRA_GAS
+            DexGas.REFERRAL_PROGRAM_CALLBACK_FIXED + DexGas.REFERRAL_SYSTEM_FIXED + DexGas.REFERRAL_DEPLOY_EMPTY_WALLET_GRAMS,
+            DexGas.REFERRAL_PROGRAM_CALLBACK_GAS + DexGas.REFERRAL_SYSTEM_EXTRA_GAS
         );
     }
 
@@ -202,11 +202,15 @@ library GasValues {
     }
 
     // 1.4801
-    function getAccountTransferGas() public returns(IGasValueStructure.GasValue) {
+    function getAccountTransferGas(bool willing_to_deploy) public returns(IGasValueStructure.GasValue) {
         IGasValueStructure.GasValue deployWallet = getDeployWalletGas();
         return IGasValueStructure.GasValue(
-            DexGas.DEX_ACCOUNT_COMPENSATION + DexGas.OPERATION_CALLBACK + deployWallet.fixedValue,
-            DexGas.ACCOUNT_TRANSFER_EXTRA_GAS + deployWallet.dynamicGas
+            DexGas.DEX_ACCOUNT_COMPENSATION +
+            DexGas.OPERATION_CALLBACK +
+            (willing_to_deploy ? deployWallet.fixedValue : 0),
+
+            DexGas.ACCOUNT_TRANSFER_EXTRA_GAS +
+            (willing_to_deploy ? deployWallet.dynamicGas : 0)
         );
     }
 

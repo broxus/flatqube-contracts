@@ -859,7 +859,7 @@ contract DexRoot is DexContractBase, IDexRoot {
 
         IUpgradableByRequest(vault)
             .upgrade{
-                value: DexGas.UPGRADE_TOKEN_VAULT_MIN_VALUE,
+                value: _calcValue(GasValues.getUpgradeTokenVaultGas()),
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 bounce: false
             }(_vaultCode, _vaultVersion, _remainingGasTo);

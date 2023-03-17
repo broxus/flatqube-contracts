@@ -360,7 +360,7 @@ contract DexAccount is
     ) override external onlyOwner {
         require(!_tmpOperations.exists(call_id), DexErrors.OPERATION_ALREADY_IN_PROGRESS);
         require(amount > 0, DexErrors.AMOUNT_TOO_LOW);
-        require(msg.value >= _calcValue(GasValues.getAccountTransferGas()), DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= _calcValue(GasValues.getAccountTransferGas(willing_to_deploy)), DexErrors.VALUE_TOO_LOW);
         require(_wallets.exists(token_root) && _balances.exists(token_root), DexErrors.UNKNOWN_TOKEN_ROOT);
         require(_balances[token_root] >= amount, DexErrors.NOT_ENOUGH_FUNDS);
 

@@ -263,7 +263,7 @@ describe('DexAccount interact with DexPool', async function () {
                     _remainingGasTo: Account2.address,
                     _referrer: locklift.utils.zeroAddress
                 },
-                value: calcValue(gas),
+                value: options.account_contract_name === 'DexAccountPrev' ? locklift.utils.convertCrystal('1.1', 'nano') : calcValue(gas),
                 keyPair: keyPairs[1]
             });
 

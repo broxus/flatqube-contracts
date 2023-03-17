@@ -64,6 +64,7 @@ contract DexGasValues is IGasValueStructure {
     function getUpgradeTokenVaultGas() external pure returns (GasValue) {
         GasValue upgradeTokenVault = GasValues.getUpgradeTokenVaultGas();
         upgradeTokenVault.fixedValue += DexGas.DEX_ROOT_COMPENSATION;
+        upgradeTokenVault.dynamicGas += 100000;
 
         return upgradeTokenVault;
     }
@@ -78,7 +79,7 @@ contract DexGasValues is IGasValueStructure {
     function getUpgradePoolGas() external pure returns (GasValue) {
         GasValue upgradePool = GasValues.getUpgradePoolGas();
         upgradePool.fixedValue += DexGas.DEX_ROOT_COMPENSATION;
-        upgradePool.dynamicGas += 100000;
+        upgradePool.dynamicGas += 300000;
 
         return upgradePool;
     }
@@ -125,8 +126,8 @@ contract DexGasValues is IGasValueStructure {
         return accountWithdraw;
     }
 
-    function getAccountTransferGas() external pure returns (GasValue) {
-        GasValue accountTransfer = GasValues.getAccountTransferGas();
+    function getAccountTransferGas(bool willing_to_deploy) external pure returns (GasValue) {
+        GasValue accountTransfer = GasValues.getAccountTransferGas(willing_to_deploy);
         accountTransfer.fixedValue += DexGas.DEX_ACCOUNT_COMPENSATION;
 
         return accountTransfer;
@@ -216,12 +217,15 @@ contract DexGasValues is IGasValueStructure {
     function getEverToTip3CrossExchangeGas(uint32 steps, uint32 leaves, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
         GasValue everToTip3 = GasValues.getEverToTip3CrossExchangeGas(deployWalletValue, leaves);
         GasValue poolCrossExchangeStep = GasValues.getPoolCrossExchangeStepGas(referrer);
+        GasValue transferTokens = GasValues.getTransferTokensGas(0); // spent token transfer
 
         return GasValue(
             everToTip3.fixedValue + steps * poolCrossExchangeStep.fixedValue + deployWalletValue * leaves +
+            transferTokens.fixedValue +
             EverToTip3Gas.EVER_WEVER_TIP3_COMPENSATION,
 
-            everToTip3.dynamicGas + steps * poolCrossExchangeStep.dynamicGas
+            everToTip3.dynamicGas + steps * poolCrossExchangeStep.dynamicGas +
+            transferTokens.dynamicGas
         );
     }
 
@@ -230,7 +234,9 @@ contract DexGasValues is IGasValueStructure {
         GasValue poolDirectExchange = GasValues.getPoolDirectExchangeGas(deployWalletValue, referrer);
 
         return GasValue(
-            tip3ToEver.fixedValue + poolDirectExchange.fixedValue + EverToTip3Gas.EVER_WEVER_TIP3_COMPENSATION,
+            tip3ToEver.fixedValue + poolDirectExchange.fixedValue +
+            EverToTip3Gas.EVER_WEVER_TIP3_COMPENSATION,
+
             tip3ToEver.dynamicGas + poolDirectExchange.dynamicGas
         );
     }
@@ -238,10 +244,15 @@ contract DexGasValues is IGasValueStructure {
     function getTip3ToEverCrossExchangeGas(uint32 steps, uint32 leaves, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
         GasValue tip3ToEver = GasValues.getTip3ToEverCrossExchangeGas(deployWalletValue, leaves);
         GasValue poolCrossExchangeStep = GasValues.getPoolCrossExchangeStepGas(referrer);
+        GasValue transferTokens = GasValues.getTransferTokensGas(0); // spent token transfer
 
         return GasValue(
-            tip3ToEver.fixedValue + steps * poolCrossExchangeStep.fixedValue + EverToTip3Gas.EVER_WEVER_TIP3_COMPENSATION,
-            tip3ToEver.dynamicGas + steps * poolCrossExchangeStep.dynamicGas
+            tip3ToEver.fixedValue + steps * poolCrossExchangeStep.fixedValue +
+            transferTokens.fixedValue +
+            EverToTip3Gas.EVER_WEVER_TIP3_COMPENSATION,
+
+            tip3ToEver.dynamicGas + steps * poolCrossExchangeStep.dynamicGas +
+            transferTokens.dynamicGas
         );
     }
 
@@ -258,12 +269,32 @@ contract DexGasValues is IGasValueStructure {
     function getEverWeverToTip3CrossExchangeGas(uint32 steps, uint32 leaves, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
         GasValue everWeverToTip3 = GasValues.getEverWeverToTip3CrossExchangeGas(deployWalletValue, leaves);
         GasValue poolCrossExchangeStep = GasValues.getPoolCrossExchangeStepGas(referrer);
+        GasValue transferTokens = GasValues.getTransferTokensGas(0); // spent token transfer
 
         return GasValue(
             everWeverToTip3.fixedValue + steps * poolCrossExchangeStep.fixedValue + deployWalletValue * leaves +
+            transferTokens.fixedValue +
             EverToTip3Gas.EVER_WEVER_TIP3_COMPENSATION,
 
-            everWeverToTip3.dynamicGas + steps * poolCrossExchangeStep.dynamicGas
+            everWeverToTip3.dynamicGas + steps * poolCrossExchangeStep.dynamicGas +
+            transferTokens.dynamicGas
         );
     }
+
+    function upgrade(TvmCell code) public {
+        require(msg.sender == _owner && msg.sender.value != 0, DexErrors.NOT_MY_OWNER);
+        tvm.rawReserve(address(this).balance - msg.value, 2);
+
+        TvmBuilder builder;
+
+        builder.store(_owner);
+        builder.store(_pendingOwner);
+
+        tvm.setcode(code);
+        tvm.setCurrentCode(code);
+
+        onCodeUpgrade(builder.toCell());
+    }
+
+    function onCodeUpgrade(TvmCell data) private {}
 }

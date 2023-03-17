@@ -37,7 +37,7 @@ async function main() {
       'send_gas_to': accountN.address
     },
     keyPair: keyPairs[options.owner_n - 1],
-    value: calcValue(gas)
+    value: options.contract_name === 'DexAccountPrev' ? locklift.utils.convertCrystal(4, 'nano') : calcValue(gas)
   });
   const dexAccountNAddress = await dexRoot.call({
     method: 'getExpectedAccountAddress',

@@ -83,7 +83,7 @@ describe('Check DexAccount add Pool', async function () {
                 params: {
                     _roots: token_roots
                 },
-                value: calcValue(gas),
+                value: options.account_contract_name === 'DexAccountPrev' ? locklift.utils.convertCrystal(3.1, 'nano') : calcValue(gas),
                 keyPair: keyPairs[options.account - 1]
             });
             displayTx(tx);

@@ -1,6 +1,6 @@
 const {expect} = require('chai');
 const {
-    Migration, afterRun, Constants, TOKEN_CONTRACTS_PATH, displayTx, expectedDepositLiquidity
+    Migration, afterRun, Constants, TOKEN_CONTRACTS_PATH, displayTx, expectedDepositLiquidity, calcValue
 } = require(process.cwd() + '/scripts/utils');
 const BigNumber = require('bignumber.js');
 const {Command} = require('commander');
@@ -42,6 +42,7 @@ let Account2;
 let FooWallet2;
 let BarWallet2;
 let FooBarLpWallet2;
+let gasValues;
 
 const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
 
@@ -142,6 +143,8 @@ describe('Check direct DexPairFooBar operations', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
     before('Load contracts', async function () {
         keyPairs = await locklift.keys.getKeyPairs();
+
+        gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
 
         DexRoot = await locklift.factory.getContract('DexRoot');
         DexVault = await locklift.factory.getContract('DexVault');
@@ -294,6 +297,14 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             });
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectExchangeGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: FooWallet3,
                 method: 'transfer',
@@ -305,7 +316,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 
@@ -372,6 +383,14 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             });
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectExchangeGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: BarWallet3,
                 method: 'transfer',
@@ -383,7 +402,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 
@@ -441,6 +460,14 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             });
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectExchangeGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: BarWallet3,
                 method: 'transfer',
@@ -452,7 +479,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 
@@ -511,6 +538,14 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             });
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectExchangeGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: FooWallet3,
                 method: 'transfer',
@@ -522,7 +557,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.6', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 
@@ -578,6 +613,14 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             });
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectDepositGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: FooWallet3,
                 method: 'transfer',
@@ -589,7 +632,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             })
 
@@ -652,6 +695,14 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             });
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectDepositGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: FooWallet3,
                 method: 'transfer',
@@ -663,7 +714,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 
@@ -726,6 +777,14 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             });
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectDepositGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: BarWallet3,
                 method: 'transfer',
@@ -737,7 +796,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 
@@ -806,6 +865,15 @@ describe('Check direct DexPairFooBar operations', async function () {
             logger.log(`Expected FOO: ${expectedFoo}`);
             logger.log(`Expected BAR: ${expectedBar}`);
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectWithdrawGas',
+                params: {
+                    N: 2,
+                    deployWalletValue: 0,
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: FooBarLpWallet3,
                 method: 'transfer',
@@ -817,7 +885,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 
@@ -894,6 +962,15 @@ describe('Check direct DexPairFooBar operations', async function () {
             logger.log(`Expected FOO: ${expectedFoo}`);
             logger.log(`Expected BAR: ${expectedBar}`);
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectWithdrawGas',
+                params: {
+                    N: 2,
+                    deployWalletValue: 0,
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: FooBarLpWallet3,
                 method: 'transfer',
@@ -905,7 +982,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 
@@ -961,6 +1038,14 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             });
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectExchangeGas',
+                params: {
+                    deployWalletValue: 0,
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: FooWallet3,
                 method: 'transfer',
@@ -972,7 +1057,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                     notify: true,
                     payload: EMPTY_TVM_CELL
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 
@@ -1019,6 +1104,14 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             });
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectExchangeGas',
+                params: {
+                    deployWalletValue: 0,
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: FooWallet3,
                 method: 'transfer',
@@ -1030,7 +1123,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('1', 'nano'),
+                value: calcValue(gas) / 2,
                 keyPair: keyPairs[2]
             });
 
@@ -1081,6 +1174,14 @@ describe('Check direct DexPairFooBar operations', async function () {
                 }
             });
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectExchangeGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: FooWallet3,
                 method: 'transfer',
@@ -1092,7 +1193,7 @@ describe('Check direct DexPairFooBar operations', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 

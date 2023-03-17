@@ -2,7 +2,7 @@ const {expect} = require('chai');
 const logger = require('mocha-logger');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
-const {Migration, TOKEN_CONTRACTS_PATH, afterRun, Constants} = require(process.cwd() + '/scripts/utils');
+const {Migration, afterRun, Constants, calcValue} = require(process.cwd() + '/scripts/utils');
 const { Command } = require('commander');
 const program = new Command();
 
@@ -65,12 +65,18 @@ describe('Test DexAccount contract upgrade', async function () {
     oldAccountData = await loadAccountData(dexAccountN);
     logger.log(`Old Account(${dexAccountN.address}) data:\n${JSON.stringify(oldAccountData, null, 4)}`);
 
+    const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
+    const gas = await gasValues.call({
+      method: 'getUpgradeAccountGas',
+      params: {}
+    });
+
     logger.log(`Requesting upgrade for DexAccount contract: ${dexAccountN.address}`);
     await accountN.runTarget({
       contract: dexAccountN,
       method: 'requestUpgrade',
       params: {send_gas_to: accountN.address},
-      value: locklift.utils.convertCrystal(6, 'nano'),
+      value: options.old_contract_name === 'DexAccountPrev' ? locklift.utils.convertCrystal(6, 'nano') : calcValue(gas),
       keyPair: keyPairs[options.owner_n - 1]
     });
     NewDexAccount.setAddress(dexAccountN.address);

@@ -20578,9 +20578,15 @@ CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 
 .macro GasValues_no_obj_getReferralProgramGas_2421acc1_macro
 .loc ../contracts/libraries/GasValues.sol, 75
-PUSHINT 50000000
-PUSHINT 200000
-PUSHINT 800000
+PUSHINT 100000000
+PUSHINT 200000000
+ADD
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSHINT 50000
+PUSHINT 400000
 ADD
 UFITS 128
 PAIR
@@ -20591,7 +20597,7 @@ PAIR
 CALL $GasValues_no_obj_getInternalPairTransferGas_73dc250d_macro$
 
 .macro GasValues_no_obj_getInternalPairTransferGas_73dc250d_macro
-.loc ../contracts/libraries/GasValues.sol, 261
+.loc ../contracts/libraries/GasValues.sol, 265
 PUSHINT 0
 PUSHINT 100000
 PAIR
@@ -20602,20 +20608,20 @@ PAIR
 CALL $GasValues_with_obj_getPoolDirectExchangeGas_47b146c5_macro$
 
 .macro GasValues_with_obj_getPoolDirectExchangeGas_47b146c5_macro
-.loc ../contracts/libraries/GasValues.sol, 268
+.loc ../contracts/libraries/GasValues.sol, 272
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 269
+.loc ../contracts/libraries/GasValues.sol, 273
 CALLREF {
 	CALL $GasValues_no_obj_getInternalPairTransferGas_73dc250d_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 270
+.loc ../contracts/libraries/GasValues.sol, 274
 PUSH S3
 CALLREF {
 	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 271
+.loc ../contracts/libraries/GasValues.sol, 275
 PUSHINT 100000000
 PUSHINT 20200000
 UFITS 128
@@ -20671,20 +20677,20 @@ NIP
 CALL $GasValues_no_obj_getPoolDirectExchangeGas_47b146c5_macro$
 
 .macro GasValues_no_obj_getPoolDirectExchangeGas_47b146c5_macro
-.loc ../contracts/libraries/GasValues.sol, 268
+.loc ../contracts/libraries/GasValues.sol, 272
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 269
+.loc ../contracts/libraries/GasValues.sol, 273
 CALLREF {
 	CALL $GasValues_no_obj_getInternalPairTransferGas_73dc250d_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 270
+.loc ../contracts/libraries/GasValues.sol, 274
 ROLL 3
 CALLREF {
 	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 271
+.loc ../contracts/libraries/GasValues.sol, 275
 PUSHINT 100000000
 PUSHINT 20200000
 UFITS 128
@@ -20740,21 +20746,21 @@ NIP
 CALL $GasValues_with_obj_getPoolDirectDepositGas_1098939c_macro$
 
 .macro GasValues_with_obj_getPoolDirectDepositGas_1098939c_macro
-.loc ../contracts/libraries/GasValues.sol, 286
+.loc ../contracts/libraries/GasValues.sol, 290
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 287
+.loc ../contracts/libraries/GasValues.sol, 291
 PUSH S2
 CALLREF {
 	CALL $GasValues_no_obj_getMintTokensGas_1c3cea29_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 288
+.loc ../contracts/libraries/GasValues.sol, 292
 PUSHINT 0
 CALLREF {
 	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 289
+.loc ../contracts/libraries/GasValues.sol, 293
 PUSHINT 100000000
 PUSHINT 20200000
 UFITS 128
@@ -20810,21 +20816,21 @@ NIP
 CALL $GasValues_no_obj_getPoolDirectDepositGas_1098939c_macro$
 
 .macro GasValues_no_obj_getPoolDirectDepositGas_1098939c_macro
-.loc ../contracts/libraries/GasValues.sol, 286
+.loc ../contracts/libraries/GasValues.sol, 290
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 287
+.loc ../contracts/libraries/GasValues.sol, 291
 ROT
 CALLREF {
 	CALL $GasValues_no_obj_getMintTokensGas_1c3cea29_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 288
+.loc ../contracts/libraries/GasValues.sol, 292
 PUSHINT 0
 CALLREF {
 	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 289
+.loc ../contracts/libraries/GasValues.sol, 293
 PUSHINT 100000000
 PUSHINT 20200000
 UFITS 128
@@ -20880,16 +20886,16 @@ NIP
 CALL $GasValues_with_obj_getPoolDirectWithdrawGas_f6c7e87a_macro$
 
 .macro GasValues_with_obj_getPoolDirectWithdrawGas_f6c7e87a_macro
-.loc ../contracts/libraries/GasValues.sol, 304
+.loc ../contracts/libraries/GasValues.sol, 308
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 305
+.loc ../contracts/libraries/GasValues.sol, 309
 ROT
 CALLREF {
 	CALL $GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 306
+.loc ../contracts/libraries/GasValues.sol, 310
 PUSHINT 20200000
 UFITS 128
 PUSHINT 100000000
@@ -20946,16 +20952,16 @@ NIP
 CALL $GasValues_no_obj_getPoolDirectWithdrawGas_f6c7e87a_macro$
 
 .macro GasValues_no_obj_getPoolDirectWithdrawGas_f6c7e87a_macro
-.loc ../contracts/libraries/GasValues.sol, 304
+.loc ../contracts/libraries/GasValues.sol, 308
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 305
+.loc ../contracts/libraries/GasValues.sol, 309
 ROT
 CALLREF {
 	CALL $GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 306
+.loc ../contracts/libraries/GasValues.sol, 310
 PUSHINT 20200000
 UFITS 128
 PUSHINT 100000000
@@ -21012,16 +21018,16 @@ BLKDROP2 2, 1
 CALL $GasValues_with_obj_getPoolDirectWithdrawOneCoinGas_64a065de_macro$
 
 .macro GasValues_with_obj_getPoolDirectWithdrawOneCoinGas_64a065de_macro
-.loc ../contracts/libraries/GasValues.sol, 319
+.loc ../contracts/libraries/GasValues.sol, 323
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 320
+.loc ../contracts/libraries/GasValues.sol, 324
 PUSH S2
 CALLREF {
 	CALL $GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 321
+.loc ../contracts/libraries/GasValues.sol, 325
 PUSHINT 20200000
 UFITS 128
 PUSHINT 100000000
@@ -21069,16 +21075,16 @@ NIP
 CALL $GasValues_no_obj_getPoolDirectWithdrawOneCoinGas_64a065de_macro$
 
 .macro GasValues_no_obj_getPoolDirectWithdrawOneCoinGas_64a065de_macro
-.loc ../contracts/libraries/GasValues.sol, 319
+.loc ../contracts/libraries/GasValues.sol, 323
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 320
+.loc ../contracts/libraries/GasValues.sol, 324
 ROT
 CALLREF {
 	CALL $GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 321
+.loc ../contracts/libraries/GasValues.sol, 325
 PUSHINT 20200000
 UFITS 128
 PUSHINT 100000000
@@ -21126,11 +21132,11 @@ NIP
 CALL $GasValues_with_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
 
 .macro GasValues_with_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro
-.loc ../contracts/libraries/GasValues.sol, 334
+.loc ../contracts/libraries/GasValues.sol, 338
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 335
+.loc ../contracts/libraries/GasValues.sol, 339
 PUSHINT 20200000
 UFITS 128
 PUSHINT 100000000
@@ -21170,11 +21176,11 @@ NIP
 CALL $GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
 
 .macro GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro
-.loc ../contracts/libraries/GasValues.sol, 334
+.loc ../contracts/libraries/GasValues.sol, 338
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 }
-.loc ../contracts/libraries/GasValues.sol, 335
+.loc ../contracts/libraries/GasValues.sol, 339
 PUSHINT 20200000
 UFITS 128
 PUSHINT 100000000
@@ -21214,7 +21220,7 @@ NIP
 CALL $GasValues_with_obj_getTokenVaultTransferGas_6edfcd15_macro$
 
 .macro GasValues_with_obj_getTokenVaultTransferGas_6edfcd15_macro
-.loc ../contracts/libraries/GasValues.sol, 349
+.loc ../contracts/libraries/GasValues.sol, 353
 PUSHINT 100000000
 OVER
 ADD
@@ -21228,7 +21234,7 @@ PAIR
 CALL $GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro$
 
 .macro GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro
-.loc ../contracts/libraries/GasValues.sol, 349
+.loc ../contracts/libraries/GasValues.sol, 353
 PUSHINT 100000000
 ADD
 UFITS 128
