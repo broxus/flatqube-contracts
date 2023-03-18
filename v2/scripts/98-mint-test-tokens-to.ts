@@ -1,6 +1,6 @@
-import {toNano, WalletTypes} from "locklift";
+import {toNano} from "locklift";
+import {Migration, Constants, EMPTY_TVM_CELL} from '../utils/migration';
 
-const {Migration, Constants, EMPTY_TVM_CELL} = require(process.cwd() + '/scripts/utils');
 const {Command} = require('commander');
 const program = new Command();
 const BigNumber = require('bignumber.js');
@@ -9,10 +9,7 @@ BigNumber.config({EXPONENTIAL_AT: 257});
 async function main() {
     const migration = new Migration();
 
-    const rootOwner = await locklift.factory.accounts.addExistingAccount({
-        type: WalletTypes.EverWallet,
-        address: migration.getAddress('Account1')
-    });
+    const rootOwner = await migration.loadAccount('Account1', '0');
 
     program
         .allowUnknownOption()
@@ -37,7 +34,7 @@ async function main() {
         const token = Constants.tokens[mint.token];
         const amount = new BigNumber(mint.amount).shiftedBy(token.decimals).toFixed();
 
-        const tokenRoot = await locklift.factory.getDeployedContract(token.upgradeable ? 'TokenRootUpgradeable' : 'TokenRoot', migration.getAddress(token.symbol + 'Root'));
+        const tokenRoot = migration.loadContract(token.upgradeable ? 'TokenRootUpgradeable' : 'TokenRoot', token.symbol + 'Root');
 
         await tokenRoot.methods.mint(
             {

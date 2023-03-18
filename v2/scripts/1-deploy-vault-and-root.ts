@@ -1,4 +1,4 @@
-import {toNano, WalletTypes, getRandomNonce, zeroAddress} from "locklift";
+import {toNano, getRandomNonce, zeroAddress} from "locklift";
 import {Migration, displayTx} from '../utils/migration';
 
 const { Command } = require('commander');

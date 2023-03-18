@@ -42,6 +42,10 @@ export class Migration<T extends FactorySource> {
     }
   };
 
+  public exists = async (name: string) => {
+    return this.migrationLog[name] !== undefined;
+  }
+
   public loadContract = <ContractName extends keyof T>(
     contract: ContractName,
     name: string,
@@ -84,13 +88,13 @@ export const Constants: {
     foo: {
       name: 'Foo',
       symbol: 'Foo',
-      decimals: 18,
+      decimals: 6,
       upgradeable: true,
     },
     bar: {
       name: 'Bar',
       symbol: 'Bar',
-      decimals: 18,
+      decimals: 6,
       upgradeable: true,
     },
     qwe: {
