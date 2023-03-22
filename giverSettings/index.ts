@@ -124,14 +124,14 @@ const testnetGiverAbi = {
     "ABI version": 2,
     header: ["pubkey", "time", "expire"],
     functions: [
-       {
+        {
             name: "sendGrams",
             inputs: [
                 {name: "dest", type: "address"},
                 {name: "amount", type: "uint64"}
             ],
             outputs: []
-       }
+        }
     ],
     events: []
 } as const;
