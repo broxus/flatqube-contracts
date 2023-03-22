@@ -87,21 +87,22 @@
 			]
 		},
 		{
-			"name": "codeOrderRoot",
+			"name": "getFeeParams",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
-				{"name":"value0","type":"cell"}
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"value0","type":"tuple"}
 			]
 		},
 		{
-			"name": "codeOrder",
+			"name": "getExpectedAddressOrderRoot",
 			"inputs": [
-				{"name":"answerId","type":"uint32"}
+				{"name":"answerId","type":"uint32"},
+				{"name":"token","type":"address"}
 			],
 			"outputs": [
-				{"name":"value0","type":"cell"}
+				{"name":"value0","type":"address"}
 			]
 		},
 		{
@@ -115,38 +116,17 @@
 			]
 		},
 		{
-			"name": "upgradeOrderRoot",
+			"name": "setPlatformRootOrderCodeOnce",
 			"inputs": [
-				{"name":"orderAddress","type":"address"}
+				{"name":"_orderRootPlatform","type":"cell"}
 			],
 			"outputs": [
 			]
 		},
 		{
-			"name": "setPlatformCodeOnce",
+			"name": "setPlatformOrderCodeOnce",
 			"inputs": [
 				{"name":"_orderPlatform","type":"cell"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "withdrawFee",
-			"inputs": [
-				{"name":"amount","type":"uint128"},
-				{"name":"recipient","type":"address"},
-				{"name":"deployWalletValue","type":"uint128"},
-				{"name":"tokenWallet","type":"address"},
-				{"name":"sendGasTo","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
-			"name": "setRootFeeParams",
-			"inputs": [
-				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"},
-				{"name":"root","type":"address"}
 			],
 			"outputs": [
 			]
@@ -155,7 +135,7 @@
 			"name": "setOrderFeeParams",
 			"inputs": [
 				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"},
-				{"name":"order","type":"address"}
+				{"name":"orders","type":"address[]"}
 			],
 			"outputs": [
 			]
@@ -169,12 +149,12 @@
 			]
 		},
 		{
-			"name": "getFeeParams",
+			"name": "setRootFeeParams",
 			"inputs": [
-				{"name":"answerId","type":"uint32"}
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"},
+				{"name":"roots","type":"address[]"}
 			],
 			"outputs": [
-				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"value0","type":"tuple"}
 			]
 		},
 		{
@@ -194,22 +174,48 @@
 			]
 		},
 		{
+			"name": "upgradeOrderRoot",
+			"inputs": [
+				{"name":"listOrderRoots","type":"address[]"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "upgradeOrderCodeInOrderRoot",
+			"inputs": [
+				{"name":"listOrderRoots","type":"address[]"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "upgradeOrder",
+			"inputs": [
+				{"name":"listOrders","type":"address[]"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "withdrawFee",
+			"inputs": [
+				{"name":"amount","type":"uint128"},
+				{"name":"recipient","type":"address"},
+				{"name":"deployWalletValue","type":"uint128"},
+				{"name":"tokenWallet","type":"address"},
+				{"name":"sendGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "createOrderRoot",
 			"inputs": [
 				{"name":"token","type":"address"},
 				{"name":"callbackId","type":"uint64"}
 			],
 			"outputs": [
-			]
-		},
-		{
-			"name": "getExpectedAddressOrderRoot",
-			"inputs": [
-				{"name":"answerId","type":"uint32"},
-				{"name":"token","type":"address"}
-			],
-			"outputs": [
-				{"name":"value0","type":"address"}
 			]
 		},
 		{
@@ -272,7 +278,14 @@
 			]
 		},
 		{
-			"name": "PlatformCodeUpgraded",
+			"name": "PlatformOrderRootCodeUpgraded",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "PlatformOrderCodeUpgraded",
 			"inputs": [
 			],
 			"outputs": [
@@ -320,15 +333,16 @@
 		{"name":"_constructorFlag","type":"bool"},
 		{"name":"randomNonce","type":"uint32"},
 		{"name":"dexRoot","type":"address"},
-		{"name":"currentVersion","type":"uint32"},
+		{"name":"version","type":"uint32"},
 		{"name":"versionOrderRoot","type":"uint32"},
 		{"name":"versionOrder","type":"uint32"},
 		{"name":"owner","type":"address"},
 		{"name":"pendingOwner","type":"address"},
 		{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"},
 		{"name":"orderRootCode","type":"cell"},
-		{"name":"orderPlatformCode","type":"cell"},
+		{"name":"orderRootPlatformCode","type":"cell"},
 		{"name":"orderCode","type":"cell"},
+		{"name":"orderPlatformCode","type":"cell"},
 		{"name":"newTestField","type":"string"}
 	]
 }

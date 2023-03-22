@@ -9,6 +9,7 @@ import {
   logMigrationProcess,
   logMigrationSuccess,
 } from './log.utils';
+import * as constants from "constants";
 
 /**
  * Deploys new account with specified amount of EVER and saves migration
@@ -289,16 +290,16 @@ export const orderFactoryMigration = async (
   }).send({
     amount: locklift.utils.toNano(0.1),
     from: account.address
-  }))
+  }));
 
-  const orderPlatformArtifacts = await locklift.factory.getContractArtifacts("OrderPlatform")
+  const orderRootPlatformArtifacts = await locklift.factory.getContractArtifacts("OrderRootPlatform")
 
-  await locklift.tracing.trace( contract.methods.setPlatformCodeOnce({
-    _orderPlatform: orderPlatformArtifacts.code
+  await locklift.tracing.trace( contract.methods.setPlatformRootOrderCodeOnce({
+    _orderRootPlatform: orderRootPlatformArtifacts.code
   }).send({
     amount: locklift.utils.toNano(0.1),
     from: account.address
-  }))
+  }));
 
   logMigrationProcess(
     'OrderFactoryMigration',
@@ -313,7 +314,16 @@ export const orderFactoryMigration = async (
   }).send({
     amount: locklift.utils.toNano(0.1),
     from: account.address
-  }))
+  }));
+
+  const orderPlatformArtifacts = await locklift.factory.getContractArtifacts('OrderPlatform')
+
+  await locklift.tracing.trace(contract.methods.setPlatformOrderCodeOnce({
+    _orderPlatform: orderPlatformArtifacts.code
+  }).send({
+    amount: locklift.utils.toNano(0.1),
+    from: account.address
+  }));
 
   logMigrationProcess(
     'OrderFactoryMigration',
@@ -371,7 +381,7 @@ export const orderRootMigration = async (
         amount: locklift.utils.toNano(6),
         from: account.address
       }
-  ), {allowedCodes: {compute: [60]}}
+  ), {allowedCodes: {compute: [60,null]}}
   )
 
   const orderRootAddress = await orderFactory.methods.getExpectedAddressOrderRoot({

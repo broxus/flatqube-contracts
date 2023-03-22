@@ -7,48 +7,73 @@ pragma AbiHeader pubkey;
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "./structures/IOrderFeeParams.tsol";
 
-contract OrderPlatform is IOrderFeeParams{
-	address static factory;
-	address static spentToken;
-	TvmCell static params;
+contract OrderPlatform is IOrderFeeParams {
+    address static factory;
+    address static root;
+    address static owner;
+    address static spentToken;
+    address static receiveToken;
+    uint64 static timeTx;
+    uint64 static nowTx;
+    TvmCell static params;
 
-	constructor(
-		uint32 version,
-		uint32 versionOrder,
-		TvmCell code,
-		TvmCell orderCode,
-		address sendGasTo,
-		OrderFeeParams fee
-	) public {
-		if (msg.sender.value != 0 && msg.sender == factory) {
-			initialize(version, versionOrder, code, orderCode, sendGasTo, fee);
-		} else {
-			sendGasTo.transfer({
-				value: 0,
-				flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO,
-				bounce: false
-			});
-		}
-	}
+    constructor(
+        uint128 _initialAmount,
+        uint128 _expectedAmount,
+        uint32 _version,
+        OrderFeeParams _fee,
+        TvmCell backendPK,
+        TvmCell _code
+    ) public {
+        if (msg.sender.value != 0 && msg.sender == root) {
+            initialize(
+                _initialAmount,
+                _expectedAmount,
+                _version,
+                _fee,
+                backendPK,
+                _code
+            );
+        } else {
+            owner.transfer({
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO,
+                bounce: false
+            });
+        }
+    }
 
-	function initialize(
-		uint32 version,
-		uint32 versionOrder,
-		TvmCell code,
-		TvmCell orderCode,
-		address sendGasTo,
-		OrderFeeParams fee
-	) private {
-		TvmCell data = abi.encode(
-			factory, spentToken, address(0), uint32(0), version, versionOrder,
-			sendGasTo, fee, orderCode, params
-		);
+    function initialize(
+        uint128 _initialAmount,
+        uint128 _expectedAmount,
+        uint32 _version,
+        OrderFeeParams _fee,
+        TvmCell backendPK,
+        TvmCell code
+    ) private {
+        TvmCell empty;
+        TvmCell data = abi.encode(
+            factory,
+            root,
+            owner,
+            spentToken,
+            receiveToken,
+            timeTx,
+            nowTx,
+            params,
+            _initialAmount,
+            _expectedAmount,
+            uint32(0),
+            _version,
+            _fee,
+            backendPK,
+            empty
+        );
+        tvm.setcode(code);
+        tvm.setCurrentCode(code);
 
-		tvm.setcode(code);
-		tvm.setCurrentCode(code);
+        onCodeUpgrade(data);
+    }
 
-		onCodeUpgrade(data);
-	}
-
-	function onCodeUpgrade(TvmCell data) private {}
+    function onCodeUpgrade(TvmCell data) private {}
 }

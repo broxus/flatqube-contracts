@@ -119,7 +119,6 @@ library OrderPayloads {
         return builder.toCell();
     }
 
-    //TODO check payloads
     function decodeOnAcceptTokenTransferData (TvmCell _payload, uint8 state) public returns (
         bool,
         uint8,
@@ -154,11 +153,10 @@ library OrderPayloads {
         address sendGasInMatching;
         address recipient;
         uint128 deployWalletValue;
-        uint128 alienSpentAmount; //TODO
+        uint128 alienSpentAmount;
         uint128 expectedAmount;
         uint128 reward;
 
-        //TODO check decode
         if (isValid) {
             if (state == OrderStatus.Initialize || state == OrderStatus.AwaitTokens) {
                 op = OrderOperationTypes.CREATE_ORDER_IN_ORDER_ROOT;

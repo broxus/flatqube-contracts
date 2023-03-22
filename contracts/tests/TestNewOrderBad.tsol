@@ -21,6 +21,7 @@ import "../interfaces/IOrderEvents.tsol";
 import "../interfaces/IOrderCallbacks.tsol";
 import "../interfaces/IHasEmergencyMode.tsol";
 import "../interfaces/IDexRoot.tsol";
+import "../interfaces/IDexPair.tsol";
 
 import "../OrderPlatform.tsol";
 
@@ -39,6 +40,9 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 	uint64 static timeTx;
 	uint64 static nowTx;
 
+	address dexRoot;
+	TvmCell orderPlatformCode;
+
 	uint128 expectedAmount;
 	uint128 initialAmount;
 
@@ -48,77 +52,26 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 	uint256 backPK;
 	uint256 backMatchingPK;
 
-	address dexRoot;
+	uint32 version;
+	OrderFeeParams fee;
+
 	address dexPair;
 
 	address spentWallet;
 	address receiveWallet;
 
-	TvmCell orderPlatformCode;
-
+	bool autoExchange;
 	uint8 state;
 	uint64 swapAttempt;
 
 	uint8 prevState;
 	uint256 emergencyManager;
 
-	bool autoExchange;
-	OrderFeeParams fee;
 	address matchingOrder;
 
-	uint32 version;
+	mapping (address => uint128) internal tmp_transactions;
 
-	constructor(
-		uint128 _expectedAmount,
-		uint128 _initialAmount,
-		uint256 _backPK,
-		uint256 _backMatchingPK,
-		address _dexRoot,
-		OrderFeeParams _fee,
-		TvmCell _orderPlatformCode,
-		uint32 _version
-	) public {
-		changeState(OrderStatus.Initialize);
-		if (
-			msg.sender.value != 0 &&
-			msg.sender == root
-		) {
-			tvm.rawReserve(address(this).balance - msg.value, 0);
-
-			currentAmountReceiveToken = expectedAmount = _expectedAmount;
-			currentAmountSpentToken = initialAmount = _initialAmount;
-			backPK = _backPK;
-			backMatchingPK = _backMatchingPK;
-			dexRoot = _dexRoot;
-			fee = _fee;
-			orderPlatformCode = _orderPlatformCode;
-			version = _version;
-
-			IDexRoot(dexRoot).getExpectedPairAddress{
-					value: OrderGas.GET_DEX_PAIR,
-					flag: MsgFlag.SENDER_PAYS_FEES,
-					callback: TestNewOrderBad.onBeginData
-			}(spentToken, receiveToken);
-
-			ITokenRoot(spentToken).deployWallet{
-					value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
-					flag: MsgFlag.SENDER_PAYS_FEES,
-					callback: TestNewOrderBad.onBeginData
-			}(address(this), OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
-
-			ITokenRoot(receiveToken).deployWallet{
-					value: OrderGas.DEPLOY_EMPTY_WALLET_VALUE,
-					flag: MsgFlag.SENDER_PAYS_FEES,
-					callback: TestNewOrderBad.onBeginData
-			}(address(this), OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
-		} else {
-			msg.sender.transfer(
-				0,
-				false,
-				MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO
-			);
-		}
-	}
+	constructor() public { revert(); }
 
 	modifier onlyFactory() {
 		require(
@@ -157,48 +110,45 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 
 	function onTokenWalletReceive(address _wallet) external {}
 
-	function onBeginData(address inAddress) external {
-		require(
-			msg.sender.value != 0 &&
-			(msg.sender == dexRoot ||
-			msg.sender == spentToken ||
-			msg.sender == receiveToken),
-			OrderErrors.NOT_BEGIN_DATA
-		);
+	function onDexPair(address _dexPair) external {
+		require(msg.sender.value != 0 && msg.sender == dexRoot, OrderErrors.NOT_DEX_ROOT);
+		dexPair = _dexPair;
 
-		if (msg.sender == dexRoot) {
-			dexPair = inAddress;
-			autoExchange = true;
-		} else if (msg.sender == spentToken) {
-			spentWallet = inAddress;
-		} else if (msg.sender == receiveToken) {
-			receiveWallet = inAddress;
-		}
-
-		if (
-			spentWallet.value != 0 &&
-			receiveWallet.value != 0
-		) {
-			TIP3TokenWallet(spentWallet).balance{
-				value: OrderGas.GET_BALANCE_WALLET,
-				flag: MsgFlag.SENDER_PAYS_FEES,
-				callback: TestNewOrderBad.onBalanceSpentWallet
-			}();
-		}
+		IDexPair(dexPair).getTokenRoots{
+				value : OrderGas.GET_TOKEN_ROOTS_PAIR,
+				flag : MsgFlag.SENDER_PAYS_FEES,
+				callback : TestNewOrderBad.onDexPairTokenRoots
+		}();
 	}
 
-	function onBalanceSpentWallet(uint128 _balance) external {
-		require(
-			msg.sender.value != 0 && msg.sender == spentWallet,
-			OrderErrors.NOT_WALLET_TOKEN_1
-		);
+	function onDexPairTokenRoots(
+		address /*leftRoot*/,
+		address /*rightRoot*/,
+		address /*lPRoot*/
+	) external {
+		require(msg.sender.value != 0 && msg.sender == dexPair, OrderErrors.NOT_DEX_PAIR);
+		autoExchange = true;
+	}
 
-		if (state != OrderStatus.Active) {
-			if (_balance >= initialAmount) {
-				changeState(OrderStatus.Active);
-			} else {
-				changeState(OrderStatus.AwaitTokens);
-			}
+	function onSpentWallet(address _wallet) external {
+		require(msg.sender.value != 0 && msg.sender == spentToken, OrderErrors.NOT_BEGIN_DATA);
+		spentWallet = _wallet;
+		checkBeginData();
+	}
+
+	function onReceiveWallet(address _wallet) external {
+		require(msg.sender.value != 0 && msg.sender == receiveToken, OrderErrors.NOT_BEGIN_DATA);
+		receiveWallet = _wallet;
+		checkBeginData();
+	}
+
+	function checkBeginData() internal {
+		if (
+			spentWallet.value != 0 && receiveWallet.value != 0 &&
+			tmp_transactions.exists(spentToken) && tmp_transactions[spentToken] >= initialAmount
+		) {
+			changeState(OrderStatus.Active);
+			tmp_transactions.delMin();
 		}
 	}
 
@@ -305,7 +255,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 		uint128 alienSpentAmount,
 		uint128 expectedReceiveAmount,
 		uint128 reward
-		) = OrderPayloads.decodeOnAcceptTokenTransferData(payload, state); //TODO decode new params
+		) = OrderPayloads.decodeOnAcceptTokenTransferData(payload, state);
 
 		recipient = (recipient.value == 0 ? sender : recipient);
 
@@ -345,7 +295,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 			} else if (msg.sender == receiveWallet) {
 				if (
 					(state == OrderStatus.Active && op == OrderOperationTypes.EXCHANGE && msg.value >= OrderGas.FILL_ORDER_MIN_VALUE + deployWalletValue) ||
-					(recipient == matchingOrder && state == OrderStatus.MatchInProgress) //TODO check amount ????
+					(recipient == matchingOrder && state == OrderStatus.MatchInProgress)
 				) {
 					if (state != OrderStatus.MatchInProgress) {
 						(expectedSenderAmount, senderFee) = _expectedSpendAmount(amount);
@@ -1059,27 +1009,6 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 		matchingOrder = address(0);
 	}
 
-	function expectedOrderRoot(address tokenRoot) internal view returns(address){
-		return address(tvm.hash(buildState(factory, tokenRoot, orderPlatformCode, buildParams())));
-	}
-
-	function buildState(address _factory, address token, TvmCell _code, TvmCell params) internal pure returns (TvmCell) {
-		return tvm.buildStateInit({
-				contr: OrderPlatform,
-				varInit: {
-					factory: _factory,
-					spentToken: token,
-					params: params
-				},
-				pubkey: 0,
-				code: _code
-		});
-	}
-
-	function buildParams() internal view returns (TvmCell) {
-		return abi.encode(dexRoot, tvm.code(), orderPlatformCode);
-	}
-
 	function expectedOrder(
 		address _factory,
 		address _root,
@@ -1088,9 +1017,9 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 		address _receiveToken,
 		uint64 _timeTx,
 		uint64 _nowTx
-	) internal pure returns(address) {
+	) internal view returns(address) {
 		return address(tvm.hash(tvm.buildStateInit({
-				contr: TestNewOrderBad,
+				contr: OrderPlatform,
 				varInit : {
 					factory: _factory,
 					root: _root,
@@ -1098,9 +1027,10 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 					spentToken: _spentToken,
 					receiveToken: _receiveToken,
 					timeTx: _timeTx,
-					nowTx: _nowTx
+					nowTx: _nowTx,
+					params: abi.encode(dexRoot, orderPlatformCode)
 				},
-				code: tvm.code()
+				code: orderPlatformCode
 		})));
 	}
 
@@ -1286,18 +1216,17 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 		if (version == _newVersion) {
 			tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 			_sendGasTo.transfer({
-					value: 0,
-					flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+				value : 0,
+				flag : MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
 			});
 		} else {
 			emit OrderCodeUpgraded();
 
 			TvmCell data = abi.encode(
-				factory, root, owner, spentToken, receiveToken, timeTx, nowTx,
-				expectedAmount, initialAmount, currentAmountSpentToken, currentAmountReceiveToken,
-				backPK, backMatchingPK, dexRoot, dexPair, spentWallet, receiveWallet, orderPlatformCode,
-				state, swapAttempt, prevState, emergencyManager, autoExchange, fee, matchingOrder, version, _newVersion
-			);
+				factory, root, owner, spentToken, receiveToken, timeTx, nowTx, abi.encode(dexRoot, orderPlatformCode),
+				initialAmount, expectedAmount, version, _newVersion, backPK, backMatchingPK, fee,
+				abi.encode(currentAmountSpentToken, currentAmountReceiveToken, dexPair, spentWallet, receiveWallet,
+				autoExchange, state, swapAttempt, prevState, emergencyManager, matchingOrder));
 
 			tvm.setcode(_code);
 			tvm.setCurrentCode(_code);

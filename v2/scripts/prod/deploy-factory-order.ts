@@ -26,6 +26,7 @@ async function main() {
     const signer = (await locklift.keystore.getSigner('0'));
     const account = await locklift.factory.accounts.addExistingAccount({type: WalletTypes.WalletV3, publicKey: signer!.publicKey});
 
+    const PlatformRootOrder = await locklift.factory.getContractArtifacts('OrderRootPlatform');
     const PlatformOrder = await locklift.factory.getContractArtifacts('OrderPlatform');
     const RootOrder = await locklift.factory.getContractArtifacts('OrderRoot');
     const Order = await locklift.factory.getContractArtifacts('Order');
@@ -47,9 +48,16 @@ async function main() {
     });
     console.log(`Order Factory address: ${factoryOrder.address}`)
 
+    console.log(`Set code OrderRootPlatform`)
+    //@ts-ignore
+    await factoryOrder.methods.setPlatformRootOrderCodeOnce({_orderRootPlatform: PlatformRootOrder.code}).send({
+        from: account.address,
+        amount: toNano(0.1)
+    })
+
     console.log(`Set code OrderPlatform`)
     //@ts-ignore
-    await factoryOrder.methods.setPlatformCodeOnce({_orderPlatform: PlatformOrder.code}).send({
+    await factoryOrder.methods.setPlatformOrderCodeOnce({_orderPlatform: PlatformOrder.code}).send({
         from: account.address,
         amount: toNano(0.1)
     })

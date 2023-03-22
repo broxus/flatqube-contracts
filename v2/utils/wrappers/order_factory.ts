@@ -67,7 +67,7 @@ export class OrderFactory {
     }
 
     async setRootFeeParams(
-        root: Address,
+        roots: Address[],
         feeNumerator: string | number,
         feeDenominator: string | number,
         matchingNumerator: string | number,
@@ -78,7 +78,7 @@ export class OrderFactory {
       const owner = this._owner as Account;
       if (trace){
         return await locklift.tracing.trace(this.contract.methods.setRootFeeParams({
-            root: root,
+            roots: roots,
             params:
             {
               numerator: feeNumerator,
@@ -93,7 +93,7 @@ export class OrderFactory {
             }))
       } else {
           return await this.contract.methods.setRootFeeParams({
-            root: root,
+            roots: roots,
             params:
             {
               numerator: feeNumerator,
@@ -162,11 +162,18 @@ export class OrderFactory {
         .send({amount: toNano(1.1), from: owner.address}))
 
     }
+    async upgradeOrderInOrderRoot(roots: Address[]) {
+        const owner = this._owner as Account;
+        return await locklift.tracing.trace(this.contract.methods.upgradeOrderCodeInOrderRoot({listOrderRoots: roots})
+            .send({amount: toNano(2), from: owner.address}))
+    }
+
+
     async updateOrder(
-        order: Address
+        orders: Address[]
     ) {
         const owner = this._owner as Account;
-        return await locklift.tracing.trace(this.contract.methods.upgradeOrder({order: order})
+        return await locklift.tracing.trace(this.contract.methods.upgradeOrder({listOrders: orders})
         .send({amount: toNano(1.1), from: owner.address}))
     }
 
@@ -189,10 +196,10 @@ export class OrderFactory {
     }
 
     async upgradeOrderRoot(
-        root: Address
+        roots: Address[]
     ) {
         const owner = this._owner as Account;
-        return await locklift.tracing.trace(this.contract.methods.upgradeOrderRoot({orderAddress: root})
+        return await locklift.tracing.trace(this.contract.methods.upgradeOrderRoot({listOrderRoots: roots})
         .send({amount: toNano(1.1), from: owner.address}))
     }
 

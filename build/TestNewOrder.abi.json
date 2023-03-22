@@ -6,14 +6,6 @@
 		{
 			"name": "constructor",
 			"inputs": [
-				{"name":"_expectedAmount","type":"uint128"},
-				{"name":"_initialAmount","type":"uint128"},
-				{"name":"_backPK","type":"uint256"},
-				{"name":"_backMatchingPK","type":"uint256"},
-				{"name":"_dexRoot","type":"address"},
-				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"_fee","type":"tuple"},
-				{"name":"_orderPlatformCode","type":"cell"},
-				{"name":"_version","type":"uint32"}
 			],
 			"outputs": [
 			]
@@ -22,6 +14,24 @@
 			"name": "onTokenWalletReceive",
 			"inputs": [
 				{"name":"_wallet","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onDexPair",
+			"inputs": [
+				{"name":"_dexPair","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onDexPairTokenRoots",
+			"inputs": [
+				{"name":"value0","type":"address"},
+				{"name":"value1","type":"address"},
+				{"name":"value2","type":"address"}
 			],
 			"outputs": [
 			]
@@ -111,7 +121,7 @@
 		{
 			"name": "onAcceptTokensTransfer",
 			"inputs": [
-				{"name":"value0","type":"address"},
+				{"name":"tokenRoot","type":"address"},
 				{"name":"amount","type":"uint128"},
 				{"name":"sender","type":"address"},
 				{"name":"value3","type":"address"},
@@ -160,7 +170,10 @@
 			"inputs": [
 				{"name":"callbackId","type":"uint64"},
 				{"name":"deployWalletValue","type":"uint128"},
-				{"name":"limitOrder","type":"address"}
+				{"name":"_orderRoot","type":"address"},
+				{"name":"_owner","type":"address"},
+				{"name":"_timeTx","type":"uint64"},
+				{"name":"_nowTx","type":"uint64"}
 			],
 			"outputs": [
 			]
@@ -294,25 +307,26 @@
 		{"name":"receiveToken","type":"address"},
 		{"name":"timeTx","type":"uint64"},
 		{"name":"nowTx","type":"uint64"},
-		{"name":"expectedAmount","type":"uint128"},
+		{"name":"dexRoot","type":"address"},
+		{"name":"orderPlatformCode","type":"cell"},
 		{"name":"initialAmount","type":"uint128"},
+		{"name":"expectedAmount","type":"uint128"},
 		{"name":"currentAmountSpentToken","type":"uint128"},
 		{"name":"currentAmountReceiveToken","type":"uint128"},
 		{"name":"backPK","type":"uint256"},
 		{"name":"backMatchingPK","type":"uint256"},
-		{"name":"dexRoot","type":"address"},
+		{"name":"version","type":"uint32"},
+		{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"},
 		{"name":"dexPair","type":"address"},
 		{"name":"spentWallet","type":"address"},
 		{"name":"receiveWallet","type":"address"},
-		{"name":"orderPlatformCode","type":"cell"},
+		{"name":"autoExchange","type":"bool"},
 		{"name":"state","type":"uint8"},
 		{"name":"swapAttempt","type":"uint64"},
 		{"name":"prevState","type":"uint8"},
 		{"name":"emergencyManager","type":"uint256"},
-		{"name":"autoExchange","type":"bool"},
-		{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"},
 		{"name":"matchingOrder","type":"address"},
-		{"name":"version","type":"uint32"},
+		{"name":"tmp_transactions","type":"map(address,uint128)"},
 		{"name":"newTestField","type":"string"}
 	]
 }

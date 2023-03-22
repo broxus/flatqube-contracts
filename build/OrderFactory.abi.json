@@ -116,7 +116,15 @@
 			]
 		},
 		{
-			"name": "setPlatformCodeOnce",
+			"name": "setPlatformRootOrderCodeOnce",
+			"inputs": [
+				{"name":"_orderRootPlatform","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setPlatformOrderCodeOnce",
 			"inputs": [
 				{"name":"_orderPlatform","type":"cell"}
 			],
@@ -135,7 +143,7 @@
 			"name": "setRootFeeParams",
 			"inputs": [
 				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"},
-				{"name":"root","type":"address"}
+				{"name":"roots","type":"address[]"}
 			],
 			"outputs": [
 			]
@@ -144,7 +152,7 @@
 			"name": "setOrderFeeParams",
 			"inputs": [
 				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"params","type":"tuple"},
-				{"name":"order","type":"address"}
+				{"name":"orders","type":"address[]"}
 			],
 			"outputs": [
 			]
@@ -168,7 +176,7 @@
 		{
 			"name": "upgradeOrderRoot",
 			"inputs": [
-				{"name":"orderAddress","type":"address"}
+				{"name":"listOrderRoots","type":"address[]"}
 			],
 			"outputs": [
 			]
@@ -176,7 +184,7 @@
 		{
 			"name": "upgradeOrderCodeInOrderRoot",
 			"inputs": [
-				{"name":"orderAddress","type":"address"}
+				{"name":"listOrderRoots","type":"address[]"}
 			],
 			"outputs": [
 			]
@@ -184,7 +192,7 @@
 		{
 			"name": "upgradeOrder",
 			"inputs": [
-				{"name":"order","type":"address"}
+				{"name":"listOrders","type":"address[]"}
 			],
 			"outputs": [
 			]
@@ -262,7 +270,14 @@
 			]
 		},
 		{
-			"name": "PlatformCodeUpgraded",
+			"name": "PlatformOrderRootCodeUpgraded",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "PlatformOrderCodeUpgraded",
 			"inputs": [
 			],
 			"outputs": [
@@ -317,7 +332,8 @@
 		{"name":"pendingOwner","type":"address"},
 		{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"},
 		{"name":"orderRootCode","type":"cell"},
-		{"name":"orderPlatformCode","type":"cell"},
-		{"name":"orderCode","type":"cell"}
+		{"name":"orderRootPlatformCode","type":"cell"},
+		{"name":"orderCode","type":"cell"},
+		{"name":"orderPlatformCode","type":"cell"}
 	]
 }

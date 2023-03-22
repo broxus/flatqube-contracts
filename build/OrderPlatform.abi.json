@@ -6,12 +6,12 @@
 		{
 			"name": "constructor",
 			"inputs": [
-				{"name":"version","type":"uint32"},
-				{"name":"versionOrder","type":"uint32"},
-				{"name":"code","type":"cell"},
-				{"name":"orderCode","type":"cell"},
-				{"name":"sendGasTo","type":"address"},
-				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"}
+				{"name":"_initialAmount","type":"uint128"},
+				{"name":"_expectedAmount","type":"uint128"},
+				{"name":"_version","type":"uint32"},
+				{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"_fee","type":"tuple"},
+				{"name":"backendPK","type":"cell"},
+				{"name":"_code","type":"cell"}
 			],
 			"outputs": [
 			]
@@ -19,8 +19,13 @@
 	],
 	"data": [
 		{"key":1,"name":"factory","type":"address"},
-		{"key":2,"name":"spentToken","type":"address"},
-		{"key":3,"name":"params","type":"cell"}
+		{"key":2,"name":"root","type":"address"},
+		{"key":3,"name":"owner","type":"address"},
+		{"key":4,"name":"spentToken","type":"address"},
+		{"key":5,"name":"receiveToken","type":"address"},
+		{"key":6,"name":"timeTx","type":"uint64"},
+		{"key":7,"name":"nowTx","type":"uint64"},
+		{"key":8,"name":"params","type":"cell"}
 	],
 	"events": [
 	],
@@ -29,7 +34,12 @@
 		{"name":"_timestamp","type":"uint64"},
 		{"name":"_constructorFlag","type":"bool"},
 		{"name":"factory","type":"address"},
+		{"name":"root","type":"address"},
+		{"name":"owner","type":"address"},
 		{"name":"spentToken","type":"address"},
+		{"name":"receiveToken","type":"address"},
+		{"name":"timeTx","type":"uint64"},
+		{"name":"nowTx","type":"uint64"},
 		{"name":"params","type":"cell"}
 	]
 }

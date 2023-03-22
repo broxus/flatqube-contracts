@@ -10,8 +10,329 @@ IFREF {
 GETGLOB 6
 THROWIF 51
 ENDS
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 31
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 45
 THROW 100
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
+.macro onTokenWallet
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 55
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $onTokenWallet_e6d1bd58_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro onTokenWallet_e6d1bd58_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 56
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 11
+SDEQ
+AND
+THROWIFNOT 311
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 60
+GETPARAM 7
+FIRST
+DEPTH
+ADDCONST -2
+PICK
+SUB
+UFITS 128
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 61
+SETGLOB 14
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 63
+GETGLOB 13
+GETGLOB 11
+MYADDR
+GETGLOB 10
+NEWC
+STSLICECONST x62_
+STSLICE
+PUSHINT 1
+STUR 111
+ROLLREV 3
+NEWC
+STSLICECONST x1f478b6f
+STSLICE
+ROTREV
+NEWC
+STSLICE
+SWAP
+NEWC
+STSLICE
+STBREFR
+STBREFR
+STBREFR
+ENDC
+PUSHPOW2 7
+SENDRAWMSG
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
+.macro onTokenWalletReceive
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 69
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $onTokenWalletReceive_aebd8150_internal_macro$
+}
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro onTokenWalletReceive_aebd8150_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 70
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+THROWIFNOT 312
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 71
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHINT 64
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
+.macro onTokenWalletBeneficiary
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 74
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $onTokenWalletBeneficiary_3ec6cd0a_internal_macro$
+}
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro onTokenWalletBeneficiary_3ec6cd0a_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 75
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+THROWIFNOT 312
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 76
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHINT 64
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
+.macro on_bounce_macro
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 80
+PUSHINT 2000000000
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 81
+PLDU 32
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 83
+PUSHINT 837670087
+EQUAL
+GETGLOB 9
+GETGLOB 11
+SDEQ
+AND
+PUSHCONT {
+	.loc ../contracts/tests/TestNewOrderRoot.tsol, 87
+	GETGLOB 13
+	NEWC
+	STSLICECONST x42_
+	STSLICE
+	PUSHINT 111
+	STZEROES
+	ENDC
+	PUSHPOW2 7
+	ADDCONST 32
+	UFITS 8
+	SENDRAWMSG
+	.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+}
+IF
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+DUP
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+
+.macro getFeeParams
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 95
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $getFeeParams_be6fc181_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST xdb99d8ba
+	SWAP
+	UNTUPLE 5
+	REVERSE 6, 0
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	SWAP
+	NEWC
+	STSLICE
+	STBREFR
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	SWAP
+	UNTUPLE 5
+	REVERSE 6, 0
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	SWAP
+	NEWC
+	STSLICE
+	STBREFR
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getFeeParams_be6fc181_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 96
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+GETGLOB 19
 .loc ../contracts/tests/TestNewOrderRoot.tsol, 0
 
 .macro getVersion
@@ -23,7 +344,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 41
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 99
 LDU 32
 GETGLOB 4
 ROT
@@ -86,7 +407,546 @@ IFREF {
 THROW 0
 
 .macro getVersion_0d8e6e2c_internal_macro
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 42
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 100
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+GETGLOB 15
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
+.macro getVersionOrder
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 103
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $getVersionOrder_f45798a9_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2903975593
+	STUR 130
+	STU 32
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 106
+	STZEROES
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STU 32
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getVersionOrder_f45798a9_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 104
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+GETGLOB 16
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
+.macro getSpentToken
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 107
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $getSpentToken_a7b67db9_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST x830316d5
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getSpentToken_a7b67db9_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 108
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+GETGLOB 11
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
+.macro getSpentWallet
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 111
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $getSpentWallet_f2a9a890_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST xa25a29a5
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getSpentWallet_f2a9a890_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 112
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+GETGLOB 14
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
+.macro getFactory
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 115
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $getFactory_88cc58e4_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST x90d09e2d
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getFactory_88cc58e4_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 116
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+GETGLOB 10
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
+.macro getDeployer
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 119
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $getDeployer_72630531_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST xa1099705
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getDeployer_72630531_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 120
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+GETGLOB 13
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
+.macro getDex
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 123
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $getDex_191622ff_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST xcf86f10c
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getDex_191622ff_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 124
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -98,6 +958,343 @@ SETGLOB 4
 GETGLOB 12
 .loc ../contracts/tests/TestNewOrderRoot.tsol, 0
 
+.macro setFeeParams
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 127
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDU 128
+LDU 128
+LDU 128
+LDU 128
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+ROLLREV 5
+TUPLE 5
+SWAP
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $setFeeParams_c19d7217_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro setFeeParams_c19d7217_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 48
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 10
+SDEQ
+AND
+THROWIFNOT 313
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 128
+PUSHINT 2000000000
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 129
+SETGLOB 19
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 130
+GETGLOB 10
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
+.macro setOrderCode
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 137
+LDREF
+LDU 32
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $setOrderCode_ec2a8133_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro setOrderCode_ec2a8133_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 48
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 10
+SDEQ
+AND
+THROWIFNOT 313
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 138
+GETPARAM 7
+FIRST
+DEPTH
+ADDCONST -2
+PICK
+SUB
+UFITS 128
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 140
+GETGLOB 16
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 141
+SWAP
+SETGLOB 16
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 142
+SWAP
+SETGLOB 17
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 144
+GETGLOB 16
+SWAP
+PUSHSLICE xc0000000000000000000000000554e07fd
+NEWC
+STSLICE
+STU 32
+STU 32
+ENDC
+PUSHINT 0
+SENDRAWMSG
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 145
+GETGLOB 10
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
+.macro expectedAddressOrder
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 148
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 64
+LDU 64
+ENDS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+CALLREF {
+	CALL $expectedAddressOrder_046f61e6_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST xcd353da6
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro expectedAddressOrder_046f61e6_internal_macro
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 162
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+PUSHINT 0
+NEWC
+STU 256
+PUSHINT 0
+NEWDICT
+PUSHINT 64
+DICTUSETB
+ROLL 7
+PUSHINT 1
+ROT
+PUSHINT 64
+DICTUSET
+ROLL 6
+PUSHINT 2
+ROT
+PUSHINT 64
+DICTUSET
+ROLL 5
+PUSHINT 3
+ROT
+PUSHINT 64
+DICTUSET
+ROLL 4
+PUSHINT 4
+ROT
+PUSHINT 64
+DICTUSET
+ROLL 3
+PUSHINT 5
+ROT
+PUSHINT 64
+DICTUSET
+ROT
+NEWC
+STU 64
+PUSHINT 6
+ROT
+PUSHINT 64
+DICTUSETB
+SWAP
+NEWC
+STU 64
+PUSHINT 7
+ROT
+PUSHINT 64
+DICTUSETB
+GETGLOB 18
+GETGLOB 12
+NEWC
+STSLICE
+STREF
+ENDC
+PUSHINT 8
+ROT
+PUSHINT 64
+DICTUSETREF
+NEWC
+STDICT
+ENDC
+GETGLOB 18
+NEWC
+STSLICECONST x2_
+STOPTREF
+STOPTREF
+STZERO
+ENDC
+HASHCU
+NEWC
+STSLICECONST x801_
+STU 256
+ENDC
+CTOS
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 0
+
 .macro upgrade
 DROP
 GETGLOB 6
@@ -107,7 +1304,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 45
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 179
 OVER
 PUSHCONT {
 	LDREF
@@ -134,7 +1331,7 @@ CALLREF {
 THROW 0
 
 .macro upgrade_fb9d1513_internal_macro
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 34
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 48
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -145,12 +1342,12 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 313
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 50
-GETGLOB 12
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 184
+GETGLOB 15
 PUSH S2
 EQUAL
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderRoot.tsol, 51
+	.loc ../contracts/tests/TestNewOrderRoot.tsol, 185
 	GETPARAM 7
 	FIRST
 	DEPTH
@@ -160,7 +1357,7 @@ PUSHCONT {
 	UFITS 128
 	PUSHINT 0
 	RAWRESERVE
-	.loc ../contracts/tests/TestNewOrderRoot.tsol, 52
+	.loc ../contracts/tests/TestNewOrderRoot.tsol, 186
 	DUP
 	NEWC
 	STSLICECONST x62_
@@ -174,20 +1371,29 @@ PUSHCONT {
 	SENDRAWMSG
 }
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderRoot.tsol, 54
-	GETGLOB 15
+	.loc ../contracts/tests/TestNewOrderRoot.tsol, 188
+	OVER
+	PUSHSLICE xc000000000000000000000000071df5078
+	NEWC
+	STSLICE
+	STU 32
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+	.loc ../contracts/tests/TestNewOrderRoot.tsol, 190
 	GETGLOB 18
+	GETGLOB 12
 	NEWC
 	STSLICE
 	STREF
 	ENDC
-	GETGLOB 14
-	GETGLOB 20
 	GETGLOB 17
+	GETGLOB 19
 	GETGLOB 13
-	PUSH S6
-	GETGLOB 12
 	GETGLOB 16
+	PUSH S6
+	GETGLOB 15
+	GETGLOB 14
 	GETGLOB 11
 	GETGLOB 10
 	NEWC
@@ -221,10 +1427,10 @@ PUSHCONT {
 	STBREFR
 	STBREFR
 	ENDC
-	.loc ../contracts/tests/TestNewOrderRoot.tsol, 59
+	.loc ../contracts/tests/TestNewOrderRoot.tsol, 195
 	PUSH S3
 	SETCODE
-	.loc ../contracts/tests/TestNewOrderRoot.tsol, 60
+	.loc ../contracts/tests/TestNewOrderRoot.tsol, 196
 	PUSH S3
 	CTOS
 	DUP
@@ -239,7 +1445,7 @@ PUSHCONT {
 	CTOS
 	BLESS
 	POP C3
-	.loc ../contracts/tests/TestNewOrderRoot.tsol, 62
+	.loc ../contracts/tests/TestNewOrderRoot.tsol, 198
 	CALLREF {
 		CALL $:onCodeUpgrade$
 	}
@@ -250,52 +1456,11 @@ BLKDROP 3
 
 .internal-alias :onCodeUpgrade, 2
 .internal :onCodeUpgrade
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 67
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 203
 PUSHINT 2000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 68
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-SETGLOB 10
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-SETGLOB 11
-PUSHINT 0
-SETGLOB 12
-PUSHINT 0
-SETGLOB 13
-PUSHREF {
-}
-SETGLOB 14
-PUSHREF {
-}
-SETGLOB 15
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-SETGLOB 16
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-SETGLOB 17
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-SETGLOB 18
-PUSHREF {
-}
-SETGLOB 19
-PUSHINT 0
-BLKPUSH 3, 0
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-TUPLE 5
-SETGLOB 20
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 72
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 207
 CTOS
 LDMSGADDR
 LDREF
@@ -330,27 +1495,27 @@ ENDS
 REVERSE 10, 0
 SETGLOB 10
 SETGLOB 11
-SETGLOB 16
-DROP
-SETGLOB 12
-SETGLOB 13
-SETGLOB 17
-SETGLOB 20
 SETGLOB 14
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 88
+DROP
+SETGLOB 15
+SETGLOB 16
+SETGLOB 13
+SETGLOB 19
+SETGLOB 17
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 223
 CTOS
 LDMSGADDR
 LDREF
 ENDS
 SWAP
+SETGLOB 12
 SETGLOB 18
-SETGLOB 15
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 90
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 225
 PUSHREF {
 	.blob x4e6577204f7264657220526f6f74
 }
-SETGLOB 19
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 92
+SETGLOB 20
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 227
 GETGLOB 10
 NEWC
 STSLICECONST x42_
@@ -378,7 +1543,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 99
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 234
 ENDS
 .loc ../contracts/tests/TestNewOrderRoot.tsol, 0
 CALLREF {
@@ -416,8 +1581,8 @@ THROW 0
 CALL $newFunc_572bedd5_internal_macro$
 
 .macro newFunc_572bedd5_internal_macro
-.loc ../contracts/tests/TestNewOrderRoot.tsol, 100
-GETGLOB 19
+.loc ../contracts/tests/TestNewOrderRoot.tsol, 235
+GETGLOB 20
 .loc ../contracts/tests/TestNewOrderRoot.tsol, 0
 
 .macro c4_to_c7
@@ -432,34 +1597,34 @@ LDREF
 ENDS
 CTOS
 LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
 LDU 32
 LDU 32
 LDREF
 LDREF
-LDREF
-ENDS
-CTOS
-LDMSGADDR
-LDREF
-ENDS
-CTOS
-LDMSGADDR
-LDREF
-ENDS
-CTOS
-LDMSGADDR
-LDREF
-LDU 128
 LDU 128
 LDU 128
 LDREF
 ENDS
 CTOS
+LDU 128
 LDU 128
 LDMSGADDR
 ROLLREV 5
 TUPLE 5
 SWAP
+LDREF
 ENDS
 SETGLOB 20
 SETGLOB 19
@@ -488,24 +1653,20 @@ PUSHCONT {
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
-	DUP
+	BLKPUSH 4, 0
 	PUSHINT 0
 	DUP
 	PUSHREF {
 	}
 	DUP
-	PUSHREFSLICE {
-		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-	}
-	BLKPUSH 2, 0
-	PUSHREF {
-	}
 	PUSHINT 0
 	BLKPUSH 3, 0
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
 	TUPLE 5
+	PUSHREF {
+	}
 	SETGLOB 20
 	SETGLOB 19
 	SETGLOB 18
@@ -551,30 +1712,30 @@ STSLICE
 ROLLREV 10
 NEWC
 STSLICE
+ROLLREV 9
+NEWC
+STSLICE
+ROLLREV 8
+NEWC
+STSLICE
+ROLLREV 7
+NEWC
+STSLICE
 STU 32
 STU 32
 STREF
-STREF
-ROLLREV 5
-NEWC
-STSLICE
-ROLLREV 4
-NEWC
-STSLICE
-ROLLREV 3
-NEWC
-STSLICE
 STREF
 SWAP
 UNTUPLE 5
 REVERSE 6, 0
 STU 128
 STU 128
-STU 128
-ROTREV
+ROLLREV 4
 NEWC
 STU 128
+STU 128
 STSLICE
+STREF
 STBREFR
 STBREFR
 STBREFR
@@ -622,7 +1783,12 @@ SETINDEXQ 3
 PUSHINT 0
 SETINDEXQ 4
 SETGLOB 4
-IFRET
+IFJMPREF {
+	OVER
+	LDSLICE 32
+	NIP
+	CALL $on_bounce_macro$
+}
 OVER
 SEMPTY ; isEmpty
 IFJMPREF {
@@ -704,22 +1870,125 @@ THROW 60
 
 .macro public_function_selector
 DUP
-PUSHINT 289559618
-EQUAL
-IFJMPREF {
-	CALL $newFunc$
-}
-DUP
-PUSHINT 766070063
-EQUAL
-IFJMPREF {
-	CALL $getVersion$
-}
-DUP
 PUSHINT 1688565960
-EQUAL
+LEQ
 IFJMPREF {
-	CALL $upgrade$
+	DUP
+	PUSHINT 554276613
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 50534101
+		EQUAL
+		IFJMPREF {
+			CALL $getSpentToken$
+		}
+		DUP
+		PUSHINT 282107437
+		EQUAL
+		IFJMPREF {
+			CALL $getFactory$
+		}
+		DUP
+		PUSHINT 289559618
+		EQUAL
+		IFJMPREF {
+			CALL $newFunc$
+		}
+		DUP
+		PUSHINT 554276613
+		EQUAL
+		IFJMPREF {
+			CALL $getDeployer$
+		}
+	}
+	DUP
+	PUSHINT 819026985
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 576334245
+		EQUAL
+		IFJMPREF {
+			CALL $getSpentWallet$
+		}
+		DUP
+		PUSHINT 756491945
+		EQUAL
+		IFJMPREF {
+			CALL $getVersionOrder$
+		}
+		DUP
+		PUSHINT 766070063
+		EQUAL
+		IFJMPREF {
+			CALL $getVersion$
+		}
+		DUP
+		PUSHINT 819026985
+		EQUAL
+		IFJMPREF {
+			CALL $onTokenWalletBeneficiary$
+		}
+	}
+	DUP
+	PUSHINT 1334243596
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 1120820710
+		EQUAL
+		IFJMPREF {
+			CALL $setOrderCode$
+		}
+		DUP
+		PUSHINT 1236465367
+		EQUAL
+		IFJMPREF {
+			CALL $onTokenWallet$
+		}
+		DUP
+		PUSHINT 1295334822
+		EQUAL
+		IFJMPREF {
+			CALL $expectedAddressOrder$
+		}
+		DUP
+		PUSHINT 1334243596
+		EQUAL
+		IFJMPREF {
+			CALL $getDex$
+		}
+	}
+	DUP
+	PUSHINT 1688565960
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 1429374416
+		EQUAL
+		IFJMPREF {
+			CALL $onTokenWalletReceive$
+		}
+		DUP
+		PUSHINT 1536809146
+		EQUAL
+		IFJMPREF {
+			CALL $getFeeParams$
+		}
+		DUP
+		PUSHINT 1601949745
+		EQUAL
+		IFJMPREF {
+			CALL $setFeeParams$
+		}
+		DUP
+		PUSHINT 1688565960
+		EQUAL
+		IFJMPREF {
+			CALL $upgrade$
+		}
+	}
 }
 DUP
 PUSHINT 1756716863

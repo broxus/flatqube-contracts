@@ -4,6 +4,7 @@ import "../structures/IOrderFeeParams.tsol";
 
 interface IOrderRoot is IOrderFeeParams {
 	function getVersion() external view responsible returns(uint32);
+	function getVersionOrder() external view responsible returns (uint32);
 	function getSpentToken() external view responsible returns (address);
 	function getSpentWallet() external view responsible returns (address);
 	function getFactory() external view responsible returns (address);
@@ -22,6 +23,6 @@ interface IOrderRoot is IOrderFeeParams {
 	) external view responsible returns (address);
 
 	function setFeeParams(OrderFeeParams params) external;
-	function setOrderCode(TvmCell _code) external;
+	function setOrderCode(TvmCell _code, uint32 _versionOrder) external;
 	function upgrade(TvmCell _code, uint32 _newVersion, address _sendGasTo) external;
 }

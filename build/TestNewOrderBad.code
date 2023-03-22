@@ -9,170 +9,10 @@ IFREF {
 }
 GETGLOB 6
 THROWIF 51
-OVER
-PUSHCONT {
-	LDREF
-	ENDS
-	CTOS
-}
-IF
-LDU 128
-LDU 128
-LDU 256
-LDU 256
-LDREF
 ENDS
-CTOS
-LDMSGADDR
-LDU 128
-LDU 128
-LDU 128
-LDREF
-ENDS
-CTOS
-LDU 128
-LDMSGADDR
-ROLLREV 5
-TUPLE 5
-SWAP
-LDREF
-LDU 32
-ENDS
-.loc ../contracts/tests/TestNewOrderBad.tsol, 81
-PUSHINT 0
-CALLREF {
-	CALL $changeState_268f1153_internal_macro$
-}
-.loc ../contracts/tests/TestNewOrderBad.tsol, 82
-GETGLOB 9
-PARSEMSGADDR
-INDEX 3
-PLDU 256
-NEQINT 0
-GETGLOB 9
-GETGLOB 11
-SDEQ
-AND
-PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 86
-	GETPARAM 7
-	FIRST
-	DEPTH
-	ADDCONST -2
-	PICK
-	SUB
-	UFITS 128
-	PUSHINT 0
-	RAWRESERVE
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 88
-	PUSH2 S7, S7
-	SETGLOB 17
-	SETGLOB 20
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 89
-	PUSH2 S6, S6
-	SETGLOB 18
-	SETGLOB 19
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 90
-	PUSH S5
-	SETGLOB 21
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 91
-	PUSH S4
-	SETGLOB 22
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 92
-	PUSH S3
-	SETGLOB 23
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 93
-	PUSH S2
-	PUSHINT 33
-	SETGLOBVAR
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 94
-	OVER
-	SETGLOB 27
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 95
-	DUP
-	PUSHINT 35
-	SETGLOBVAR
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 97
-	GETGLOB 14
-	GETGLOB 13
-	GETGLOB 23
-	NEWC
-	STSLICECONST x62_
-	STSLICE
-	PUSHINT 2803819077499249229031122585109857988247553
-	STUR 143
-	ROTREV
-	PUSHSLICE x2c7cef91748e3be5
-	NEWC
-	STSLICE
-	STSLICE
-	SWAP
-	NEWC
-	STSLICE
-	STBREFR
-	STBREFR
-	ENDC
-	PUSHINT 1
-	SENDRAWMSG
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 103
-	PUSHINT 200000000
-	MYADDR
-	GETGLOB 13
-	NEWC
-	STSLICECONST x62_
-	STSLICE
-	PUSHINT 2852496860548013238048595988196296388247553
-	STUR 143
-	ROTREV
-	PUSHSLICE x31edd4c7748e3be5
-	NEWC
-	STSLICE
-	STSLICE
-	STU 128
-	STBREFR
-	ENDC
-	PUSHINT 1
-	SENDRAWMSG
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 109
-	PUSHINT 200000000
-	MYADDR
-	GETGLOB 14
-	NEWC
-	STSLICECONST x62_
-	STSLICE
-	PUSHINT 2852496860548013238048595988196296388247553
-	STUR 143
-	ROTREV
-	PUSHSLICE x31edd4c7748e3be5
-	NEWC
-	STSLICE
-	STSLICE
-	STU 128
-	STBREFR
-	ENDC
-	PUSHINT 1
-}
-PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 115
-	GETGLOB 9
-	NEWC
-	STSLICECONST x42_
-	STSLICE
-	PUSHINT 111
-	STZEROES
-	ENDC
-	PUSHPOW2 7
-	ADDCONST 32
-	UFITS 8
-}
-IFELSE
-SENDRAWMSG
+.loc ../contracts/tests/TestNewOrderBad.tsol, 74
+THROW 100
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
-BLKDROP 8
-CALLREF {
-	CALL $c7_to_c4$
-}
-THROW 0
 
 .macro onTokenWalletReceive
 DROP
@@ -183,7 +23,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 158
+.loc ../contracts/tests/TestNewOrderBad.tsol, 111
 OVER
 PUSHCONT {
 	LDREF
@@ -204,11 +44,11 @@ CALLREF {
 THROW 0
 
 .macro onTokenWalletReceive_aebd8150_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 158
+.loc ../contracts/tests/TestNewOrderBad.tsol, 111
 DROP
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 
-.macro onBeginData
+.macro onDexPair
 DROP
 GETGLOB 6
 THROWIFNOT 76
@@ -217,7 +57,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 160
+.loc ../contracts/tests/TestNewOrderBad.tsol, 113
 OVER
 PUSHCONT {
 	LDREF
@@ -229,7 +69,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 CALLREF {
-	CALL $onBeginData_6afdd659_internal_macro$
+	CALL $onDexPair_f01a7bbd_internal_macro$
 }
 DROP
 CALLREF {
@@ -237,97 +77,33 @@ CALLREF {
 }
 THROW 0
 
-.macro onBeginData_6afdd659_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 161
+.macro onDexPair_f01a7bbd_internal_macro
+.loc ../contracts/tests/TestNewOrderBad.tsol, 114
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
 PLDU 256
 NEQINT 0
 GETGLOB 9
-GETGLOB 23
+GETGLOB 17
 SDEQ
-GETGLOB 9
-GETGLOB 13
-SDEQ
-GETGLOB 9
-GETGLOB 14
-SDEQ
-OR
-OR
 AND
-THROWIFNOT 303
-.loc ../contracts/tests/TestNewOrderBad.tsol, 169
-GETGLOB 9
-GETGLOB 23
-SDEQ
-PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 170
-	DUP
-	SETGLOB 24
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 171
-	TRUE
-	PUSHINT 32
-	SETGLOBVAR
-}
-PUSHCONT {
-	GETGLOB 9
-	GETGLOB 13
-	SDEQ
-	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 173
-		DUP
-		SETGLOB 25
-	}
-	PUSHCONT {
-		GETGLOB 9
-		GETGLOB 14
-		SDEQ
-		PUSHCONT {
-			.loc ../contracts/tests/TestNewOrderBad.tsol, 175
-			DUP
-			SETGLOB 26
-			.loc ../contracts/tests/TestNewOrderBad.tsol, 0
-		}
-		IF
-	}
-	IFELSE
-}
-IFELSE
-.loc ../contracts/tests/TestNewOrderBad.tsol, 178
-DROP
-GETGLOB 25
-PARSEMSGADDR
-INDEX 3
-PLDU 256
-NEQINT 0
+THROWIFNOT 304
+.loc ../contracts/tests/TestNewOrderBad.tsol, 115
 DUP
-PUSHCONT {
-	DROP
-	GETGLOB 26
-	PARSEMSGADDR
-	INDEX 3
-	PLDU 256
-	NEQINT 0
-}
-IF
-PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 182
-	GETGLOB 25
-	NEWC
-	STSLICECONST x62_
-	STSLICE
-	PUSHINT 51721332951613057734990901608657498043136036075707396568046812
-	STUR 207
-	ENDC
-	PUSHINT 1
-	SENDRAWMSG
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
-}
-IF
+SETGLOB 27
+.loc ../contracts/tests/TestNewOrderBad.tsol, 117
+NEWC
+STSLICECONST x62_
+STSLICE
+PUSHINT 51721332951613057734990901608657498043136032672860080556616959
+STUR 207
+ENDC
+PUSHINT 1
+SENDRAWMSG
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 
-.macro onBalanceSpentWallet
+.macro onDexPairTokenRoots
 DROP
 GETGLOB 6
 THROWIFNOT 76
@@ -336,7 +112,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 190
+.loc ../contracts/tests/TestNewOrderBad.tsol, 124
 OVER
 PUSHCONT {
 	LDREF
@@ -344,11 +120,19 @@ PUSHCONT {
 	CTOS
 }
 IF
-LDU 128
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
 ENDS
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 CALLREF {
-	CALL $onBalanceSpentWallet_1488f15b_internal_macro$
+	CALL $onDexPairTokenRoots_efaa2889_internal_macro$
 }
 DROP
 CALLREF {
@@ -356,37 +140,197 @@ CALLREF {
 }
 THROW 0
 
-.macro onBalanceSpentWallet_1488f15b_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 191
+.macro onDexPairTokenRoots_efaa2889_internal_macro
+.loc ../contracts/tests/TestNewOrderBad.tsol, 129
+BLKDROP 3
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
 PLDU 256
 NEQINT 0
 GETGLOB 9
-GETGLOB 25
+GETGLOB 27
 SDEQ
 AND
-THROWIFNOT 307
-.loc ../contracts/tests/TestNewOrderBad.tsol, 196
-GETGLOB 28
-NEQINT 2
+THROWIFNOT 305
+.loc ../contracts/tests/TestNewOrderBad.tsol, 130
+TRUE
+SETGLOB 30
+.loc ../contracts/tests/TestNewOrderBad.tsol, 0
+
+.macro onSpentWallet
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderBad.tsol, 133
+OVER
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 197
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+ENDS
+.loc ../contracts/tests/TestNewOrderBad.tsol, 0
+CALLREF {
+	CALL $onSpentWallet_72e299c2_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro onSpentWallet_72e299c2_internal_macro
+.loc ../contracts/tests/TestNewOrderBad.tsol, 134
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 13
+SDEQ
+AND
+THROWIFNOT 303
+.loc ../contracts/tests/TestNewOrderBad.tsol, 135
+SETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 136
+CALLREF {
+	CALL $checkBeginData_56fc00a9_internal_macro$
+}
+.loc ../contracts/tests/TestNewOrderBad.tsol, 0
+
+.macro onReceiveWallet
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/TestNewOrderBad.tsol, 139
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+ENDS
+.loc ../contracts/tests/TestNewOrderBad.tsol, 0
+CALLREF {
+	CALL $onReceiveWallet_9a86c53f_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro onReceiveWallet_9a86c53f_internal_macro
+.loc ../contracts/tests/TestNewOrderBad.tsol, 140
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 14
+SDEQ
+AND
+THROWIFNOT 303
+.loc ../contracts/tests/TestNewOrderBad.tsol, 141
+SETGLOB 29
+.loc ../contracts/tests/TestNewOrderBad.tsol, 142
+CALLREF {
+	CALL $checkBeginData_56fc00a9_internal_macro$
+}
+.loc ../contracts/tests/TestNewOrderBad.tsol, 0
+
+.globl	checkBeginData_56fc00a9_internal
+.type	checkBeginData_56fc00a9_internal, @function
+CALL $checkBeginData_56fc00a9_internal_macro$
+
+.macro checkBeginData_56fc00a9_internal_macro
+.loc ../contracts/tests/TestNewOrderBad.tsol, 146
+GETGLOB 28
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 29
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
 	DUP
-	GETGLOB 18
-	GEQ
+	PUSHCONT {
+		DROP
+		GETGLOB 13
+		PUSHINT 36
+		GETGLOBVAR
+		PUSHINT 267
+		DICTGET
+		NULLSWAPIFNOT
+		NIP
+		DUP
+		PUSHCONT {
+			DROP
+			GETGLOB 13
+			PUSHINT 36
+			GETGLOBVAR
+			PUSHINT 267
+			DICTGET
+			ZEROSWAPIFNOT
+			PUSHCONT {
+				PLDU 128
+			}
+			IF
+			GETGLOB 20
+			GEQ
+		}
+		IF
+	}
+	IF
+}
+IF
+PUSHCONT {
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 150
 	PUSHINT 2
-	PUSHINT 1
-	CONDSEL
 	CALLREF {
 		CALL $changeState_268f1153_internal_macro$
 	}
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 151
+	PUSHINT 36
+	GETGLOBVAR
+	PUSHINT 267
+	DICTREMMIN
+	NULLSWAPIFNOT
+	PUSHCONT {
+		SWAP
+		PLDU 128
+		PAIR
+	}
+	IF
+	DROP
+	PUSHINT 36
+	SETGLOBVAR
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IF
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
-DROP
 
 .macro on_bounce_macro
 GETGLOB 6
@@ -396,27 +340,27 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 206
+.loc ../contracts/tests/TestNewOrderBad.tsol, 156
 PLDU 32
-.loc ../contracts/tests/TestNewOrderBad.tsol, 208
+.loc ../contracts/tests/TestNewOrderBad.tsol, 158
 PUSHINT 1301782387
 EQUAL
 GETGLOB 9
-PUSHINT 34
+PUSHINT 35
 GETGLOBVAR
 SDEQ
 AND
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 212
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 162
 	PUSHINT 2
 	CALLREF {
 		CALL $changeState_268f1153_internal_macro$
 	}
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 213
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 163
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
-	PUSHINT 34
+	PUSHINT 35
 	SETGLOBVAR
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
@@ -430,7 +374,7 @@ CALLREF {
 DROP
 GETGLOB 6
 THROWIFNOT 76
-.loc ../contracts/tests/TestNewOrderBad.tsol, 217
+.loc ../contracts/tests/TestNewOrderBad.tsol, 167
 OVER
 PUSHCONT {
 	LDU 64
@@ -507,7 +451,7 @@ IFREF {
 THROW 0
 
 .macro buildPayload_7c704969_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 224
+.loc ../contracts/tests/TestNewOrderBad.tsol, 174
 PUSHINT 50
 ROLLREV 5
 CALLREF {
@@ -524,7 +468,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 234
+.loc ../contracts/tests/TestNewOrderBad.tsol, 184
 LDU 32
 GETGLOB 4
 ROT
@@ -587,7 +531,7 @@ IFREF {
 THROW 0
 
 .macro currentStatus_ef8a9235_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 235
+.loc ../contracts/tests/TestNewOrderBad.tsol, 185
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -596,7 +540,7 @@ SETINDEXQ 1
 PUSHINT 64
 SETINDEXQ 4
 SETGLOB 4
-GETGLOB 28
+GETGLOB 31
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 
 .macro initParams
@@ -608,7 +552,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 238
+.loc ../contracts/tests/TestNewOrderBad.tsol, 188
 LDU 32
 GETGLOB 4
 ROT
@@ -720,7 +664,7 @@ IFREF {
 THROW 0
 
 .macro initParams_fb0c8628_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 243
+.loc ../contracts/tests/TestNewOrderBad.tsol, 193
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -748,7 +692,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 254
+.loc ../contracts/tests/TestNewOrderBad.tsol, 204
 LDU 32
 GETGLOB 4
 ROT
@@ -942,7 +886,7 @@ IFREF {
 THROW 0
 
 .macro getDetails_fbbf93a0_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 261
+.loc ../contracts/tests/TestNewOrderBad.tsol, 211
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -965,7 +909,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 264
+.loc ../contracts/tests/TestNewOrderBad.tsol, 214
 LDU 32
 GETGLOB 4
 ROT
@@ -1055,7 +999,7 @@ IFREF {
 THROW 0
 
 .macro getFeeParams_be6fc181_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 265
+.loc ../contracts/tests/TestNewOrderBad.tsol, 215
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -1064,8 +1008,7 @@ SETINDEXQ 1
 PUSHINT 64
 SETINDEXQ 4
 SETGLOB 4
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 
 .macro getExpectedSpendAmount
@@ -1077,7 +1020,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 268
+.loc ../contracts/tests/TestNewOrderBad.tsol, 218
 LDU 32
 GETGLOB 4
 ROT
@@ -1155,7 +1098,7 @@ IFREF {
 THROW 0
 
 .macro getExpectedSpendAmount_fd82ad5f_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 269
+.loc ../contracts/tests/TestNewOrderBad.tsol, 219
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -1178,7 +1121,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 272
+.loc ../contracts/tests/TestNewOrderBad.tsol, 222
 LDU 32
 GETGLOB 4
 ROT
@@ -1256,7 +1199,7 @@ IFREF {
 THROW 0
 
 .macro getExpectedSpendAmountOfMatching_d5b0b65b_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 273
+.loc ../contracts/tests/TestNewOrderBad.tsol, 223
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -1279,7 +1222,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 276
+.loc ../contracts/tests/TestNewOrderBad.tsol, 226
 OVER
 PUSHCONT {
 	LDREF
@@ -1310,7 +1253,7 @@ CALLREF {
 THROW 0
 
 .macro setFeeParams_c19d7217_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 124
+.loc ../contracts/tests/TestNewOrderBad.tsol, 77
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -1321,7 +1264,7 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 313
-.loc ../contracts/tests/TestNewOrderBad.tsol, 277
+.loc ../contracts/tests/TestNewOrderBad.tsol, 227
 GETPARAM 7
 FIRST
 DEPTH
@@ -1331,10 +1274,9 @@ SUB
 UFITS 128
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/tests/TestNewOrderBad.tsol, 279
-PUSHINT 33
-SETGLOBVAR
-.loc ../contracts/tests/TestNewOrderBad.tsol, 280
+.loc ../contracts/tests/TestNewOrderBad.tsol, 229
+SETGLOB 26
+.loc ../contracts/tests/TestNewOrderBad.tsol, 230
 GETGLOB 10
 NEWC
 STSLICECONST x42_
@@ -1357,7 +1299,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 287
+.loc ../contracts/tests/TestNewOrderBad.tsol, 237
 OVER
 PUSHCONT {
 	LDREF
@@ -1392,19 +1334,19 @@ CALLREF {
 THROW 0
 
 .macro onAcceptTokensTransfer_e63f2284_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 295
+.loc ../contracts/tests/TestNewOrderBad.tsol, 245
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
 PLDU 256
 THROWIFNOT 100
-.loc ../contracts/tests/TestNewOrderBad.tsol, 297
+.loc ../contracts/tests/TestNewOrderBad.tsol, 247
 DUP
-GETGLOB 28
+GETGLOB 31
 CALLREF {
 	CALL $OrderPayloads_no_obj_decodeOnAcceptTokenTransferData_3ec80200_macro$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 310
+.loc ../contracts/tests/TestNewOrderBad.tsol, 260
 PUSH S6
 PARSEMSGADDR
 INDEX 3
@@ -1417,54 +1359,54 @@ PUSHCONT {
 }
 IFELSE
 POP S7
-.loc ../contracts/tests/TestNewOrderBad.tsol, 312
+.loc ../contracts/tests/TestNewOrderBad.tsol, 262
 ROLL 10
 PUSH S9
 CALLREF {
 	CALL $OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 319
+.loc ../contracts/tests/TestNewOrderBad.tsol, 269
 PUSHINT 0
 BLKPUSH 2, 0
-.loc ../contracts/tests/TestNewOrderBad.tsol, 323
+.loc ../contracts/tests/TestNewOrderBad.tsol, 273
 ROLL 16
 NOT
-.loc ../contracts/tests/TestNewOrderBad.tsol, 324
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 274
+GETGLOB 31
 EQINT 3
-GETGLOB 28
+GETGLOB 31
 EQINT 5
 OR
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 325
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 275
 	DROP
 	TRUE
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IF
-.loc ../contracts/tests/TestNewOrderBad.tsol, 328
+.loc ../contracts/tests/TestNewOrderBad.tsol, 278
 DUP
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 329
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 279
 	GETGLOB 9
-	GETGLOB 25
+	GETGLOB 28
 	SDEQ
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 330
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 280
 		PUSH S19
 		GETGLOB 11
 		SDEQ
 		PUSH S21
-		GETGLOB 18
+		GETGLOB 20
 		GEQ
-		GETGLOB 28
+		GETGLOB 31
 		EQINT 0
-		GETGLOB 28
+		GETGLOB 31
 		EQINT 1
 		OR
 		AND
 		AND
-		GETGLOB 28
+		GETGLOB 31
 		EQINT 4
 		PUSH S18
 		PUSHINT 201
@@ -1472,15 +1414,15 @@ PUSHCONT {
 		AND
 		OR
 		PUSHCONT {
-			.loc ../contracts/tests/TestNewOrderBad.tsol, 335
+			.loc ../contracts/tests/TestNewOrderBad.tsol, 285
 			PUSHINT 2
 			CALLREF {
 				CALL $changeState_268f1153_internal_macro$
 			}
-			.loc ../contracts/tests/TestNewOrderBad.tsol, 337
+			.loc ../contracts/tests/TestNewOrderBad.tsol, 287
 			PUSH S15
 			GTINT 0
-			GETGLOB 28
+			GETGLOB 31
 			EQINT 4
 			PUSH S18
 			PUSHINT 201
@@ -1488,7 +1430,7 @@ PUSHCONT {
 			AND
 			AND
 			PUSHCONT {
-				.loc ../contracts/tests/TestNewOrderBad.tsol, 338
+				.loc ../contracts/tests/TestNewOrderBad.tsol, 288
 				PUSH2 S15, S13
 				FALSE
 				NEWC
@@ -1509,7 +1451,7 @@ PUSHCONT {
 			IF
 		}
 		PUSHCONT {
-			.loc ../contracts/tests/TestNewOrderBad.tsol, 344
+			.loc ../contracts/tests/TestNewOrderBad.tsol, 294
 			DROP
 			TRUE
 		}
@@ -1518,11 +1460,11 @@ PUSHCONT {
 	}
 	PUSHCONT {
 		GETGLOB 9
-		GETGLOB 26
+		GETGLOB 29
 		SDEQ
 		PUSHCONT {
-			.loc ../contracts/tests/TestNewOrderBad.tsol, 346
-			GETGLOB 28
+			.loc ../contracts/tests/TestNewOrderBad.tsol, 296
+			GETGLOB 31
 			EQINT 2
 			PUSH S17
 			EQINT 50
@@ -1541,19 +1483,19 @@ PUSHCONT {
 			}
 			IF
 			PUSH S15
-			PUSHINT 34
+			PUSHINT 35
 			GETGLOBVAR
 			SDEQ
-			GETGLOB 28
+			GETGLOB 31
 			EQINT 7
 			AND
 			OR
 			PUSHCONT {
-				.loc ../contracts/tests/TestNewOrderBad.tsol, 350
-				GETGLOB 28
+				.loc ../contracts/tests/TestNewOrderBad.tsol, 300
+				GETGLOB 31
 				NEQINT 7
 				PUSHCONT {
-					.loc ../contracts/tests/TestNewOrderBad.tsol, 351
+					.loc ../contracts/tests/TestNewOrderBad.tsol, 301
 					PUSH S20
 					CALLREF {
 						CALL $_expectedSpendAmount_94832ad6_internal_macro$
@@ -1562,30 +1504,30 @@ PUSHCONT {
 					POP S3
 				}
 				PUSHCONT {
-					.loc ../contracts/tests/TestNewOrderBad.tsol, 353
+					.loc ../contracts/tests/TestNewOrderBad.tsol, 303
 					PUSH S20
 					POP S3
-					.loc ../contracts/tests/TestNewOrderBad.tsol, 354
+					.loc ../contracts/tests/TestNewOrderBad.tsol, 304
 					PUSHINT 0
 					POP S2
 				}
 				IFELSE
-				.loc ../contracts/tests/TestNewOrderBad.tsol, 357
+				.loc ../contracts/tests/TestNewOrderBad.tsol, 307
 				PUSHREF {
 				}
-				.loc ../contracts/tests/TestNewOrderBad.tsol, 358
-				GETGLOB 28
+				.loc ../contracts/tests/TestNewOrderBad.tsol, 308
+				GETGLOB 31
 				EQINT 7
 				PUSH S18
 				EQINT 51
 				AND
 				PUSHCONT {
-					.loc ../contracts/tests/TestNewOrderBad.tsol, 359
+					.loc ../contracts/tests/TestNewOrderBad.tsol, 309
 					PUSH3 S9, S12, S14
 					CALLREF {
 						CALL $transferMatchingReward_a99ed683_internal_macro$
 					}
-					.loc ../contracts/tests/TestNewOrderBad.tsol, 361
+					.loc ../contracts/tests/TestNewOrderBad.tsol, 311
 					PUSHINT 52
 					PUSH S17
 					PUSH S16
@@ -1598,12 +1540,12 @@ PUSHCONT {
 					.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 				}
 				IF
-				.loc ../contracts/tests/TestNewOrderBad.tsol, 371
+				.loc ../contracts/tests/TestNewOrderBad.tsol, 321
 				PUSH S3
-				GETGLOB 20
+				GETGLOB 22
 				GEQ
 				PUSHCONT {
-					.loc ../contracts/tests/TestNewOrderBad.tsol, 372
+					.loc ../contracts/tests/TestNewOrderBad.tsol, 322
 					PUSH S17
 					PUSH3 S4, S12, S3
 					PUSH S16
@@ -1619,7 +1561,7 @@ PUSHCONT {
 					}
 				}
 				PUSHCONT {
-					.loc ../contracts/tests/TestNewOrderBad.tsol, 387
+					.loc ../contracts/tests/TestNewOrderBad.tsol, 337
 					PUSH S17
 					PUSH S17
 					PUSH3 S5, S13, S12
@@ -1641,18 +1583,18 @@ PUSHCONT {
 				DROP
 			}
 			PUSHCONT {
-				GETGLOB 28
+				GETGLOB 31
 				EQINT 4
 				PUSH S17
 				PUSHINT 200
 				EQUAL
 				PUSH S22
-				GETGLOB 20
+				GETGLOB 22
 				GEQ
 				AND
 				AND
 				PUSHCONT {
-					.loc ../contracts/tests/TestNewOrderBad.tsol, 409
+					.loc ../contracts/tests/TestNewOrderBad.tsol, 359
 					PUSH S15
 					PUSH S21
 					PUSH2 S13, S15
@@ -1661,7 +1603,7 @@ PUSHCONT {
 					}
 				}
 				PUSHCONT {
-					.loc ../contracts/tests/TestNewOrderBad.tsol, 416
+					.loc ../contracts/tests/TestNewOrderBad.tsol, 366
 					DROP
 					TRUE
 				}
@@ -1671,24 +1613,24 @@ PUSHCONT {
 			.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 		}
 		PUSHCONT {
-			.loc ../contracts/tests/TestNewOrderBad.tsol, 419
+			.loc ../contracts/tests/TestNewOrderBad.tsol, 369
 			DROP
 			TRUE
 		}
 		IFELSE
 	}
 	IFELSE
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 422
-	GETGLOB 20
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 372
+	GETGLOB 22
 	EQINT 0
-	GETGLOB 19
+	GETGLOB 21
 	EQINT 0
 	AND
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 426
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 376
 		OVER
-		GETGLOB 20
-		GETGLOB 19
+		GETGLOB 22
+		GETGLOB 21
 		PUSH S5
 		GETGLOB 14
 		PUSH S8
@@ -1718,11 +1660,11 @@ PUSHCONT {
 		ENDC
 		PUSHINT 0
 		SENDRAWMSG
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 436
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 386
 		PUSH S15
 		GTINT 0
 		PUSHCONT {
-			.loc ../contracts/tests/TestNewOrderBad.tsol, 437
+			.loc ../contracts/tests/TestNewOrderBad.tsol, 387
 			GETGLOB 13
 			PUSH S4
 			GETGLOB 14
@@ -1764,20 +1706,19 @@ PUSHCONT {
 			ADDCONST 2
 			UFITS 8
 			SENDRAWMSG
-			.loc ../contracts/tests/TestNewOrderBad.tsol, 453
+			.loc ../contracts/tests/TestNewOrderBad.tsol, 403
 			PUSH S13
 			GETGLOB 10
 			SDEQ
 			NOT
 			PUSH S14
-			PUSHINT 33
-			GETGLOBVAR
+			GETGLOB 26
 			INDEX 4
 			SDEQ
 			NOT
 			AND
 			PUSHCONT {
-				.loc ../contracts/tests/TestNewOrderBad.tsol, 454
+				.loc ../contracts/tests/TestNewOrderBad.tsol, 404
 				GETGLOB 14
 				PUSH S21
 				GETGLOB 13
@@ -1786,9 +1727,9 @@ PUSHCONT {
 				PUSHINT 0
 				GETGLOB 12
 				PUSH S18
-				GETGLOB 28
+				GETGLOB 31
 				NEQINT 7
-				GETGLOB 28
+				GETGLOB 31
 				NEQINT 4
 				AND
 				PUSHCONT {
@@ -1836,12 +1777,12 @@ PUSHCONT {
 			.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 		}
 		IF
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 472
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 422
 		PUSHINT 3
 		CALLREF {
 			CALL $changeState_268f1153_internal_macro$
 		}
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 473
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 423
 		GETGLOB 12
 		NEWC
 		STSLICECONST x42_
@@ -1855,7 +1796,7 @@ PUSHCONT {
 		SENDRAWMSG
 	}
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 475
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 425
 		GETPARAM 7
 		FIRST
 		DEPTH
@@ -1865,18 +1806,18 @@ PUSHCONT {
 		UFITS 128
 		PUSHINT 0
 		RAWRESERVE
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 476
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 426
 		DUP
 		PUSHCONT {
-			.loc ../contracts/tests/TestNewOrderBad.tsol, 477
+			.loc ../contracts/tests/TestNewOrderBad.tsol, 427
 			PUSH S16
 			EQINT 52
 			PUSHCONT {
-				.loc ../contracts/tests/TestNewOrderBad.tsol, 478
+				.loc ../contracts/tests/TestNewOrderBad.tsol, 428
 				PUSH S13
 			}
 			PUSHCONT {
-				.loc ../contracts/tests/TestNewOrderBad.tsol, 480
+				.loc ../contracts/tests/TestNewOrderBad.tsol, 430
 				PUSH S14
 			}
 			IFELSE
@@ -1898,13 +1839,13 @@ PUSHCONT {
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IFNOT
-.loc ../contracts/tests/TestNewOrderBad.tsol, 486
+.loc ../contracts/tests/TestNewOrderBad.tsol, 436
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 487
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 437
 	PUSH S14
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 488
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 438
 		BLKPUSH 2, 14
 		FALSE
 		NEWC
@@ -1923,10 +1864,10 @@ PUSHCONT {
 		.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 	}
 	IF
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 495
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 445
 	PUSHREF {
 	}
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 496
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 446
 	PUSH S5
 	PUSHCONT {
 		PUSH S16
@@ -1982,13 +1923,13 @@ DROPX
 CALL $_fullFilledOrder_17951ab6_internal_macro$
 
 .macro _fullFilledOrder_17951ab6_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 525
+.loc ../contracts/tests/TestNewOrderBad.tsol, 475
 PUSHREF {
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 526
+.loc ../contracts/tests/TestNewOrderBad.tsol, 476
 PUSHINT 0
-.loc ../contracts/tests/TestNewOrderBad.tsol, 528
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 478
+GETGLOB 31
 NEQINT 7
 PUSHCONT {
 	CALLREF {
@@ -2011,8 +1952,8 @@ TRUE
 PUSH S9
 PUSHINT 0
 GETGLOB 12
-GETGLOB 20
-GETGLOB 26
+GETGLOB 22
+GETGLOB 29
 FALSE
 NEWC
 STSLICECONST x6_
@@ -2037,20 +1978,19 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/tests/TestNewOrderBad.tsol, 544
+.loc ../contracts/tests/TestNewOrderBad.tsol, 494
 PUSH S10
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 545
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 495
 	OVER
 	FALSE
 	PUSH S9
 	PUSHINT 0
-	PUSHINT 33
-	GETGLOBVAR
+	GETGLOB 26
 	INDEX 4
 	PUSH S15
-	GETGLOB 26
+	GETGLOB 29
 	FALSE
 	NEWC
 	STSLICECONST x6_
@@ -2078,18 +2018,18 @@ PUSHCONT {
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IF
-.loc ../contracts/tests/TestNewOrderBad.tsol, 559
+.loc ../contracts/tests/TestNewOrderBad.tsol, 509
 PUSH S13
 NEQINT 52
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 560
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 510
 	PUSH S12
-	GETGLOB 20
+	GETGLOB 22
 	GREATER
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 561
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 511
 		PUSH S12
-		GETGLOB 20
+		GETGLOB 22
 		SUB
 		UFITS 128
 		CALLREF {
@@ -2103,10 +2043,10 @@ PUSHCONT {
 		PUSHINT 0
 		PUSH S12
 		PUSH S17
-		GETGLOB 20
+		GETGLOB 22
 		SUB
 		UFITS 128
-		GETGLOB 26
+		GETGLOB 29
 		FALSE
 		NEWC
 		STSLICECONST x6_
@@ -2134,8 +2074,8 @@ PUSHCONT {
 		.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 	}
 	IF
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 578
-	GETGLOB 28
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 528
+	GETGLOB 31
 	NEQINT 7
 	PUSHCONT {
 		PUSH S3
@@ -2154,7 +2094,7 @@ PUSHCONT {
 		PUSH S6
 	}
 	IFELSE
-	GETGLOB 28
+	GETGLOB 31
 	NEQINT 7
 	PUSHCONT {
 		PUSH S4
@@ -2164,7 +2104,7 @@ PUSHCONT {
 	}
 	IFELSE
 	PUSH S9
-	GETGLOB 28
+	GETGLOB 31
 	NEQINT 7
 	ZEROSWAPIFNOT
 	PUSHCONT {
@@ -2172,11 +2112,11 @@ PUSHCONT {
 	}
 	IF
 	PUSH S12
-	GETGLOB 19
+	GETGLOB 21
 	DEPTH
 	ADDCONST -2
 	PICK
-	GETGLOB 25
+	GETGLOB 28
 	FALSE
 	NEWC
 	STSLICECONST x6_
@@ -2203,27 +2143,27 @@ PUSHCONT {
 	ENDC
 	PUSHINT 1
 	SENDRAWMSG
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 591
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 541
 	DROP
-	GETGLOB 19
+	GETGLOB 21
 }
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 593
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 543
 	PUSH S11
 	NIP
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 594
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 544
 	PUSH S5
 	GETGLOB 10
 	SDEQ
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 595
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 545
 		DEPTH
 		ADDCONST -2
 		PICK
 		PUSH S5
 	}
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 597
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 547
 		DEPTH
 		ADDCONST -2
 		PICK
@@ -2243,26 +2183,26 @@ PUSHCONT {
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IFELSE
-.loc ../contracts/tests/TestNewOrderBad.tsol, 601
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 551
+GETGLOB 31
 EQINT 7
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 602
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 552
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
-	PUSHINT 34
+	PUSHINT 35
 	SETGLOBVAR
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IF
-.loc ../contracts/tests/TestNewOrderBad.tsol, 605
+.loc ../contracts/tests/TestNewOrderBad.tsol, 555
 PUSHINT 0
-SETGLOB 20
-.loc ../contracts/tests/TestNewOrderBad.tsol, 606
+SETGLOB 22
+.loc ../contracts/tests/TestNewOrderBad.tsol, 556
 PUSHINT 0
-SETGLOB 19
-.loc ../contracts/tests/TestNewOrderBad.tsol, 608
+SETGLOB 21
+.loc ../contracts/tests/TestNewOrderBad.tsol, 558
 BLKDROP2 13, 1
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 
@@ -2271,13 +2211,13 @@ BLKDROP2 13, 1
 CALL $_partFilledOrder_b0d096f1_internal_macro$
 
 .macro _partFilledOrder_b0d096f1_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 626
+.loc ../contracts/tests/TestNewOrderBad.tsol, 576
 PUSHREF {
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 627
+.loc ../contracts/tests/TestNewOrderBad.tsol, 577
 PUSHINT 0
-.loc ../contracts/tests/TestNewOrderBad.tsol, 629
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 579
+GETGLOB 31
 NEQINT 7
 PUSHCONT {
 	PUSH S12
@@ -2303,7 +2243,7 @@ PUSH S8
 PUSHINT 0
 GETGLOB 12
 PUSH S17
-GETGLOB 26
+GETGLOB 29
 FALSE
 NEWC
 STSLICECONST x6_
@@ -2328,20 +2268,19 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/tests/TestNewOrderBad.tsol, 651
+.loc ../contracts/tests/TestNewOrderBad.tsol, 601
 PUSH S9
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 652
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 602
 	OVER
 	FALSE
 	PUSH S8
 	PUSHINT 0
-	PUSHINT 33
-	GETGLOBVAR
+	GETGLOB 26
 	INDEX 4
 	PUSH S14
-	GETGLOB 26
+	GETGLOB 29
 	FALSE
 	NEWC
 	STSLICECONST x6_
@@ -2369,33 +2308,33 @@ PUSHCONT {
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IF
-.loc ../contracts/tests/TestNewOrderBad.tsol, 666
+.loc ../contracts/tests/TestNewOrderBad.tsol, 616
 PUSH S14
 NEQINT 52
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 667
-	GETGLOB 28
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 617
+	GETGLOB 31
 	NEQINT 7
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 668
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 618
 		PUSH S12
-		GETGLOB 18
-		GETGLOB 17
+		GETGLOB 20
+		GETGLOB 19
 		MULDIV
 		UFITS 128
 	}
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 674
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 624
 		PUSH S10
 	}
 	IFELSE
 	NIP
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 677
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 627
 	DUP
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 678
-		GETGLOB 28
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 628
+		GETGLOB 31
 		NEQINT 7
 		PUSHCONT {
 			PUSH S3
@@ -2414,7 +2353,7 @@ PUSHCONT {
 			PUSH S5
 		}
 		IFELSE
-		GETGLOB 28
+		GETGLOB 31
 		NEQINT 7
 		PUSHCONT {
 			PUSH S4
@@ -2424,7 +2363,7 @@ PUSHCONT {
 		}
 		IFELSE
 		PUSH S8
-		GETGLOB 28
+		GETGLOB 31
 		NEQINT 7
 		ZEROSWAPIFNOT
 		PUSHCONT {
@@ -2432,7 +2371,7 @@ PUSHCONT {
 		}
 		IF
 		PUSH2 S11, S4
-		GETGLOB 28
+		GETGLOB 31
 		NEQINT 7
 		PUSHCONT {
 			PUSHINT 200000000
@@ -2446,7 +2385,7 @@ PUSHCONT {
 			UFITS 128
 		}
 		IFELSE
-		GETGLOB 25
+		GETGLOB 28
 		FALSE
 		NEWC
 		STSLICECONST x6_
@@ -2476,33 +2415,33 @@ PUSHCONT {
 		.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 	}
 	IF
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 692
-	GETGLOB 19
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 642
+	GETGLOB 21
 	OVER
 	SUB
 	UFITS 128
-	SETGLOB 19
+	SETGLOB 21
 }
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 694
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 644
 	PUSH S11
 	NIP
 }
 IFELSE
-.loc ../contracts/tests/TestNewOrderBad.tsol, 697
-GETGLOB 20
+.loc ../contracts/tests/TestNewOrderBad.tsol, 647
+GETGLOB 22
 PUSH S13
 SUB
 UFITS 128
-SETGLOB 20
-.loc ../contracts/tests/TestNewOrderBad.tsol, 699
-GETGLOB 19
+SETGLOB 22
+.loc ../contracts/tests/TestNewOrderBad.tsol, 649
+GETGLOB 21
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 700
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 650
 	PUSH S9
-	GETGLOB 20
-	GETGLOB 19
+	GETGLOB 22
+	GETGLOB 21
 	PUSH S15
 	GETGLOB 14
 	PUSH S5
@@ -2532,17 +2471,17 @@ PUSHCONT {
 	ENDC
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 710
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 660
 	PUSH S13
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 711
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 661
 		GETGLOB 13
 		OVER
 		GETGLOB 14
 		PUSH S15
-		GETGLOB 19
-		GETGLOB 20
+		GETGLOB 21
+		GETGLOB 22
 		TUPLE 6
 		PUSH S10
 		GETGLOB 12
@@ -2582,26 +2521,25 @@ PUSHCONT {
 		ADDCONST 2
 		UFITS 8
 		SENDRAWMSG
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 729
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 679
 		GETGLOB 14
 		PUSH S13
 		GETGLOB 13
 		PUSH S3
-		GETGLOB 20
-		GETGLOB 19
+		GETGLOB 22
+		GETGLOB 21
 		TUPLE 6
 		PUSHINT 0
 		GETGLOB 12
 		PUSH S16
-		GETGLOB 28
+		GETGLOB 31
 		EQINT 7
 		PUSH S9
 		GETGLOB 10
 		SDEQ
 		NOT
 		PUSH S10
-		PUSHINT 33
-		GETGLOBVAR
+		GETGLOB 26
 		INDEX 4
 		SDEQ
 		NOT
@@ -2654,17 +2592,17 @@ PUSHCONT {
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IF
-.loc ../contracts/tests/TestNewOrderBad.tsol, 751
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 701
+GETGLOB 31
 EQINT 7
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 752
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 702
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
-	PUSHINT 34
+	PUSHINT 35
 	SETGLOBVAR
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 753
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 703
 	PUSHINT 2
 	CALLREF {
 		CALL $changeState_268f1153_internal_macro$
@@ -2672,7 +2610,7 @@ PUSHCONT {
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IF
-.loc ../contracts/tests/TestNewOrderBad.tsol, 756
+.loc ../contracts/tests/TestNewOrderBad.tsol, 706
 BLKDROP2 14, 1
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 
@@ -2681,17 +2619,17 @@ BLKDROP2 14, 1
 CALL $_swapSuccess_fc6ab8bc_internal_macro$
 
 .macro _swapSuccess_fc6ab8bc_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 765
+.loc ../contracts/tests/TestNewOrderBad.tsol, 715
 PUSHREF {
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 768
+.loc ../contracts/tests/TestNewOrderBad.tsol, 718
 DUP
 TRUE
 GETGLOB 12
 PUSHINT 0
 GETGLOB 12
-GETGLOB 20
-GETGLOB 26
+GETGLOB 22
+GETGLOB 29
 FALSE
 NEWC
 STSLICECONST x6_
@@ -2716,14 +2654,14 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/tests/TestNewOrderBad.tsol, 781
+.loc ../contracts/tests/TestNewOrderBad.tsol, 731
 PUSH S4
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 782
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 732
 	GETGLOB 12
 	PUSH2 S2, S4
-	GETGLOB 20
+	GETGLOB 22
 	SUB
 	UFITS 128
 	TRIPLE
@@ -2759,22 +2697,22 @@ PUSHCONT {
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IF
-.loc ../contracts/tests/TestNewOrderBad.tsol, 796
+.loc ../contracts/tests/TestNewOrderBad.tsol, 746
 PUSH S3
-GETGLOB 20
+GETGLOB 22
 SUB
 UFITS 128
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 798
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 748
 	DUP
 	TRUE
 	PUSH3 S3, S4, S3
 	PUSH S8
-	GETGLOB 20
+	GETGLOB 22
 	SUB
 	UFITS 128
-	GETGLOB 26
+	GETGLOB 29
 	FALSE
 	NEWC
 	STSLICECONST x6_
@@ -2799,14 +2737,14 @@ PUSHCONT {
 	ENDC
 	PUSHINT 1
 	SENDRAWMSG
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 811
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 761
 	PUSH S4
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 812
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 762
 		GETGLOB 12
 		PUSH2 S2, S4
-		GETGLOB 20
+		GETGLOB 22
 		SUB
 		UFITS 128
 		TRIPLE
@@ -2844,7 +2782,7 @@ PUSHCONT {
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IF
-.loc ../contracts/tests/TestNewOrderBad.tsol, 827
+.loc ../contracts/tests/TestNewOrderBad.tsol, 777
 DROP
 NEWC
 STSLICECONST x42_
@@ -2854,13 +2792,13 @@ STZEROES
 ENDC
 PUSHINT 64
 SENDRAWMSG
-.loc ../contracts/tests/TestNewOrderBad.tsol, 829
+.loc ../contracts/tests/TestNewOrderBad.tsol, 779
 BLKDROP 3
 PUSHINT 0
-SETGLOB 20
-.loc ../contracts/tests/TestNewOrderBad.tsol, 830
+SETGLOB 22
+.loc ../contracts/tests/TestNewOrderBad.tsol, 780
 PUSHINT 0
-SETGLOB 19
+SETGLOB 21
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 
 .macro cancel
@@ -2872,7 +2810,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 833
+.loc ../contracts/tests/TestNewOrderBad.tsol, 783
 LDU 64
 ENDS
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
@@ -2886,7 +2824,7 @@ CALLREF {
 THROW 0
 
 .macro cancel_4c125e79_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 132
+.loc ../contracts/tests/TestNewOrderBad.tsol, 85
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -2897,30 +2835,30 @@ GETGLOB 12
 SDEQ
 AND
 THROWIFNOT 306
-.loc ../contracts/tests/TestNewOrderBad.tsol, 834
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 784
+GETGLOB 31
 EQINT 2
-GETGLOB 28
+GETGLOB 31
 EQINT 4
-GETGLOB 28
+GETGLOB 31
 EQINT 7
 OR
 OR
 THROWIFNOT 309
-.loc ../contracts/tests/TestNewOrderBad.tsol, 841
+.loc ../contracts/tests/TestNewOrderBad.tsol, 791
 ACCEPT
-.loc ../contracts/tests/TestNewOrderBad.tsol, 842
+.loc ../contracts/tests/TestNewOrderBad.tsol, 792
 PUSHINT 5
 CALLREF {
 	CALL $changeState_268f1153_internal_macro$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 843
+.loc ../contracts/tests/TestNewOrderBad.tsol, 793
 DUP
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 844
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 794
 	GETGLOB 13
-	GETGLOB 19
+	GETGLOB 21
 	PAIR
 	OVER
 	GETGLOB 12
@@ -2962,7 +2900,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 858
+.loc ../contracts/tests/TestNewOrderBad.tsol, 808
 LDU 64
 ENDS
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
@@ -2976,7 +2914,7 @@ CALLREF {
 THROW 0
 
 .macro backendSwap_beb18340_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 859
+.loc ../contracts/tests/TestNewOrderBad.tsol, 809
 GETGLOB 5
 DUP
 ISNULL
@@ -2985,20 +2923,19 @@ PUSHCONT {
 	PUSHINT 0
 }
 IF
-GETGLOB 21
+GETGLOB 23
 EQUAL
 THROWIFNOT 310
-.loc ../contracts/tests/TestNewOrderBad.tsol, 860
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 810
+GETGLOB 31
 EQINT 2
 THROWIFNOT 309
-.loc ../contracts/tests/TestNewOrderBad.tsol, 861
-PUSHINT 32
-GETGLOBVAR
+.loc ../contracts/tests/TestNewOrderBad.tsol, 811
+GETGLOB 30
 TRUE
 EQUAL
 THROWIFNOT 318
-.loc ../contracts/tests/TestNewOrderBad.tsol, 863
+.loc ../contracts/tests/TestNewOrderBad.tsol, 813
 PUSHINT 0
 GETGLOB 12
 GETGLOB 9
@@ -3021,7 +2958,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 866
+.loc ../contracts/tests/TestNewOrderBad.tsol, 816
 OVER
 PUSHCONT {
 	LDU 64
@@ -3046,17 +2983,16 @@ CALLREF {
 THROW 0
 
 .macro swap_95c939ac_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 867
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 817
+GETGLOB 31
 EQINT 2
 THROWIFNOT 309
-.loc ../contracts/tests/TestNewOrderBad.tsol, 868
-PUSHINT 32
-GETGLOBVAR
+.loc ../contracts/tests/TestNewOrderBad.tsol, 818
+GETGLOB 30
 TRUE
 EQUAL
 THROWIFNOT 318
-.loc ../contracts/tests/TestNewOrderBad.tsol, 869
+.loc ../contracts/tests/TestNewOrderBad.tsol, 819
 DEPTH
 ADDCONST -2
 PICK
@@ -3066,7 +3002,7 @@ ADD
 UFITS 128
 GEQ
 THROWIFNOT 302
-.loc ../contracts/tests/TestNewOrderBad.tsol, 871
+.loc ../contracts/tests/TestNewOrderBad.tsol, 821
 GETGLOB 9
 DUP
 PUSHREFSLICE {
@@ -3084,14 +3020,14 @@ CALLREF {
 CALL $_swap_7b07c34e_internal_macro$
 
 .macro _swap_7b07c34e_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 884
+.loc ../contracts/tests/TestNewOrderBad.tsol, 834
 DUP
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 885
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 835
 	ACCEPT
 }
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 887
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 837
 	GETPARAM 7
 	FIRST
 	DEPTH
@@ -3103,36 +3039,38 @@ PUSHCONT {
 	RAWRESERVE
 }
 IFELSE
-.loc ../contracts/tests/TestNewOrderBad.tsol, 890
-GETGLOB 29
+.loc ../contracts/tests/TestNewOrderBad.tsol, 840
+PUSHINT 32
+GETGLOBVAR
 INC
 UFITS 64
-SETGLOB 29
-.loc ../contracts/tests/TestNewOrderBad.tsol, 891
+PUSHINT 32
+SETGLOBVAR
+.loc ../contracts/tests/TestNewOrderBad.tsol, 841
 PUSHINT 4
 CALLREF {
 	CALL $changeState_268f1153_internal_macro$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 893
+.loc ../contracts/tests/TestNewOrderBad.tsol, 843
 BLKSWAP 2, 5
-GETGLOB 20
+GETGLOB 22
 BLKSWAP 3, 5
 GETGLOB 14
 ROLL 8
 CALLREF {
 	CALL $OrderPayloads_no_obj_buildSwapExchangePayload_63976777_macro$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 904
+.loc ../contracts/tests/TestNewOrderBad.tsol, 854
 TRUE
 MYADDR
 PUSHINT 0
-GETGLOB 24
-GETGLOB 19
+GETGLOB 27
+GETGLOB 21
 PUSH S6
 PUSHINT 3000000000
 PUSHINT 0
 CONDSEL
-GETGLOB 25
+GETGLOB 28
 NEWC
 STSLICECONST x62_
 STSLICE
@@ -3170,7 +3108,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 917
+.loc ../contracts/tests/TestNewOrderBad.tsol, 867
 OVER
 PUSHCONT {
 	LDU 64
@@ -3195,7 +3133,7 @@ CALLREF {
 THROW 0
 
 .macro backendMatching_ae31c208_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 918
+.loc ../contracts/tests/TestNewOrderBad.tsol, 868
 GETGLOB 5
 DUP
 ISNULL
@@ -3204,25 +3142,25 @@ PUSHCONT {
 	PUSHINT 0
 }
 IF
-GETGLOB 22
+GETGLOB 24
 EQUAL
 THROWIFNOT 310
-.loc ../contracts/tests/TestNewOrderBad.tsol, 919
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 869
+GETGLOB 31
 EQINT 2
 THROWIFNOT 309
-.loc ../contracts/tests/TestNewOrderBad.tsol, 924
+.loc ../contracts/tests/TestNewOrderBad.tsol, 874
 ACCEPT
-.loc ../contracts/tests/TestNewOrderBad.tsol, 925
+.loc ../contracts/tests/TestNewOrderBad.tsol, 875
 PUSHINT 7
 CALLREF {
 	CALL $changeState_268f1153_internal_macro$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 926
+.loc ../contracts/tests/TestNewOrderBad.tsol, 876
 DUP
-PUSHINT 34
+PUSHINT 35
 SETGLOBVAR
-.loc ../contracts/tests/TestNewOrderBad.tsol, 928
+.loc ../contracts/tests/TestNewOrderBad.tsol, 878
 CALLREF {
 	CALL $buildDetails_03265ec2_internal_macro$
 }
@@ -3319,7 +3257,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 939
+.loc ../contracts/tests/TestNewOrderBad.tsol, 889
 OVER
 PUSHCONT {
 	LDU 64
@@ -3345,11 +3283,11 @@ CALLREF {
 THROW 0
 
 .macro matching_fa07e6f4_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 940
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 890
+GETGLOB 31
 EQINT 2
 THROWIFNOT 309
-.loc ../contracts/tests/TestNewOrderBad.tsol, 945
+.loc ../contracts/tests/TestNewOrderBad.tsol, 895
 DEPTH
 ADDCONST -2
 PICK
@@ -3359,7 +3297,7 @@ ADD
 UFITS 128
 GEQ
 THROWIFNOT 302
-.loc ../contracts/tests/TestNewOrderBad.tsol, 950
+.loc ../contracts/tests/TestNewOrderBad.tsol, 900
 GETPARAM 7
 FIRST
 DEPTH
@@ -3369,16 +3307,16 @@ SUB
 UFITS 128
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/tests/TestNewOrderBad.tsol, 952
+.loc ../contracts/tests/TestNewOrderBad.tsol, 902
 PUSHINT 7
 CALLREF {
 	CALL $changeState_268f1153_internal_macro$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 953
+.loc ../contracts/tests/TestNewOrderBad.tsol, 903
 DUP
-PUSHINT 34
+PUSHINT 35
 SETGLOBVAR
-.loc ../contracts/tests/TestNewOrderBad.tsol, 955
+.loc ../contracts/tests/TestNewOrderBad.tsol, 905
 CALLREF {
 	CALL $buildDetails_03265ec2_internal_macro$
 }
@@ -3472,7 +3410,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 965
+.loc ../contracts/tests/TestNewOrderBad.tsol, 915
 OVER
 PUSHCONT {
 	LDU 64
@@ -3557,7 +3495,7 @@ CALLREF {
 THROW 0
 
 .macro matchingCheck_7bbc4bb5_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 966
+.loc ../contracts/tests/TestNewOrderBad.tsol, 916
 GETGLOB 10
 OVER
 SECOND
@@ -3574,8 +3512,8 @@ CALLREF {
 }
 GETGLOB 9
 SDEQ
-THROWIFNOT 323
-.loc ../contracts/tests/TestNewOrderBad.tsol, 978
+THROWIFNOT 324
+.loc ../contracts/tests/TestNewOrderBad.tsol, 928
 GETPARAM 7
 FIRST
 DEPTH
@@ -3585,45 +3523,45 @@ SUB
 UFITS 128
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/tests/TestNewOrderBad.tsol, 980
+.loc ../contracts/tests/TestNewOrderBad.tsol, 930
 GETGLOB 9
-PUSHINT 34
+PUSHINT 35
 SETGLOBVAR
-.loc ../contracts/tests/TestNewOrderBad.tsol, 981
+.loc ../contracts/tests/TestNewOrderBad.tsol, 931
 PUSHINT 7
 CALLREF {
 	CALL $changeState_268f1153_internal_macro$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 983
+.loc ../contracts/tests/TestNewOrderBad.tsol, 933
 PUSHINT 0
 BLKPUSH 2, 0
-.loc ../contracts/tests/TestNewOrderBad.tsol, 986
+.loc ../contracts/tests/TestNewOrderBad.tsol, 936
 PUSH S3
 PUSHINT 19
 INDEXVAR
-.loc ../contracts/tests/TestNewOrderBad.tsol, 988
+.loc ../contracts/tests/TestNewOrderBad.tsol, 938
 PUSH S4
 INDEX 12
 PUSH S5
 INDEX 13
 DIV
-.loc ../contracts/tests/TestNewOrderBad.tsol, 989
-GETGLOB 20
-GETGLOB 19
+.loc ../contracts/tests/TestNewOrderBad.tsol, 939
+GETGLOB 22
+GETGLOB 21
 DIV
-.loc ../contracts/tests/TestNewOrderBad.tsol, 990
+.loc ../contracts/tests/TestNewOrderBad.tsol, 940
 GEQ
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 991
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 941
 	PUSH S4
 	INDEX 13
-	GETGLOB 20
-	GETGLOB 19
+	GETGLOB 22
+	GETGLOB 21
 	MULDIV
 	UFITS 128
 	POP S3
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 992
-	GETGLOB 19
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 942
+	GETGLOB 21
 	PUSH S5
 	INDEX 13
 	GEQ
@@ -3632,11 +3570,11 @@ PUSHCONT {
 		INDEX 13
 	}
 	PUSHCONT {
-		GETGLOB 19
+		GETGLOB 21
 	}
 	IFELSE
 	POP S4
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 993
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 943
 	PUSH S4
 	INDEX 12
 	PUSH S3
@@ -3646,21 +3584,21 @@ PUSHCONT {
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IF
-.loc ../contracts/tests/TestNewOrderBad.tsol, 996
+.loc ../contracts/tests/TestNewOrderBad.tsol, 946
 PUSH S2
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1016
-	GETGLOB 19
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 966
+	GETGLOB 21
 	PUSH S4
 	SUB
 	UFITS 128
-	SETGLOB 19
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1018
+	SETGLOB 21
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 968
 	PUSH S6
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 1019
-		PUSHINT 34
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 969
+		PUSHINT 35
 		GETGLOBVAR
 		MYADDR
 		GETGLOB 14
@@ -3708,7 +3646,7 @@ PUSHCONT {
 		.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 	}
 	IF
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1037
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 987
 	PUSHINT 51
 	PUSH3 S7, S1, S6
 	BLKPUSH 3, 7
@@ -3716,13 +3654,13 @@ PUSHCONT {
 		CALL $OrderPayloads_no_obj_buildMatchExchangePayload_dfab77e5_macro$
 	}
 	TRUE
-	PUSHINT 34
+	PUSHINT 35
 	GETGLOBVAR
 	PUSHINT 0
-	PUSHINT 34
+	PUSHINT 35
 	GETGLOBVAR
 	PUSH S8
-	GETGLOB 25
+	GETGLOB 28
 	FALSE
 	NEWC
 	STSLICECONST x6_
@@ -3746,25 +3684,25 @@ PUSHCONT {
 	STBREFR
 }
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 997
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 947
 	PUSHINT 2
 	CALLREF {
 		CALL $changeState_268f1153_internal_macro$
 	}
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 999
-	PUSHINT 34
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 949
+	PUSHINT 35
 	GETGLOBVAR
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1000
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 950
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
-	PUSHINT 34
+	PUSHINT 35
 	SETGLOBVAR
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1002
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 952
 	PUSH S7
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 1003
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 953
 		PUSH2 S7, S1
 		FALSE
 		NEWC
@@ -3783,7 +3721,7 @@ PUSHCONT {
 		.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 	}
 	IF
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1010
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 960
 	FALSE
 	NEWC
 	STSLICECONST x6_
@@ -3809,7 +3747,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1056
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1006
 ENDS
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 CALLREF {
@@ -3822,102 +3760,24 @@ CALLREF {
 THROW 0
 
 .macro matchingCancel_5f4b298b_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1057
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1007
 GETGLOB 9
-PUSHINT 34
+PUSHINT 35
 GETGLOBVAR
 SDEQ
-THROWIFNOT 324
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1058
-GETGLOB 30
+THROWIFNOT 325
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1008
+PUSHINT 33
+GETGLOBVAR
 CALLREF {
 	CALL $changeState_268f1153_internal_macro$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1059
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1009
 PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
-PUSHINT 34
+PUSHINT 35
 SETGLOBVAR
-.loc ../contracts/tests/TestNewOrderBad.tsol, 0
-
-.globl	expectedOrderRoot_2fda74e9_internal
-.type	expectedOrderRoot_2fda74e9_internal, @function
-CALL $expectedOrderRoot_2fda74e9_internal_macro$
-
-.macro expectedOrderRoot_2fda74e9_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1063
-GETGLOB 10
-SWAP
-GETGLOB 27
-CALLREF {
-	CALL $buildParams_c863cf6a_internal_macro$
-}
-CALLREF {
-	CALL $buildState_a6158885_internal_macro$
-}
-HASHCU
-NEWC
-STSLICECONST x801_
-STU 256
-ENDC
-CTOS
-.loc ../contracts/tests/TestNewOrderBad.tsol, 0
-
-.globl	buildState_a6158885_internal
-.type	buildState_a6158885_internal, @function
-CALL $buildState_a6158885_internal_macro$
-
-.macro buildState_a6158885_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1067
-PUSHINT 0
-NEWC
-STU 256
-PUSHINT 0
-NEWDICT
-PUSHINT 64
-DICTUSETB
-ROLL 4
-PUSHINT 1
-ROT
-PUSHINT 64
-DICTUSET
-ROLL 3
-PUSHINT 2
-ROT
-PUSHINT 64
-DICTUSET
-SWAP
-PUSHINT 3
-ROT
-PUSHINT 64
-DICTUSETREF
-NEWC
-STDICT
-ENDC
-SWAP
-NEWC
-STSLICECONST x2_
-STOPTREF
-STOPTREF
-STZERO
-ENDC
-.loc ../contracts/tests/TestNewOrderBad.tsol, 0
-
-.globl	buildParams_c863cf6a_internal
-.type	buildParams_c863cf6a_internal, @function
-CALL $buildParams_c863cf6a_internal_macro$
-
-.macro buildParams_c863cf6a_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1080
-GETGLOB 27
-MYCODE
-GETGLOB 23
-NEWC
-STSLICE
-STREF
-STREF
-ENDC
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 
 .globl	expectedOrder_000c864c_internal
@@ -3925,7 +3785,7 @@ ENDC
 CALL $expectedOrder_000c864c_internal_macro$
 
 .macro expectedOrder_000c864c_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1092
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1021
 PUSHINT 0
 NEWC
 STU 256
@@ -3972,10 +3832,20 @@ PUSHINT 7
 ROT
 PUSHINT 64
 DICTUSETB
+GETGLOB 18
+GETGLOB 17
+NEWC
+STSLICE
+STREF
+ENDC
+PUSHINT 8
+ROT
+PUSHINT 64
+DICTUSETREF
 NEWC
 STDICT
 ENDC
-MYCODE
+GETGLOB 18
 NEWC
 STSLICECONST x2_
 STOPTREF
@@ -3995,18 +3865,20 @@ CTOS
 CALL $changeState_268f1153_internal_macro$
 
 .macro changeState_268f1153_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1108
-GETGLOB 28
-SETGLOB 30
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1109
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1038
+GETGLOB 31
+PUSHINT 33
+SETGLOBVAR
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1039
 DUP
-SETGLOB 28
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1110
+SETGLOB 31
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1040
 CALLREF {
 	CALL $buildDetails_03265ec2_internal_macro$
 }
 SWAP
-GETGLOB 30
+PUSHINT 33
+GETGLOBVAR
 PUSHREFSLICE {
 	.blob xc0000000000000000000000001
 }
@@ -4091,30 +3963,30 @@ SENDRAWMSG
 CALL $buildDetails_03265ec2_internal_macro$
 
 .macro buildDetails_03265ec2_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1115
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1045
 GETGLOB 10
 GETGLOB 11
 GETGLOB 12
 GETGLOB 15
 GETGLOB 16
-GETGLOB 28
+GETGLOB 31
 GETGLOB 13
 GETGLOB 14
-GETGLOB 25
-GETGLOB 26
-GETGLOB 18
-GETGLOB 17
-GETGLOB 19
+GETGLOB 28
+GETGLOB 29
 GETGLOB 20
-PUSHINT 35
-GETGLOBVAR
+GETGLOB 19
 GETGLOB 21
 GETGLOB 22
+GETGLOB 25
 GETGLOB 23
 GETGLOB 24
+GETGLOB 17
+GETGLOB 27
 GETGLOB 9
-GETGLOB 29
-PUSHINT 34
+PUSHINT 32
+GETGLOBVAR
+PUSHINT 35
 GETGLOBVAR
 PUSHINT 22
 TUPLEVAR
@@ -4125,48 +3997,41 @@ TUPLEVAR
 CALL $_expectedSpendAmount_94832ad6_internal_macro$
 
 .macro _expectedSpendAmount_94832ad6_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1142
-PUSHINT 33
-GETGLOBVAR
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1072
+GETGLOB 26
 FIRST
 EQINT 0
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 SECOND
 EQINT 0
 OR
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1143
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1073
 	PUSHINT 0
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IFJMP
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1145
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1075
 DUP
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 FIRST
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 SECOND
 MULDIVC
 UFITS 128
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1146
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1076
 SWAP
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 SECOND
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 FIRST
 SUB
 UFITS 128
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 SECOND
 MULDIV
 UFITS 128
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1147
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1077
 SWAP
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 
@@ -4175,48 +4040,41 @@ SWAP
 CALL $_expectedSpendAmountOfMatching_4b89f31b_internal_macro$
 
 .macro _expectedSpendAmountOfMatching_4b89f31b_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1151
-PUSHINT 33
-GETGLOBVAR
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1081
+GETGLOB 26
 THIRD
 EQINT 0
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 INDEX 3
 EQINT 0
 OR
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1152
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1082
 	PUSHINT 0
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IFJMP
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1155
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1085
 DUP
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 THIRD
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 INDEX 3
 MULDIVC
 UFITS 128
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1156
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1086
 SWAP
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 INDEX 3
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 THIRD
 SUB
 UFITS 128
-PUSHINT 33
-GETGLOBVAR
+GETGLOB 26
 INDEX 3
 MULDIV
 UFITS 128
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1157
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1087
 SWAP
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 
@@ -4225,32 +4083,31 @@ SWAP
 CALL $transferMatchingReward_a99ed683_internal_macro$
 
 .macro transferMatchingReward_a99ed683_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1165
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1095
 PUSH S2
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1166
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1096
 	PUSHREF {
 	}
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1167
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1097
 	PUSH S3
 	CALLREF {
 		CALL $_expectedSpendAmountOfMatching_4b89f31b_internal_macro$
 	}
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1172
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1102
 	DUP
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 1173
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 1103
 		PUSH S2
 		TRUE
 		GETGLOB 12
 		PUSH S7
-		PUSHINT 33
-		GETGLOBVAR
+		GETGLOB 26
 		INDEX 4
 		PUSH S5
-		GETGLOB 25
+		GETGLOB 28
 		FALSE
 		NEWC
 		STSLICECONST x6_
@@ -4278,17 +4135,17 @@ PUSHCONT {
 		.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 	}
 	IF
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1187
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1117
 	DROP
 	DUP
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/tests/TestNewOrderBad.tsol, 1188
+		.loc ../contracts/tests/TestNewOrderBad.tsol, 1118
 		OVER
 		TRUE
 		PUSH3 S4, S5, S4
 		PUSH S5
-		GETGLOB 25
+		GETGLOB 28
 		FALSE
 		NEWC
 		STSLICECONST x6_
@@ -4316,13 +4173,13 @@ PUSHCONT {
 		.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 	}
 	IF
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1202
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1132
 	DROP2
-	GETGLOB 19
+	GETGLOB 21
 	PUSH S3
 	SUB
 	UFITS 128
-	SETGLOB 19
+	SETGLOB 21
 	.loc ../contracts/tests/TestNewOrderBad.tsol, 0
 }
 IF
@@ -4338,7 +4195,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1206
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1136
 OVER
 PUSHCONT {
 	LDREF
@@ -4359,7 +4216,7 @@ CALLREF {
 THROW 0
 
 .macro enableEmergency_df0128f6_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 124
+.loc ../contracts/tests/TestNewOrderBad.tsol, 77
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -4370,7 +4227,7 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 313
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1207
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1137
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -4381,24 +4238,27 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 100
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1208
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1138
+GETGLOB 31
 NEQINT 6
 THROWIFNOT 316
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1213
-GETGLOB 28
-SETGLOB 30
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1214
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1143
+GETGLOB 31
+PUSHINT 33
+SETGLOBVAR
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1144
 PUSHINT 6
-SETGLOB 28
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1215
 SETGLOB 31
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1217
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1145
+PUSHINT 34
+SETGLOBVAR
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1147
 CALLREF {
 	CALL $buildDetails_03265ec2_internal_macro$
 }
-GETGLOB 28
-GETGLOB 30
+GETGLOB 31
+PUSHINT 33
+GETGLOBVAR
 PUSHREFSLICE {
 	.blob xc0000000000000000000000001
 }
@@ -4487,7 +4347,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1220
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1150
 ENDS
 .loc ../contracts/tests/TestNewOrderBad.tsol, 0
 CALLREF {
@@ -4500,7 +4360,7 @@ CALLREF {
 THROW 0
 
 .macro disableEmergency_d59b7807_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 124
+.loc ../contracts/tests/TestNewOrderBad.tsol, 77
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -4511,7 +4371,7 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 313
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1221
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1151
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -4522,24 +4382,27 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 100
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1222
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1152
+GETGLOB 31
 EQINT 6
 THROWIFNOT 316
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1227
-GETGLOB 30
-SETGLOB 28
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1228
-PUSHINT 0
-SETGLOB 30
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1229
-PUSHINT 0
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1157
+PUSHINT 33
+GETGLOBVAR
 SETGLOB 31
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1231
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1158
+PUSHINT 0
+PUSHINT 33
+SETGLOBVAR
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1159
+PUSHINT 0
+PUSHINT 34
+SETGLOBVAR
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1161
 CALLREF {
 	CALL $buildDetails_03265ec2_internal_macro$
 }
-GETGLOB 28
+GETGLOB 31
 PUSHINT 6
 PUSHREFSLICE {
 	.blob xc0000000000000000000000001
@@ -4629,7 +4492,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1238
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1168
 OVER
 PUSHCONT {
 	LDREF
@@ -4666,8 +4529,9 @@ THROW 0
 CALL $proxyTokensTransfer_00745f71_internal_macro$
 
 .macro proxyTokensTransfer_00745f71_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 148
-GETGLOB 31
+.loc ../contracts/tests/TestNewOrderBad.tsol, 101
+PUSHINT 34
+GETGLOBVAR
 NEQINT 0
 DUP
 PUSHCONT {
@@ -4684,7 +4548,8 @@ PUSHCONT {
 		PARSEMSGADDR
 		INDEX 3
 		PLDU 256
-		GETGLOB 31
+		PUSHINT 34
+		GETGLOBVAR
 		EQUAL
 	}
 	IF
@@ -4696,19 +4561,20 @@ PUSHCONT {
 		PUSHINT 0
 	}
 	IF
-	GETGLOB 31
+	PUSHINT 34
+	GETGLOBVAR
 	EQUAL
 	OR
 }
 IF
 THROWIFNOT 315
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1249
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1179
+GETGLOB 31
 EQINT 6
 THROWIFNOT 317
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1253
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1183
 ACCEPT
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1255
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1185
 REVERSE 8, 0
 NEWC
 STSLICECONST x62_
@@ -4744,7 +4610,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1268
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1198
 OVER
 PUSHCONT {
 	LDREF
@@ -4770,8 +4636,9 @@ THROW 0
 CALL $sendGas_344a5ee6_internal_macro$
 
 .macro sendGas_344a5ee6_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 148
-GETGLOB 31
+.loc ../contracts/tests/TestNewOrderBad.tsol, 101
+PUSHINT 34
+GETGLOBVAR
 NEQINT 0
 DUP
 PUSHCONT {
@@ -4788,7 +4655,8 @@ PUSHCONT {
 		PARSEMSGADDR
 		INDEX 3
 		PLDU 256
-		GETGLOB 31
+		PUSHINT 34
+		GETGLOBVAR
 		EQUAL
 	}
 	IF
@@ -4800,19 +4668,20 @@ PUSHCONT {
 		PUSHINT 0
 	}
 	IF
-	GETGLOB 31
+	PUSHINT 34
+	GETGLOBVAR
 	EQUAL
 	OR
 }
 IF
 THROWIFNOT 315
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1273
-GETGLOB 28
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1203
+GETGLOB 31
 EQINT 6
 THROWIFNOT 317
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1277
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1207
 ACCEPT
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1278
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1208
 XCHG S2
 NEWC
 STSLICECONST x42_
@@ -4835,7 +4704,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1281
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1211
 OVER
 PUSHCONT {
 	LDREF
@@ -4862,7 +4731,7 @@ CALLREF {
 THROW 0
 
 .macro upgrade_fb9d1513_internal_macro
-.loc ../contracts/tests/TestNewOrderBad.tsol, 124
+.loc ../contracts/tests/TestNewOrderBad.tsol, 77
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -4873,17 +4742,16 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 313
-.loc ../contracts/tests/TestNewOrderBad.tsol, 1286
-PUSHINT 35
-GETGLOBVAR
+.loc ../contracts/tests/TestNewOrderBad.tsol, 1216
+GETGLOB 25
 PUSH S2
 EQUAL
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1287
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1217
 	PUSHINT 1000000000
 	PUSHINT 0
 	RAWRESERVE
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1288
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1218
 	DUP
 	NEWC
 	STSLICECONST x62_
@@ -4897,14 +4765,13 @@ PUSHCONT {
 	SENDRAWMSG
 }
 PUSHCONT {
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1293
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1223
 	PUSHREF {
 		.blob xc000000000000000000000000064874be9
 	}
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1295
-	OVER
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1225
 	PUSHINT 35
 	GETGLOBVAR
 	PUSHINT 34
@@ -4918,16 +4785,43 @@ PUSHCONT {
 	GETGLOB 29
 	GETGLOB 28
 	GETGLOB 27
-	GETGLOB 26
-	GETGLOB 25
-	GETGLOB 24
-	GETGLOB 23
 	GETGLOB 22
 	GETGLOB 21
-	GETGLOB 20
+	NEWC
+	STU 128
+	STU 128
+	STSLICE
+	ROLLREV 8
+	NEWC
+	STSLICE
+	ROLLREV 7
+	NEWC
+	STSLICE
+	STI 1
+	STU 8
+	STU 64
+	STU 8
+	STU 256
+	SWAP
+	NEWC
+	STSLICE
+	STBREFR
+	STBREFR
+	STBREFR
+	ENDC
+	GETGLOB 26
+	GETGLOB 24
+	GETGLOB 23
+	PUSH S5
+	GETGLOB 25
 	GETGLOB 19
+	GETGLOB 20
 	GETGLOB 18
 	GETGLOB 17
+	NEWC
+	STSLICE
+	STREF
+	ENDC
 	GETGLOB 16
 	GETGLOB 15
 	GETGLOB 14
@@ -4937,33 +4831,9 @@ PUSHCONT {
 	GETGLOB 10
 	NEWC
 	STSLICE
-	PUSHINT 26
-	ROLLREVX
+	ROLLREV 15
 	NEWC
 	STSLICE
-	PUSHINT 25
-	ROLLREVX
-	NEWC
-	STSLICE
-	PUSHINT 24
-	ROLLREVX
-	NEWC
-	STSLICE
-	PUSHINT 23
-	ROLLREVX
-	NEWC
-	STSLICE
-	STU 64
-	STU 64
-	STU 128
-	STU 128
-	PUSHINT 18
-	ROLLREVX
-	NEWC
-	STU 128
-	STU 128
-	STU 256
-	STU 256
 	ROLLREV 14
 	NEWC
 	STSLICE
@@ -4973,38 +4843,28 @@ PUSHCONT {
 	ROLLREV 12
 	NEWC
 	STSLICE
-	ROLLREV 11
-	NEWC
-	STSLICE
-	STREF
-	STU 8
 	STU 64
-	STU 8
+	STU 64
+	STREF
+	STU 128
+	STU 128
+	STU 32
+	ROLLREV 5
+	NEWC
+	STU 32
 	STU 256
-	STI 1
+	STU 256
 	SWAP
 	UNTUPLE 5
 	REVERSE 6, 0
-	ROLLREV 8
-	NEWC
 	STU 128
 	STU 128
 	STU 128
-	STU 128
-	ROLLREV 4
-	NEWC
-	STSLICE
 	ROLLREV 3
 	NEWC
+	STU 128
 	STSLICE
-	STU 32
-	STU 32
-	STBREFR
-	STBREFR
-	STBREFR
-	STBREFR
-	STBREFR
-	STBREFR
+	STREF
 	STBREFR
 	STBREFR
 	STBREFR
@@ -5012,10 +4872,10 @@ PUSHCONT {
 	STBREFR
 	STBREFR
 	ENDC
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1302
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1231
 	PUSH S3
 	SETCODE
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1303
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1232
 	PUSH S3
 	CTOS
 	DUP
@@ -5030,7 +4890,7 @@ PUSHCONT {
 	CTOS
 	BLESS
 	POP C3
-	.loc ../contracts/tests/TestNewOrderBad.tsol, 1305
+	.loc ../contracts/tests/TestNewOrderBad.tsol, 1234
 	CALLREF {
 		CALL $:onCodeUpgrade$
 	}
@@ -5075,47 +4935,28 @@ CTOS
 LDMSGADDR
 LDU 64
 LDU 64
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+LDU 128
 LDU 128
 LDU 128
 LDREF
 ENDS
 CTOS
-LDU 128
 LDU 128
 LDU 256
 LDU 256
-LDREF
-ENDS
-CTOS
-LDMSGADDR
-LDREF
-ENDS
-CTOS
-LDMSGADDR
-LDREF
-ENDS
-CTOS
-LDMSGADDR
-LDREF
-ENDS
-CTOS
-LDMSGADDR
-LDREF
-LDU 8
-LDU 64
-LDU 8
-LDU 256
-LDI 1
-LDREF
-ENDS
-CTOS
-LDU 128
-LDU 128
+LDU 32
 LDU 128
 LDU 128
 LDREF
 ENDS
 CTOS
+LDU 128
+LDU 128
 LDMSGADDR
 ROLLREV 5
 TUPLE 5
@@ -5124,7 +4965,24 @@ LDREF
 ENDS
 CTOS
 LDMSGADDR
-LDU 32
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDI 1
+LDU 8
+LDU 64
+LDU 8
+LDU 256
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDDICT
 ENDS
 PUSHINT 0
 GETGLOBVAR
@@ -5137,10 +4995,10 @@ GETGLOB 6
 GETGLOB 7
 GETGLOB 8
 GETGLOB 9
-PUSHINT 26
+PUSHINT 27
 PUSHINT 10
 BLKSWX
-PUSHINT 36
+PUSHINT 37
 TUPLEVAR
 POP C7
 SETGLOB 3
@@ -5235,16 +5093,13 @@ PUSHCONT {
 		PLDU 64
 	}
 	IF
-	PUSHINT 0
-	BLKPUSH 5, 0
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
-	BLKPUSH 3, 0
 	PUSHREF {
 	}
 	PUSHINT 0
-	BLKPUSH 8, 0
+	BLKPUSH 10, 0
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
@@ -5252,8 +5107,14 @@ PUSHCONT {
 	PUSHREFSLICE {
 		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 	}
+	BLKPUSH 2, 0
 	PUSHINT 0
-	PUSHINT 36
+	BLKPUSH 4, 0
+	PUSHREFSLICE {
+		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+	}
+	NEWDICT
+	PUSHINT 37
 	TUPLEVAR
 	POP C7
 	PUSHINT 64
@@ -5271,12 +5132,12 @@ IFREFELSE {
 .macro c7_to_c4
 PUSH C7
 FALSE
-PUSHINT 36
-SETINDEXVARQ
 PUSHINT 37
+SETINDEXVARQ
+PUSHINT 38
 UNTUPLEVAR
 DROP
-PUSHINT 36
+PUSHINT 37
 PUSHINT 0
 REVX
 BLKDROP 10
@@ -5286,6 +5147,10 @@ NEWC
 STU 256
 STU 64
 STONE
+STSLICE
+PUSHINT 26
+ROLLREVX
+NEWC
 STSLICE
 PUSHINT 25
 ROLLREVX
@@ -5299,56 +5164,50 @@ PUSHINT 23
 ROLLREVX
 NEWC
 STSLICE
-PUSHINT 22
+STU 64
+STU 64
+PUSHINT 20
 ROLLREVX
 NEWC
 STSLICE
-STU 64
-STU 64
+STREF
 STU 128
 STU 128
-PUSHINT 17
-ROLLREVX
+STU 128
+ROLLREV 15
 NEWC
 STU 128
+STU 256
+STU 256
+STU 32
+SWAP
+UNTUPLE 5
+REVERSE 6, 0
 STU 128
-STU 256
-STU 256
+STU 128
 ROLLREV 13
 NEWC
-STSLICE
-ROLLREV 12
-NEWC
-STSLICE
-ROLLREV 11
-NEWC
+STU 128
+STU 128
 STSLICE
 ROLLREV 10
 NEWC
 STSLICE
-STREF
+ROLLREV 9
+NEWC
+STSLICE
+ROLLREV 8
+NEWC
+STSLICE
+STI 1
 STU 8
 STU 64
 STU 8
 STU 256
-STI 1
-SWAP
-UNTUPLE 5
-REVERSE 6, 0
-ROLLREV 7
-NEWC
-STU 128
-STU 128
-STU 128
-STU 128
-ROLLREV 3
-NEWC
-STSLICE
 ROTREV
 NEWC
 STSLICE
-STU 32
-STBREFR
+STDICT
 STBREFR
 STBREFR
 STBREFR
@@ -5489,902 +5348,6 @@ CALLREF {
 }
 THROW 60
 
-.globl	OrderPayloads_with_obj_buildSwapExchangePayload_63976777
-.type	OrderPayloads_with_obj_buildSwapExchangePayload_63976777, @function
-CALL $OrderPayloads_with_obj_buildSwapExchangePayload_63976777_macro$
-
-.macro OrderPayloads_with_obj_buildSwapExchangePayload_63976777_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 52
-NEWC
-STSLICECONST xc8
-.loc ../contracts/libraries/OrderPayloads.tsol, 53
-PUSH S8
-STUR 64
-.loc ../contracts/libraries/OrderPayloads.tsol, 54
-ROLL 5
-STSLICER
-.loc ../contracts/libraries/OrderPayloads.tsol, 55
-PUSH S6
-STUR 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 58
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 61
-NEWC
-STSLICECONST xc9
-.loc ../contracts/libraries/OrderPayloads.tsol, 62
-PUSH S8
-STUR 64
-.loc ../contracts/libraries/OrderPayloads.tsol, 63
-ROLL 5
-STSLICER
-.loc ../contracts/libraries/OrderPayloads.tsol, 66
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 68
-PUSH S7
-ROLLREV 7
-CALLREF {
-	CALL $PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildSwapExchangePayload_63976777
-.type	OrderPayloads_no_obj_buildSwapExchangePayload_63976777, @function
-CALL $OrderPayloads_no_obj_buildSwapExchangePayload_63976777_macro$
-
-.macro OrderPayloads_no_obj_buildSwapExchangePayload_63976777_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 52
-NEWC
-STSLICECONST xc8
-.loc ../contracts/libraries/OrderPayloads.tsol, 53
-PUSH S8
-STUR 64
-.loc ../contracts/libraries/OrderPayloads.tsol, 54
-ROLL 5
-STSLICER
-.loc ../contracts/libraries/OrderPayloads.tsol, 55
-PUSH S6
-STUR 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 58
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 61
-NEWC
-STSLICECONST xc9
-.loc ../contracts/libraries/OrderPayloads.tsol, 62
-PUSH S8
-STUR 64
-.loc ../contracts/libraries/OrderPayloads.tsol, 63
-ROLL 5
-STSLICER
-.loc ../contracts/libraries/OrderPayloads.tsol, 66
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 68
-CALLREF {
-	CALL $PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildMatchExchangePayload_dfab77e5
-.type	OrderPayloads_with_obj_buildMatchExchangePayload_dfab77e5, @function
-CALL $OrderPayloads_with_obj_buildMatchExchangePayload_dfab77e5_macro$
-
-.macro OrderPayloads_with_obj_buildMatchExchangePayload_dfab77e5_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 92
-PUSH S6
-NEWC
-STU 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 93
-ROLL 6
-STUR 64
-.loc ../contracts/libraries/OrderPayloads.tsol, 94
-ROLL 5
-STSLICER
-.loc ../contracts/libraries/OrderPayloads.tsol, 95
-ROLL 4
-STUR 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 96
-ROLL 3
-STUR 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 97
-XCHG S1, S2
-STU 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 98
-STU 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 100
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildMatchExchangePayload_dfab77e5
-.type	OrderPayloads_no_obj_buildMatchExchangePayload_dfab77e5, @function
-CALL $OrderPayloads_no_obj_buildMatchExchangePayload_dfab77e5_macro$
-
-.macro OrderPayloads_no_obj_buildMatchExchangePayload_dfab77e5_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 92
-ROLL 6
-NEWC
-STU 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 93
-ROLL 6
-STUR 64
-.loc ../contracts/libraries/OrderPayloads.tsol, 94
-ROLL 5
-STSLICER
-.loc ../contracts/libraries/OrderPayloads.tsol, 95
-ROLL 4
-STUR 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 96
-ROLL 3
-STUR 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 97
-XCHG S1, S2
-STU 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 98
-STU 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 100
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildMatchTransferPayload_56279caf
-.type	OrderPayloads_with_obj_buildMatchTransferPayload_56279caf, @function
-CALL $OrderPayloads_with_obj_buildMatchTransferPayload_56279caf_macro$
-
-.macro OrderPayloads_with_obj_buildMatchTransferPayload_56279caf_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 112
-PUSH S5
-NEWC
-STU 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 113
-ROLL 5
-STUR 64
-.loc ../contracts/libraries/OrderPayloads.tsol, 114
-ROLL 4
-STSLICER
-.loc ../contracts/libraries/OrderPayloads.tsol, 115
-ROLL 3
-STUR 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 116
-XCHG S1, S2
-STU 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 117
-STSLICE
-.loc ../contracts/libraries/OrderPayloads.tsol, 119
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildMatchTransferPayload_56279caf
-.type	OrderPayloads_no_obj_buildMatchTransferPayload_56279caf, @function
-CALL $OrderPayloads_no_obj_buildMatchTransferPayload_56279caf_macro$
-
-.macro OrderPayloads_no_obj_buildMatchTransferPayload_56279caf_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 112
-ROLL 5
-NEWC
-STU 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 113
-ROLL 5
-STUR 64
-.loc ../contracts/libraries/OrderPayloads.tsol, 114
-ROLL 4
-STSLICER
-.loc ../contracts/libraries/OrderPayloads.tsol, 115
-ROLL 3
-STUR 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 116
-XCHG S1, S2
-STU 128
-.loc ../contracts/libraries/OrderPayloads.tsol, 117
-STSLICE
-.loc ../contracts/libraries/OrderPayloads.tsol, 119
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_decodeOnAcceptTokenTransferData_3ec80200
-.type	OrderPayloads_with_obj_decodeOnAcceptTokenTransferData_3ec80200, @function
-CALL $OrderPayloads_with_obj_decodeOnAcceptTokenTransferData_3ec80200_macro$
-
-.macro OrderPayloads_with_obj_decodeOnAcceptTokenTransferData_3ec80200_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 135
-OVER
-CTOS
-.loc ../contracts/libraries/OrderPayloads.tsol, 136
-OVER
-EQINT 4
-OVER
-SBITS
-GTINT 15
-AND
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 137
-	DUP
-	LDU 8
-	LDU 8
-	POP S3
-	.loc ../contracts/libraries/OrderPayloads.tsol, 138
-	EQINT 6
-	PUSH S2
-	SREFS
-	GTINT 0
-	PUSH S2
-	PUSHINT 200
-	EQUAL
-	ROLL 3
-	PUSHINT 201
-	EQUAL
-	OR
-	AND
-	AND
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 145
-		LDREFRTOS
-		NIP
-		.loc ../contracts/libraries/OrderPayloads.tsol, 0
-	}
-	IF
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IF
-.loc ../contracts/libraries/OrderPayloads.tsol, 149
-DUP
-SBITS
-PUSHINT 200
-GEQ
-.loc ../contracts/libraries/OrderPayloads.tsol, 151
-PUSHINT 0
-DUP
-.loc ../contracts/libraries/OrderPayloads.tsol, 153
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-BLKPUSH 2, 0
-.loc ../contracts/libraries/OrderPayloads.tsol, 156
-PUSHINT 0
-BLKPUSH 3, 0
-.loc ../contracts/libraries/OrderPayloads.tsol, 162
-PUSH S9
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 163
-	PUSH S11
-	EQINT 0
-	PUSH S12
-	EQINT 1
-	OR
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 164
-		PUSHINT 53
-		POP S9
-		.loc ../contracts/libraries/OrderPayloads.tsol, 165
-		PUSH S10
-		LDU 64
-		POP S12
-		POP S8
-	}
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 167
-		PUSH S10
-		LDU 8
-		LDU 64
-		POP S13
-		POP S9
-		POP S9
-	}
-	IFELSE
-	.loc ../contracts/libraries/OrderPayloads.tsol, 173
-	PUSH S10
-	SBITS
-	GTINT 127
-	PUSH S9
-	EQINT 50
-	AND
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 177
-		PUSH S10
-		LDU 128
-		POP S12
-		POP S4
-		.loc ../contracts/libraries/OrderPayloads.tsol, 0
-	}
-	IF
-	.loc ../contracts/libraries/OrderPayloads.tsol, 180
-	PUSH S10
-	SBITS
-	PUSHINT 267
-	GEQ
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 181
-		PUSH S8
-		NEQINT 50
-		PUSHCONT {
-			.loc ../contracts/libraries/OrderPayloads.tsol, 182
-			PUSH S10
-			LDMSGADDR
-			POP S12
-			POP S7
-		}
-		PUSHCONT {
-			.loc ../contracts/libraries/OrderPayloads.tsol, 184
-			PUSH S10
-			LDMSGADDR
-			POP S12
-			POP S5
-		}
-		IFELSE
-		.loc ../contracts/libraries/OrderPayloads.tsol, 0
-	}
-	IF
-	.loc ../contracts/libraries/OrderPayloads.tsol, 188
-	PUSH S10
-	SBITS
-	GTINT 127
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 189
-		PUSH S8
-		EQINT 51
-		PUSH S9
-		PUSHINT 200
-		EQUAL
-		OR
-		PUSHCONT {
-			.loc ../contracts/libraries/OrderPayloads.tsol, 193
-			PUSH S10
-			LDU 128
-			POP S12
-			POP S4
-		}
-		PUSHCONT {
-			PUSH S8
-			EQINT 52
-			PUSHCONT {
-				.loc ../contracts/libraries/OrderPayloads.tsol, 195
-				PUSH S10
-				LDU 128
-				POP S12
-				POP S3
-				.loc ../contracts/libraries/OrderPayloads.tsol, 0
-			}
-			IF
-		}
-		IFELSE
-		.loc ../contracts/libraries/OrderPayloads.tsol, 0
-	}
-	IF
-	.loc ../contracts/libraries/OrderPayloads.tsol, 199
-	PUSH S10
-	SBITS
-	GTINT 127
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 200
-		PUSH S8
-		EQINT 51
-		PUSHCONT {
-			.loc ../contracts/libraries/OrderPayloads.tsol, 202
-			PUSH S10
-			LDU 128
-			POP S12
-			POP S3
-		}
-		PUSHCONT {
-			PUSH S8
-			EQINT 52
-			PUSHCONT {
-				.loc ../contracts/libraries/OrderPayloads.tsol, 204
-				PUSH S10
-				LDU 128
-				POP S12
-				POP S2
-				.loc ../contracts/libraries/OrderPayloads.tsol, 0
-			}
-			IF
-		}
-		IFELSE
-		.loc ../contracts/libraries/OrderPayloads.tsol, 0
-	}
-	IF
-	.loc ../contracts/libraries/OrderPayloads.tsol, 208
-	PUSH S10
-	SBITS
-	PUSHPOW2 8
-	GEQ
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 209
-		PUSH S8
-		EQINT 51
-		PUSHCONT {
-			.loc ../contracts/libraries/OrderPayloads.tsol, 210
-			PUSH S10
-			LDU 128
-			LDU 128
-			POP S13
-			BLKDROP2 2, 2
-		}
-		PUSHCONT {
-			PUSH S8
-			EQINT 52
-			PUSHCONT {
-				.loc ../contracts/libraries/OrderPayloads.tsol, 212
-				PUSH S10
-				LDMSGADDR
-				POP S12
-				POP S6
-				.loc ../contracts/libraries/OrderPayloads.tsol, 0
-			}
-			IF
-		}
-		IFELSE
-		.loc ../contracts/libraries/OrderPayloads.tsol, 0
-	}
-	IF
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IF
-.loc ../contracts/libraries/OrderPayloads.tsol, 217
-BLKSWAP 3, 7
-ROLL 7
-BLKSWAP 6, 4
-BLKDROP2 2, 10
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_decodeOnAcceptTokenTransferData_3ec80200
-.type	OrderPayloads_no_obj_decodeOnAcceptTokenTransferData_3ec80200, @function
-CALL $OrderPayloads_no_obj_decodeOnAcceptTokenTransferData_3ec80200_macro$
-
-.macro OrderPayloads_no_obj_decodeOnAcceptTokenTransferData_3ec80200_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 135
-SWAP
-CTOS
-.loc ../contracts/libraries/OrderPayloads.tsol, 136
-OVER
-EQINT 4
-OVER
-SBITS
-GTINT 15
-AND
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 137
-	DUP
-	LDU 8
-	LDU 8
-	POP S3
-	.loc ../contracts/libraries/OrderPayloads.tsol, 138
-	EQINT 6
-	PUSH S2
-	SREFS
-	GTINT 0
-	PUSH S2
-	PUSHINT 200
-	EQUAL
-	ROLL 3
-	PUSHINT 201
-	EQUAL
-	OR
-	AND
-	AND
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 145
-		LDREFRTOS
-		NIP
-		.loc ../contracts/libraries/OrderPayloads.tsol, 0
-	}
-	IF
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IF
-.loc ../contracts/libraries/OrderPayloads.tsol, 149
-DUP
-SBITS
-PUSHINT 200
-GEQ
-.loc ../contracts/libraries/OrderPayloads.tsol, 151
-PUSHINT 0
-DUP
-.loc ../contracts/libraries/OrderPayloads.tsol, 153
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-BLKPUSH 2, 0
-.loc ../contracts/libraries/OrderPayloads.tsol, 156
-PUSHINT 0
-BLKPUSH 3, 0
-.loc ../contracts/libraries/OrderPayloads.tsol, 162
-PUSH S9
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 163
-	PUSH S11
-	EQINT 0
-	PUSH S12
-	EQINT 1
-	OR
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 164
-		PUSHINT 53
-		POP S9
-		.loc ../contracts/libraries/OrderPayloads.tsol, 165
-		PUSH S10
-		LDU 64
-		POP S12
-		POP S8
-	}
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 167
-		PUSH S10
-		LDU 8
-		LDU 64
-		POP S13
-		POP S9
-		POP S9
-	}
-	IFELSE
-	.loc ../contracts/libraries/OrderPayloads.tsol, 173
-	PUSH S10
-	SBITS
-	GTINT 127
-	PUSH S9
-	EQINT 50
-	AND
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 177
-		PUSH S10
-		LDU 128
-		POP S12
-		POP S4
-		.loc ../contracts/libraries/OrderPayloads.tsol, 0
-	}
-	IF
-	.loc ../contracts/libraries/OrderPayloads.tsol, 180
-	PUSH S10
-	SBITS
-	PUSHINT 267
-	GEQ
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 181
-		PUSH S8
-		NEQINT 50
-		PUSHCONT {
-			.loc ../contracts/libraries/OrderPayloads.tsol, 182
-			PUSH S10
-			LDMSGADDR
-			POP S12
-			POP S7
-		}
-		PUSHCONT {
-			.loc ../contracts/libraries/OrderPayloads.tsol, 184
-			PUSH S10
-			LDMSGADDR
-			POP S12
-			POP S5
-		}
-		IFELSE
-		.loc ../contracts/libraries/OrderPayloads.tsol, 0
-	}
-	IF
-	.loc ../contracts/libraries/OrderPayloads.tsol, 188
-	PUSH S10
-	SBITS
-	GTINT 127
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 189
-		PUSH S8
-		EQINT 51
-		PUSH S9
-		PUSHINT 200
-		EQUAL
-		OR
-		PUSHCONT {
-			.loc ../contracts/libraries/OrderPayloads.tsol, 193
-			PUSH S10
-			LDU 128
-			POP S12
-			POP S4
-		}
-		PUSHCONT {
-			PUSH S8
-			EQINT 52
-			PUSHCONT {
-				.loc ../contracts/libraries/OrderPayloads.tsol, 195
-				PUSH S10
-				LDU 128
-				POP S12
-				POP S3
-				.loc ../contracts/libraries/OrderPayloads.tsol, 0
-			}
-			IF
-		}
-		IFELSE
-		.loc ../contracts/libraries/OrderPayloads.tsol, 0
-	}
-	IF
-	.loc ../contracts/libraries/OrderPayloads.tsol, 199
-	PUSH S10
-	SBITS
-	GTINT 127
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 200
-		PUSH S8
-		EQINT 51
-		PUSHCONT {
-			.loc ../contracts/libraries/OrderPayloads.tsol, 202
-			PUSH S10
-			LDU 128
-			POP S12
-			POP S3
-		}
-		PUSHCONT {
-			PUSH S8
-			EQINT 52
-			PUSHCONT {
-				.loc ../contracts/libraries/OrderPayloads.tsol, 204
-				PUSH S10
-				LDU 128
-				POP S12
-				POP S2
-				.loc ../contracts/libraries/OrderPayloads.tsol, 0
-			}
-			IF
-		}
-		IFELSE
-		.loc ../contracts/libraries/OrderPayloads.tsol, 0
-	}
-	IF
-	.loc ../contracts/libraries/OrderPayloads.tsol, 208
-	PUSH S10
-	SBITS
-	PUSHPOW2 8
-	GEQ
-	PUSHCONT {
-		.loc ../contracts/libraries/OrderPayloads.tsol, 209
-		PUSH S8
-		EQINT 51
-		PUSHCONT {
-			.loc ../contracts/libraries/OrderPayloads.tsol, 210
-			PUSH S10
-			LDU 128
-			LDU 128
-			POP S13
-			BLKDROP2 2, 2
-		}
-		PUSHCONT {
-			PUSH S8
-			EQINT 52
-			PUSHCONT {
-				.loc ../contracts/libraries/OrderPayloads.tsol, 212
-				PUSH S10
-				LDMSGADDR
-				POP S12
-				POP S6
-				.loc ../contracts/libraries/OrderPayloads.tsol, 0
-			}
-			IF
-		}
-		IFELSE
-		.loc ../contracts/libraries/OrderPayloads.tsol, 0
-	}
-	IF
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IF
-.loc ../contracts/libraries/OrderPayloads.tsol, 217
-BLKSWAP 3, 7
-ROLL 7
-BLKSWAP 6, 4
-BLKDROP2 2, 10
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
-.type	OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
-CALL $OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
-
-.macro OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 237
-OVER
-CTOS
-.loc ../contracts/libraries/OrderPayloads.tsol, 238
-DUP
-SREFS
-.loc ../contracts/libraries/OrderPayloads.tsol, 240
-PUSHINT 0
-DUP
-.loc ../contracts/libraries/OrderPayloads.tsol, 243
-PUSHREF {
-}
-DUP
-.loc ../contracts/libraries/OrderPayloads.tsol, 246
-ROLL 6
-NEQINT 50
-PUSH S5
-EQINT 0
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 247
-	XCHG S1, S2
-	BLKDROP2 2, 4
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IFJMP
-.loc ../contracts/libraries/OrderPayloads.tsol, 250
-PUSH S4
-GTINT 0
-POP S4
-.loc ../contracts/libraries/OrderPayloads.tsol, 251
-ROLL 4
-GTINT 1
-POP S3
-.loc ../contracts/libraries/OrderPayloads.tsol, 253
-PUSH S3
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 253
-	PUSH S4
-	LDREF
-	POP S6
-	POP S2
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IF
-.loc ../contracts/libraries/OrderPayloads.tsol, 254
-PUSH S2
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 254
-	PUSH S4
-	LDREF
-	POP S6
-	NIP
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IF
-.loc ../contracts/libraries/OrderPayloads.tsol, 256
-XCHG S1, S2
-BLKDROP2 1, 4
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
-.type	OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
-CALL $OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
-
-.macro OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 237
-SWAP
-CTOS
-.loc ../contracts/libraries/OrderPayloads.tsol, 238
-DUP
-SREFS
-.loc ../contracts/libraries/OrderPayloads.tsol, 240
-PUSHINT 0
-DUP
-.loc ../contracts/libraries/OrderPayloads.tsol, 243
-PUSHREF {
-}
-DUP
-.loc ../contracts/libraries/OrderPayloads.tsol, 246
-ROLL 6
-NEQINT 50
-PUSH S5
-EQINT 0
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 247
-	XCHG S1, S2
-	BLKDROP2 2, 4
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IFJMP
-.loc ../contracts/libraries/OrderPayloads.tsol, 250
-PUSH S4
-GTINT 0
-POP S4
-.loc ../contracts/libraries/OrderPayloads.tsol, 251
-ROLL 4
-GTINT 1
-POP S3
-.loc ../contracts/libraries/OrderPayloads.tsol, 253
-PUSH S3
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 253
-	PUSH S4
-	LDREF
-	POP S6
-	POP S2
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IF
-.loc ../contracts/libraries/OrderPayloads.tsol, 254
-PUSH S2
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 254
-	PUSH S4
-	LDREF
-	POP S6
-	NIP
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IF
-.loc ../contracts/libraries/OrderPayloads.tsol, 256
-XCHG S1, S2
-BLKDROP2 1, 4
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildSuccessPayload_ca821d98
-.type	OrderPayloads_with_obj_buildSuccessPayload_ca821d98, @function
-CALL $OrderPayloads_with_obj_buildSuccessPayload_ca821d98_macro$
-
-.macro OrderPayloads_with_obj_buildSuccessPayload_ca821d98_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 268
-NEWC
-STSLICECONST xcb
-.loc ../contracts/libraries/OrderPayloads.tsol, 269
-PUSH S3
-STUR 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 270
-XCHG S1, S2
-STREF
-.loc ../contracts/libraries/OrderPayloads.tsol, 273
-SWAP
-NEWC
-STSLICE
-.loc ../contracts/libraries/OrderPayloads.tsol, 275
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/OrderPayloads.tsol, 277
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildSuccessPayload_ca821d98
-.type	OrderPayloads_no_obj_buildSuccessPayload_ca821d98, @function
-CALL $OrderPayloads_no_obj_buildSuccessPayload_ca821d98_macro$
-
-.macro OrderPayloads_no_obj_buildSuccessPayload_ca821d98_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 268
-NEWC
-STSLICECONST xcb
-.loc ../contracts/libraries/OrderPayloads.tsol, 269
-ROLL 3
-STUR 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 270
-XCHG S1, S2
-STREF
-.loc ../contracts/libraries/OrderPayloads.tsol, 273
-SWAP
-NEWC
-STSLICE
-.loc ../contracts/libraries/OrderPayloads.tsol, 275
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/OrderPayloads.tsol, 277
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildCancelPayload_bb10a79a
-.type	OrderPayloads_with_obj_buildCancelPayload_bb10a79a, @function
-CALL $OrderPayloads_with_obj_buildCancelPayload_bb10a79a_macro$
-
-.macro OrderPayloads_with_obj_buildCancelPayload_bb10a79a_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 284
-NEWC
-STSLICECONST xcc
-.loc ../contracts/libraries/OrderPayloads.tsol, 285
-PUSH S2
-STUR 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 286
-STREF
-.loc ../contracts/libraries/OrderPayloads.tsol, 288
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildCancelPayload_bb10a79a
-.type	OrderPayloads_no_obj_buildCancelPayload_bb10a79a, @function
-CALL $OrderPayloads_no_obj_buildCancelPayload_bb10a79a_macro$
-
-.macro OrderPayloads_no_obj_buildCancelPayload_bb10a79a_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 284
-NEWC
-STSLICECONST xcc
-.loc ../contracts/libraries/OrderPayloads.tsol, 285
-XCHG S1, S2
-STU 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 286
-STREF
-.loc ../contracts/libraries/OrderPayloads.tsol, 288
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
 .globl	OrderPayloads_with_obj_buildOrderPayload_4398d981
 .type	OrderPayloads_with_obj_buildOrderPayload_4398d981, @function
 CALL $OrderPayloads_with_obj_buildOrderPayload_4398d981_macro$
@@ -6483,404 +5446,78 @@ ENDC
 BLKDROP2 2, 1
 .loc ../contracts/libraries/OrderPayloads.tsol, 0
 
-.globl	OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c
-.type	OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c, @function
-CALL $OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c_macro$
+.globl	OrderPayloads_with_obj_buildSwapExchangePayload_63976777
+.type	OrderPayloads_with_obj_buildSwapExchangePayload_63976777, @function
+CALL $OrderPayloads_with_obj_buildSwapExchangePayload_63976777_macro$
 
-.macro OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 320
-PUSHINT 1
-OVER
-NULL
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c
-.type	OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c, @function
-CALL $OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 320
-PUSHINT 1
-SWAP
-NULL
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4
-.type	OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4, @function
-CALL $OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 308
-PUSH S2
+.macro OrderPayloads_with_obj_buildSwapExchangePayload_63976777_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 52
 NEWC
-STU 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 310
-NULL
-.loc ../contracts/libraries/OrderPayloads.tsol, 312
-PUSH2 S1, S2
-ISNULL
-PUSHCONT {
-	PUSH S3
-}
-PUSHCONT {
-	OVER
-}
-IFELSE
-PUSH S5
-CALLREF {
-	CALL $OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro$
-}
-STREFR
-BLKDROP2 2, 1
-.loc ../contracts/libraries/OrderPayloads.tsol, 313
-ROT
-CALLREF {
-	CALL $OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro$
-}
-STREFR
-.loc ../contracts/libraries/OrderPayloads.tsol, 315
-ENDC
-NIP
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4
-.type	OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4, @function
-CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 308
-ROT
-NEWC
-STU 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 310
-NULL
-.loc ../contracts/libraries/OrderPayloads.tsol, 312
-PUSH2 S1, S2
-ISNULL
-PUSHCONT {
-	PUSH S3
-}
-PUSHCONT {
-	OVER
-}
-IFELSE
-PUSH S5
-CALLREF {
-	CALL $OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro$
-}
-STREFR
-BLKDROP2 2, 1
-.loc ../contracts/libraries/OrderPayloads.tsol, 313
-ROT
-CALLREF {
-	CALL $OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro$
-}
-STREFR
-.loc ../contracts/libraries/OrderPayloads.tsol, 315
-ENDC
-NIP
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b
-.type	OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b, @function
-CALL $OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 328
-PUSHINT 2
-XCPU S1, S2
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b
-.type	OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b, @function
-CALL $OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 328
-PUSHINT 2
-XCHG S2
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d
-.type	OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d, @function
-CALL $OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 337
-PUSHINT 4
-OVER
-NULL
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d
-.type	OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d, @function
-CALL $OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 337
-PUSHINT 4
-SWAP
-NULL
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_initDataOrderBlock_4c347cdf
-.type	OrderPayloads_with_obj_initDataOrderBlock_4c347cdf, @function
-CALL $OrderPayloads_with_obj_initDataOrderBlock_4c347cdf_macro$
-
-.macro OrderPayloads_with_obj_initDataOrderBlock_4c347cdf_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 369
-DUP
-INDEX 4
-OVER
-INDEX 3
-PUSH S2
-INDEX 7
-PUSH S3
-INDEX 6
-PUSH S4
-THIRD
-PUSH S5
-SECOND
+STSLICECONST xc8
+.loc ../contracts/libraries/OrderPayloads.tsol, 53
+PUSH S8
+STUR 64
+.loc ../contracts/libraries/OrderPayloads.tsol, 54
+ROLL 5
+STSLICER
+.loc ../contracts/libraries/OrderPayloads.tsol, 55
 PUSH S6
-FIRST
-NEWC
-STSLICE
-ROLLREV 6
-NEWC
-STSLICE
-ROLLREV 5
-NEWC
-STSLICE
-ROLLREV 4
-NEWC
-STSLICE
-ROLLREV 3
-NEWC
-STSLICE
-STU 64
-STU 64
-STBREFR
-STBREFR
-STBREFR
-STBREFR
+STUR 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 58
 ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_initDataOrderBlock_4c347cdf
-.type	OrderPayloads_no_obj_initDataOrderBlock_4c347cdf, @function
-CALL $OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro$
-
-.macro OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 369
-DUP
-INDEX 4
-OVER
-INDEX 3
-PUSH S2
-INDEX 7
-PUSH S3
-INDEX 6
-PUSH S4
-THIRD
-PUSH S5
-SECOND
-ROLL 6
-FIRST
+.loc ../contracts/libraries/OrderPayloads.tsol, 61
 NEWC
-STSLICE
-ROLLREV 6
-NEWC
-STSLICE
-ROLLREV 5
-NEWC
-STSLICE
-ROLLREV 4
-NEWC
-STSLICE
-ROLLREV 3
-NEWC
-STSLICE
-STU 64
-STU 64
-STBREFR
-STBREFR
-STBREFR
-STBREFR
+STSLICECONST xc9
+.loc ../contracts/libraries/OrderPayloads.tsol, 62
+PUSH S8
+STUR 64
+.loc ../contracts/libraries/OrderPayloads.tsol, 63
+ROLL 5
+STSLICER
+.loc ../contracts/libraries/OrderPayloads.tsol, 66
 ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d
-.type	OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d, @function
-CALL $OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 324
-PUSHINT 3
-XCPU S1, S2
+.loc ../contracts/libraries/OrderPayloads.tsol, 68
+PUSH S7
+ROLLREV 7
 CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+	CALL $PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro$
 }
 .loc ../contracts/libraries/OrderPayloads.tsol, 0
 
-.globl	OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d
-.type	OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d, @function
-CALL $OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d_macro$
+.globl	OrderPayloads_no_obj_buildSwapExchangePayload_63976777
+.type	OrderPayloads_no_obj_buildSwapExchangePayload_63976777, @function
+CALL $OrderPayloads_no_obj_buildSwapExchangePayload_63976777_macro$
 
-.macro OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 324
-PUSHINT 3
-XCHG S2
+.macro OrderPayloads_no_obj_buildSwapExchangePayload_63976777_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 52
+NEWC
+STSLICECONST xc8
+.loc ../contracts/libraries/OrderPayloads.tsol, 53
+PUSH S8
+STUR 64
+.loc ../contracts/libraries/OrderPayloads.tsol, 54
+ROLL 5
+STSLICER
+.loc ../contracts/libraries/OrderPayloads.tsol, 55
+PUSH S6
+STUR 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 58
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 61
+NEWC
+STSLICECONST xc9
+.loc ../contracts/libraries/OrderPayloads.tsol, 62
+PUSH S8
+STUR 64
+.loc ../contracts/libraries/OrderPayloads.tsol, 63
+ROLL 5
+STSLICER
+.loc ../contracts/libraries/OrderPayloads.tsol, 66
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 68
 CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+	CALL $PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro$
 }
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d
-.type	OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d, @function
-CALL $OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 341
-PUSHINT 2
-XCPU S1, S2
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d
-.type	OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d, @function
-CALL $OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 341
-PUSHINT 2
-XCHG S2
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_infoOrderBlock_841a3ec0
-.type	OrderPayloads_with_obj_infoOrderBlock_841a3ec0, @function
-CALL $OrderPayloads_with_obj_infoOrderBlock_841a3ec0_macro$
-
-.macro OrderPayloads_with_obj_infoOrderBlock_841a3ec0_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 350
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 359
-	DUP
-	INDEX 13
-	OVER
-	INDEX 12
-	PUSH S2
-	INDEX 11
-	ROLL 3
-	INDEX 10
-	NEWC
-	STU 128
-	STU 128
-	STU 128
-	STU 128
-	ENDC
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 351
-	DUP
-	INDEX 13
-	OVER
-	INDEX 12
-	PUSH S2
-	INDEX 11
-	ROLL 3
-	INDEX 10
-	PUSH2 S4, S4
-	ISNULL
-	THROWIF 63
-	NEWC
-	STU 128
-	STU 128
-	STU 128
-	STU 128
-	STU 128
-	ENDC
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IFELSE
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_infoOrderBlock_841a3ec0
-.type	OrderPayloads_no_obj_infoOrderBlock_841a3ec0, @function
-CALL $OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro$
-
-.macro OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 350
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 359
-	DUP
-	INDEX 13
-	OVER
-	INDEX 12
-	PUSH S2
-	INDEX 11
-	ROLL 3
-	INDEX 10
-	NEWC
-	STU 128
-	STU 128
-	STU 128
-	STU 128
-	ENDC
-	NIP
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 351
-	DUP
-	INDEX 13
-	OVER
-	INDEX 12
-	PUSH S2
-	INDEX 11
-	ROLL 3
-	INDEX 10
-	ROLL 4
-	DUP
-	ISNULL
-	THROWIF 63
-	NEWC
-	STU 128
-	STU 128
-	STU 128
-	STU 128
-	STU 128
-	ENDC
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IFELSE
 .loc ../contracts/libraries/OrderPayloads.tsol, 0
 
 .globl	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7
@@ -7029,6 +5666,1228 @@ ENDC
 BLKDROP2 2, 1
 .loc ../contracts/libraries/PairPayload.tsol, 0
 
+.globl	OrderPayloads_with_obj_buildMatchExchangePayload_dfab77e5
+.type	OrderPayloads_with_obj_buildMatchExchangePayload_dfab77e5, @function
+CALL $OrderPayloads_with_obj_buildMatchExchangePayload_dfab77e5_macro$
+
+.macro OrderPayloads_with_obj_buildMatchExchangePayload_dfab77e5_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 92
+PUSH S6
+NEWC
+STU 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 93
+ROLL 6
+STUR 64
+.loc ../contracts/libraries/OrderPayloads.tsol, 94
+ROLL 5
+STSLICER
+.loc ../contracts/libraries/OrderPayloads.tsol, 95
+ROLL 4
+STUR 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 96
+ROLL 3
+STUR 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 97
+XCHG S1, S2
+STU 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 98
+STU 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 100
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildMatchExchangePayload_dfab77e5
+.type	OrderPayloads_no_obj_buildMatchExchangePayload_dfab77e5, @function
+CALL $OrderPayloads_no_obj_buildMatchExchangePayload_dfab77e5_macro$
+
+.macro OrderPayloads_no_obj_buildMatchExchangePayload_dfab77e5_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 92
+ROLL 6
+NEWC
+STU 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 93
+ROLL 6
+STUR 64
+.loc ../contracts/libraries/OrderPayloads.tsol, 94
+ROLL 5
+STSLICER
+.loc ../contracts/libraries/OrderPayloads.tsol, 95
+ROLL 4
+STUR 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 96
+ROLL 3
+STUR 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 97
+XCHG S1, S2
+STU 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 98
+STU 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 100
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
+.type	OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
+CALL $OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
+
+.macro OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 235
+OVER
+CTOS
+.loc ../contracts/libraries/OrderPayloads.tsol, 236
+DUP
+SREFS
+.loc ../contracts/libraries/OrderPayloads.tsol, 238
+PUSHINT 0
+DUP
+.loc ../contracts/libraries/OrderPayloads.tsol, 241
+PUSHREF {
+}
+DUP
+.loc ../contracts/libraries/OrderPayloads.tsol, 244
+ROLL 6
+NEQINT 50
+PUSH S5
+EQINT 0
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 245
+	XCHG S1, S2
+	BLKDROP2 2, 4
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IFJMP
+.loc ../contracts/libraries/OrderPayloads.tsol, 248
+PUSH S4
+GTINT 0
+POP S4
+.loc ../contracts/libraries/OrderPayloads.tsol, 249
+ROLL 4
+GTINT 1
+POP S3
+.loc ../contracts/libraries/OrderPayloads.tsol, 251
+PUSH S3
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 251
+	PUSH S4
+	LDREF
+	POP S6
+	POP S2
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IF
+.loc ../contracts/libraries/OrderPayloads.tsol, 252
+PUSH S2
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 252
+	PUSH S4
+	LDREF
+	POP S6
+	NIP
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IF
+.loc ../contracts/libraries/OrderPayloads.tsol, 254
+XCHG S1, S2
+BLKDROP2 1, 4
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
+.type	OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
+CALL $OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
+
+.macro OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 235
+SWAP
+CTOS
+.loc ../contracts/libraries/OrderPayloads.tsol, 236
+DUP
+SREFS
+.loc ../contracts/libraries/OrderPayloads.tsol, 238
+PUSHINT 0
+DUP
+.loc ../contracts/libraries/OrderPayloads.tsol, 241
+PUSHREF {
+}
+DUP
+.loc ../contracts/libraries/OrderPayloads.tsol, 244
+ROLL 6
+NEQINT 50
+PUSH S5
+EQINT 0
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 245
+	XCHG S1, S2
+	BLKDROP2 2, 4
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IFJMP
+.loc ../contracts/libraries/OrderPayloads.tsol, 248
+PUSH S4
+GTINT 0
+POP S4
+.loc ../contracts/libraries/OrderPayloads.tsol, 249
+ROLL 4
+GTINT 1
+POP S3
+.loc ../contracts/libraries/OrderPayloads.tsol, 251
+PUSH S3
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 251
+	PUSH S4
+	LDREF
+	POP S6
+	POP S2
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IF
+.loc ../contracts/libraries/OrderPayloads.tsol, 252
+PUSH S2
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 252
+	PUSH S4
+	LDREF
+	POP S6
+	NIP
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IF
+.loc ../contracts/libraries/OrderPayloads.tsol, 254
+XCHG S1, S2
+BLKDROP2 1, 4
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildSuccessPayload_ca821d98
+.type	OrderPayloads_with_obj_buildSuccessPayload_ca821d98, @function
+CALL $OrderPayloads_with_obj_buildSuccessPayload_ca821d98_macro$
+
+.macro OrderPayloads_with_obj_buildSuccessPayload_ca821d98_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 266
+NEWC
+STSLICECONST xcb
+.loc ../contracts/libraries/OrderPayloads.tsol, 267
+PUSH S3
+STUR 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 268
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/OrderPayloads.tsol, 271
+SWAP
+NEWC
+STSLICE
+.loc ../contracts/libraries/OrderPayloads.tsol, 273
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/OrderPayloads.tsol, 275
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildSuccessPayload_ca821d98
+.type	OrderPayloads_no_obj_buildSuccessPayload_ca821d98, @function
+CALL $OrderPayloads_no_obj_buildSuccessPayload_ca821d98_macro$
+
+.macro OrderPayloads_no_obj_buildSuccessPayload_ca821d98_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 266
+NEWC
+STSLICECONST xcb
+.loc ../contracts/libraries/OrderPayloads.tsol, 267
+ROLL 3
+STUR 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 268
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/OrderPayloads.tsol, 271
+SWAP
+NEWC
+STSLICE
+.loc ../contracts/libraries/OrderPayloads.tsol, 273
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/OrderPayloads.tsol, 275
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildCancelPayload_bb10a79a
+.type	OrderPayloads_with_obj_buildCancelPayload_bb10a79a, @function
+CALL $OrderPayloads_with_obj_buildCancelPayload_bb10a79a_macro$
+
+.macro OrderPayloads_with_obj_buildCancelPayload_bb10a79a_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 282
+NEWC
+STSLICECONST xcc
+.loc ../contracts/libraries/OrderPayloads.tsol, 283
+PUSH S2
+STUR 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 284
+STREF
+.loc ../contracts/libraries/OrderPayloads.tsol, 286
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildCancelPayload_bb10a79a
+.type	OrderPayloads_no_obj_buildCancelPayload_bb10a79a, @function
+CALL $OrderPayloads_no_obj_buildCancelPayload_bb10a79a_macro$
+
+.macro OrderPayloads_no_obj_buildCancelPayload_bb10a79a_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 282
+NEWC
+STSLICECONST xcc
+.loc ../contracts/libraries/OrderPayloads.tsol, 283
+XCHG S1, S2
+STU 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 284
+STREF
+.loc ../contracts/libraries/OrderPayloads.tsol, 286
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_decodeOnAcceptTokenTransferData_3ec80200
+.type	OrderPayloads_with_obj_decodeOnAcceptTokenTransferData_3ec80200, @function
+CALL $OrderPayloads_with_obj_decodeOnAcceptTokenTransferData_3ec80200_macro$
+
+.macro OrderPayloads_with_obj_decodeOnAcceptTokenTransferData_3ec80200_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 134
+OVER
+CTOS
+.loc ../contracts/libraries/OrderPayloads.tsol, 135
+OVER
+EQINT 4
+OVER
+SBITS
+GTINT 15
+AND
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 136
+	DUP
+	LDU 8
+	LDU 8
+	POP S3
+	.loc ../contracts/libraries/OrderPayloads.tsol, 137
+	EQINT 6
+	PUSH S2
+	SREFS
+	GTINT 0
+	PUSH S2
+	PUSHINT 200
+	EQUAL
+	ROLL 3
+	PUSHINT 201
+	EQUAL
+	OR
+	AND
+	AND
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 144
+		LDREFRTOS
+		NIP
+		.loc ../contracts/libraries/OrderPayloads.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IF
+.loc ../contracts/libraries/OrderPayloads.tsol, 148
+DUP
+SBITS
+PUSHINT 200
+GEQ
+.loc ../contracts/libraries/OrderPayloads.tsol, 150
+PUSHINT 0
+DUP
+.loc ../contracts/libraries/OrderPayloads.tsol, 152
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+BLKPUSH 2, 0
+.loc ../contracts/libraries/OrderPayloads.tsol, 155
+PUSHINT 0
+BLKPUSH 3, 0
+.loc ../contracts/libraries/OrderPayloads.tsol, 160
+PUSH S9
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 161
+	PUSH S11
+	EQINT 0
+	PUSH S12
+	EQINT 1
+	OR
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 162
+		PUSHINT 53
+		POP S9
+		.loc ../contracts/libraries/OrderPayloads.tsol, 163
+		PUSH S10
+		LDU 64
+		POP S12
+		POP S8
+	}
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 165
+		PUSH S10
+		LDU 8
+		LDU 64
+		POP S13
+		POP S9
+		POP S9
+	}
+	IFELSE
+	.loc ../contracts/libraries/OrderPayloads.tsol, 171
+	PUSH S10
+	SBITS
+	GTINT 127
+	PUSH S9
+	EQINT 50
+	AND
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 175
+		PUSH S10
+		LDU 128
+		POP S12
+		POP S4
+		.loc ../contracts/libraries/OrderPayloads.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/OrderPayloads.tsol, 178
+	PUSH S10
+	SBITS
+	PUSHINT 267
+	GEQ
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 179
+		PUSH S8
+		NEQINT 50
+		PUSHCONT {
+			.loc ../contracts/libraries/OrderPayloads.tsol, 180
+			PUSH S10
+			LDMSGADDR
+			POP S12
+			POP S7
+		}
+		PUSHCONT {
+			.loc ../contracts/libraries/OrderPayloads.tsol, 182
+			PUSH S10
+			LDMSGADDR
+			POP S12
+			POP S5
+		}
+		IFELSE
+		.loc ../contracts/libraries/OrderPayloads.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/OrderPayloads.tsol, 186
+	PUSH S10
+	SBITS
+	GTINT 127
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 187
+		PUSH S8
+		EQINT 51
+		PUSH S9
+		PUSHINT 200
+		EQUAL
+		OR
+		PUSHCONT {
+			.loc ../contracts/libraries/OrderPayloads.tsol, 191
+			PUSH S10
+			LDU 128
+			POP S12
+			POP S4
+		}
+		PUSHCONT {
+			PUSH S8
+			EQINT 52
+			PUSHCONT {
+				.loc ../contracts/libraries/OrderPayloads.tsol, 193
+				PUSH S10
+				LDU 128
+				POP S12
+				POP S3
+				.loc ../contracts/libraries/OrderPayloads.tsol, 0
+			}
+			IF
+		}
+		IFELSE
+		.loc ../contracts/libraries/OrderPayloads.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/OrderPayloads.tsol, 197
+	PUSH S10
+	SBITS
+	GTINT 127
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 198
+		PUSH S8
+		EQINT 51
+		PUSHCONT {
+			.loc ../contracts/libraries/OrderPayloads.tsol, 200
+			PUSH S10
+			LDU 128
+			POP S12
+			POP S3
+		}
+		PUSHCONT {
+			PUSH S8
+			EQINT 52
+			PUSHCONT {
+				.loc ../contracts/libraries/OrderPayloads.tsol, 202
+				PUSH S10
+				LDU 128
+				POP S12
+				POP S2
+				.loc ../contracts/libraries/OrderPayloads.tsol, 0
+			}
+			IF
+		}
+		IFELSE
+		.loc ../contracts/libraries/OrderPayloads.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/OrderPayloads.tsol, 206
+	PUSH S10
+	SBITS
+	PUSHPOW2 8
+	GEQ
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 207
+		PUSH S8
+		EQINT 51
+		PUSHCONT {
+			.loc ../contracts/libraries/OrderPayloads.tsol, 208
+			PUSH S10
+			LDU 128
+			LDU 128
+			POP S13
+			BLKDROP2 2, 2
+		}
+		PUSHCONT {
+			PUSH S8
+			EQINT 52
+			PUSHCONT {
+				.loc ../contracts/libraries/OrderPayloads.tsol, 210
+				PUSH S10
+				LDMSGADDR
+				POP S12
+				POP S6
+				.loc ../contracts/libraries/OrderPayloads.tsol, 0
+			}
+			IF
+		}
+		IFELSE
+		.loc ../contracts/libraries/OrderPayloads.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IF
+.loc ../contracts/libraries/OrderPayloads.tsol, 215
+BLKSWAP 3, 7
+ROLL 7
+BLKSWAP 6, 4
+BLKDROP2 2, 10
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_decodeOnAcceptTokenTransferData_3ec80200
+.type	OrderPayloads_no_obj_decodeOnAcceptTokenTransferData_3ec80200, @function
+CALL $OrderPayloads_no_obj_decodeOnAcceptTokenTransferData_3ec80200_macro$
+
+.macro OrderPayloads_no_obj_decodeOnAcceptTokenTransferData_3ec80200_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 134
+SWAP
+CTOS
+.loc ../contracts/libraries/OrderPayloads.tsol, 135
+OVER
+EQINT 4
+OVER
+SBITS
+GTINT 15
+AND
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 136
+	DUP
+	LDU 8
+	LDU 8
+	POP S3
+	.loc ../contracts/libraries/OrderPayloads.tsol, 137
+	EQINT 6
+	PUSH S2
+	SREFS
+	GTINT 0
+	PUSH S2
+	PUSHINT 200
+	EQUAL
+	ROLL 3
+	PUSHINT 201
+	EQUAL
+	OR
+	AND
+	AND
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 144
+		LDREFRTOS
+		NIP
+		.loc ../contracts/libraries/OrderPayloads.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IF
+.loc ../contracts/libraries/OrderPayloads.tsol, 148
+DUP
+SBITS
+PUSHINT 200
+GEQ
+.loc ../contracts/libraries/OrderPayloads.tsol, 150
+PUSHINT 0
+DUP
+.loc ../contracts/libraries/OrderPayloads.tsol, 152
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+BLKPUSH 2, 0
+.loc ../contracts/libraries/OrderPayloads.tsol, 155
+PUSHINT 0
+BLKPUSH 3, 0
+.loc ../contracts/libraries/OrderPayloads.tsol, 160
+PUSH S9
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 161
+	PUSH S11
+	EQINT 0
+	PUSH S12
+	EQINT 1
+	OR
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 162
+		PUSHINT 53
+		POP S9
+		.loc ../contracts/libraries/OrderPayloads.tsol, 163
+		PUSH S10
+		LDU 64
+		POP S12
+		POP S8
+	}
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 165
+		PUSH S10
+		LDU 8
+		LDU 64
+		POP S13
+		POP S9
+		POP S9
+	}
+	IFELSE
+	.loc ../contracts/libraries/OrderPayloads.tsol, 171
+	PUSH S10
+	SBITS
+	GTINT 127
+	PUSH S9
+	EQINT 50
+	AND
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 175
+		PUSH S10
+		LDU 128
+		POP S12
+		POP S4
+		.loc ../contracts/libraries/OrderPayloads.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/OrderPayloads.tsol, 178
+	PUSH S10
+	SBITS
+	PUSHINT 267
+	GEQ
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 179
+		PUSH S8
+		NEQINT 50
+		PUSHCONT {
+			.loc ../contracts/libraries/OrderPayloads.tsol, 180
+			PUSH S10
+			LDMSGADDR
+			POP S12
+			POP S7
+		}
+		PUSHCONT {
+			.loc ../contracts/libraries/OrderPayloads.tsol, 182
+			PUSH S10
+			LDMSGADDR
+			POP S12
+			POP S5
+		}
+		IFELSE
+		.loc ../contracts/libraries/OrderPayloads.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/OrderPayloads.tsol, 186
+	PUSH S10
+	SBITS
+	GTINT 127
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 187
+		PUSH S8
+		EQINT 51
+		PUSH S9
+		PUSHINT 200
+		EQUAL
+		OR
+		PUSHCONT {
+			.loc ../contracts/libraries/OrderPayloads.tsol, 191
+			PUSH S10
+			LDU 128
+			POP S12
+			POP S4
+		}
+		PUSHCONT {
+			PUSH S8
+			EQINT 52
+			PUSHCONT {
+				.loc ../contracts/libraries/OrderPayloads.tsol, 193
+				PUSH S10
+				LDU 128
+				POP S12
+				POP S3
+				.loc ../contracts/libraries/OrderPayloads.tsol, 0
+			}
+			IF
+		}
+		IFELSE
+		.loc ../contracts/libraries/OrderPayloads.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/OrderPayloads.tsol, 197
+	PUSH S10
+	SBITS
+	GTINT 127
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 198
+		PUSH S8
+		EQINT 51
+		PUSHCONT {
+			.loc ../contracts/libraries/OrderPayloads.tsol, 200
+			PUSH S10
+			LDU 128
+			POP S12
+			POP S3
+		}
+		PUSHCONT {
+			PUSH S8
+			EQINT 52
+			PUSHCONT {
+				.loc ../contracts/libraries/OrderPayloads.tsol, 202
+				PUSH S10
+				LDU 128
+				POP S12
+				POP S2
+				.loc ../contracts/libraries/OrderPayloads.tsol, 0
+			}
+			IF
+		}
+		IFELSE
+		.loc ../contracts/libraries/OrderPayloads.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/OrderPayloads.tsol, 206
+	PUSH S10
+	SBITS
+	PUSHPOW2 8
+	GEQ
+	PUSHCONT {
+		.loc ../contracts/libraries/OrderPayloads.tsol, 207
+		PUSH S8
+		EQINT 51
+		PUSHCONT {
+			.loc ../contracts/libraries/OrderPayloads.tsol, 208
+			PUSH S10
+			LDU 128
+			LDU 128
+			POP S13
+			BLKDROP2 2, 2
+		}
+		PUSHCONT {
+			PUSH S8
+			EQINT 52
+			PUSHCONT {
+				.loc ../contracts/libraries/OrderPayloads.tsol, 210
+				PUSH S10
+				LDMSGADDR
+				POP S12
+				POP S6
+				.loc ../contracts/libraries/OrderPayloads.tsol, 0
+			}
+			IF
+		}
+		IFELSE
+		.loc ../contracts/libraries/OrderPayloads.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IF
+.loc ../contracts/libraries/OrderPayloads.tsol, 215
+BLKSWAP 3, 7
+ROLL 7
+BLKSWAP 6, 4
+BLKDROP2 2, 10
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c
+.type	OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c, @function
+CALL $OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 318
+PUSHINT 1
+OVER
+NULL
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c
+.type	OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c, @function
+CALL $OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 318
+PUSHINT 1
+SWAP
+NULL
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4
+.type	OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4, @function
+CALL $OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 306
+PUSH S2
+NEWC
+STU 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 308
+NULL
+.loc ../contracts/libraries/OrderPayloads.tsol, 310
+PUSH2 S1, S2
+ISNULL
+PUSHCONT {
+	PUSH S3
+}
+PUSHCONT {
+	OVER
+}
+IFELSE
+PUSH S5
+CALLREF {
+	CALL $OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro$
+}
+STREFR
+BLKDROP2 2, 1
+.loc ../contracts/libraries/OrderPayloads.tsol, 311
+ROT
+CALLREF {
+	CALL $OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro$
+}
+STREFR
+.loc ../contracts/libraries/OrderPayloads.tsol, 313
+ENDC
+NIP
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4
+.type	OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4, @function
+CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 306
+ROT
+NEWC
+STU 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 308
+NULL
+.loc ../contracts/libraries/OrderPayloads.tsol, 310
+PUSH2 S1, S2
+ISNULL
+PUSHCONT {
+	PUSH S3
+}
+PUSHCONT {
+	OVER
+}
+IFELSE
+PUSH S5
+CALLREF {
+	CALL $OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro$
+}
+STREFR
+BLKDROP2 2, 1
+.loc ../contracts/libraries/OrderPayloads.tsol, 311
+ROT
+CALLREF {
+	CALL $OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro$
+}
+STREFR
+.loc ../contracts/libraries/OrderPayloads.tsol, 313
+ENDC
+NIP
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildMatchTransferPayload_56279caf
+.type	OrderPayloads_with_obj_buildMatchTransferPayload_56279caf, @function
+CALL $OrderPayloads_with_obj_buildMatchTransferPayload_56279caf_macro$
+
+.macro OrderPayloads_with_obj_buildMatchTransferPayload_56279caf_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 112
+PUSH S5
+NEWC
+STU 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 113
+ROLL 5
+STUR 64
+.loc ../contracts/libraries/OrderPayloads.tsol, 114
+ROLL 4
+STSLICER
+.loc ../contracts/libraries/OrderPayloads.tsol, 115
+ROLL 3
+STUR 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 116
+XCHG S1, S2
+STU 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 117
+STSLICE
+.loc ../contracts/libraries/OrderPayloads.tsol, 119
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildMatchTransferPayload_56279caf
+.type	OrderPayloads_no_obj_buildMatchTransferPayload_56279caf, @function
+CALL $OrderPayloads_no_obj_buildMatchTransferPayload_56279caf_macro$
+
+.macro OrderPayloads_no_obj_buildMatchTransferPayload_56279caf_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 112
+ROLL 5
+NEWC
+STU 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 113
+ROLL 5
+STUR 64
+.loc ../contracts/libraries/OrderPayloads.tsol, 114
+ROLL 4
+STSLICER
+.loc ../contracts/libraries/OrderPayloads.tsol, 115
+ROLL 3
+STUR 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 116
+XCHG S1, S2
+STU 128
+.loc ../contracts/libraries/OrderPayloads.tsol, 117
+STSLICE
+.loc ../contracts/libraries/OrderPayloads.tsol, 119
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d
+.type	OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d, @function
+CALL $OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 322
+PUSHINT 3
+XCPU S1, S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d
+.type	OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d, @function
+CALL $OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 322
+PUSHINT 3
+XCHG S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b
+.type	OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b, @function
+CALL $OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 326
+PUSHINT 2
+XCPU S1, S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b
+.type	OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b, @function
+CALL $OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 326
+PUSHINT 2
+XCHG S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d
+.type	OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d, @function
+CALL $OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 335
+PUSHINT 4
+OVER
+NULL
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d
+.type	OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d, @function
+CALL $OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 335
+PUSHINT 4
+SWAP
+NULL
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d
+.type	OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d, @function
+CALL $OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 339
+PUSHINT 2
+XCPU S1, S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d
+.type	OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d, @function
+CALL $OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 339
+PUSHINT 2
+XCHG S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_infoOrderBlock_841a3ec0
+.type	OrderPayloads_with_obj_infoOrderBlock_841a3ec0, @function
+CALL $OrderPayloads_with_obj_infoOrderBlock_841a3ec0_macro$
+
+.macro OrderPayloads_with_obj_infoOrderBlock_841a3ec0_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 348
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 357
+	DUP
+	INDEX 13
+	OVER
+	INDEX 12
+	PUSH S2
+	INDEX 11
+	ROLL 3
+	INDEX 10
+	NEWC
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	ENDC
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 349
+	DUP
+	INDEX 13
+	OVER
+	INDEX 12
+	PUSH S2
+	INDEX 11
+	ROLL 3
+	INDEX 10
+	PUSH2 S4, S4
+	ISNULL
+	THROWIF 63
+	NEWC
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	ENDC
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IFELSE
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_infoOrderBlock_841a3ec0
+.type	OrderPayloads_no_obj_infoOrderBlock_841a3ec0, @function
+CALL $OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro$
+
+.macro OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 348
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 357
+	DUP
+	INDEX 13
+	OVER
+	INDEX 12
+	PUSH S2
+	INDEX 11
+	ROLL 3
+	INDEX 10
+	NEWC
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	ENDC
+	NIP
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 349
+	DUP
+	INDEX 13
+	OVER
+	INDEX 12
+	PUSH S2
+	INDEX 11
+	ROLL 3
+	INDEX 10
+	ROLL 4
+	DUP
+	ISNULL
+	THROWIF 63
+	NEWC
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	ENDC
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IFELSE
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_initDataOrderBlock_4c347cdf
+.type	OrderPayloads_with_obj_initDataOrderBlock_4c347cdf, @function
+CALL $OrderPayloads_with_obj_initDataOrderBlock_4c347cdf_macro$
+
+.macro OrderPayloads_with_obj_initDataOrderBlock_4c347cdf_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 367
+DUP
+INDEX 4
+OVER
+INDEX 3
+PUSH S2
+INDEX 7
+PUSH S3
+INDEX 6
+PUSH S4
+THIRD
+PUSH S5
+SECOND
+PUSH S6
+FIRST
+NEWC
+STSLICE
+ROLLREV 6
+NEWC
+STSLICE
+ROLLREV 5
+NEWC
+STSLICE
+ROLLREV 4
+NEWC
+STSLICE
+ROLLREV 3
+NEWC
+STSLICE
+STU 64
+STU 64
+STBREFR
+STBREFR
+STBREFR
+STBREFR
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_initDataOrderBlock_4c347cdf
+.type	OrderPayloads_no_obj_initDataOrderBlock_4c347cdf, @function
+CALL $OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro$
+
+.macro OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 367
+DUP
+INDEX 4
+OVER
+INDEX 3
+PUSH S2
+INDEX 7
+PUSH S3
+INDEX 6
+PUSH S4
+THIRD
+PUSH S5
+SECOND
+ROLL 6
+FIRST
+NEWC
+STSLICE
+ROLLREV 6
+NEWC
+STSLICE
+ROLLREV 5
+NEWC
+STSLICE
+ROLLREV 4
+NEWC
+STSLICE
+ROLLREV 3
+NEWC
+STSLICE
+STU 64
+STU 64
+STBREFR
+STBREFR
+STBREFR
+STBREFR
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
 .macro public_function_selector
 DUP
 PUSHINT 1301782387
@@ -7093,9 +6952,15 @@ IFJMPREF {
 		}
 	}
 	DUP
-	PUSHINT 1144198229
+	PUSHINT 1018307753
 	LEQ
 	IFJMPREF {
+		DUP
+		PUSHINT 867476164
+		EQUAL
+		IFJMPREF {
+			CALL $onDexPair$
+		}
 		DUP
 		PUSHINT 872557582
 		EQUAL
@@ -7114,34 +6979,28 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getDetails$
 		}
-		DUP
-		PUSHINT 1144198229
-		EQUAL
-		IFJMPREF {
-			CALL $matching$
-		}
 	}
 	DUP
 	PUSHINT 1301782387
 	LEQ
 	IFJMPREF {
 		DUP
+		PUSHINT 1022917526
+		EQUAL
+		IFJMPREF {
+			CALL $onReceiveWallet$
+		}
+		DUP
+		PUSHINT 1144198229
+		EQUAL
+		IFJMPREF {
+			CALL $matching$
+		}
+		DUP
 		PUSHINT 1147733178
 		EQUAL
 		IFJMPREF {
 			CALL $enableEmergency$
-		}
-		DUP
-		PUSHINT 1192816516
-		EQUAL
-		IFJMPREF {
-			CALL $constructor$
-		}
-		DUP
-		PUSHINT 1230953692
-		EQUAL
-		IFJMPREF {
-			CALL $onBalanceSpentWallet$
 		}
 		DUP
 		PUSHINT 1301782387
@@ -7152,7 +7011,7 @@ IFJMPREF {
 	}
 }
 DUP
-PUSHINT 1955478501
+PUSHINT 1923342633
 LEQ
 IFJMPREF {
 	DUP
@@ -7185,7 +7044,7 @@ IFJMPREF {
 		}
 	}
 	DUP
-	PUSHINT 1923342633
+	PUSHINT 1756912347
 	LEQ
 	IFJMPREF {
 		DUP
@@ -7201,10 +7060,33 @@ IFJMPREF {
 			CALL $disableEmergency$
 		}
 		DUP
+		PUSHINT 1756716863
+		EQUAL
+		IFJMPREF {
+			CALL $constructor$
+		}
+		DUP
+		PUSHINT 1756912347
+		EQUAL
+		IFJMPREF {
+			CALL $onSpentWallet$
+		}
+	}
+	DUP
+	PUSHINT 1923342633
+	LEQ
+	IFJMPREF {
+		DUP
 		PUSHINT 1893244873
 		EQUAL
 		IFJMPREF {
 			CALL $onAcceptTokensTransfer$
+		}
+		DUP
+		PUSHINT 1906191615
+		EQUAL
+		IFJMPREF {
+			CALL $onDexPairTokenRoots$
 		}
 		DUP
 		PUSHINT 1923342633
@@ -7212,12 +7094,6 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getExpectedSpendAmount$
 		}
-	}
-	DUP
-	PUSHINT 1955478501
-	EQUAL
-	IFJMPREF {
-		CALL $onBeginData$
 	}
 }
 

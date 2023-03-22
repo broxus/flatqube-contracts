@@ -53,6 +53,15 @@
 			]
 		},
 		{
+			"name": "getVersionOrder",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
 			"name": "getSpentToken",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
@@ -153,7 +162,8 @@
 		{
 			"name": "setOrderCode",
 			"inputs": [
-				{"name":"_code","type":"cell"}
+				{"name":"_code","type":"cell"},
+				{"name":"_versionOrder","type":"uint32"}
 			],
 			"outputs": [
 			]
@@ -216,13 +226,13 @@
 		{"name":"_constructorFlag","type":"bool"},
 		{"name":"factory","type":"address"},
 		{"name":"spentToken","type":"address"},
+		{"name":"dexRoot","type":"address"},
+		{"name":"deployer","type":"address"},
+		{"name":"spentTokenWallet","type":"address"},
 		{"name":"version","type":"uint32"},
 		{"name":"versionOrder","type":"uint32"},
 		{"name":"orderCode","type":"cell"},
 		{"name":"orderPlatformCode","type":"cell"},
-		{"name":"spentTokenWallet","type":"address"},
-		{"name":"deployer","type":"address"},
-		{"name":"dexRoot","type":"address"},
 		{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"}
 	]
 }

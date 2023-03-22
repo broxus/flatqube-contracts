@@ -127,10 +127,6 @@ describe('OrderTest', () => {
         const factoryAddress = (await rootTokenReceive.methods.walletOf({walletOwner: factoryOrder.address, answerId: 0}).call()).value0;
         FactoryWalletTst = await TokenWallet.from_addr(factoryAddress, factoryOrder.address, "FactoryWalletTst");
 
-        //TODO
-        await factoryOrder.transferOwner(new Address('0:9be58a09cc9f33c2f2f78f5cb91e7cda53673b4dd179acfeda06505a88e21a00'));
-        //TODO
-
         dexPair = await dexPairMigration(
             account1,
             dexRoot,
@@ -933,6 +929,8 @@ describe('OrderTest', () => {
             const BadOrderCode = (await locklift.factory.getContractArtifacts('TestNewOrderBad')).code
 
             await factoryOrder.setOrderCode(BadOrderCode)
+            //let roots : Address[] = [RootOrderBar.address, RootOrderTst.address];
+            //await factoryOrder.upgradeOrderInOrderRoot(roots);
 
             const payload = await RootOrderBar.buildPayloadRoot(
                 0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
@@ -943,8 +941,8 @@ describe('OrderTest', () => {
                 numberString(TOKENS_TO_EXCHANGE1, barDecimals), RootOrderBar.address, payload, toNano(6)
             ), {allowedCodes:{compute: [60]}});
             let order = await RootOrderBar.getEventCreateOrder(account3);
-
-            await factoryOrder.updateOrder(order.address)
+            let orders:Address[] = [order.address];
+            await factoryOrder.updateOrder(orders)
             order = new OrderWrapper((await locklift.factory.getDeployedContract("TestNewOrderBad", order.address)), account3);
 
             await order.cancel(15);
@@ -1019,8 +1017,9 @@ describe('OrderTest', () => {
             const balanceTstAcc5Start = await accountTokenBalances(tstWallet5, tstDecimals);
             await displayLog(balanceBarAcc5Start, balanceTstAcc5Start, true, "Account5");
 
+            let listRoots:Address[] = [RootOrderTst.address];
             await factoryOrder.setRootFeeParams(
-                RootOrderTst.address,
+                listRoots,
                 0, 0, 1, 2, zeroAddress, true
             )
 
@@ -1727,8 +1726,9 @@ describe('OrderTest', () => {
             MATCHINGNUMERATOR = 0;
             MATCHINGDENOMINATOR = 0;
 
+            let listRoots:Address[] = [RootOrderBar.address];
             await factoryOrder.setRootFeeParams(
-                RootOrderBar.address,
+                listRoots,
                 NUMERATOR, DENOMINATOR, MATCHINGNUMERATOR, MATCHINGDENOMINATOR, zeroAddress, true
             )
 
@@ -1824,8 +1824,9 @@ describe('OrderTest', () => {
             MATCHINGNUMERATOR = 0;
             MATCHINGDENOMINATOR = 0;
 
+            let listRoots: Address[] = [RootOrderBar.address];
             await factoryOrder.setRootFeeParams(
-                RootOrderBar.address,
+                listRoots,
                 NUMERATOR, DENOMINATOR, MATCHINGNUMERATOR, MATCHINGDENOMINATOR, zeroAddress, true
             )
 
@@ -1927,8 +1928,9 @@ describe('OrderTest', () => {
             MATCHINGNUMERATOR = 0;
             MATCHINGDENOMINATOR = 0;
 
+            let listOrders : Address[] = [RootOrderBar.address];
             await factoryOrder.setRootFeeParams(
-                RootOrderBar.address,
+                listOrders,
                 NUMERATOR, DENOMINATOR, MATCHINGNUMERATOR, MATCHINGDENOMINATOR, zeroAddress, true
             )
 
@@ -2046,8 +2048,10 @@ describe('OrderTest', () => {
             MATCHINGNUMERATOR = 0;
             MATCHINGDENOMINATOR = 0;
 
+            let listOrders : Address[] = [RootOrderBar.address];
+
             await factoryOrder.setRootFeeParams(
-                RootOrderBar.address,
+                listOrders,
                 NUMERATOR, DENOMINATOR, MATCHINGNUMERATOR, MATCHINGDENOMINATOR, zeroAddress, true
             )
             const feeParams = await RootOrderBar.feeParams()
@@ -2058,7 +2062,7 @@ describe('OrderTest', () => {
             expect(feeParams.params.matchingDenominator).to.equal(MATCHINGDENOMINATOR.toString(), 'Wrong MATCHINGDENOMINATOR');
 
             await factoryOrder.setRootFeeParams(
-                RootOrderBar.address,
+                listOrders,
                 NUMERATOR, DENOMINATOR, MATCHINGNUMERATOR, MATCHINGDENOMINATOR, newBeneficiary.address, true
             )
             const payload = await RootOrderBar.buildPayloadRoot(
@@ -2141,7 +2145,8 @@ describe('OrderTest', () => {
             const testOrderCode = (await locklift.factory.getContractArtifacts("TestNewOrder")).code
 
             await factoryOrder.setOrderCode(testOrderCode)
-            await factoryOrder.updateOrder(order.address)
+            let orders:Address[] = [order.address];
+            await factoryOrder.updateOrder(orders)
 
             const newOrder = await locklift.factory.getDeployedContract("TestNewOrder", order.address);
             const testMessage = (await newOrder.methods.newFunc().call()).value0;
@@ -2158,7 +2163,8 @@ describe('OrderTest', () => {
 
             const testFactoryCode = (await locklift.factory.getContractArtifacts("TestNewOrderRoot")).code
             await factoryOrder.setOrderRootCode(testFactoryCode)
-            await factoryOrder.upgradeOrderRoot(RootOrderBar.address)
+            let roots:Address[] = [RootOrderBar.address];
+            await factoryOrder.upgradeOrderRoot(roots)
 
             const newRoot = await locklift.factory.getDeployedContract("TestNewOrderRoot", RootOrderBar.address)
             const testMessage = (await newRoot.methods.newFunc().call()).value0;
