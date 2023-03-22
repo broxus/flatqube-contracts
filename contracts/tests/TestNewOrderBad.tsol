@@ -356,8 +356,10 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 					op == DexOperationStatusV2.SUCCESS &&
 					amount >= currentAmountReceiveToken
 				) {
-					_swapSuccess(
+					expectedSenderAmount = amount;
+					transferAmount = _swapSuccess(
 						callbackId,
+						alienSpentAmount,
 						amount,
 						deployWalletValue,
 						sendGasTo
@@ -708,31 +710,35 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 
 	function _swapSuccess(
 		uint64 _callbackId,
+		uint128 _amountSpent,
 		uint128 _amount,
 		uint128 _deployWalletValue,
 		address _sendGasTo
-	) private {
+	) private returns(uint128) {
 		TvmCell emptyPayload;
+		uint128 _transferAmount = _amountSpent;
 
-		// send owner
 		ITokenWallet(receiveWallet).transfer{
-			value: OrderGas.TRANSFER_MIN_VALUE,
-			flag: MsgFlag.SENDER_PAYS_FEES,
-			bounce: false
+				value : OrderGas.TRANSFER_MIN_VALUE,
+				flag : MsgFlag.SENDER_PAYS_FEES,
+				bounce : false
 		}(
-			currentAmountReceiveToken,
+			(_sendGasTo != owner ? currentAmountReceiveToken : _amount),
 			owner,
 			0,
 			owner,
 			true,
-			emptyPayload
+			OrderPayloads.buildOrderOperationAMM(
+			_sendGasTo != owner ? currentAmountReceiveToken : _amount,
+			buildDetails()
+		)
 		);
 
 		if (_callbackId > 0) {
 			IOrderCallbacks(owner).onOrderSwapSuccess{
-					value: OrderGas.OPERATION_CALLBACK_BASE,
-					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-					bounce: false
+					value : OrderGas.OPERATION_CALLBACK_BASE,
+					flag : MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+					bounce : false
 			}(
 				_callbackId,
 				IOrderSwapResult.OrderSwapResult(
@@ -743,12 +749,12 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 			);
 		}
 
-		if (_amount - currentAmountReceiveToken > 0) {
+		if (_amount - currentAmountReceiveToken > 0 && _sendGasTo != owner) {
 			// send the difference swap to initiator
 			ITokenWallet(receiveWallet).transfer{
-				value: OrderGas.TRANSFER_MIN_VALUE,
-				flag: MsgFlag.SENDER_PAYS_FEES,
-				bounce: false
+					value : (OrderGas.SWAP_MIN_VALUE - OrderGas.SWAP_BACK_MIN_VALUE) + msg.value,
+					flag : MsgFlag.SENDER_PAYS_FEES,
+					bounce : false
 			}(
 				_amount - currentAmountReceiveToken,
 				_sendGasTo,
@@ -760,24 +766,24 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 
 			if (_callbackId > 0) {
 				IOrderCallbacks(_sendGasTo).onOrderSwapSuccess{
-					value: OrderGas.OPERATION_CALLBACK_BASE,
-					flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-					bounce: false
+						value : OrderGas.OPERATION_CALLBACK_BASE,
+						flag : MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+						bounce : false
 				}(
 					_callbackId,
 					IOrderSwapResult.OrderSwapResult(
-						owner,
-						_sendGasTo,
-						_amount - currentAmountReceiveToken
-					)
+					owner,
+					_sendGasTo,
+					_amount - currentAmountReceiveToken
+				)
 				);
 			}
 		}
 
-		_sendGasTo.transfer({value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS});
-
 		currentAmountReceiveToken = 0;
 		currentAmountSpentToken = 0;
+
+		return _transferAmount;
 	}
 
 	function cancel(uint64 callbackId) external onlyOwner {
@@ -843,6 +849,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 		TvmCell payload = OrderPayloads.buildSwapExchangePayload(
 			callbackId,
 			_deployWalletValue,
+			currentAmountSpentToken,
 			currentAmountReceiveToken,
 			_owner,
 			_sender,

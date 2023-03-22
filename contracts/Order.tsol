@@ -362,8 +362,10 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                     op == DexOperationStatusV2.SUCCESS &&
                     amount >= currentAmountReceiveToken
                 ) {
-                    _swapSuccess(
+                    expectedSenderAmount = amount;
+                    transferAmount = _swapSuccess(
                         callbackId,
+                        alienSpentAmount,
                         amount,
                         deployWalletValue,
                         sendGasTo
@@ -714,11 +716,13 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 
     function _swapSuccess(
         uint64 _callbackId,
+        uint128 _amountSpent,
         uint128 _amount,
         uint128 _deployWalletValue,
         address _sendGasTo
-    ) private {
+    ) private returns(uint128) {
         TvmCell emptyPayload;
+        uint128 _transferAmount = _amountSpent;
 
         ITokenWallet(receiveWallet).transfer{
             value : OrderGas.TRANSFER_MIN_VALUE,
@@ -784,6 +788,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 
         currentAmountReceiveToken = 0;
         currentAmountSpentToken = 0;
+
+        return _transferAmount = _amountSpent;
     }
 
     function cancel(uint64 callbackId) external onlyOwner onlyActiveOrder {
@@ -849,6 +855,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
         TvmCell payload = OrderPayloads.buildSwapExchangePayload(
             callbackId,
             _deployWalletValue,
+            currentAmountSpentToken,
             currentAmountReceiveToken,
             _owner,
             _sender,
