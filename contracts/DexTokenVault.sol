@@ -349,10 +349,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         onCodeUpgrade(builder.toCell());
     }
 
-    function onCodeUpgrade(TvmCell _data)
-        private
-        reserve(_getTargetBalanceInternal())
-    {
+    function onCodeUpgrade(TvmCell _data) private {
         tvm.resetStorage();
 
         TvmSlice slice = _data.toSlice();
@@ -371,6 +368,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
         _vault = vault;
 
         if (previousVersion == 0) {
+            tvm.rawReserve(_getTargetBalanceInternal(), 0);
             _onPlatformUpgrade(_data);
         } else {
             _onUpgrade(_data);
@@ -524,7 +522,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
     //  \____/_/   \_\_____|_____|____/_/   \_\____|_|\_\____/
 
     function onAcceptTokensMint(
-        address _mintedTokenRoot,
+        address /*_mintedTokenRoot*/,
         uint128 _amount,
         address _remainingGasTo,
         TvmCell _payload
@@ -633,7 +631,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
                         roots,
 
                         op,
-                        _mintedTokenRoot,
+                        _tokenRoot,
                         nextPoolAmount,
 
                         senderAddress,

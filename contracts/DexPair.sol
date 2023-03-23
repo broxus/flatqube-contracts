@@ -536,7 +536,7 @@ contract DexPair is DexPairBase, INextExchangeData {
     function withdrawLiquidity(
         uint64 _callId,
         TokenOperation _operation,
-        TokenOperation[] /* _expected */,
+        TokenOperation[] _expected,
         address _accountOwner,
         uint32,
         address _remainingGasTo
@@ -544,6 +544,12 @@ contract DexPair is DexPairBase, INextExchangeData {
         require(_operation.root == _lpRoot(), DexErrors.NOT_LP_TOKEN_ROOT);
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
+
+        TokenOperation[] expected = _expected[0].root == _tokenRoots()[1] ? [_expected[1], _expected[0]] : _expected;
+
+        uint128 leftBackAmount =  math.muldiv(_reserves()[0], _operation.amount, _lpReserve());
+        uint128 rightBackAmount = math.muldiv(_reserves()[1], _operation.amount, _lpReserve());
+        require(leftBackAmount >= expected[0].amount && rightBackAmount >= expected[1].amount, DexErrors.WRONG_LIQUIDITY);
 
         TvmCell empty;
 
@@ -637,7 +643,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         }
 
         for (TokenOperation op : operations) {
-            if (op.amount >= 0) {
+            if (op.amount > 0) {
                 if (_isViaAccount) {
                     IDexAccount(msg.sender)
                         .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
@@ -1591,8 +1597,10 @@ contract DexPair is DexPairBase, INextExchangeData {
 
         if (_tokenRoot == _lpRoot() && _msgSender != _typeToWalletAddresses[DexAddressType.LP][0]) return DirectOperationErrors.NOT_LP_TOKEN_WALLET;
         if (_tokenRoot != _lpRoot()) {
-            if (_tokenRoot != _tokenRoots()[0] && _tokenRoot != _tokenRoots()[1]) return DirectOperationErrors.NOT_TOKEN_ROOT;
-            if (_msgSender != _typeToWalletAddresses[DexAddressType.RESERVE][0] && _msgSender != _typeToWalletAddresses[DexAddressType.RESERVE][1]) return DirectOperationErrors.NOT_TOKEN_WALLET;
+            address[] roots = _tokenRoots();
+            address[] wallets = _typeToWalletAddresses[DexAddressType.RESERVE];
+            if (_tokenRoot != roots[0] && _tokenRoot != roots[1]) return DirectOperationErrors.NOT_TOKEN_ROOT;
+            if (_tokenRoot == roots[0] && _msgSender != wallets[0] || _tokenRoot == roots[1] && _msgSender != wallets[1]) return DirectOperationErrors.NOT_TOKEN_WALLET;
         }
 
         if (!(_msgSender == _typeToWalletAddresses[DexAddressType.LP][0] && (op == DexOperationTypes.WITHDRAW_LIQUIDITY || op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) ||

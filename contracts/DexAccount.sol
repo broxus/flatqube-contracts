@@ -167,6 +167,7 @@ contract DexAccount is
         address _originalGasTo,
         TvmCell _payload
     ) override external {
+        require(msg.value >= DexGas.DEPOSIT_TO_ACCOUNT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
         tvm.rawReserve(DexGas.ACCOUNT_INITIAL_BALANCE, 0);
 
         TvmSlice payloadSlice = _payload.toSlice();
