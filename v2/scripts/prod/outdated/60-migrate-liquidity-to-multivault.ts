@@ -3,7 +3,7 @@ import {
   DexTokenVaultAbi,
   TokenRootAbi,
   TokenWalletAbi,
-} from '../../../build/factorySource';
+} from '../../../../build/factorySource';
 import { BigNumber } from 'bignumber.js';
 
 BigNumber.config({ EXPONENTIAL_AT: 257 });

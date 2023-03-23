@@ -2,7 +2,7 @@ import { Address, toNano, WalletTypes } from 'locklift';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { Migration } = require(process.cwd() + '/scripts/utils');
 import { yellowBright } from 'chalk';
-import accounts from '../../../dex_accounts.json';
+import pairs from '../../../dex_pools.json';
 
 const chunkify = <T>(arr: T[], size: number): T[][] =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
@@ -29,18 +29,22 @@ const main = async () => {
   console.log('DexRoot:' + dexRoot.address);
   console.log('Manager:' + manager.address);
 
-  console.log(`Start force upgrade DexAccounts. Count = ${accounts.length}`);
+  console.log(`Start force upgrade DexPairs. Count = ${pairs.length}`);
 
-  const params = accounts.map((a) => ({
-    owner: a.owner,
-    account: a.dexAccount,
+  const params = pairs.map((p) => ({
+    tokenRoots: p.tokenRoots.map((tr) => new Address(tr)),
+    poolType: 3,
+    pool: p.dexPool,
   }));
 
-  for (const chunk of chunkify(params, 20)) {
+  for (const chunk of chunkify(params, 1000)) {
     const { traceTree } = await locklift.tracing.trace(
       dexRoot.methods
-        .upgradeAccounts({
-          _accountsOwners: chunk.map((a) => new Address(a.owner)),
+        .upgradePairs({
+          _params: chunk.map((p) => ({
+            tokenRoots: p.tokenRoots,
+            poolType: p.poolType,
+          })),
           _offset: 0,
           _remainingGasTo: manager.address,
         })
@@ -50,24 +54,26 @@ const main = async () => {
         }),
     );
 
-    for (const account of chunk) {
-      const DexAccount = locklift.factory.getDeployedContract(
-        'DexAccount',
-        new Address(account.account),
+    //await traceTree.beautyPrint();
+
+    for (const pair of chunk) {
+      const DexPool = locklift.factory.getDeployedContract(
+        'DexStablePool',
+        new Address(pair.pool),
       );
 
       const events = traceTree.findEventsForContract({
-        contract: DexAccount,
-        name: 'AccountCodeUpgraded' as const,
+        contract: DexPool,
+        name: 'PoolCodeUpgraded' as const,
       });
 
       if (events.length > 0) {
         console.log(
-          `DexAccount ${account.account} upgraded. Current version: ${events[0].version}`,
+          `DexPair ${pair.pool} upgraded. Current version: ${events[0].version}`,
         );
       } else {
         console.log(
-          yellowBright(`DexAccount ${account.account} wasn't upgraded`),
+          yellowBright(`DexStablePool ${pair.pool} wasn't upgraded`),
         );
       }
     }

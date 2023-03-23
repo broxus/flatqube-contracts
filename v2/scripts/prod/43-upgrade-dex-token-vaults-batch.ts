@@ -2,7 +2,7 @@ import { Address, toNano, WalletTypes } from 'locklift';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { Migration } = require(process.cwd() + '/scripts/utils');
 import { yellowBright } from 'chalk';
-import pairs from '../../../dex_pairs.json';
+import tokenVaults from '../../../dex_token_vaults.json';
 
 const chunkify = <T>(arr: T[], size: number): T[][] =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
@@ -29,22 +29,18 @@ const main = async () => {
   console.log('DexRoot:' + dexRoot.address);
   console.log('Manager:' + manager.address);
 
-  console.log(`Start force upgrade DexPairs. Count = ${pairs.length}`);
+  console.log(`Start upgrade DexTokenVaults. Count = ${tokenVaults.length}`);
 
-  const params = pairs.map((p) => ({
-    tokenRoots: [new Address(p.left), new Address(p.right)],
-    poolType: 1,
-    pool: p.dexPair,
+  const params = tokenVaults.map((p) => ({
+    tokenRoot: new Address(p.tokenRoot),
+    tokenVault: new Address(p.tokenVault),
   }));
 
   for (const chunk of chunkify(params, 1000)) {
     const { traceTree } = await locklift.tracing.trace(
       dexRoot.methods
-        .upgradePairs({
-          _params: chunk.map((p) => ({
-            tokenRoots: p.tokenRoots,
-            poolType: p.poolType,
-          })),
+        .upgradeTokenVaults({
+          _tokenRoots: chunk.map((p) => p.tokenRoot),
           _offset: 0,
           _remainingGasTo: manager.address,
         })
@@ -56,23 +52,27 @@ const main = async () => {
 
     //await traceTree.beautyPrint();
 
-    for (const pair of chunk) {
-      const DexPair = locklift.factory.getDeployedContract(
-        'DexPair',
-        new Address(pair.pool),
+    for (const tokenVault of chunk) {
+      const DexTokenVault = locklift.factory.getDeployedContract(
+        'DexTokenVault',
+        tokenVault.tokenVault,
       );
 
       const events = traceTree.findEventsForContract({
-        contract: DexPair,
-        name: 'PairCodeUpgraded' as const,
+        contract: DexTokenVault,
+        name: 'TokenVaultCodeUpgraded' as const,
       });
 
       if (events.length > 0) {
         console.log(
-          `DexPair ${pair.pool} upgraded. Current version: ${events[0].version}`,
+          `DexTokenVault ${tokenVault.tokenVault} for token ${tokenVault.tokenRoot} upgraded. Current version: ${events[0].currentVersion}`,
         );
       } else {
-        console.log(yellowBright(`DexPair ${pair.pool} wasn't upgraded`));
+        console.log(
+          yellowBright(
+            `DexTokenVault ${tokenVault.tokenVault} wasn't upgraded`,
+          ),
+        );
       }
     }
   }
