@@ -6,17 +6,24 @@ program
     .allowUnknownOption()
     .option('-rcn, --root_contract_name <root_contract_name>', 'DexRoot contract name')
     .option('-prcn, --pair_contract_name <pair_contract_name>', 'DexPair contract name')
+    .option('-plcn, --pool_contract_name <pool_contract_name>', 'DexStablePool contract name')
+    .option('-stcn, --stableswap_contract_name <stableswap_contract_name>', 'DexStablePair contract name')
     .option('-acn, --account_contract_name <account_contract_name>', 'DexAccount contract name')
-    .option('-vcn, --vault_contract_name <vault_contract_name>', 'DexVault contract name');
+    .option('-vcn, --vault_contract_name <vault_contract_name>', 'DexVault contract name')
+    .option('-tvcn, --token_vault_contract_name <token_vault_contract_name>', 'DexTokenVault contract name')
+    .option('-lpcn, --lp_pending_contract_name <lp_pending_contract_name>', 'LpTokenPending contract name');
 
 program.parse(process.argv);
 
 const options = program.opts();
 options.root_contract_name = options.root_contract_name || 'DexRoot';
 options.pair_contract_name = options.pair_contract_name || 'DexPair';
-// options.pool_contract_name = options.pool_contract_name || 'DexStablePool';
+options.pool_contract_name = options.pool_contract_name || 'DexStablePool';
+options.stableswap_contract_name = options.stableswap_contract_name || 'DexStablePair';
 options.account_contract_name = options.account_contract_name || 'DexAccount';
 options.vault_contract_name = options.vault_contract_name || 'DexVault';
+options.token_vault_contract_name = options.token_vault_contract_name || 'DexTokenVault';
+options.lp_pending_contract_name = options.lp_pending_contract_name || 'DexVaultLpTokenPendingV2';
 
 let tx;
 
@@ -31,10 +38,10 @@ async function main() {
   const DexPlatform = await locklift.factory.getContract('DexPlatform', 'precompiled');
   const DexAccount = await locklift.factory.getContract(options.account_contract_name);
   const DexPair = await locklift.factory.getContract(options.pair_contract_name);
-  const DexStablePair = await locklift.factory.getContract('DexStablePair');
-  const DexStablePool = await locklift.factory.getContract('DexStablePool');
-  const DexVaultLpTokenPendingV2 = await locklift.factory.getContract('DexVaultLpTokenPendingV2');
-  const DexTokenVault = await locklift.factory.getContract('DexTokenVault');
+  const DexStablePair = await locklift.factory.getContract(options.stableswap_contract_name);
+  const DexStablePool = await locklift.factory.getContract(options.pool_contract_name);
+  const DexVaultLpTokenPendingV2 = await locklift.factory.getContract(options.lp_pending_contract_name);
+  const DexTokenVault = await locklift.factory.getContract(options.token_vault_contract_name);
 
   const [keyPair] = await locklift.keys.getKeyPairs();
 
@@ -150,22 +157,23 @@ async function main() {
   });
   displayTx(tx);
 
-  // console.log(`DexRoot: installing DexStablePool code...`);
-  // tx = await account.runTarget({
-  //   contract: dexRoot,
-  //   method: 'installOrUpdatePoolCode',
-  //   params: {code: DexStablePool.code, pool_type: 2},
-  //   keyPair
-  // });
-  // displayTx(tx);
-  // console.log(`DexRoot: installing DexPair STABLESWAP code...`);
-  // tx = await account.runTarget({
-  //   contract: dexRoot,
-  //   method: 'installOrUpdatePairCode',
-  //   params: {code: DexStablePair.code, pool_type: 2},
-  //   keyPair
-  // });
-  // displayTx(tx);
+  console.log(`DexRoot: installing DexPair STABLESWAP code...`);
+  tx = await account.runTarget({
+    contract: dexRoot,
+    method: 'installOrUpdatePairCode',
+    params: {code: DexStablePair.code, pool_type: 2},
+    keyPair
+  });
+  displayTx(tx);
+
+  console.log(`DexRoot: installing DexStablePool code...`);
+  tx = await account.runTarget({
+    contract: dexRoot,
+    method: 'installOrUpdatePoolCode',
+    params: {code: DexStablePool.code, pool_type: 3},
+    keyPair
+  });
+  displayTx(tx);
 
   console.log(`DexRoot: set Dex is active...`);
   tx = await account.runTarget({
