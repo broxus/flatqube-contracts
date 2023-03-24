@@ -1,6 +1,10 @@
-import { LockliftConfig } from 'locklift';
+import { LockliftConfig, lockliftChai } from 'locklift';
 import { GiverWallet, SimpleGiver, TestnetGiver } from "./giverSettings";
 import { FactorySource } from './build/factorySource';
+
+import chai from "chai";
+chai.use(lockliftChai);
+
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment

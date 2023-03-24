@@ -878,8 +878,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
     }
 
     function backendMatching(uint64 callbackId, address limitOrder) external onlyBackend(backMatchingPK) onlyActiveOrder {
-        changeState(OrderStatus.MatchInProgress);
         matchingOrder = limitOrder;
+        changeState(OrderStatus.MatchInProgress);
 
         IOrder(limitOrder).matchingCheck{
             value : OrderGas.MATCHING_BACK_MIN_VALUE,
@@ -914,8 +914,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 
         tvm.rawReserve(address(this).balance - msg.value, 0);
 
-        changeState(OrderStatus.MatchInProgress);
         matchingOrder = limitOrder;
+        changeState(OrderStatus.MatchInProgress);
 
         IOrder(limitOrder).matchingCheck{
                 value : 0,
