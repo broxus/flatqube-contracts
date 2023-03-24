@@ -21,7 +21,7 @@ async function main() {
 
   const accountN = await migration.loadAccount(
     'Account' + options.owner_n,
-      String(options.owner_n - 1)
+    String(options.owner_n - 1),
   );
 
   if (locklift.tracing) {

@@ -9,7 +9,8 @@ const {expect} = require('chai');
 const logger = require('mocha-logger');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
-const { Command } = require('commander');
+import { Command } from 'commander';
+
 const program = new Command();
 
 const migration = new Migration();

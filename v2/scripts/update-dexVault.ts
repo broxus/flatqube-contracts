@@ -1,7 +1,7 @@
 import {toNano, WalletTypes} from "locklift";
 
 const {Migration} = require(process.cwd() + '/scripts/utils')
-const { Command } = require('commander');
+import { Command } from 'commander';
 const program = new Command();
 const migration = new Migration();
 

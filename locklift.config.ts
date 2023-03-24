@@ -91,43 +91,15 @@ const config: LockliftConfig = {
     main: {
       connection: 'mainnetJrpc',
       giver: {
-        // Mainnet giver has the same abi as testnet one
-        giverFactory:
-          process.env.MAIN_GIVER_TYPE == 'Wallet'
-            ? (ever, keyPair, address) =>
-                new GiverWallet(ever, keyPair, address)
-            : (ever, keyPair, address) =>
-                new TestnetGiver(ever, keyPair, address),
         address: process.env.MAIN_GIVER_ADDRESS ?? '',
         phrase: process.env.MAIN_GIVER_SEED ?? '',
         accountId: 0,
-      },
-      tracing: {
-        endpoint: process.env.MAIN_GQL_ENDPOINT ?? '',
       },
       keys: {
         phrase: process.env.MAIN_SEED_PHRASE ?? '',
         amount: 20,
       },
-    },
-    prod: {
-      connection: 'mainnetJrpc',
-      giver: {
-        // Mainnet giver has the same abi as testnet one
-        giverFactory: (ever, keyPair, address) =>
-          new TestnetGiver(ever, keyPair, address),
-        address:
-          '0:3bcef54ea5fe3e68ac31b17799cdea8b7cffd4da75b0b1a70b93a18b5c87f723',
-        key: process.env.MAIN_GIVER_KEY ?? '',
-      },
-      tracing: {
-        endpoint: process.env.MAIN_GQL_ENDPOINT ?? '',
-      },
-      keys: {
-        phrase: process.env.MAIN_SEED_PHRASE ?? '',
-        amount: 500,
-      },
-    },
+    }
   },
   mocha: { timeout: 2000000 },
 };

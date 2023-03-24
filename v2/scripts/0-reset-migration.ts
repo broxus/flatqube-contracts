@@ -1,15 +1,13 @@
-const {Migration} = require(process.cwd()+'/scripts/utils')
-const range = n => [...Array(n).keys()];
-
-const migration = new Migration();
+import { Migration } from '../utils/migration';
 
 async function main() {
+  const migration = new Migration();
   migration.reset();
 }
 
 main()
   .then(() => process.exit(0))
-  .catch(e => {
+  .catch((e) => {
     console.log(e);
     process.exit(1);
   });

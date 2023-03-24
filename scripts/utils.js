@@ -51,13 +51,13 @@ const Constants = {
     foo: {
       name: 'Foo',
       symbol: 'Foo',
-      decimals: 18,
+      decimals: 6,
       upgradeable: true
     },
     bar: {
       name: 'Bar',
       symbol: 'Bar',
-      decimals: 18,
+      decimals: 6,
       upgradeable: true
     },
     qwe: {

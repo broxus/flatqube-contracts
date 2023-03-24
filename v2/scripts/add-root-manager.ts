@@ -1,8 +1,9 @@
 import { Migration, displayTx } from '../utils/migration';
-import {toNano} from "locklift";
+import { Address, toNano } from 'locklift';
 
-const MANAGER =
-  '0:30b833a0dbb28f79d461e6a1d5818b748c20eb9ab32286c03a7652a555d9a996';
+const MANAGER = new Address(
+  '0:30b833a0dbb28f79d461e6a1d5818b748c20eb9ab32286c03a7652a555d9a996',
+);
 
 async function main() {
   const migration = new Migration();
@@ -10,9 +11,9 @@ async function main() {
 
   const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
 
-  let tx = await dexRoot.methods.setManager({_newManager: MANAGER}).send({
+  const tx = await dexRoot.methods.setManager({ _newManager: MANAGER }).send({
     from: owner.address,
-    amount: toNano(1)
+    amount: toNano(1),
   });
 
   displayTx(tx);
