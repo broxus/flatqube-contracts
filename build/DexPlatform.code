@@ -1,4 +1,6 @@
-.version sol 0.62.0
+.version sol 0.57.1
+
+.pragma selector-save-my-code
 
 .macro constructor
 DROP
@@ -28,19 +30,19 @@ ENDS
 CTOS
 LDMSGADDR
 ENDS
-.loc ../contracts/DexPlatform.tsol, 17
+.loc ../contracts/DexPlatform.sol, 17
 GETGLOB 9
 GETGLOB 10
 SDEQ
 PUSHCONT {
-	.loc ../contracts/DexPlatform.tsol, 18
+	.loc ../contracts/DexPlatform.sol, 18
 	BLKPUSH 4, 3
 	CALLREF {
-		CALL $_initialize_7ad5427c_internal_macro$
+		CALL $_initialize_internal_macro$
 	}
 }
 PUSHCONT {
-	.loc ../contracts/DexPlatform.tsol, 20
+	.loc ../contracts/DexPlatform.sol, 20
 	DUP
 	NEWC
 	STSLICECONST x42_
@@ -48,50 +50,63 @@ PUSHCONT {
 	PUSHINT 111
 	STZEROES
 	ENDC
-	PUSHPOW2 7
+	PUSHINT 128
 	ADDCONST 32
 	UFITS 8
 	SENDRAWMSG
 }
 IFELSE
-.loc ../contracts/DexPlatform.tsol, 0
+.loc ../contracts/DexPlatform.sol, 0
 BLKDROP 4
 CALLREF {
 	CALL $c7_to_c4$
 }
 THROW 0
 
-.globl	_initialize_7ad5427c_internal
-.type	_initialize_7ad5427c_internal, @function
-CALL $_initialize_7ad5427c_internal_macro$
+.globl	_initialize_internal
+.type	_initialize_internal, @function
+CALL $_initialize_internal_macro$
 
-.macro _initialize_7ad5427c_internal_macro
-.loc ../contracts/DexPlatform.tsol, 31
+.macro _initialize_internal_macro
+.loc ../contracts/DexPlatform.sol, 31
 GETGLOB 10
 NEWC
 STSLICE
-.loc ../contracts/DexPlatform.tsol, 32
+.loc ../contracts/DexPlatform.sol, 32
 XCHG S1, S2
 STSLICE
-.loc ../contracts/DexPlatform.tsol, 33
-STSLICECONST x00000000
-.loc ../contracts/DexPlatform.tsol, 34
+.loc ../contracts/DexPlatform.sol, 33
+PUSHINT 0
+SWAP
+STU 32
+.loc ../contracts/DexPlatform.sol, 34
 XCHG S1, S2
 STU 32
-.loc ../contracts/DexPlatform.tsol, 35
+.loc ../contracts/DexPlatform.sol, 35
 STSLICE
-.loc ../contracts/DexPlatform.tsol, 37
-MYCODE
+.loc ../contracts/DexPlatform.sol, 37
+GETGLOB 1
+PUSHREF {
+	DUP
+	SETGLOB 1
+	BLESS
+	JMPX
+}
+NEWC
+STSLICECONST x8adb35
+STREF
+STSLICE
+ENDC
 SWAP
 STREF
-.loc ../contracts/DexPlatform.tsol, 38
+.loc ../contracts/DexPlatform.sol, 38
 GETGLOB 12
 SWAP
 STREF
-.loc ../contracts/DexPlatform.tsol, 41
+.loc ../contracts/DexPlatform.sol, 41
 OVER
 SETCODE
-.loc ../contracts/DexPlatform.tsol, 44
+.loc ../contracts/DexPlatform.sol, 44
 SWAP
 CTOS
 DUP
@@ -106,17 +121,17 @@ PLDREF
 CTOS
 BLESS
 POP C3
-.loc ../contracts/DexPlatform.tsol, 45
+.loc ../contracts/DexPlatform.sol, 45
 ENDC
 CALLREF {
 	CALL $:onCodeUpgrade$
 }
-.loc ../contracts/DexPlatform.tsol, 0
+.loc ../contracts/DexPlatform.sol, 0
 
 .internal-alias :onCodeUpgrade, 2
 .internal :onCodeUpgrade
 DROP
-.loc ../contracts/DexPlatform.tsol, 0
+.loc ../contracts/DexPlatform.sol, 0
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -164,11 +179,13 @@ PUSHCONT {
 	PUSH S2
 	PUSHINT 64
 	DICTUGET
-	ZEROSWAPIFNOT
 	PUSHCONT {
 		PLDU 8
 	}
-	IF
+	PUSHCONT {
+		PUSHINT 0
+	}
+	IFELSE
 	PUSHINT 3
 	PUSH S3
 	PUSHINT 64
@@ -277,12 +294,12 @@ CALLREF {
 LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
-	PUSHPOW2 9
+	PUSHINT 512
 	LDSLICEX ; signatureSlice msgSlice
 	DUP
 	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
-	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
+	LDU 1 ; signatureSlice hashMsgSlice havePubkey msgSlice
 	SWAP
 	PUSHCONT {
 		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
@@ -298,7 +315,7 @@ PUSHCONT {
 	THROWIFNOT 40
 }
 PUSHCONT {
-	LDU 1 ; hasPubkey msgSlice
+	LDU 1 ; havePubkey msgSlice
 	SWAP
 	THROWIF 58
 }
