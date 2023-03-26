@@ -67,6 +67,7 @@ contract NewDexVault is IReferralProgramParams{
         flag: MsgFlag.REMAINING_GAS
         } _refProgramParams;
     }
+
     function onCodeUpgrade(TvmCell _data) private {
         tvm.resetStorage();
 

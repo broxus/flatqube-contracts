@@ -23,7 +23,7 @@ async function main() {
   account.afterRun = afterRun;
   const [keyPair] = await locklift.keys.getKeyPairs();
 
-  const DexVaultLpTokenPendingV2 = await locklift.factory.getContract('DexVaultLpTokenPendingV2');
+  const LpTokenPending = await locklift.factory.getContract('LpTokenPending');
   const DexTokenVault = await locklift.factory.getContract('DexTokenVault');
   const dexRoot = migration.load(await locklift.factory.getContract(options.old_contract), 'DexRoot');
   const NewDexRoot = await locklift.factory.getContract(options.new_contract);
@@ -58,7 +58,7 @@ async function main() {
     contract: NewDexRoot,
     method: 'installOrUpdateLpTokenPendingCode',
     params: {
-      _newCode: DexVaultLpTokenPendingV2.code,
+      _newCode: LpTokenPending.code,
       _remainingGasTo: account.address,
     },
     keyPair,

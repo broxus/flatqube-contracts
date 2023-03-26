@@ -52,7 +52,7 @@ options.vault_contract_name = options.vault_contract_name || 'DexVault';
 options.token_vault_contract_name =
   options.token_vault_contract_name || 'DexTokenVault';
 options.lp_pending_contract_name =
-  options.lp_pending_contract_name || 'DexVaultLpTokenPendingV2';
+  options.lp_pending_contract_name || 'LpTokenPending';
 
 async function main() {
   const migration = new Migration();
@@ -81,7 +81,7 @@ async function main() {
   const DexStablePool = await locklift.factory.getContractArtifacts(
     options.pool_contract_name,
   );
-  const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts(
+  const LpTokenPending = await locklift.factory.getContractArtifacts(
     options.lp_pending_contract_name,
   );
   const DexTokenVault = await locklift.factory.getContractArtifacts(
@@ -153,7 +153,7 @@ async function main() {
   console.log('DexRoot: installing lp pending code...');
   tx = await dexRoot.methods
     .installOrUpdateLpTokenPendingCode({
-      _newCode: DexVaultLpTokenPendingV2.code,
+      _newCode: LpTokenPending.code,
       _remainingGasTo: account.address,
     })
     .send({

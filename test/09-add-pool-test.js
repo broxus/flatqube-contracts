@@ -2,6 +2,7 @@ const {expect} = require('chai');
 const logger = require('mocha-logger');
 const {Migration, afterRun, Constants, displayTx, calcValue} = require(process.cwd() + '/scripts/utils');
 const { Command } = require('commander');
+const BigNumber = require("bignumber.js");
 const program = new Command();
 const migration = new Migration();
 
@@ -83,7 +84,9 @@ describe('Check DexAccount add Pool', async function () {
                 params: {
                     _roots: token_roots
                 },
-                value: options.account_contract_name === 'DexAccountPrev' ? locklift.utils.convertCrystal(3.1, 'nano') : calcValue(gas),
+                value: options.account_contract_name === 'DexAccountPrev' ?
+                    locklift.utils.convertCrystal(3.1, 'nano') :
+                    new BigNumber('0.1').shiftedBy(9).plus(calcValue(gas)).toString(),
                 keyPair: keyPairs[options.account - 1]
             });
             displayTx(tx);

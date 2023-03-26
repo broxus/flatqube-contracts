@@ -9,7 +9,7 @@ import "../libraries/DexPlatformTypes.sol";
 import "../structures/IGasValueStructure.sol";
 
 import "../DexPlatform.sol";
-import "../DexVaultLpTokenPendingV2.sol";
+import "../LpTokenPending.sol";
 
 abstract contract DexContractBase  {
     TvmCell public platform_code;
@@ -179,7 +179,7 @@ abstract contract DexContractBase  {
         TvmCell _code
     ) internal pure returns (TvmCell) {
         return tvm.buildStateInit({
-            contr: DexVaultLpTokenPendingV2,
+            contr: LpTokenPending,
             varInit: {
                 _nonce: _nonce,
                 root: address(this),

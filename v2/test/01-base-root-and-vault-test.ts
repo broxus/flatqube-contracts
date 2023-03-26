@@ -150,7 +150,7 @@ describe('Check for correct deployment', () => {
 
     it('Check LpTokenPending code is installed', async () => {
       const LpTokenPending = locklift.factory.getContractArtifacts(
-        'DexVaultLpTokenPendingV2',
+        'LpTokenPending',
       );
 
       const lpTokenPendingCode = await dexRoot.methods

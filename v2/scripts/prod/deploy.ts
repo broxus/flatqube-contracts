@@ -112,8 +112,8 @@ async function main() {
   const DexTokenVault = await locklift.factory.getContractArtifacts(
     'DexTokenVault',
   );
-  const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts(
-    'DexVaultLpTokenPendingV2',
+  const LpTokenPending = await locklift.factory.getContractArtifacts(
+    'LpTokenPending',
   );
 
   console.log(`Deploying DexRoot...`);
@@ -186,7 +186,7 @@ async function main() {
 
   tx = await dexRoot.methods
     .installOrUpdateLpTokenPendingCode({
-      _newCode: DexVaultLpTokenPendingV2.code,
+      _newCode: LpTokenPending.code,
       _remainingGasTo: account.address,
     })
     .send({

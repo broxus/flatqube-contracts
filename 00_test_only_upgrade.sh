@@ -2,7 +2,7 @@ echo "test_only_upgrade.sh START";
 
 npx locklift build --config locklift.config.js
 
-export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --external-build node_modules/tip3/build --network local"
+export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --network local"
 export NO_TRACE="--config locklift.config.js --disable-build --network local"
 
 echo "____________________________________________________________________";
@@ -11,17 +11,18 @@ npx locklift run $NO_TRACE --script scripts/0-reset-migration.js
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0' --balance='100'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='1' --balance='50'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='2' --balance='50'
+npx locklift run $NO_TRACE --script scripts/deploy-DexGasValues.js
 npx locklift run $NO_TRACE --script scripts/0-deploy-TokenFactory.js
-npx locklift run $NO_TRACE --script scripts/1-deploy-vault-and-root.js --pair_contract_name='DexPairPrev' --root_contract_name='DexRootPrev' --vault_contract_name='DexVaultPrev' --token_vault_contract_name='DexTokenVaultPrev' --account_contract_name='DexAccountPrev' --stableswap_contract_name='DexStablePairPrev' --pool_contract_name='DexStablePoolPrev' --lp_pending_contract_name='DexVaultLpTokenPendingV2Prev'
+npx locklift run $NO_TRACE --script scripts/1-deploy-vault-and-root.js --pair_contract_name='DexPairPrev' --root_contract_name='DexRootPrev' --vault_contract_name='DexVaultPrev' --token_vault_contract_name='DexTokenVaultPrev' --account_contract_name='DexAccountPrev' --stableswap_contract_name='DexStablePairPrev' --pool_contract_name='DexStablePoolPrev' --lp_pending_contract_name='LpTokenPendingPrev'
 npx locklift run $NO_TRACE --script scripts/2-deploy-test-tokens.js --tokens='["foo","bar","qwe"]'
-npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"account":2,"amount":200000000,"token":"bar"},{"account":2,"amount":200000000,"token":"foo"},{"account":2,"amount":200000000,"token":"qwe"}]'
+npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"account":2,"amount":2000000000,"token":"bar"},{"account":2,"amount":2000000000,"token":"foo"},{"account":2,"amount":2000000000,"token":"qwe"}]'
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2 --contract_name='DexAccountPrev'
 npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["foo", "bar"], ["bar", "qwe"]]' --contract_name='DexPairPrev'
 npx locklift test $NO_TRACE --tests test/30-install-pair-code-v2.js --contract_name='DexStablePairPrev' --pool_type=2
 
 
 npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='foo' --right='bar' --account=2 --contract_name='DexPairPrev' --account_contract_name='DexAccountPrev' --ignore_already_added='true'
-npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits='[{ "tokenId": "bar", "amount": 100000000 }, { "tokenId": "foo", "amount": 100000000 }]'
+npx locklift test $DEFAULT_PARAMS --tests test/10-deposit-to-dex-account.js --deposits='[{ "tokenId": "bar", "amount": 100000000 }, { "tokenId": "foo", "amount": 100000000 }]'
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'foo' --right_token_id 'bar' --left_amount '100000' --right_amount '100000' --auto_change 'false' --contract_name='DexPairPrev' --account_contract_name='DexAccountPrev'
 
 echo "____________________________________________________________________";
@@ -48,8 +49,8 @@ npx locklift test $NO_TRACE --tests test/31-install-account-code.js --contract_n
 npx locklift test $NO_TRACE --tests test/36-upgrade-account.js --owner_n=3 --old_contract_name="DexAccount" --new_contract_name="TestNewDexAccount"
 
 #echo "____________________________________________________________________";
-#echo "prev vault ->  vault";
-#npx locklift run $DEFAULT_PARAMS --script scripts/update-dexVault.js --old_contract='DexVaultPrev' --new_contract='DexVault'
+echo "prev vault ->  vault";
+npx locklift run $DEFAULT_PARAMS --script scripts/update-dexVault.js --old_contract='DexVaultPrev' --new_contract='DexVault'
 
 echo "____________________________________________________________________";
 echo "prev pair -> pair";
@@ -132,7 +133,7 @@ npx locklift test $NO_TRACE --tests test/38-upgrade-token-vault.js --token="foo"
 
 echo "____________________________________________________________________";
 echo "vault -> next vault";
-npx locklift test $NO_TRACE --tests test/upgrade/3-vault-upgrade-test.js
+npx locklift test $DEFAULT_PARAMS --tests test/upgrade/3-vault-upgrade-test.js
 
 echo "____________________________________________________________________";
 echo "root -> next root";

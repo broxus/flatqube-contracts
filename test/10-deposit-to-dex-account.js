@@ -2,7 +2,7 @@ const {expect} = require('chai');
 const logger = require('mocha-logger');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
-const {Migration, TOKEN_CONTRACTS_PATH, afterRun, EMPTY_TVM_CELL, Constants, calcValue} = require(process.cwd() + '/scripts/utils');
+const {Migration, TOKEN_CONTRACTS_PATH, afterRun, EMPTY_TVM_CELL, Constants, displayTx} = require(process.cwd() + '/scripts/utils');
 const { Command } = require('commander');
 const program = new Command();
 
@@ -105,6 +105,7 @@ describe('Check Deposit to Dex Account', async function () {
     }
     accountN.afterRun = afterRun;
     dexAccountN = migration.load(DexAccount, 'DexAccount' + options.owner_n);
+    logger.log(`DexAccount: ${DexAccount.address}`);
 
     for (const deposit of deposits) {
       deposit.history = [];
@@ -123,13 +124,7 @@ describe('Check Deposit to Dex Account', async function () {
       before(`Make ${tokenData.symbol} deposit`, async function () {
         logger.log('#################################################');
         logger.log(`# Make ${tokenData.symbol} deposit`);
-
-        const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
-        const gas = await gasValues.call({
-          method: 'getDepositToAccountGas',
-          params: {}
-        });
-        await accountN.runTarget({
+        const tx = await accountN.runTarget({
           contract: deposit.accountWallet,
           method: 'transferToWallet',
           params: {
@@ -139,9 +134,11 @@ describe('Check Deposit to Dex Account', async function () {
             notify: true,
             payload: EMPTY_TVM_CELL
           },
-          value: calcValue(gas),
+          //TODO: check account version and use calcGas
+          value: locklift.utils.convertCrystal('1.5', 'nano'),
           keyPair: keyPairs[options.owner_n - 1]
         });
+        displayTx(tx);
         logger.log(tokenData.symbol + ' balance changes:');
         await displayBalancesChanges(deposit);
         await migration.logGas();

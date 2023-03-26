@@ -732,7 +732,7 @@ contract DexRoot is DexContractBase, IDexRoot {
             _lpTokenPendingCode
         );
 
-        new DexVaultLpTokenPendingV2{
+        new LpTokenPending{
             stateInit: data,
             value: 0,
             flag: MsgFlag.ALL_NOT_RESERVED,

@@ -116,6 +116,7 @@ async function dexPairInfo() {
 describe('DexAccount interact with DexPair', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
     before('Load contracts', async function () {
+        console.log(`12-pair-deposit-liquidity.js`);
         keyPairs = await locklift.keys.getKeyPairs();
 
         if (locklift.tracing) {
@@ -256,9 +257,13 @@ describe('DexAccount interact with DexPair', async function () {
                     auto_change: options.auto_change,
                     send_gas_to: Account2.address
                 },
-                value: options.account_contract_name === 'DexAccountPrev' ? locklift.utils.convertCrystal('1.1', 'nano') : calcValue(gas),
+                value: options.account_contract_name === 'DexAccountPrev' ?
+                    locklift.utils.convertCrystal('1.5', 'nano') :
+                    //extra fwd fee because locklift-v1 not support flag=1
+                    new BigNumber('0.1').shiftedBy(9).plus(calcValue(gas)).toString(),
                 keyPair: keyPairs[1]
             });
+
 
             displayTx(tx);
 

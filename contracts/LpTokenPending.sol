@@ -16,7 +16,7 @@ import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
 import "./libraries/GasValues.sol";
 
-contract DexVaultLpTokenPendingV2 is
+contract LpTokenPending is
     ITokenRootDeployedCallback,
     ITransferTokenRootOwnershipCallback,
     IGasValueStructure

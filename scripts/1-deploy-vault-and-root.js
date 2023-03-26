@@ -23,7 +23,7 @@ options.stableswap_contract_name = options.stableswap_contract_name || 'DexStabl
 options.account_contract_name = options.account_contract_name || 'DexAccount';
 options.vault_contract_name = options.vault_contract_name || 'DexVault';
 options.token_vault_contract_name = options.token_vault_contract_name || 'DexTokenVault';
-options.lp_pending_contract_name = options.lp_pending_contract_name || 'DexVaultLpTokenPendingV2';
+options.lp_pending_contract_name = options.lp_pending_contract_name || 'LpTokenPending';
 
 let tx;
 
@@ -40,7 +40,7 @@ async function main() {
   const DexPair = await locklift.factory.getContract(options.pair_contract_name);
   const DexStablePair = await locklift.factory.getContract(options.stableswap_contract_name);
   const DexStablePool = await locklift.factory.getContract(options.pool_contract_name);
-  const DexVaultLpTokenPendingV2 = await locklift.factory.getContract(options.lp_pending_contract_name);
+  const LpTokenPending = await locklift.factory.getContract(options.lp_pending_contract_name);
   const DexTokenVault = await locklift.factory.getContract(options.token_vault_contract_name);
 
   const [keyPair] = await locklift.keys.getKeyPairs();
@@ -110,7 +110,7 @@ async function main() {
     contract: dexRoot,
     method: 'installOrUpdateLpTokenPendingCode',
     params: {
-      _newCode: DexVaultLpTokenPendingV2.code,
+      _newCode: LpTokenPending.code,
       _remainingGasTo: account.address,
     },
     keyPair,

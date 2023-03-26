@@ -106,6 +106,7 @@ async function dexPoolInfo() {
 describe('DexAccount interact with DexPool', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
     before('Load contracts', async function () {
+        console.log(`12-pool-deposit-liquidity.js`);
         keyPairs = await locklift.keys.getKeyPairs();
 
         if (locklift.tracing) {
@@ -263,7 +264,9 @@ describe('DexAccount interact with DexPool', async function () {
                     _remainingGasTo: Account2.address,
                     _referrer: locklift.utils.zeroAddress
                 },
-                value: options.account_contract_name === 'DexAccountPrev' ? locklift.utils.convertCrystal('1.1', 'nano') : calcValue(gas),
+                value: options.account_contract_name === 'DexAccountPrev' ?
+                    locklift.utils.convertCrystal('1.5', 'nano') :
+                    new BigNumber('0.1').shiftedBy(9).plus(calcValue(gas)).toString(),
                 keyPair: keyPairs[1]
             });
 
