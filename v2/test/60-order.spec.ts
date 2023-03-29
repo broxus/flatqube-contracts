@@ -1665,7 +1665,7 @@ describe('OrderTest', () => {
                 numberString(TOKENS_TO_EXCHANGE1, tstDecimals), RootOrderBar.address, payload, toNano(6),
             ), {allowedCodes: {compute: [60,null]}});
 
-            const expectPayload = await RootOrderBar.buildCancelPayload(53, cancelPayloadRoot);
+            const expectPayload = await RootOrderBar.buildCancelPayload(53, 201, cancelPayloadRoot);
 
             await transaction1.traceTree.beautyPrint();
             const depositCalls = transaction1.traceTree?.findCallsForContract({

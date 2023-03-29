@@ -38,6 +38,7 @@ export class OrderCallbacks {
                 name: "onOrderCreateOrderReject",
                 inputs: [
                     { name: 'id', type: 'uint64' },
+                    { name: 'errorCode', type: 'uint16' },
                 ],
                 outputs: []
             },

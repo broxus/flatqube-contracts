@@ -63,6 +63,7 @@ library OrderPayloads {
         cancelBuilder.store(DexOperationStatusV2.CANCEL);
         cancelBuilder.store(_callbackId);
         cancelBuilder.store(_sender);
+        cancelBuilder.store(_amountSpent);
 
         optional(TvmCell) cancelPayload;
         cancelPayload.set(cancelBuilder.toCell());
@@ -178,7 +179,7 @@ library OrderPayloads {
             }
 
             if (payloadSlice.bits() >= 267) {
-                if (op != OrderOperationTypes.EXCHANGE) {
+                if (op != OrderOperationTypes.EXCHANGE){
                     sendGasTo = payloadSlice.decode(address);
                 } else {
                     recipient = payloadSlice.decode(address);
@@ -191,7 +192,7 @@ library OrderPayloads {
                     op == DexOperationStatusV2.SUCCESS
                 ){
                     deployWalletValue = payloadSlice.decode(uint128);
-                } else if (op == OrderOperationTypes.MATCHING_ORDER_TRANSFER) {
+                } else if (op == OrderOperationTypes.MATCHING_ORDER_TRANSFER){
                     alienSpentAmount = payloadSlice.decode(uint128);
                 }
             }
@@ -202,7 +203,10 @@ library OrderPayloads {
                     op == DexOperationStatusV2.SUCCESS
                 ){
                     alienSpentAmount = payloadSlice.decode(uint128);
-                } else if (op == OrderOperationTypes.MATCHING_ORDER_TRANSFER) {
+                } else if (
+                    op == OrderOperationTypes.MATCHING_ORDER_TRANSFER ||
+                    op == DexOperationStatusV2.CANCEL
+                ){
                     expectedAmount = payloadSlice.decode(uint128);
                 }
             }
@@ -291,12 +295,13 @@ library OrderPayloads {
 
     }
 
-    function buildCancelPayloadOrderRoot(uint8 op, TvmCell originalPayload) public returns (TvmCell) {
+    function buildCancelPayloadOrderRoot(uint8 op, uint16 errorCode, TvmCell originalPayload) public returns (TvmCell) {
 
         TvmBuilder builder;
 
         builder.store(OrderOperationStatus.CANCEL_ORDER_ROOT);
         builder.store(op);
+        builder.store(errorCode);
         builder.store(originalPayload);
 
         return builder.toCell();

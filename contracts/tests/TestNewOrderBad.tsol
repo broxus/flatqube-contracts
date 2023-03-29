@@ -185,22 +185,6 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } state;
 	}
 
-	function initParams() external view responsible override returns (InitParams){
-		return {
-				value: 0,
-				bounce: false,
-				flag: MsgFlag.REMAINING_GAS
-		} InitParams(
-			factory,
-			root,
-			owner,
-			spentToken,
-			receiveToken,
-			timeTx,
-			nowTx
-		);
-	}
-
 	function getDetails()
 	external
 	view
