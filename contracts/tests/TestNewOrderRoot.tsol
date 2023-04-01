@@ -176,6 +176,43 @@ contract TestNewOrderRoot is IOrderRoot, IOrderRootEvents {
         ));
     }
 
+    function proxyTokensTransfer(
+        address _tokenWallet,
+        uint128 _gasValue,
+        uint128 _amount,
+        address _recipient,
+        uint128 _deployWalletValue,
+        address _remainingGasTo,
+        bool _notify,
+        TvmCell _payload
+    ) override external onlyFactory {
+
+        tvm.accept();
+
+        ITokenWallet(_tokenWallet).transfer{
+                value : _gasValue,
+                flag : MsgFlag.SENDER_PAYS_FEES
+        }(
+            _amount,
+            _recipient,
+            _deployWalletValue,
+            _remainingGasTo,
+            _notify,
+            _payload
+        );
+    }
+
+    function sendGas(
+        address to,
+        uint128 _value,
+        uint16 _flag
+    ) override external onlyFactory {
+
+        tvm.accept();
+        to.transfer({value : _value, flag : _flag, bounce : false});
+    }
+
+
     function upgrade(
         TvmCell _code,
         uint32 _newVersion,
