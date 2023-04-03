@@ -81,3 +81,5 @@ npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='qwe' --righ
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'qwe' --right_token_id 'tst' --left_amount '10000' --right_amount '10000' --auto_change 'true' --contract_name='DexPair'
 
 npx locklift run $NO_TRACE --script scripts/update-dexRoot.js --old_contract='DexRoot' --new_contract='TestNewDexRoot'
+
+npx locklift run $NO_TRACE --script scripts/0-backup-migration.js

@@ -68,8 +68,8 @@ npx locklift run $NO_TRACE --script scripts/5-deploy-test-pool.js --pools='[["fo
 npx locklift test $NO_TRACE --tests test/09-add-pool-test.js --roots='["foo", "bar", "qwe"]' --account=2 --contract_name='DexStablePoolPrev' --ignore_already_added='true'
 npx locklift test $NO_TRACE --tests test/09-add-pool-test.js --roots='["foo", "qwe"]' --account=2 --contract_name='DexStablePoolPrev' --ignore_already_added='true'
 npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits='[{ "tokenId": "foo", "amount": 100000000 },{ "tokenId": "qwe", "amount": 100000000 }]'
-npx locklift test $NO_TRACE --tests test/12-pool-deposit-liquidity.js --roots='["foo", "bar", "qwe"]' --amounts='[100000, 100000, 100000]' --contract_name='DexStablePoolPrev'
-npx locklift test $NO_TRACE --tests test/12-pool-deposit-liquidity.js --roots='["foo", "qwe"]' --amounts='[100000, 100000]' --contract_name='DexStablePoolPrev'
+npx locklift test $NO_TRACE --tests test/12-pool-deposit-liquidity.js --roots='["foo", "bar", "qwe"]' --amounts='[100000, 100000, 100000]' --contract_name='DexStablePoolPrev' --account_contract_name='DexAccountPrev'
+npx locklift test $NO_TRACE --tests test/12-pool-deposit-liquidity.js --roots='["foo", "qwe"]' --amounts='[100000, 100000]' --contract_name='DexStablePoolPrev' --account_contract_name='DexAccountPrev'
 
 echo "____________________________________________________________________";
 echo "prev stablepool -> stablepool";
@@ -143,5 +143,7 @@ npx locklift test $DEFAULT_PARAMS --tests test/upgrade/4-root-upgrade-test.js
 echo "get-evers-back";
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='0'
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='1'
+
+npx locklift run $NO_TRACE --script scripts/0-backup-migration.js
 
 echo "test_only_upgrade.sh END";

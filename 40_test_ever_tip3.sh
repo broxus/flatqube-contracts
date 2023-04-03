@@ -38,3 +38,5 @@ npx locklift test $NO_TRACE --tests test/41-ever-split-cross-pool-exchange.js --
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='0'
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='1'
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='2'
+
+npx locklift run $NO_TRACE --script scripts/0-backup-migration.js

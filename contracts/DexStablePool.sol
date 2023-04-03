@@ -922,7 +922,7 @@ contract DexStablePool is
         return 0;
     }
 
-    function _getOperationMinValue(uint8 _op, uint128 _deployWalletGrams, address _referrer) private pure returns (uint128) {
+    function _getOperationMinValue(uint8 _op, uint128 _deployWalletGrams, address _referrer) private view returns (uint128) {
         if (_op == DexOperationTypes.EXCHANGE_V2) {
             return _calcValue(GasValues.getPoolDirectExchangeGas(_deployWalletGrams, _referrer));
         }
@@ -930,7 +930,7 @@ contract DexStablePool is
             return _calcValue(GasValues.getPoolDirectDepositGas(_deployWalletGrams, _referrer));
         }
         if (_op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
-            return _calcValue(GasValues.getPoolDirectWithdrawGas(2, _deployWalletGrams, _referrer));
+            return _calcValue(GasValues.getPoolDirectWithdrawGas(N_COINS, _deployWalletGrams, _referrer));
         }
         if (_op == DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN) {
             return _calcValue(GasValues.getPoolDirectWithdrawOneCoinGas(_deployWalletGrams, _referrer));

@@ -22,7 +22,8 @@ program
     .option('-r, --roots <roots>', 'pool tokens list')
     .option('-a, --amounts <amounts>', 'token amounts')
     .option('-ac, --auto_change <auto_change>', 'auto change')
-    .option('-cn, --contract_name <contract_name>', 'DexPool contract name');
+    .option('-cn, --contract_name <contract_name>', 'DexPool contract name')
+    .option('-acn, --account_contract_name <account_contract_name>', 'DexAccount contract name');
 
 program.parse(process.argv);
 
@@ -31,6 +32,7 @@ const options = program.opts();
 options.roots = options.roots ? JSON.parse(options.roots) : ['foo', 'bar', 'qwe'];
 options.amounts = options.amounts ? JSON.parse(options.amounts) : ['1000000, 1000000, 1000000'];
 options.contract_name = options.contract_name || 'DexStablePool';
+options.account_contract_name = options.account_contract_name || 'DexAccount';
 options.auto_change = options.auto_change || false;
 
 const tokens = [];
@@ -123,7 +125,7 @@ describe('DexAccount interact with DexPool', async function () {
         }
         poolLpRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
         Account2 = await locklift.factory.getAccount('Wallet');
-        DexAccount2 = await locklift.factory.getContract('DexAccount');
+        DexAccount2 = await locklift.factory.getContract(options.account_contract_name);
         poolLpWallet2 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
         tokenWallets2 = [];
         for (let i = 0; i < N_COINS; i++) {
@@ -266,7 +268,7 @@ describe('DexAccount interact with DexPool', async function () {
                 },
                 value: options.account_contract_name === 'DexAccountPrev' ?
                     locklift.utils.convertCrystal('1.5', 'nano') :
-                    new BigNumber('0.1').shiftedBy(9).plus(calcValue(gas)).toString(),
+                    calcValue(gas),
                 keyPair: keyPairs[1]
             });
 

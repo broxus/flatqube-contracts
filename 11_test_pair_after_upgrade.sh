@@ -17,16 +17,14 @@ npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"ac
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2 --contract_name='DexAccountPrev'
 
 npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["foo", "bar"]]' --contract_name='DexPairPrev' --account_contract_name='DexAccountPrev'
-npx locklift test $DEFAULT_PARAMS --tests test/09-add-pair-test.js --left='foo' --right='bar' --account=2 --contract_name='DexPairPrev' --account_contract_name='DexAccountPrev' --ignore_already_added='true'
+npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='foo' --right='bar' --account=2 --contract_name='DexPairPrev' --account_contract_name='DexAccountPrev' --ignore_already_added='true'
 npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits='[{ "tokenId": "foo", "amount": 1000000 }, { "tokenId": "bar", "amount": 1000000 }]' --account_contract_name='DexAccountPrev'
-npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js  --contract_name='DexPairPrev' --left_token_id 'foo' --right_token_id 'bar' --left_amount '10000' --right_amount '10000' --auto_change 'true'
+npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js  --contract_name='DexPairPrev' --account_contract_name='DexAccountPrev' --left_token_id 'foo' --right_token_id 'bar' --left_amount '10000' --right_amount '10000' --auto_change 'true'
 
 #######################################################
 #upgrade START
-npx locklift run $NO_TRACE --script scripts/8-add-wallets-info-to-vault.js
 npx locklift run $NO_TRACE --script scripts/update-dexRoot.js --old_contract='DexRootPrev' --new_contract='DexRoot'
 npx locklift run $NO_TRACE --script scripts/update-dexVault.js --old_contract='DexVaultPrev' --new_contract='DexVault'
-npx locklift run $NO_TRACE --script scripts/60-migrate-liquidity-to-multivault.js
 
 npx locklift test $NO_TRACE --tests test/31-install-account-code.js --contract_name='DexAccount'
 npx locklift test $NO_TRACE --tests test/36-upgrade-account.js --owner_n=2 --old_contract_name="DexAccountPrev" --new_contract_name="DexAccount"
@@ -76,3 +74,5 @@ npx locklift test $NO_TRACE --tests test/51-referrer-beneficiary-fee.js --roots=
 #npx locklift test $NO_TRACE --tests test/36-upgrade-account.js --owner_n='2' --old_contract_name='DexAccount' --new_contract_name='TestNewDexAccount'
 
 npx locklift test $NO_TRACE --tests test/13-pair-withdraw-liquidity.js --left_token_id 'bar' --right_token_id 'tst'
+
+npx locklift run $NO_TRACE --script scripts/0-backup-migration.js

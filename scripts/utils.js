@@ -43,7 +43,7 @@ const displayTx = (_tx) => {
 
 const gasPrice = 1000;
 const calcValue = (gas) => {
-  return Number(gas.fixedValue) + gasPrice * Number(gas.dynamicGas)
+  return new BigNumber(gas.dynamicGas).plus(100000).times(gasPrice).plus(gas.fixedValue).toNumber()
 }
 
 const Constants = {
@@ -122,6 +122,10 @@ class Migration {
 
   _saveMigrationLog() {
     fs.writeFileSync(this.log_path, JSON.stringify(this.migration_log));
+  }
+
+  backup() {
+    fs.writeFileSync("migration-log-" + (new Date().getTime()) + ".json", JSON.stringify(this.migration_log));
   }
 
   exists(alias) {

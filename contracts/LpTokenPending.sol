@@ -117,8 +117,9 @@ contract LpTokenPending is
         mapping(address => ICallbackParamsStructure.CallbackParams) callbacks;
         callbacks[address(this)] = ICallbackParamsStructure.CallbackParams(0, empty);
         ITransferableOwnership(token_root).transferOwnership{
-            value: _calcValue(GasValues.getTransferOwnershipGas()),
-            flag: MsgFlag.SENDER_PAYS_FEES
+            // must be > _calcValue(GasValues.getTransferOwnershipGas())
+            value: 0,
+            flag:  MsgFlag.REMAINING_GAS
         }(pool, address(this), callbacks);
     }
 

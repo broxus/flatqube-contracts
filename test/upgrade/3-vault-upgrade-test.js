@@ -67,7 +67,7 @@ describe('Test Dex Vault contract upgrade', async function () {
       params: {
         code: NewDexVault.code
       },
-      value: new BigNumber(0.1).shiftedBy(9).plus(calcValue(gas)).toString(),
+      value: calcValue(gas),
       keyPair
     });
     NewDexVault.setAddress(dexVault.address);

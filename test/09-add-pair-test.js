@@ -90,7 +90,7 @@ describe('Check DexAccount add Pair', async function () {
         },
         value: options.account_contract_name === 'DexAccountPrev' ?
             locklift.utils.convertCrystal(3.1, 'nano') :
-            new BigNumber('0.1').shiftedBy(9).plus(calcValue(gas)).toString(),
+            calcValue(gas),
         keyPair: keyPairs[options.account - 1]
       });
       displayTx(tx);

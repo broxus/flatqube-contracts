@@ -3,6 +3,7 @@ pragma ton-solidity >= 0.62.0;
 library EverToTip3Gas {
     uint128 constant TARGET_BALANCE                     = 1 ever;
 
+    uint128 constant WEVER_VAULT_RECEIVE_SAFE_FEE       = 1 ever;
     uint128 constant OPERATION_CALLBACK_BASE            = 0.01 ever;
     uint128 constant MINT_DEPLOY_EMPTY_WALLET_GRAMS     = 0.1 ever;
 

@@ -501,7 +501,7 @@ describe('Check direct DexPairFooBar operations', async function () {
             const expectedAccountBar = new BigNumber(accountStart3.bar)
                 .minus(new BigNumber(expected.expected_amount).shiftedBy(-Constants.tokens.bar.decimals)).toString();
 
-            // expect(expectedDexFoo).to.equal(dexEnd.foo.toString(), 'Wrong DEX FOO balance');
+            expect(expectedDexFoo).to.equal(dexEnd.foo.toString(), 'Wrong DEX FOO balance');
             expect(expectedDexBar).to.equal(dexEnd.bar.toString(), 'Wrong DEX BAR balance');
             expect(expectedAccountFoo).to.equal(accountEnd2.foo.toString(), 'Wrong Account#2 FOO balance');
             expect(expectedAccountBar).to.equal(accountEnd3.bar.toString(), 'Wrong Account#3 BAR balance');

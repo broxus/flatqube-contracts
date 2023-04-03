@@ -15,9 +15,14 @@ npx locklift run $NO_TRACE --script scripts/3-mint-test-tokens.js --mints='[{"ac
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=2
 npx locklift run $NO_TRACE --script scripts/4-deploy-test-dex-account.js --owner_n=3
 
-npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["foo", "bar"]]' --contract_name='DexPair'
+#npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["foo", "bar"]]' --contract_name='DexPair'
+npx locklift test $NO_TRACE --tests test/5-deploy-pair-test.js --pairs='[["foo", "bar"]]' --contract_name='DexPair'
+
+
+
 npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='foo' --right='bar' --account=2 --contract_name='DexPair' --ignore_already_added='true'
-npx locklift test $DEFAULT_PARAMS --tests test/10-deposit-to-dex-account.js --deposits='[{ "tokenId": "foo", "amount": 1000000 }, { "tokenId": "bar", "amount": 1000000 }]'
+npx locklift test $NO_TRACE --tests test/10-deposit-to-dex-account.js --deposits='[{ "tokenId": "foo", "amount": 1000000 }, { "tokenId": "bar", "amount": 1000000 }]'
+
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'foo' --right_token_id 'bar' --left_amount '10000' --right_amount '10000' --auto_change 'true' --contract_name='DexPair'
 
 npx locklift run $NO_TRACE --script scripts/5-deploy-test-pair.js --pairs='[["foo", "tst"],["bar", "tst"],["bar", "qwe"],["foo", "qwe"]]' --contract_name='DexPair'
@@ -60,3 +65,5 @@ npx locklift test $NO_TRACE --tests test/51-referrer-beneficiary-fee.js --roots=
 #npx locklift test $NO_TRACE --tests test/36-upgrade-account.js --owner_n='2' --old_contract_name='DexAccount' --new_contract_name='TestNewDexAccount'
 
 npx locklift test $NO_TRACE --tests test/13-pair-withdraw-liquidity.js --left_token_id 'bar' --right_token_id 'tst'
+
+npx locklift run $NO_TRACE --script scripts/0-backup-migration.js
