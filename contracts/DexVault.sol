@@ -34,101 +34,6 @@ contract DexVault is DexContractBase, IDexVault, IGasValueStructure {
     // referral program
     ReferralProgramParams _refProgramParams;
 
-    // migration START
-    uint8 constant MAX_ITERATIONS_PER_MSG = 10;
-
-    function migrateLiquidity() external onlyManagerOrOwner {
-        require(_vaultWallets.min().hasValue(), 404);
-        internalHelper(address(0));
-    }
-
-    function continueMigrateLiquidity(address _fromTokenRoot) external onlyManagerOrOwner {
-        require(_vaultWallets.exists(_fromTokenRoot), 404);
-        internalHelper(_fromTokenRoot);
-    }
-
-    function migrateToken(address _tokenRoot) external onlyManagerOrOwner {
-        require(_vaultWallets.exists(_tokenRoot), 404);
-        require(msg.value >= _calcValue(GasValues.getDeployTokenVaultGas()) + _calcValue(GasValues.getTransferTokensGas(DexGas.DEPLOY_EMPTY_WALLET_GRAMS)) + 0.5 ever, 404);
-
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
-
-        address vaultTokenWallet = _vaultWallets.at(_tokenRoot);
-
-        _vaultWalletsToRoots[vaultTokenWallet] = _tokenRoot;
-
-        ITokenWallet(vaultTokenWallet).balance{
-            value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED,
-            callback: DexVault.onTokenBalance
-        }();
-    }
-
-    function _migrateNext(address _startTokenRoot) external {
-        require(msg.sender == address(this), 503);
-        internalHelper(_startTokenRoot);
-    }
-
-    function onTokenBalance(uint128 _amount) external view {
-        require(_vaultWalletsToRoots.exists(msg.sender));
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
-
-        address _tokenRoot = _vaultWalletsToRoots.at(msg.sender);
-
-        IDexRoot(_dexRoot()).deployTokenVault{
-            value: _calcValue(GasValues.getDeployTokenVaultGas()) + 0.05 ever,
-            flag: MsgFlag.SENDER_PAYS_FEES
-        }(_tokenRoot, _owner);
-
-        if(_amount > 0) {
-            TvmCell empty;
-
-            ITokenWallet(msg.sender).transfer{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED
-            }(
-                _amount,
-                _expectedTokenVaultAddress(_tokenRoot),
-                DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
-                _owner,
-                false,
-                empty
-            );
-        } else {
-            _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
-        }
-    }
-
-    function internalHelper(address _startTokenRoot) internal {
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
-        uint8 counter = 0;
-        optional(address, address) itemOpt = _vaultWallets.next(_startTokenRoot);
-
-        while (itemOpt.hasValue()) {
-            (address tokenRoot, address vaultTokenWallet) = itemOpt.get();
-            _vaultWalletsToRoots[vaultTokenWallet] = tokenRoot;
-            counter++;
-            ITokenWallet(vaultTokenWallet).balance{
-                value: _calcValue(GasValues.getDeployTokenVaultGas()) + _calcValue(GasValues.getTransferTokensGas(DexGas.DEPLOY_EMPTY_WALLET_GRAMS)) + 0.5 ever,
-                flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: DexVault.onTokenBalance
-            }();
-
-            itemOpt = _vaultWallets.next(tokenRoot);
-
-            if (!itemOpt.hasValue()) {
-                itemOpt.reset();
-                _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
-                break;
-            } else if(counter >= MAX_ITERATIONS_PER_MSG) {
-                itemOpt.reset();
-                this._migrateNext{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(tokenRoot);
-                break;
-            }
-        }
-    }
-    //migration END
-
     modifier onlyOwner() {
         require(msg.sender == _owner, DexErrors.NOT_MY_OWNER);
         _;
@@ -399,7 +304,7 @@ contract DexVault is DexContractBase, IDexVault, IGasValueStructure {
                     bounce: false
                 }(_referral, _referrer, _referral);
 
-            TvmCell refPayload = abi.encode(_refProgramParams.projectId, _referrer, _referral);
+            TvmCell refPayload = abi.encode(_refProgramParams.projectId, _referral, _referrer);
 
             ITokenWallet(msg.sender)
                 .transfer{
