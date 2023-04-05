@@ -616,6 +616,8 @@ describe('Check direct DexPairFooBar operations', async function () {
             const gas = await gasValues.call({
                 method: 'getPoolDirectDepositGas',
                 params: {
+                    poolType: options.contract_name.indexOf('Stable') === -1 ? 1 : 2,
+                    N: 2,
                     deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
                     referrer: locklift.utils.zeroAddress
                 }
@@ -698,6 +700,8 @@ describe('Check direct DexPairFooBar operations', async function () {
             const gas = await gasValues.call({
                 method: 'getPoolDirectDepositGas',
                 params: {
+                    poolType: options.contract_name.indexOf('Stable') === -1 ? 1 : 2,
+                    N: 2,
                     deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
                     referrer: locklift.utils.zeroAddress
                 }
@@ -780,6 +784,8 @@ describe('Check direct DexPairFooBar operations', async function () {
             const gas = await gasValues.call({
                 method: 'getPoolDirectDepositGas',
                 params: {
+                    poolType: options.contract_name.indexOf('Stable') === -1 ? 1 : 2,
+                    N: 2,
                     deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
                     referrer: locklift.utils.zeroAddress
                 }

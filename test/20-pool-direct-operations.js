@@ -616,6 +616,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
             const gas = await gasValues.call({
                 method: 'getPoolDirectDepositGas',
                 params: {
+                    poolType: 3,
+                    N: N_COINS,
                     deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
                     referrer: locklift.utils.zeroAddress
                 }
@@ -698,6 +700,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 const gas = await gasValues.call({
                     method: 'getPoolDirectDepositGas',
                     params: {
+                        poolType: 3,
+                        N: N_COINS,
                         deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
                         referrer: locklift.utils.zeroAddress
                     }
@@ -779,6 +783,8 @@ describe(`Check direct DexPool${poolName} operations`, async function () {
                 const gas = await gasValues.call({
                     method: 'getPoolDirectDepositGas',
                     params: {
+                        poolType: 3,
+                        N: N_COINS,
                         deployWalletValue: 0,
                         referrer: locklift.utils.zeroAddress
                     }

@@ -1,6 +1,7 @@
 pragma ton-solidity >= 0.62.0;
 
 import "../libraries/DexGas.sol";
+import "../libraries/DexPoolTypes.sol";
 import "../libraries/EverToTip3Gas.sol";
 
 import "../structures/IGasValueStructure.sol";
@@ -70,11 +71,11 @@ library GasValues {
         );
     }
 
-    // 1.05 ever
+    // 0.111 fixed + 0.55 dynamic
     function getReferralProgramGas() public returns(IGasValueStructure.GasValue) {
         return IGasValueStructure.GasValue(
-            DexGas.REFERRAL_PROGRAM_CALLBACK_FIXED + DexGas.REFERRAL_SYSTEM_FIXED + DexGas.REFERRAL_DEPLOY_EMPTY_WALLET_GRAMS,
-            DexGas.REFERRAL_PROGRAM_CALLBACK_GAS + DexGas.REFERRAL_SYSTEM_EXTRA_GAS
+            DexGas.REFERRER_FEE_DEX_FIXED + DexGas.REFERRAL_REFLAST_FIXED + DexGas.REFERRAL_DEPLOY_EMPTY_WALLET_GRAMS,
+            DexGas.REFERRER_FEE_DEX_GAS + DexGas.REFERRAL_REFLAST_GAS + DexGas.REFERRAL_TRANSFER_GAS
         );
     }
 
@@ -286,21 +287,23 @@ library GasValues {
         );
     }
 
-    function getPoolDirectDepositGas(uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
+    function getPoolDirectDepositGas(uint8 poolType, uint8 N, uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
         IGasValueStructure.GasValue referralProgram = getReferralProgramGas();
         IGasValueStructure.GasValue mintTokens = getMintTokensGas(_deployWalletValue);
         IGasValueStructure.GasValue transferTokens = getTransferTokensGas(0);
+
+        uint128 refPaymentsCount = referrer.value != 0 ? (poolType == DexPoolTypes.CONSTANT_PRODUCT ? uint128(1) : uint128(N)) : uint128(0);
         return IGasValueStructure.GasValue(
             DexGas.DEX_POOL_COMPENSATION +
             2 * DexGas.OPERATION_CALLBACK +
             transferTokens.fixedValue +
             mintTokens.fixedValue +
-            (referrer.value != 0 ? referralProgram.fixedValue : 0),
+            refPaymentsCount * referralProgram.fixedValue,
 
             DexGas.DIRECT_DEPOSIT_EXTRA_GAS +
             transferTokens.dynamicGas +
             mintTokens.dynamicGas +
-            (referrer.value != 0 ? referralProgram.dynamicGas : 0)
+            refPaymentsCount * referralProgram.dynamicGas
         );
     }
 

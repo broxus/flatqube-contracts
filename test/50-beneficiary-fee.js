@@ -488,7 +488,12 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
 
             const gas = await gasValues.call({
                 method: 'getPoolDirectDepositGas',
-                params: {deployWalletValue: 0, referrer: locklift.utils.zeroAddress}
+                params: {
+                    poolType: options.pair_contract_name.indexOf('Stable') === -1 ? 1 : 2,
+                    N: 2,
+                    deployWalletValue: 0,
+                    referrer: locklift.utils.zeroAddress
+                }
             });
 
             tx = await Account2.runTarget({
@@ -594,7 +599,12 @@ describe(`Test beneficiary fee ${options.pair_contract_name}`, async function ()
 
             const gas = await gasValues.call({
                 method: 'getPoolDirectDepositGas',
-                params: {deployWalletValue: 0, referrer: locklift.utils.zeroAddress}
+                params: {
+                    poolType: options.pair_contract_name.indexOf('Stable') === -1 ? 1 : 2,
+                    N: 2,
+                    deployWalletValue: 0,
+                    referrer: locklift.utils.zeroAddress
+                }
             });
 
             tx = await Account2.runTarget({

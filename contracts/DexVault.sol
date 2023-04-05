@@ -261,13 +261,7 @@ contract DexVault is DexContractBase, IDexVault, IGasValueStructure {
         address _remainingGasTo,
         TvmCell _payload
     ) external override {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            0
-        );
+        tvm.rawReserve(0, 4);
 
         TvmSlice payloadSlice = _payload.toSlice();
         optional(uint8) op = payloadSlice.decodeQ(uint8);
@@ -299,7 +293,7 @@ contract DexVault is DexContractBase, IDexVault, IGasValueStructure {
 
             IReferralProgramCallbacks(_refProgramParams.projectAddress)
                 .onRefLastUpdate{
-                    value: _calcValue(GasValue(DexGas.REFERRAL_PROGRAM_CALLBACK_FIXED, DexGas.REFERRAL_PROGRAM_CALLBACK_GAS)),
+                    value: _calcValue(GasValue(DexGas.REFERRAL_REFLAST_FIXED, DexGas.REFERRAL_REFLAST_GAS)),
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(_referral, _referrer, _referral);

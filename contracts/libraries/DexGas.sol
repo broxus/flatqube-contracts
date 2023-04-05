@@ -64,12 +64,12 @@ library DexGas {
     uint128 constant OPERATION_CALLBACK_BASE            = 0.01 ever;
 //    uint128 constant SET_FEE_PARAMS_MIN_VALUE           = 1 ever;
 
-    // uint128 constant REFERRER_FEE_EXTRA_VALUE           = 1 ever;
-    uint128 constant REFERRAL_PROGRAM_CALLBACK_FIXED    = 0.1 ever;
-    uint128 constant REFERRAL_PROGRAM_CALLBACK_GAS      = 50000;
-    uint128 constant REFERRAL_SYSTEM_FIXED              = 0.2 ever;
+    uint128 constant REFERRER_FEE_DEX_GAS               = 150000;
+    uint128 constant REFERRER_FEE_DEX_FIXED             = 0.01 ever;  // storage fee compensation for Dex contracts
+    uint128 constant REFERRAL_REFLAST_FIXED             = 0.001 ever; // storage fee compensation for RefProject
+    uint128 constant REFERRAL_REFLAST_GAS               = 100000;
     uint128 constant REFERRAL_DEPLOY_EMPTY_WALLET_GRAMS = 0.1 ever;
-    uint128 constant REFERRAL_SYSTEM_EXTRA_GAS          = 400000;
+    uint128 constant REFERRAL_TRANSFER_GAS              = 300000;
 
     uint128 constant OPERATION_CALLBACK                 = 0.0101 ever;
 

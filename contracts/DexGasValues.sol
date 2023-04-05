@@ -161,8 +161,8 @@ contract DexGasValues is IGasValueStructure {
         return poolDirectExchange;
     }
 
-    function getPoolDirectDepositGas(uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue poolDirectDeposit = GasValues.getPoolDirectDepositGas(deployWalletValue, referrer);
+    function getPoolDirectDepositGas(uint8 poolType, uint8 N, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue poolDirectDeposit = GasValues.getPoolDirectDepositGas(poolType, N, deployWalletValue, referrer);
         poolDirectDeposit.fixedValue += DexGas.DEX_POOL_COMPENSATION;
 
         return poolDirectDeposit;
