@@ -189,7 +189,7 @@ SDEQ
 THROWIFNOT 100
 .loc ../contracts/LpTokenPending.sol, 89
 ACCEPT
-.loc ../contracts/LpTokenPending.sol, 155
+.loc ../contracts/LpTokenPending.sol, 154
 GETGLOB 20
 GETGLOB 19
 GETGLOB 16
@@ -328,11 +328,11 @@ PUSHCONT {
 	.loc ../contracts/LpTokenPending.sol, 0
 }
 IFNOT
-.loc ../contracts/LpTokenPending.sol, 213
+.loc ../contracts/LpTokenPending.sol, 212
 DROP
 GETGLOB 21
 PUSHCONT {
-	.loc ../contracts/LpTokenPending.sol, 155
+	.loc ../contracts/LpTokenPending.sol, 154
 	GETGLOB 20
 	GETGLOB 19
 	GETGLOB 16
@@ -443,12 +443,20 @@ DICTSETB
 .loc ../contracts/LpTokenPending.sol, 119
 MYADDR
 GETGLOB 15
-ROLL 3
+CALLREF {
+	CALL $GasValues_no_obj_getTransferOwnershipGas_77a4dfa4_macro$
+}
+CALLREF {
+	CALL $_calcValue_2fb4263c_internal_macro$
+}
+ROLL 4
 NEWC
 STSLICECONST x62_
 STSLICE
+SWAP
+STGRAMS
 PUSHINT 1
-STUR 111
+STUR 107
 ROLLREV 3
 NEWC
 STSLICECONST x1df385c6
@@ -460,7 +468,7 @@ STDICT
 STBREFR
 STBREFR
 ENDC
-PUSHINT 64
+PUSHINT 1
 SENDRAWMSG
 .loc ../contracts/LpTokenPending.sol, 0
 DROP
@@ -474,7 +482,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/LpTokenPending.sol, 126
+.loc ../contracts/LpTokenPending.sol, 125
 OVER
 PUSHCONT {
 	LDREF
@@ -504,7 +512,7 @@ CALLREF {
 THROW 0
 
 .macro onTransferTokenRootOwnership_4fb0aa5d_internal_macro
-.loc ../contracts/LpTokenPending.sol, 132
+.loc ../contracts/LpTokenPending.sol, 131
 DROP2
 GETGLOB 9
 PARSEMSGADDR
@@ -516,12 +524,12 @@ GETGLOB 19
 SDEQ
 AND
 THROWIFNOT 113
-.loc ../contracts/LpTokenPending.sol, 134
+.loc ../contracts/LpTokenPending.sol, 133
 GETGLOB 21
 DEC
 UFITS 8
 SETGLOB 21
-.loc ../contracts/LpTokenPending.sol, 136
+.loc ../contracts/LpTokenPending.sol, 135
 SWAP
 MYADDR
 SDEQ
@@ -530,7 +538,7 @@ GETGLOB 15
 SDEQ
 AND
 PUSHCONT {
-	.loc ../contracts/LpTokenPending.sol, 137
+	.loc ../contracts/LpTokenPending.sol, 136
 	GETGLOB 20
 	GETGLOB 19
 	GETGLOB 16
@@ -550,7 +558,7 @@ PUSHCONT {
 	STSLICECONST x02cd0b49
 }
 PUSHCONT {
-	.loc ../contracts/LpTokenPending.sol, 155
+	.loc ../contracts/LpTokenPending.sol, 154
 	GETGLOB 20
 	GETGLOB 19
 	GETGLOB 16
@@ -598,12 +606,12 @@ SENDRAWMSG
 CALL $createLpTokenAndWallets_67630af4_internal_macro$
 
 .macro createLpTokenAndWallets_67630af4_internal_macro
-.loc ../contracts/LpTokenPending.sol, 170
+.loc ../contracts/LpTokenPending.sol, 169
 GETGLOB 22
 CALLREF {
 	CALL $lpTokenSymbol_e9f51bbf_internal_macro$
 }
-.loc ../contracts/LpTokenPending.sol, 171
+.loc ../contracts/LpTokenPending.sol, 170
 GETGLOB 12
 CALLREF {
 	CALL $deployLpToken_7356b9ee_internal_macro$
@@ -615,12 +623,12 @@ CALLREF {
 CALL $deployLpToken_7356b9ee_internal_macro$
 
 .macro deployLpToken_7356b9ee_internal_macro
-.loc ../contracts/LpTokenPending.sol, 175
+.loc ../contracts/LpTokenPending.sol, 174
 GETGLOB 21
 INC
 UFITS 8
 SETGLOB 21
-.loc ../contracts/LpTokenPending.sol, 176
+.loc ../contracts/LpTokenPending.sol, 175
 PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
@@ -667,9 +675,9 @@ SENDRAWMSG
 CALL $lpTokenSymbol_e9f51bbf_internal_macro$
 
 .macro lpTokenSymbol_e9f51bbf_internal_macro
-.loc ../contracts/LpTokenPending.sol, 195
+.loc ../contracts/LpTokenPending.sol, 194
 GETGLOB 10
-.loc ../contracts/LpTokenPending.sol, 196
+.loc ../contracts/LpTokenPending.sol, 195
 PUSHINT 0
 PUSH S2
 SECOND
@@ -679,7 +687,7 @@ THROWIFNOT 50
 CALLREF {
 	CALL $concatenateStrings_macro$
 }
-.loc ../contracts/LpTokenPending.sol, 197
+.loc ../contracts/LpTokenPending.sol, 196
 PUSHINT 1
 PUSHCONT {
 	DUP
@@ -687,14 +695,14 @@ PUSHCONT {
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/LpTokenPending.sol, 198
+	.loc ../contracts/LpTokenPending.sol, 197
 	OVER
 	GETGLOB 11
 	CALLREF {
 		CALL $concatenateStrings_macro$
 	}
 	POP S2
-	.loc ../contracts/LpTokenPending.sol, 199
+	.loc ../contracts/LpTokenPending.sol, 198
 	DUP2
 	PUSH S4
 	SECOND
@@ -705,14 +713,14 @@ PUSHCONT {
 		CALL $concatenateStrings_macro$
 	}
 	POP S2
-	.loc ../contracts/LpTokenPending.sol, 197
+	.loc ../contracts/LpTokenPending.sol, 196
 	INC
 	UFITS 8
 	.loc ../contracts/LpTokenPending.sol, 0
 }
 WHILE
 DROP
-.loc ../contracts/LpTokenPending.sol, 202
+.loc ../contracts/LpTokenPending.sol, 201
 NIP
 .loc ../contracts/LpTokenPending.sol, 0
 
@@ -721,7 +729,7 @@ NIP
 CALL $isSenderExpectedToken_2fda6d0c_internal_macro$
 
 .macro isSenderExpectedToken_2fda6d0c_internal_macro
-.loc ../contracts/LpTokenPending.sol, 206
+.loc ../contracts/LpTokenPending.sol, 205
 PUSHINT 0
 FALSE ; decl return flag
 PUSHCONT {
@@ -730,7 +738,7 @@ PUSHCONT {
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/LpTokenPending.sol, 207
+	.loc ../contracts/LpTokenPending.sol, 206
 	GETGLOB 9
 	PUSH S2
 	GETGLOB 16
@@ -746,7 +754,7 @@ PUSHCONT {
 		RETALT
 	}
 	IFJMP
-	.loc ../contracts/LpTokenPending.sol, 206
+	.loc ../contracts/LpTokenPending.sol, 205
 	OVER
 	INC
 	UFITS 8
@@ -756,7 +764,7 @@ PUSHCONT {
 WHILEBRK
 IFRET
 DROP
-.loc ../contracts/LpTokenPending.sol, 209
+.loc ../contracts/LpTokenPending.sol, 208
 FALSE
 .loc ../contracts/LpTokenPending.sol, 0
 
@@ -769,7 +777,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/LpTokenPending.sol, 219
+.loc ../contracts/LpTokenPending.sol, 218
 CALLREF {
 	CALL $isSenderExpectedToken_2fda6d0c_internal_macro$
 }
@@ -782,15 +790,15 @@ SDEQ
 OR
 OR
 PUSHCONT {
-	.loc ../contracts/LpTokenPending.sol, 220
+	.loc ../contracts/LpTokenPending.sol, 219
 	GETGLOB 21
 	DEC
 	UFITS 8
 	DUP
 	SETGLOB 21
-	.loc ../contracts/LpTokenPending.sol, 213
+	.loc ../contracts/LpTokenPending.sol, 212
 	PUSHCONT {
-		.loc ../contracts/LpTokenPending.sol, 155
+		.loc ../contracts/LpTokenPending.sol, 154
 		GETGLOB 20
 		GETGLOB 19
 		GETGLOB 16
@@ -845,7 +853,7 @@ CALLREF {
 CALL $_calcValue_2fb4263c_internal_macro$
 
 .macro _calcValue_2fb4263c_internal_macro
-.loc ../contracts/LpTokenPending.sol, 226
+.loc ../contracts/LpTokenPending.sol, 225
 DUP
 FIRST
 SWAP
@@ -1202,6 +1210,17 @@ CALL $GasValues_no_obj_getTokenDataGas_304799e7_macro$
 .loc ../contracts/libraries/GasValues.sol, 46
 PUSHINT 100000000
 PUSHINT 50000
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getTransferOwnershipGas_77a4dfa4
+.type	GasValues_no_obj_getTransferOwnershipGas_77a4dfa4, @function
+CALL $GasValues_no_obj_getTransferOwnershipGas_77a4dfa4_macro$
+
+.macro GasValues_no_obj_getTransferOwnershipGas_77a4dfa4_macro
+.loc ../contracts/libraries/GasValues.sol, 53
+PUSHINT 0
+PUSHINT 80000
 PAIR
 .loc ../contracts/libraries/GasValues.sol, 0
 

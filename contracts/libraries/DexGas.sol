@@ -69,7 +69,7 @@ library DexGas {
     uint128 constant REFERRAL_REFLAST_FIXED             = 0.001 ever; // storage fee compensation for RefProject
     uint128 constant REFERRAL_REFLAST_GAS               = 100000;
     uint128 constant REFERRAL_DEPLOY_EMPTY_WALLET_GRAMS = 0.1 ever;
-    uint128 constant REFERRAL_TRANSFER_GAS              = 300000;
+    uint128 constant REFERRAL_TRANSFER_GAS              = 470000;
 
     uint128 constant OPERATION_CALLBACK                 = 0.0101 ever;
 
