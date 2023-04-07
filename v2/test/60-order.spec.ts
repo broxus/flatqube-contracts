@@ -272,6 +272,7 @@ describe('OrderTest', () => {
         ${feesTst.params.matchingNumerator}/${feesTst.params.matchingDenominator}`)
     });
 
+    // TODO make tests for orders with data expired
     describe('Direct execution Order', async () => {
         it('Check full execution with 2 buyer, case 1.1', async () => {
             console.log(`#############################\n`);
@@ -669,6 +670,54 @@ describe('OrderTest', () => {
             expect(balanceBarAcc4Start.token.toString()).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
             expect(balanceTstAcc4Start.token.toString()).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
         });
+        it('Check execution closed order BY BACKEND, case 4.2', async () => {
+            console.log(`#############################`);
+            console.log(``);
+            const balanceBarAcc3Start = await accountTokenBalances(barWallet3, barDecimals);
+            const balanceTstAcc3Start = await accountTokenBalances(tstWallet3, tstDecimals);
+            await displayLog(balanceBarAcc3Start, balanceTstAcc3Start, true, "Account3");
+
+            const balanceBarAcc4Start = await accountTokenBalances(barWallet4, barDecimals);
+            const balanceTstAcc4Start = await accountTokenBalances(tstWallet4, tstDecimals);
+            await displayLog(balanceBarAcc4Start, balanceTstAcc4Start, true, 'Account4');
+
+            TOKENS_TO_EXCHANGE1 = 15;
+            TOKENS_TO_EXCHANGE2 = 30;
+            const signer = await locklift.keystore.getSigner("5");
+
+            const payload = await RootOrderBar.buildPayloadRoot(
+                0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
+                toNano(0.1), `0x${signer.publicKey}`,
+                )
+
+            await locklift.tracing.trace(barWallet3.transfer(
+                numberString(TOKENS_TO_EXCHANGE1, barDecimals), RootOrderBar.address, payload, toNano(6)
+            ), {allowedCodes: {compute: [60]}});
+
+            const order = await RootOrderBar.getEventCreateOrder(account3);
+            const payloadLO = await order.buildPayload('1', 0.1);
+
+            await order.backendCancel(signer, 15)
+
+            await locklift.tracing.trace(tstWallet4.transfer(
+                numberString(TOKENS_TO_EXCHANGE2, tstDecimals), order.address, payloadLO, toNano(5)
+            ), {allowedCodes: {compute: [60]}});
+
+            const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
+            const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
+            await displayLog(balanceBarAcc3End, balanceTstAcc3End, false, "Account3");
+
+            const balanceBarAcc4End = await accountTokenBalances(barWallet4, barDecimals);
+            const balanceTstAcc4End = await accountTokenBalances(tstWallet4, tstDecimals);
+            await displayLog(balanceBarAcc4Start, balanceTstAcc4Start, false, 'Account4');
+
+            expect(5).to.be.equal((Number(await order.status())), 'Wrong status Limit Order');
+            expect(0).to.be.equal(Number(await(locklift.provider.getBalance(order.address))), 'Wrong Balance Ever Limit Order')
+            expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
+            expect(balanceTstAcc3Start.token.toString()).to.equal(balanceTstAcc3End.token.toString(), 'Wrong Account3 Tst balance');
+            expect(balanceBarAcc4Start.token.toString()).to.equal(balanceBarAcc4End.token.toString(), 'Wrong Account4 Bar balance');
+            expect(balanceTstAcc4Start.token.toString()).to.equal(balanceTstAcc4End.token.toString(), 'Wrong Account4 Tst balance');
+        });
     });
     describe('Execution order via DEX', async () => {
         it('Order from backend SUCCESS', async () => {
@@ -995,6 +1044,76 @@ describe('OrderTest', () => {
             // @ts-ignore
             expect(balanceBarAcc3Start.token.toString()).to.equal(balanceBarAcc3End.token.toString(), 'Wrong Account3 Bar balance');
         });
+        it('Test proxyTokensTransfer and sendGas on OrderRoot', async () => {
+            console.log(`#############################`);
+            console.log(``);
+
+            const walletRootBarAddress = (await rootTokenBar.methods.walletOf({
+                answerId: 0,
+                walletOwner: RootOrderBar.address
+            }).call())
+            const walletRootBar = await TokenWallet.from_addr(walletRootBarAddress.value0, factoryOrder.address, "factoryWalletTst");
+
+            const balanceOrderRootStart = new BigNumber(await locklift.provider.getBalance(RootOrderBar.address)).shiftedBy(-9)
+            const balanceAccount8Start = new BigNumber(await locklift.provider.getBalance(account8.address)).shiftedBy(-9)
+
+            await factoryOrder.contract.methods.sendGasRoot({
+                to: account8.address,
+                _value: toNano(1),
+                _flag: 66,
+                root: RootOrderBar.address
+            }).send({
+                from: account1.address, amount: toNano(0.2)
+            })
+            const balanceOrderRootEnd = new BigNumber(await locklift.provider.getBalance(RootOrderBar.address)).shiftedBy(-9)
+            const balanceAccount8End = new BigNumber(await locklift.provider.getBalance(account8.address)).shiftedBy(-9)
+
+            const mainCode = (await locklift.factory.getContractArtifacts("OrderRoot")).code
+            const testFactoryCode = (await locklift.factory.getContractArtifacts("TestNewOrderRoot")).code
+            await factoryOrder.setOrderRootCode(testFactoryCode)
+            let roots:Address[] = [RootOrderBar.address];
+            await factoryOrder.upgradeOrderRoot(roots)
+
+            const newRoot = await locklift.factory.getDeployedContract("TestNewOrderRoot", RootOrderBar.address)
+            // Проверяем
+
+            await locklift.tracing.trace(barWallet3.transfer(
+                numberString(50, barDecimals), RootOrderBar.address, '', toNano(6)
+            ), {allowedCodes: {compute:[60]}});
+
+
+            const barWallet8Address = await deployWallet(account8, rootTokenBar, account1)
+            const barWallet8 = await TokenWallet.from_addr(barWallet8Address, account6, 'barWallet8');
+
+            const tokenRootStart = new BigNumber(await walletRootBar.balance())
+            const tokenAccountStart = new BigNumber(await barWallet8.balance())
+
+            await locklift.tracing.trace(factoryOrder.contract.methods.proxyRootTokensTransfer({
+                _notify: true,
+                _deployWalletValue: toNano(0.1),
+                _payload: '',
+                _gasValue: toNano(0.2),
+                _remainingGasTo: account8.address,
+                _amount: numberString(50, barDecimals),
+                root: RootOrderBar.address,
+                _tokenWallet: walletRootBar.address,
+                _recipient: account8.address
+            }).send({
+                from: account1.address, amount: toNano(2)
+            }))
+
+            const tokenRootEnd = new BigNumber(await walletRootBar.balance())
+            const tokenAccountEnd = new BigNumber(await barWallet8.balance())
+
+            await factoryOrder.setOrderRootCode(mainCode)
+            await factoryOrder.upgradeOrderRoot(roots)
+
+            expect(tokenRootStart.minus(tokenRootEnd).isGreaterThanOrEqualTo(new BigNumber(numberString(50, barDecimals)))).to.equal(true, 'Wrong gas Balance');
+            expect(tokenAccountEnd.minus(tokenAccountStart).isGreaterThanOrEqualTo(new BigNumber(numberString(50, barDecimals)))).to.equal(true, 'Wrong gas Balance');
+            expect(balanceOrderRootStart.minus(balanceOrderRootEnd).isGreaterThanOrEqualTo(1)).to.equal(true, 'Wrong gas Balance');
+            expect(balanceAccount8End.minus(balanceAccount8Start).isGreaterThanOrEqualTo(1)).to.equal(true, 'Wrong gas Balance');
+        });
+
     });
     describe('Matching orders', async  () => {
         it('Matching on full filled order 1 and 2', async () => {
@@ -2265,7 +2384,7 @@ describe('OrderTest', () => {
             console.log(`#############################\n`);
 
             console.log(`Upgrade OrderRoot...`)
-            const NEW_VERSION = 2
+            const NEW_VERSION = 4
 
             const testFactoryCode = (await locklift.factory.getContractArtifacts("TestNewOrderRoot")).code
             await factoryOrder.setOrderRootCode(testFactoryCode)
