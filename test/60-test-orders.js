@@ -37,8 +37,6 @@ let account6;
 let barWallet6;
 let tstWallet6;
 
-// TODO make tests for orders with data expired
-
 describe('Check orders', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
 

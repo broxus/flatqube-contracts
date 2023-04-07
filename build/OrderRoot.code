@@ -1399,7 +1399,7 @@ ENDC
 BLKDROP2 3, 1
 .loc ../contracts/OrderRoot.tsol, 0
 
-.macro onAcceptTokensTransfer
+.macro proxyTokensTransfer
 DROP
 GETGLOB 6
 THROWIFNOT 76
@@ -1409,6 +1409,148 @@ IFREF {
 	CALL $c4_to_c7$
 }
 .loc ../contracts/OrderRoot.tsol, 199
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDU 128
+LDU 128
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 128
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDI 1
+LDREF
+ENDS
+.loc ../contracts/OrderRoot.tsol, 0
+CALLREF {
+	CALL $proxyTokensTransfer_00745f71_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro proxyTokensTransfer_00745f71_internal_macro
+.loc ../contracts/OrderRoot.tsol, 46
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 10
+SDEQ
+AND
+THROWIFNOT 314
+.loc ../contracts/OrderRoot.tsol, 210
+ACCEPT
+.loc ../contracts/OrderRoot.tsol, 212
+REVERSE 8, 0
+NEWC
+STSLICECONST x62_
+STSLICE
+SWAP
+STGRAMS
+PUSHINT 1
+STUR 107
+ROLLREV 6
+NEWC
+STSLICECONST x73e22143
+STU 128
+STSLICE
+STU 128
+ROLLREV 3
+NEWC
+STSLICE
+STI 1
+STREF
+STBREFR
+STBREFR
+ENDC
+PUSHINT 1
+SENDRAWMSG
+.loc ../contracts/OrderRoot.tsol, 0
+
+.macro sendGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/OrderRoot.tsol, 225
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDU 128
+LDU 16
+ENDS
+.loc ../contracts/OrderRoot.tsol, 0
+CALLREF {
+	CALL $sendGas_344a5ee6_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro sendGas_344a5ee6_internal_macro
+.loc ../contracts/OrderRoot.tsol, 46
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 10
+SDEQ
+AND
+THROWIFNOT 314
+.loc ../contracts/OrderRoot.tsol, 231
+ACCEPT
+.loc ../contracts/OrderRoot.tsol, 232
+XCHG S2
+NEWC
+STSLICECONST x42_
+STSLICE
+SWAP
+STGRAMS
+PUSHINT 107
+STZEROES
+ENDC
+SWAP
+SENDRAWMSG
+.loc ../contracts/OrderRoot.tsol, 0
+
+.macro onAcceptTokensTransfer
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/OrderRoot.tsol, 235
 OVER
 PUSHCONT {
 	LDREF
@@ -1443,25 +1585,25 @@ CALLREF {
 THROW 0
 
 .macro onAcceptTokensTransfer_e63f2284_internal_macro
-.loc ../contracts/OrderRoot.tsol, 207
+.loc ../contracts/OrderRoot.tsol, 243
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
 PLDU 256
 THROWIFNOT 100
-.loc ../contracts/OrderRoot.tsol, 209
+.loc ../contracts/OrderRoot.tsol, 245
 PUSHINT 53
-.loc ../contracts/OrderRoot.tsol, 211
+.loc ../contracts/OrderRoot.tsol, 247
 OVER
 CTOS
-.loc ../contracts/OrderRoot.tsol, 212
+.loc ../contracts/OrderRoot.tsol, 248
 PUSHINT 0
-.loc ../contracts/OrderRoot.tsol, 213
+.loc ../contracts/OrderRoot.tsol, 249
 OVER
 SBITS
 GTINT 63
 PUSHCONT {
-	.loc ../contracts/OrderRoot.tsol, 214
+	.loc ../contracts/OrderRoot.tsol, 250
 	OVER
 	LDU 64
 	POP S3
@@ -1469,24 +1611,24 @@ PUSHCONT {
 	.loc ../contracts/OrderRoot.tsol, 0
 }
 IF
-.loc ../contracts/OrderRoot.tsol, 217
+.loc ../contracts/OrderRoot.tsol, 253
 OVER
 LDREF
 POP S3
-.loc ../contracts/OrderRoot.tsol, 219
+.loc ../contracts/OrderRoot.tsol, 255
 PUSHINT 0
-.loc ../contracts/OrderRoot.tsol, 220
+.loc ../contracts/OrderRoot.tsol, 256
 PUSHREF {
 }
-.loc ../contracts/OrderRoot.tsol, 221
+.loc ../contracts/OrderRoot.tsol, 257
 PUSH S4
 SREFS
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/OrderRoot.tsol, 222
+	.loc ../contracts/OrderRoot.tsol, 258
 	TRUE
 	POP S2
-	.loc ../contracts/OrderRoot.tsol, 223
+	.loc ../contracts/OrderRoot.tsol, 259
 	PUSH S4
 	LDREF
 	POP S6
@@ -1494,7 +1636,7 @@ PUSHCONT {
 	.loc ../contracts/OrderRoot.tsol, 0
 }
 IF
-.loc ../contracts/OrderRoot.tsol, 226
+.loc ../contracts/OrderRoot.tsol, 262
 GETGLOB 9
 DUP
 PARSEMSGADDR
@@ -1504,10 +1646,10 @@ PUSH2 S6, S4
 CALLREF {
 	CALL $_checkOperationData_fbcfd402_internal_macro$
 }
-.loc ../contracts/OrderRoot.tsol, 233
+.loc ../contracts/OrderRoot.tsol, 269
 DUP
 PUSHCONT {
-	.loc ../contracts/OrderRoot.tsol, 234
+	.loc ../contracts/OrderRoot.tsol, 270
 	PUSH S5
 	LDMSGADDR
 	LDMSGADDR
@@ -1515,19 +1657,19 @@ PUSHCONT {
 	LDU 64
 	LDU 64
 	POP S11
-	.loc ../contracts/OrderRoot.tsol, 242
+	.loc ../contracts/OrderRoot.tsol, 278
 	PUSH S4
 	PARSEMSGADDR
 	INDEX 3
 	PLDU 256
 	PUSHCONT {
-		.loc ../contracts/OrderRoot.tsol, 243
+		.loc ../contracts/OrderRoot.tsol, 279
 		PUSH S15
 		POP S5
 		.loc ../contracts/OrderRoot.tsol, 0
 	}
 	IFNOT
-	.loc ../contracts/OrderRoot.tsol, 246
+	.loc ../contracts/OrderRoot.tsol, 282
 	PUSH S2
 	PUSH S17
 	SWAP2
@@ -1536,7 +1678,7 @@ PUSHCONT {
 	CALLREF {
 		CALL $_createOrder_28f47520_internal_macro$
 	}
-	.loc ../contracts/OrderRoot.tsol, 256
+	.loc ../contracts/OrderRoot.tsol, 292
 	XCPU S1, S2
 	PUSH S16
 	GETGLOB 11
@@ -1566,11 +1708,11 @@ PUSHCONT {
 	ENDC
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/OrderRoot.tsol, 258
+	.loc ../contracts/OrderRoot.tsol, 294
 	PUSH S7
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/OrderRoot.tsol, 259
+		.loc ../contracts/OrderRoot.tsol, 295
 		PUSH3 S0, S7, S2
 		FALSE
 		NEWC
@@ -1591,11 +1733,11 @@ PUSHCONT {
 		ADDCONST 2
 		UFITS 8
 		SENDRAWMSG
-		.loc ../contracts/OrderRoot.tsol, 265
+		.loc ../contracts/OrderRoot.tsol, 301
 		PUSH2 S2, S13
 		SDEQ
 		PUSHCONT {
-			.loc ../contracts/OrderRoot.tsol, 266
+			.loc ../contracts/OrderRoot.tsol, 302
 			PUSH3 S0, S7, S13
 			FALSE
 			NEWC
@@ -1622,7 +1764,7 @@ PUSHCONT {
 		.loc ../contracts/OrderRoot.tsol, 0
 	}
 	IF
-	.loc ../contracts/OrderRoot.tsol, 274
+	.loc ../contracts/OrderRoot.tsol, 310
 	PUSHINT 100000000
 	ROLL 3
 	PUSH S3
@@ -1641,7 +1783,7 @@ PUSHCONT {
 	ENDC
 	PUSHINT 1
 	SENDRAWMSG
-	.loc ../contracts/OrderRoot.tsol, 280
+	.loc ../contracts/OrderRoot.tsol, 316
 	PUSHINT 100000000
 	GETGLOB 19
 	INDEX 4
@@ -1661,11 +1803,11 @@ PUSHCONT {
 	ENDC
 	PUSHINT 1
 	SENDRAWMSG
-	.loc ../contracts/OrderRoot.tsol, 286
+	.loc ../contracts/OrderRoot.tsol, 322
 	PUSHINT 1000000000
 	PUSHINT 0
 	RAWRESERVE
-	.loc ../contracts/OrderRoot.tsol, 287
+	.loc ../contracts/OrderRoot.tsol, 323
 	PUSH S8
 	TRUE
 	PUSH S2
@@ -1700,10 +1842,10 @@ PUSHCONT {
 	.loc ../contracts/OrderRoot.tsol, 0
 }
 IFNOT
-.loc ../contracts/OrderRoot.tsol, 301
+.loc ../contracts/OrderRoot.tsol, 337
 DUP
 PUSHCONT {
-	.loc ../contracts/OrderRoot.tsol, 302
+	.loc ../contracts/OrderRoot.tsol, 338
 	DUP
 	PUSHSLICE xc00000000000000000000000000d66a836
 	NEWC
@@ -1712,11 +1854,11 @@ PUSHCONT {
 	ENDC
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/OrderRoot.tsol, 303
+	.loc ../contracts/OrderRoot.tsol, 339
 	PUSH S4
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/OrderRoot.tsol, 304
+		.loc ../contracts/OrderRoot.tsol, 340
 		PUSH3 S0, S4, S10
 		FALSE
 		NEWC
@@ -1736,7 +1878,7 @@ PUSHCONT {
 		.loc ../contracts/OrderRoot.tsol, 0
 	}
 	IF
-	.loc ../contracts/OrderRoot.tsol, 311
+	.loc ../contracts/OrderRoot.tsol, 347
 	GETPARAM 7
 	FIRST
 	DEPTH
@@ -1746,7 +1888,7 @@ PUSHCONT {
 	UFITS 128
 	PUSHINT 0
 	RAWRESERVE
-	.loc ../contracts/OrderRoot.tsol, 313
+	.loc ../contracts/OrderRoot.tsol, 349
 	PUSH3 S6, S0, S1
 	CALLREF {
 		CALL $OrderPayloads_no_obj_buildCancelPayloadOrderRoot_847b3495_macro$
@@ -1792,7 +1934,7 @@ BLKDROP 13
 CALL $_checkOperationData_fbcfd402_internal_macro$
 
 .macro _checkOperationData_fbcfd402_internal_macro
-.loc ../contracts/OrderRoot.tsol, 334
+.loc ../contracts/OrderRoot.tsol, 370
 ROT
 PUSHINT 6000000000
 LESS
@@ -1801,7 +1943,7 @@ PUSHCONT {
 	PUSHINT 200
 }
 IFJMP
-.loc ../contracts/OrderRoot.tsol, 335
+.loc ../contracts/OrderRoot.tsol, 371
 ROT
 GETGLOB 14
 SDEQ
@@ -1810,9 +1952,9 @@ PUSHCONT {
 	PUSHINT 201
 }
 IFNOTJMP
-.loc ../contracts/OrderRoot.tsol, 336
+.loc ../contracts/OrderRoot.tsol, 372
 CTOS
-.loc ../contracts/OrderRoot.tsol, 337
+.loc ../contracts/OrderRoot.tsol, 373
 SWAP
 SBITS
 PUSHINT 790
@@ -1826,7 +1968,7 @@ PUSHCONT {
 	PUSHINT 202
 }
 IFJMP
-.loc ../contracts/OrderRoot.tsol, 339
+.loc ../contracts/OrderRoot.tsol, 375
 PUSHINT 0
 .loc ../contracts/OrderRoot.tsol, 0
 
@@ -1835,7 +1977,7 @@ PUSHINT 0
 CALL $_createOrder_28f47520_internal_macro$
 
 .macro _createOrder_28f47520_internal_macro
-.loc ../contracts/OrderRoot.tsol, 351
+.loc ../contracts/OrderRoot.tsol, 387
 GETGLOB 17
 SWAP
 GETGLOB 19
@@ -1925,7 +2067,7 @@ SENDRAWMSG
 CALL $buildState_4d117d4f_internal_macro$
 
 .macro buildState_4d117d4f_internal_macro
-.loc ../contracts/OrderRoot.tsol, 364
+.loc ../contracts/OrderRoot.tsol, 400
 PUSHINT 0
 NEWC
 STU 256
@@ -1998,7 +2140,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/OrderRoot.tsol, 380
+.loc ../contracts/OrderRoot.tsol, 416
 LDREF
 LDU 32
 ENDS
@@ -2024,7 +2166,7 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 314
-.loc ../contracts/OrderRoot.tsol, 381
+.loc ../contracts/OrderRoot.tsol, 417
 GETPARAM 7
 FIRST
 DEPTH
@@ -2034,15 +2176,15 @@ SUB
 UFITS 128
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/OrderRoot.tsol, 383
+.loc ../contracts/OrderRoot.tsol, 419
 GETGLOB 16
-.loc ../contracts/OrderRoot.tsol, 384
+.loc ../contracts/OrderRoot.tsol, 420
 SWAP
 SETGLOB 16
-.loc ../contracts/OrderRoot.tsol, 385
+.loc ../contracts/OrderRoot.tsol, 421
 SWAP
 SETGLOB 17
-.loc ../contracts/OrderRoot.tsol, 387
+.loc ../contracts/OrderRoot.tsol, 423
 GETGLOB 16
 SWAP
 PUSHSLICE xc0000000000000000000000000554e07fd
@@ -2053,7 +2195,7 @@ STU 32
 ENDC
 PUSHINT 0
 SENDRAWMSG
-.loc ../contracts/OrderRoot.tsol, 388
+.loc ../contracts/OrderRoot.tsol, 424
 GETGLOB 10
 NEWC
 STSLICECONST x42_
@@ -2076,7 +2218,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/OrderRoot.tsol, 391
+.loc ../contracts/OrderRoot.tsol, 427
 OVER
 PUSHCONT {
 	LDREF
@@ -2114,12 +2256,12 @@ GETGLOB 10
 SDEQ
 AND
 THROWIFNOT 314
-.loc ../contracts/OrderRoot.tsol, 396
+.loc ../contracts/OrderRoot.tsol, 432
 GETGLOB 15
 PUSH S2
 EQUAL
 PUSHCONT {
-	.loc ../contracts/OrderRoot.tsol, 397
+	.loc ../contracts/OrderRoot.tsol, 433
 	GETPARAM 7
 	FIRST
 	DEPTH
@@ -2129,7 +2271,7 @@ PUSHCONT {
 	UFITS 128
 	PUSHINT 0
 	RAWRESERVE
-	.loc ../contracts/OrderRoot.tsol, 398
+	.loc ../contracts/OrderRoot.tsol, 434
 	DUP
 	NEWC
 	STSLICECONST x62_
@@ -2143,7 +2285,7 @@ PUSHCONT {
 	SENDRAWMSG
 }
 PUSHCONT {
-	.loc ../contracts/OrderRoot.tsol, 400
+	.loc ../contracts/OrderRoot.tsol, 436
 	OVER
 	PUSHSLICE xc000000000000000000000000071df5078
 	NEWC
@@ -2152,7 +2294,7 @@ PUSHCONT {
 	ENDC
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/OrderRoot.tsol, 402
+	.loc ../contracts/OrderRoot.tsol, 438
 	GETGLOB 18
 	GETGLOB 12
 	NEWC
@@ -2199,10 +2341,10 @@ PUSHCONT {
 	STBREFR
 	STBREFR
 	ENDC
-	.loc ../contracts/OrderRoot.tsol, 407
+	.loc ../contracts/OrderRoot.tsol, 443
 	PUSH S3
 	SETCODE
-	.loc ../contracts/OrderRoot.tsol, 408
+	.loc ../contracts/OrderRoot.tsol, 444
 	PUSH S3
 	CTOS
 	DUP
@@ -2217,7 +2359,7 @@ PUSHCONT {
 	CTOS
 	BLESS
 	POP C3
-	.loc ../contracts/OrderRoot.tsol, 410
+	.loc ../contracts/OrderRoot.tsol, 446
 	CALLREF {
 		CALL $:onCodeUpgrade$
 	}
@@ -2228,11 +2370,11 @@ BLKDROP 3
 
 .internal-alias :onCodeUpgrade, 2
 .internal :onCodeUpgrade
-.loc ../contracts/OrderRoot.tsol, 415
+.loc ../contracts/OrderRoot.tsol, 451
 PUSHINT 2000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/OrderRoot.tsol, 416
+.loc ../contracts/OrderRoot.tsol, 452
 PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
@@ -2270,9 +2412,9 @@ PUSHREFSLICE {
 }
 TUPLE 5
 SETGLOB 19
-.loc ../contracts/OrderRoot.tsol, 418
+.loc ../contracts/OrderRoot.tsol, 454
 PUSHINT 0
-.loc ../contracts/OrderRoot.tsol, 420
+.loc ../contracts/OrderRoot.tsol, 456
 SWAP
 CTOS
 LDMSGADDR
@@ -2315,7 +2457,7 @@ SETGLOB 16
 SETGLOB 13
 SETGLOB 19
 SETGLOB 17
-.loc ../contracts/OrderRoot.tsol, 436
+.loc ../contracts/OrderRoot.tsol, 472
 CTOS
 LDMSGADDR
 LDREF
@@ -2323,13 +2465,13 @@ ENDS
 SWAP
 SETGLOB 12
 SETGLOB 18
-.loc ../contracts/OrderRoot.tsol, 438
+.loc ../contracts/OrderRoot.tsol, 474
 PUSHCONT {
-	.loc ../contracts/OrderRoot.tsol, 458
+	.loc ../contracts/OrderRoot.tsol, 494
 	GETGLOB 10
 }
 PUSHCONT {
-	.loc ../contracts/OrderRoot.tsol, 439
+	.loc ../contracts/OrderRoot.tsol, 475
 	PUSHINT 100000000
 	MYADDR
 	GETGLOB 11
@@ -2348,14 +2490,14 @@ PUSHCONT {
 	ENDC
 	PUSHINT 1
 	SENDRAWMSG
-	.loc ../contracts/OrderRoot.tsol, 448
+	.loc ../contracts/OrderRoot.tsol, 484
 	GETGLOB 19
 	INDEX 4
 	PARSEMSGADDR
 	INDEX 3
 	PLDU 256
 	PUSHCONT {
-		.loc ../contracts/OrderRoot.tsol, 449
+		.loc ../contracts/OrderRoot.tsol, 485
 		GETGLOB 19
 		GETGLOB 10
 		SETINDEX 4
@@ -2363,7 +2505,7 @@ PUSHCONT {
 		.loc ../contracts/OrderRoot.tsol, 0
 	}
 	IFNOT
-	.loc ../contracts/OrderRoot.tsol, 452
+	.loc ../contracts/OrderRoot.tsol, 488
 	GETGLOB 13
 }
 IFELSE
@@ -2702,7 +2844,7 @@ ENDC
 
 .macro public_function_selector
 DUP
-PUSHINT 1688565960
+PUSHINT 1536809146
 LEQ
 IFJMPREF {
 	DUP
@@ -2735,9 +2877,15 @@ IFJMPREF {
 		}
 	}
 	DUP
-	PUSHINT 1120820710
+	PUSHINT 819026985
 	LEQ
 	IFJMPREF {
+		DUP
+		PUSHINT 739445888
+		EQUAL
+		IFJMPREF {
+			CALL $sendGas$
+		}
 		DUP
 		PUSHINT 756491945
 		EQUAL
@@ -2756,17 +2904,23 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $onTokenWalletBeneficiary$
 		}
+	}
+	DUP
+	PUSHINT 1295334822
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 872557582
+		EQUAL
+		IFJMPREF {
+			CALL $proxyTokensTransfer$
+		}
 		DUP
 		PUSHINT 1120820710
 		EQUAL
 		IFJMPREF {
 			CALL $setOrderCode$
 		}
-	}
-	DUP
-	PUSHINT 1334243596
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1236465367
 		EQUAL
@@ -2779,6 +2933,11 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $expectedAddressOrder$
 		}
+	}
+	DUP
+	PUSHINT 1536809146
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1316209144
 		EQUAL
@@ -2791,11 +2950,6 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getDex$
 		}
-	}
-	DUP
-	PUSHINT 1688565960
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1429374416
 		EQUAL
@@ -2808,24 +2962,24 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getFeeParams$
 		}
-		DUP
-		PUSHINT 1601949745
-		EQUAL
-		IFJMPREF {
-			CALL $setFeeParams$
-		}
-		DUP
-		PUSHINT 1688565960
-		EQUAL
-		IFJMPREF {
-			CALL $upgrade$
-		}
 	}
 }
 DUP
 PUSHINT 1893244873
 LEQ
 IFJMPREF {
+	DUP
+	PUSHINT 1601949745
+	EQUAL
+	IFJMPREF {
+		CALL $setFeeParams$
+	}
+	DUP
+	PUSHINT 1688565960
+	EQUAL
+	IFJMPREF {
+		CALL $upgrade$
+	}
 	DUP
 	PUSHINT 1756716863
 	EQUAL

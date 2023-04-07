@@ -687,7 +687,7 @@ describe('OrderTest', () => {
 
             const payload = await RootOrderBar.buildPayloadRoot(
                 0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
-                toNano(0.1), `0x${signer.publicKey}`,
+                `0x${signer.publicKey}`, `0x${signer.publicKey}`
                 )
 
             await locklift.tracing.trace(barWallet3.transfer(
