@@ -21,7 +21,9 @@ const config: LockliftConfig = {
     version: "0.62.0",
     externalContracts: {
       'precompiled': [
-          'DexPlatform'
+          'DexPlatform',
+          'OrderRootPlatform',
+          'OrderPlatform'
       ],
       'node_modules/tip3/build': [
         'TokenRootUpgradeable',

@@ -40,7 +40,6 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
 
     OrderFeeParams fee;
 
-    //TODO add date expire order-а
     constructor() public { revert(); }
 
     modifier onlyFactory() {
@@ -169,10 +168,11 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         address user,
         address tokenReceive,
         uint128 expectedTokenAmount,
-        uint128 deployWalletValue,
         uint256 backPK,
         uint256 backMatchingPK,
-        optional(TvmCell) cancelPayload
+        optional(TvmCell) cancelPayload,
+        optional(uint64) startTime,
+        optional(uint64) durationTime
     ) external pure returns (TvmCell) {
         TvmBuilder builderBackendPK;
         builderBackendPK.store(backPK);
@@ -183,7 +183,10 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         builder.store(user);
         builder.store(tokenReceive);
         builder.store(expectedTokenAmount);
-        builder.store(deployWalletValue);
+
+        builder.store(startTime.hasValue() && durationTime.hasValue() ? startTime.get() : now);
+        builder.store(durationTime.hasValue() ? durationTime.get() : 0);
+
         builder.storeRef(builderBackendPK);
 
         if (cancelPayload.hasValue()) {
@@ -232,8 +235,9 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 address user,
                 address receiveToken,
                 uint128 expectedAmount,
-                uint128 deployWalletValue //????
-            ) = payloadSlice.decode(address, address, uint128, uint128);
+                uint64 startTime,
+                uint64 durationTime
+            ) = payloadSlice.decode(address, address, uint128, uint64, uint64);
 
             if (user.value == 0) {
                 user = sender;
@@ -242,6 +246,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             address orderAddress = _createOrder(
                 expectedAmount,
                 amount,
+                startTime,
+                durationTime,
                 user,
                 receiveToken,
                 dataPK
@@ -336,6 +342,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
     function _createOrder(
         uint128 _expectedAmount,
         uint128 _amount,
+        uint64 _startTime,
+        uint64 _durationTime,
         address _sender,
         address _receiveToken,
         TvmCell _dataPK
@@ -347,7 +355,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                     ),
             value: OrderGas.DEPLOY_ORDER
         }(
-            _amount, _expectedAmount,
+            _amount, _expectedAmount, _startTime, _durationTime,
             versionOrder, fee, _dataPK, orderCode
         ));
     }

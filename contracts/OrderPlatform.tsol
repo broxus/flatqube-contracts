@@ -20,6 +20,8 @@ contract OrderPlatform is IOrderFeeParams {
     constructor(
         uint128 _initialAmount,
         uint128 _expectedAmount,
+        uint64 _startTime,
+        uint64 _durationTime,
         uint32 _version,
         OrderFeeParams _fee,
         TvmCell backendPK,
@@ -29,6 +31,8 @@ contract OrderPlatform is IOrderFeeParams {
             initialize(
                 _initialAmount,
                 _expectedAmount,
+                _startTime,
+                _durationTime,
                 _version,
                 _fee,
                 backendPK,
@@ -46,6 +50,8 @@ contract OrderPlatform is IOrderFeeParams {
     function initialize(
         uint128 _initialAmount,
         uint128 _expectedAmount,
+        uint64 _startTime,
+        uint64 _durationTime,
         uint32 _version,
         OrderFeeParams _fee,
         TvmCell backendPK,
@@ -65,6 +71,9 @@ contract OrderPlatform is IOrderFeeParams {
             _expectedAmount,
             uint32(0),
             _version,
+            _startTime,
+            _durationTime,
+            uint64(0),
             _fee,
             backendPK,
             empty

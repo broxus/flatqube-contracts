@@ -12,6 +12,7 @@ import "../structures/IOrderStructures.tsol";
 
 library OrderPayloads {
 
+    event DD1 (uint128, uint128, uint128);
     function buildOrderPayload(
         uint8 op,
         uint64 callbackId,
@@ -89,7 +90,8 @@ library OrderPayloads {
         uint128 deployWalletValue,
         uint128 alienSpentAmount,
         uint128 expectedAmount,
-        uint128 reward
+        uint128 reward,
+        address tokenReward
     ) public returns(TvmCell) {
         TvmBuilder builder;
         builder.store(op);
@@ -99,6 +101,11 @@ library OrderPayloads {
         builder.store(alienSpentAmount);
         builder.store(expectedAmount);
         builder.store(reward);
+
+        TvmBuilder builder2;
+        builder2.store(tokenReward);
+
+        builder.storeRef(builder2);
 
         return builder.toCell();
     }
@@ -132,7 +139,8 @@ library OrderPayloads {
         uint128,
         uint128,
         uint128,
-        uint128
+        uint128,
+        address
     ){
         TvmSlice payloadSlice = _payload.toSlice();
         if (state == OrderStatus.SwapInProgress && payloadSlice.bits() >= 16) {
@@ -159,6 +167,7 @@ library OrderPayloads {
         uint128 alienSpentAmount;
         uint128 expectedAmount;
         uint128 reward;
+        address tokenReward;
 
         if (isValid) {
             if (state == OrderStatus.Initialize || state == OrderStatus.AwaitTokens) {
@@ -214,10 +223,16 @@ library OrderPayloads {
             if (payloadSlice.bits() >= 256) {
                 if (op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE) {
                     (expectedAmount, reward) = payloadSlice.decode(uint128, uint128);
+                    if (payloadSlice.refs() >= 1) {
+                        TvmSlice refSlice = payloadSlice.loadRefAsSlice();
+                        tokenReward = refSlice.decode(address);
+                    }
                 } else if (op == OrderOperationTypes.MATCHING_ORDER_TRANSFER){
                     sendGasInMatching = payloadSlice.decode(address);
                 }
             }
+
+            emit DD1(alienSpentAmount, expectedAmount, reward);
         }
 
         return (
@@ -230,7 +245,8 @@ library OrderPayloads {
             deployWalletValue,
             alienSpentAmount,
             expectedAmount,
-            reward
+            reward,
+            tokenReward
         );
     }
 

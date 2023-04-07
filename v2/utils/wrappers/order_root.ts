@@ -58,20 +58,22 @@ export class OrderRoot {
         user: Address,
         tokenReceive: Address,
         expectedTokenAmount: number | string,
-        deployWalletValue: number | string,
         backPK: number | string,
         backMatchingPK:  number | string,
         cancelPayload: string = '',
+        startTime: number = 0,
+        durationTime: number = 0
     ) {
         return (await this.contract.methods.buildPayload({
             callbackId: callbackId,
             user: user,
             tokenReceive: tokenReceive,
             expectedTokenAmount: expectedTokenAmount,
-            deployWalletValue: deployWalletValue,
             backPK: backPK,
             backMatchingPK: backMatchingPK,
-            cancelPayload: cancelPayload
+            cancelPayload: cancelPayload,
+            startTime: startTime,
+            durationTime: durationTime
         }).call()).value0;
     }
 
