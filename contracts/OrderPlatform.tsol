@@ -20,23 +20,21 @@ contract OrderPlatform is IOrderFeeParams {
     constructor(
         uint128 _initialAmount,
         uint128 _expectedAmount,
-        uint64 _startTime,
-        uint64 _durationTime,
         uint32 _version,
         OrderFeeParams _fee,
         TvmCell backendPK,
-        TvmCell _code
+        TvmCell _code,
+        TvmCell _customParams
     ) public {
         if (msg.sender.value != 0 && msg.sender == root) {
             initialize(
                 _initialAmount,
                 _expectedAmount,
-                _startTime,
-                _durationTime,
                 _version,
                 _fee,
                 backendPK,
-                _code
+                _code,
+                _customParams
             );
         } else {
             owner.transfer({
@@ -50,14 +48,12 @@ contract OrderPlatform is IOrderFeeParams {
     function initialize(
         uint128 _initialAmount,
         uint128 _expectedAmount,
-        uint64 _startTime,
-        uint64 _durationTime,
         uint32 _version,
         OrderFeeParams _fee,
         TvmCell backendPK,
-        TvmCell code
+        TvmCell code,
+        TvmCell _customParams
     ) private {
-        TvmCell empty;
         TvmCell data = abi.encode(
             factory,
             root,
@@ -71,12 +67,10 @@ contract OrderPlatform is IOrderFeeParams {
             _expectedAmount,
             uint32(0),
             _version,
-            _startTime,
-            _durationTime,
-            uint64(0),
             _fee,
             backendPK,
-            empty
+            _customParams
+
         );
         tvm.setcode(code);
         tvm.setCurrentCode(code);

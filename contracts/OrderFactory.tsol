@@ -399,35 +399,32 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 
 			_createOrderRoot(token);
 
-			if (callbackId > 0) {
-				IOrderFactoryCallbacks(msg.sender).onOrderRootCreateSuccess{
-					value: 0,
-					flag: MsgFlag.ALL_NOT_RESERVED,
-					bounce: false
-				}(
-					callbackId,
-					IOrderRootCreateResult.OrderRootCreateResult(
-						address(this),
-						token,
-						uint32(0),
-						versionOrderRoot,
-						msg.sender
-					)
-				);
-			}
+			IOrderFactoryCallbacks(msg.sender).onOrderRootCreateSuccess{
+				value: 0,
+				flag: MsgFlag.ALL_NOT_RESERVED,
+				bounce: false
+			}(
+				callbackId,
+				IOrderRootCreateResult.OrderRootCreateResult(
+					address(this),
+					token,
+					uint32(0),
+					versionOrderRoot,
+					msg.sender
+				)
+			);
 		} else {
 			emit CreateOrderRootReject(token);
-			if (callbackId > 0) {
-				IOrderFactoryCallbacks(msg.sender).onOrderRootCreateReject{
-					value: 0,
-					flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
-					bounce: false
-				}(callbackId);
-			}
+			IOrderFactoryCallbacks(msg.sender).onOrderRootCreateReject{
+				value: 0,
+				flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+				bounce: false
+			}(callbackId);
 		}
 	}
 
 	function _createOrderRoot(address token) private view {
+		TvmCell emptyCustomParams;
 		new OrderRootPlatform {
 			stateInit: buildState(token, orderRootPlatformCode, buildParams()),
 			value: OrderGas.DEPLOY_ORDERS_ROOT,
@@ -438,7 +435,8 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 			orderRootCode,
 			orderCode,
 			msg.sender,
-			fee
+			fee,
+			emptyCustomParams
 		);
 	}
 

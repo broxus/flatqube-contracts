@@ -18,10 +18,11 @@ contract OrderRootPlatform is IOrderFeeParams {
 		TvmCell code,
 		TvmCell orderCode,
 		address sendGasTo,
-		OrderFeeParams fee
+		OrderFeeParams fee,
+		TvmCell _customParams
 	) public {
 		if (msg.sender.value != 0 && msg.sender == factory) {
-			initialize(version, versionOrder, code, orderCode, sendGasTo, fee);
+			initialize(version, versionOrder, code, orderCode, sendGasTo, fee, _customParams);
 		} else {
 			sendGasTo.transfer({
 				value: 0,
@@ -37,11 +38,12 @@ contract OrderRootPlatform is IOrderFeeParams {
 		TvmCell code,
 		TvmCell orderCode,
 		address sendGasTo,
-		OrderFeeParams fee
+		OrderFeeParams fee,
+		TvmCell customParams
 	) private {
 		TvmCell data = abi.encode(
 			factory, spentToken, address(0), uint32(0), version, versionOrder,
-			sendGasTo, fee, orderCode, params
+			sendGasTo, fee, orderCode, params, customParams
 		);
 
 		tvm.setcode(code);

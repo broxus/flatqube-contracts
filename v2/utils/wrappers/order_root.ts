@@ -60,9 +60,7 @@ export class OrderRoot {
         expectedTokenAmount: number | string,
         backPK: number | string,
         backMatchingPK:  number | string,
-        cancelPayload: string = '',
-        startTime: number = 0,
-        durationTime: number = 0
+        cancelPayload: string = ''
     ) {
         return (await this.contract.methods.buildPayload({
             callbackId: callbackId,
@@ -71,9 +69,7 @@ export class OrderRoot {
             expectedTokenAmount: expectedTokenAmount,
             backPK: backPK,
             backMatchingPK: backMatchingPK,
-            cancelPayload: cancelPayload,
-            startTime: startTime,
-            durationTime: durationTime
+            cancelPayload: cancelPayload
         }).call()).value0;
     }
 

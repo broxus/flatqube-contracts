@@ -688,7 +688,7 @@ describe('OrderTest', () => {
             const payload = await RootOrderBar.buildPayloadRoot(
                 0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
                 `0x${signer.publicKey}`, `0x${signer.publicKey}`
-                )
+            )
 
             await locklift.tracing.trace(barWallet3.transfer(
                 numberString(TOKENS_TO_EXCHANGE1, barDecimals), RootOrderBar.address, payload, toNano(6)
@@ -1113,7 +1113,6 @@ describe('OrderTest', () => {
             expect(balanceOrderRootStart.minus(balanceOrderRootEnd).isGreaterThanOrEqualTo(1)).to.equal(true, 'Wrong gas Balance');
             expect(balanceAccount8End.minus(balanceAccount8Start).isGreaterThanOrEqualTo(1)).to.equal(true, 'Wrong gas Balance');
         });
-
     });
     describe('Matching orders', async  () => {
         it('Matching on full filled order 1 and 2', async () => {

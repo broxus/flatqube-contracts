@@ -70,10 +70,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 
     mapping (address => uint128) internal tmp_transactions;
 
-    uint64 startTime;
-    uint64 durationTime;
-    uint64 endTime;
-
     string newTestField;
 
     constructor() public { revert(); }
@@ -1056,10 +1052,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
             dexPair,
             msg.sender,
             swapAttempt,
-            matchingOrder,
-            startTime,
-            durationTime,
-            endTime
+            matchingOrder
         );
     }
 
@@ -1228,7 +1221,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 
             TvmCell data = abi.encode(
                 factory, root, owner, spentToken, receiveToken, timeTx, nowTx, abi.encode(dexRoot, orderPlatformCode),
-                initialAmount, expectedAmount, version, _newVersion, startTime, durationTime, endTime, fee, abi.encode(backPK, backMatchingPK),
+                initialAmount, expectedAmount, version, _newVersion, fee, abi.encode(backPK, backMatchingPK),
                 abi.encode(currentAmountSpentToken, currentAmountReceiveToken, dexPair, spentWallet, receiveWallet,
                 autoExchange, state, swapAttempt, prevState, emergencyManager, matchingOrder));
 
@@ -1242,16 +1235,16 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
     function onCodeUpgrade(TvmCell data) private {
         tvm.accept();
         uint32 _oldVersion;
+        TvmCell params;
         TvmCell _backPK;
         TvmCell _data;
-        TvmCell params;
         (
             factory, root, owner, spentToken, receiveToken, timeTx, nowTx, params,
-            initialAmount, expectedAmount, _oldVersion, version, startTime, durationTime, endTime,
+            initialAmount, expectedAmount, _oldVersion, version,
             fee, _backPK, _data
         ) = abi.decode(data,(
             address, address, address, address, address, uint64, uint64, TvmCell,
-            uint128, uint128, uint32, uint32, uint64, uint64, uint64,
+            uint128, uint128, uint32, uint32,
             OrderFeeParams, TvmCell, TvmCell)
         );
 

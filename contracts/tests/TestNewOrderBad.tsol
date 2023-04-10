@@ -71,10 +71,6 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 
 	mapping (address => uint128) internal tmp_transactions;
 
-	uint64 startTime;
-	uint64 durationTime;
-	uint64 endTime;
-
 	constructor() public { revert(); }
 
 	modifier onlyFactory() {
@@ -1062,10 +1058,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 			dexPair,
 			msg.sender,
 			swapAttempt,
-			matchingOrder,
-			startTime,
-			durationTime,
-			endTime
+			matchingOrder
 		);
 	}
 
@@ -1231,7 +1224,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 
 			TvmCell data = abi.encode(
 				factory, root, owner, spentToken, receiveToken, timeTx, nowTx, abi.encode(dexRoot, orderPlatformCode),
-				initialAmount, expectedAmount, version, _newVersion, startTime, durationTime, endTime, fee, abi.encode(backPK, backMatchingPK),
+				initialAmount, expectedAmount, version, _newVersion, fee, abi.encode(backPK, backMatchingPK),
 				abi.encode(currentAmountSpentToken, currentAmountReceiveToken, dexPair, spentWallet, receiveWallet,
 				autoExchange, state, swapAttempt, prevState, emergencyManager, matchingOrder));
 

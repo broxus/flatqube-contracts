@@ -431,6 +431,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	function _createOrderRoot(address token) private view {
+		TvmCell customParams;
 		new OrderRootPlatform {
 				stateInit: buildState(token, orderRootPlatformCode, buildParams()),
 				value: OrderGas.DEPLOY_ORDERS_ROOT,
@@ -441,7 +442,8 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 			orderRootCode,
 			orderCode,
 			msg.sender,
-			fee
+			fee,
+			customParams
 		);
 	}
 
