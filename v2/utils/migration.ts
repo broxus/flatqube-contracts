@@ -127,4 +127,13 @@ export const Constants: {
   TESTS_TIMEOUT: 120000,
 };
 
+for (let i = 0; i < 40; i++) {
+  Constants.tokens['gen' + i] = {
+    name: 'Gen' + i,
+    symbol: 'GEN' + i,
+    decimals: 9,
+    upgradeable: true
+  };
+}
+
 export const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';

@@ -2,10 +2,10 @@ import { writeFileSync } from 'fs';
 import { Address } from 'locklift';
 import { yellowBright } from 'chalk';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Migration } = require(process.cwd() + '/scripts/utils');
+import { Migration } from '../../utils/migration';
 
 const OLD_DEX_PAIR_CODE_HASH =
-  '97cc5eacd09228ae5c0cb5c4f727a5b1d12fe4cc322afd6a329771d678a69366';
+  '0afc963fd771422b9a0e8a1eeb1a1add3106eb304a531a5547335ca5f3ae5b2e';
 
 type PairEntity = {
   dexPair: Address;
@@ -17,10 +17,7 @@ type PairEntity = {
 async function exportDexPairs() {
   const migration = new Migration();
 
-  const dexRoot = await locklift.factory.getDeployedContract(
-    'DexRoot',
-    migration.getAddress('DexRoot'),
-  );
+  const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
 
   console.log('DexRoot: ' + dexRoot.address);
 

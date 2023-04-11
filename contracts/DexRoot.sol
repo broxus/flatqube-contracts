@@ -1050,7 +1050,7 @@ contract DexRoot is DexContractBase, IDexRoot {
             (code, version, pool_type, send_gas_to);
     }
 
-    function upgradePairs(
+    function upgradePools(
         PairUpgradeParam[] _params,
         uint32 _offset,
         address _remainingGasTo
@@ -1066,12 +1066,16 @@ contract DexRoot is DexContractBase, IDexRoot {
         uint takeUntil = math.min(_offset + 5, length);
 
         for (uint i = _offset; i < takeUntil; i++) {
-            _upgradePairInternal(_params[i], _remainingGasTo);
+            if (_params[i].poolType == DexPoolTypes.STABLE_POOL) {
+                _upgradePoolInternal(_params[i], _remainingGasTo);
+            } else {
+                _upgradePairInternal(_params[i], _remainingGasTo);
+            }
         }
 
         if (takeUntil < length) {
             IDexRoot(address(this))
-                .upgradePairs{
+                .upgradePools{
                     value: 0,
                     flag: MsgFlag.ALL_NOT_RESERVED,
                     bounce: false
@@ -1105,6 +1109,28 @@ contract DexRoot is DexContractBase, IDexRoot {
                 value: _calcValue(GasValues.getUpgradePoolGas()),
                 flag: MsgFlag.SENDER_PAYS_FEES
             }(code, version, _param.poolType, _remainingGasTo);
+    }
+
+    function _upgradePoolInternal(
+        PairUpgradeParam _param,
+        address _remainingGasTo
+    ) private view {
+        require(
+            _poolVersions.exists(_param.poolType) &&
+            _poolCodes.exists(_param.poolType),
+            DexErrors.UNSUPPORTED_POOL_TYPE
+        );
+
+        emit RequestedPoolUpgrade(_param.tokenRoots);
+
+        TvmCell code = _poolCodes[_param.poolType];
+        uint32 version = _poolVersions[_param.poolType];
+
+        IDexBasePool(_expectedPoolAddress(_param.tokenRoots))
+            .upgrade{
+                value: _calcValue(GasValues.getUpgradePoolGas()),
+                flag: MsgFlag.SENDER_PAYS_FEES
+        }(code, version, _param.poolType, _remainingGasTo);
     }
 
     function setPoolActive(

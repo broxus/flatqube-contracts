@@ -1,6 +1,6 @@
-import {toNano, WalletTypes} from "locklift";
+import {toNano} from "locklift";
 
-const {Migration} = require(process.cwd() + '/scripts/utils')
+import { Migration } from '../utils/migration';
 import { Command } from 'commander';
 const program = new Command();
 const migration = new Migration();
@@ -17,12 +17,9 @@ options.old_contract = options.old_contract || 'DexVaultPrev';
 options.new_contract = options.new_contract || 'DexVault';
 
 async function main() {
-  const account = await locklift.factory.accounts.addExistingAccount({
-    type: WalletTypes.EverWallet,
-    address: migration.getAddress('Account1')
-  });
+  const account = await migration.loadAccount('Account1', '0');
 
-  const dexVaultPrev = await locklift.factory.getDeployedContract(options.old_contract, migration.getAddress('DexVault'));
+  const dexVaultPrev = await migration.loadContract('DexVault', 'DexVault');
   const DexVault = await locklift.factory.getContractArtifacts(options.new_contract);
 
   console.log(`Upgrading DexVault contract: ${dexVaultPrev.address}`);

@@ -1,17 +1,11 @@
-import { toNano, WalletTypes } from 'locklift';
+import { toNano } from 'locklift';
 
-const { Migration, displayTx } = require(process.cwd() + '/scripts/utils');
+import { displayTx, Migration } from '../utils/migration';
 const migration = new Migration();
 
 async function main() {
-  const account = await locklift.factory.accounts.addExistingAccount({
-    type: WalletTypes.EverWallet,
-    address: migration.getAddress('Account1'),
-  });
-  const dexRoot = await locklift.factory.getDeployedContract(
-    'DexRoot',
-    migration.getAddress('DexRoot'),
-  );
+  const account = await migration.loadAccount('Account1', '0');
+  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
   const NewDexPair = await locklift.factory.getContractArtifacts('DexPair');
 
   console.log(`Installing new DexPair contract in DexRoot: ${dexRoot.address}`);
@@ -26,13 +20,13 @@ async function main() {
 
   const pairs_to_update = [
     {
-      left: await locklift.factory.getDeployedContract(
+      left: migration.loadContract(
         'TokenRootUpgradeable',
-        migration.getAddress('CoinRoot'),
+        'CoinRoot'
       ),
-      right: await locklift.factory.getDeployedContract(
+      right: migration.loadContract(
         'TokenRootUpgradeable',
-        migration.getAddress('FooRoot'),
+        'FooRoot'
       ),
     },
     // {
@@ -40,13 +34,13 @@ async function main() {
     //   right: await locklift.factory.getDeployedContract('TokenRootUpgradeable', migration.getAddress('BarRoot'))
     // },
     {
-      left: await locklift.factory.getDeployedContract(
+      left: migration.loadContract(
         'TokenRootUpgradeable',
-        migration.getAddress('TstRoot'),
+        'TstRoot'
       ),
-      right: await locklift.factory.getDeployedContract(
+      right: migration.loadContract(
         'TokenRootUpgradeable',
-        migration.getAddress('FooRoot'),
+        'FooRoot'
       ),
     },
   ];

@@ -1,6 +1,6 @@
-import { Address, toNano, WalletTypes } from 'locklift';
+import { Address, toNano } from 'locklift';
 
-const { Migration, displayTx } = require(process.cwd() + '/scripts/utils');
+import { displayTx, Migration } from '../utils/migration';
 import { Command } from 'commander';
 const program = new Command();
 const migration = new Migration();
@@ -38,10 +38,7 @@ async function main() {
   );
   console.log(`update-dexRoot.js`);
   console.log(`OPTIONS: `, options);
-  const account = await locklift.factory.accounts.addExistingAccount({
-    type: WalletTypes.EverWallet,
-    address: migration.getAddress('Account1'),
-  });
+  const account = await migration.loadAccount('Account1', '0');
 
   const LpTokenPending = await locklift.factory.getContractArtifacts(
     'LpTokenPending',
@@ -49,20 +46,20 @@ async function main() {
   const DexTokenVault = await locklift.factory.getContractArtifacts(
     'DexTokenVault',
   );
-  const dexRoot = await locklift.factory.getDeployedContract<'DexRoot'>(
-    options.old_contract,
-    migration.getAddress('DexRoot'),
-  );
+  const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
   const NewDexRoot = await locklift.factory.getContractArtifacts(
     options.new_contract,
   );
 
-  let tokenFactoryAddress: Address;
+  let tokenFactory;
 
   if (migration.exists('TokenFactory')) {
-    tokenFactoryAddress = migration.getAddress('TokenFactory');
+    tokenFactory = migration.loadContract('TokenFactory', 'TokenFactory');
   } else {
-    tokenFactoryAddress = DEFAULT_TOKEN_FACTORY_ADDRESS;
+    tokenFactory = await locklift.factory.getDeployedContract<'DexRoot'>(
+        options.old_contract,
+        DEFAULT_TOKEN_FACTORY_ADDRESS,
+    );
   }
 
   console.log(`Upgrading DexRoot contract: ${dexRoot.address}`);
@@ -106,7 +103,7 @@ async function main() {
   console.log('DexRoot: set token factory...');
   tx = await newDexRoot.methods
     .setTokenFactory({
-      _newTokenFactory: tokenFactoryAddress,
+      _newTokenFactory: tokenFactory.address,
       _remainingGasTo: account.address,
     })
     .send({

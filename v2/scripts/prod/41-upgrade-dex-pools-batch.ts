@@ -1,9 +1,9 @@
 import { Address, toNano, WalletTypes } from 'locklift';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Migration } = require(process.cwd() + '/scripts/utils');
+// const { Migration } = require(process.cwd() + '/scripts/utils');
 import { yellowBright } from 'chalk';
-import pairs from '../../../dex_pools.json';
-import {displayTx} from "../../utils/migration";
+import pools from '../../../dex_pools.json';
+import { Migration, displayTx} from "../../utils/migration";
 
 const TRACE = false;
 
@@ -15,10 +15,8 @@ const chunkify = <T>(arr: T[], size: number): T[][] =>
 const main = async () => {
   const migration = new Migration();
 
-  const dexRoot = await locklift.factory.getDeployedContract(
-    'DexRoot',
-    migration.getAddress('DexRoot'),
-  );
+  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+
   const dexManagerAddress = await dexRoot.methods
     .getManager({ answerId: 0 })
     .call()
@@ -32,9 +30,9 @@ const main = async () => {
   console.log('DexRoot:' + dexRoot.address);
   console.log('Manager:' + manager.address);
 
-  console.log(`Start force upgrade DexPairs. Count = ${pairs.length}`);
+  console.log(`Start force upgrade DexPools. Count = ${pools.length}`);
 
-  const params = pairs.map((p) => ({
+  const params = pools.map((p) => ({
     tokenRoots: p.tokenRoots.map((tr) => new Address(tr)),
     poolType: 3,
     pool: p.dexPool,
@@ -42,7 +40,7 @@ const main = async () => {
 
   for (const chunk of chunkify(params, 1000)) {
     const p = dexRoot.methods
-      .upgradePairs({
+      .upgradePools({
         _params: chunk.map((p) => ({
           tokenRoots: p.tokenRoots,
           poolType: p.poolType,
@@ -71,7 +69,7 @@ const main = async () => {
 
         if (events.length > 0) {
           console.log(
-            `DexPair ${pair.pool} upgraded. Current version: ${events[0].version}`,
+            `DexPool ${pair.pool} upgraded. Current version: ${events[0].version}`,
           );
         } else {
           console.log(

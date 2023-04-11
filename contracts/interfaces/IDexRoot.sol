@@ -263,7 +263,7 @@ interface IDexRoot is
         uint8 poolType;
     }
 
-    function upgradePairs(
+    function upgradePools(
         PairUpgradeParam[] _params,
         uint32 _offset,
         address _remainingGasTo
