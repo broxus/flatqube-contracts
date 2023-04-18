@@ -179,11 +179,18 @@ contract DexStablePool is
     ) external override onlyRoot {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        bool previous = active;
+
         if (_newActive) {
             _tryToActivate();
         } else {
             active = false;
         }
+
+        emit ActiveStatusUpdated({
+            current: active,
+            previous: previous
+        });
 
         _remainingGasTo.transfer({
             value: 0,
@@ -204,11 +211,13 @@ contract DexStablePool is
     }
 
     function setFeeParams(FeeParams params, address send_gas_to) override external onlyRoot {
-        require(params.denominator != 0 &&
-        (params.pool_numerator + params.beneficiary_numerator) < params.denominator &&
+        require(
+            params.denominator != 0 &&
+            (params.pool_numerator + params.beneficiary_numerator + params.referrer_numerator) < params.denominator &&
             ((params.beneficiary.value != 0 && params.beneficiary_numerator != 0) ||
             (params.beneficiary.value == 0 && params.beneficiary_numerator == 0)),
-            DexErrors.WRONG_FEE_PARAMS);
+            DexErrors.WRONG_FEE_PARAMS
+        );
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
@@ -547,7 +556,7 @@ contract DexStablePool is
 
                     if (recipient != sender_address) {
                         IDexPairOperationCallback(recipient).dexPairExchangeSuccessV2{
-                            value: DexGas.OPERATION_CALLBACK_BASE,
+                            value: DexGas.OPERATION_CALLBACK_BASE + 10,
                             flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                             bounce: false
                         }(id, false, IExchangeResultV2.ExchangeResultV2(
@@ -749,6 +758,31 @@ contract DexStablePool is
 
                                 emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
                             }
+
+                            IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
+                                value: DexGas.OPERATION_CALLBACK_BASE + 4,
+                                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                                bounce: false
+                            }(id, false, IExchangeResult.ExchangeResult(
+                                i == 0 && j == 1,
+                                tokens_amount,
+                                dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
+                                dy_result.amount
+                            ));
+
+                            if (recipient != sender_address) {
+                                IDexPairOperationCallback(recipient).dexPairExchangeSuccess{
+                                    value: DexGas.OPERATION_CALLBACK_BASE + 4,
+                                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                                    bounce: false
+                                }(id, false, IExchangeResult.ExchangeResult(
+                                    i == 0 && j == 1,
+                                    tokens_amount,
+                                    dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
+                                    dy_result.amount
+                                ));
+                            }
+
                         }
                     }
                 }
@@ -866,7 +900,7 @@ contract DexStablePool is
 
             if (recipient != sender_address) {
                 IDexPairOperationCallback(recipient).dexPairOperationCancelled{
-                    value: DexGas.OPERATION_CALLBACK_BASE,
+                    value: DexGas.OPERATION_CALLBACK_BASE + 44,
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(id);
@@ -1526,6 +1560,30 @@ contract DexStablePool is
 
                         emit ReferrerFees([TokenOperation(referrer_fee, tokenData[i].root)]);
                     }
+
+                    IDexPairOperationCallback(sender_address).dexPairExchangeSuccess{
+                        value: DexGas.OPERATION_CALLBACK_BASE + 8,
+                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                        bounce: false
+                    }(id, false, IExchangeResult.ExchangeResult(
+                        i == 0 && j == 1,
+                        spent_amount,
+                        dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
+                        dy_result.amount
+                    ));
+
+                    if (recipient != sender_address) {
+                        IDexPairOperationCallback(recipient).dexPairExchangeSuccess{
+                            value: DexGas.OPERATION_CALLBACK_BASE + 8,
+                            flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                            bounce: false
+                        }(id, false, IExchangeResult.ExchangeResult(
+                            i == 0 && j == 1,
+                            spent_amount,
+                            dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
+                            dy_result.amount
+                        ));
+                    }
                 }
             }
 
@@ -1612,7 +1670,7 @@ contract DexStablePool is
 
                             if (recipient != sender_address) {
                                 IDexPairOperationCallback(recipient).dexPairOperationCancelled{
-                                    value: DexGas.OPERATION_CALLBACK_BASE,
+                                    value: DexGas.OPERATION_CALLBACK_BASE + 44,
                                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                                     bounce: false
                                 }(id);
@@ -1648,7 +1706,7 @@ contract DexStablePool is
 
             if (recipient != sender_address) {
                 IDexPairOperationCallback(recipient).dexPairOperationCancelled{
-                    value: DexGas.OPERATION_CALLBACK_BASE,
+                    value: DexGas.OPERATION_CALLBACK_BASE + 44,
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(id);
@@ -2640,8 +2698,8 @@ contract DexStablePool is
             uint128 ideal_balance = uint128(math.muldiv(D1, old_balances[j], D0));
             uint128 new_balance = new_balances[j];
             uint128 difference = ideal_balance > new_balance ? ideal_balance - new_balance : new_balance - ideal_balance;
-            differences[i] = difference;
-            sell[i] = ideal_balance < new_balance;
+            differences[j] = difference;
+            sell[j] = ideal_balance < new_balance;
         }
 
         uint128 fee_numerator = fee.beneficiary_numerator + fee.pool_numerator + fee.referrer_numerator;
@@ -2751,7 +2809,7 @@ contract DexStablePool is
 
         if (recipient != sender_address) {
             IDexPairOperationCallback(recipient).dexPairDepositLiquiditySuccessV2{
-                value: DexGas.OPERATION_CALLBACK_BASE,
+                value: DexGas.OPERATION_CALLBACK_BASE + 2,
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 bounce: false
             }(call_id, via_account, r);
@@ -2990,7 +3048,7 @@ contract DexStablePool is
 
         if (sender_address != recipient) {
             IDexPairOperationCallback(recipient).dexPairWithdrawSuccessV2{
-                value: DexGas.OPERATION_CALLBACK_BASE,
+                value: DexGas.OPERATION_CALLBACK_BASE + 2,
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 bounce: false
             }(call_id, via_account, r);

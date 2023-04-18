@@ -89,7 +89,14 @@ contract DexStablePair is
     }
 
     // Prevent manual transfers
-    receive() external pure { revert(); }
+    receive() external pure {
+        tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
+        msg.sender.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
+    }
 
     // Prevent undefined functions call, need for bounce future Account/Root functions calls, when not upgraded
     fallback() external pure { revert();  }
@@ -164,11 +171,18 @@ contract DexStablePair is
     ) external override onlyRoot {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
+        bool previous = active;
+
         if (_newActive) {
             _tryToActivate();
         } else {
             active = false;
         }
+
+        emit ActiveStatusUpdated({
+            current: active,
+            previous: previous
+        });
 
         _remainingGasTo.transfer({
             value: 0,
@@ -189,11 +203,13 @@ contract DexStablePair is
     }
 
     function setFeeParams(FeeParams params, address send_gas_to) override external onlyRoot {
-        require(params.denominator != 0 &&
-                (params.pool_numerator + params.beneficiary_numerator) < params.denominator &&
-                ((params.beneficiary.value != 0 && params.beneficiary_numerator != 0) ||
-                 (params.beneficiary.value == 0 && params.beneficiary_numerator == 0)),
-            DexErrors.WRONG_FEE_PARAMS);
+        require(
+            params.denominator != 0 &&
+            (params.pool_numerator + params.beneficiary_numerator + params.referrer_numerator) < params.denominator &&
+            ((params.beneficiary.value != 0 && params.beneficiary_numerator != 0) ||
+            (params.beneficiary.value == 0 && params.beneficiary_numerator == 0)),
+            DexErrors.WRONG_FEE_PARAMS
+        );
 
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
@@ -422,7 +438,7 @@ contract DexStablePair is
 
                         if (recipient != sender_address) {
                             IDexPairOperationCallback(recipient).dexPairWithdrawSuccess{
-                                value: DexGas.OPERATION_CALLBACK_BASE,
+                                value: DexGas.OPERATION_CALLBACK_BASE + 30,
                                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                                 bounce: false
                             }(id, false, IWithdrawResult.WithdrawResult(tokens_amount, operations[0].amount, operations[1].amount));
@@ -523,7 +539,7 @@ contract DexStablePair is
 
                         if (recipient != sender_address) {
                             IDexPairOperationCallback(recipient).dexPairExchangeSuccess{
-                                value: DexGas.OPERATION_CALLBACK_BASE,
+                                value: DexGas.OPERATION_CALLBACK_BASE + 10,
                                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                                 bounce: false
                             }(id, false, IExchangeResult.ExchangeResult(
@@ -654,6 +670,19 @@ contract DexStablePair is
                             dy_result.amount
                         ));
 
+                        if (recipient != sender_address) {
+                            IDexPairOperationCallback(recipient).dexPairExchangeSuccess{
+                                value: DexGas.OPERATION_CALLBACK_BASE + 40,
+                                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                                bounce: false
+                            }(id, false, IExchangeResult.ExchangeResult(
+                                i == 0 && j == 1,
+                                tokens_amount,
+                                dy_result.pool_fee + dy_result.beneficiary_fee + referrer_fee,
+                                dy_result.amount
+                            ));
+                        }
+
                         ITokenWallet(msg.sender).transfer{
                             value: _calcValue(GasValues.getTransferTokensGas(0)),
                             flag: MsgFlag.SENDER_PAYS_FEES
@@ -757,6 +786,14 @@ contract DexStablePair is
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 bounce: false
             }(id);
+
+            if (recipient != sender_address) {
+                IDexPairOperationCallback(recipient).dexPairOperationCancelled{
+                    value: DexGas.OPERATION_CALLBACK_BASE + 44,
+                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                    bounce: false
+                }(id);
+            }
 
             ITokenWallet(msg.sender).transferToWallet{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
                 tokens_amount,
@@ -1237,7 +1274,7 @@ contract DexStablePair is
 
                 if (recipient != sender_address) {
                     IDexPairOperationCallback(recipient).dexPairExchangeSuccess{
-                        value: DexGas.OPERATION_CALLBACK_BASE,
+                        value: DexGas.OPERATION_CALLBACK_BASE + 4,
                         flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                         bounce: false
                     }(id, false, IExchangeResult.ExchangeResult(
@@ -1328,7 +1365,7 @@ contract DexStablePair is
 
                         if (recipient != sender_address) {
                             IDexPairOperationCallback(recipient).dexPairOperationCancelled{
-                                value: DexGas.OPERATION_CALLBACK_BASE,
+                                value: DexGas.OPERATION_CALLBACK_BASE + 44,
                                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                                 bounce: false
                             }(id);
@@ -1363,7 +1400,7 @@ contract DexStablePair is
 
             if (recipient != sender_address) {
                 IDexPairOperationCallback(recipient).dexPairOperationCancelled{
-                    value: DexGas.OPERATION_CALLBACK_BASE,
+                    value: DexGas.OPERATION_CALLBACK_BASE + 44,
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(id);
@@ -2184,7 +2221,7 @@ contract DexStablePair is
 
         if (recipient != sender_address) {
             IDexPairOperationCallback(recipient).dexPairDepositLiquiditySuccessV2{
-                value: DexGas.OPERATION_CALLBACK_BASE,
+                value: DexGas.OPERATION_CALLBACK_BASE + 2,
                 flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                 bounce: false
             }(call_id, via_account, r);

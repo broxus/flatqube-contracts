@@ -320,7 +320,7 @@ contract DexRoot is DexContractBase, IDexRoot {
             _vaultVersion > 0 &&
             _lpTokenPendingVersion > 0 &&
             _accountVersion > 0 &&
-            !_pairVersions.empty()
+            _pairVersions.exists(DexPoolTypes.CONSTANT_PRODUCT)
         ) {
             _active = true;
         } else {

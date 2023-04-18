@@ -263,20 +263,18 @@ contract DexPair is DexPairBase, INextExchangeData {
             }
         } else {
             if (_autoChange) {
-                for (uint i = 0; i < operations.length; i++) {
-                    _typeToReserves[DexReserveType.POOL][i] += operations[i].amount;
-                }
-
                 if (result.step_2_right_to_left) {
                     require(result.step_2_received <= _typeToReserves[DexReserveType.POOL][0] + result.step_1_left_deposit, DexErrors.NOT_ENOUGH_FUNDS);
 
-                    _typeToReserves[DexReserveType.POOL][1] -= step2BeneficiaryFee + step2ReferrerFee;
+                    _typeToReserves[DexReserveType.POOL][0] += operations[0].amount;
+                    _typeToReserves[DexReserveType.POOL][1] += operations[1].amount - step2BeneficiaryFee - step2ReferrerFee;
                     _typeToReserves[DexReserveType.FEE][1] += step2BeneficiaryFee;
                 } else if (result.step_2_left_to_right) {
                     require(result.step_2_received <= _typeToReserves[DexReserveType.POOL][1] + result.step_1_right_deposit, DexErrors.NOT_ENOUGH_FUNDS);
 
-                    _typeToReserves[DexReserveType.POOL][0] -= step2BeneficiaryFee + step2ReferrerFee;
+                    _typeToReserves[DexReserveType.POOL][0] += operations[0].amount - step2BeneficiaryFee - step2ReferrerFee;
                     _typeToReserves[DexReserveType.FEE][0] += step2BeneficiaryFee;
+                    _typeToReserves[DexReserveType.POOL][1] += operations[1].amount;
                 }
 
                 _exchangeBase(
@@ -328,7 +326,8 @@ contract DexPair is DexPairBase, INextExchangeData {
             true,
             result,
             _accountOwner,
-            _accountOwner
+            _accountOwner,
+            tokenReserves
         );
 
         _sync();
@@ -363,15 +362,14 @@ contract DexPair is DexPairBase, INextExchangeData {
         bool _isViaAccount,
         DepositLiquidityResult _result,
         address _senderAddress,
-        address _recipient
+        address _recipient,
+        uint128[] _oldReserves
     ) private {
-        uint128[] oldReserves = _reserves();
-
         _typeToReserves[DexReserveType.LP][0] += _result.step_1_lp_reward + _result.step_3_lp_reward;
 
         _write(
-            oldReserves[0],
-            oldReserves[1],
+            _oldReserves[0],
+            _oldReserves[1],
             now
         );
 
@@ -439,7 +437,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         if (_recipient != _senderAddress) {
             IDexPairOperationCallback(_recipient)
                 .dexPairDepositLiquiditySuccess{
-                    value: DexGas.OPERATION_CALLBACK_BASE,
+                    value: DexGas.OPERATION_CALLBACK_BASE + 2,
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(
@@ -629,7 +627,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         if (_recipient != _senderAddress) {
             IDexPairOperationCallback(_recipient)
                 .dexPairWithdrawSuccess{
-                    value: DexGas.OPERATION_CALLBACK_BASE,
+                    value: DexGas.OPERATION_CALLBACK_BASE + 3,
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(
@@ -892,11 +890,13 @@ contract DexPair is DexPairBase, INextExchangeData {
             fees
         );
 
-        _write(
-            oldReserves[0],
-            oldReserves[1],
-            now
-        );
+        if (!_isNominal) {
+            _write(
+                oldReserves[0],
+                oldReserves[1],
+                now
+            );
+        }
 
         IExchangeResult.ExchangeResult result =  IExchangeResult.ExchangeResult(
             spentTokenIndex == 0 && receiveTokenIndex == 1,
@@ -919,7 +919,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         if (_recipient != _senderAddress) {
             IDexPairOperationCallback(_recipient)
                 .dexPairExchangeSuccess{
-                    value: DexGas.OPERATION_CALLBACK_BASE,
+                    value: DexGas.OPERATION_CALLBACK_BASE + 1,
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(
@@ -951,7 +951,7 @@ contract DexPair is DexPairBase, INextExchangeData {
         TvmCell _successPayload,
         bool _notifyCancel,
         TvmCell _cancelPayload
-    ) override external onlyPoolOrTokenVault(_prevPoolTokenRoots, _spentTokenRoot) onlyActive notSelfCall {
+    ) override external onlyPoolOrTokenVault(_prevPoolTokenRoots, _spentTokenRoot) {
         tvm.rawReserve(DexGas.PAIR_INITIAL_BALANCE, 0);
 
         // Decode data from payload
@@ -1097,7 +1097,7 @@ contract DexPair is DexPairBase, INextExchangeData {
 
                             if (_recipient != _senderAddress) {
                                 IDexPairOperationCallback(_recipient).dexPairOperationCancelled{
-                                    value: DexGas.OPERATION_CALLBACK_BASE,
+                                    value: DexGas.OPERATION_CALLBACK_BASE + 44,
                                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                                     bounce: false
                                 }(_id);
@@ -1134,7 +1134,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                 if (_recipient != _senderAddress) {
                     IDexPairOperationCallback(_recipient)
                         .dexPairOperationCancelled{
-                            value: DexGas.OPERATION_CALLBACK_BASE,
+                            value: DexGas.OPERATION_CALLBACK_BASE + 44,
                             flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                             bounce: false
                         }(_id);
@@ -1292,6 +1292,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                     }
                 } else if (op == DexOperationTypes.DEPOSIT_LIQUIDITY || op == DexOperationTypes.DEPOSIT_LIQUIDITY_V2) {
                     // Calculate deposit result
+                    uint128[] tokenReserves = _reserves();
                     (
                         DepositLiquidityResult r,
                         uint128 step2PoolFee,
@@ -1301,8 +1302,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                         _tokenRoot == _tokenRoots()[0] ? _tokensAmount : 0,
                         _tokenRoot == _tokenRoots()[1] ? _tokensAmount : 0,
                         true,
-                        _reserves()[0],
-                        _reserves()[1],
+                        tokenReserves[0],
+                        tokenReserves[1],
                         _lpReserve(),
                         _fee,
                         referrer,
@@ -1346,7 +1347,8 @@ contract DexPair is DexPairBase, INextExchangeData {
                             false,
                             r,
                             _senderAddress,
-                            recipient
+                            recipient,
+                            tokenReserves
                         );
 
                         ITokenWallet(msg.sender)

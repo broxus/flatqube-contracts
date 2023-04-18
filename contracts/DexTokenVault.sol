@@ -24,7 +24,9 @@ import "./libraries/PairPayload.sol";
 import "./libraries/DirectOperationErrors.sol";
 import "./libraries/GasValues.sol";
 
-contract DexTokenVault is DexContractBase, IDexTokenVault {
+import "./structures/IGasValueStructure.sol";
+
+contract DexTokenVault is DexContractBase, IDexTokenVault, IGasValueStructure {
     address private _root;
     address private _vault;
     uint32 private _version;
@@ -606,12 +608,12 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
             allLeaves += nextStep.leaves;
         }
 
-        if (errorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * allNestedNodes) {
+        if (errorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * allNestedNodes + _calcValue(GasValue(0, 100000))) {
             errorCode = DirectOperationErrors.VALUE_TOO_LOW;
         }
 
         if (errorCode == 0 && nextSteps.length > 0) {
-            uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * allNestedNodes;
+            uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * allNestedNodes - _calcValue(GasValue(0, 100000));
 
             for (uint32 i = 0; i < nextSteps.length; i++) {
                 NextExchangeData nextStep = nextSteps[i];

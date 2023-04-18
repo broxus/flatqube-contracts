@@ -1350,7 +1350,7 @@ DICTUGET
 THROWIFNOT 50
 PLDU 128
 PUSHINT 1
-ROLL 6
+PUSH S6
 SECOND
 PUSHINT 32
 DICTUGET
@@ -1360,7 +1360,7 @@ CALLREF {
 	CALL $_lpReserve_922dba47_internal_macro$
 }
 GETGLOB 18
-PUSH S9
+PUSH S10
 PUSHINT 0
 PUSH S9
 SECOND
@@ -1397,7 +1397,7 @@ PUSH S4
 INDEX 10
 ADD
 UFITS 128
-ROLL 12
+ROLL 13
 FIRST
 GEQ
 THROWIFNOT 127
@@ -1407,82 +1407,13 @@ CALLREF {
 }
 PUSHCONT {
 	.loc ../contracts/DexPair.sol, 265
-	PUSH S10
+	PUSH S11
 	PUSHCONT {
 		.loc ../contracts/DexPair.sol, 266
-		PUSHINT 0
-		PUSHCONT {
-			PUSH2 S0, S5
-			FIRST
-			LESS
-		}
-		PUSHCONT {
-			.loc ../contracts/DexPair.sol, 267
-			PUSH2 S0, S5
-			SECOND
-			PUSHINT 32
-			DICTUGET
-			THROWIFNOT 50
-			CALLREF {
-				LDU 128
-				LDMSGADDR
-				ENDS
-				PAIR
-			}
-			FIRST
-			PUSHINT 1
-			GETGLOB 21
-			DUP2
-			PUSHINT 8
-			DICTUGET
-			PUSHCONT {
-				LDU 32
-				PLDDICT
-			}
-			PUSHCONT {
-				PUSHINT 0
-				NEWDICT
-			}
-			IFELSE
-			PUXC S5, S-1
-			PUSH2 S1, S2
-			LESS
-			THROWIFNOT 50
-			DUP2
-			PUSHINT 32
-			DICTUGET
-			THROWIFNOT 50
-			PLDU 128
-			ROLL 6
-			ADD
-			UFITS 128
-			NEWC
-			STU 128
-			ROTREV
-			PUSHINT 32
-			DICTUSETB
-			PAIR
-			NEWC
-			SWAP
-			UNPAIR
-			XCHG S2
-			STU 32
-			STDICT
-			ROTREV
-			PUSHINT 8
-			DICTUSETB
-			SETGLOB 21
-			.loc ../contracts/DexPair.sol, 266
-			INC
-			.loc ../contracts/DexPair.sol, 0
-		}
-		WHILE
-		DROP
-		.loc ../contracts/DexPair.sol, 270
 		PUSH S3
 		INDEX 4
 		PUSHCONT {
-			.loc ../contracts/DexPair.sol, 271
+			.loc ../contracts/DexPair.sol, 267
 			PUSH S3
 			INDEX 7
 			PUSHINT 0
@@ -1511,9 +1442,82 @@ PUSHCONT {
 			UFITS 128
 			LEQ
 			THROWIFNOT 118
-			.loc ../contracts/DexPair.sol, 273
+			.loc ../contracts/DexPair.sol, 269
+			PUSHINT 0
+			PUSH S5
+			SECOND
+			PUSHINT 32
+			DICTUGET
+			THROWIFNOT 50
+			CALLREF {
+				LDU 128
+				LDMSGADDR
+				ENDS
+				PAIR
+			}
+			FIRST
+			PUSHINT 1
+			GETGLOB 21
 			DUP2
+			PUSHINT 8
+			DICTUGET
+			PUSHCONT {
+				LDU 32
+				PLDDICT
+			}
+			PUSHCONT {
+				PUSHINT 0
+				NEWDICT
+			}
+			IFELSE
+			PUSHINT 0
+			TUCK
+			PUSH S3
+			LESS
+			THROWIFNOT 50
+			DUP2
+			PUSHINT 32
+			DICTUGET
+			THROWIFNOT 50
+			PLDU 128
+			ROLL 6
 			ADD
+			UFITS 128
+			NEWC
+			STU 128
+			ROTREV
+			PUSHINT 32
+			DICTUSETB
+			PAIR
+			NEWC
+			SWAP
+			UNPAIR
+			XCHG S2
+			STU 32
+			STDICT
+			ROTREV
+			PUSHINT 8
+			DICTUSETB
+			SETGLOB 21
+			.loc ../contracts/DexPair.sol, 270
+			PUSHINT 1
+			PUSH S5
+			SECOND
+			PUSHINT 32
+			DICTUGET
+			THROWIFNOT 50
+			CALLREF {
+				LDU 128
+				LDMSGADDR
+				ENDS
+				PAIR
+			}
+			FIRST
+			PUSH S2
+			SUB
+			UFITS 128
+			OVER
+			SUB
 			UFITS 128
 			PUSHINT 1
 			GETGLOB 21
@@ -1540,7 +1544,7 @@ PUSHCONT {
 			THROWIFNOT 50
 			PLDU 128
 			ROLL 6
-			SUB
+			ADD
 			UFITS 128
 			NEWC
 			STU 128
@@ -1558,7 +1562,7 @@ PUSHCONT {
 			PUSHINT 8
 			DICTUSETB
 			SETGLOB 21
-			.loc ../contracts/DexPair.sol, 274
+			.loc ../contracts/DexPair.sol, 271
 			OVER
 			PUSHINT 2
 			GETGLOB 21
@@ -1608,7 +1612,7 @@ PUSHCONT {
 			PUSH S3
 			INDEX 3
 			PUSHCONT {
-				.loc ../contracts/DexPair.sol, 276
+				.loc ../contracts/DexPair.sol, 273
 				PUSH S3
 				INDEX 7
 				PUSHINT 1
@@ -1637,9 +1641,25 @@ PUSHCONT {
 				UFITS 128
 				LEQ
 				THROWIFNOT 118
-				.loc ../contracts/DexPair.sol, 278
-				DUP2
-				ADD
+				.loc ../contracts/DexPair.sol, 275
+				PUSHINT 0
+				PUSH S5
+				SECOND
+				PUSHINT 32
+				DICTUGET
+				THROWIFNOT 50
+				CALLREF {
+					LDU 128
+					LDMSGADDR
+					ENDS
+					PAIR
+				}
+				FIRST
+				PUSH S2
+				SUB
+				UFITS 128
+				OVER
+				SUB
 				UFITS 128
 				PUSHINT 1
 				GETGLOB 21
@@ -1666,7 +1686,7 @@ PUSHCONT {
 				THROWIFNOT 50
 				PLDU 128
 				ROLL 6
-				SUB
+				ADD
 				UFITS 128
 				NEWC
 				STU 128
@@ -1684,7 +1704,7 @@ PUSHCONT {
 				PUSHINT 8
 				DICTUSETB
 				SETGLOB 21
-				.loc ../contracts/DexPair.sol, 279
+				.loc ../contracts/DexPair.sol, 276
 				OVER
 				PUSHINT 2
 				GETGLOB 21
@@ -1729,13 +1749,70 @@ PUSHCONT {
 				PUSHINT 8
 				DICTUSETB
 				SETGLOB 21
+				.loc ../contracts/DexPair.sol, 277
+				PUSHINT 1
+				PUSH S5
+				SECOND
+				PUSHINT 32
+				DICTUGET
+				THROWIFNOT 50
+				CALLREF {
+					LDU 128
+					LDMSGADDR
+					ENDS
+					PAIR
+				}
+				FIRST
+				PUSHINT 1
+				GETGLOB 21
+				DUP2
+				PUSHINT 8
+				DICTUGET
+				PUSHCONT {
+					LDU 32
+					PLDDICT
+				}
+				PUSHCONT {
+					PUSHINT 0
+					NEWDICT
+				}
+				IFELSE
+				PUSHINT 1
+				TUCK
+				PUSH S3
+				LESS
+				THROWIFNOT 50
+				DUP2
+				PUSHINT 32
+				DICTUGET
+				THROWIFNOT 50
+				PLDU 128
+				ROLL 6
+				ADD
+				UFITS 128
+				NEWC
+				STU 128
+				ROTREV
+				PUSHINT 32
+				DICTUSETB
+				PAIR
+				NEWC
+				SWAP
+				UNPAIR
+				XCHG S2
+				STU 32
+				STDICT
+				ROTREV
+				PUSHINT 8
+				DICTUSETB
+				SETGLOB 21
 				.loc ../contracts/DexPair.sol, 0
 			}
 			IF
 		}
 		IFELSE
-		.loc ../contracts/DexPair.sol, 282
-		PUSH S12
+		.loc ../contracts/DexPair.sol, 280
+		PUSH S13
 		TRUE
 		PUSH S5
 		INDEX 3
@@ -1752,17 +1829,17 @@ PUSHCONT {
 		PUSH3 S6, S7, S5
 		PUSH S11
 		INDEX 7
-		PUSH S18
-		PUSH S17
-		PUSH S20
-		TRUE
 		PUSH S19
+		PUSH S18
+		PUSH S21
+		TRUE
+		PUSH S20
 		CALLREF {
 			CALL $_exchangeBase_57ab6473_internal_macro$
 		}
 	}
 	PUSHCONT {
-		.loc ../contracts/DexPair.sol, 299
+		.loc ../contracts/DexPair.sol, 297
 		PUSH S3
 		FIRST
 		PUSHINT 1
@@ -1780,6 +1857,52 @@ PUSHCONT {
 		}
 		IFELSE
 		PUSHINT 0
+		TUCK
+		PUSH S3
+		LESS
+		THROWIFNOT 50
+		DUP2
+		PUSHINT 32
+		DICTUGET
+		THROWIFNOT 50
+		PLDU 128
+		ROLL 6
+		ADD
+		UFITS 128
+		NEWC
+		STU 128
+		ROTREV
+		PUSHINT 32
+		DICTUSETB
+		PAIR
+		NEWC
+		SWAP
+		UNPAIR
+		XCHG S2
+		STU 32
+		STDICT
+		ROTREV
+		PUSHINT 8
+		DICTUSETB
+		SETGLOB 21
+		.loc ../contracts/DexPair.sol, 298
+		PUSH S3
+		SECOND
+		PUSHINT 1
+		GETGLOB 21
+		DUP2
+		PUSHINT 8
+		DICTUGET
+		PUSHCONT {
+			LDU 32
+			PLDDICT
+		}
+		PUSHCONT {
+			PUSHINT 0
+			NEWDICT
+		}
+		IFELSE
+		PUSHINT 1
 		TUCK
 		PUSH S3
 		LESS
@@ -1810,52 +1933,6 @@ PUSHCONT {
 		SETGLOB 21
 		.loc ../contracts/DexPair.sol, 300
 		PUSH S3
-		SECOND
-		PUSHINT 1
-		GETGLOB 21
-		DUP2
-		PUSHINT 8
-		DICTUGET
-		PUSHCONT {
-			LDU 32
-			PLDDICT
-		}
-		PUSHCONT {
-			PUSHINT 0
-			NEWDICT
-		}
-		IFELSE
-		PUSHINT 1
-		TUCK
-		PUSH S3
-		LESS
-		THROWIFNOT 50
-		DUP2
-		PUSHINT 32
-		DICTUGET
-		THROWIFNOT 50
-		PLDU 128
-		ROLL 6
-		ADD
-		UFITS 128
-		NEWC
-		STU 128
-		ROTREV
-		PUSHINT 32
-		DICTUSETB
-		PAIR
-		NEWC
-		SWAP
-		UNPAIR
-		XCHG S2
-		STU 32
-		STDICT
-		ROTREV
-		PUSHINT 8
-		DICTUSETB
-		SETGLOB 21
-		.loc ../contracts/DexPair.sol, 302
-		PUSH S3
 		FIRST
 		PUSHINT 0
 		PUSH S6
@@ -1872,8 +1949,8 @@ PUSHCONT {
 		FIRST
 		LESS
 		PUSHCONT {
-			.loc ../contracts/DexPair.sol, 303
-			PUSH S7
+			.loc ../contracts/DexPair.sol, 301
+			PUSH S8
 			PUSHINT 1
 			GETGLOB 19
 			PUSHINT 8
@@ -1889,7 +1966,7 @@ PUSHCONT {
 			IFELSE
 			PAIR
 			PUSHINT 0
-			PUSH S8
+			PUSH S9
 			SECOND
 			PUSHINT 32
 			DICTUGET
@@ -1946,7 +2023,7 @@ PUSHCONT {
 			.loc ../contracts/DexPair.sol, 0
 		}
 		IF
-		.loc ../contracts/DexPair.sol, 313
+		.loc ../contracts/DexPair.sol, 311
 		PUSH S3
 		SECOND
 		PUSHINT 1
@@ -1964,8 +2041,8 @@ PUSHCONT {
 		FIRST
 		LESS
 		PUSHCONT {
-			.loc ../contracts/DexPair.sol, 314
-			PUSH S7
+			.loc ../contracts/DexPair.sol, 312
+			PUSH S8
 			PUSHINT 1
 			GETGLOB 19
 			PUSHINT 8
@@ -1981,7 +2058,7 @@ PUSHCONT {
 			IFELSE
 			PAIR
 			PUSHINT 1
-			PUSH S8
+			PUSH S9
 			SECOND
 			PUSHINT 32
 			DICTUGET
@@ -2107,22 +2184,23 @@ PUSHCONT {
 	DROP
 }
 IFELSE
-.loc ../contracts/DexPair.sol, 326
+.loc ../contracts/DexPair.sol, 324
 BLKDROP 3
-PUSH S9
+PUSH S10
 TRUE
-PUSH3 S2, S8, S8
+PUSH3 S2, S9, S9
+ROLL 7
 CALLREF {
-	CALL $_depositLiquidityBase_c7415d07_internal_macro$
+	CALL $_depositLiquidityBase_4da14027_internal_macro$
 }
-.loc ../contracts/DexPair.sol, 334
+.loc ../contracts/DexPair.sol, 333
 CALLREF {
 	CALL $_sync_ee5e2717_internal_macro$
 }
-.loc ../contracts/DexPair.sol, 336
+.loc ../contracts/DexPair.sol, 335
 PUSHREF {
 }
-.loc ../contracts/DexPair.sol, 338
+.loc ../contracts/DexPair.sol, 337
 PUSH2 S5, S7
 SDEQ
 ROLL 6
@@ -2167,7 +2245,7 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/DexPair.sol, 351
+.loc ../contracts/DexPair.sol, 350
 BLKDROP 6
 GETGLOB 9
 NEWC
@@ -2181,16 +2259,12 @@ PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/DexPair.sol, 0
 
-.globl	_depositLiquidityBase_c7415d07_internal
-.type	_depositLiquidityBase_c7415d07_internal, @function
-CALL $_depositLiquidityBase_c7415d07_internal_macro$
+.globl	_depositLiquidityBase_4da14027_internal
+.type	_depositLiquidityBase_4da14027_internal, @function
+CALL $_depositLiquidityBase_4da14027_internal_macro$
 
-.macro _depositLiquidityBase_c7415d07_internal_macro
+.macro _depositLiquidityBase_4da14027_internal_macro
 .loc ../contracts/DexPair.sol, 368
-CALLREF {
-	CALL $_reserves_02c6ae9f_internal_macro$
-}
-.loc ../contracts/DexPair.sol, 370
 PUSH S3
 THIRD
 PUSH S4
@@ -2240,7 +2314,7 @@ ROTREV
 PUSHINT 8
 DICTUSETB
 SETGLOB 21
-.loc ../contracts/DexPair.sol, 372
+.loc ../contracts/DexPair.sol, 370
 PUSHINT 0
 OVER
 SECOND
@@ -2260,16 +2334,16 @@ CALLREF {
 	CALL $_write_2c4b51c2_internal_macro$
 }
 DROP
-.loc ../contracts/DexPair.sol, 378
+.loc ../contracts/DexPair.sol, 376
 PUSH S2
 THIRD
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 379
+	.loc ../contracts/DexPair.sol, 377
 	PUSHINT 0
 	NEWDICT
 	PAIR
-	.loc ../contracts/DexPair.sol, 381
+	.loc ../contracts/DexPair.sol, 379
 	PUSH S3
 	FIRST
 	PUSHINT 0
@@ -2296,7 +2370,7 @@ PUSHCONT {
 	PUSHINT 32
 	DICTUSETB
 	PAIR
-	.loc ../contracts/DexPair.sol, 388
+	.loc ../contracts/DexPair.sol, 386
 	PUSH S3
 	SECOND
 	PUSHINT 1
@@ -2323,7 +2397,7 @@ PUSHCONT {
 	PUSHINT 32
 	DICTUSETB
 	PAIR
-	.loc ../contracts/DexPair.sol, 395
+	.loc ../contracts/DexPair.sol, 393
 	PUSH S3
 	THIRD
 	XCPU S1, S2
@@ -2354,16 +2428,16 @@ PUSHCONT {
 	.loc ../contracts/DexPair.sol, 0
 }
 IF
-.loc ../contracts/DexPair.sol, 403
+.loc ../contracts/DexPair.sol, 401
 PUSH S2
 INDEX 10
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 404
+	.loc ../contracts/DexPair.sol, 402
 	PUSHINT 0
 	NEWDICT
 	PAIR
-	.loc ../contracts/DexPair.sol, 406
+	.loc ../contracts/DexPair.sol, 404
 	PUSH S3
 	INDEX 8
 	PUSHINT 0
@@ -2390,7 +2464,7 @@ PUSHCONT {
 	PUSHINT 32
 	DICTUSETB
 	PAIR
-	.loc ../contracts/DexPair.sol, 413
+	.loc ../contracts/DexPair.sol, 411
 	PUSH S3
 	INDEX 9
 	PUSHINT 1
@@ -2417,7 +2491,7 @@ PUSHCONT {
 	PUSHINT 32
 	DICTUSETB
 	PAIR
-	.loc ../contracts/DexPair.sol, 420
+	.loc ../contracts/DexPair.sol, 418
 	PUSH S3
 	INDEX 10
 	XCPU S1, S2
@@ -2448,7 +2522,7 @@ PUSHCONT {
 	.loc ../contracts/DexPair.sol, 0
 }
 IF
-.loc ../contracts/DexPair.sol, 428
+.loc ../contracts/DexPair.sol, 426
 PUSH3 S2, S3, S4
 PUSHINT 10000000
 ADDCONST 2
@@ -2492,22 +2566,27 @@ PUSHINT 1
 ADDCONST 2
 UFITS 8
 SENDRAWMSG
-.loc ../contracts/DexPair.sol, 439
+.loc ../contracts/DexPair.sol, 437
 DUP
 ROT
 SDEQ
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 440
+	.loc ../contracts/DexPair.sol, 438
 	PUSH3 S1, S2, S3
-	PUSH S3
+	PUSHINT 10000000
+	ADDCONST 2
+	UFITS 128
+	PUSH S4
 	FALSE
 	NEWC
 	STSLICECONST x6_
 	STI 1
 	STSLICECONST x1_
 	STSLICE
-	PUSHINT 9789369574394656757036770681243717074945
-	STUR 135
+	SWAP
+	STGRAMS
+	PUSHINT 1
+	STUR 107
 	ROLLREV 3
 	NEWC
 	STSLICECONST x5cb9d05d
@@ -2547,7 +2626,7 @@ BLKDROP 4
 CALL $_withdrawLiquidityBase_ee51d595_internal_macro$
 
 .macro _withdrawLiquidityBase_ee51d595_internal_macro
-.loc ../contracts/DexPair.sol, 460
+.loc ../contracts/DexPair.sol, 458
 PUSHINT 0
 CALLREF {
 	CALL $_reserves_02c6ae9f_internal_macro$
@@ -2563,7 +2642,7 @@ CALLREF {
 }
 MULDIV
 UFITS 128
-.loc ../contracts/DexPair.sol, 466
+.loc ../contracts/DexPair.sol, 464
 PUSHINT 1
 CALLREF {
 	CALL $_reserves_02c6ae9f_internal_macro$
@@ -2579,7 +2658,7 @@ CALLREF {
 }
 MULDIV
 UFITS 128
-.loc ../contracts/DexPair.sol, 473
+.loc ../contracts/DexPair.sol, 471
 OVER
 PUSHINT 1
 GETGLOB 21
@@ -2624,7 +2703,7 @@ ROTREV
 PUSHINT 8
 DICTUSETB
 SETGLOB 21
-.loc ../contracts/DexPair.sol, 474
+.loc ../contracts/DexPair.sol, 472
 DUP
 PUSHINT 1
 GETGLOB 21
@@ -2669,7 +2748,7 @@ ROTREV
 PUSHINT 8
 DICTUSETB
 SETGLOB 21
-.loc ../contracts/DexPair.sol, 475
+.loc ../contracts/DexPair.sol, 473
 PUSH S3
 PUSHINT 3
 GETGLOB 21
@@ -2714,11 +2793,11 @@ ROTREV
 PUSHINT 8
 DICTUSETB
 SETGLOB 21
-.loc ../contracts/DexPair.sol, 478
+.loc ../contracts/DexPair.sol, 476
 PUSHINT 0
 NEWDICT
 PAIR
-.loc ../contracts/DexPair.sol, 480
+.loc ../contracts/DexPair.sol, 478
 ROT
 PUSHINT 0
 CALLREF {
@@ -2744,7 +2823,7 @@ ROLLREV 3
 PUSHINT 32
 DICTUSETB
 PAIR
-.loc ../contracts/DexPair.sol, 487
+.loc ../contracts/DexPair.sol, 485
 SWAP
 PUSHINT 1
 CALLREF {
@@ -2770,7 +2849,7 @@ ROLLREV 3
 PUSHINT 32
 DICTUSETB
 PAIR
-.loc ../contracts/DexPair.sol, 495
+.loc ../contracts/DexPair.sol, 493
 DUP
 ROLL 3
 PUSH S3
@@ -2809,7 +2888,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexPair.sol, 505
+.loc ../contracts/DexPair.sol, 503
 LDU 32
 GETGLOB 4
 ROT
@@ -2880,7 +2959,7 @@ IFREF {
 THROW 0
 
 .macro expectedWithdrawLiquidity_44419f3c_internal_macro
-.loc ../contracts/DexPair.sol, 511
+.loc ../contracts/DexPair.sol, 509
 PUSHINT 0
 CALLREF {
 	CALL $_reserves_02c6ae9f_internal_macro$
@@ -2896,7 +2975,7 @@ CALLREF {
 }
 MULDIV
 UFITS 128
-.loc ../contracts/DexPair.sol, 517
+.loc ../contracts/DexPair.sol, 515
 PUSHINT 1
 CALLREF {
 	CALL $_reserves_02c6ae9f_internal_macro$
@@ -2912,7 +2991,7 @@ CALLREF {
 }
 MULDIV
 UFITS 128
-.loc ../contracts/DexPair.sol, 527
+.loc ../contracts/DexPair.sol, 525
 GETGLOB 4
 PUSHINT 0
 SETINDEXQ 2
@@ -2932,7 +3011,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexPair.sol, 533
+.loc ../contracts/DexPair.sol, 531
 OVER
 PUSHCONT {
 	LDU 64
@@ -2988,7 +3067,7 @@ CALLREF {
 }
 SDEQ
 THROWIFNOT 105
-.loc ../contracts/DexPair.sol, 541
+.loc ../contracts/DexPair.sol, 539
 PUSH S4
 SECOND
 CALLREF {
@@ -2996,11 +3075,11 @@ CALLREF {
 }
 SDEQ
 THROWIFNOT 113
-.loc ../contracts/DexPair.sol, 543
+.loc ../contracts/DexPair.sol, 541
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/DexPair.sol, 545
+.loc ../contracts/DexPair.sol, 543
 PUSHINT 0
 PUSH S4
 SECOND
@@ -3074,7 +3153,7 @@ PUSHCONT {
 	PUSH S3
 }
 IFELSE
-.loc ../contracts/DexPair.sol, 547
+.loc ../contracts/DexPair.sol, 545
 PUSHINT 0
 CALLREF {
 	CALL $_reserves_02c6ae9f_internal_macro$
@@ -3091,7 +3170,7 @@ CALLREF {
 }
 MULDIV
 UFITS 128
-.loc ../contracts/DexPair.sol, 548
+.loc ../contracts/DexPair.sol, 546
 PUSHINT 1
 CALLREF {
 	CALL $_reserves_02c6ae9f_internal_macro$
@@ -3108,7 +3187,7 @@ CALLREF {
 }
 MULDIV
 UFITS 128
-.loc ../contracts/DexPair.sol, 549
+.loc ../contracts/DexPair.sol, 547
 SWAP
 PUSHINT 0
 PUSH S3
@@ -3145,11 +3224,11 @@ PUSHCONT {
 }
 IF
 THROWIFNOT 127
-.loc ../contracts/DexPair.sol, 551
+.loc ../contracts/DexPair.sol, 549
 DROP2
 PUSHREF {
 }
-.loc ../contracts/DexPair.sol, 553
+.loc ../contracts/DexPair.sol, 551
 PUSH S6
 TRUE
 PUSH S7
@@ -3162,11 +3241,11 @@ PUSH2 S0, S7
 CALLREF {
 	CALL $_withdrawBase_7167026b_internal_macro$
 }
-.loc ../contracts/DexPair.sol, 565
+.loc ../contracts/DexPair.sol, 563
 CALLREF {
 	CALL $_sync_ee5e2717_internal_macro$
 }
-.loc ../contracts/DexPair.sol, 567
+.loc ../contracts/DexPair.sol, 565
 PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
@@ -3213,7 +3292,7 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/DexPair.sol, 577
+.loc ../contracts/DexPair.sol, 575
 DROP2
 GETGLOB 9
 NEWC
@@ -3232,16 +3311,16 @@ SENDRAWMSG
 CALL $_withdrawBase_7167026b_internal_macro$
 
 .macro _withdrawBase_7167026b_internal_macro
-.loc ../contracts/DexPair.sol, 602
+.loc ../contracts/DexPair.sol, 600
 CALLREF {
 	CALL $_reserves_02c6ae9f_internal_macro$
 }
-.loc ../contracts/DexPair.sol, 604
+.loc ../contracts/DexPair.sol, 602
 BLKPUSH 2, 7
 CALLREF {
 	CALL $_withdrawLiquidityBase_ee51d595_internal_macro$
 }
-.loc ../contracts/DexPair.sol, 606
+.loc ../contracts/DexPair.sol, 604
 PUSHINT 0
 PUSH S2
 SECOND
@@ -3261,7 +3340,7 @@ CALLREF {
 	CALL $_write_2c4b51c2_internal_macro$
 }
 DROP
-.loc ../contracts/DexPair.sol, 612
+.loc ../contracts/DexPair.sol, 610
 ROLL 7
 PUSHINT 0
 PUSH S2
@@ -3290,7 +3369,7 @@ CALLREF {
 }
 FIRST
 TRIPLE
-.loc ../contracts/DexPair.sol, 618
+.loc ../contracts/DexPair.sol, 616
 PUSH3 S0, S8, S9
 PUSHINT 10000000
 ADDCONST 3
@@ -3323,22 +3402,27 @@ PUSHINT 1
 ADDCONST 2
 UFITS 8
 SENDRAWMSG
-.loc ../contracts/DexPair.sol, 629
+.loc ../contracts/DexPair.sol, 627
 PUSH S6
 ROLL 8
 SDEQ
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 630
+	.loc ../contracts/DexPair.sol, 628
 	PUSH3 S0, S7, S8
-	PUSH S9
+	PUSHINT 10000000
+	ADDCONST 3
+	UFITS 128
+	PUSH S10
 	FALSE
 	NEWC
 	STSLICECONST x6_
 	STI 1
 	STSLICECONST x1_
 	STSLICE
-	PUSHINT 9789369574394656757036770681243717074945
-	STUR 135
+	SWAP
+	STGRAMS
+	PUSHINT 1
+	STUR 107
 	ROLLREV 3
 	NEWC
 	STSLICECONST x212aeb01
@@ -3359,7 +3443,7 @@ PUSHCONT {
 	.loc ../contracts/DexPair.sol, 0
 }
 IFNOT
-.loc ../contracts/DexPair.sol, 642
+.loc ../contracts/DexPair.sol, 640
 DROP
 SECOND
 PUSHINT 0
@@ -3381,15 +3465,15 @@ PUSHCONT {
 	NOT
 }
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 643
+	.loc ../contracts/DexPair.sol, 641
 	DUP
 	FIRST
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/DexPair.sol, 644
+		.loc ../contracts/DexPair.sol, 642
 		PUSH S8
 		PUSHCONT {
-			.loc ../contracts/DexPair.sol, 645
+			.loc ../contracts/DexPair.sol, 643
 			PUSH S6
 			CALLREF {
 				CALL $_tokenRoots_475f7f72_internal_macro$
@@ -3424,7 +3508,7 @@ PUSHCONT {
 			STDICT
 		}
 		PUSHCONT {
-			.loc ../contracts/DexPair.sol, 654
+			.loc ../contracts/DexPair.sol, 652
 			PUSH S6
 			GETGLOB 17
 			PUSHINT 1
@@ -3508,7 +3592,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexPair.sol, 676
+.loc ../contracts/DexPair.sol, 674
 LDU 32
 GETGLOB 4
 ROT
@@ -3590,10 +3674,10 @@ IFREF {
 THROW 0
 
 .macro expectedExchange_4661473d_internal_macro
-.loc ../contracts/DexPair.sol, 676
+.loc ../contracts/DexPair.sol, 674
 PUSHINT 0
 PUSH2 S0, S1
-.loc ../contracts/DexPair.sol, 683
+.loc ../contracts/DexPair.sol, 681
 PUSHINT 0
 CALLREF {
 	CALL $_tokenRoots_475f7f72_internal_macro$
@@ -3606,7 +3690,7 @@ SDEQ
 PUSHINT 0
 PUSHINT 1
 CONDSEL
-.loc ../contracts/DexPair.sol, 684
+.loc ../contracts/DexPair.sol, 682
 PUSH S3
 PUSHINT 0
 CALLREF {
@@ -3620,7 +3704,7 @@ SDEQ
 PUSHINT 1
 PUSHINT 0
 CONDSEL
-.loc ../contracts/DexPair.sol, 686
+.loc ../contracts/DexPair.sol, 684
 FALSE ; decl return flag
 PUSH S5
 PUSHINT 0
@@ -3648,7 +3732,7 @@ PUSHCONT {
 }
 IFNOT
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 690
+	.loc ../contracts/DexPair.sol, 688
 	ROLL 6
 	PUSH S3
 	CALLREF {
@@ -3684,7 +3768,7 @@ PUSHCONT {
 		CALL $Math_no_obj_calculateExpectedExchange_8403c9d6_macro$
 	}
 	DROP
-	.loc ../contracts/DexPair.sol, 707
+	.loc ../contracts/DexPair.sol, 705
 	GETGLOB 4
 	PUSHINT 0
 	SETINDEXQ 2
@@ -3699,7 +3783,7 @@ PUSHCONT {
 	PUSHINT 4
 }
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 712
+	.loc ../contracts/DexPair.sol, 710
 	THROW 112
 }
 IFELSE
@@ -3717,7 +3801,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexPair.sol, 716
+.loc ../contracts/DexPair.sol, 714
 LDU 32
 GETGLOB 4
 ROT
@@ -3799,10 +3883,10 @@ IFREF {
 THROW 0
 
 .macro expectedSpendAmount_47965468_internal_macro
-.loc ../contracts/DexPair.sol, 716
+.loc ../contracts/DexPair.sol, 714
 PUSHINT 0
 PUSH2 S0, S1
-.loc ../contracts/DexPair.sol, 723
+.loc ../contracts/DexPair.sol, 721
 PUSHINT 1
 CALLREF {
 	CALL $_tokenRoots_475f7f72_internal_macro$
@@ -3815,7 +3899,7 @@ SDEQ
 PUSHINT 0
 PUSHINT 1
 CONDSEL
-.loc ../contracts/DexPair.sol, 724
+.loc ../contracts/DexPair.sol, 722
 PUSH S3
 PUSHINT 1
 CALLREF {
@@ -3829,7 +3913,7 @@ SDEQ
 PUSHINT 1
 PUSHINT 0
 CONDSEL
-.loc ../contracts/DexPair.sol, 726
+.loc ../contracts/DexPair.sol, 724
 FALSE ; decl return flag
 PUSH S5
 PUSHINT 0
@@ -3857,7 +3941,7 @@ PUSHCONT {
 }
 IFNOT
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 734
+	.loc ../contracts/DexPair.sol, 732
 	GETGLOB 4
 	PUSHINT 0
 	SETINDEXQ 2
@@ -3893,7 +3977,7 @@ PUSHCONT {
 	PUSHINT 4
 }
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 741
+	.loc ../contracts/DexPair.sol, 739
 	THROW 112
 }
 IFELSE
@@ -3911,7 +3995,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexPair.sol, 745
+.loc ../contracts/DexPair.sol, 743
 OVER
 PUSHCONT {
 	LDU 64
@@ -3973,7 +4057,7 @@ SDEQ
 THROWIFNOT 105
 .loc ../contracts/abstract/DexContractBase.sol, 36
 ROLLREV 6
-.loc ../contracts/DexPair.sol, 753
+.loc ../contracts/DexPair.sol, 751
 PUSH S4
 SECOND
 PUSHINT 0
@@ -4034,7 +4118,7 @@ PUSHCONT {
 }
 IFNOT
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 757
+	.loc ../contracts/DexPair.sol, 755
 	PUSH S4
 	SECOND
 	PUSHINT 0
@@ -4049,7 +4133,7 @@ PUSHCONT {
 	PUSHINT 0
 	PUSHINT 1
 	CONDSEL
-	.loc ../contracts/DexPair.sol, 758
+	.loc ../contracts/DexPair.sol, 756
 	PUSH S5
 	SECOND
 	PUSHINT 0
@@ -4064,7 +4148,7 @@ PUSHCONT {
 	PUSHINT 1
 	PUSHINT 0
 	CONDSEL
-	.loc ../contracts/DexPair.sol, 760
+	.loc ../contracts/DexPair.sol, 758
 	PUSH S6
 	FIRST
 	PUSH S2
@@ -4100,7 +4184,7 @@ PUSHCONT {
 	CALLREF {
 		CALL $Math_no_obj_calculateExpectedExchange_8403c9d6_macro$
 	}
-	.loc ../contracts/DexPair.sol, 774
+	.loc ../contracts/DexPair.sol, 772
 	PUSH2 S3, S4
 	CALLREF {
 		CALL $_reserves_02c6ae9f_internal_macro$
@@ -4112,16 +4196,16 @@ PUSHCONT {
 	PLDU 128
 	LEQ
 	THROWIFNOT 118
-	.loc ../contracts/DexPair.sol, 775
+	.loc ../contracts/DexPair.sol, 773
 	PUSH2 S3, S9
 	FIRST
 	GEQ
 	THROWIFNOT 123
-	.loc ../contracts/DexPair.sol, 776
+	.loc ../contracts/DexPair.sol, 774
 	PUSH S3
 	GTINT 0
 	THROWIFNOT 116
-	.loc ../contracts/DexPair.sol, 777
+	.loc ../contracts/DexPair.sol, 775
 	PUSH S2
 	GTINT 0
 	GETGLOB 18
@@ -4129,7 +4213,7 @@ PUSHCONT {
 	EQINT 0
 	OR
 	THROWIFNOT 116
-	.loc ../contracts/DexPair.sol, 778
+	.loc ../contracts/DexPair.sol, 776
 	OVER
 	GTINT 0
 	GETGLOB 18
@@ -4137,11 +4221,11 @@ PUSHCONT {
 	EQINT 0
 	OR
 	THROWIFNOT 116
-	.loc ../contracts/DexPair.sol, 780
+	.loc ../contracts/DexPair.sol, 778
 	PUSHINT 1000000000
 	PUSHINT 0
 	RAWRESERVE
-	.loc ../contracts/DexPair.sol, 782
+	.loc ../contracts/DexPair.sol, 780
 	PUSH S11
 	TRUE
 	ROLL 7
@@ -4158,11 +4242,11 @@ PUSHCONT {
 	CALLREF {
 		CALL $_exchangeBase_57ab6473_internal_macro$
 	}
-	.loc ../contracts/DexPair.sol, 799
+	.loc ../contracts/DexPair.sol, 797
 	CALLREF {
 		CALL $_sync_ee5e2717_internal_macro$
 	}
-	.loc ../contracts/DexPair.sol, 801
+	.loc ../contracts/DexPair.sol, 799
 	PUSH S2
 	CALLREF {
 		CALL $_tokenRoots_475f7f72_internal_macro$
@@ -4208,7 +4292,7 @@ PUSHCONT {
 	ENDC
 	PUSHINT 1
 	SENDRAWMSG
-	.loc ../contracts/DexPair.sol, 810
+	.loc ../contracts/DexPair.sol, 808
 	PUSH S5
 	GETGLOB 9
 	NEWC
@@ -4222,7 +4306,7 @@ PUSHCONT {
 	SENDRAWMSG
 }
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 814
+	.loc ../contracts/DexPair.sol, 812
 	THROW 112
 }
 IFELSE
@@ -4234,11 +4318,11 @@ BLKDROP 7
 CALL $_exchangeBase_57ab6473_internal_macro$
 
 .macro _exchangeBase_57ab6473_internal_macro
-.loc ../contracts/DexPair.sol, 843
+.loc ../contracts/DexPair.sol, 841
 CALLREF {
 	CALL $_reserves_02c6ae9f_internal_macro$
 }
-.loc ../contracts/DexPair.sol, 846
+.loc ../contracts/DexPair.sol, 844
 PUSH S2
 ZEROSWAPIF
 PUSHCONT {
@@ -4293,7 +4377,7 @@ ROTREV
 PUSHINT 8
 DICTUSETB
 SETGLOB 21
-.loc ../contracts/DexPair.sol, 847
+.loc ../contracts/DexPair.sol, 845
 PUSH S2
 ZEROSWAPIF
 PUSHCONT {
@@ -4343,19 +4427,19 @@ ROTREV
 PUSHINT 8
 DICTUSETB
 SETGLOB 21
-.loc ../contracts/DexPair.sol, 849
+.loc ../contracts/DexPair.sol, 847
 PUSH S13
 NOT
-ROLL 3
+PUSH S3
 NOT
 OR
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 851
-	PUSH S8
+	.loc ../contracts/DexPair.sol, 849
+	PUSH S9
 	GTINT 0
 	PUSHCONT {
-		.loc ../contracts/DexPair.sol, 852
-		PUSH S8
+		.loc ../contracts/DexPair.sol, 850
+		PUSH S9
 		PUSHINT 2
 		GETGLOB 21
 		DUP2
@@ -4370,7 +4454,7 @@ PUSHCONT {
 			NEWDICT
 		}
 		IFELSE
-		PUSH S16
+		PUSH S17
 		TUCK
 		PUSH S3
 		LESS
@@ -4399,9 +4483,9 @@ PUSHCONT {
 		PUSHINT 8
 		DICTUSETB
 		SETGLOB 21
-		.loc ../contracts/DexPair.sol, 854
+		.loc ../contracts/DexPair.sol, 852
 		FALSE
-		PUSH S4
+		PUSH S5
 		CALLREF {
 			CALL $_processBeneficiaryFees_7e638fc6_internal_macro$
 		}
@@ -4411,22 +4495,22 @@ PUSHCONT {
 	.loc ../contracts/DexPair.sol, 0
 }
 IF
-.loc ../contracts/DexPair.sol, 858
-PUSH S6
+.loc ../contracts/DexPair.sol, 856
+PUSH S7
 GTINT 0
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 859
+	.loc ../contracts/DexPair.sol, 857
 	CALLREF {
 		CALL $_tokenRoots_475f7f72_internal_macro$
 	}
-	PUSH3 S4, S2, S7
+	PUSH3 S5, S2, S8
 	CALLREF {
 		CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 	}
 	CALLREF {
 		CALL $_calcValue_2fb4263c_internal_macro$
 	}
-	PUSH S16
+	PUSH S17
 	CALLREF {
 		CALL $_tokenRoots_475f7f72_internal_macro$
 	}
@@ -4462,8 +4546,8 @@ PUSHCONT {
 	ENDC
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/DexPair.sol, 870
-	PUSH2 S6, S11
+	.loc ../contracts/DexPair.sol, 868
+	PUSH2 S7, S12
 	CALLREF {
 		CALL $_tokenRoots_475f7f72_internal_macro$
 	}
@@ -4507,12 +4591,12 @@ PUSHCONT {
 	.loc ../contracts/DexPair.sol, 0
 }
 IF
-.loc ../contracts/DexPair.sol, 873
+.loc ../contracts/DexPair.sol, 871
 PUSHINT 0
 NEWDICT
 PAIR
-.loc ../contracts/DexPair.sol, 875
-PUSH S12
+.loc ../contracts/DexPair.sol, 873
+PUSH S13
 CALLREF {
 	CALL $_tokenRoots_475f7f72_internal_macro$
 }
@@ -4520,7 +4604,7 @@ SECOND
 PUSHINT 32
 DICTUGET
 THROWIFNOT 50
-PUSH2 S9, S10
+PUSH2 S10, S11
 GETGLOB 18
 INDEX 4
 TUPLE 4
@@ -4545,8 +4629,8 @@ ROLLREV 3
 PUSHINT 32
 DICTUSETREF
 PAIR
-.loc ../contracts/DexPair.sol, 885
-PUSH2 S6, S11
+.loc ../contracts/DexPair.sol, 883
+PUSH2 S7, S12
 CALLREF {
 	CALL $_tokenRoots_475f7f72_internal_macro$
 }
@@ -4554,7 +4638,7 @@ SECOND
 PUSHINT 32
 DICTUGET
 THROWIFNOT 50
-PUSH2 S12, S14
+PUSH2 S13, S15
 CALLREF {
 	CALL $_tokenRoots_475f7f72_internal_macro$
 }
@@ -4562,7 +4646,7 @@ SECOND
 PUSHINT 32
 DICTUGET
 THROWIFNOT 50
-PUSH2 S7, S9
+PUSH2 S8, S10
 PUSHREFSLICE {
 	.blob xc0000000000000000000000001
 }
@@ -4595,27 +4679,34 @@ STBREFR
 ENDC
 PUSHINT 0
 SENDRAWMSG
-.loc ../contracts/DexPair.sol, 895
-PUSHINT 0
-OVER
-SECOND
-PUSHINT 32
-DICTUGET
-THROWIFNOT 50
-PLDU 128
-PUSHINT 1
+.loc ../contracts/DexPair.sol, 893
 ROT
-SECOND
-PUSHINT 32
-DICTUGET
-THROWIFNOT 50
-PLDU 128
-NOW
-CALLREF {
-	CALL $_write_2c4b51c2_internal_macro$
+PUSHCONT {
+	.loc ../contracts/DexPair.sol, 894
+	PUSHINT 0
+	OVER
+	SECOND
+	PUSHINT 32
+	DICTUGET
+	THROWIFNOT 50
+	PLDU 128
+	PUSHINT 1
+	PUSH S2
+	SECOND
+	PUSHINT 32
+	DICTUGET
+	THROWIFNOT 50
+	PLDU 128
+	NOW
+	CALLREF {
+		CALL $_write_2c4b51c2_internal_macro$
+	}
+	DROP
+	.loc ../contracts/DexPair.sol, 0
 }
-DROP2
+IFNOT
 .loc ../contracts/DexPair.sol, 901
+DROP2
 ROLL 9
 EQINT 0
 ROLL 9
@@ -4671,15 +4762,20 @@ SDEQ
 PUSHCONT {
 	.loc ../contracts/DexPair.sol, 920
 	PUSH3 S0, S3, S4
-	PUSH S4
+	PUSHINT 10000000
+	INC
+	UFITS 128
+	PUSH S5
 	FALSE
 	NEWC
 	STSLICECONST x6_
 	STI 1
 	STSLICECONST x1_
 	STSLICE
-	PUSHINT 9789369574394656757036770681243717074945
-	STUR 135
+	SWAP
+	STGRAMS
+	PUSHINT 1
+	STUR 107
 	ROLLREV 3
 	NEWC
 	STSLICECONST x04e34150
@@ -4798,15 +4894,7 @@ PUSHCONT {
 }
 IFNOT
 THROWIFNOT 146
-.loc ../contracts/abstract/DexPairBase.sol, 74
-GETGLOB 16
-THROWIFNOT 114
-.loc ../contracts/abstract/DexPairBase.sol, 117
-GETGLOB 9
-MYADDR
-SDEQ
-THROWIF 100
-.loc ../contracts/abstract/DexPairBase.sol, 118
+.loc ../contracts/abstract/DexPairBase.sol, 112
 PUSHINT 17
 PUSHINT 2
 BLKSWX
@@ -5431,15 +5519,20 @@ PUSHCONT {
 						PUSHCONT {
 							.loc ../contracts/DexPair.sol, 1099
 							PUSH S32
-							PUSH S25
+							PUSHINT 10000000
+							ADDCONST 44
+							UFITS 128
+							PUSH S26
 							FALSE
 							NEWC
 							STSLICECONST x6_
 							STI 1
 							STSLICECONST x1_
 							STSLICE
-							PUSHINT 42045022170482489768618347945393405442361463019782
-							STUR 167
+							SWAP
+							STGRAMS
+							PUSHINT 201988358
+							STUR 139
 							STU 64
 							ENDC
 							PUSHINT 1
@@ -5576,15 +5669,20 @@ PUSHCONT {
 		PUSHCONT {
 			.loc ../contracts/DexPair.sol, 1135
 			PUSH S21
-			PUSH S14
+			PUSHINT 10000000
+			ADDCONST 44
+			UFITS 128
+			PUSH S15
 			FALSE
 			NEWC
 			STSLICECONST x6_
 			STI 1
 			STSLICECONST x1_
 			STSLICE
-			PUSHINT 42045022170482489768618347945393405442361463019782
-			STUR 167
+			SWAP
+			STGRAMS
+			PUSHINT 201988358
+			STUR 139
 			STU 64
 			ENDC
 			PUSHINT 1
@@ -5731,7 +5829,7 @@ PUSHCONT {
 	.loc ../contracts/DexPair.sol, 1192
 	PUSHINT 2
 	PUSHREF
-	.compute $new_array_line_1191_column_30_ast_id_3042$
+	.compute $new_array_line_1191_column_30_ast_id_3057$
 	PAIR
 	POP S4
 	.loc ../contracts/DexPair.sol, 0
@@ -6057,23 +6155,12 @@ PUSHCONT {
 			OR
 			PUSHCONT {
 				.loc ../contracts/DexPair.sol, 1295
-				PUSH S22
-				PUSHINT 0
 				CALLREF {
-					CALL $_tokenRoots_475f7f72_internal_macro$
+					CALL $_reserves_02c6ae9f_internal_macro$
 				}
-				SECOND
-				PUSHINT 32
-				DICTUGET
-				THROWIFNOT 50
-				SDEQ
-				ZEROSWAPIFNOT
-				PUSHCONT {
-					PUSH S21
-				}
-				IF
+				.loc ../contracts/DexPair.sol, 1296
 				PUSH S23
-				PUSHINT 1
+				PUSHINT 0
 				CALLREF {
 					CALL $_tokenRoots_475f7f72_internal_macro$
 				}
@@ -6087,20 +6174,31 @@ PUSHCONT {
 					PUSH S22
 				}
 				IF
+				PUSH S24
+				PUSHINT 1
+				CALLREF {
+					CALL $_tokenRoots_475f7f72_internal_macro$
+				}
+				SECOND
+				PUSHINT 32
+				DICTUGET
+				THROWIFNOT 50
+				SDEQ
+				ZEROSWAPIFNOT
+				PUSHCONT {
+					PUSH S23
+				}
+				IF
 				TRUE
 				PUSHINT 0
-				CALLREF {
-					CALL $_reserves_02c6ae9f_internal_macro$
-				}
+				PUSH S4
 				SECOND
 				PUSHINT 32
 				DICTUGET
 				THROWIFNOT 50
 				PLDU 128
 				PUSHINT 1
-				CALLREF {
-					CALL $_reserves_02c6ae9f_internal_macro$
-				}
+				PUSH S5
 				SECOND
 				PUSHINT 32
 				DICTUGET
@@ -6110,7 +6208,7 @@ PUSHCONT {
 					CALL $_lpReserve_922dba47_internal_macro$
 				}
 				GETGLOB 18
-				PUSH S16
+				PUSH S17
 				PUSHINT 0
 				CALLREF {
 					CALL $_tokenRoots_475f7f72_internal_macro$
@@ -6130,7 +6228,7 @@ PUSHCONT {
 				CALLREF {
 					CALL $Math_no_obj_calculateExpectedDepositLiquidity_2a45505a_macro$
 				}
-				.loc ../contracts/DexPair.sol, 1314
+				.loc ../contracts/DexPair.sol, 1315
 				PUSH S3
 				INDEX 10
 				EQINT 0
@@ -6139,7 +6237,7 @@ PUSHCONT {
 					DROP
 					PUSH S3
 					INDEX 7
-					PUSH S5
+					PUSH S6
 					CALLREF {
 						CALL $_reserves_02c6ae9f_internal_macro$
 					}
@@ -6170,23 +6268,23 @@ PUSHCONT {
 				}
 				IFNOT
 				PUSHCONT {
-					.loc ../contracts/DexPair.sol, 1321
+					.loc ../contracts/DexPair.sol, 1322
 					PUSHINT 109
-					POP S7
+					POP S8
 				}
 				PUSHCONT {
 					PUSH S3
 					INDEX 10
-					PUSH S13
+					PUSH S14
 					LESS
 					PUSHCONT {
-						.loc ../contracts/DexPair.sol, 1323
+						.loc ../contracts/DexPair.sol, 1324
 						PUSHINT 110
-						POP S7
+						POP S8
 					}
 					PUSHCONT {
-						.loc ../contracts/DexPair.sol, 1325
-						PUSH S25
+						.loc ../contracts/DexPair.sol, 1326
+						PUSH S26
 						PUSH S2
 						SUB
 						UFITS 128
@@ -6207,7 +6305,7 @@ PUSHCONT {
 							NEWDICT
 						}
 						IFELSE
-						PUXC S10, S-1
+						PUXC S11, S-1
 						PUSH2 S1, S2
 						LESS
 						THROWIFNOT 50
@@ -6235,41 +6333,43 @@ PUSHCONT {
 						PUSHINT 8
 						DICTUSETB
 						SETGLOB 21
-						.loc ../contracts/DexPair.sol, 1327
-						PUSH S18
+						.loc ../contracts/DexPair.sol, 1328
+						PUSH S19
 						FALSE
-						BLKPUSH 3, 7
+						BLKPUSH 2, 8
+						PUSH S7
 						INDEX 5
 						PUSH3 S6, S7, S5
 						PUSH S11
 						INDEX 7
+						PUSH S34
 						PUSH S33
-						PUSH S32
-						PUSH S27
+						PUSH S28
 						TRUE
-						PUSH S26
+						PUSH S27
 						CALLREF {
 							CALL $_exchangeBase_57ab6473_internal_macro$
 						}
-						.loc ../contracts/DexPair.sol, 1344
-						PUSH S18
+						.loc ../contracts/DexPair.sol, 1345
+						PUSH S19
 						FALSE
 						PUSH S5
-						PUSH S27
-						PUSH S20
+						PUSH S28
+						PUSH S21
+						PUSH S9
 						CALLREF {
-							CALL $_depositLiquidityBase_c7415d07_internal_macro$
+							CALL $_depositLiquidityBase_4da14027_internal_macro$
 						}
-						.loc ../contracts/DexPair.sol, 1352
-						PUSH S7
+						.loc ../contracts/DexPair.sol, 1354
+						PUSH S8
 						FALSE
-						PUSH S24
+						PUSH S25
 						PUSHINT 0
-						PUSH S30
+						PUSH S31
 						CALLREF {
 							CALL $_expectedTokenVaultAddress_3a7b5f9b_internal_macro$
 						}
-						PUSH S30
+						PUSH S31
 						PUSHINT 0
 						CALLREF {
 							CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
@@ -6301,17 +6401,17 @@ PUSHCONT {
 						ENDC
 						PUSHINT 1
 						SENDRAWMSG
-						.loc ../contracts/DexPair.sol, 1363
-						PUSH S19
-						PUSH S11
-						PUSH S26
+						.loc ../contracts/DexPair.sol, 1365
+						PUSH S20
+						PUSH S12
+						PUSH S27
 						CALLREF {
 							CALL $PairPayload_no_obj_buildSuccessPayload_ca821d98_macro$
 						}
-						PUSH S12
-						PUSH S24
-						PUSH S20
-						PUSH S20
+						PUSH S13
+						PUSH S25
+						PUSH S21
+						PUSH S21
 						PUSH S8
 						INDEX 10
 						CALLREF {
@@ -6343,7 +6443,7 @@ PUSHCONT {
 				}
 				IFELSE
 				.loc ../contracts/DexPair.sol, 0
-				BLKDROP 4
+				BLKDROP 5
 			}
 			PUSHCONT {
 				PUSH S15
@@ -6352,24 +6452,24 @@ PUSHCONT {
 				EQINT 9
 				OR
 				PUSHCONT {
-					.loc ../contracts/DexPair.sol, 1376
+					.loc ../contracts/DexPair.sol, 1378
 					PUSH S10
 					FIRST
 					PUSHCONT {
-						.loc ../contracts/DexPair.sol, 1376
+						.loc ../contracts/DexPair.sol, 1378
 						PUSHINT 111
 						POP S3
 						.loc ../contracts/DexPair.sol, 0
 					}
 					IFNOT
-					.loc ../contracts/DexPair.sol, 1378
+					.loc ../contracts/DexPair.sol, 1380
 					PUSH S2
 					EQINT 0
 					PUSH S16
 					EQINT 4
 					AND
 					PUSHCONT {
-						.loc ../contracts/DexPair.sol, 1380
+						.loc ../contracts/DexPair.sol, 1382
 						PUSHINT 0
 						PUSH S11
 						SECOND
@@ -6451,7 +6551,7 @@ PUSHCONT {
 						.loc ../contracts/DexPair.sol, 0
 					}
 					IF
-					.loc ../contracts/DexPair.sol, 1384
+					.loc ../contracts/DexPair.sol, 1386
 					PUSH S21
 					PUSH S2
 					CALLREF {
@@ -6483,16 +6583,16 @@ PUSHCONT {
 					CALLREF {
 						CALL $Math_no_obj_calculateExpectedExchange_8403c9d6_macro$
 					}
-					.loc ../contracts/DexPair.sol, 1398
+					.loc ../contracts/DexPair.sol, 1400
 					PUSHINT 0
-					.loc ../contracts/DexPair.sol, 1399
+					.loc ../contracts/DexPair.sol, 1401
 					PUSH S15
 					FIRST
 					UFITS 32
-					.loc ../contracts/DexPair.sol, 1400
+					.loc ../contracts/DexPair.sol, 1402
 					PUSHINT 0
 					BLKPUSH 3, 0
-					.loc ../contracts/DexPair.sol, 1403
+					.loc ../contracts/DexPair.sol, 1405
 					PUSHCONT {
 						DUP
 						PUSH S21
@@ -6500,7 +6600,7 @@ PUSHCONT {
 						LESS
 					}
 					PUSHCONT {
-						.loc ../contracts/DexPair.sol, 1404
+						.loc ../contracts/DexPair.sol, 1406
 						DUP
 						PUSH S21
 						SECOND
@@ -6516,7 +6616,7 @@ PUSHCONT {
 							ENDS
 							TUPLE 5
 						}
-						.loc ../contracts/DexPair.sol, 1405
+						.loc ../contracts/DexPair.sol, 1407
 						DUP
 						SECOND
 						PARSEMSGADDR
@@ -6537,42 +6637,42 @@ PUSHCONT {
 						OR
 						OR
 						PUSHCONT {
-							.loc ../contracts/DexPair.sol, 1408
+							.loc ../contracts/DexPair.sol, 1410
 							PUSHINT 111
 							POP S14
-							.loc ../contracts/DexPair.sol, 1409
+							.loc ../contracts/DexPair.sol, 1411
 							DROP
 							RETALT
 							.loc ../contracts/DexPair.sol, 0
 						}
 						IFJMP
-						.loc ../contracts/DexPair.sol, 1411
+						.loc ../contracts/DexPair.sol, 1413
 						DUP
 						INDEX 3
 						PUSH S4
 						GREATER
 						PUSHCONT {
-							.loc ../contracts/DexPair.sol, 1412
+							.loc ../contracts/DexPair.sol, 1414
 							DUP
 							INDEX 3
 							POP S4
-							.loc ../contracts/DexPair.sol, 1413
+							.loc ../contracts/DexPair.sol, 1415
 							OVER
 							POP S3
 							.loc ../contracts/DexPair.sol, 0
 						}
 						IF
-						.loc ../contracts/DexPair.sol, 1415
+						.loc ../contracts/DexPair.sol, 1417
 						DUP
 						FIRST
 						PUSH S7
 						ADD
 						POP S7
-						.loc ../contracts/DexPair.sol, 1416
+						.loc ../contracts/DexPair.sol, 1418
 						PUSH S26
 						NEQINT 4
 						PUSHCONT {
-							.loc ../contracts/DexPair.sol, 1417
+							.loc ../contracts/DexPair.sol, 1419
 							DUP
 							INDEX 3
 							PUSH S6
@@ -6582,20 +6682,20 @@ PUSHCONT {
 							.loc ../contracts/DexPair.sol, 0
 						}
 						IF
-						.loc ../contracts/DexPair.sol, 1419
+						.loc ../contracts/DexPair.sol, 1421
 						INDEX 4
 						PUSH S4
 						ADD
 						UFITS 32
 						POP S4
-						.loc ../contracts/DexPair.sol, 1403
+						.loc ../contracts/DexPair.sol, 1405
 						INC
 						UFITS 32
 						.loc ../contracts/DexPair.sol, 0
 					}
 					WHILEBRK
 					DROP
-					.loc ../contracts/DexPair.sol, 1423
+					.loc ../contracts/DexPair.sol, 1425
 					PUSH S11
 					EQINT 0
 					DUP
@@ -6630,7 +6730,7 @@ PUSHCONT {
 					}
 					IF
 					PUSHCONT {
-						.loc ../contracts/DexPair.sol, 1424
+						.loc ../contracts/DexPair.sol, 1426
 						PUSHINT 103
 						POP S12
 					}
@@ -6666,7 +6766,7 @@ PUSHCONT {
 						OR
 						OR
 						PUSHCONT {
-							.loc ../contracts/DexPair.sol, 1431
+							.loc ../contracts/DexPair.sol, 1433
 							PUSHINT 109
 							POP S12
 						}
@@ -6675,7 +6775,7 @@ PUSHCONT {
 							PUSH S18
 							LESS
 							PUSHCONT {
-								.loc ../contracts/DexPair.sol, 1433
+								.loc ../contracts/DexPair.sol, 1435
 								PUSHINT 110
 								POP S12
 								.loc ../contracts/DexPair.sol, 0
@@ -6685,10 +6785,10 @@ PUSHCONT {
 						IFELSE
 					}
 					IFELSE
-					.loc ../contracts/DexPair.sol, 1436
+					.loc ../contracts/DexPair.sol, 1438
 					PUSH S11
 					PUSHCONT {
-						.loc ../contracts/DexPair.sol, 1438
+						.loc ../contracts/DexPair.sol, 1440
 						PUSH S23
 						FALSE
 						BLKPUSH 2, 12
@@ -6703,7 +6803,7 @@ PUSHCONT {
 						CALLREF {
 							CALL $_exchangeBase_57ab6473_internal_macro$
 						}
-						.loc ../contracts/DexPair.sol, 1456
+						.loc ../contracts/DexPair.sol, 1458
 						PUSH S12
 						FALSE
 						PUSH S29
@@ -6744,7 +6844,7 @@ PUSHCONT {
 						ENDC
 						PUSHINT 1
 						SENDRAWMSG
-						.loc ../contracts/DexPair.sol, 1468
+						.loc ../contracts/DexPair.sol, 1470
 						DEPTH
 						ADDCONST -2
 						PICK
@@ -6772,7 +6872,7 @@ PUSHCONT {
 						}
 						SUB
 						UFITS 128
-						.loc ../contracts/DexPair.sol, 1472
+						.loc ../contracts/DexPair.sol, 1474
 						PUSHINT 0
 						PUSHCONT {
 							DUP
@@ -6781,7 +6881,7 @@ PUSHCONT {
 							LESS
 						}
 						PUSHCONT {
-							.loc ../contracts/DexPair.sol, 1473
+							.loc ../contracts/DexPair.sol, 1475
 							DUP
 							PUSH S22
 							SECOND
@@ -6797,19 +6897,19 @@ PUSHCONT {
 								ENDS
 								TUPLE 5
 							}
-							.loc ../contracts/DexPair.sol, 1475
+							.loc ../contracts/DexPair.sol, 1477
 							PUSH2 S11, S0
 							FIRST
 							PUSH S9
 							MULDIV
 							UFITS 128
-							.loc ../contracts/DexPair.sol, 1476
+							.loc ../contracts/DexPair.sol, 1478
 							OVER
 							INDEX 4
 							PUSH2 S4, S7
 							MULDIV
 							UFITS 128
-							.loc ../contracts/DexPair.sol, 1478
+							.loc ../contracts/DexPair.sol, 1480
 							PUSH S18
 							PUSH S20
 							PUSH S22
@@ -6917,7 +7017,7 @@ PUSHCONT {
 							SENDRAWMSG
 							.loc ../contracts/DexPair.sol, 0
 							DROP
-							.loc ../contracts/DexPair.sol, 1472
+							.loc ../contracts/DexPair.sol, 1474
 							INC
 							UFITS 32
 							.loc ../contracts/DexPair.sol, 0
@@ -6931,7 +7031,7 @@ PUSHCONT {
 					BLKDROP 9
 				}
 				PUSHCONT {
-					.loc ../contracts/DexPair.sol, 1503
+					.loc ../contracts/DexPair.sol, 1505
 					PUSHINT 108
 					POP S3
 					.loc ../contracts/DexPair.sol, 0
@@ -6950,7 +7050,7 @@ PUSHCONT {
 		EQINT 8
 		OR
 		PUSHCONT {
-			.loc ../contracts/DexPair.sol, 1507
+			.loc ../contracts/DexPair.sol, 1509
 			PUSHINT 0
 			CALLREF {
 				CALL $_reserves_02c6ae9f_internal_macro$
@@ -6966,7 +7066,7 @@ PUSHCONT {
 			}
 			MULDIV
 			UFITS 128
-			.loc ../contracts/DexPair.sol, 1508
+			.loc ../contracts/DexPair.sol, 1510
 			PUSHINT 1
 			CALLREF {
 				CALL $_reserves_02c6ae9f_internal_macro$
@@ -6982,7 +7082,7 @@ PUSHCONT {
 			}
 			MULDIV
 			UFITS 128
-			.loc ../contracts/DexPair.sol, 1511
+			.loc ../contracts/DexPair.sol, 1513
 			SWAP
 			PUSHINT 0
 			PUSH S12
@@ -7007,12 +7107,12 @@ PUSHCONT {
 			}
 			IFNOT
 			PUSHCONT {
-				.loc ../contracts/DexPair.sol, 1515
+				.loc ../contracts/DexPair.sol, 1517
 				PUSHINT 110
 				POP S2
 			}
 			PUSHCONT {
-				.loc ../contracts/DexPair.sol, 1517
+				.loc ../contracts/DexPair.sol, 1519
 				PUSH S13
 				FALSE
 				PUSH S22
@@ -7030,7 +7130,7 @@ PUSHCONT {
 				CALLREF {
 					CALL $_withdrawBase_7167026b_internal_macro$
 				}
-				.loc ../contracts/DexPair.sol, 1530
+				.loc ../contracts/DexPair.sol, 1532
 				PUSH S2
 				PUSHREFSLICE {
 					.blob x8000000000000000000000000000000000000000000000000000000000000000001_
@@ -7063,7 +7163,7 @@ PUSHCONT {
 			DROP
 		}
 		PUSHCONT {
-			.loc ../contracts/DexPair.sol, 1540
+			.loc ../contracts/DexPair.sol, 1542
 			DROP
 			PUSHINT 108
 		}
@@ -7073,10 +7173,10 @@ PUSHCONT {
 	.loc ../contracts/DexPair.sol, 0
 }
 IFNOT
-.loc ../contracts/DexPair.sol, 1544
+.loc ../contracts/DexPair.sol, 1546
 DUP
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 1546
+	.loc ../contracts/DexPair.sol, 1548
 	PUSH S12
 	PUSH S19
 	FALSE
@@ -7093,12 +7193,12 @@ PUSHCONT {
 	ADDCONST 2
 	UFITS 8
 	SENDRAWMSG
-	.loc ../contracts/DexPair.sol, 1553
+	.loc ../contracts/DexPair.sol, 1555
 	PUSH S10
 	PUSH S19
 	SDEQ
 	PUSHCONT {
-		.loc ../contracts/DexPair.sol, 1554
+		.loc ../contracts/DexPair.sol, 1556
 		PUSH2 S12, S10
 		FALSE
 		NEWC
@@ -7117,7 +7217,7 @@ PUSHCONT {
 		.loc ../contracts/DexPair.sol, 0
 	}
 	IFNOT
-	.loc ../contracts/DexPair.sol, 1563
+	.loc ../contracts/DexPair.sol, 1565
 	PUSH3 S13, S0, S2
 	PUSH S11
 	CALLREF {
@@ -7162,21 +7262,21 @@ DROPX
 CALL $_checkOperationData_88d821d7_internal_macro$
 
 .macro _checkOperationData_88d821d7_internal_macro
-.loc ../contracts/DexPair.sol, 1587
+.loc ../contracts/DexPair.sol, 1589
 GETGLOB 16
 PUSHCONT {
 	BLKDROP 7
 	PUSHINT 101
 }
 IFNOTJMP
-.loc ../contracts/DexPair.sol, 1588
+.loc ../contracts/DexPair.sol, 1590
 ROLL 4
 PUSHCONT {
 	BLKDROP 6
 	PUSHINT 102
 }
 IFNOTJMP
-.loc ../contracts/DexPair.sol, 1589
+.loc ../contracts/DexPair.sol, 1591
 CALLREF {
 	CALL $_lpReserve_922dba47_internal_macro$
 }
@@ -7185,7 +7285,7 @@ PUSHCONT {
 	PUSHINT 104
 }
 IFNOTJMP
-.loc ../contracts/DexPair.sol, 1591
+.loc ../contracts/DexPair.sol, 1593
 OVER
 CALLREF {
 	CALL $_lpRoot_f44284e8_internal_macro$
@@ -7223,7 +7323,7 @@ PUSHCONT {
 	PUSHINT 105
 }
 IFJMP
-.loc ../contracts/DexPair.sol, 1592
+.loc ../contracts/DexPair.sol, 1594
 FALSE ; decl return flag
 PUSH S2
 CALLREF {
@@ -7231,11 +7331,11 @@ CALLREF {
 }
 SDEQ
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 1593
+	.loc ../contracts/DexPair.sol, 1595
 	CALLREF {
 		CALL $_tokenRoots_475f7f72_internal_macro$
 	}
-	.loc ../contracts/DexPair.sol, 1594
+	.loc ../contracts/DexPair.sol, 1596
 	PUSHINT 1
 	GETGLOB 20
 	PUSHINT 8
@@ -7250,7 +7350,7 @@ PUSHCONT {
 	}
 	IFELSE
 	PAIR
-	.loc ../contracts/DexPair.sol, 1595
+	.loc ../contracts/DexPair.sol, 1597
 	PUSH S4
 	PUSHINT 0
 	PUSH S3
@@ -7280,7 +7380,7 @@ PUSHCONT {
 		PUSHINT 4
 	}
 	IFJMP
-	.loc ../contracts/DexPair.sol, 1596
+	.loc ../contracts/DexPair.sol, 1598
 	PUSH S4
 	PUSHINT 0
 	PUSH S3
@@ -7342,7 +7442,7 @@ PUSHCONT {
 IFNOT
 .loc ../contracts/DexPair.sol, 0
 IFRET
-.loc ../contracts/DexPair.sol, 1599
+.loc ../contracts/DexPair.sol, 1601
 PUSH S5
 PUSHINT 0
 PUSHINT 2
@@ -7420,7 +7520,7 @@ PUSHCONT {
 	PUSHINT 108
 }
 IFNOTJMP
-.loc ../contracts/DexPair.sol, 1607
+.loc ../contracts/DexPair.sol, 1609
 XCHG S1, S3
 XCHG S3, S4
 CALLREF {
@@ -7428,13 +7528,13 @@ CALLREF {
 }
 LESS
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 1608
+	.loc ../contracts/DexPair.sol, 1610
 	DROP2
 	PUSHINT 103
 	.loc ../contracts/DexPair.sol, 0
 }
 IFJMP
-.loc ../contracts/DexPair.sol, 1611
+.loc ../contracts/DexPair.sol, 1613
 DROP2
 PUSHINT 0
 .loc ../contracts/DexPair.sol, 0
@@ -7444,14 +7544,14 @@ PUSHINT 0
 CALL $_getOperationMinValue_242725a2_internal_macro$
 
 .macro _getOperationMinValue_242725a2_internal_macro
-.loc ../contracts/DexPair.sol, 1615
+.loc ../contracts/DexPair.sol, 1617
 PUSH S2
 EQINT 1
 PUSH S3
 EQINT 6
 OR
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 1616
+	.loc ../contracts/DexPair.sol, 1618
 	CALLREF {
 		CALL $GasValues_no_obj_getPoolDirectExchangeGas_47b146c5_macro$
 	}
@@ -7462,14 +7562,14 @@ PUSHCONT {
 	.loc ../contracts/DexPair.sol, 0
 }
 IFJMP
-.loc ../contracts/DexPair.sol, 1618
+.loc ../contracts/DexPair.sol, 1620
 PUSH S2
 EQINT 2
 PUSH S3
 EQINT 7
 OR
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 1619
+	.loc ../contracts/DexPair.sol, 1621
 	PUSHINT 1
 	PUSHINT 2
 	SWAP2
@@ -7483,14 +7583,14 @@ PUSHCONT {
 	.loc ../contracts/DexPair.sol, 0
 }
 IFJMP
-.loc ../contracts/DexPair.sol, 1621
+.loc ../contracts/DexPair.sol, 1623
 PUSH S2
 EQINT 3
 PUSH S3
 EQINT 8
 OR
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 1622
+	.loc ../contracts/DexPair.sol, 1624
 	PUSHINT 2
 	ROTREV
 	CALLREF {
@@ -7503,11 +7603,11 @@ PUSHCONT {
 	.loc ../contracts/DexPair.sol, 0
 }
 IFJMP
-.loc ../contracts/DexPair.sol, 1624
+.loc ../contracts/DexPair.sol, 1626
 ROT
 EQINT 5
 PUSHCONT {
-	.loc ../contracts/DexPair.sol, 1625
+	.loc ../contracts/DexPair.sol, 1627
 	CALLREF {
 		CALL $GasValues_no_obj_getPoolDirectWithdrawOneCoinGas_64a065de_macro$
 	}
@@ -7517,7 +7617,7 @@ PUSHCONT {
 	.loc ../contracts/DexPair.sol, 0
 }
 IFJMP
-.loc ../contracts/DexPair.sol, 1628
+.loc ../contracts/DexPair.sol, 1630
 PUSHINT 2
 SWAP
 CALLREF {
@@ -11326,7 +11426,7 @@ PUSHCONT {
 			.loc ../contracts/abstract/DexPairBase.sol, 663
 			PUSHINT 2
 			PUSHREF
-			.compute $new_array_line_662_column_56_ast_id_6281$
+			.compute $new_array_line_662_column_56_ast_id_6303$
 			PAIR
 			.loc ../contracts/abstract/DexPairBase.sol, 665
 			TRUE
@@ -11907,7 +12007,7 @@ PUSHCONT {
 				.loc ../contracts/abstract/DexPairBase.sol, 707
 				PUSHINT 2
 				PUSHREF
-				.compute $new_array_line_706_column_56_ast_id_6456$
+				.compute $new_array_line_706_column_56_ast_id_6478$
 				PAIR
 				.loc ../contracts/abstract/DexPairBase.sol, 709
 				TRUE
@@ -14926,101 +15026,6 @@ PUSHCONT {
 IF
 THROW 0
 
-.globl	FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6
-.type	FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6, @function
-CALL $FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6_macro$
-
-.macro FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 25
-OVER
-CALLREF {
-	CALL $FixedPoint128_no_obj_encode_16990793_macro$
-}
-SWAP
-CALLREF {
-	CALL $FixedPoint128_no_obj_div_39f92878_macro$
-}
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6
-.type	FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6, @function
-CALL $FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6_macro$
-
-.macro FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 25
-SWAP
-CALLREF {
-	CALL $FixedPoint128_no_obj_encode_16990793_macro$
-}
-SWAP
-CALLREF {
-	CALL $FixedPoint128_no_obj_div_39f92878_macro$
-}
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_with_obj_encode_16990793
-.type	FixedPoint128_with_obj_encode_16990793, @function
-CALL $FixedPoint128_with_obj_encode_16990793_macro$
-
-.macro FixedPoint128_with_obj_encode_16990793_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 13
-DUP
-PUSHPOW2 128
-MUL
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_no_obj_encode_16990793
-.type	FixedPoint128_no_obj_encode_16990793, @function
-CALL $FixedPoint128_no_obj_encode_16990793_macro$
-
-.macro FixedPoint128_no_obj_encode_16990793_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 13
-PUSHPOW2 128
-MUL
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042
-.type	FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042, @function
-CALL $FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042_macro$
-
-.macro FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 45
-PUXC S1, S-1
-PUSHPOW2 128
-MULDIV
-UFITS 128
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042
-.type	FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042, @function
-CALL $FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042_macro$
-
-.macro FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 45
-PUSHPOW2 128
-MULDIV
-UFITS 128
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_with_obj_div_39f92878
-.type	FixedPoint128_with_obj_div_39f92878, @function
-CALL $FixedPoint128_with_obj_div_39f92878_macro$
-
-.macro FixedPoint128_with_obj_div_39f92878_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 33
-PUXC S1, S-1
-DIV
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
-.globl	FixedPoint128_no_obj_div_39f92878
-.type	FixedPoint128_no_obj_div_39f92878, @function
-CALL $FixedPoint128_no_obj_div_39f92878_macro$
-
-.macro FixedPoint128_no_obj_div_39f92878_macro
-.loc ../contracts/libraries/FixedPoint128.sol, 33
-DIV
-.loc ../contracts/libraries/FixedPoint128.sol, 0
-
 .globl	Math_with_obj_calculateExpectedDepositLiquidity_2a45505a
 .type	Math_with_obj_calculateExpectedDepositLiquidity_2a45505a, @function
 CALL $Math_with_obj_calculateExpectedDepositLiquidity_2a45505a_macro$
@@ -16479,510 +16484,6 @@ STU 128
 ENDC
 .loc ../contracts/libraries/PairPayload.sol, 0
 
-.globl	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7
-.type	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7, @function
-CALL $PairPayload_with_obj_buildExchangePayloadV2_d2029fe7_macro$
-
-.macro PairPayload_with_obj_buildExchangePayloadV2_d2029fe7_macro
-.loc ../contracts/libraries/PairPayload.sol, 55
-DUP
-ISNULL
-PUSH S2
-ISNULL
-NOT
-OR
-THROWIFNOT 148
-.loc ../contracts/libraries/PairPayload.sol, 59
-NEWC
-STSLICECONST x06
-.loc ../contracts/libraries/PairPayload.sol, 60
-PUSH S8
-STUR 64
-.loc ../contracts/libraries/PairPayload.sol, 61
-ROLL 7
-STUR 128
-.loc ../contracts/libraries/PairPayload.sol, 62
-ROLL 5
-STSLICER
-.loc ../contracts/libraries/PairPayload.sol, 63
-ROLL 3
-STSLICER
-.loc ../contracts/libraries/PairPayload.sol, 66
-PUSHREF {
-}
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 68
-BLKSWAP 2, 3
-SWAP
-NEWC
-STU 128
-STSLICE
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 70
-PUSH S2
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 71
-	PUSH2 S2, S2
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.sol, 73
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 74
-	PUSH2 S1, S1
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.sol, 77
-ENDC
-BLKDROP2 2, 1
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_no_obj_buildExchangePayloadV2_d2029fe7
-.type	PairPayload_no_obj_buildExchangePayloadV2_d2029fe7, @function
-CALL $PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro$
-
-.macro PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro
-.loc ../contracts/libraries/PairPayload.sol, 55
-DUP
-ISNULL
-PUSH S2
-ISNULL
-NOT
-OR
-THROWIFNOT 148
-.loc ../contracts/libraries/PairPayload.sol, 59
-NEWC
-STSLICECONST x06
-.loc ../contracts/libraries/PairPayload.sol, 60
-ROLL 8
-STUR 64
-.loc ../contracts/libraries/PairPayload.sol, 61
-ROLL 7
-STUR 128
-.loc ../contracts/libraries/PairPayload.sol, 62
-ROLL 5
-STSLICER
-.loc ../contracts/libraries/PairPayload.sol, 63
-ROLL 3
-STSLICER
-.loc ../contracts/libraries/PairPayload.sol, 66
-PUSHREF {
-}
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 68
-BLKSWAP 2, 3
-SWAP
-NEWC
-STU 128
-STSLICE
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 70
-PUSH S2
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 71
-	PUSH2 S2, S2
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.sol, 73
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 74
-	PUSH2 S1, S1
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.sol, 77
-ENDC
-BLKDROP2 2, 1
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_with_obj_buildDepositLiquidityPayload_ef8b4859
-.type	PairPayload_with_obj_buildDepositLiquidityPayload_ef8b4859, @function
-CALL $PairPayload_with_obj_buildDepositLiquidityPayload_ef8b4859_macro$
-
-.macro PairPayload_with_obj_buildDepositLiquidityPayload_ef8b4859_macro
-.loc ../contracts/libraries/PairPayload.sol, 92
-NEWC
-STSLICECONST x02
-.loc ../contracts/libraries/PairPayload.sol, 93
-PUSH S2
-STUR 64
-.loc ../contracts/libraries/PairPayload.sol, 94
-STU 128
-.loc ../contracts/libraries/PairPayload.sol, 96
-ENDC
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_no_obj_buildDepositLiquidityPayload_ef8b4859
-.type	PairPayload_no_obj_buildDepositLiquidityPayload_ef8b4859, @function
-CALL $PairPayload_no_obj_buildDepositLiquidityPayload_ef8b4859_macro$
-
-.macro PairPayload_no_obj_buildDepositLiquidityPayload_ef8b4859_macro
-.loc ../contracts/libraries/PairPayload.sol, 92
-NEWC
-STSLICECONST x02
-.loc ../contracts/libraries/PairPayload.sol, 93
-XCHG S1, S2
-STU 64
-.loc ../contracts/libraries/PairPayload.sol, 94
-STU 128
-.loc ../contracts/libraries/PairPayload.sol, 96
-ENDC
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_with_obj_buildDepositLiquidityPayloadV2_81d3ea96
-.type	PairPayload_with_obj_buildDepositLiquidityPayloadV2_81d3ea96, @function
-CALL $PairPayload_with_obj_buildDepositLiquidityPayloadV2_81d3ea96_macro$
-
-.macro PairPayload_with_obj_buildDepositLiquidityPayloadV2_81d3ea96_macro
-.loc ../contracts/libraries/PairPayload.sol, 116
-DUP
-ISNULL
-PUSH S2
-ISNULL
-NOT
-OR
-THROWIFNOT 148
-.loc ../contracts/libraries/PairPayload.sol, 120
-NEWC
-STSLICECONST x07
-.loc ../contracts/libraries/PairPayload.sol, 121
-PUSH S7
-STUR 64
-.loc ../contracts/libraries/PairPayload.sol, 122
-ROLL 6
-STUR 128
-.loc ../contracts/libraries/PairPayload.sol, 123
-ROLL 4
-STSLICER
-.loc ../contracts/libraries/PairPayload.sol, 124
-ROLL 3
-STSLICER
-.loc ../contracts/libraries/PairPayload.sol, 127
-PUSHREF {
-}
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 129
-ROLL 3
-NEWC
-STU 128
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 131
-PUSH S2
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 132
-	PUSH2 S2, S2
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.sol, 134
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 135
-	PUSH2 S1, S1
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.sol, 138
-ENDC
-BLKDROP2 2, 1
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_no_obj_buildDepositLiquidityPayloadV2_81d3ea96
-.type	PairPayload_no_obj_buildDepositLiquidityPayloadV2_81d3ea96, @function
-CALL $PairPayload_no_obj_buildDepositLiquidityPayloadV2_81d3ea96_macro$
-
-.macro PairPayload_no_obj_buildDepositLiquidityPayloadV2_81d3ea96_macro
-.loc ../contracts/libraries/PairPayload.sol, 116
-DUP
-ISNULL
-PUSH S2
-ISNULL
-NOT
-OR
-THROWIFNOT 148
-.loc ../contracts/libraries/PairPayload.sol, 120
-NEWC
-STSLICECONST x07
-.loc ../contracts/libraries/PairPayload.sol, 121
-ROLL 7
-STUR 64
-.loc ../contracts/libraries/PairPayload.sol, 122
-ROLL 6
-STUR 128
-.loc ../contracts/libraries/PairPayload.sol, 123
-ROLL 4
-STSLICER
-.loc ../contracts/libraries/PairPayload.sol, 124
-ROLL 3
-STSLICER
-.loc ../contracts/libraries/PairPayload.sol, 127
-PUSHREF {
-}
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 129
-ROLL 3
-NEWC
-STU 128
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 131
-PUSH S2
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 132
-	PUSH2 S2, S2
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.sol, 134
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 135
-	PUSH2 S1, S1
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.sol, 138
-ENDC
-BLKDROP2 2, 1
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_with_obj_buildWithdrawLiquidityPayload_3c8dc902
-.type	PairPayload_with_obj_buildWithdrawLiquidityPayload_3c8dc902, @function
-CALL $PairPayload_with_obj_buildWithdrawLiquidityPayload_3c8dc902_macro$
-
-.macro PairPayload_with_obj_buildWithdrawLiquidityPayload_3c8dc902_macro
-.loc ../contracts/libraries/PairPayload.sol, 153
-NEWC
-STSLICECONST x03
-.loc ../contracts/libraries/PairPayload.sol, 154
-PUSH S2
-STUR 64
-.loc ../contracts/libraries/PairPayload.sol, 155
-STU 128
-.loc ../contracts/libraries/PairPayload.sol, 157
-ENDC
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_no_obj_buildWithdrawLiquidityPayload_3c8dc902
-.type	PairPayload_no_obj_buildWithdrawLiquidityPayload_3c8dc902, @function
-CALL $PairPayload_no_obj_buildWithdrawLiquidityPayload_3c8dc902_macro$
-
-.macro PairPayload_no_obj_buildWithdrawLiquidityPayload_3c8dc902_macro
-.loc ../contracts/libraries/PairPayload.sol, 153
-NEWC
-STSLICECONST x03
-.loc ../contracts/libraries/PairPayload.sol, 154
-XCHG S1, S2
-STU 64
-.loc ../contracts/libraries/PairPayload.sol, 155
-STU 128
-.loc ../contracts/libraries/PairPayload.sol, 157
-ENDC
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_with_obj_buildWithdrawLiquidityPayloadV2_e3728d59
-.type	PairPayload_with_obj_buildWithdrawLiquidityPayloadV2_e3728d59, @function
-CALL $PairPayload_with_obj_buildWithdrawLiquidityPayloadV2_e3728d59_macro$
-
-.macro PairPayload_with_obj_buildWithdrawLiquidityPayloadV2_e3728d59_macro
-.loc ../contracts/libraries/PairPayload.sol, 177
-DUP
-ISNULL
-PUSH S2
-ISNULL
-NOT
-OR
-THROWIFNOT 148
-.loc ../contracts/libraries/PairPayload.sol, 181
-NEWC
-STSLICECONST x08
-.loc ../contracts/libraries/PairPayload.sol, 182
-PUSH S7
-STUR 64
-.loc ../contracts/libraries/PairPayload.sol, 183
-ROLL 6
-STUR 128
-.loc ../contracts/libraries/PairPayload.sol, 184
-ROLL 4
-STSLICER
-.loc ../contracts/libraries/PairPayload.sol, 185
-ROLL 3
-STSLICER
-.loc ../contracts/libraries/PairPayload.sol, 188
-PUSHREF {
-}
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 190
-NEWC
-ROLL 4
-UNPAIR
-XCHG S2
-STU 32
-STDICT
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 192
-PUSH S2
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 193
-	PUSH2 S2, S2
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.sol, 195
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 196
-	PUSH2 S1, S1
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.sol, 199
-ENDC
-BLKDROP2 2, 1
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_no_obj_buildWithdrawLiquidityPayloadV2_e3728d59
-.type	PairPayload_no_obj_buildWithdrawLiquidityPayloadV2_e3728d59, @function
-CALL $PairPayload_no_obj_buildWithdrawLiquidityPayloadV2_e3728d59_macro$
-
-.macro PairPayload_no_obj_buildWithdrawLiquidityPayloadV2_e3728d59_macro
-.loc ../contracts/libraries/PairPayload.sol, 177
-DUP
-ISNULL
-PUSH S2
-ISNULL
-NOT
-OR
-THROWIFNOT 148
-.loc ../contracts/libraries/PairPayload.sol, 181
-NEWC
-STSLICECONST x08
-.loc ../contracts/libraries/PairPayload.sol, 182
-ROLL 7
-STUR 64
-.loc ../contracts/libraries/PairPayload.sol, 183
-ROLL 6
-STUR 128
-.loc ../contracts/libraries/PairPayload.sol, 184
-ROLL 4
-STSLICER
-.loc ../contracts/libraries/PairPayload.sol, 185
-ROLL 3
-STSLICER
-.loc ../contracts/libraries/PairPayload.sol, 188
-PUSHREF {
-}
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 190
-NEWC
-ROLL 4
-UNPAIR
-XCHG S2
-STU 32
-STDICT
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 192
-PUSH S2
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 193
-	PUSH2 S2, S2
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.sol, 195
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 196
-	PUSH2 S1, S1
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.sol, 199
-ENDC
-BLKDROP2 2, 1
-.loc ../contracts/libraries/PairPayload.sol, 0
-
 .globl	PairPayload_with_obj_buildCrossPairExchangePayload_dd899e22
 .type	PairPayload_with_obj_buildCrossPairExchangePayload_dd899e22, @function
 CALL $PairPayload_with_obj_buildCrossPairExchangePayload_dd899e22_macro$
@@ -18398,224 +17899,224 @@ PUSHREFSLICE {
 }
 .loc ../contracts/libraries/PairPayload.sol, 0
 
-.globl	PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e
-.type	PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e, @function
-CALL $PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e_macro$
+.globl	PairPayload_with_obj_buildCancelPayload_d16d279d
+.type	PairPayload_with_obj_buildCancelPayload_d16d279d, @function
+CALL $PairPayload_with_obj_buildCancelPayload_d16d279d_macro$
 
-.macro PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e_macro
-.loc ../contracts/libraries/PairPayload.sol, 643
-PUSHINT 0
-.loc ../contracts/libraries/PairPayload.sol, 644
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-.loc ../contracts/libraries/PairPayload.sol, 645
-PUSHINT 0
-NEWDICT
-PAIR
-.loc ../contracts/libraries/PairPayload.sol, 647
+.macro PairPayload_with_obj_buildCancelPayload_d16d279d_macro
+.loc ../contracts/libraries/PairPayload.sol, 680
 PUSH S3
+EQINT 1
+PUSH S4
+EQINT 2
+PUSH S5
+EQINT 3
+PUSH S6
 EQINT 4
+OR
+OR
+OR
 PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 648
-	PUSH S4
-	CTOS
-	.loc ../contracts/libraries/PairPayload.sol, 650
-	DUP
-	LDU 128
-	POP S2
-	POP S4
-	.loc ../contracts/libraries/PairPayload.sol, 651
-	DUP
-	SREFS
-	GTINT 0
-	.loc ../contracts/libraries/PairPayload.sol, 653
+	.loc ../contracts/libraries/PairPayload.sol, 685
+	DROP
+	NIP
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFJMP
+.loc ../contracts/libraries/PairPayload.sol, 690
+NEWC
+STSLICECONST xc9
+.loc ../contracts/libraries/PairPayload.sol, 691
+PUSH S4
+STUR 8
+.loc ../contracts/libraries/PairPayload.sol, 692
+ROLL 3
+STUR 16
+.loc ../contracts/libraries/PairPayload.sol, 693
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 695
+PUSH S2
+EQINT 9
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 699
+	OVER
+	FIRST
+	PUSHINT 0
+	PUSHINT 1
+	CONDSEL
+	.loc ../contracts/libraries/PairPayload.sol, 700
+	PUSH S2
+	SECOND
+	PUSHINT 0
+	NULL
 	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 654
-		DUP
-		SBITS
-		PUSHINT 267
-		GEQ
-		PUSHCONT {
-			DUP
+		PUSH2 S1, S2
+		PUSHINT 32
+		DICTUGET
+		NULLSWAPIFNOT
+		IFREF {
+			LDU 128
 			LDMSGADDR
-			POP S2
+			LDREF
+			LDU 32
+			LDU 32
+			ENDS
+			TUPLE 5
 		}
-		PUSHCONT {
-			PUSHREFSLICE {
-				.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-			}
-		}
-		IFELSE
-		.loc ../contracts/libraries/PairPayload.sol, 655
-		PUSH S2
-		PUSHINT 1
-		ROT
-		PUSH S3
-		LDREF
-		POP S5
-		PUSHINT 1
 		DUP
-		TUPLE 5
-		CALLREF {
-			UNTUPLE 5
-			REVERSE 5, 0
-			NEWC
-			STU 128
-			STSLICE
-			STREF
-			STU 32
-			STU 32
-		}
-		SWAP
-		UNPAIR
+		POP S2
+		ISNULL
+		NOT
+	}
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 701
+		DUP
+		INDEX 4
+		PUSH S4
+		ADD
+		UFITS 32
+		POP S4
+		.loc ../contracts/libraries/PairPayload.sol, 0
 		OVER
 		INC
-		ROLLREV 3
-		PUSHINT 32
-		DICTUSETB
-		PAIR
 		POP S2
-		.loc ../contracts/libraries/PairPayload.sol, 0
 	}
-	IF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-	DROP
-}
-PUSHCONT {
-	PUSH S3
-	EQINT 9
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 664
-		PUSH S4
-		CTOS
-		LDU 128
-		LDMSGADDR
-		LDU 32
-		LDDICT
-		ROTREV
-		PAIR
-		SWAP
-		ENDS
-		BLKDROP2 3, 3
-		.loc ../contracts/libraries/PairPayload.sol, 0
-	}
-	IF
+	WHILE
+	BLKDROP 3
+	.loc ../contracts/libraries/PairPayload.sol, 704
+	NEWC
+	STU 32
+	.loc ../contracts/libraries/PairPayload.sol, 706
+	ENDC
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 707
+	NEWC
+	PUSH S2
+	UNPAIR
+	XCHG S2
+	STU 32
+	STDICT
+	ENDC
+	SWAP
+	STREF
 	.loc ../contracts/libraries/PairPayload.sol, 0
 }
-IFELSE
-.loc ../contracts/libraries/PairPayload.sol, 667
-BLKDROP2 1, 3
+IF
+.loc ../contracts/libraries/PairPayload.sol, 710
+ENDC
+NIP
 .loc ../contracts/libraries/PairPayload.sol, 0
 
-.globl	PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e
-.type	PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e, @function
-CALL $PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e_macro$
+.globl	PairPayload_no_obj_buildCancelPayload_d16d279d
+.type	PairPayload_no_obj_buildCancelPayload_d16d279d, @function
+CALL $PairPayload_no_obj_buildCancelPayload_d16d279d_macro$
 
-.macro PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e_macro
-.loc ../contracts/libraries/PairPayload.sol, 643
-PUSHINT 0
-.loc ../contracts/libraries/PairPayload.sol, 644
-PUSHREFSLICE {
-	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-}
-.loc ../contracts/libraries/PairPayload.sol, 645
-PUSHINT 0
-NEWDICT
-PAIR
-.loc ../contracts/libraries/PairPayload.sol, 647
+.macro PairPayload_no_obj_buildCancelPayload_d16d279d_macro
+.loc ../contracts/libraries/PairPayload.sol, 680
 PUSH S3
+EQINT 1
+PUSH S4
+EQINT 2
+PUSH S5
+EQINT 3
+PUSH S6
 EQINT 4
+OR
+OR
+OR
 PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 648
-	PUSH S4
-	CTOS
-	.loc ../contracts/libraries/PairPayload.sol, 650
-	DUP
-	LDU 128
-	POP S2
-	POP S4
-	.loc ../contracts/libraries/PairPayload.sol, 651
-	DUP
-	SREFS
-	GTINT 0
-	.loc ../contracts/libraries/PairPayload.sol, 653
+	.loc ../contracts/libraries/PairPayload.sol, 685
+	DROP
+	BLKDROP2 2, 1
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFJMP
+.loc ../contracts/libraries/PairPayload.sol, 690
+NEWC
+STSLICECONST xc9
+.loc ../contracts/libraries/PairPayload.sol, 691
+PUSH S4
+STUR 8
+.loc ../contracts/libraries/PairPayload.sol, 692
+ROLL 3
+STUR 16
+.loc ../contracts/libraries/PairPayload.sol, 693
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 695
+ROT
+EQINT 9
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 699
+	OVER
+	FIRST
+	PUSHINT 0
+	PUSHINT 1
+	CONDSEL
+	.loc ../contracts/libraries/PairPayload.sol, 700
+	PUSH S2
+	SECOND
+	PUSHINT 0
+	NULL
 	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 654
-		DUP
-		SBITS
-		PUSHINT 267
-		GEQ
-		PUSHCONT {
-			DUP
+		PUSH2 S1, S2
+		PUSHINT 32
+		DICTUGET
+		NULLSWAPIFNOT
+		IFREF {
+			LDU 128
 			LDMSGADDR
-			POP S2
+			LDREF
+			LDU 32
+			LDU 32
+			ENDS
+			TUPLE 5
 		}
-		PUSHCONT {
-			PUSHREFSLICE {
-				.blob x8000000000000000000000000000000000000000000000000000000000000000001_
-			}
-		}
-		IFELSE
-		.loc ../contracts/libraries/PairPayload.sol, 655
-		PUSH S2
-		PUSHINT 1
-		ROT
-		PUSH S3
-		LDREF
-		POP S5
-		PUSHINT 1
 		DUP
-		TUPLE 5
-		CALLREF {
-			UNTUPLE 5
-			REVERSE 5, 0
-			NEWC
-			STU 128
-			STSLICE
-			STREF
-			STU 32
-			STU 32
-		}
-		SWAP
-		UNPAIR
+		POP S2
+		ISNULL
+		NOT
+	}
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 701
+		DUP
+		INDEX 4
+		PUSH S4
+		ADD
+		UFITS 32
+		POP S4
+		.loc ../contracts/libraries/PairPayload.sol, 0
 		OVER
 		INC
-		ROLLREV 3
-		PUSHINT 32
-		DICTUSETB
-		PAIR
 		POP S2
-		.loc ../contracts/libraries/PairPayload.sol, 0
 	}
-	IF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-	DROP
-}
-PUSHCONT {
-	PUSH S3
-	EQINT 9
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 664
-		PUSH S4
-		CTOS
-		LDU 128
-		LDMSGADDR
-		LDU 32
-		LDDICT
-		ROTREV
-		PAIR
-		SWAP
-		ENDS
-		BLKDROP2 3, 3
-		.loc ../contracts/libraries/PairPayload.sol, 0
-	}
-	IF
+	WHILE
+	BLKDROP 3
+	.loc ../contracts/libraries/PairPayload.sol, 704
+	NEWC
+	STU 32
+	.loc ../contracts/libraries/PairPayload.sol, 706
+	ENDC
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 707
+	NEWC
+	PUSH S2
+	UNPAIR
+	XCHG S2
+	STU 32
+	STDICT
+	ENDC
+	SWAP
+	STREF
 	.loc ../contracts/libraries/PairPayload.sol, 0
 }
-IFELSE
-.loc ../contracts/libraries/PairPayload.sol, 667
-BLKDROP2 2, 3
+IF
+.loc ../contracts/libraries/PairPayload.sol, 710
+ENDC
+NIP
 .loc ../contracts/libraries/PairPayload.sol, 0
 
 .globl	PairPayload_with_obj__decodeOnAcceptTokensTransferDataV2_e91032f2
@@ -19003,444 +18504,6 @@ ROLL 9
 REVERSE 8, 0
 REVERSE 8, 1
 BLKDROP2 3, 9
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
-.type	PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
-CALL $PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
-
-.macro PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
-.loc ../contracts/libraries/PairPayload.sol, 584
-OVER
-CTOS
-.loc ../contracts/libraries/PairPayload.sol, 585
-DUP
-SREFS
-.loc ../contracts/libraries/PairPayload.sol, 588
-PUSHINT 0
-DUP
-.loc ../contracts/libraries/PairPayload.sol, 591
-PUSHREF {
-}
-PUSH2 S0, S3
-.loc ../contracts/libraries/PairPayload.sol, 594
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 595
-	XCHG S1, S2
-	BLKDROP2 3, 4
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOTJMP
-.loc ../contracts/libraries/PairPayload.sol, 598
-PUSH S6
-EQINT 1
-PUSH S7
-EQINT 2
-PUSH S8
-EQINT 3
-OR
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 603
-	PUSH S4
-	GTINT 0
-	POP S4
-	.loc ../contracts/libraries/PairPayload.sol, 604
-	PUSH S4
-	GTINT 1
-	POP S3
-}
-PUSHCONT {
-	PUSH S6
-	EQINT 4
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 606
-		PUSH S4
-		GTINT 1
-		POP S4
-		.loc ../contracts/libraries/PairPayload.sol, 607
-		PUSH S4
-		GTINT 2
-		POP S3
-		.loc ../contracts/libraries/PairPayload.sol, 609
-	}
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 611
-		PUSH S4
-		GTINT 2
-		POP S4
-		.loc ../contracts/libraries/PairPayload.sol, 612
-		PUSH S4
-		EQINT 4
-		POP S3
-		.loc ../contracts/libraries/PairPayload.sol, 614
-		PUSH S5
-		LDREF
-		POP S7
-		DROP
-		.loc ../contracts/libraries/PairPayload.sol, 615
-	}
-	IFELSE
-	PUSH S5
-	LDREF
-	POP S7
-	DROP
-}
-IFELSE
-.loc ../contracts/libraries/PairPayload.sol, 618
-PUSH S3
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 618
-	PUSH S5
-	LDREF
-	POP S7
-	POP S2
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IF
-.loc ../contracts/libraries/PairPayload.sol, 620
-PUSH S2
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 620
-	PUSH S5
-	LDREF
-	POP S7
-	NIP
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IF
-.loc ../contracts/libraries/PairPayload.sol, 622
-XCHG S1, S2
-BLKDROP2 3, 4
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
-.type	PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
-CALL $PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
-
-.macro PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
-.loc ../contracts/libraries/PairPayload.sol, 584
-SWAP
-CTOS
-.loc ../contracts/libraries/PairPayload.sol, 585
-DUP
-SREFS
-.loc ../contracts/libraries/PairPayload.sol, 588
-PUSHINT 0
-DUP
-.loc ../contracts/libraries/PairPayload.sol, 591
-PUSHREF {
-}
-PUSH2 S0, S3
-.loc ../contracts/libraries/PairPayload.sol, 594
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 595
-	XCHG S1, S2
-	BLKDROP2 3, 4
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFNOTJMP
-.loc ../contracts/libraries/PairPayload.sol, 598
-PUSH S6
-EQINT 1
-PUSH S7
-EQINT 2
-PUSH S8
-EQINT 3
-OR
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 603
-	PUSH S4
-	GTINT 0
-	POP S4
-	.loc ../contracts/libraries/PairPayload.sol, 604
-	PUSH S4
-	GTINT 1
-	POP S3
-}
-PUSHCONT {
-	PUSH S6
-	EQINT 4
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 606
-		PUSH S4
-		GTINT 1
-		POP S4
-		.loc ../contracts/libraries/PairPayload.sol, 607
-		PUSH S4
-		GTINT 2
-		POP S3
-		.loc ../contracts/libraries/PairPayload.sol, 609
-	}
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 611
-		PUSH S4
-		GTINT 2
-		POP S4
-		.loc ../contracts/libraries/PairPayload.sol, 612
-		PUSH S4
-		EQINT 4
-		POP S3
-		.loc ../contracts/libraries/PairPayload.sol, 614
-		PUSH S5
-		LDREF
-		POP S7
-		DROP
-		.loc ../contracts/libraries/PairPayload.sol, 615
-	}
-	IFELSE
-	PUSH S5
-	LDREF
-	POP S7
-	DROP
-}
-IFELSE
-.loc ../contracts/libraries/PairPayload.sol, 618
-PUSH S3
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 618
-	PUSH S5
-	LDREF
-	POP S7
-	POP S2
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IF
-.loc ../contracts/libraries/PairPayload.sol, 620
-PUSH S2
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 620
-	PUSH S5
-	LDREF
-	POP S7
-	NIP
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IF
-.loc ../contracts/libraries/PairPayload.sol, 622
-XCHG S1, S2
-BLKDROP2 3, 4
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_with_obj_buildCancelPayload_d16d279d
-.type	PairPayload_with_obj_buildCancelPayload_d16d279d, @function
-CALL $PairPayload_with_obj_buildCancelPayload_d16d279d_macro$
-
-.macro PairPayload_with_obj_buildCancelPayload_d16d279d_macro
-.loc ../contracts/libraries/PairPayload.sol, 680
-PUSH S3
-EQINT 1
-PUSH S4
-EQINT 2
-PUSH S5
-EQINT 3
-PUSH S6
-EQINT 4
-OR
-OR
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 685
-	DROP
-	NIP
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFJMP
-.loc ../contracts/libraries/PairPayload.sol, 690
-NEWC
-STSLICECONST xc9
-.loc ../contracts/libraries/PairPayload.sol, 691
-PUSH S4
-STUR 8
-.loc ../contracts/libraries/PairPayload.sol, 692
-ROLL 3
-STUR 16
-.loc ../contracts/libraries/PairPayload.sol, 693
-XCHG S1, S2
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 695
-PUSH S2
-EQINT 9
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 699
-	OVER
-	FIRST
-	PUSHINT 0
-	PUSHINT 1
-	CONDSEL
-	.loc ../contracts/libraries/PairPayload.sol, 700
-	PUSH S2
-	SECOND
-	PUSHINT 0
-	NULL
-	PUSHCONT {
-		PUSH2 S1, S2
-		PUSHINT 32
-		DICTUGET
-		NULLSWAPIFNOT
-		IFREF {
-			LDU 128
-			LDMSGADDR
-			LDREF
-			LDU 32
-			LDU 32
-			ENDS
-			TUPLE 5
-		}
-		DUP
-		POP S2
-		ISNULL
-		NOT
-	}
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 701
-		DUP
-		INDEX 4
-		PUSH S4
-		ADD
-		UFITS 32
-		POP S4
-		.loc ../contracts/libraries/PairPayload.sol, 0
-		OVER
-		INC
-		POP S2
-	}
-	WHILE
-	BLKDROP 3
-	.loc ../contracts/libraries/PairPayload.sol, 704
-	NEWC
-	STU 32
-	.loc ../contracts/libraries/PairPayload.sol, 706
-	ENDC
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 707
-	NEWC
-	PUSH S2
-	UNPAIR
-	XCHG S2
-	STU 32
-	STDICT
-	ENDC
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IF
-.loc ../contracts/libraries/PairPayload.sol, 710
-ENDC
-NIP
-.loc ../contracts/libraries/PairPayload.sol, 0
-
-.globl	PairPayload_no_obj_buildCancelPayload_d16d279d
-.type	PairPayload_no_obj_buildCancelPayload_d16d279d, @function
-CALL $PairPayload_no_obj_buildCancelPayload_d16d279d_macro$
-
-.macro PairPayload_no_obj_buildCancelPayload_d16d279d_macro
-.loc ../contracts/libraries/PairPayload.sol, 680
-PUSH S3
-EQINT 1
-PUSH S4
-EQINT 2
-PUSH S5
-EQINT 3
-PUSH S6
-EQINT 4
-OR
-OR
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 685
-	DROP
-	BLKDROP2 2, 1
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IFJMP
-.loc ../contracts/libraries/PairPayload.sol, 690
-NEWC
-STSLICECONST xc9
-.loc ../contracts/libraries/PairPayload.sol, 691
-PUSH S4
-STUR 8
-.loc ../contracts/libraries/PairPayload.sol, 692
-ROLL 3
-STUR 16
-.loc ../contracts/libraries/PairPayload.sol, 693
-XCHG S1, S2
-STREF
-.loc ../contracts/libraries/PairPayload.sol, 695
-ROT
-EQINT 9
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.sol, 699
-	OVER
-	FIRST
-	PUSHINT 0
-	PUSHINT 1
-	CONDSEL
-	.loc ../contracts/libraries/PairPayload.sol, 700
-	PUSH S2
-	SECOND
-	PUSHINT 0
-	NULL
-	PUSHCONT {
-		PUSH2 S1, S2
-		PUSHINT 32
-		DICTUGET
-		NULLSWAPIFNOT
-		IFREF {
-			LDU 128
-			LDMSGADDR
-			LDREF
-			LDU 32
-			LDU 32
-			ENDS
-			TUPLE 5
-		}
-		DUP
-		POP S2
-		ISNULL
-		NOT
-	}
-	PUSHCONT {
-		.loc ../contracts/libraries/PairPayload.sol, 701
-		DUP
-		INDEX 4
-		PUSH S4
-		ADD
-		UFITS 32
-		POP S4
-		.loc ../contracts/libraries/PairPayload.sol, 0
-		OVER
-		INC
-		POP S2
-	}
-	WHILE
-	BLKDROP 3
-	.loc ../contracts/libraries/PairPayload.sol, 704
-	NEWC
-	STU 32
-	.loc ../contracts/libraries/PairPayload.sol, 706
-	ENDC
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 707
-	NEWC
-	PUSH S2
-	UNPAIR
-	XCHG S2
-	STU 32
-	STDICT
-	ENDC
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.sol, 0
-}
-IF
-.loc ../contracts/libraries/PairPayload.sol, 710
-ENDC
-NIP
 .loc ../contracts/libraries/PairPayload.sol, 0
 
 .globl	PairPayload_with_obj_buildSuccessPayload_ca821d98
@@ -20292,7 +19355,1044 @@ PUSHINT 200000
 PAIR
 .loc ../contracts/libraries/GasValues.sol, 0
 
-.macro new_array_line_1191_column_30_ast_id_3042
+.globl	FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6
+.type	FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6, @function
+CALL $FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6_macro$
+
+.macro FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 25
+OVER
+CALLREF {
+	CALL $FixedPoint128_no_obj_encode_16990793_macro$
+}
+SWAP
+CALLREF {
+	CALL $FixedPoint128_no_obj_div_39f92878_macro$
+}
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6
+.type	FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6, @function
+CALL $FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6_macro$
+
+.macro FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 25
+SWAP
+CALLREF {
+	CALL $FixedPoint128_no_obj_encode_16990793_macro$
+}
+SWAP
+CALLREF {
+	CALL $FixedPoint128_no_obj_div_39f92878_macro$
+}
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_with_obj_encode_16990793
+.type	FixedPoint128_with_obj_encode_16990793, @function
+CALL $FixedPoint128_with_obj_encode_16990793_macro$
+
+.macro FixedPoint128_with_obj_encode_16990793_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 13
+DUP
+PUSHPOW2 128
+MUL
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_no_obj_encode_16990793
+.type	FixedPoint128_no_obj_encode_16990793, @function
+CALL $FixedPoint128_no_obj_encode_16990793_macro$
+
+.macro FixedPoint128_no_obj_encode_16990793_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 13
+PUSHPOW2 128
+MUL
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042
+.type	FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042, @function
+CALL $FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042_macro$
+
+.macro FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 45
+PUXC S1, S-1
+PUSHPOW2 128
+MULDIV
+UFITS 128
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042
+.type	FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042, @function
+CALL $FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042_macro$
+
+.macro FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 45
+PUSHPOW2 128
+MULDIV
+UFITS 128
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_with_obj_div_39f92878
+.type	FixedPoint128_with_obj_div_39f92878, @function
+CALL $FixedPoint128_with_obj_div_39f92878_macro$
+
+.macro FixedPoint128_with_obj_div_39f92878_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 33
+PUXC S1, S-1
+DIV
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	FixedPoint128_no_obj_div_39f92878
+.type	FixedPoint128_no_obj_div_39f92878, @function
+CALL $FixedPoint128_no_obj_div_39f92878_macro$
+
+.macro FixedPoint128_no_obj_div_39f92878_macro
+.loc ../contracts/libraries/FixedPoint128.sol, 33
+DIV
+.loc ../contracts/libraries/FixedPoint128.sol, 0
+
+.globl	PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e
+.type	PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e, @function
+CALL $PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e_macro$
+
+.macro PairPayload_with_obj_decodeCrossPoolExchangePayload_b5aa801e_macro
+.loc ../contracts/libraries/PairPayload.sol, 643
+PUSHINT 0
+.loc ../contracts/libraries/PairPayload.sol, 644
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+.loc ../contracts/libraries/PairPayload.sol, 645
+PUSHINT 0
+NEWDICT
+PAIR
+.loc ../contracts/libraries/PairPayload.sol, 647
+PUSH S3
+EQINT 4
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 648
+	PUSH S4
+	CTOS
+	.loc ../contracts/libraries/PairPayload.sol, 650
+	DUP
+	LDU 128
+	POP S2
+	POP S4
+	.loc ../contracts/libraries/PairPayload.sol, 651
+	DUP
+	SREFS
+	GTINT 0
+	.loc ../contracts/libraries/PairPayload.sol, 653
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 654
+		DUP
+		SBITS
+		PUSHINT 267
+		GEQ
+		PUSHCONT {
+			DUP
+			LDMSGADDR
+			POP S2
+		}
+		PUSHCONT {
+			PUSHREFSLICE {
+				.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+			}
+		}
+		IFELSE
+		.loc ../contracts/libraries/PairPayload.sol, 655
+		PUSH S2
+		PUSHINT 1
+		ROT
+		PUSH S3
+		LDREF
+		POP S5
+		PUSHINT 1
+		DUP
+		TUPLE 5
+		CALLREF {
+			UNTUPLE 5
+			REVERSE 5, 0
+			NEWC
+			STU 128
+			STSLICE
+			STREF
+			STU 32
+			STU 32
+		}
+		SWAP
+		UNPAIR
+		OVER
+		INC
+		ROLLREV 3
+		PUSHINT 32
+		DICTUSETB
+		PAIR
+		POP S2
+		.loc ../contracts/libraries/PairPayload.sol, 0
+	}
+	IF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+	DROP
+}
+PUSHCONT {
+	PUSH S3
+	EQINT 9
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 664
+		PUSH S4
+		CTOS
+		LDU 128
+		LDMSGADDR
+		LDU 32
+		LDDICT
+		ROTREV
+		PAIR
+		SWAP
+		ENDS
+		BLKDROP2 3, 3
+		.loc ../contracts/libraries/PairPayload.sol, 0
+	}
+	IF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFELSE
+.loc ../contracts/libraries/PairPayload.sol, 667
+BLKDROP2 1, 3
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e
+.type	PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e, @function
+CALL $PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e_macro$
+
+.macro PairPayload_no_obj_decodeCrossPoolExchangePayload_b5aa801e_macro
+.loc ../contracts/libraries/PairPayload.sol, 643
+PUSHINT 0
+.loc ../contracts/libraries/PairPayload.sol, 644
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+.loc ../contracts/libraries/PairPayload.sol, 645
+PUSHINT 0
+NEWDICT
+PAIR
+.loc ../contracts/libraries/PairPayload.sol, 647
+PUSH S3
+EQINT 4
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 648
+	PUSH S4
+	CTOS
+	.loc ../contracts/libraries/PairPayload.sol, 650
+	DUP
+	LDU 128
+	POP S2
+	POP S4
+	.loc ../contracts/libraries/PairPayload.sol, 651
+	DUP
+	SREFS
+	GTINT 0
+	.loc ../contracts/libraries/PairPayload.sol, 653
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 654
+		DUP
+		SBITS
+		PUSHINT 267
+		GEQ
+		PUSHCONT {
+			DUP
+			LDMSGADDR
+			POP S2
+		}
+		PUSHCONT {
+			PUSHREFSLICE {
+				.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+			}
+		}
+		IFELSE
+		.loc ../contracts/libraries/PairPayload.sol, 655
+		PUSH S2
+		PUSHINT 1
+		ROT
+		PUSH S3
+		LDREF
+		POP S5
+		PUSHINT 1
+		DUP
+		TUPLE 5
+		CALLREF {
+			UNTUPLE 5
+			REVERSE 5, 0
+			NEWC
+			STU 128
+			STSLICE
+			STREF
+			STU 32
+			STU 32
+		}
+		SWAP
+		UNPAIR
+		OVER
+		INC
+		ROLLREV 3
+		PUSHINT 32
+		DICTUSETB
+		PAIR
+		POP S2
+		.loc ../contracts/libraries/PairPayload.sol, 0
+	}
+	IF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+	DROP
+}
+PUSHCONT {
+	PUSH S3
+	EQINT 9
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 664
+		PUSH S4
+		CTOS
+		LDU 128
+		LDMSGADDR
+		LDU 32
+		LDDICT
+		ROTREV
+		PAIR
+		SWAP
+		ENDS
+		BLKDROP2 3, 3
+		.loc ../contracts/libraries/PairPayload.sol, 0
+	}
+	IF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFELSE
+.loc ../contracts/libraries/PairPayload.sol, 667
+BLKDROP2 2, 3
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
+.type	PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
+CALL $PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
+
+.macro PairPayload_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
+.loc ../contracts/libraries/PairPayload.sol, 584
+OVER
+CTOS
+.loc ../contracts/libraries/PairPayload.sol, 585
+DUP
+SREFS
+.loc ../contracts/libraries/PairPayload.sol, 588
+PUSHINT 0
+DUP
+.loc ../contracts/libraries/PairPayload.sol, 591
+PUSHREF {
+}
+PUSH2 S0, S3
+.loc ../contracts/libraries/PairPayload.sol, 594
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 595
+	XCHG S1, S2
+	BLKDROP2 3, 4
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOTJMP
+.loc ../contracts/libraries/PairPayload.sol, 598
+PUSH S6
+EQINT 1
+PUSH S7
+EQINT 2
+PUSH S8
+EQINT 3
+OR
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 603
+	PUSH S4
+	GTINT 0
+	POP S4
+	.loc ../contracts/libraries/PairPayload.sol, 604
+	PUSH S4
+	GTINT 1
+	POP S3
+}
+PUSHCONT {
+	PUSH S6
+	EQINT 4
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 606
+		PUSH S4
+		GTINT 1
+		POP S4
+		.loc ../contracts/libraries/PairPayload.sol, 607
+		PUSH S4
+		GTINT 2
+		POP S3
+		.loc ../contracts/libraries/PairPayload.sol, 609
+	}
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 611
+		PUSH S4
+		GTINT 2
+		POP S4
+		.loc ../contracts/libraries/PairPayload.sol, 612
+		PUSH S4
+		EQINT 4
+		POP S3
+		.loc ../contracts/libraries/PairPayload.sol, 614
+		PUSH S5
+		LDREF
+		POP S7
+		DROP
+		.loc ../contracts/libraries/PairPayload.sol, 615
+	}
+	IFELSE
+	PUSH S5
+	LDREF
+	POP S7
+	DROP
+}
+IFELSE
+.loc ../contracts/libraries/PairPayload.sol, 618
+PUSH S3
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 618
+	PUSH S5
+	LDREF
+	POP S7
+	POP S2
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IF
+.loc ../contracts/libraries/PairPayload.sol, 620
+PUSH S2
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 620
+	PUSH S5
+	LDREF
+	POP S7
+	NIP
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IF
+.loc ../contracts/libraries/PairPayload.sol, 622
+XCHG S1, S2
+BLKDROP2 3, 4
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
+.type	PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
+CALL $PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
+
+.macro PairPayload_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
+.loc ../contracts/libraries/PairPayload.sol, 584
+SWAP
+CTOS
+.loc ../contracts/libraries/PairPayload.sol, 585
+DUP
+SREFS
+.loc ../contracts/libraries/PairPayload.sol, 588
+PUSHINT 0
+DUP
+.loc ../contracts/libraries/PairPayload.sol, 591
+PUSHREF {
+}
+PUSH2 S0, S3
+.loc ../contracts/libraries/PairPayload.sol, 594
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 595
+	XCHG S1, S2
+	BLKDROP2 3, 4
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOTJMP
+.loc ../contracts/libraries/PairPayload.sol, 598
+PUSH S6
+EQINT 1
+PUSH S7
+EQINT 2
+PUSH S8
+EQINT 3
+OR
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 603
+	PUSH S4
+	GTINT 0
+	POP S4
+	.loc ../contracts/libraries/PairPayload.sol, 604
+	PUSH S4
+	GTINT 1
+	POP S3
+}
+PUSHCONT {
+	PUSH S6
+	EQINT 4
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 606
+		PUSH S4
+		GTINT 1
+		POP S4
+		.loc ../contracts/libraries/PairPayload.sol, 607
+		PUSH S4
+		GTINT 2
+		POP S3
+		.loc ../contracts/libraries/PairPayload.sol, 609
+	}
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.sol, 611
+		PUSH S4
+		GTINT 2
+		POP S4
+		.loc ../contracts/libraries/PairPayload.sol, 612
+		PUSH S4
+		EQINT 4
+		POP S3
+		.loc ../contracts/libraries/PairPayload.sol, 614
+		PUSH S5
+		LDREF
+		POP S7
+		DROP
+		.loc ../contracts/libraries/PairPayload.sol, 615
+	}
+	IFELSE
+	PUSH S5
+	LDREF
+	POP S7
+	DROP
+}
+IFELSE
+.loc ../contracts/libraries/PairPayload.sol, 618
+PUSH S3
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 618
+	PUSH S5
+	LDREF
+	POP S7
+	POP S2
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IF
+.loc ../contracts/libraries/PairPayload.sol, 620
+PUSH S2
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 620
+	PUSH S5
+	LDREF
+	POP S7
+	NIP
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IF
+.loc ../contracts/libraries/PairPayload.sol, 622
+XCHG S1, S2
+BLKDROP2 3, 4
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7
+.type	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7, @function
+CALL $PairPayload_with_obj_buildExchangePayloadV2_d2029fe7_macro$
+
+.macro PairPayload_with_obj_buildExchangePayloadV2_d2029fe7_macro
+.loc ../contracts/libraries/PairPayload.sol, 55
+DUP
+ISNULL
+PUSH S2
+ISNULL
+NOT
+OR
+THROWIFNOT 148
+.loc ../contracts/libraries/PairPayload.sol, 59
+NEWC
+STSLICECONST x06
+.loc ../contracts/libraries/PairPayload.sol, 60
+PUSH S8
+STUR 64
+.loc ../contracts/libraries/PairPayload.sol, 61
+ROLL 7
+STUR 128
+.loc ../contracts/libraries/PairPayload.sol, 62
+ROLL 5
+STSLICER
+.loc ../contracts/libraries/PairPayload.sol, 63
+ROLL 3
+STSLICER
+.loc ../contracts/libraries/PairPayload.sol, 66
+PUSHREF {
+}
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 68
+BLKSWAP 2, 3
+SWAP
+NEWC
+STU 128
+STSLICE
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 70
+PUSH S2
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 71
+	PUSH2 S2, S2
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.sol, 73
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 74
+	PUSH2 S1, S1
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.sol, 77
+ENDC
+BLKDROP2 2, 1
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_no_obj_buildExchangePayloadV2_d2029fe7
+.type	PairPayload_no_obj_buildExchangePayloadV2_d2029fe7, @function
+CALL $PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro$
+
+.macro PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro
+.loc ../contracts/libraries/PairPayload.sol, 55
+DUP
+ISNULL
+PUSH S2
+ISNULL
+NOT
+OR
+THROWIFNOT 148
+.loc ../contracts/libraries/PairPayload.sol, 59
+NEWC
+STSLICECONST x06
+.loc ../contracts/libraries/PairPayload.sol, 60
+ROLL 8
+STUR 64
+.loc ../contracts/libraries/PairPayload.sol, 61
+ROLL 7
+STUR 128
+.loc ../contracts/libraries/PairPayload.sol, 62
+ROLL 5
+STSLICER
+.loc ../contracts/libraries/PairPayload.sol, 63
+ROLL 3
+STSLICER
+.loc ../contracts/libraries/PairPayload.sol, 66
+PUSHREF {
+}
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 68
+BLKSWAP 2, 3
+SWAP
+NEWC
+STU 128
+STSLICE
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 70
+PUSH S2
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 71
+	PUSH2 S2, S2
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.sol, 73
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 74
+	PUSH2 S1, S1
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.sol, 77
+ENDC
+BLKDROP2 2, 1
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_with_obj_buildDepositLiquidityPayload_ef8b4859
+.type	PairPayload_with_obj_buildDepositLiquidityPayload_ef8b4859, @function
+CALL $PairPayload_with_obj_buildDepositLiquidityPayload_ef8b4859_macro$
+
+.macro PairPayload_with_obj_buildDepositLiquidityPayload_ef8b4859_macro
+.loc ../contracts/libraries/PairPayload.sol, 92
+NEWC
+STSLICECONST x02
+.loc ../contracts/libraries/PairPayload.sol, 93
+PUSH S2
+STUR 64
+.loc ../contracts/libraries/PairPayload.sol, 94
+STU 128
+.loc ../contracts/libraries/PairPayload.sol, 96
+ENDC
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_no_obj_buildDepositLiquidityPayload_ef8b4859
+.type	PairPayload_no_obj_buildDepositLiquidityPayload_ef8b4859, @function
+CALL $PairPayload_no_obj_buildDepositLiquidityPayload_ef8b4859_macro$
+
+.macro PairPayload_no_obj_buildDepositLiquidityPayload_ef8b4859_macro
+.loc ../contracts/libraries/PairPayload.sol, 92
+NEWC
+STSLICECONST x02
+.loc ../contracts/libraries/PairPayload.sol, 93
+XCHG S1, S2
+STU 64
+.loc ../contracts/libraries/PairPayload.sol, 94
+STU 128
+.loc ../contracts/libraries/PairPayload.sol, 96
+ENDC
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_with_obj_buildDepositLiquidityPayloadV2_81d3ea96
+.type	PairPayload_with_obj_buildDepositLiquidityPayloadV2_81d3ea96, @function
+CALL $PairPayload_with_obj_buildDepositLiquidityPayloadV2_81d3ea96_macro$
+
+.macro PairPayload_with_obj_buildDepositLiquidityPayloadV2_81d3ea96_macro
+.loc ../contracts/libraries/PairPayload.sol, 116
+DUP
+ISNULL
+PUSH S2
+ISNULL
+NOT
+OR
+THROWIFNOT 148
+.loc ../contracts/libraries/PairPayload.sol, 120
+NEWC
+STSLICECONST x07
+.loc ../contracts/libraries/PairPayload.sol, 121
+PUSH S7
+STUR 64
+.loc ../contracts/libraries/PairPayload.sol, 122
+ROLL 6
+STUR 128
+.loc ../contracts/libraries/PairPayload.sol, 123
+ROLL 4
+STSLICER
+.loc ../contracts/libraries/PairPayload.sol, 124
+ROLL 3
+STSLICER
+.loc ../contracts/libraries/PairPayload.sol, 127
+PUSHREF {
+}
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 129
+ROLL 3
+NEWC
+STU 128
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 131
+PUSH S2
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 132
+	PUSH2 S2, S2
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.sol, 134
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 135
+	PUSH2 S1, S1
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.sol, 138
+ENDC
+BLKDROP2 2, 1
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_no_obj_buildDepositLiquidityPayloadV2_81d3ea96
+.type	PairPayload_no_obj_buildDepositLiquidityPayloadV2_81d3ea96, @function
+CALL $PairPayload_no_obj_buildDepositLiquidityPayloadV2_81d3ea96_macro$
+
+.macro PairPayload_no_obj_buildDepositLiquidityPayloadV2_81d3ea96_macro
+.loc ../contracts/libraries/PairPayload.sol, 116
+DUP
+ISNULL
+PUSH S2
+ISNULL
+NOT
+OR
+THROWIFNOT 148
+.loc ../contracts/libraries/PairPayload.sol, 120
+NEWC
+STSLICECONST x07
+.loc ../contracts/libraries/PairPayload.sol, 121
+ROLL 7
+STUR 64
+.loc ../contracts/libraries/PairPayload.sol, 122
+ROLL 6
+STUR 128
+.loc ../contracts/libraries/PairPayload.sol, 123
+ROLL 4
+STSLICER
+.loc ../contracts/libraries/PairPayload.sol, 124
+ROLL 3
+STSLICER
+.loc ../contracts/libraries/PairPayload.sol, 127
+PUSHREF {
+}
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 129
+ROLL 3
+NEWC
+STU 128
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 131
+PUSH S2
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 132
+	PUSH2 S2, S2
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.sol, 134
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 135
+	PUSH2 S1, S1
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.sol, 138
+ENDC
+BLKDROP2 2, 1
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_with_obj_buildWithdrawLiquidityPayload_3c8dc902
+.type	PairPayload_with_obj_buildWithdrawLiquidityPayload_3c8dc902, @function
+CALL $PairPayload_with_obj_buildWithdrawLiquidityPayload_3c8dc902_macro$
+
+.macro PairPayload_with_obj_buildWithdrawLiquidityPayload_3c8dc902_macro
+.loc ../contracts/libraries/PairPayload.sol, 153
+NEWC
+STSLICECONST x03
+.loc ../contracts/libraries/PairPayload.sol, 154
+PUSH S2
+STUR 64
+.loc ../contracts/libraries/PairPayload.sol, 155
+STU 128
+.loc ../contracts/libraries/PairPayload.sol, 157
+ENDC
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_no_obj_buildWithdrawLiquidityPayload_3c8dc902
+.type	PairPayload_no_obj_buildWithdrawLiquidityPayload_3c8dc902, @function
+CALL $PairPayload_no_obj_buildWithdrawLiquidityPayload_3c8dc902_macro$
+
+.macro PairPayload_no_obj_buildWithdrawLiquidityPayload_3c8dc902_macro
+.loc ../contracts/libraries/PairPayload.sol, 153
+NEWC
+STSLICECONST x03
+.loc ../contracts/libraries/PairPayload.sol, 154
+XCHG S1, S2
+STU 64
+.loc ../contracts/libraries/PairPayload.sol, 155
+STU 128
+.loc ../contracts/libraries/PairPayload.sol, 157
+ENDC
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_with_obj_buildWithdrawLiquidityPayloadV2_e3728d59
+.type	PairPayload_with_obj_buildWithdrawLiquidityPayloadV2_e3728d59, @function
+CALL $PairPayload_with_obj_buildWithdrawLiquidityPayloadV2_e3728d59_macro$
+
+.macro PairPayload_with_obj_buildWithdrawLiquidityPayloadV2_e3728d59_macro
+.loc ../contracts/libraries/PairPayload.sol, 177
+DUP
+ISNULL
+PUSH S2
+ISNULL
+NOT
+OR
+THROWIFNOT 148
+.loc ../contracts/libraries/PairPayload.sol, 181
+NEWC
+STSLICECONST x08
+.loc ../contracts/libraries/PairPayload.sol, 182
+PUSH S7
+STUR 64
+.loc ../contracts/libraries/PairPayload.sol, 183
+ROLL 6
+STUR 128
+.loc ../contracts/libraries/PairPayload.sol, 184
+ROLL 4
+STSLICER
+.loc ../contracts/libraries/PairPayload.sol, 185
+ROLL 3
+STSLICER
+.loc ../contracts/libraries/PairPayload.sol, 188
+PUSHREF {
+}
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 190
+NEWC
+ROLL 4
+UNPAIR
+XCHG S2
+STU 32
+STDICT
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 192
+PUSH S2
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 193
+	PUSH2 S2, S2
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.sol, 195
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 196
+	PUSH2 S1, S1
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.sol, 199
+ENDC
+BLKDROP2 2, 1
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.globl	PairPayload_no_obj_buildWithdrawLiquidityPayloadV2_e3728d59
+.type	PairPayload_no_obj_buildWithdrawLiquidityPayloadV2_e3728d59, @function
+CALL $PairPayload_no_obj_buildWithdrawLiquidityPayloadV2_e3728d59_macro$
+
+.macro PairPayload_no_obj_buildWithdrawLiquidityPayloadV2_e3728d59_macro
+.loc ../contracts/libraries/PairPayload.sol, 177
+DUP
+ISNULL
+PUSH S2
+ISNULL
+NOT
+OR
+THROWIFNOT 148
+.loc ../contracts/libraries/PairPayload.sol, 181
+NEWC
+STSLICECONST x08
+.loc ../contracts/libraries/PairPayload.sol, 182
+ROLL 7
+STUR 64
+.loc ../contracts/libraries/PairPayload.sol, 183
+ROLL 6
+STUR 128
+.loc ../contracts/libraries/PairPayload.sol, 184
+ROLL 4
+STSLICER
+.loc ../contracts/libraries/PairPayload.sol, 185
+ROLL 3
+STSLICER
+.loc ../contracts/libraries/PairPayload.sol, 188
+PUSHREF {
+}
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 190
+NEWC
+ROLL 4
+UNPAIR
+XCHG S2
+STU 32
+STDICT
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.sol, 192
+PUSH S2
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 193
+	PUSH2 S2, S2
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.sol, 195
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.sol, 196
+	PUSH2 S1, S1
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.sol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.sol, 199
+ENDC
+BLKDROP2 2, 1
+.loc ../contracts/libraries/PairPayload.sol, 0
+
+.macro new_array_line_1191_column_30_ast_id_3057
 PUSHINT 0
 NEWC
 STU 128
@@ -20310,7 +20410,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_662_column_56_ast_id_6281
+.macro new_array_line_662_column_56_ast_id_6303
 PUSHREF
 .compute $default_tuple_builder_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool$
 PUSHINT 0
@@ -20327,7 +20427,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_706_column_56_ast_id_6456
+.macro new_array_line_706_column_56_ast_id_6478
 PUSHREF
 .compute $default_tuple_builder_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool$
 PUSHINT 0

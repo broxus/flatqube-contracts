@@ -2074,13 +2074,20 @@ PUSHCONT {
 			GTINT 0
 			GETGLOB 13
 			GTINT 0
-			GETGLOB 15
-			DICTEMPTY
-			NOT
 			AND
 			AND
 			AND
-			AND
+			DUP
+			PUSHCONT {
+				DROP
+				PUSHINT 1
+				GETGLOB 15
+				PUSHINT 8
+				DICTUGET
+				NULLSWAPIFNOT
+				NIP
+			}
+			IF
 		}
 		IF
 	}
