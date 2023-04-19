@@ -274,7 +274,6 @@ library GasValues {
         IGasValueStructure.GasValue internalPairTransfer = getInternalPairTransferGas();
         IGasValueStructure.GasValue transferTokens = getTransferTokensGas(_deployWalletValue);
         return IGasValueStructure.GasValue(
-            DexGas.DEX_POOL_COMPENSATION +
             2 * DexGas.OPERATION_CALLBACK +
             internalPairTransfer.fixedValue +
             transferTokens.fixedValue +
@@ -294,7 +293,6 @@ library GasValues {
 
         uint128 refPaymentsCount = referrer.value != 0 ? (poolType == DexPoolTypes.CONSTANT_PRODUCT ? uint128(1) : uint128(N)) : uint128(0);
         return IGasValueStructure.GasValue(
-            DexGas.DEX_POOL_COMPENSATION +
             2 * DexGas.OPERATION_CALLBACK +
             transferTokens.fixedValue +
             mintTokens.fixedValue +
@@ -312,7 +310,6 @@ library GasValues {
         IGasValueStructure.GasValue tokenVaultTransfer = getTokenVaultTransferGas(_deployWalletValue);
         return IGasValueStructure.GasValue(
             2 * DexGas.OPERATION_CALLBACK +
-            DexGas.DEX_POOL_COMPENSATION +
             N * tokenVaultTransfer.fixedValue +
             (referrer.value != 0 ? N * referralProgram.fixedValue : 0),
 
@@ -327,7 +324,6 @@ library GasValues {
         IGasValueStructure.GasValue tokenVaultTransfer = getTokenVaultTransferGas(_deployWalletValue);
         return IGasValueStructure.GasValue(
             2 * DexGas.OPERATION_CALLBACK +
-            DexGas.DEX_POOL_COMPENSATION +
             tokenVaultTransfer.fixedValue +
             (referrer.value != 0 ? referralProgram.fixedValue : 0),
 

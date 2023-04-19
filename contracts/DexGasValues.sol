@@ -189,11 +189,11 @@ contract DexGasValues is IGasValueStructure {
         return GasValue(
             poolCrossExchangeStep.fixedValue * steps +
             deployWalletValue * leaves +
-            transferTokens.fixedValue +
-            DexGas.DEX_POOL_COMPENSATION,
+            transferTokens.fixedValue,
 
             poolCrossExchangeStep.dynamicGas * steps +
-            transferTokens.dynamicGas
+            transferTokens.dynamicGas +
+            150000
         );
     }
 
@@ -252,7 +252,8 @@ contract DexGasValues is IGasValueStructure {
             EverToTip3Gas.EVER_WEVER_TIP3_COMPENSATION,
 
             tip3ToEver.dynamicGas + steps * poolCrossExchangeStep.dynamicGas +
-            transferTokens.dynamicGas
+            transferTokens.dynamicGas +
+            150000
         );
     }
 
