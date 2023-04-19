@@ -116,6 +116,23 @@ async function main() {
     'LpTokenPending',
   );
 
+  console.log(`Deploying DexGasValues...`);
+  const { contract: gasValues, tx: gasTx } =
+    await locklift.factory.deployContract({
+      contract: 'DexGasValues',
+      constructorParams: {
+        owner_: account.address,
+      },
+      initParams: {
+        _nonce: getRandomNonce(),
+      },
+      publicKey: signer.publicKey,
+      value: toNano(2),
+    });
+  migration.store(gasValues, 'DexGasValues');
+  console.log(`DexGasValues: ${gasValues.address}`);
+  displayTx(gasTx.transaction);
+
   console.log(`Deploying DexRoot...`);
   const { contract: dexRoot, tx: dexTx } =
     await locklift.factory.deployContract({
@@ -307,6 +324,17 @@ async function main() {
       .transferOwner({
         answerId: 0,
         newOwner: newOwner,
+      })
+      .send({
+        from: account.address,
+        amount: toNano(1),
+      });
+    displayTx(tx);
+
+    console.log(`Transfer for DexGasValues: ${gasValues.address}`);
+    tx = await gasValues.methods
+      .transferOwner({
+        new_owner: newOwner,
       })
       .send({
         from: account.address,

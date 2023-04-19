@@ -3,7 +3,7 @@ import { Address, toNano, WalletTypes } from 'locklift';
 // const { Migration } = require(process.cwd() + '/scripts/utils');
 import { yellowBright } from 'chalk';
 import pools from '../../../dex_pools.json';
-import { Migration, displayTx} from "../../utils/migration";
+import { displayTx, Migration } from '../../utils/migration';
 
 const TRACE = false;
 
