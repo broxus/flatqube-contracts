@@ -2,10 +2,10 @@ import { writeFileSync } from 'fs';
 import { Address } from 'locklift';
 import { yellowBright } from 'chalk';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Migration } = require(process.cwd() + '/scripts/utils');
+import { Migration } from '../../utils/migration';
 
 const OLD_DEX_ACCOUNT_CODE_HASH =
-  'ca02d602836badbed5602ff9d2086143570a887331b7827ee955b9716f1dabd7';
+  '345a26f10e059ebca100974c51b39bfb241b937f2e27e7f235b3950242682b2d';
 
 type AccountEntity = {
   dexAccount: Address;
@@ -15,10 +15,7 @@ type AccountEntity = {
 async function main() {
   const migration = new Migration();
 
-  const dexRoot = await locklift.factory.getDeployedContract(
-    'DexRoot',
-    migration.getAddress('DexRoot'),
-  );
+  const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
 
   console.log('DexRoot: ' + dexRoot.address);
 
@@ -56,7 +53,7 @@ async function main() {
           .getRoot({ answerId: 0 })
           .call({})
           .then((r) => r.value0.toString());
-
+console.log(dexRoot.address.toString());
         if (root === dexRoot.address.toString()) {
           const owner = await DexAccount.methods
             .getOwner({ answerId: 0 })

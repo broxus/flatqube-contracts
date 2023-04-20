@@ -1,9 +1,8 @@
 import { Address, toNano, WalletTypes } from 'locklift';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Migration } = require(process.cwd() + '/scripts/utils');
 import { yellowBright } from 'chalk';
 import accounts from '../../../dex_accounts.json';
-import { displayTx } from '../../utils/migration';
+import { displayTx, Migration } from '../../utils/migration';
 
 const TRACE = false;
 
@@ -15,10 +14,8 @@ const chunkify = <T>(arr: T[], size: number): T[][] =>
 const main = async () => {
   const migration = new Migration();
 
-  const dexRoot = await locklift.factory.getDeployedContract(
-    'DexRoot',
-    migration.getAddress('DexRoot'),
-  );
+  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+
   const dexManagerAddress = await dexRoot.methods
     .getManager({ answerId: 0 })
     .call()
