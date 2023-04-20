@@ -303,11 +303,10 @@ describe('DexAccount interact with DexPair', async function () {
             logger.log(`Expected BAR: ${expectedBar}`);
 
             const gas = await gasValues.call({
-                method: 'getPoolDirectWithdrawGas',
+                method: 'getPoolDirectNoFeeWithdrawGas',
                 params: {
                     N: 2,
-                    deployWalletValue: 0,
-                    referrer: locklift.utils.zeroAddress
+                    deployWalletValue: 0
                 }
             });
 

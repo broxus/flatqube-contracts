@@ -527,8 +527,6 @@ describe('Check direct DexPairFooBar operations', async function () {
             const gas = await gasValues.call({
                 method: 'getPoolDirectDepositGas',
                 params: {
-                    poolType: options.contract_name.indexOf('Stable') === -1 ? 1 : 2,
-                    N: 2,
                     deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
                     referrer: locklift.utils.zeroAddress
                 }
@@ -606,8 +604,6 @@ describe('Check direct DexPairFooBar operations', async function () {
             const gas = await gasValues.call({
                 method: 'getPoolDirectDepositGas',
                 params: {
-                    poolType: options.contract_name.indexOf('Stable') === -1 ? 1 : 2,
-                    N: 2,
                     deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
                     referrer: locklift.utils.zeroAddress
                 }
@@ -685,8 +681,6 @@ describe('Check direct DexPairFooBar operations', async function () {
             const gas = await gasValues.call({
                 method: 'getPoolDirectDepositGas',
                 params: {
-                    poolType: options.contract_name.indexOf('Stable') === -1 ? 1 : 2,
-                    N: 2,
                     deployWalletValue: 0,
                     referrer: locklift.utils.zeroAddress
                 }
@@ -768,11 +762,10 @@ describe('Check direct DexPairFooBar operations', async function () {
             logger.log(`Expected BAR: ${expectedBar}`);
 
             const gas = await gasValues.call({
-                method: 'getPoolDirectWithdrawGas',
+                method: 'getPoolDirectNoFeeWithdrawGas',
                 params: {
                     N: 2,
-                    deployWalletValue: 0,
-                    referrer: locklift.utils.zeroAddress
+                    deployWalletValue: 0
                 }
             });
 
@@ -861,11 +854,10 @@ describe('Check direct DexPairFooBar operations', async function () {
             logger.log(`Expected BAR: ${expectedBar}`);
 
             const gas = await gasValues.call({
-                method: 'getPoolDirectWithdrawGas',
+                method: 'getPoolDirectNoFeeWithdrawGas',
                 params: {
                     N: 2,
-                    deployWalletValue: 0,
-                    referrer: locklift.utils.zeroAddress
+                    deployWalletValue: 0
                 }
             });
 

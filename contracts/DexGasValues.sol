@@ -161,25 +161,25 @@ contract DexGasValues is IGasValueStructure {
         return poolDirectExchange;
     }
 
-    function getPoolDirectDepositGas(uint8 poolType, uint8 N, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue poolDirectDeposit = GasValues.getPoolDirectDepositGas(poolType, N, deployWalletValue, referrer);
+    function getPoolDirectDepositGas(uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue poolDirectDeposit = GasValues.getPoolDirectDepositGas(deployWalletValue, referrer);
         poolDirectDeposit.fixedValue += DexGas.DEX_POOL_COMPENSATION;
 
         return poolDirectDeposit;
     }
 
-    function getPoolDirectWithdrawGas(uint8 N, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue poolDirectWithdraw = GasValues.getPoolDirectWithdrawGas(N, deployWalletValue, referrer);
+    function getPoolDirectNoFeeWithdrawGas(uint8 N, uint128 deployWalletValue) external pure returns (GasValue) {
+        GasValue poolDirectWithdraw = GasValues.getPoolDirectNoFeeWithdrawGas(N, deployWalletValue);
         poolDirectWithdraw.fixedValue += DexGas.DEX_POOL_COMPENSATION;
 
         return poolDirectWithdraw;
     }
 
-    function getPoolDirectWithdrawOneCoinGas(uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
-        GasValue poolDirectWithdrawOneCoin = GasValues.getPoolDirectWithdrawOneCoinGas(deployWalletValue, referrer);
-        poolDirectWithdrawOneCoin.fixedValue += DexGas.DEX_POOL_COMPENSATION;
+    function getPoolDirectWithdrawGas(uint8 numberOfCurrenciesToWithdraw, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {
+        GasValue poolDirectWithdraw = GasValues.getPoolDirectWithdrawGas(numberOfCurrenciesToWithdraw, deployWalletValue, referrer);
+        poolDirectWithdraw.fixedValue += DexGas.DEX_POOL_COMPENSATION;
 
-        return poolDirectWithdrawOneCoin;
+        return poolDirectWithdraw;
     }
 
     function getPoolCrossExchangeGas(uint32 steps, uint32 leaves, uint128 deployWalletValue, address referrer) external pure returns (GasValue) {

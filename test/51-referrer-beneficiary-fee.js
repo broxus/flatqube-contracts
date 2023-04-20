@@ -783,8 +783,6 @@ describe(`Test beneficiary fee ${options.pool_contract_name}`, async function ()
             const gas = await gasValues.call({
                 method: 'getPoolDirectDepositGas',
                 params: {
-                    poolType: options.pool_contract_name.indexOf('Stable') === -1 ? 1 : 2,
-                    N: N_COINS,
                     deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
                     referrer: Account2.address
                 }

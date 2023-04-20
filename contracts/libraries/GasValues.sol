@@ -286,12 +286,12 @@ library GasValues {
         );
     }
 
-    function getPoolDirectDepositGas(uint8 poolType, uint8 N, uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
+    function getPoolDirectDepositGas(uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
         IGasValueStructure.GasValue referralProgram = getReferralProgramGas();
         IGasValueStructure.GasValue mintTokens = getMintTokensGas(_deployWalletValue);
         IGasValueStructure.GasValue transferTokens = getTransferTokensGas(0);
 
-        uint128 refPaymentsCount = referrer.value != 0 ? (poolType == DexPoolTypes.CONSTANT_PRODUCT ? uint128(1) : uint128(N)) : uint128(0);
+        uint128 refPaymentsCount = referrer.value != 0 ? uint128(1) : uint128(0);
         return IGasValueStructure.GasValue(
             2 * DexGas.OPERATION_CALLBACK +
             transferTokens.fixedValue +
@@ -305,17 +305,28 @@ library GasValues {
         );
     }
 
-    function getPoolDirectWithdrawGas(uint8 N, uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
+    function getPoolDirectNoFeeWithdrawGas(uint8 N, uint128 _deployWalletValue) public returns(IGasValueStructure.GasValue) {
+        IGasValueStructure.GasValue tokenVaultTransfer = getTokenVaultTransferGas(_deployWalletValue);
+        return IGasValueStructure.GasValue(
+            2 * DexGas.OPERATION_CALLBACK +
+            N * tokenVaultTransfer.fixedValue,
+
+            DexGas.DIRECT_WITHDRAW_EXTRA_GAS +
+            N * tokenVaultTransfer.dynamicGas
+        );
+}
+
+    function getPoolDirectWithdrawGas(uint8 _numberOfCurrenciesToWithdraw, uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
         IGasValueStructure.GasValue referralProgram = getReferralProgramGas();
         IGasValueStructure.GasValue tokenVaultTransfer = getTokenVaultTransferGas(_deployWalletValue);
         return IGasValueStructure.GasValue(
             2 * DexGas.OPERATION_CALLBACK +
-            N * tokenVaultTransfer.fixedValue +
-            (referrer.value != 0 ? N * referralProgram.fixedValue : 0),
+            _numberOfCurrenciesToWithdraw * tokenVaultTransfer.fixedValue +
+            (referrer.value != 0 ? _numberOfCurrenciesToWithdraw * referralProgram.fixedValue : 0),
 
             DexGas.DIRECT_WITHDRAW_EXTRA_GAS +
-            N * tokenVaultTransfer.dynamicGas +
-            (referrer.value != 0 ? N * referralProgram.dynamicGas : 0)
+            _numberOfCurrenciesToWithdraw * tokenVaultTransfer.dynamicGas +
+            (referrer.value != 0 ? _numberOfCurrenciesToWithdraw * referralProgram.dynamicGas : 0)
         );
     }
 

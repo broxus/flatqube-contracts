@@ -174,10 +174,18 @@
 		{
 			"name": "getPoolDirectDepositGas",
 			"inputs": [
-				{"name":"poolType","type":"uint8"},
-				{"name":"N","type":"uint8"},
 				{"name":"deployWalletValue","type":"uint128"},
 				{"name":"referrer","type":"address"}
+			],
+			"outputs": [
+				{"components":[{"name":"fixedValue","type":"uint128"},{"name":"dynamicGas","type":"uint128"}],"name":"value0","type":"tuple"}
+			]
+		},
+		{
+			"name": "getPoolDirectNoFeeWithdrawGas",
+			"inputs": [
+				{"name":"N","type":"uint8"},
+				{"name":"deployWalletValue","type":"uint128"}
 			],
 			"outputs": [
 				{"components":[{"name":"fixedValue","type":"uint128"},{"name":"dynamicGas","type":"uint128"}],"name":"value0","type":"tuple"}
@@ -186,17 +194,7 @@
 		{
 			"name": "getPoolDirectWithdrawGas",
 			"inputs": [
-				{"name":"N","type":"uint8"},
-				{"name":"deployWalletValue","type":"uint128"},
-				{"name":"referrer","type":"address"}
-			],
-			"outputs": [
-				{"components":[{"name":"fixedValue","type":"uint128"},{"name":"dynamicGas","type":"uint128"}],"name":"value0","type":"tuple"}
-			]
-		},
-		{
-			"name": "getPoolDirectWithdrawOneCoinGas",
-			"inputs": [
+				{"name":"numberOfCurrenciesToWithdraw","type":"uint8"},
 				{"name":"deployWalletValue","type":"uint128"},
 				{"name":"referrer","type":"address"}
 			],
