@@ -1618,7 +1618,7 @@ contract DexPair is DexPairBase, INextExchangeData {
             return _calcValue(GasValues.getPoolDirectExchangeGas(_deployWalletGrams, _referrer));
         }
         if (_op == DexOperationTypes.DEPOSIT_LIQUIDITY || _op == DexOperationTypes.DEPOSIT_LIQUIDITY_V2) {
-            return _calcValue(GasValues.getPoolDirectDepositGas(_deployWalletGrams, _referrer));
+            return _calcValue(GasValues.getPoolDirectDepositGas(DexPoolTypes.CONSTANT_PRODUCT, 2, _deployWalletGrams, _referrer));
         }
         if (_op == DexOperationTypes.WITHDRAW_LIQUIDITY || _op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
             return _calcValue(GasValues.getPoolDirectNoFeeWithdrawGas(2, _deployWalletGrams));

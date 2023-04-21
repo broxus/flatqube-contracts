@@ -53,53 +53,53 @@ const config: LockliftConfig = {
         amount: 20,
       },
     },
-    // test: {
-    //   // Specify connection settings for https://github.com/broxus/everscale-standalone-client/
-    //   connection: {
-    //     group: 'testnet',
-    //     // @ts-ignore
-    //     type: 'graphql',
-    //     data: {
-    //       // @ts-ignore
-    //       endpoints: [process.env.TESTNET_GQL_ENDPOINT],
-    //       latencyDetectionInterval: 1000,
-    //       local: false,
-    //     },
-    //   },
-    //   // This giver is default local-node giverV2
-    //   giver: {
-    //     // Check if you need provide custom giver
-    //     giverFactory:
-    //       process.env.TESTNET_GIVER_TYPE == 'Wallet'
-    //         ? (ever, keyPair, address) =>
-    //             new GiverWallet(ever, keyPair, address)
-    //         : (ever, keyPair, address) =>
-    //             new TestnetGiver(ever, keyPair, address),
-    //     address: process.env.TESTNET_GIVER_ADDRESS ?? '',
-    //     phrase: process.env.TESTNET_GIVER_SEED ?? '',
-    //     accountId: 0,
-    //   },
-    //   tracing: {
-    //     endpoint: process.env.TESTNET_GQL_ENDPOINT ?? '',
-    //   },
-    //
-    //   keys: {
-    //     phrase: process.env.TESTNET_SEED_PHRASE ?? '',
-    //     amount: 20,
-    //   },
-    // },
-    // main: {
-    //   connection: 'mainnetJrpc',
-    //   giver: {
-    //     address: process.env.MAIN_GIVER_ADDRESS ?? '',
-    //     phrase: process.env.MAIN_GIVER_SEED ?? '',
-    //     accountId: 0,
-    //   },
-    //   keys: {
-    //     phrase: process.env.MAIN_SEED_PHRASE ?? '',
-    //     amount: 20,
-    //   },
-    // }
+    test: {
+      // Specify connection settings for https://github.com/broxus/everscale-standalone-client/
+      connection: {
+        group: 'testnet',
+        // @ts-ignore
+        type: 'graphql',
+        data: {
+          // @ts-ignore
+          endpoints: [process.env.TESTNET_GQL_ENDPOINT],
+          latencyDetectionInterval: 1000,
+          local: false,
+        },
+      },
+      // This giver is default local-node giverV2
+      giver: {
+        // Check if you need provide custom giver
+        giverFactory:
+          process.env.TESTNET_GIVER_TYPE == 'Wallet'
+            ? (ever, keyPair, address) =>
+                new GiverWallet(ever, keyPair, address)
+            : (ever, keyPair, address) =>
+                new TestnetGiver(ever, keyPair, address),
+        address: process.env.TESTNET_GIVER_ADDRESS ?? '',
+        phrase: process.env.TESTNET_GIVER_SEED ?? '',
+        accountId: 0,
+      },
+      tracing: {
+        endpoint: process.env.TESTNET_GQL_ENDPOINT ?? '',
+      },
+
+      keys: {
+        phrase: process.env.TESTNET_SEED_PHRASE ?? '',
+        amount: 20,
+      },
+    },
+    main: {
+      connection: 'mainnetJrpc',
+      giver: {
+        address: process.env.MAIN_GIVER_ADDRESS ?? '',
+        phrase: process.env.MAIN_GIVER_SEED ?? '',
+        accountId: 0,
+      },
+      keys: {
+        phrase: process.env.MAIN_SEED_PHRASE ?? '',
+        amount: 20,
+      },
+    }
   },
   mocha: { timeout: 2000000 },
 };

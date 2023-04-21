@@ -286,12 +286,12 @@ library GasValues {
         );
     }
 
-    function getPoolDirectDepositGas(uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
+    function getPoolDirectDepositGas(uint8 poolType, uint8 N, uint128 _deployWalletValue, address referrer) public returns(IGasValueStructure.GasValue) {
         IGasValueStructure.GasValue referralProgram = getReferralProgramGas();
         IGasValueStructure.GasValue mintTokens = getMintTokensGas(_deployWalletValue);
         IGasValueStructure.GasValue transferTokens = getTransferTokensGas(0);
 
-        uint128 refPaymentsCount = referrer.value != 0 ? uint128(1) : uint128(0);
+        uint128 refPaymentsCount = referrer.value != 0 ? (poolType == DexPoolTypes.CONSTANT_PRODUCT ? uint128(1) : uint128(N)) : uint128(0);
         return IGasValueStructure.GasValue(
             2 * DexGas.OPERATION_CALLBACK +
             transferTokens.fixedValue +

@@ -961,7 +961,7 @@ contract DexStablePool is
             return _calcValue(GasValues.getPoolDirectExchangeGas(_deployWalletGrams, _referrer));
         }
         if (_op == DexOperationTypes.DEPOSIT_LIQUIDITY_V2) {
-            return _calcValue(GasValues.getPoolDirectDepositGas(_deployWalletGrams, _referrer));
+            return _calcValue(GasValues.getPoolDirectDepositGas(DexPoolTypes.STABLE_POOL, 2, _deployWalletGrams, _referrer));
         }
         if (_op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
             return _calcValue(GasValues.getPoolDirectNoFeeWithdrawGas(N_COINS, _deployWalletGrams));

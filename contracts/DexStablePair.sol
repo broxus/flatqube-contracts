@@ -847,10 +847,10 @@ contract DexStablePair is
             return _calcValue(GasValues.getPoolDirectExchangeGas(_deployWalletGrams, _referrer));
         }
         if (_op == DexOperationTypes.DEPOSIT_LIQUIDITY || _op == DexOperationTypes.DEPOSIT_LIQUIDITY_V2) {
-            return _calcValue(GasValues.getPoolDirectDepositGas(_deployWalletGrams, _referrer));
+            return _calcValue(GasValues.getPoolDirectDepositGas(DexPoolTypes.STABLESWAP, 2, _deployWalletGrams, _referrer));
         }
         if (_op == DexOperationTypes.WITHDRAW_LIQUIDITY || _op == DexOperationTypes.WITHDRAW_LIQUIDITY_V2) {
-            return _calcValue(GasValues.getPoolDirectWithdrawGas(2, _deployWalletGrams, _referrer));
+            return _calcValue(GasValues.getPoolDirectNoFeeWithdrawGas(2, _deployWalletGrams));
         }
         if (_op == DexOperationTypes.WITHDRAW_LIQUIDITY_ONE_COIN) {
             return _calcValue(GasValues.getPoolDirectWithdrawGas(1, _deployWalletGrams, _referrer));
