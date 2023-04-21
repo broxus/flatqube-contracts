@@ -5332,8 +5332,11 @@ EQINT 7
 OR
 PUSHCONT {
 	.loc ../contracts/DexStablePair.sol, 850
+	PUSHINT 2
+	DUP
+	SWAP2
 	CALLREF {
-		CALL $GasValues_no_obj_getPoolDirectDepositGas_1098939c_macro$
+		CALL $GasValues_no_obj_getPoolDirectDepositGas_4a58381b_macro$
 	}
 	CALLREF {
 		CALL $_calcValue_2fb4263c_internal_macro$
@@ -5351,14 +5354,14 @@ OR
 PUSHCONT {
 	.loc ../contracts/DexStablePair.sol, 853
 	PUSHINT 2
-	ROTREV
+	ROT
 	CALLREF {
-		CALL $GasValues_no_obj_getPoolDirectWithdrawGas_f6c7e87a_macro$
+		CALL $GasValues_no_obj_getPoolDirectNoFeeWithdrawGas_b20f954d_macro$
 	}
 	CALLREF {
 		CALL $_calcValue_2fb4263c_internal_macro$
 	}
-	NIP
+	BLKDROP2 2, 1
 	.loc ../contracts/DexStablePair.sol, 0
 }
 IFJMP
@@ -6470,7 +6473,7 @@ RAWRESERVE
 .loc ../contracts/DexStablePair.sol, 968
 PUSHINT 2
 PUSHREF
-.compute $new_array_line_967_column_37_ast_id_2996$
+.compute $new_array_line_967_column_37_ast_id_2998$
 PAIR
 .loc ../contracts/DexStablePair.sol, 969
 ROLL 4
@@ -10417,7 +10420,7 @@ PUSHCONT {
 			.loc ../contracts/DexStablePair.sol, 1623
 			PUSHINT 2
 			PUSHREF
-			.compute $new_array_line_1622_column_24_ast_id_5236$
+			.compute $new_array_line_1622_column_24_ast_id_5238$
 			PAIR
 			SETGLOB 15
 			.loc ../contracts/DexStablePair.sol, 1624
@@ -10879,7 +10882,7 @@ PUSHCONT {
 	.loc ../contracts/DexStablePair.sol, 1560
 	PUSHINT 2
 	PUSHREF
-	.compute $new_array_line_1559_column_24_ast_id_4989$
+	.compute $new_array_line_1559_column_24_ast_id_4991$
 	PAIR
 	SETGLOB 15
 	.loc ../contracts/DexStablePair.sol, 1561
@@ -13946,31 +13949,31 @@ OVER
 .loc ../contracts/DexStablePair.sol, 2041
 PUSHINT 2
 PUSHREF
-.compute $new_array_line_2040_column_30_ast_id_7203$
+.compute $new_array_line_2040_column_30_ast_id_7205$
 PAIR
 .loc ../contracts/DexStablePair.sol, 2042
 PUSHINT 2
 PUSHREF
-.compute $new_array_line_2041_column_37_ast_id_7214$
+.compute $new_array_line_2041_column_37_ast_id_7216$
 PAIR
 .loc ../contracts/DexStablePair.sol, 2043
 PUSHINT 2
 PUSHREF
-.compute $new_array_line_2042_column_34_ast_id_7225$
+.compute $new_array_line_2042_column_34_ast_id_7227$
 PAIR
 .loc ../contracts/DexStablePair.sol, 2044
 PUSH S5
 .loc ../contracts/DexStablePair.sol, 2045
 PUSHINT 2
 PUSHREF
-.compute $new_array_line_2044_column_32_ast_id_7243$
+.compute $new_array_line_2044_column_32_ast_id_7245$
 PAIR
 .loc ../contracts/DexStablePair.sol, 2046
 PUSHINT 0
 .loc ../contracts/DexStablePair.sol, 2047
 PUSHINT 2
 PUSHREF
-.compute $new_array_line_2046_column_22_ast_id_7257$
+.compute $new_array_line_2046_column_22_ast_id_7259$
 PAIR
 .loc ../contracts/DexStablePair.sol, 2049
 FALSE
@@ -16654,17 +16657,17 @@ PAIR
 NIP
 .loc ../contracts/libraries/GasValues.sol, 0
 
-.globl	GasValues_with_obj_getPoolDirectDepositGas_1098939c
-.type	GasValues_with_obj_getPoolDirectDepositGas_1098939c, @function
-CALL $GasValues_with_obj_getPoolDirectDepositGas_1098939c_macro$
+.globl	GasValues_with_obj_getPoolDirectDepositGas_4a58381b
+.type	GasValues_with_obj_getPoolDirectDepositGas_4a58381b, @function
+CALL $GasValues_with_obj_getPoolDirectDepositGas_4a58381b_macro$
 
-.macro GasValues_with_obj_getPoolDirectDepositGas_1098939c_macro
+.macro GasValues_with_obj_getPoolDirectDepositGas_4a58381b_macro
 .loc ../contracts/libraries/GasValues.sol, 290
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
 }
 .loc ../contracts/libraries/GasValues.sol, 291
-PUSH S2
+ROT
 CALLREF {
 	CALL $GasValues_no_obj_getMintTokensGas_1c3cea29_macro$
 }
@@ -16678,9 +16681,19 @@ ROLL 3
 PARSEMSGADDR
 INDEX 3
 PLDU 256
-PUSHINT 1
-PUSHINT 0
-CONDSEL
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH S4
+	EQINT 1
+	PUSHCONT {
+		PUSHINT 1
+	}
+	PUSHCONT {
+		PUSH S3
+	}
+	IFELSE
+}
+IF
 .loc ../contracts/libraries/GasValues.sol, 295
 PUSHINT 20200000
 UFITS 128
@@ -16715,13 +16728,14 @@ UFITS 128
 ADD
 UFITS 128
 PAIR
+NIP
 .loc ../contracts/libraries/GasValues.sol, 0
 
-.globl	GasValues_no_obj_getPoolDirectDepositGas_1098939c
-.type	GasValues_no_obj_getPoolDirectDepositGas_1098939c, @function
-CALL $GasValues_no_obj_getPoolDirectDepositGas_1098939c_macro$
+.globl	GasValues_no_obj_getPoolDirectDepositGas_4a58381b
+.type	GasValues_no_obj_getPoolDirectDepositGas_4a58381b, @function
+CALL $GasValues_no_obj_getPoolDirectDepositGas_4a58381b_macro$
 
-.macro GasValues_no_obj_getPoolDirectDepositGas_1098939c_macro
+.macro GasValues_no_obj_getPoolDirectDepositGas_4a58381b_macro
 .loc ../contracts/libraries/GasValues.sol, 290
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
@@ -16741,9 +16755,19 @@ ROLL 3
 PARSEMSGADDR
 INDEX 3
 PLDU 256
-PUSHINT 1
-PUSHINT 0
-CONDSEL
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH S4
+	EQINT 1
+	PUSHCONT {
+		PUSHINT 1
+	}
+	PUSHCONT {
+		PUSH S3
+	}
+	IFELSE
+}
+IF
 .loc ../contracts/libraries/GasValues.sol, 295
 PUSHINT 20200000
 UFITS 128
@@ -16772,6 +16796,64 @@ ADD
 UFITS 128
 SWAP2
 SWAP
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+BLKDROP2 2, 1
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_with_obj_getPoolDirectNoFeeWithdrawGas_b20f954d
+.type	GasValues_with_obj_getPoolDirectNoFeeWithdrawGas_b20f954d, @function
+CALL $GasValues_with_obj_getPoolDirectNoFeeWithdrawGas_b20f954d_macro$
+
+.macro GasValues_with_obj_getPoolDirectNoFeeWithdrawGas_b20f954d_macro
+.loc ../contracts/libraries/GasValues.sol, 309
+CALLREF {
+	CALL $GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 310
+PUSHINT 20200000
+UFITS 128
+BLKPUSH 2, 2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 350000
+PUSH S3
+ROLL 3
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getPoolDirectNoFeeWithdrawGas_b20f954d
+.type	GasValues_no_obj_getPoolDirectNoFeeWithdrawGas_b20f954d, @function
+CALL $GasValues_no_obj_getPoolDirectNoFeeWithdrawGas_b20f954d_macro$
+
+.macro GasValues_no_obj_getPoolDirectNoFeeWithdrawGas_b20f954d_macro
+.loc ../contracts/libraries/GasValues.sol, 309
+CALLREF {
+	CALL $GasValues_no_obj_getTokenVaultTransferGas_6edfcd15_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 310
+PUSHINT 20200000
+UFITS 128
+BLKPUSH 2, 2
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 350000
+SWAP2
 SECOND
 MUL
 UFITS 128
@@ -20114,7 +20196,7 @@ STREF
 ENDC
 .loc ../contracts/libraries/PairPayload.sol, 0
 
-.macro new_array_line_1559_column_24_ast_id_4989
+.macro new_array_line_1559_column_24_ast_id_4991
 PUSHREF
 .compute $default_tuple_builder_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool$
 PUSHINT 0
@@ -20131,7 +20213,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_1622_column_24_ast_id_5236
+.macro new_array_line_1622_column_24_ast_id_5238
 PUSHREF
 .compute $default_tuple_builder_t_address_t_address_t_uint128_t_uint8_t_uint128_t_uint256_t_uint256_t_bool_t_bool$
 PUSHINT 0
@@ -20148,7 +20230,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_2040_column_30_ast_id_7203
+.macro new_array_line_2040_column_30_ast_id_7205
 PUSHINT 0
 NEWC
 STU 128
@@ -20166,7 +20248,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_2041_column_37_ast_id_7214
+.macro new_array_line_2041_column_37_ast_id_7216
 PUSHINT 0
 NEWC
 STU 128
@@ -20184,7 +20266,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_2042_column_34_ast_id_7225
+.macro new_array_line_2042_column_34_ast_id_7227
 PUSHINT 0
 NEWC
 STU 128
@@ -20202,7 +20284,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_2044_column_32_ast_id_7243
+.macro new_array_line_2044_column_32_ast_id_7245
 PUSHINT 0
 NEWC
 STU 128
@@ -20220,7 +20302,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_2046_column_22_ast_id_7257
+.macro new_array_line_2046_column_22_ast_id_7259
 PUSHINT 0
 NEWC
 STI 1
@@ -20274,7 +20356,7 @@ PUSHCONT {
 REPEAT
 BLKDROP2 2, 1
 
-.macro new_array_line_967_column_37_ast_id_2996
+.macro new_array_line_967_column_37_ast_id_2998
 PUSHINT 0
 NEWC
 STU 128

@@ -1149,12 +1149,16 @@ THROWIFNOT 76
 .loc ../contracts/DexGasValues.sol, 164
 OVER
 PUSHCONT {
+	LDU 8
+	LDU 8
 	LDU 128
 	LDREF
 	ENDS
 	CTOS
 }
 PUSHCONT {
+	LDU 8
+	LDU 8
 	LDU 128
 }
 IFELSE
@@ -1162,7 +1166,7 @@ LDMSGADDR
 ENDS
 .loc ../contracts/DexGasValues.sol, 0
 CALLREF {
-	CALL $getPoolDirectDepositGas_1098939c_internal_macro$
+	CALL $getPoolDirectDepositGas_4a58381b_internal_macro$
 }
 OVER
 PUSHCONT {
@@ -1175,7 +1179,7 @@ PUSHCONT {
 	NEWC
 	STSLICECONST xc
 	STSLICE
-	PUSHINT 2210636931
+	PUSHINT 4141932303
 	STUR 130
 	SWAP
 	UNPAIR
@@ -1195,10 +1199,10 @@ IFREF {
 }
 THROW 0
 
-.macro getPoolDirectDepositGas_1098939c_internal_macro
+.macro getPoolDirectDepositGas_4a58381b_internal_macro
 .loc ../contracts/DexGasValues.sol, 165
 CALLREF {
-	CALL $GasValues_no_obj_getPoolDirectDepositGas_1098939c_macro$
+	CALL $GasValues_no_obj_getPoolDirectDepositGas_4a58381b_macro$
 }
 .loc ../contracts/DexGasValues.sol, 166
 DUP
@@ -3415,74 +3419,11 @@ PAIR
 NIP
 .loc ../contracts/libraries/GasValues.sol, 0
 
-.globl	GasValues_with_obj_getPoolDirectDepositGas_1098939c
-.type	GasValues_with_obj_getPoolDirectDepositGas_1098939c, @function
-CALL $GasValues_with_obj_getPoolDirectDepositGas_1098939c_macro$
+.globl	GasValues_with_obj_getPoolDirectDepositGas_4a58381b
+.type	GasValues_with_obj_getPoolDirectDepositGas_4a58381b, @function
+CALL $GasValues_with_obj_getPoolDirectDepositGas_4a58381b_macro$
 
-.macro GasValues_with_obj_getPoolDirectDepositGas_1098939c_macro
-.loc ../contracts/libraries/GasValues.sol, 290
-CALLREF {
-	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
-}
-.loc ../contracts/libraries/GasValues.sol, 291
-PUSH S2
-CALLREF {
-	CALL $GasValues_no_obj_getMintTokensGas_1c3cea29_macro$
-}
-.loc ../contracts/libraries/GasValues.sol, 292
-PUSHINT 0
-CALLREF {
-	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
-}
-.loc ../contracts/libraries/GasValues.sol, 294
-ROLL 3
-PARSEMSGADDR
-INDEX 3
-PLDU 256
-PUSHINT 1
-PUSHINT 0
-CONDSEL
-.loc ../contracts/libraries/GasValues.sol, 295
-PUSHINT 20200000
-UFITS 128
-PUSH S2
-FIRST
-ADD
-UFITS 128
-PUSH S3
-FIRST
-ADD
-UFITS 128
-PUSH2 S1, S4
-FIRST
-MUL
-UFITS 128
-ADD
-UFITS 128
-PUSHINT 350000
-ROLL 3
-SECOND
-ADD
-UFITS 128
-ROLL 3
-SECOND
-ADD
-UFITS 128
-SWAP2
-SWAP
-SECOND
-MUL
-UFITS 128
-ADD
-UFITS 128
-PAIR
-.loc ../contracts/libraries/GasValues.sol, 0
-
-.globl	GasValues_no_obj_getPoolDirectDepositGas_1098939c
-.type	GasValues_no_obj_getPoolDirectDepositGas_1098939c, @function
-CALL $GasValues_no_obj_getPoolDirectDepositGas_1098939c_macro$
-
-.macro GasValues_no_obj_getPoolDirectDepositGas_1098939c_macro
+.macro GasValues_with_obj_getPoolDirectDepositGas_4a58381b_macro
 .loc ../contracts/libraries/GasValues.sol, 290
 CALLREF {
 	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
@@ -3502,9 +3443,19 @@ ROLL 3
 PARSEMSGADDR
 INDEX 3
 PLDU 256
-PUSHINT 1
-PUSHINT 0
-CONDSEL
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH S4
+	EQINT 1
+	PUSHCONT {
+		PUSHINT 1
+	}
+	PUSHCONT {
+		PUSH S3
+	}
+	IFELSE
+}
+IF
 .loc ../contracts/libraries/GasValues.sol, 295
 PUSHINT 20200000
 UFITS 128
@@ -3539,6 +3490,81 @@ UFITS 128
 ADD
 UFITS 128
 PAIR
+NIP
+.loc ../contracts/libraries/GasValues.sol, 0
+
+.globl	GasValues_no_obj_getPoolDirectDepositGas_4a58381b
+.type	GasValues_no_obj_getPoolDirectDepositGas_4a58381b, @function
+CALL $GasValues_no_obj_getPoolDirectDepositGas_4a58381b_macro$
+
+.macro GasValues_no_obj_getPoolDirectDepositGas_4a58381b_macro
+.loc ../contracts/libraries/GasValues.sol, 290
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 291
+ROT
+CALLREF {
+	CALL $GasValues_no_obj_getMintTokensGas_1c3cea29_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 292
+PUSHINT 0
+CALLREF {
+	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
+}
+.loc ../contracts/libraries/GasValues.sol, 294
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH S4
+	EQINT 1
+	PUSHCONT {
+		PUSHINT 1
+	}
+	PUSHCONT {
+		PUSH S3
+	}
+	IFELSE
+}
+IF
+.loc ../contracts/libraries/GasValues.sol, 295
+PUSHINT 20200000
+UFITS 128
+PUSH S2
+FIRST
+ADD
+UFITS 128
+PUSH S3
+FIRST
+ADD
+UFITS 128
+PUSH2 S1, S4
+FIRST
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 350000
+ROLL 3
+SECOND
+ADD
+UFITS 128
+ROLL 3
+SECOND
+ADD
+UFITS 128
+SWAP2
+SWAP
+SECOND
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+BLKDROP2 2, 1
 .loc ../contracts/libraries/GasValues.sol, 0
 
 .globl	GasValues_with_obj_getPoolDirectNoFeeWithdrawGas_b20f954d
@@ -4130,11 +4156,11 @@ PAIR
 
 .macro public_function_selector
 DUP
-PUSHINT 926569592
+PUSHINT 1022602248
 LEQ
 IFJMPREF {
 	DUP
-	PUSHINT 143262989
+	PUSHINT 206567577
 	LEQ
 	IFJMPREF {
 		DUP
@@ -4142,12 +4168,6 @@ IFJMPREF {
 		EQUAL
 		IFJMPREF {
 			CALL $getDeployAccountGas$
-		}
-		DUP
-		PUSHINT 63153283
-		EQUAL
-		IFJMPREF {
-			CALL $getPoolDirectDepositGas$
 		}
 		DUP
 		PUSHINT 106294208
@@ -4161,17 +4181,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getDeployTokenVaultGas$
 		}
-	}
-	DUP
-	PUSHINT 442982756
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 206567577
 		EQUAL
 		IFJMPREF {
 			CALL $getTip3ToEverExchangeGas$
 		}
+	}
+	DUP
+	PUSHINT 453826860
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 345774155
 		EQUAL
@@ -4190,17 +4210,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getPoolCrossExchangeGas$
 		}
-	}
-	DUP
-	PUSHINT 712476374
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 453826860
 		EQUAL
 		IFJMPREF {
 			CALL $transferOwner$
 		}
+	}
+	DUP
+	PUSHINT 813019621
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 500198932
 		EQUAL
@@ -4219,17 +4239,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getEverWeverToTip3CrossExchangeGas$
 		}
-	}
-	DUP
-	PUSHINT 926569592
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 813019621
 		EQUAL
 		IFJMPREF {
 			CALL $getSetAmplificationCoefficientGas$
 		}
+	}
+	DUP
+	PUSHINT 1022602248
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 825076180
 		EQUAL
@@ -4248,6 +4268,12 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getAccountTransferGas$
 		}
+		DUP
+		PUSHINT 1022602248
+		EQUAL
+		IFJMPREF {
+			CALL $getAccountExchangeGas$
+		}
 	}
 }
 DUP
@@ -4255,15 +4281,9 @@ PUSHINT 2068601325
 LEQ
 IFJMPREF {
 	DUP
-	PUSHINT 1125148745
+	PUSHINT 1146955867
 	LEQ
 	IFJMPREF {
-		DUP
-		PUSHINT 1022602248
-		EQUAL
-		IFJMPREF {
-			CALL $getAccountExchangeGas$
-		}
 		DUP
 		PUSHINT 1025363684
 		EQUAL
@@ -4282,17 +4302,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getUpgradeTokenVaultGas$
 		}
-	}
-	DUP
-	PUSHINT 1270509631
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1146955867
 		EQUAL
 		IFJMPREF {
 			CALL $getAccountWithdrawGas$
 		}
+	}
+	DUP
+	PUSHINT 1306576439
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1178692339
 		EQUAL
@@ -4311,17 +4331,17 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $getAccountDepositGas$
 		}
-	}
-	DUP
-	PUSHINT 1809145905
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1306576439
 		EQUAL
 		IFJMPREF {
 			CALL $getUpgradeRootGas$
 		}
+	}
+	DUP
+	PUSHINT 1825454087
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1419332328
 		EQUAL
@@ -4340,22 +4360,28 @@ IFJMPREF {
 		IFJMPREF {
 			CALL $acceptOwner$
 		}
-	}
-	DUP
-	PUSHINT 2068601325
-	LEQ
-	IFJMPREF {
 		DUP
 		PUSHINT 1825454087
 		EQUAL
 		IFJMPREF {
 			CALL $getPoolDirectExchangeGas$
 		}
+	}
+	DUP
+	PUSHINT 2068601325
+	LEQ
+	IFJMPREF {
 		DUP
 		PUSHINT 1961822439
 		EQUAL
 		IFJMPREF {
 			CALL $getDepositToAccountGas$
+		}
+		DUP
+		PUSHINT 1994448655
+		EQUAL
+		IFJMPREF {
+			CALL $getPoolDirectDepositGas$
 		}
 		DUP
 		PUSHINT 2000030591
