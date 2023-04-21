@@ -291,7 +291,15 @@ library GasValues {
         IGasValueStructure.GasValue mintTokens = getMintTokensGas(_deployWalletValue);
         IGasValueStructure.GasValue transferTokens = getTransferTokensGas(0);
 
-        uint128 refPaymentsCount = referrer.value != 0 ? (poolType == DexPoolTypes.CONSTANT_PRODUCT ? uint128(1) : uint128(N)) : uint128(0);
+        uint128 refPaymentsCount = 0;
+        if (referrer.value != 0) {
+            if(poolType == DexPoolTypes.CONSTANT_PRODUCT || poolType == DexPoolTypes.STABLE_POOL) {
+                refPaymentsCount = 1;
+            } else {
+                refPaymentsCount = N;
+            }
+        }
+
         return IGasValueStructure.GasValue(
             2 * DexGas.OPERATION_CALLBACK +
             transferTokens.fixedValue +
