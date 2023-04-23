@@ -94,7 +94,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 
 		emit OwnerTransferAccepted(owner, pendingOwner);
 		owner = pendingOwner;
-		pendingOwner = address(0);
+		delete pendingOwner;
 
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
 	}

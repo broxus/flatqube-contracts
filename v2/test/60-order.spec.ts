@@ -272,7 +272,6 @@ describe('OrderTest', () => {
         ${feesTst.params.matchingNumerator}/${feesTst.params.matchingDenominator}`)
     });
 
-    // TODO make tests for orders with data expired
     describe('Direct execution Order', async () => {
         it('Check full execution with 2 buyer, case 1.1', async () => {
             console.log(`#############################\n`);
@@ -783,6 +782,7 @@ describe('OrderTest', () => {
             ), {allowedCodes: {compute: [60]}});
 
             const order = await RootOrderBar.getEventCreateOrder(account3);
+            console.log(`Limit order: ${order.address}`);
             const expected = await dexPair.methods.expectedExchange({
                 answerId: 1,
                 amount: numberString(TOKENS_TO_EXCHANGE1, barDecimals),
@@ -826,6 +826,7 @@ describe('OrderTest', () => {
             ), {allowedCodes:{compute:[60]}});
 
             const order = await RootOrderBar.getEventCreateOrder(account3);
+            console.log(`Limit order: ${order.address}`);
             const expected = await dexPair.methods.expectedExchange({
                 answerId: 1,
                 amount: numberString(TOKENS_TO_EXCHANGE1, barDecimals),
@@ -881,6 +882,7 @@ describe('OrderTest', () => {
             ), {allowedCodes: {compute:[60]}});
 
             const order = await RootOrderBar.getEventCreateOrder(account3);
+            console.log(`Limit order: ${order.address}`);
             const expected = await dexPair.methods.expectedExchange({
                 answerId: 1,
                 amount: numberString(TOKENS_TO_EXCHANGE1, barDecimals),

@@ -160,7 +160,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 			msg.sender == matchingOrder
 		){
 			changeState(OrderStatus.Active);
-			matchingOrder = address(0);
+			delete matchingOrder;
 		}
 	}
 
@@ -292,7 +292,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 						(expectedSenderAmount, senderFee) = _expectedSpendAmount(amount);
 					} else {
 						expectedSenderAmount = amount;
-						senderFee = 0;
+						delete senderFee;
 					}
 
 					if (expectedSenderAmount > 0) {
@@ -376,7 +376,8 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 					expectedSenderAmount,
 					currentAmountSpentToken,
 					currentAmountReceiveToken,
-					senderFee
+					senderFee,
+					(state != OrderStatus.MatchInProgress ? recipient : sendGasTo)
 				);
 
 				if (callbackId > 0) {
@@ -404,7 +405,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 							}(
 							callbackId,
 							owner,
-							uint128(0),
+							0,
 							IOrderExchangeResult.OrderExchangeFilledResult(
 								receiveToken,
 								amount,
@@ -446,7 +447,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 				}(
 				amount,
 				recipient,
-				uint128(0),
+				0,
 				originalGasTo,
 				notifyCancel,
 				(notifyCancel ? OrderPayloads.buildCancelPayload(op, cancelPayload) : emptyPayload)
@@ -478,7 +479,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 		}(
 			currentAmountReceiveToken,
 			owner,
-			uint128(0),
+			0,
 			_originalGasTo,
 			true,
 			(state != OrderStatus.MatchInProgress ?
@@ -495,7 +496,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 			}(
 				_senderFee,
 				fee.beneficiary,
-				uint128(0),
+				0,
 				_originalGasTo,
 				false,
 				emptyPayload
@@ -511,7 +512,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 				}(
 					_expectedSenderAmount - currentAmountReceiveToken,
 					_sender,
-					uint128(0),
+					0,
 					_originalGasTo,
 					true,
 					OrderPayloads.buildOrderOperationChange(
@@ -545,11 +546,11 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 		}
 
 		if (state == OrderStatus.MatchInProgress) {
-			matchingOrder = address(0);
+			delete matchingOrder;
 		}
 
-		currentAmountReceiveToken = 0;
-		currentAmountSpentToken = 0;
+		delete currentAmountReceiveToken;
+		delete currentAmountSpentToken;
 
 		return _transferAmount;
 	}
@@ -579,7 +580,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 		}(
 			_expectedSenderAmount,
 			owner,
-			uint128(0),
+			0,
 			_originalGasTo,
 			true,
 			(state != OrderStatus.MatchInProgress ?
@@ -602,7 +603,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 			}(
 				_senderFee,
 				fee.beneficiary,
-				uint128(0),
+				0,
 				_originalGasTo,
 				false,
 				emptyPayload
@@ -628,7 +629,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 				}(
 					_transferAmount,
 					_sender,
-					(state != OrderStatus.MatchInProgress ? _deployWalletValue : uint128(0)),
+					(state != OrderStatus.MatchInProgress ? _deployWalletValue : 0),
 					_originalGasTo,
 					(state != OrderStatus.MatchInProgress ? _notifySuccess : true),
 					(state != OrderStatus.MatchInProgress ? (_notifySuccess ? OrderPayloads.buildSuccessPayload(_op, _successPayload, _sender) : emptyPayload) : payloadForTransfer)
@@ -650,7 +651,8 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 				_expectedSenderAmount,
 				currentAmountSpentToken,
 				currentAmountReceiveToken,
-				_senderFee
+				_senderFee,
+				(state != OrderStatus.MatchInProgress ? _sender : _sendGasTo)
 			);
 
 			if (_callbackId > 0) {
@@ -681,7 +683,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 				}(
 					_callbackId,
 					owner,
-					uint128(0),
+					0,
 					IOrderExchangeResult.OrderExchangeResult(
 					receiveToken,
 					_expectedSenderAmount,
@@ -695,7 +697,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 		}
 
 		if (state == OrderStatus.MatchInProgress) {
-			matchingOrder = address(0);
+			delete matchingOrder;
 			changeState(OrderStatus.Active);
 		}
 
@@ -774,8 +776,8 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 			}
 		}
 
-		currentAmountReceiveToken = 0;
-		currentAmountSpentToken = 0;
+		delete currentAmountReceiveToken;
+		delete currentAmountSpentToken;
 
 		return _transferAmount;
 	}
@@ -858,7 +860,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 		}(
 			currentAmountSpentToken,
 			dexPair,
-			uint128(0),
+			0,
 			address(this),
 			true,
 			payload
@@ -882,7 +884,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 			bounce: false
 		}(
 			callbackId,
-			uint128(0),
+			0,
 			buildDetails()
 		);
 	}
@@ -974,7 +976,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 					}(
 					alienAmountSpent,
 					matchingOrder,
-					uint128(0),
+					0,
 					matchingOrder,
 					true,
 					OrderPayloads.buildMatchExchangePayload(
@@ -1000,7 +1002,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 	function matchingCancel() override external {
 		require(msg.sender == matchingOrder, OrderErrors.NOT_ORDER_FOR_MATCHING);
 		changeState(prevState);
-		matchingOrder = address(0);
+		delete matchingOrder;
 	}
 
 	function expectedOrder(
@@ -1155,8 +1157,8 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 		);
 
 		state = prevState;
-		prevState = 0;
-		emergencyManager = 0;
+		delete prevState;
+		delete emergencyManager;
 
 		emit StateChanged(
 			OrderStatus.Emergency,

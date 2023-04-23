@@ -272,11 +272,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             }
 
             address orderAddress = _createOrder(
-                expectedAmount,
-                amount,
-                user,
-                receiveToken,
-                dataPK
+                expectedAmount, amount, user,
+                receiveToken, dataPK
             );
 
             emit CreateOrder(orderAddress, user, spentToken, amount, receiveToken, expectedAmount);
@@ -308,7 +305,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             }(fee.beneficiary, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
             tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-            ITokenWallet(msg.sender).transfer{
+
+            ITokenWallet(msg.sender).transfer {
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED,
                 bounce: false
@@ -339,7 +337,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             }(
                 amount,
                 sender,
-                uint128(0),
+                0,
                 originalGasTo,
                 notifyCancel,
                 OrderPayloads.buildCancelPayloadOrderRoot(op, errorCode, cancelPayload)
@@ -369,21 +367,22 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         TvmCell _dataPK
     ) private view returns(address) {
         TvmCell emptyCustomParams;
-        return (new OrderPlatform {
-            stateInit: buildState(
-                        orderPlatformCode, _sender, _receiveToken,
-                        abi.encode(dexRoot, orderPlatformCode)
-                    ),
-            value: OrderGas.DEPLOY_ORDER
-        }(
-            _amount,
-            _expectedAmount,
-            versionOrder,
-            fee,
-            _dataPK,
-            orderCode,
-            emptyCustomParams
-        ));
+        return (
+            new OrderPlatform {
+                value: OrderGas.DEPLOY_ORDER,
+                stateInit: buildState(
+                    orderPlatformCode, _sender, _receiveToken,
+                    abi.encode(dexRoot, orderPlatformCode))
+            }(
+                _amount,
+                _expectedAmount,
+                versionOrder,
+                fee,
+                _dataPK,
+                orderCode,
+                emptyCustomParams
+            )
+        );
     }
 
     function buildState(
@@ -400,7 +399,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 owner: _sender,
                 spentToken: spentToken,
                 receiveToken: _receiveToken,
-                timeTx: uint64(tx.timestamp),
+                timeTx: tx.timestamp,
                 nowTx: uint64(now),
                 params: params
             },
