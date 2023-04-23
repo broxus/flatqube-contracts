@@ -180,6 +180,13 @@ export class OrderWrapper {
             }), {allowedCodes:{compute:[60]}});
     }
 
+    async backendCancel(
+        signer: any,
+        callbackId: number = 0
+    ){
+        return await locklift.tracing.trace(this.contract.methods.cancel({callbackId: callbackId}).sendExternal({publicKey: signer.publicKey}), {allowedCodes:{compute:[60]}});
+    }
+
     async backendSwap(
         signer: any,
         trace: boolean = false,

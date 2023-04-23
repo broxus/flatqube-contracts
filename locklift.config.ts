@@ -5,7 +5,6 @@ import { FactorySource } from './build/factorySource';
 import chai from "chai";
 chai.use(lockliftChai);
 
-
 declare global {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -22,7 +21,9 @@ const config: LockliftConfig = {
     version: "0.62.0",
     externalContracts: {
       'precompiled': [
-          'DexPlatform'
+          'DexPlatform',
+          'OrderRootPlatform',
+          'OrderPlatform'
       ],
       'node_modules/tip3/build': [
         'TokenRootUpgradeable',

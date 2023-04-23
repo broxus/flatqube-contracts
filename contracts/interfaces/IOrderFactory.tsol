@@ -47,6 +47,25 @@ interface IOrderFactory is IOrderFeeParams {
 
     function setOrderCode(TvmCell _orderCode) external;
 
+    function proxyRootTokensTransfer(
+		address root,
+	    address _tokenWallet,
+        uint128 _gasValue,
+        uint128 _amount,
+        address _recipient,
+        uint128 _deployWalletValue,
+        address _remainingGasTo,
+        bool _notify,
+        TvmCell _payload
+	) external;
+
+    function sendGasRoot(
+        address root,
+		address to,
+        uint128 _value,
+        uint16 _flag
+	) external;
+
     function withdrawFee(
         uint128 amount,
         address recipient,

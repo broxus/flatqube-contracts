@@ -39,7 +39,7 @@ export const accountMigration = async (
   logMigrationSuccess(
     'Account',
     'constructor',
-    `Deployed Account: ${account.address}`,
+    `Deployed Account: ${account.address.toString()}`,
   );
   new Migration().store(account, name);
 

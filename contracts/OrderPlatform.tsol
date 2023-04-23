@@ -23,7 +23,8 @@ contract OrderPlatform is IOrderFeeParams {
         uint32 _version,
         OrderFeeParams _fee,
         TvmCell backendPK,
-        TvmCell _code
+        TvmCell _code,
+        TvmCell _customParams
     ) public {
         if (msg.sender.value != 0 && msg.sender == root) {
             initialize(
@@ -32,7 +33,8 @@ contract OrderPlatform is IOrderFeeParams {
                 _version,
                 _fee,
                 backendPK,
-                _code
+                _code,
+                _customParams
             );
         } else {
             owner.transfer({
@@ -49,9 +51,9 @@ contract OrderPlatform is IOrderFeeParams {
         uint32 _version,
         OrderFeeParams _fee,
         TvmCell backendPK,
-        TvmCell code
+        TvmCell code,
+        TvmCell _customParams
     ) private {
-        TvmCell empty;
         TvmCell data = abi.encode(
             factory,
             root,
@@ -67,7 +69,8 @@ contract OrderPlatform is IOrderFeeParams {
             _version,
             _fee,
             backendPK,
-            empty
+            _customParams
+
         );
         tvm.setcode(code);
         tvm.setCurrentCode(code);

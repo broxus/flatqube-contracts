@@ -137,7 +137,6 @@
 				{"name":"user","type":"address"},
 				{"name":"tokenReceive","type":"address"},
 				{"name":"expectedTokenAmount","type":"uint128"},
-				{"name":"deployWalletValue","type":"uint128"},
 				{"name":"backPK","type":"uint256"},
 				{"name":"backMatchingPK","type":"uint256"},
 				{"name":"cancelPayload","type":"optional(cell)"}
@@ -147,9 +146,34 @@
 			]
 		},
 		{
+			"name": "proxyTokensTransfer",
+			"inputs": [
+				{"name":"_tokenWallet","type":"address"},
+				{"name":"_gasValue","type":"uint128"},
+				{"name":"_amount","type":"uint128"},
+				{"name":"_recipient","type":"address"},
+				{"name":"_deployWalletValue","type":"uint128"},
+				{"name":"_remainingGasTo","type":"address"},
+				{"name":"_notify","type":"bool"},
+				{"name":"_payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "sendGas",
+			"inputs": [
+				{"name":"to","type":"address"},
+				{"name":"_value","type":"uint128"},
+				{"name":"_flag","type":"uint16"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "onAcceptTokensTransfer",
 			"inputs": [
-				{"name":"tokenRoot","type":"address"},
+				{"name":"value0","type":"address"},
 				{"name":"amount","type":"uint128"},
 				{"name":"sender","type":"address"},
 				{"name":"value3","type":"address"},
@@ -198,6 +222,7 @@
 		{
 			"name": "CreateOrderReject",
 			"inputs": [
+				{"name":"errorCode","type":"uint16"}
 			],
 			"outputs": [
 			]

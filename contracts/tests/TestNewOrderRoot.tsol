@@ -176,6 +176,43 @@ contract TestNewOrderRoot is IOrderRoot, IOrderRootEvents {
         ));
     }
 
+    function proxyTokensTransfer(
+        address _tokenWallet,
+        uint128 _gasValue,
+        uint128 _amount,
+        address _recipient,
+        uint128 _deployWalletValue,
+        address _remainingGasTo,
+        bool _notify,
+        TvmCell _payload
+    ) override external onlyFactory {
+
+        tvm.accept();
+
+        ITokenWallet(_tokenWallet).transfer{
+                value : _gasValue,
+                flag : MsgFlag.SENDER_PAYS_FEES
+        }(
+            _amount,
+            _recipient,
+            _deployWalletValue,
+            _remainingGasTo,
+            _notify,
+            _payload
+        );
+    }
+
+    function sendGas(
+        address to,
+        uint128 _value,
+        uint16 _flag
+    ) override external onlyFactory {
+
+        tvm.accept();
+        to.transfer({value : _value, flag : _flag, bounce : false});
+    }
+
+
     function upgrade(
         TvmCell _code,
         uint32 _newVersion,
@@ -187,9 +224,10 @@ contract TestNewOrderRoot is IOrderRoot, IOrderRootEvents {
         } else {
             emit OrderRootCodeUpgraded(_newVersion);
 
+            TvmCell customParams;
             TvmCell data = abi.encode(
                 factory, spentToken, spentTokenWallet, version, _newVersion, versionOrder,
-                deployer, fee, orderCode, abi.encode(dexRoot, orderPlatformCode)
+                deployer, fee, orderCode, abi.encode(dexRoot, orderPlatformCode), customParams
             );
 
             tvm.setcode(_code);
@@ -204,21 +242,14 @@ contract TestNewOrderRoot is IOrderRoot, IOrderRootEvents {
 
         uint32 _oldVersion;
         TvmCell data;
+        TvmCell customParams;
         (
-            factory,
-            spentToken,
-            spentTokenWallet,
-            _oldVersion,
-            version,
-            versionOrder,
-            deployer,
-            fee,
-            orderCode,
-            data
+            factory, spentToken, spentTokenWallet, _oldVersion, version, versionOrder,
+            deployer, fee, orderCode, data, customParams
         ) = abi.decode(_data, (
-            address, address, address, uint32, uint32,
-            uint32, address, OrderFeeParams, TvmCell, TvmCell
-            ));
+            address, address, address, uint32, uint32, uint32,
+            address, OrderFeeParams, TvmCell, TvmCell, TvmCell
+        ));
 
         (dexRoot, orderPlatformCode) = abi.decode(data, (address, TvmCell));
 

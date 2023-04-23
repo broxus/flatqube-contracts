@@ -168,7 +168,6 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         address user,
         address tokenReceive,
         uint128 expectedTokenAmount,
-        uint128 deployWalletValue,
         uint256 backPK,
         uint256 backMatchingPK,
         optional(TvmCell) cancelPayload
@@ -182,7 +181,6 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         builder.store(user);
         builder.store(tokenReceive);
         builder.store(expectedTokenAmount);
-        builder.store(deployWalletValue);
         builder.storeRef(builderBackendPK);
 
         if (cancelPayload.hasValue()) {
@@ -192,8 +190,44 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         return builder.toCell();
     }
 
+    function proxyTokensTransfer(
+        address _tokenWallet,
+        uint128 _gasValue,
+        uint128 _amount,
+        address _recipient,
+        uint128 _deployWalletValue,
+        address _remainingGasTo,
+        bool _notify,
+        TvmCell _payload
+    ) override external onlyFactory {
+
+        tvm.accept();
+
+        ITokenWallet(_tokenWallet).transfer{
+                value : _gasValue,
+                flag : MsgFlag.SENDER_PAYS_FEES
+        }(
+            _amount,
+            _recipient,
+            _deployWalletValue,
+            _remainingGasTo,
+            _notify,
+            _payload
+        );
+    }
+
+    function sendGas(
+        address to,
+        uint128 _value,
+        uint16 _flag
+    ) override external onlyFactory {
+
+        tvm.accept();
+        to.transfer({value : _value, flag : _flag, bounce : false});
+    }
+
     function onAcceptTokensTransfer(
-        address tokenRoot,
+        address /*tokenRoot*/,
         uint128 amount,
         address sender,
         address, /*senderWallet*/
@@ -230,38 +264,32 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             (
                 address user,
                 address receiveToken,
-                uint128 expectedAmount,
-                uint128 deployWalletValue
-            ) = payloadSlice.decode(address, address, uint128, uint128);
+                uint128 expectedAmount
+            ) = payloadSlice.decode(address, address, uint128);
 
             if (user.value == 0) {
                 user = sender;
             }
 
             address orderAddress = _createOrder(
-                expectedAmount,
-                amount,
-                user,
-                receiveToken,
-                dataPK
+                expectedAmount, amount, user,
+                receiveToken, dataPK
             );
 
-            emit CreateOrder(orderAddress, user, tokenRoot, amount, receiveToken, expectedAmount);
+            emit CreateOrder(orderAddress, user, spentToken, amount, receiveToken, expectedAmount);
 
-            if (callbackId > 0) {
-                IOrderRootCallbacks(user).onOrderCreateOrderSuccess {
+            IOrderRootCallbacks(user).onOrderCreateOrderSuccess {
+                value: OrderGas.OPERATION_CALLBACK_BASE,
+                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                bounce: false
+            }(callbackId, orderAddress);
+
+            if (user != sender) {
+                IOrderRootCallbacks(sender).onOrderCreateOrderSuccess {
                     value: OrderGas.OPERATION_CALLBACK_BASE,
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(callbackId, orderAddress);
-
-                if (user != sender) {
-                    IOrderRootCallbacks(sender).onOrderCreateOrderSuccess {
-                        value: OrderGas.OPERATION_CALLBACK_BASE,
-                        flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                        bounce: false
-                    }(callbackId, orderAddress);
-                }
             }
 
             ITokenRoot(receiveToken).deployWallet {
@@ -277,14 +305,15 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             }(fee.beneficiary, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
             tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-            ITokenWallet(spentTokenWallet).transfer{
+
+            ITokenWallet(msg.sender).transfer {
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED,
                 bounce: false
             }(
                 amount,
                 orderAddress,
-                (deployWalletValue <= OrderGas.DEPLOY_EMPTY_WALLET_GRAMS? deployWalletValue : OrderGas.DEPLOY_EMPTY_WALLET_GRAMS),
+                OrderGas.DEPLOY_EMPTY_WALLET_GRAMS,
                 orderAddress,
                 true,
                 payload
@@ -292,14 +321,12 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         }
 
         if (errorCode != 0) {
-            emit CreateOrderReject();
-            if (callbackId > 0){
-                IOrderRootCallbacks(sender).onOrderCreateOrderReject{
-                    value: OrderGas.OPERATION_CALLBACK_BASE,
-                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                    bounce: false
-                }(callbackId);
-            }
+            emit CreateOrderReject(errorCode);
+            IOrderRootCallbacks(sender).onOrderCreateOrderReject {
+                value: OrderGas.OPERATION_CALLBACK_BASE,
+                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                bounce: false
+            }(callbackId, errorCode);
 
             tvm.rawReserve(address(this).balance - msg.value, 0);
 
@@ -310,10 +337,10 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             }(
                 amount,
                 sender,
-                uint128(0),
+                0,
                 originalGasTo,
                 notifyCancel,
-                OrderPayloads.buildCancelPayloadOrderRoot(op, cancelPayload)
+                OrderPayloads.buildCancelPayloadOrderRoot(op, errorCode, cancelPayload)
             );
         }
     }
@@ -327,7 +354,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         if (msgValue < OrderGas.DEPLOY_ORDER_MIN_VALUE) return OrderRootOperationErrors.VALUE_TOO_LOW;
         if (msgSender != spentTokenWallet) return OrderRootOperationErrors.NOT_SPENT_TOKEN_ROOT;
         TvmSlice dataPkSlice = dataPk.toSlice();
-        if (payloadSlice.bits() != 790 || dataPkSlice.bits() != 512) return OrderRootOperationErrors.INVALID_PAYLOAD;
+        if (payloadSlice.bits() != 662 || dataPkSlice.bits() != 512) return OrderRootOperationErrors.INVALID_PAYLOAD;
 
         return 0;
     }
@@ -338,20 +365,32 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         address _sender,
         address _receiveToken,
         TvmCell _dataPK
-    ) private view returns(address){
-        return (new OrderPlatform {
-            stateInit: buildState(
-                        orderPlatformCode, _sender, _receiveToken,
-                        abi.encode(dexRoot, orderPlatformCode)
-                    ),
-            value: OrderGas.DEPLOY_ORDER
-        }(
-            _amount, _expectedAmount,
-            versionOrder, fee, _dataPK, orderCode
-        ));
+    ) private view returns(address) {
+        TvmCell emptyCustomParams;
+        return (
+            new OrderPlatform {
+                value: OrderGas.DEPLOY_ORDER,
+                stateInit: buildState(
+                    orderPlatformCode, _sender, _receiveToken,
+                    abi.encode(dexRoot, orderPlatformCode))
+            }(
+                _amount,
+                _expectedAmount,
+                versionOrder,
+                fee,
+                _dataPK,
+                orderCode,
+                emptyCustomParams
+            )
+        );
     }
 
-    function buildState(TvmCell _code, address _sender, address _receiveToken, TvmCell params) internal view returns (TvmCell) {
+    function buildState(
+        TvmCell _code,
+        address _sender,
+        address _receiveToken,
+        TvmCell params
+    ) internal view returns (TvmCell) {
         return tvm.buildStateInit({
             contr: OrderPlatform,
             varInit: {
@@ -360,7 +399,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 owner: _sender,
                 spentToken: spentToken,
                 receiveToken: _receiveToken,
-                timeTx: uint64(tx.timestamp),
+                timeTx: tx.timestamp,
                 nowTx: uint64(now),
                 params: params
             },
@@ -390,9 +429,10 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         } else {
             emit OrderRootCodeUpgraded(_newVersion);
 
+            TvmCell customParams;
             TvmCell data = abi.encode(
                 factory, spentToken, spentTokenWallet, version, _newVersion, versionOrder,
-                deployer, fee, orderCode, abi.encode(dexRoot, orderPlatformCode)
+                deployer, fee, orderCode, abi.encode(dexRoot, orderPlatformCode), customParams
             );
 
             tvm.setcode(_code);
@@ -408,20 +448,13 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
 
         uint32 _oldVersion;
         TvmCell data;
+        TvmCell _customParams;
         (
-            factory,
-            spentToken,
-            spentTokenWallet,
-            _oldVersion,
-            version,
-            versionOrder,
-            deployer,
-            fee,
-            orderCode,
-            data
+            factory, spentToken, spentTokenWallet, _oldVersion, version, versionOrder,
+            deployer, fee, orderCode, data, _customParams
         ) = abi.decode(_data, (
-            address, address, address, uint32, uint32,
-            uint32, address, OrderFeeParams, TvmCell, TvmCell
+            address, address, address, uint32, uint32, uint32,
+            address, OrderFeeParams, TvmCell, TvmCell, TvmCell
         ));
 
         (dexRoot, orderPlatformCode) = abi.decode(data, (address, TvmCell));

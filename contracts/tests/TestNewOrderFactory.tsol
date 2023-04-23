@@ -95,7 +95,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 		);
 		emit OwnerTransferAccepted(owner, pendingOwner);
 		owner = pendingOwner;
-		pendingOwner = address(0);
+		delete pendingOwner;
 
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
 	}
@@ -198,6 +198,59 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 					bounce: false
 			}(params);
 		}
+
+		owner.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
+	}
+
+	function proxyRootTokensTransfer(
+		address root,
+	    address _tokenWallet,
+        uint128 _gasValue,
+        uint128 _amount,
+        address _recipient,
+        uint128 _deployWalletValue,
+        address _remainingGasTo,
+        bool _notify,
+        TvmCell _payload
+	) override external onlyOwner() {
+		require(msg.value >= OrderGas.PROXY_ROOT_TRANSFER_VALUE + _gasValue, OrderErrors.VALUE_TOO_LOW);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+
+
+		IOrderRoot(root).proxyTokensTransfer{
+				value: OrderGas.PROXY_ROOT_TRANSFER_VALUE + _gasValue,
+				flag: MsgFlag.SENDER_PAYS_FEES,
+				bounce: false
+		}(_tokenWallet, _gasValue, _amount, _recipient, _deployWalletValue, _remainingGasTo, _notify, _payload);
+
+
+		owner.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
+	}
+
+	function sendGasRoot(
+		address root,
+		address to,
+        uint128 _value,
+        uint16 _flag
+	) override external onlyOwner() {
+//		require(msg.value >= OrderGas.SEND_GAS_ROOT_VALUE, OrderErrors.VALUE_TOO_LOW);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+
+
+		IOrderRoot(root).sendGas{
+				value: OrderGas.SEND_GAS_ROOT_VALUE,
+				flag: MsgFlag.SENDER_PAYS_FEES,
+				bounce: false
+		}(to, _value, _flag);
+
 
 		owner.transfer(
 			0,
@@ -378,6 +431,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	function _createOrderRoot(address token) private view {
+		TvmCell customParams;
 		new OrderRootPlatform {
 				stateInit: buildState(token, orderRootPlatformCode, buildParams()),
 				value: OrderGas.DEPLOY_ORDERS_ROOT,
@@ -388,7 +442,8 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 			orderRootCode,
 			orderCode,
 			msg.sender,
-			fee
+			fee,
+			customParams
 		);
 	}
 

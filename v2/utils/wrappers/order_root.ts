@@ -58,17 +58,15 @@ export class OrderRoot {
         user: Address,
         tokenReceive: Address,
         expectedTokenAmount: number | string,
-        deployWalletValue: number | string,
         backPK: number | string,
         backMatchingPK:  number | string,
-        cancelPayload: string = '',
+        cancelPayload: string = ''
     ) {
         return (await this.contract.methods.buildPayload({
             callbackId: callbackId,
             user: user,
             tokenReceive: tokenReceive,
             expectedTokenAmount: expectedTokenAmount,
-            deployWalletValue: deployWalletValue,
             backPK: backPK,
             backMatchingPK: backMatchingPK,
             cancelPayload: cancelPayload
@@ -98,17 +96,20 @@ export class OrderRoot {
 
     async buildCancelPayload(
         operation: number,
+        errorCode: number,
         originalPayload: string
     ) {
         const cancelPayload = await locklift.provider.packIntoCell({
             structure: [
                 { name: 'orderStatus', type: 'uint8' },
                 { name:'op', type: 'uint8' },
+                { name:'errorCode', type: 'uint16' },
                 { name: 'originalPayload', type: 'cell' },
             ] as const,
             data: {
                 orderStatus: 205,
                 op: operation,
+                errorCode: errorCode,
                 originalPayload: originalPayload
             }
         });
