@@ -41,7 +41,7 @@ const displayTx = (_tx) => {
   }
 };
 
-const gasPrice = 100;
+const gasPrice = 1000;
 const calcValue = (gas) => {
   return new BigNumber(gas.dynamicGas).plus(100000).times(gasPrice).plus(gas.fixedValue).toNumber()
 }
