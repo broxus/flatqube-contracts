@@ -2466,12 +2466,11 @@ contract DexStablePool is
                 return (result, dy_fee);
             }
 
-            uint256 fee_precision_mul = tokenData[i].precisionMul;
-            uint256 dy_minus_fee = math.divc(y_minus_fee_opt.get() - xp[i] + 1, fee_precision_mul); // prevent rounding errors
+            uint256 dy_minus_fee = math.divc(y_minus_fee_opt.get() - xp[i] + 1, tokenData[i].precisionMul); // prevent rounding errors
             uint256 dy = math.muldivc(dy_minus_fee, fee.denominator, fee.denominator - (fee.beneficiary_numerator + fee.pool_numerator + fee.referrer_numerator));
-            dy_fee = uint128(math.muldivc(dy - dy_minus_fee, fee_precision_mul, tokenData[i].precisionMul));
+            dy_fee = uint128(dy - dy_minus_fee);
 
-            result.set(uint128(math.muldivc(dy, fee_precision_mul, tokenData[i].precisionMul)));
+            result.set(uint128(dy));
         }
 
         return (result, dy_fee);
