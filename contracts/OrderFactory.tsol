@@ -158,7 +158,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 
 	function setPlatformRootOrderCodeOnce(TvmCell _orderRootPlatform) public onlyOwner() {
 		require(orderRootPlatformCode.toSlice().empty(), OrderErrors.ORDER_ROOT_PLATFORM_CODE_NON_EMPTY);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		orderRootPlatformCode = _orderRootPlatform;
 		emit PlatformOrderRootCodeUpgraded();
@@ -171,7 +171,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 
 	function setPlatformOrderCodeOnce(TvmCell _orderPlatform) public onlyOwner() {
 		require(orderPlatformCode.toSlice().empty(), OrderErrors.ORDER_PLATFORM_CODE_NON_EMPTY);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		orderPlatformCode = _orderPlatform;
 		emit PlatformOrderCodeUpgraded();
@@ -183,7 +183,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	function setFeeParams(OrderFeeParams params) override external onlyOwner() {
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		if (params.beneficiary.value == 0){
 			params.beneficiary = address(this);
@@ -209,9 +209,9 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
         TvmCell _payload
 	) override external onlyOwner() {
 		require(msg.value >= OrderGas.PROXY_ROOT_TRANSFER_VALUE + _gasValue, OrderErrors.VALUE_TOO_LOW);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 
-		IOrderRoot(root).proxyTokensTransfer{
+		IOrderRoot(root).proxyTokensTransfer {
 				value: OrderGas.PROXY_ROOT_TRANSFER_VALUE + _gasValue,
 				flag: MsgFlag.SENDER_PAYS_FEES,
 				bounce: false
@@ -232,8 +232,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
         uint16 _flag
 	) override external onlyOwner() {
 		require(msg.value >= OrderGas.SEND_GAS_ROOT_VALUE, OrderErrors.VALUE_TOO_LOW);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
-
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		IOrderRoot(root).sendGas{
 				value: OrderGas.SEND_GAS_ROOT_VALUE,
@@ -251,7 +250,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 
 	function setRootFeeParams(OrderFeeParams params, address[] roots) override external onlyOwner() {
 		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.VALUE_TOO_LOW);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		if (params.beneficiary.value == 0){
 			params.beneficiary = address(this);
@@ -274,7 +273,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 
 	function setOrderFeeParams(OrderFeeParams params, address[] orders) override external onlyOwner() {
 		require(msg.value >= OrderGas.SET_FEE_PARAMS_VALUE, OrderErrors.VALUE_TOO_LOW);
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		if (params.beneficiary.value == 0){
 			params.beneficiary = address(this);
@@ -296,7 +295,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	function setOrderRootCode(TvmCell _orderRootCode) override external onlyOwner() {
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		uint32 prevVersion = versionOrderRoot;
 		versionOrderRoot++;
@@ -311,7 +310,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	function setOrderCode(TvmCell _orderCode) override external onlyOwner() {
-		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		uint32 prevVersion = versionOrder;
 		versionOrder++;
@@ -325,43 +324,55 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		);
 	}
 
-	function upgradeOrderRoot(address[] listOrderRoots) external view onlyOwner() {
+	function upgradeOrderRoot(address[] listOrderRoots, optional(TvmCell) _code) external view onlyOwner() {
 		require(msg.value >= OrderGas.UPDATE_ORDER_ROOT, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
+
+		TvmCell codeForUpgrade = (_code.hasValue() ? _code.get() : orderRootCode);
 
 		for (uint i = 0; i < listOrderRoots.length; i++) {
 			IOrderRoot(listOrderRoots[i].value).upgrade {
 				value: OrderGas.UPDATE_ORDER_ROOT,
 				flag: MsgFlag.SENDER_PAYS_FEES,
 				bounce: false
-			}(orderRootCode, versionOrderRoot, address(this));
+			}(codeForUpgrade, versionOrderRoot, address(this));
 		}
+
+		owner.transfer(0, false, MsgFlag.ALL_NOT_RESERVED);
 	}
 
-	function upgradeOrderCodeInOrderRoot(address[] listOrderRoots) external view onlyOwner() {
+	function upgradeOrderCodeInOrderRoot(address[] listOrderRoots, optional(TvmCell) _code) external view onlyOwner() {
 		require(msg.value >= OrderGas.UPDATE_ORDER_ROOT, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
+
+		TvmCell codeForUpgrade = (_code.hasValue() ? _code.get() : orderCode);
 
 		for (uint i = 0; i < listOrderRoots.length; i++) {
 			IOrderRoot(listOrderRoots[i].value).setOrderCode {
 				value: OrderGas.UPDATE_ORDER_ROOT,
 				flag: MsgFlag.SENDER_PAYS_FEES,
 				bounce: false
-			}(orderCode, versionOrder);
+			}(codeForUpgrade, versionOrder);
 		}
+
+		owner.transfer(0, false, MsgFlag.ALL_NOT_RESERVED);
 	}
 
-	function upgradeOrder(address[] listOrders) external view onlyOwner() {
+	function upgradeOrder(address[] listOrders, optional(TvmCell) _code) external view onlyOwner() {
 		require(msg.value >= OrderGas.UPDATE_ORDER, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
+
+		TvmCell codeForUpgrade = (_code.hasValue() ? _code.get() : orderCode);
 
 		for (uint i = 0; i < listOrders.length; i++) {
 			IOrder(listOrders[i].value).upgrade {
 				value: OrderGas.UPDATE_ORDER,
 				flag: MsgFlag.SENDER_PAYS_FEES,
 				bounce: false
-			}(orderCode, versionOrder, address(this));
+			}(codeForUpgrade, versionOrder, address(this));
 		}
+
+		owner.transfer(0, false, MsgFlag.ALL_NOT_RESERVED);
 	}
 
 	function withdrawFee(

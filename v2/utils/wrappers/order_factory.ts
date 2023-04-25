@@ -164,7 +164,8 @@ export class OrderFactory {
     }
     async upgradeOrderInOrderRoot(roots: Address[]) {
         const owner = this._owner as Account;
-        return await locklift.tracing.trace(this.contract.methods.upgradeOrderCodeInOrderRoot({listOrderRoots: roots})
+        return await locklift.tracing.trace(
+            this.contract.methods.upgradeOrderCodeInOrderRoot({listOrderRoots: roots, _code: null})
             .send({amount: toNano(2), from: owner.address}))
     }
 
@@ -173,7 +174,7 @@ export class OrderFactory {
         orders: Address[]
     ) {
         const owner = this._owner as Account;
-        return await locklift.tracing.trace(this.contract.methods.upgradeOrder({listOrders: orders})
+        return await locklift.tracing.trace(this.contract.methods.upgradeOrder({listOrders: orders, _code: null})
         .send({amount: toNano(1.1), from: owner.address}))
     }
 
@@ -199,7 +200,8 @@ export class OrderFactory {
         roots: Address[]
     ) {
         const owner = this._owner as Account;
-        return await locklift.tracing.trace(this.contract.methods.upgradeOrderRoot({listOrderRoots: roots})
+        return await locklift.tracing.trace(
+            this.contract.methods.upgradeOrderRoot({listOrderRoots: roots, _code: null})
         .send({amount: toNano(1.1), from: owner.address}))
     }
 
