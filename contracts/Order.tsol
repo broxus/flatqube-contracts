@@ -1303,13 +1303,13 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
             OrderFeeParams, TvmCell, TvmCell
         ));
 
+        (dexRoot, orderPlatformCode) = abi.decode(params, (address, TvmCell));
+        (backPK, backMatchingPK) = abi.decode(_backPK, (uint256, uint256));
+
         if (_oldVersion == 0) {
             changeState(OrderStatus.Initialize);
             currentAmountSpentToken = initialAmount;
             currentAmountReceiveToken = expectedAmount;
-
-            (dexRoot, orderPlatformCode) = abi.decode(params, (address, TvmCell));
-            (backPK, backMatchingPK) = abi.decode(_backPK, (uint256, uint256));
 
             IDexRoot(dexRoot).getExpectedPairAddress{
                 value : OrderGas.GET_DEX_PAIR,
@@ -1331,6 +1331,18 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 
         } else {
             tvm.rawReserve(address(this).balance - msg.value, 0);
+
+            (
+                currentAmountSpentToken, currentAmountReceiveToken, dexPair, spentWallet, receiveWallet, autoExchange,
+                state, swapAttempt, prevState, emergencyManager, matchingOrder
+            ) = abi.decode(_data,
+                (
+                    uint128,uint128, address,
+                    address, address, bool,
+                    uint8, uint64, uint8, uint256, address
+                )
+            );
+
             factory.transfer({
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
