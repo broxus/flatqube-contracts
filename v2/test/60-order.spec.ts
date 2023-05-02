@@ -1760,18 +1760,19 @@ describe('OrderTest', () => {
             const payloadLO4 = await order.buildPayload(1, 0.1, account4.address, successPayload4, cancelPayload4)
 
             const expectPayload = await order.buildSuccessPayload(50, successPayload4, account4.address)
-            const transaction1 = await locklift.tracing.trace(tstWallet4.transfer(
+            const {traceTree} = await locklift.tracing.trace(tstWallet4.transfer(
                 numberString(TOKENS_TO_EXCHANGE2_ACC3, tstDecimals), order.address, payloadLO4, toNano(5)
             ), {allowedCodes: {compute: [60,null]}});
 
-            await transaction1.traceTree.beautyPrint();
-            const depositCalls = transaction1.traceTree?.findCallsForContract({
+            await traceTree?.beautyPrint();
+
+            const depositCalls = traceTree?.findCallsForContract({
                 contract: barWallet4.contract,
                 name: "acceptTransfer"
             });
 
             expect(depositCalls[0].payload.toString()).to.eq(expectPayload.toString(), "Fault payload success");
-            expect(transaction1.traceTree).to.call("acceptTransfer", barWallet4.address).withNamedArgs({
+            expect(traceTree).to.call("acceptTransfer", barWallet4.address).withNamedArgs({
                 amount: "5000000000",
                 sender: order.address,
                 remainingGasTo: account4.address.toString(),
@@ -1833,18 +1834,18 @@ describe('OrderTest', () => {
             const payloadLO4 = await order.buildPayload(1, 0.1, account4.address, successPayload4, cancelPayload4)
 
             const expectPayload = await order.buildCancelPayload(50, cancelPayload4)
-            const transaction1 = await locklift.tracing.trace(barWallet4.transfer(
+            const { traceTree } = await locklift.tracing.trace(barWallet4.transfer(
                 numberString(TOKENS_TO_EXCHANGE2_ACC3, barDecimals), order.address, payloadLO4, toNano(5)
             ), {allowedCodes: {compute: [60,null]}});
 
-            await transaction1.traceTree.beautyPrint();
-            const depositCalls = transaction1.traceTree?.findCallsForContract({
+            await traceTree?.beautyPrint();
+            const depositCalls = traceTree?.findCallsForContract({
                 contract: barWallet4.contract,
                 name: "acceptTransfer"
             });
 
             expect(depositCalls[0].payload.toString()).to.eq(expectPayload.toString(), "Fault payload cancel");
-            expect(transaction1.traceTree).to.call("acceptTransfer", barWallet4.address).withNamedArgs({
+            expect(traceTree).to.call("acceptTransfer", barWallet4.address).withNamedArgs({
                 amount: "10000000000",
                 sender: order.address,
                 remainingGasTo: account4.address.toString(),
@@ -1887,20 +1888,20 @@ describe('OrderTest', () => {
                 0, 0, cancelPayloadRoot
             )
 
-            const transaction1 = await locklift.tracing.trace(tstWallet3.transfer(
+            const { traceTree } = await locklift.tracing.trace(tstWallet3.transfer(
                 numberString(TOKENS_TO_EXCHANGE1, tstDecimals), RootOrderBar.address, payload, toNano(6),
             ), {allowedCodes: {compute: [60,null]}});
 
             const expectPayload = await RootOrderBar.buildCancelPayload(53, 201, cancelPayloadRoot);
 
-            await transaction1.traceTree.beautyPrint();
-            const depositCalls = transaction1.traceTree?.findCallsForContract({
+            await traceTree?.beautyPrint();
+            const depositCalls = traceTree?.findCallsForContract({
                 contract: tstWallet3.contract,
                 name: "acceptTransfer"
             });
 
             expect(depositCalls[0].payload.toString()).to.eq(expectPayload.toString(), "Fault payload cancel");
-            expect(transaction1.traceTree).to.call("acceptTransfer", tstWallet3.address).withNamedArgs({
+            expect(traceTree).to.call("acceptTransfer", tstWallet3.address).withNamedArgs({
                 amount: "10000000000",
                 sender: RootOrderBar.address,
                 remainingGasTo: account3.address.toString(),

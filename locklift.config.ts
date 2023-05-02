@@ -114,7 +114,7 @@ const config: LockliftConfig = {
         // Mainnet giver has the same abi as testnet one
         giverFactory: (ever, keyPair, address) => new TestnetGiver(ever, keyPair, address),
         address: "0:3bcef54ea5fe3e68ac31b17799cdea8b7cffd4da75b0b1a70b93a18b5c87f723",
-        key: process.env.MAIN_GIVER_KEY ?? ""
+        key: process.env.MAIN_GIVER_KEY ?? "action inject penalty envelope rabbit element slim tornado dinner pizza off blood"
       },
       tracing: {
         endpoint: process.env.MAIN_GQL_ENDPOINT ?? ""
