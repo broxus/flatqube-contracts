@@ -20272,360 +20272,6 @@ PUSHCONT {
 IF
 THROW 0
 
-.globl	PairPayload_with_obj_buildCrossPairExchangePayloadV2_3181478d
-.type	PairPayload_with_obj_buildCrossPairExchangePayloadV2_3181478d, @function
-CALL $PairPayload_with_obj_buildCrossPairExchangePayloadV2_3181478d_macro$
-
-.macro PairPayload_with_obj_buildCrossPairExchangePayloadV2_3181478d_macro
-.loc ../contracts/libraries/PairPayload.tsol, 308
-PUSH S4
-FIRST
-GTINT 0
-THROWIFNOT 147
-.loc ../contracts/libraries/PairPayload.tsol, 309
-DUP
-ISNULL
-PUSH S2
-ISNULL
-NOT
-OR
-THROWIFNOT 148
-.loc ../contracts/libraries/PairPayload.tsol, 313
-NEWC
-STSLICECONST x09
-.loc ../contracts/libraries/PairPayload.tsol, 314
-PUSH S11
-STUR 64
-.loc ../contracts/libraries/PairPayload.tsol, 315
-ROLL 10
-STUR 128
-.loc ../contracts/libraries/PairPayload.tsol, 316
-ROLL 9
-STSLICER
-.loc ../contracts/libraries/PairPayload.tsol, 317
-ROLL 3
-STSLICER
-.loc ../contracts/libraries/PairPayload.tsol, 319
-PUSHINT 0
-NEWDICT
-PAIR
-.loc ../contracts/libraries/PairPayload.tsol, 320
-ROLL 6
-SECOND
-PUSHINT 0
-NULL
-PUSHCONT {
-	PUSH2 S1, S2
-	PUSHINT 32
-	DICTUGET
-	NULLSWAPIFNOT
-	PUSHCONT {
-		PLDU 32
-	}
-	IF
-	DUP
-	POP S2
-	ISNULL
-	NOT
-}
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.tsol, 321
-	PUSH2 S0, S8
-	FIRST
-	LESS
-	THROWIFNOT 100
-	.loc ../contracts/libraries/PairPayload.tsol, 323
-	BLKPUSH 2, 8
-	PUSH S2
-	CALLREF {
-		CALL $PairPayload_no_obj__encodeCrossPairExchangeData_a800fa17_macro$
-	}
-	.loc ../contracts/libraries/PairPayload.tsol, 324
-	PUSH3 S6, S3, S11
-	SECOND
-	PUSHINT 32
-	DICTUGET
-	THROWIFNOT 50
-	CALLREF {
-		LDU 128
-		LDU 32
-		LDDICT
-		ROTREV
-		PAIR
-		SWAP
-		LDMSGADDR
-		LDU 128
-		LDU 32
-		LDDICT
-		ROTREV
-		PAIR
-		SWAP
-		ENDS
-		TUPLE 5
-	}
-	INDEX 3
-	PUSH2 S5, S12
-	SECOND
-	PUSHINT 32
-	DICTUGET
-	THROWIFNOT 50
-	BLKSWAP 3, 3
-	TUPLE 5
-	CALLREF {
-		UNTUPLE 5
-		REVERSE 5, 0
-		NEWC
-		STU 128
-		STSLICE
-		STREF
-		STU 32
-		STU 32
-	}
-	SWAP
-	UNPAIR
-	OVER
-	INC
-	ROLLREV 3
-	PUSHINT 32
-	DICTUSETB
-	PAIR
-	POP S4
-	.loc ../contracts/libraries/PairPayload.tsol, 0
-	OVER
-	INC
-	POP S2
-}
-WHILE
-BLKDROP 3
-.loc ../contracts/libraries/PairPayload.tsol, 334
-PUSHREF {
-}
-PUSH S2
-STREF
-POP S2
-.loc ../contracts/libraries/PairPayload.tsol, 336
-BLKSWAP 2, 6
-SWAP
-NEWC
-STU 128
-STSLICE
-SWAP
-UNPAIR
-XCHG S2
-STU 32
-STDICT
-ENDC
-.loc ../contracts/libraries/PairPayload.tsol, 337
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.tsol, 339
-PUSH S2
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.tsol, 340
-	PUSH2 S2, S2
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.tsol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.tsol, 342
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.tsol, 343
-	PUSH2 S1, S1
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.tsol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.tsol, 346
-ENDC
-BLKDROP2 4, 1
-.loc ../contracts/libraries/PairPayload.tsol, 0
-
-.globl	PairPayload_no_obj_buildCrossPairExchangePayloadV2_3181478d
-.type	PairPayload_no_obj_buildCrossPairExchangePayloadV2_3181478d, @function
-CALL $PairPayload_no_obj_buildCrossPairExchangePayloadV2_3181478d_macro$
-
-.macro PairPayload_no_obj_buildCrossPairExchangePayloadV2_3181478d_macro
-.loc ../contracts/libraries/PairPayload.tsol, 308
-PUSH S4
-FIRST
-GTINT 0
-THROWIFNOT 147
-.loc ../contracts/libraries/PairPayload.tsol, 309
-DUP
-ISNULL
-PUSH S2
-ISNULL
-NOT
-OR
-THROWIFNOT 148
-.loc ../contracts/libraries/PairPayload.tsol, 313
-NEWC
-STSLICECONST x09
-.loc ../contracts/libraries/PairPayload.tsol, 314
-ROLL 11
-STUR 64
-.loc ../contracts/libraries/PairPayload.tsol, 315
-ROLL 10
-STUR 128
-.loc ../contracts/libraries/PairPayload.tsol, 316
-ROLL 9
-STSLICER
-.loc ../contracts/libraries/PairPayload.tsol, 317
-ROLL 3
-STSLICER
-.loc ../contracts/libraries/PairPayload.tsol, 319
-PUSHINT 0
-NEWDICT
-PAIR
-.loc ../contracts/libraries/PairPayload.tsol, 320
-ROLL 6
-SECOND
-PUSHINT 0
-NULL
-PUSHCONT {
-	PUSH2 S1, S2
-	PUSHINT 32
-	DICTUGET
-	NULLSWAPIFNOT
-	PUSHCONT {
-		PLDU 32
-	}
-	IF
-	DUP
-	POP S2
-	ISNULL
-	NOT
-}
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.tsol, 321
-	PUSH2 S0, S8
-	FIRST
-	LESS
-	THROWIFNOT 100
-	.loc ../contracts/libraries/PairPayload.tsol, 323
-	BLKPUSH 2, 8
-	PUSH S2
-	CALLREF {
-		CALL $PairPayload_no_obj__encodeCrossPairExchangeData_a800fa17_macro$
-	}
-	.loc ../contracts/libraries/PairPayload.tsol, 324
-	PUSH3 S6, S3, S11
-	SECOND
-	PUSHINT 32
-	DICTUGET
-	THROWIFNOT 50
-	CALLREF {
-		LDU 128
-		LDU 32
-		LDDICT
-		ROTREV
-		PAIR
-		SWAP
-		LDMSGADDR
-		LDU 128
-		LDU 32
-		LDDICT
-		ROTREV
-		PAIR
-		SWAP
-		ENDS
-		TUPLE 5
-	}
-	INDEX 3
-	PUSH2 S5, S12
-	SECOND
-	PUSHINT 32
-	DICTUGET
-	THROWIFNOT 50
-	BLKSWAP 3, 3
-	TUPLE 5
-	CALLREF {
-		UNTUPLE 5
-		REVERSE 5, 0
-		NEWC
-		STU 128
-		STSLICE
-		STREF
-		STU 32
-		STU 32
-	}
-	SWAP
-	UNPAIR
-	OVER
-	INC
-	ROLLREV 3
-	PUSHINT 32
-	DICTUSETB
-	PAIR
-	POP S4
-	.loc ../contracts/libraries/PairPayload.tsol, 0
-	OVER
-	INC
-	POP S2
-}
-WHILE
-BLKDROP 3
-.loc ../contracts/libraries/PairPayload.tsol, 334
-PUSHREF {
-}
-PUSH S2
-STREF
-POP S2
-.loc ../contracts/libraries/PairPayload.tsol, 336
-BLKSWAP 2, 6
-SWAP
-NEWC
-STU 128
-STSLICE
-SWAP
-UNPAIR
-XCHG S2
-STU 32
-STDICT
-ENDC
-.loc ../contracts/libraries/PairPayload.tsol, 337
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.tsol, 339
-PUSH S2
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.tsol, 340
-	PUSH2 S2, S2
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.tsol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.tsol, 342
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.tsol, 343
-	PUSH2 S1, S1
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.tsol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.tsol, 346
-ENDC
-BLKDROP2 4, 1
-.loc ../contracts/libraries/PairPayload.tsol, 0
-
 .globl	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7
 .type	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7, @function
 CALL $PairPayload_with_obj_buildExchangePayloadV2_d2029fe7_macro$
@@ -21206,6 +20852,360 @@ IFNOT
 .loc ../contracts/libraries/PairPayload.tsol, 239
 ENDC
 BLKDROP2 2, 1
+.loc ../contracts/libraries/PairPayload.tsol, 0
+
+.globl	PairPayload_with_obj_buildCrossPairExchangePayloadV2_3181478d
+.type	PairPayload_with_obj_buildCrossPairExchangePayloadV2_3181478d, @function
+CALL $PairPayload_with_obj_buildCrossPairExchangePayloadV2_3181478d_macro$
+
+.macro PairPayload_with_obj_buildCrossPairExchangePayloadV2_3181478d_macro
+.loc ../contracts/libraries/PairPayload.tsol, 308
+PUSH S4
+FIRST
+GTINT 0
+THROWIFNOT 147
+.loc ../contracts/libraries/PairPayload.tsol, 309
+DUP
+ISNULL
+PUSH S2
+ISNULL
+NOT
+OR
+THROWIFNOT 148
+.loc ../contracts/libraries/PairPayload.tsol, 313
+NEWC
+STSLICECONST x09
+.loc ../contracts/libraries/PairPayload.tsol, 314
+PUSH S11
+STUR 64
+.loc ../contracts/libraries/PairPayload.tsol, 315
+ROLL 10
+STUR 128
+.loc ../contracts/libraries/PairPayload.tsol, 316
+ROLL 9
+STSLICER
+.loc ../contracts/libraries/PairPayload.tsol, 317
+ROLL 3
+STSLICER
+.loc ../contracts/libraries/PairPayload.tsol, 319
+PUSHINT 0
+NEWDICT
+PAIR
+.loc ../contracts/libraries/PairPayload.tsol, 320
+ROLL 6
+SECOND
+PUSHINT 0
+NULL
+PUSHCONT {
+	PUSH2 S1, S2
+	PUSHINT 32
+	DICTUGET
+	NULLSWAPIFNOT
+	PUSHCONT {
+		PLDU 32
+	}
+	IF
+	DUP
+	POP S2
+	ISNULL
+	NOT
+}
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 321
+	PUSH2 S0, S8
+	FIRST
+	LESS
+	THROWIFNOT 100
+	.loc ../contracts/libraries/PairPayload.tsol, 323
+	BLKPUSH 2, 8
+	PUSH S2
+	CALLREF {
+		CALL $PairPayload_no_obj__encodeCrossPairExchangeData_a800fa17_macro$
+	}
+	.loc ../contracts/libraries/PairPayload.tsol, 324
+	PUSH3 S6, S3, S11
+	SECOND
+	PUSHINT 32
+	DICTUGET
+	THROWIFNOT 50
+	CALLREF {
+		LDU 128
+		LDU 32
+		LDDICT
+		ROTREV
+		PAIR
+		SWAP
+		LDMSGADDR
+		LDU 128
+		LDU 32
+		LDDICT
+		ROTREV
+		PAIR
+		SWAP
+		ENDS
+		TUPLE 5
+	}
+	INDEX 3
+	PUSH2 S5, S12
+	SECOND
+	PUSHINT 32
+	DICTUGET
+	THROWIFNOT 50
+	BLKSWAP 3, 3
+	TUPLE 5
+	CALLREF {
+		UNTUPLE 5
+		REVERSE 5, 0
+		NEWC
+		STU 128
+		STSLICE
+		STREF
+		STU 32
+		STU 32
+	}
+	SWAP
+	UNPAIR
+	OVER
+	INC
+	ROLLREV 3
+	PUSHINT 32
+	DICTUSETB
+	PAIR
+	POP S4
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+	OVER
+	INC
+	POP S2
+}
+WHILE
+BLKDROP 3
+.loc ../contracts/libraries/PairPayload.tsol, 334
+PUSHREF {
+}
+PUSH S2
+STREF
+POP S2
+.loc ../contracts/libraries/PairPayload.tsol, 336
+BLKSWAP 2, 6
+SWAP
+NEWC
+STU 128
+STSLICE
+SWAP
+UNPAIR
+XCHG S2
+STU 32
+STDICT
+ENDC
+.loc ../contracts/libraries/PairPayload.tsol, 337
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.tsol, 339
+PUSH S2
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 340
+	PUSH2 S2, S2
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.tsol, 342
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 343
+	PUSH2 S1, S1
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.tsol, 346
+ENDC
+BLKDROP2 4, 1
+.loc ../contracts/libraries/PairPayload.tsol, 0
+
+.globl	PairPayload_no_obj_buildCrossPairExchangePayloadV2_3181478d
+.type	PairPayload_no_obj_buildCrossPairExchangePayloadV2_3181478d, @function
+CALL $PairPayload_no_obj_buildCrossPairExchangePayloadV2_3181478d_macro$
+
+.macro PairPayload_no_obj_buildCrossPairExchangePayloadV2_3181478d_macro
+.loc ../contracts/libraries/PairPayload.tsol, 308
+PUSH S4
+FIRST
+GTINT 0
+THROWIFNOT 147
+.loc ../contracts/libraries/PairPayload.tsol, 309
+DUP
+ISNULL
+PUSH S2
+ISNULL
+NOT
+OR
+THROWIFNOT 148
+.loc ../contracts/libraries/PairPayload.tsol, 313
+NEWC
+STSLICECONST x09
+.loc ../contracts/libraries/PairPayload.tsol, 314
+ROLL 11
+STUR 64
+.loc ../contracts/libraries/PairPayload.tsol, 315
+ROLL 10
+STUR 128
+.loc ../contracts/libraries/PairPayload.tsol, 316
+ROLL 9
+STSLICER
+.loc ../contracts/libraries/PairPayload.tsol, 317
+ROLL 3
+STSLICER
+.loc ../contracts/libraries/PairPayload.tsol, 319
+PUSHINT 0
+NEWDICT
+PAIR
+.loc ../contracts/libraries/PairPayload.tsol, 320
+ROLL 6
+SECOND
+PUSHINT 0
+NULL
+PUSHCONT {
+	PUSH2 S1, S2
+	PUSHINT 32
+	DICTUGET
+	NULLSWAPIFNOT
+	PUSHCONT {
+		PLDU 32
+	}
+	IF
+	DUP
+	POP S2
+	ISNULL
+	NOT
+}
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 321
+	PUSH2 S0, S8
+	FIRST
+	LESS
+	THROWIFNOT 100
+	.loc ../contracts/libraries/PairPayload.tsol, 323
+	BLKPUSH 2, 8
+	PUSH S2
+	CALLREF {
+		CALL $PairPayload_no_obj__encodeCrossPairExchangeData_a800fa17_macro$
+	}
+	.loc ../contracts/libraries/PairPayload.tsol, 324
+	PUSH3 S6, S3, S11
+	SECOND
+	PUSHINT 32
+	DICTUGET
+	THROWIFNOT 50
+	CALLREF {
+		LDU 128
+		LDU 32
+		LDDICT
+		ROTREV
+		PAIR
+		SWAP
+		LDMSGADDR
+		LDU 128
+		LDU 32
+		LDDICT
+		ROTREV
+		PAIR
+		SWAP
+		ENDS
+		TUPLE 5
+	}
+	INDEX 3
+	PUSH2 S5, S12
+	SECOND
+	PUSHINT 32
+	DICTUGET
+	THROWIFNOT 50
+	BLKSWAP 3, 3
+	TUPLE 5
+	CALLREF {
+		UNTUPLE 5
+		REVERSE 5, 0
+		NEWC
+		STU 128
+		STSLICE
+		STREF
+		STU 32
+		STU 32
+	}
+	SWAP
+	UNPAIR
+	OVER
+	INC
+	ROLLREV 3
+	PUSHINT 32
+	DICTUSETB
+	PAIR
+	POP S4
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+	OVER
+	INC
+	POP S2
+}
+WHILE
+BLKDROP 3
+.loc ../contracts/libraries/PairPayload.tsol, 334
+PUSHREF {
+}
+PUSH S2
+STREF
+POP S2
+.loc ../contracts/libraries/PairPayload.tsol, 336
+BLKSWAP 2, 6
+SWAP
+NEWC
+STU 128
+STSLICE
+SWAP
+UNPAIR
+XCHG S2
+STU 32
+STDICT
+ENDC
+.loc ../contracts/libraries/PairPayload.tsol, 337
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.tsol, 339
+PUSH S2
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 340
+	PUSH2 S2, S2
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.tsol, 342
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 343
+	PUSH2 S1, S1
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.tsol, 346
+ENDC
+BLKDROP2 4, 1
 .loc ../contracts/libraries/PairPayload.tsol, 0
 
 .globl	PairPayload_with_obj__encodeCrossPairExchangeData_a800fa17
