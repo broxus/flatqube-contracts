@@ -1265,7 +1265,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
         address _sendGasTo
     ) external override onlyFactory {
         if (version == _newVersion) {
-            tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+            tvm.rawReserve(address(this).balance - msg.value, 0);
             _sendGasTo.transfer({
                 value : 0,
                 flag : MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
