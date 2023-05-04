@@ -324,52 +324,46 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		);
 	}
 
-	function upgradeOrderRoot(address[] listOrderRoots, optional(TvmCell) _code) external view onlyOwner() {
+	function upgradeOrderRoot(address[] listOrderRoots) external view onlyOwner() {
 		require(msg.value >= OrderGas.UPDATE_ORDER_ROOT, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
-
-		TvmCell codeForUpgrade = (_code.hasValue() ? _code.get() : orderRootCode);
 
 		for (uint i = 0; i < listOrderRoots.length; i++) {
 			IOrderRoot(listOrderRoots[i].value).upgrade {
 				value: OrderGas.UPDATE_ORDER_ROOT,
 				flag: MsgFlag.SENDER_PAYS_FEES,
 				bounce: false
-			}(codeForUpgrade, versionOrderRoot, address(this));
+			}(orderRootCode, versionOrderRoot, address(this));
 		}
 
 		owner.transfer(0, false, MsgFlag.ALL_NOT_RESERVED);
 	}
 
-	function upgradeOrderCodeInOrderRoot(address[] listOrderRoots, optional(TvmCell) _code) external view onlyOwner() {
+	function upgradeOrderCodeInOrderRoot(address[] listOrderRoots) external view onlyOwner() {
 		require(msg.value >= OrderGas.UPDATE_ORDER_ROOT, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
-
-		TvmCell codeForUpgrade = (_code.hasValue() ? _code.get() : orderCode);
 
 		for (uint i = 0; i < listOrderRoots.length; i++) {
 			IOrderRoot(listOrderRoots[i].value).setOrderCode {
 				value: OrderGas.UPDATE_ORDER_ROOT,
 				flag: MsgFlag.SENDER_PAYS_FEES,
 				bounce: false
-			}(codeForUpgrade, versionOrder);
+			}(orderCode, versionOrder);
 		}
 
 		owner.transfer(0, false, MsgFlag.ALL_NOT_RESERVED);
 	}
 
-	function upgradeOrder(address[] listOrders, optional(TvmCell) _code) external view onlyOwner() {
+	function upgradeOrder(address[] listOrders) external view onlyOwner() {
 		require(msg.value >= OrderGas.UPDATE_ORDER, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
-
-		TvmCell codeForUpgrade = (_code.hasValue() ? _code.get() : orderCode);
 
 		for (uint i = 0; i < listOrders.length; i++) {
 			IOrder(listOrders[i].value).upgrade {
 				value: OrderGas.UPDATE_ORDER,
 				flag: MsgFlag.SENDER_PAYS_FEES,
 				bounce: false
-			}(codeForUpgrade, versionOrder, address(this));
+			}(orderCode, versionOrder, address(this));
 		}
 
 		owner.transfer(0, false, MsgFlag.ALL_NOT_RESERVED);
