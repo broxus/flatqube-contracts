@@ -1,11 +1,13 @@
 import {Migration, displayTx, EMPTY_TVM_CELL, Constants} from '../utils/migration';
 import {toNano, zeroAddress} from "locklift";
+import {deployProject, deployRefFactory, deployRefSystem} from "../utils/ref";
 
 const deposits = [
     { tokenId: 'foo', amount: '100000000000000000000000' },
     { tokenId: 'bar', amount: '100000000000000000000000' },
     { tokenId: 'qwe', amount: '100000000000000000000000' },
-    { tokenId: 'tst', amount: '100000000000000000000000' }
+    { tokenId: 'tst', amount: '100000000000000000000000' },
+    { tokenId: 'coin', amount: '100000000000000000000000' },
 ];
 
 async function main() {
@@ -13,6 +15,9 @@ async function main() {
     const mainAccount = await migration.loadAccount('Account1', '0');
     const additionalAccount = await migration.loadAccount('Account3', '2');
     const owner = await migration.loadAccount('Account2', '1');
+    const emptyAccount = await migration.loadAccount('Account4', '3');
+
+    const DexVault = migration.loadContract('DexVault', 'DexVault');
 
     const dexAccountN = migration.loadContract('DexAccount', 'DexAccount' + 2);
     const dexPool = migration.loadContract('DexStablePool', 'DexPoolFooBarQwe');
@@ -42,6 +47,40 @@ async function main() {
             walletOwner: owner.address,
         })
         .call()).value0);
+
+    let refFactory = await deployRefFactory(mainAccount)
+    console.log("RefFactory:", refFactory.address);
+    migration.store(refFactory, "RefFactory");
+
+    await refFactory.methods.setManager({newManager: DexVault.address}).send({from: mainAccount.address, amount: toNano(0.8)});
+
+    // refSysOwner = Account2;
+    let refSystem = await deployRefSystem(mainAccount, refFactory, owner, 300);
+    console.log("RefSystem:", refSystem.address);
+    migration.store(refSystem, "RefSystem");
+
+    let { value0: refSysAccountAddr } = await refSystem.methods.deriveRefAccount({ answerId: 0, owner: additionalAccount.address }).call()
+    let refSysAccount = locklift.factory.getDeployedContract("RefAccount", refSysAccountAddr);
+
+    // projectOwner = account3
+    let project = await deployProject(additionalAccount, refSystem, 5, 5);
+    console.log("Project:", project.address);
+    migration.store(project, "Project");
+
+    await project.methods.setManager({
+        manager: DexVault.address
+    }).send({from: additionalAccount.address, amount: toNano(0.6)});
+
+    await refSystem.methods.setProjectApproval({ projectId: 0, value: true }).send({from: owner.address, amount: toNano(0.6)});
+
+    await DexVault.methods.setReferralProgramParams({params: {
+            projectId: 0,
+            projectAddress: project.address,
+            systemAddress: refSystem.address
+        }}).send({
+        from: mainAccount.address,
+        amount: toNano(1),
+    });
 
     // let payload = (await dexPool.methods.buildExchangePayload({
     //     id: 0,
@@ -140,63 +179,21 @@ async function main() {
     let steps = [
         {
             amount: 0,
-            roots: [token_roots[1].address, token_roots[3].address],
+            roots: [poolLpRoot.address, token_roots[3].address],
             outcoming: zeroAddress,
             numerator: 1,
             nextStepIndices: [1]
         },
         {
             amount: 0,
-            roots: [token_roots[0].address, token_roots[1].address, token_roots[2].address],
-            outcoming: token_roots[0].address,
+            roots: [token_roots[1].address, token_roots[3].address],
+            outcoming: zeroAddress,
             numerator: 1,
             nextStepIndices: [2]
         },
         {
             amount: 0,
-            roots: [token_roots[0].address, token_roots[3].address],
-            outcoming: zeroAddress,
-            numerator: 1,
-            nextStepIndices: [3]
-        },
-        {
-            amount: 0,
-            roots: [token_roots[1].address, token_roots[3].address],
-            outcoming: zeroAddress,
-            numerator: 1,
-            nextStepIndices: [4]
-        },
-        {
-            amount: 0,
-            roots: [token_roots[0].address, token_roots[1].address, token_roots[2].address],
-            outcoming: token_roots[0].address,
-            numerator: 1,
-            nextStepIndices: [5]
-        },
-        {
-            amount: 0,
-            roots: [token_roots[0].address, token_roots[3].address],
-            outcoming: zeroAddress,
-            numerator: 1,
-            nextStepIndices: [6]
-        },
-        {
-            amount: 0,
-            roots: [token_roots[1].address, token_roots[3].address],
-            outcoming: zeroAddress,
-            numerator: 1,
-            nextStepIndices: [7]
-        },
-        {
-            amount: 0,
-            roots: [token_roots[0].address, token_roots[1].address, token_roots[2].address],
-            outcoming: token_roots[0].address,
-            numerator: 1,
-            nextStepIndices: [8]
-        },
-        {
-            amount: 0,
-            roots: [token_roots[0].address, token_roots[3].address],
+            roots: [token_roots[1].address, token_roots[4].address],
             outcoming: zeroAddress,
             numerator: 1,
             nextStepIndices: []
@@ -204,39 +201,41 @@ async function main() {
     ];
 
     // const dexPair = migration.loadContract('DexPair', 'DexPoolTstFoo');
-    // let payload = (await dexPair.methods.buildCrossPairExchangePayloadV2({
-    //     _id: 0,
-    //     _deployWalletGrams: 0,
-    //     _expectedAmount: 0,
-    //     _outcoming: zeroAddress,
-    //     _nextStepIndices: [0],
-    //     _steps: steps,
-    //     _recipient: owner.address,
-    //     _referrer: zeroAddress,
-    //     _successPayload: null,
-    //     _cancelPayload: null
-    // }).call()).value0;
+    let payload = (await dexPool.methods.buildCrossPairExchangePayload({
+        id: 0,
+        deployWalletGrams: toNano(0.1),
+        expectedAmount: 0,
+        outcoming: poolLpRoot.address,
+        nextStepIndices: [0],
+        steps: steps,
+        recipient: emptyAccount.address,
+        referrer: additionalAccount.address,
+        success_payload: null,
+        cancel_payload: null
+    }).call()).value0;
+
+    let { traceTree } = await locklift.tracing.trace(accountWalletFoo.methods.transfer({
+        amount: '100000000000000000000',
+        recipient: dexPool.address,
+        deployWalletValue: 0,
+        remainingGasTo: owner.address,
+        notify: true,
+        payload: payload,
+        // @ts-ignore
+    }).send({
+        from: owner.address,
+        amount: toNano(10),
+    }));
     //
-    // let { traceTree } = await locklift.tracing.trace(accountWalletFoo.methods.transfer({
-    //     amount: '100000000000',
-    //     recipient: dexPair.address,
-    //     deployWalletValue: 0,
-    //     remainingGasTo: owner.address,
-    //     notify: true,
-    //     payload: payload,
-    //     // @ts-ignore
-    // }).send({
-    //     from: owner.address,
-    //     amount: toNano(10),
-    // }));
-    //
-    // await traceTree?.beautyPrint();
-    //
-    // console.log("balanceChangeInfo");
-    //
-    // for(let addr in traceTree?.balanceChangeInfo) {
-    //     console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
-    // }
+    // displayTx(tx);
+
+    await traceTree?.beautyPrint();
+
+    console.log("balanceChangeInfo");
+
+    for(let addr in traceTree?.balanceChangeInfo) {
+        console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+    }
 }
 
 main()

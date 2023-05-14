@@ -669,7 +669,7 @@ contract DexStablePool is
                             }(
                                 result.lp_reward,
                                 _expectedTokenVaultAddress(lp_root),
-                                deploy_wallet_grams,
+                                0,
                                 original_gas_to,
                                 true,
                                 builder.toCell()
@@ -1469,7 +1469,7 @@ contract DexStablePool is
                     }(
                         result.lp_reward,
                         _expectedTokenVaultAddress(lp_root),
-                        deploy_wallet_grams,
+                        0,
                         original_gas_to,
                         true,
                         builder.toCell()

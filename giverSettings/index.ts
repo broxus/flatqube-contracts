@@ -209,3 +209,36 @@ const broxusEverWallet = {
   ],
   events: [],
 } as const;
+
+
+export class GiverV1 implements Giver {
+  public giverContract: Contract<typeof giverV1Abi>;
+
+  constructor(ever: ProviderRpcClient, readonly keyPair: Ed25519KeyPair, address: string) {
+    const giverAddr = new Address(address);
+    this.giverContract = new ever.Contract(giverV1Abi, giverAddr);
+  }
+
+  public async sendTo(sendTo: Address, value: string): Promise<{ transaction: Transaction; output?: {} }> {
+    console.log(`GiverV1 sendTo : ${sendTo.toString()}`)
+    return this.giverContract.methods
+        .sendGrams({
+          amount: value,
+          dest: sendTo,
+        })
+        .sendExternal({publicKey: this.keyPair.publicKey, withoutSignature: true});
+  }
+
+}
+
+const giverV1Abi = {
+  "ABI version": 1,
+  "functions": [{"name": "constructor", "inputs": [], "outputs": []}, {
+    "name": "sendGrams",
+    "inputs": [{"name": "dest", "type": "address"}, {"name": "amount", "type": "uint64"}],
+    "outputs": []
+  }],
+  "events": [],
+  "data": []
+} as const;
+

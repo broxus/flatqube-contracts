@@ -1,11 +1,12 @@
 import {Migration, displayTx, EMPTY_TVM_CELL, Constants} from '../utils/migration';
-import {toNano, zeroAddress} from "locklift";
+import {Address, toNano, zeroAddress} from "locklift";
 
 const deposits = [
     { tokenId: 'foo', amount: '100000000000000000000000' },
     { tokenId: 'bar', amount: '100000000000000000000000' },
     { tokenId: 'qwe', amount: '100000000000000000000000' },
-    { tokenId: 'tst', amount: '100000000000000000000000' }
+    { tokenId: 'tst', amount: '100000000000000000000000' },
+    { tokenId: 'coin', amount: '100000000000000000000000' },
 ];
 
 async function main() {
@@ -14,19 +15,24 @@ async function main() {
     const additionalAccount = await migration.loadAccount('Account3', '2');
     const owner = await migration.loadAccount('Account2', '1');
 
+    const emptyAccount = await migration.loadAccount('Account4', '3');
+
     const everToTip3 = migration.loadContract('EverToTip3', 'EverToTip3');
     const tip3ToEver = migration.loadContract('Tip3ToEver', 'Tip3ToEver');
     const everWeverToTip3 = migration.loadContract('EverWeverToTip3', 'EverWeverToTip3');
 
+    const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+
     const dexAccountN = migration.loadContract('DexAccount', 'DexAccount' + 2);
     const wEverWallet2 = migration.loadContract('TokenWalletUpgradeable', 'WEVERWallet2');
     const dexPool = migration.loadContract('DexStablePool', 'DexPoolFooBarQwe');
-    const dexPairTstWever = migration.loadContract('DexPair', 'DexPoolTstWEVER');
-    const dexPairTstFoo = migration.loadContract('DexPair', 'DexPoolTstFoo');
+    const dexPairFooWever = migration.loadContract('DexPair', 'DexPoolFooWEVER');
+    const DexPoolFooBarQweLpTst = migration.loadContract('DexPair', 'DexPoolFooBarQweLpTst');
     const dexPairTstBar = migration.loadContract('DexPair', 'DexPoolTstBar');
+    const dexPairBarCoin = migration.loadContract('DexPair', 'DexPoolBarCoin');
 
+    const fooWeverLpRoot = migration.loadContract('TokenRootUpgradeable', 'FooWEVERLpRoot');
     const poolLpRoot = migration.loadContract('TokenRootUpgradeable', 'FooBarQweLpRoot');
-    const pairLpRoot = migration.loadContract('TokenRootUpgradeable', 'TstWEVERLpRoot');
 
     const wEverRoot = migration.loadContract('TokenRootUpgradeable', 'WEVERRoot');
     const wEverVault = migration.loadContract('TestWeverVault', 'WEVERVault');
@@ -42,7 +48,35 @@ async function main() {
         ));
     }
 
-    await dexAccountN.methods.addPool({_roots: [token_roots[3].address, wEverRoot.address]}).send({
+    let fee = {
+        "denominator": "1000000",
+        "pool_numerator": "0",
+        "beneficiary_numerator": "5000",
+        "referrer_numerator": "5000",
+        "beneficiary": additionalAccount.address,
+        "threshold": [
+            [
+                token_roots[0].address,
+                "500000000000"
+            ],
+            [
+                wEverRoot.address,
+                "500"
+            ],
+        ],
+        "referrer_threshold": []
+    }
+
+    await dexRoot.methods.setPairFeeParams({
+        _roots: [token_roots[0].address, wEverRoot.address],
+        _params: fee,
+        _remainingGasTo: mainAccount.address
+    }).send({
+        from: mainAccount.address,
+        amount: toNano(1.5),
+    });
+
+    await dexAccountN.methods.addPool({_roots: [token_roots[0].address, wEverRoot.address]}).send({
         from: owner.address,
         amount: toNano(4),
     });
@@ -64,8 +98,8 @@ async function main() {
     // initial deposit
     tx = await dexAccountN.methods.depositLiquidityV2({
         _callId: 123,
-        _operations: [{amount: '500000000000', root: wEverRoot.address},{amount: '5000000000000000000000', root: token_roots[3].address}],
-        _expected: {amount: '0', root: pairLpRoot.address},
+        _operations: [{amount: '500000000000', root: wEverRoot.address},{amount: '5000000000000000000000', root: token_roots[0].address}],
+        _expected: {amount: '0', root: fooWeverLpRoot.address},
         _autoChange: false,
         _remainingGasTo: owner.address,
         _referrer: owner.address
@@ -89,63 +123,28 @@ async function main() {
     let steps = [
         {
             amount: 0,
-            pool: dexPairTstBar.address,
-            outcoming: zeroAddress,
+            pool: dexPool.address,
+            outcoming: poolLpRoot.address,
             numerator: 1,
             nextStepIndices: [1]
         },
         {
             amount: 0,
-            pool: dexPool.address,
-            outcoming: token_roots[0].address,
+            pool: DexPoolFooBarQweLpTst.address,
+            outcoming: zeroAddress,
             numerator: 1,
             nextStepIndices: [2]
         },
         {
             amount: 0,
-            pool: dexPairTstFoo.address,
+            pool: dexPairTstBar.address,
             outcoming: zeroAddress,
             numerator: 1,
             nextStepIndices: [3]
         },
         {
             amount: 0,
-            pool: dexPairTstBar.address,
-            outcoming: zeroAddress,
-            numerator: 1,
-            nextStepIndices: [4]
-        },
-        {
-            amount: 0,
-            pool: dexPool.address,
-            outcoming: token_roots[0].address,
-            numerator: 1,
-            nextStepIndices: [5]
-        },
-        {
-            amount: 0,
-            pool: dexPairTstFoo.address,
-            outcoming: zeroAddress,
-            numerator: 1,
-            nextStepIndices: [6]
-        },
-        {
-            amount: 0,
-            pool: dexPairTstBar.address,
-            outcoming: zeroAddress,
-            numerator: 1,
-            nextStepIndices: [7]
-        },
-        {
-            amount: 0,
-            pool: dexPool.address,
-            outcoming: token_roots[0].address,
-            numerator: 1,
-            nextStepIndices: [8]
-        },
-        {
-            amount: 0,
-            pool: dexPairTstFoo.address,
+            pool: dexPairBarCoin.address,
             outcoming: zeroAddress,
             numerator: 1,
             nextStepIndices: []
@@ -248,36 +247,38 @@ async function main() {
     let payload = (await everWeverToTip3.methods.buildCrossPairExchangePayload({
         id: 11,
         amount: toNano(EVERS_TO_EXCHANGE + WEVERS_TO_EXCHANGE),
-        pool: dexPairTstWever.address,
+        pool: dexPairFooWever.address,
         expectedAmount: 0,
         deployWalletValue: toNano(0.1),
         nextStepIndices: [0],
         steps: steps,
-        referrer: zeroAddress,
+        referrer: mainAccount.address,
         outcoming: zeroAddress
     }).call()).value0;
 
-    let { traceTree } = await locklift.tracing.trace(wEverWallet2.methods.transfer({
+    tx = await wEverWallet2.methods.transfer({
         amount: toNano(WEVERS_TO_EXCHANGE),
         recipient: everWeverToTip3.address,
         deployWalletValue: toNano(0.1),
-        remainingGasTo: owner.address,
+        remainingGasTo: emptyAccount.address,
         notify: true,
         payload: payload,
         // @ts-ignore
     }).send({
         from: owner.address,
         amount: toNano(EVERS_TO_EXCHANGE + 10),
-    }));
+    });
+
+    displayTx(tx);
 
 
-    await traceTree?.beautyPrint();
-
-    console.log("balanceChangeInfo");
-
-    for(let addr in traceTree?.balanceChangeInfo) {
-        console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
-    }
+    // await traceTree?.beautyPrint();
+    //
+    // console.log("balanceChangeInfo");
+    //
+    // for(let addr in traceTree?.balanceChangeInfo) {
+    //     console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+    // }
 }
 
 main()

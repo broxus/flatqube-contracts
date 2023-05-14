@@ -6,6 +6,7 @@ const deposits = [
     { tokenId: 'bar', amount: '100000000000000000000000' },
     { tokenId: 'qwe', amount: '100000000000000000000000' },
     { tokenId: 'tst', amount: '100000000000000000000000' },
+    { tokenId: 'coin', amount: '100000000000000000000000' },
 ];
 
 async function main() {
@@ -17,8 +18,9 @@ async function main() {
     const dexAccountN = migration.loadContract('DexAccount', 'DexAccount' + 2);
     const dexPool = migration.loadContract('DexStablePool', 'DexPoolFooBarQwe');
     const poolLpRoot = migration.loadContract('TokenRootUpgradeable', 'FooBarQweLpRoot');
-    const pairTstFooLpRoot = migration.loadContract('TokenRootUpgradeable', 'TstFooLpRoot');
+    const pairBarCoinLpRoot = migration.loadContract('TokenRootUpgradeable', 'BarCoinLpRoot');
     const pairTstBarLpRoot = migration.loadContract('TokenRootUpgradeable', 'TstBarLpRoot');
+    const FooBarQweLpTstLpRoot = migration.loadContract('TokenRootUpgradeable', 'FooBarQweLpTstLpRoot');
     const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
     const dexVault = migration.loadContract('DexVault', 'DexVault');
 
@@ -56,17 +58,45 @@ async function main() {
         "referrer_threshold": []
     }
 
-    await dexVault.methods.setReferralProgramParams({params: {
-            projectId: 0,
-            projectAddress: new Address('0:262c8f1f919c7b7c23dfd6afc419e83be84b90689631b63e9bada61624789df0'),
-            systemAddress: new Address('0:887e8e9d03d3d8d9769aebcdb58c7966f83511d663fef014891215d37f89a200')
-        }}).send({
-        from: mainAccount.address,
-        amount: toNano(1),
-    });
+    // await dexVault.methods.setReferralProgramParams({params: {
+    //         projectId: 0,
+    //         projectAddress: new Address('0:262c8f1f919c7b7c23dfd6afc419e83be84b90689631b63e9bada61624789df0'),
+    //         systemAddress: new Address('0:887e8e9d03d3d8d9769aebcdb58c7966f83511d663fef014891215d37f89a200')
+    //     }}).send({
+    //     from: mainAccount.address,
+    //     amount: toNano(1),
+    // });
 
     await dexRoot.methods.setPairFeeParams({
         _roots: token_roots.slice(0, 3),
+        _params: fee,
+        _remainingGasTo: mainAccount.address
+    }).send({
+        from: mainAccount.address,
+        amount: toNano(1.5),
+    });
+
+    fee = {
+        "denominator": "1000000",
+        "pool_numerator": "0",
+        "beneficiary_numerator": "5000",
+        "referrer_numerator": "5000",
+        "beneficiary": additionalAccount.address,
+        "threshold": [
+            [
+                token_roots[1],
+                "500000000000"
+            ],
+            [
+                token_roots[4],
+                "500000000000"
+            ],
+        ],
+        "referrer_threshold": []
+    }
+
+    await dexRoot.methods.setPairFeeParams({
+        _roots: [token_roots[1], token_roots[4]],
         _params: fee,
         _remainingGasTo: mainAccount.address
     }).send({
@@ -79,12 +109,73 @@ async function main() {
         amount: toNano(4),
     });
 
+    await dexAccountN.methods.addPool({_roots: [token_roots[1], token_roots[4]]}).send({
+        from: owner.address,
+        amount: toNano(4),
+    });
+
+    fee = {
+        "denominator": "1000000",
+        "pool_numerator": "0",
+        "beneficiary_numerator": "5000",
+        "referrer_numerator": "5000",
+        "beneficiary": additionalAccount.address,
+        "threshold": [
+            [
+                token_roots[1],
+                "500000000000"
+            ],
+            [
+                token_roots[3],
+                "500000000000"
+            ],
+        ],
+        "referrer_threshold": []
+    }
+
+    await dexRoot.methods.setPairFeeParams({
+        _roots: [token_roots[1], token_roots[3]],
+        _params: fee,
+        _remainingGasTo: mainAccount.address
+    }).send({
+        from: mainAccount.address,
+        amount: toNano(1.5),
+    });
+
     await dexAccountN.methods.addPool({_roots: [token_roots[1], token_roots[3]]}).send({
         from: owner.address,
         amount: toNano(4),
     });
 
-    await dexAccountN.methods.addPool({_roots: [token_roots[0], token_roots[3]]}).send({
+    fee = {
+        "denominator": "1000000",
+        "pool_numerator": "0",
+        "beneficiary_numerator": "5000",
+        "referrer_numerator": "5000",
+        "beneficiary": additionalAccount.address,
+        "threshold": [
+            [
+                token_roots[3],
+                "500000000000"
+            ],
+            [
+                poolLpRoot.address,
+                "500"
+            ],
+        ],
+        "referrer_threshold": []
+    }
+
+    await dexRoot.methods.setPairFeeParams({
+        _roots: [token_roots[3], poolLpRoot.address],
+        _params: fee,
+        _remainingGasTo: mainAccount.address
+    }).send({
+        from: mainAccount.address,
+        amount: toNano(1.5),
+    });
+
+    await dexAccountN.methods.addPool({_roots: [token_roots[3], poolLpRoot.address]}).send({
         from: owner.address,
         amount: toNano(4),
     });
@@ -114,7 +205,7 @@ async function main() {
     // initial deposit
     let tx = await dexAccountN.methods.depositLiquidityV2({
         _callId: 123,
-        _operations: [{amount: '1000000000000000000000', root: token_roots[0]},{amount: '1000000000000000000000', root: token_roots[1]},{amount: '1000000000000000000000', root: token_roots[2]}],
+        _operations: [{amount: '10000000000000000000000', root: token_roots[0]},{amount: '10000000000000000000000', root: token_roots[1]},{amount: '10000000000000000000000', root: token_roots[2]}],
         _expected: {amount: '0', root: poolLpRoot.address},
         _autoChange: false,
         _remainingGasTo: owner.address,
@@ -127,8 +218,8 @@ async function main() {
 
     tx = await dexAccountN.methods.depositLiquidityV2({
         _callId: 123,
-        _operations: [{amount: '10000000000000000000000', root: token_roots[0]},{amount: '10000000000000000000000', root: token_roots[3]}],
-        _expected: {amount: '0', root: pairTstFooLpRoot.address},
+        _operations: [{amount: '10000000000000000000000', root: token_roots[1]},{amount: '10000000000000000000000', root: token_roots[4]}],
+        _expected: {amount: '0', root: pairBarCoinLpRoot.address},
         _autoChange: false,
         _remainingGasTo: owner.address,
         _referrer: owner.address
@@ -159,7 +250,7 @@ async function main() {
         .call()).value0);
 
     await accountWallet.methods.transfer({
-        amount: '100000000000',
+        amount: '1000000000000',
         recipient: dexAccountN.address,
         deployWalletValue: 100000000,
         remainingGasTo: owner.address,
@@ -169,6 +260,20 @@ async function main() {
     }).send({
         from: owner.address,
         amount: toNano(2),
+    });
+    displayTx(tx);
+
+
+    tx = await dexAccountN.methods.depositLiquidityV2({
+        _callId: 123,
+        _operations: [{amount: '1000000000000', root: poolLpRoot.address},{amount: '10000000000000000000000', root: token_roots[3]}],
+        _expected: {amount: '0', root: FooBarQweLpTstLpRoot.address},
+        _autoChange: false,
+        _remainingGasTo: owner.address,
+        _referrer: owner.address
+    }).send({
+        from: owner.address,
+        amount: toNano(4),
     });
     displayTx(tx);
 
