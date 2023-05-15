@@ -204,7 +204,9 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
         return {value : 0, bounce : false, flag : MsgFlag.REMAINING_GAS} _expectedSpendAmount(amount);
     }
 
-    function getExpectedSpendAmountOfMatching(uint128 amount) override external view responsible returns (uint128, uint128) {
+    function getExpectedSpendAmountOfMatching(
+        uint128 amount
+    ) override external view responsible returns (uint128, uint128) {
         return {value : 0, bounce : false, flag : MsgFlag.REMAINING_GAS} _expectedSpendAmountOfMatching(amount);
     }
 
@@ -258,7 +260,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 
         bool needCancel = !isPayloadValid;
         if (
-            state == OrderStatus.Filled || state == OrderStatus.Cancelled || state == OrderStatus.Expire || state == OrderStatus.Emergency
+            state == OrderStatus.Filled || state == OrderStatus.Cancelled ||
+            state == OrderStatus.Expire || state == OrderStatus.Emergency
         ) {
             needCancel = true;
         }
@@ -274,7 +277,10 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                 if (
                     (sender == root && amount >= initialAmount &&
                     (state == OrderStatus.Initialize || state == OrderStatus.AwaitTokens)) ||
-                    (amount >= expectedReceiveAmount && state == OrderStatus.SwapInProgress && op == DexOperationStatusV2.CANCEL)
+                    (
+                        amount >= expectedReceiveAmount && state == OrderStatus.SwapInProgress &&
+                        op == DexOperationStatusV2.CANCEL
+                    )
                 ){
                     changeState(OrderStatus.Active);
 
@@ -288,8 +294,10 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                 } else {needCancel = true;}
             } else if (msg.sender == receiveWallet) {
                 if (
-                    (state == OrderStatus.Active && op == OrderOperationTypes.EXCHANGE && msg.value >= OrderGas.FILL_ORDER_MIN_VALUE + deployWalletValue) ||
-                    (recipient == matchingOrder && state == OrderStatus.MatchInProgress)
+                    (
+                        state == OrderStatus.Active && op == OrderOperationTypes.EXCHANGE &&
+                        msg.value >= OrderGas.FILL_ORDER_MIN_VALUE + deployWalletValue
+                    ) || (recipient == matchingOrder && state == OrderStatus.MatchInProgress)
                 ) {
                     if (state != OrderStatus.MatchInProgress) {
                         (expectedSenderAmount, senderFee) = _expectedSpendAmount(amount);
@@ -300,8 +308,13 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 
                     if (expectedSenderAmount > 0) {
                         TvmCell payloadForTransfer;
-                        if (state == OrderStatus.MatchInProgress && op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE) {
-                            expectedSenderAmount = transferMatchingReward(expectedSenderAmount, reward, deployWalletValue, tokenReward, sendGasTo);
+                        if (
+                            state == OrderStatus.MatchInProgress &&
+                            op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE
+                        ) {
+                            expectedSenderAmount = transferMatchingReward(
+                                expectedSenderAmount, reward, deployWalletValue, tokenReward, sendGasTo
+                            );
 
                             payloadForTransfer = OrderPayloads.buildMatchTransferPayload(
                                 OrderOperationTypes.MATCHING_ORDER_TRANSFER,
@@ -439,8 +452,12 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                 if (!needCancel) {
                     if (op == OrderOperationTypes.MATCHING_ORDER_TRANSFER) {
                         sendGasTo.transfer(0, false, MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS);
+                    } else if (op == OrderOperationTypes.MATCHING_ORDER_EXCHANGE) {
+                        sendGasTo.transfer(0, false, MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS);
                     } else {
-                        recipient.transfer(0, false, MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS);
+                        if (recipient != root) {
+                            recipient.transfer(0, false, MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS);
+                        }
                     }
                 }
             }
@@ -528,7 +545,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
             currentAmountReceiveToken,
             owner,
             0,
-            _originalGasTo,
+            owner,
             true,
             (state != OrderStatus.MatchInProgress ?
                 OrderPayloads.buildOrderOperationFullExchange(buildDetails()) :
@@ -545,7 +562,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                 _senderFee,
                 fee.beneficiary,
                 0,
-                _originalGasTo,
+                owner,
                 false,
                 emptyPayload
             );
@@ -561,7 +578,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                     _expectedSenderAmount - currentAmountReceiveToken,
                     _sender,
                     0,
-                    _originalGasTo,
+                    _sender,
                     true,
                     OrderPayloads.buildOrderOperationChange(
                     _expectedSenderAmount - currentAmountReceiveToken,
@@ -578,9 +595,11 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                 currentAmountSpentToken,
                 _sender,
                 (state != OrderStatus.MatchInProgress ? _deployWalletValue : 0),
-                _originalGasTo,
+                _sender,
                 (state != OrderStatus.MatchInProgress ? _notifySuccess : true),
-                (state != OrderStatus.MatchInProgress ? (_notifySuccess ? OrderPayloads.buildSuccessPayload(_op, _successPayload, _sender) : emptyPayload) : payloadForTransfer)
+                (state != OrderStatus.MatchInProgress ? (
+                    _notifySuccess ? OrderPayloads.buildSuccessPayload(_op, _successPayload, _sender) : emptyPayload
+                ) : payloadForTransfer)
             );
 
             _transferAmount = currentAmountSpentToken;
@@ -620,7 +639,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
             _expectedSenderAmount,
             owner,
             0,
-            _originalGasTo,
+            owner,
             true,
             (state != OrderStatus.MatchInProgress ?
                 OrderPayloads.buildOrderOperationPartExchange(
@@ -643,7 +662,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                 _senderFee,
                 fee.beneficiary,
                 0,
-                _originalGasTo,
+                owner,
                 false,
                 emptyPayload
             );
@@ -669,9 +688,11 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                     _transferAmount,
                     _sender,
                     (state != OrderStatus.MatchInProgress ? _deployWalletValue : 0),
-                    _originalGasTo,
+                    _sender,
                     (state != OrderStatus.MatchInProgress ? _notifySuccess : true),
-                    (state != OrderStatus.MatchInProgress ? (_notifySuccess ? OrderPayloads.buildSuccessPayload(_op, _successPayload, _sender) : emptyPayload) : payloadForTransfer)
+                    (state != OrderStatus.MatchInProgress ? (
+                        _notifySuccess ? OrderPayloads.buildSuccessPayload(_op, _successPayload, _sender) : emptyPayload
+                    ) : payloadForTransfer)
                 );
             }
 
@@ -904,7 +925,10 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
         );
     }
 
-    function backendMatching(uint64 callbackId, address limitOrder) external onlyBackend(backMatchingPK) onlyActiveOrder {
+    function backendMatching(
+        uint64 callbackId,
+        address limitOrder
+    ) external onlyBackend(backMatchingPK) onlyActiveOrder {
         matchingOrder = limitOrder;
         changeState(OrderStatus.MatchInProgress);
 
@@ -945,8 +969,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
         changeState(OrderStatus.MatchInProgress);
 
         IOrder(limitOrder).matchingCheck{
-                value : 0,
-                flag : MsgFlag.ALL_NOT_RESERVED
+            value : 0,
+            flag : MsgFlag.ALL_NOT_RESERVED
         }(
             callbackId,
             deployWalletValue,
@@ -973,8 +997,13 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
             uint priceToken;
             uint alienPriceToken;
 
-            priceToken = FixedPoint128.encodeFromNumeratorAndDenominator(detailsLO.currentAmountSpentToken, detailsLO.currentAmountReceiveToken);
-            alienPriceToken = FixedPoint128.encodeFromNumeratorAndDenominator(currentAmountReceiveToken, currentAmountSpentToken);
+            priceToken = FixedPoint128.encodeFromNumeratorAndDenominator(
+                detailsLO.currentAmountSpentToken, detailsLO.currentAmountReceiveToken
+            );
+
+            alienPriceToken = FixedPoint128.encodeFromNumeratorAndDenominator(
+                currentAmountReceiveToken, currentAmountSpentToken
+            );
 
             uint128 expectedAmountSpent;
             uint128 expectedAmountReceive;
@@ -985,16 +1014,26 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 
             if (priceToken >= alienPriceToken) {
                 expectedAmountReceive = math.min(detailsLO.currentAmountReceiveToken, currentAmountSpentToken);
-                expectedAmountSpent = math.muldiv(expectedAmountReceive, detailsLO.currentAmountSpentToken, detailsLO.currentAmountReceiveToken);
-                alienAmountReceive = math.muldiv(expectedAmountReceive, currentAmountReceiveToken, currentAmountSpentToken);
+
+                expectedAmountSpent = math.muldiv(
+                    expectedAmountReceive, detailsLO.currentAmountSpentToken, detailsLO.currentAmountReceiveToken
+                );
+
+                alienAmountReceive = math.muldiv(
+                    expectedAmountReceive, currentAmountReceiveToken, currentAmountSpentToken
+                );
+
                 alienAmountSpent = math.muldiv(alienAmountReceive, currentAmountSpentToken, currentAmountReceiveToken);
 
-                tokenReward = expectedAmountSpent > alienAmountReceive ? detailsLO.spentToken : (alienAmountSpent > expectedAmountReceive ? detailsLO.receiveToken : address(0));
-                reward = expectedAmountSpent > alienAmountReceive ? expectedAmountSpent - alienAmountReceive : (alienAmountSpent > expectedAmountReceive ? alienAmountSpent - expectedAmountReceive : 0);
+                tokenReward = expectedAmountSpent > alienAmountReceive ? detailsLO.spentToken :
+                (alienAmountSpent > expectedAmountReceive ? detailsLO.receiveToken : address(0));
+
+                reward = expectedAmountSpent > alienAmountReceive ? expectedAmountSpent - alienAmountReceive :
+                (alienAmountSpent > expectedAmountReceive ? alienAmountSpent - expectedAmountReceive : 0);
             }
 
             if (expectedAmountReceive == 0 || state != OrderStatus.Active) {
-                if (sendGasTo.value != 0) {
+                if (sendGasTo.value != 0 && sendGasTo != factory) {
                     IOrderCallbacks(sendGasTo).onMatchingCancel{
                         value : OrderGas.OPERATION_CALLBACK_BASE,
                         flag : MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
@@ -1050,7 +1089,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
         if (needCancel) {
             IOrder(msg.sender).matchingCancel{
                 value : 0,
-                flag : MsgFlag.ALL_NOT_RESERVED,
+                flag : MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
                 bounce : false
             }();
         }
