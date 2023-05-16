@@ -55,7 +55,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             msg.sender.value != 0 && msg.sender == spentToken,
             OrderErrors.NOT_TOKEN1_ROOT
         );
-        tvm.rawReserve(address(this).balance - msg.value, 0);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
         spentTokenWallet = _wallet;
 
         IOrderFactory(factory).onOrderRootDeployedCallback{
@@ -204,8 +204,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         tvm.accept();
 
         ITokenWallet(_tokenWallet).transfer{
-                value : _gasValue,
-                flag : MsgFlag.SENDER_PAYS_FEES
+            value : _gasValue,
+            flag : MsgFlag.SENDER_PAYS_FEES
         }(
             _amount,
             _recipient,
@@ -304,7 +304,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 callback: OrderRoot.onTokenWalletBeneficiary
             }(fee.beneficiary, OrderGas.DEPLOY_EMPTY_WALLET_GRAMS);
 
-            tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
+            tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
 
             ITokenWallet(msg.sender).transfer {
                 value: 0,
@@ -328,7 +328,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
                 bounce: false
             }(callbackId, errorCode);
 
-            tvm.rawReserve(address(this).balance - msg.value, 0);
+            tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
 
             ITokenWallet(msg.sender).transfer{
                 value: 0,
@@ -408,7 +408,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
     }
 
     function setOrderCode(TvmCell _code, uint32 _versionOrder) override external onlyFactory() {
-        tvm.rawReserve(address(this).balance - msg.value, 0);
+        tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
 
         uint32 prevVersion = versionOrder;
         versionOrder = _versionOrder;
@@ -424,7 +424,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         address _sendGasTo
     ) override external onlyFactory() {
         if (version == _newVersion) {
-            tvm.rawReserve(address(this).balance - msg.value, 0);
+            tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
             _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
         } else {
             emit OrderRootCodeUpgraded(_newVersion);

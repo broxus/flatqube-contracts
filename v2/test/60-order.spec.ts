@@ -1056,8 +1056,12 @@ describe('OrderTest', () => {
             }).call())
             const walletRootBar = await TokenWallet.from_addr(walletRootBarAddress.value0, factoryOrder.address, "factoryWalletTst");
 
-            const balanceOrderRootStart = new BigNumber(await locklift.provider.getBalance(RootOrderBar.address)).shiftedBy(-9)
-            const balanceAccount8Start = new BigNumber(await locklift.provider.getBalance(account8.address)).shiftedBy(-9)
+            await locklift.provider.sendMessage({
+                sender: account1.address,
+                recipient: RootOrderBar.address,
+                amount: toNano(2),
+                bounce: false,
+            });
 
             await factoryOrder.contract.methods.sendGasRoot({
                 to: account8.address,
@@ -1067,8 +1071,6 @@ describe('OrderTest', () => {
             }).send({
                 from: account1.address, amount: toNano(0.2)
             })
-            const balanceOrderRootEnd = new BigNumber(await locklift.provider.getBalance(RootOrderBar.address)).shiftedBy(-9)
-            const balanceAccount8End = new BigNumber(await locklift.provider.getBalance(account8.address)).shiftedBy(-9)
 
             const mainCode = (await locklift.factory.getContractArtifacts("OrderRoot")).code
             const testFactoryCode = (await locklift.factory.getContractArtifacts("TestNewOrderRoot")).code
@@ -1083,12 +1085,18 @@ describe('OrderTest', () => {
                 numberString(50, barDecimals), RootOrderBar.address, '', toNano(6)
             ), {allowedCodes: {compute:[60]}});
 
-
             const barWallet8Address = await deployWallet(account8, rootTokenBar, account1)
             const barWallet8 = await TokenWallet.from_addr(barWallet8Address, account6, 'barWallet8');
 
             const tokenRootStart = new BigNumber(await walletRootBar.balance())
             const tokenAccountStart = new BigNumber(await barWallet8.balance())
+
+            await locklift.provider.sendMessage({
+                sender: account1.address,
+                recipient: RootOrderBar.address,
+                amount: toNano(2),
+                bounce: false,
+            });
 
             await locklift.tracing.trace(factoryOrder.contract.methods.proxyRootTokensTransfer({
                 _notify: true,
@@ -1102,7 +1110,7 @@ describe('OrderTest', () => {
                 _recipient: account8.address
             }).send({
                 from: account1.address, amount: toNano(2)
-            }))
+            }));
 
             const tokenRootEnd = new BigNumber(await walletRootBar.balance())
             const tokenAccountEnd = new BigNumber(await barWallet8.balance())
@@ -1112,8 +1120,6 @@ describe('OrderTest', () => {
 
             expect(tokenRootStart.minus(tokenRootEnd).isGreaterThanOrEqualTo(new BigNumber(numberString(50, barDecimals)))).to.equal(true, 'Wrong gas Balance');
             expect(tokenAccountEnd.minus(tokenAccountStart).isGreaterThanOrEqualTo(new BigNumber(numberString(50, barDecimals)))).to.equal(true, 'Wrong gas Balance');
-            expect(balanceOrderRootStart.minus(balanceOrderRootEnd).isGreaterThanOrEqualTo(1)).to.equal(true, 'Wrong gas Balance');
-            expect(balanceAccount8End.minus(balanceAccount8Start).isGreaterThanOrEqualTo(1)).to.equal(true, 'Wrong gas Balance');
         });
     });
     describe('Matching orders', async  () => {

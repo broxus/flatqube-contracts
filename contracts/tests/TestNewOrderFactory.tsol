@@ -217,12 +217,13 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
         bool _notify,
         TvmCell _payload
 	) override external onlyOwner() {
-		require(msg.value >= OrderGas.PROXY_ROOT_TRANSFER_VALUE + _gasValue, OrderErrors.VALUE_TOO_LOW);
+		require(
+			msg.value >= OrderGas.PROXY_ROOT_TRANSFER_VALUE + _deployWalletValue + _gasValue, OrderErrors.VALUE_TOO_LOW
+		);
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
-
 		IOrderRoot(root).proxyTokensTransfer{
-				value: OrderGas.PROXY_ROOT_TRANSFER_VALUE + _gasValue,
+				value: OrderGas.PROXY_ROOT_TRANSFER_VALUE + _deployWalletValue + _gasValue,
 				flag: MsgFlag.SENDER_PAYS_FEES,
 				bounce: false
 		}(_tokenWallet, _gasValue, _amount, _recipient, _deployWalletValue, _remainingGasTo, _notify, _payload);
@@ -241,7 +242,6 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
         uint128 _value,
         uint16 _flag
 	) override external onlyOwner() {
-//		require(msg.value >= OrderGas.SEND_GAS_ROOT_VALUE, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 0);
 
 
@@ -484,6 +484,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 			emit OrderFactoryUpgrade(version, newVersion);
 
 			TvmCell data = abi.encode(
+				randomNonce,
 				version,
 				newVersion,
 				versionOrderRoot,
@@ -510,13 +511,13 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE, 2);
         tvm.resetStorage();
 
-        uint32 oldVersion;
+		uint32 oldVersion;
         address sendGasTo;
 		(
-			oldVersion, version, versionOrderRoot, versionOrder, owner, pendingOwner,
+			randomNonce, oldVersion, version, versionOrderRoot, versionOrder, owner, pendingOwner,
 			dexRoot, orderRootCode, orderCode, orderRootPlatformCode, orderPlatformCode, fee, sendGasTo
 		) = abi.decode(data,(
-			uint32, uint32, uint32, uint32, address, address,
+			uint32, uint32, uint32, uint32, uint32, address, address,
 			address, TvmCell, TvmCell, TvmCell, TvmCell, OrderFeeParams, address)
 		);
 
