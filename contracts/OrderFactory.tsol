@@ -295,7 +295,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	function setOrderRootCode(TvmCell _orderRootCode) override external onlyOwner() {
-		tvm.rawReserve(address(this).balance - msg.value, 0);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE_FACTORY, 0);
 
 		uint32 prevVersion = versionOrderRoot;
 		versionOrderRoot++;
@@ -310,7 +310,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	function setOrderCode(TvmCell _orderCode) override external onlyOwner() {
-		tvm.rawReserve(address(this).balance - msg.value, 0);
+		tvm.rawReserve(OrderGas.TARGET_BALANCE_FACTORY, 0);
 
 		uint32 prevVersion = versionOrder;
 		versionOrder++;
