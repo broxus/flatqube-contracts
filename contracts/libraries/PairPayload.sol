@@ -469,7 +469,7 @@ library PairPayload {
                     1,
                     nextTokenRoot,
                     nextStepsData,
-                    1,
+                    0,
                     1
                 ));
             }
