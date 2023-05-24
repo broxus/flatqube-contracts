@@ -42,8 +42,6 @@ library MultiScatterPayload {
         bool,
         uint16,
         uint8,
-        address,
-        TvmCell,
         IMultiScatterStructures.PayloadOrder[]
     ) {
 
@@ -52,8 +50,6 @@ library MultiScatterPayload {
         bool isValid;
         uint16 errorCode;
         uint8 op;
-        address recipientReturn;
-        TvmCell originalPayload;
         IMultiScatterStructures.PayloadOrder[] _payloadsForOrders;
 
         if (payloadSlice.refs() == 1) {
@@ -79,8 +75,6 @@ library MultiScatterPayload {
             isValid,
             errorCode,
             op,
-            recipientReturn,
-            originalPayload,
             _payloadsForOrders
         );
     }
@@ -89,7 +83,7 @@ library MultiScatterPayload {
         uint128 msgValue,
         uint128 amount,
         IMultiScatterStructures.PayloadOrder[] payloadsForOrders
-    ) internal pure returns(uint16) {
+    ) internal returns(uint16) {
         if (payloadsForOrders.length == 0) return MultiScatterErrors.EMPTY_COUNT_ORDERS;
         if (payloadsForOrders.length >= 201) return MultiScatterErrors.EXCEED_COUNT_ORDERS;
         IMultiScatterStructures.CalculationResult calcResult = calculateTokensValue(payloadsForOrders);
@@ -102,7 +96,7 @@ library MultiScatterPayload {
 
     function calculateTokensValue(
         IMultiScatterStructures.PayloadOrder[] _payloadsForOrders
-    ) public pure returns (IMultiScatterStructures.CalculationResult) {
+    ) public returns (IMultiScatterStructures.CalculationResult) {
         uint128 requiredEverValue;
         uint128 requiredTokenAmount;
         for (IMultiScatterStructures.PayloadOrder payloadsForOrders : _payloadsForOrders) {

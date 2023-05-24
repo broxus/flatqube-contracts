@@ -141,7 +141,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
     function checkBeginData() internal {
         if (
             spentWallet.value != 0 && receiveWallet.value != 0 &&
-            tmp_transactions.exists(spentToken) && tmp_transactions[spentToken] >= initialAmount
+            tmp_transactions.exists(spentWallet) && tmp_transactions[spentWallet] >= initialAmount
         ) {
             changeState(OrderStatus.Active);
             tmp_transactions.delMin();
@@ -272,7 +272,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                 (state == OrderStatus.Initialize || state == OrderStatus.AwaitTokens) &&
                 spentWallet.value == 0
             ) {
-                tmp_transactions[tokenRoot] += amount;
+                tmp_transactions[msg.sender] += amount;
             } else if (msg.sender == spentWallet) {
                 if (
                     (sender == root && amount >= initialAmount &&
@@ -334,10 +334,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                                 senderFee,
                                 deployWalletValue,
                                 recipient,
-                                originalGasTo,
                                 payloadForTransfer,
-                                sendGasTo,
-                                sendGasInMatching,
                                 notifySuccess,
                                 successPayload
                             );
@@ -351,7 +348,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                                 senderFee,
                                 deployWalletValue,
                                 recipient,
-                                originalGasTo,
                                 payloadForTransfer,
                                 sendGasTo,
                                 notifySuccess,
@@ -527,10 +523,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
         uint128 _senderFee,
         uint128 _deployWalletValue,
         address _sender,
-        address _originalGasTo,
         TvmCell payloadForTransfer,
-        address _sendGasTo,
-        address _sendGasInMatching,
         bool _notifySuccess,
         TvmCell _successPayload
     ) private returns (uint128){
@@ -622,7 +615,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
         uint128 _senderFee,
         uint128 _deployWalletValue,
         address _sender,
-        address _originalGasTo,
         TvmCell payloadForTransfer,
         address _sendGasTo,
         bool _notifySuccess,
