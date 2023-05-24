@@ -2,6 +2,9 @@ import { LockliftConfig, lockliftChai } from 'locklift';
 import { GiverWallet, SimpleGiver, TestnetGiver } from "./giverSettings";
 import { FactorySource } from './build/factorySource';
 
+import "locklift-deploy";
+import { Deployments } from "locklift-deploy";
+
 import chai from "chai";
 chai.use(lockliftChai);
 
@@ -9,6 +12,13 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const locklift: import('locklift').Locklift<FactorySource>;
+}
+
+declare module "locklift" {
+  //@ts-ignore
+  export interface Locklift {
+    deployments: Deployments<FactorySource>;
+  }
 }
 
 const LOCAL_NETWORK_ENDPOINT = 'http://localhost:80/graphql';

@@ -1,0 +1,164 @@
+{
+	"ABI version": 2,
+	"version": "2.2",
+	"header": ["pubkey", "time", "expire"],
+	"functions": [
+		{
+			"name": "constructor",
+			"inputs": [
+				{"name":"_version","type":"uint32"},
+				{"name":"_isActive","type":"bool"},
+				{"name":"_owner","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "transferOwner",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"_owner","type":"address"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "acceptOwner",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getDetails",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint64"},
+				{"name":"value1","type":"address"},
+				{"name":"value2","type":"uint32"},
+				{"name":"value3","type":"bool"}
+			]
+		},
+		{
+			"name": "buildPayload",
+			"inputs": [
+				{"components":[{"name":"destination","type":"address"},{"name":"amount","type":"uint128"},{"name":"gasValue","type":"uint128"},{"name":"payload","type":"cell"}],"name":"payloadsOrders","type":"tuple[]"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "onAcceptTokensTransfer",
+			"inputs": [
+				{"name":"value0","type":"address"},
+				{"name":"amount","type":"uint128"},
+				{"name":"sender","type":"address"},
+				{"name":"value3","type":"address"},
+				{"name":"originalGasTo","type":"address"},
+				{"name":"payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "calculateTokensValue",
+			"inputs": [
+				{"components":[{"name":"destination","type":"address"},{"name":"amount","type":"uint128"},{"name":"gasValue","type":"uint128"},{"name":"payload","type":"cell"}],"name":"_payloadsForOrders","type":"tuple[]"}
+			],
+			"outputs": [
+				{"components":[{"name":"everValue","type":"uint128"},{"name":"tokenAmount","type":"uint128"}],"name":"value0","type":"tuple"}
+			]
+		},
+		{
+			"name": "proxyTokensTransfer",
+			"inputs": [
+				{"name":"_tokenWallet","type":"address"},
+				{"name":"_gasValue","type":"uint128"},
+				{"name":"_amount","type":"uint128"},
+				{"name":"_recipient","type":"address"},
+				{"name":"_deployWalletValue","type":"uint128"},
+				{"name":"_remainingGasTo","type":"address"},
+				{"name":"_notify","type":"bool"},
+				{"name":"_payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "sendGas",
+			"inputs": [
+				{"name":"to","type":"address"},
+				{"name":"_value","type":"uint128"},
+				{"name":"_flag","type":"uint16"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "upgrade",
+			"inputs": [
+				{"name":"_code","type":"cell"},
+				{"name":"_newVersion","type":"uint32"},
+				{"name":"_sendGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		}
+	],
+	"data": [
+		{"key":1,"name":"nonce","type":"uint64"}
+	],
+	"events": [
+		{
+			"name": "RequestedOwnerTransfer",
+			"inputs": [
+				{"name":"value0","type":"address"},
+				{"name":"value1","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "OwnerTransferAccepted",
+			"inputs": [
+				{"name":"value0","type":"address"},
+				{"name":"value1","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "ErrorCode",
+			"inputs": [
+				{"name":"value0","type":"uint16"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "MultiScatterUpgrade",
+			"inputs": [
+				{"name":"value0","type":"uint32"},
+				{"name":"value1","type":"uint32"}
+			],
+			"outputs": [
+			]
+		}
+	],
+	"fields": [
+		{"name":"_pubkey","type":"uint256"},
+		{"name":"_timestamp","type":"uint64"},
+		{"name":"_constructorFlag","type":"bool"},
+		{"name":"nonce","type":"uint64"},
+		{"name":"owner","type":"address"},
+		{"name":"pendingOwner","type":"address"},
+		{"name":"version","type":"uint32"},
+		{"name":"isActive","type":"bool"}
+	]
+}

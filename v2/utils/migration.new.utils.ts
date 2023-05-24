@@ -487,7 +487,7 @@ export const tokenRootMigration = async (
 export const dexRootMigration = async (
   account: Account,
   tokenFactory: Contract<FactorySource['TokenFactory']>
-): any => {
+): Promise<any> => {
   // Load signer and account
   const signer = await locklift.keystore.getSigner('0');
   const DexPair = await locklift.factory.getContractArtifacts('DexPair');
@@ -609,4 +609,38 @@ export const dexRootMigration = async (
   new Migration().store(contract, `DexRoot`);
 
   return [contract, DexVault] as const;
+};
+
+export const multiScatterMigration = async (
+    version: number,
+    isActive: boolean = true,
+    account: Account
+): Promise<
+    Contract<FactorySource['MultiScatter']>
+> => {
+  const signer = await locklift.keystore.getSigner('0');
+
+  logMigrationProcess(
+      'MultiScatter',
+      'constructor',
+      'Deploying MultiScatter...',
+  );
+
+  const { contract } = await locklift.factory.deployContract({
+    contract: 'MultiScatter',
+    publicKey: signer.publicKey,
+    initParams: {
+      nonce: getRandomNonce(),
+    },
+    constructorParams: {
+      _version: version.toString(),
+      _isActive: isActive,
+      _owner: account.address,
+    },
+    value: toNano(3),
+  });
+
+  new Migration().store(contract, 'MultiScatter');
+
+  return contract;
 };

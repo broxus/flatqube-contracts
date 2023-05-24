@@ -1,0 +1,1837 @@
+.version sol 0.62.0
+
+.macro constructor
+DROP
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7_with_init_storage$
+}
+GETGLOB 6
+THROWIF 51
+OVER
+PUSHCONT {
+	LDU 32
+	LDI 1
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 32
+	LDI 1
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/MultiScatter.tsol, 37
+DUP
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+THROWIFNOT 100
+.loc ../contracts/MultiScatter.tsol, 38
+ACCEPT
+.loc ../contracts/MultiScatter.tsol, 39
+PUSHINT 2000000000
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/MultiScatter.tsol, 41
+PUSH S2
+PUSHCONT {
+	PUSH S2
+}
+PUSHCONT {
+	PUSHINT 1
+}
+IFELSE
+SETGLOB 13
+.loc ../contracts/MultiScatter.tsol, 42
+SWAP
+SETGLOB 14
+.loc ../contracts/MultiScatter.tsol, 43
+SETGLOB 11
+.loc ../contracts/MultiScatter.tsol, 44
+DROP
+GETGLOB 11
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/MultiScatter.tsol, 0
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro transferOwner
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/MultiScatter.tsol, 56
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+ENDS
+.loc ../contracts/MultiScatter.tsol, 0
+CALLREF {
+	CALL $transferOwner_4fb2e45d_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST xdab72ca1
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro transferOwner_4fb2e45d_internal_macro
+.loc ../contracts/MultiScatter.tsol, 52
+GETGLOB 9
+GETGLOB 11
+SDEQ
+THROWIFNOT 400
+.loc ../contracts/MultiScatter.tsol, 57
+DUP
+SETGLOB 12
+.loc ../contracts/MultiScatter.tsol, 58
+GETGLOB 11
+PUSHSLICE xc0000000000000000000000001
+NEWC
+STSLICE
+ROTREV
+NEWC
+STSLICECONST x39a1cc5a
+STSLICE
+SWAP
+NEWC
+STSLICE
+STBREFR
+STBREFR
+ENDC
+PUSHINT 0
+SENDRAWMSG
+.loc ../contracts/MultiScatter.tsol, 60
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+GETGLOB 12
+.loc ../contracts/MultiScatter.tsol, 0
+
+.macro acceptOwner
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/MultiScatter.tsol, 63
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/MultiScatter.tsol, 0
+CALLREF {
+	CALL $acceptOwner_ebbc4965_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST xbceff0f7
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro acceptOwner_ebbc4965_internal_macro
+.loc ../contracts/MultiScatter.tsol, 64
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 12
+SDEQ
+AND
+THROWIFNOT 406
+.loc ../contracts/MultiScatter.tsol, 69
+GETGLOB 12
+GETGLOB 11
+PUSHSLICE xc0000000000000000000000001
+NEWC
+STSLICE
+ROTREV
+NEWC
+STSLICECONST x1251dc40
+STSLICE
+SWAP
+NEWC
+STSLICE
+STBREFR
+STBREFR
+ENDC
+PUSHINT 0
+SENDRAWMSG
+.loc ../contracts/MultiScatter.tsol, 70
+GETGLOB 12
+SETGLOB 11
+.loc ../contracts/MultiScatter.tsol, 71
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+SETGLOB 12
+.loc ../contracts/MultiScatter.tsol, 73
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+GETGLOB 11
+.loc ../contracts/MultiScatter.tsol, 0
+
+.macro getDetails
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/MultiScatter.tsol, 76
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/MultiScatter.tsol, 0
+CALLREF {
+	CALL $getDetails_fbbf93a0_internal_macro$
+}
+PUSH S4
+PUSHCONT {
+	PUSH S6
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	REVERSE 5, 0
+	NEWC
+	STSLICECONST xb36ad05c
+	STU 64
+	STSLICE
+	STU 32
+	STI 1
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	REVERSE 5, 0
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STU 64
+	STSLICE
+	STU 32
+	STI 1
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getDetails_fbbf93a0_internal_macro
+.loc ../contracts/MultiScatter.tsol, 77
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+FALSE
+SETINDEXQ 1
+PUSHINT 64
+SETINDEXQ 4
+SETGLOB 4
+GETGLOB 10
+GETGLOB 11
+GETGLOB 13
+GETGLOB 14
+.loc ../contracts/MultiScatter.tsol, 0
+
+.macro buildPayload
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/MultiScatter.tsol, 80
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+ENDS
+.loc ../contracts/MultiScatter.tsol, 0
+CALLREF {
+	CALL $buildPayload_3c5f922f_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 3316973518
+	STUR 130
+	STREF
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro buildPayload_3c5f922f_internal_macro
+.loc ../contracts/MultiScatter.tsol, 83
+CALLREF {
+	CALL $MultiScatterPayload_no_obj_buildPayload_3c5f922f_macro$
+}
+.loc ../contracts/MultiScatter.tsol, 0
+
+.macro onAcceptTokensTransfer
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/MultiScatter.tsol, 86
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDU 128
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+.loc ../contracts/MultiScatter.tsol, 0
+CALLREF {
+	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro onAcceptTokensTransfer_e63f2284_internal_macro
+.loc ../contracts/MultiScatter.tsol, 94
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+THROWIFNOT 100
+.loc ../contracts/MultiScatter.tsol, 95
+GETPARAM 7
+FIRST
+DEPTH
+ADDCONST -2
+PICK
+SUB
+UFITS 128
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/MultiScatter.tsol, 97
+DEPTH
+ADDCONST -2
+PICK
+PUSH S5
+ROT
+CALLREF {
+	CALL $MultiScatterPayload_no_obj_decodeOnAcceptTokenTransferData_8c63b781_macro$
+}
+.loc ../contracts/MultiScatter.tsol, 106
+ROLL 5
+NOT
+GETGLOB 14
+NOT
+OR
+.loc ../contracts/MultiScatter.tsol, 108
+PUSH S5
+PUSHCONT {
+	.loc ../contracts/MultiScatter.tsol, 109
+	PUSH S5
+	PUSHSLICE xc0000000000000000000000000562889c5
+	NEWC
+	STSLICE
+	STU 16
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+	.loc ../contracts/MultiScatter.tsol, 0
+}
+IF
+.loc ../contracts/MultiScatter.tsol, 112
+DUP
+PUSHCONT {
+	.loc ../contracts/MultiScatter.tsol, 113
+	PUSH S4
+	EQINT 60
+	PUSHCONT {
+		.loc ../contracts/MultiScatter.tsol, 114
+		PUSHINT 0
+		PUSH2 S0, S2
+		.loc ../contracts/MultiScatter.tsol, 116
+		SECOND
+		PUSHINT 0
+		NULL
+		PUSHCONT {
+			PUSH2 S1, S2
+			PUSHINT 32
+			DICTUGET
+			NULLSWAPIFNOT
+			IFREF {
+				LDMSGADDR
+				LDU 128
+				LDU 128
+				LDREF
+				ENDS
+				TUPLE 4
+			}
+			DUP
+			POP S2
+			ISNULL
+			NOT
+		}
+		PUSHCONT {
+			.loc ../contracts/MultiScatter.tsol, 117
+			DUP
+			THIRD
+			PUSHINT 2000000000
+			GEQ
+			PUSHCONT {
+				.loc ../contracts/MultiScatter.tsol, 118
+				DUP
+				INDEX 3
+				TRUE
+				PUSH S13
+				PUSHINT 0
+				PUSH S4
+				FIRST
+				PUSH S5
+				SECOND
+				PUSH S6
+				THIRD
+				GETGLOB 9
+				FALSE
+				NEWC
+				STSLICECONST x6_
+				STI 1
+				STSLICECONST x1_
+				STSLICE
+				SWAP
+				STGRAMS
+				PUSHINT 1
+				STUR 107
+				ROLLREV 6
+				NEWC
+				STSLICECONST x73e22143
+				STU 128
+				STSLICE
+				STU 128
+				ROLLREV 3
+				NEWC
+				STSLICE
+				STI 1
+				STREF
+				STBREFR
+				STBREFR
+				ENDC
+				PUSHINT 1
+				SENDRAWMSG
+			}
+			PUSHCONT {
+				.loc ../contracts/MultiScatter.tsol, 131
+				DUP
+				THIRD
+				PUSH S5
+				ADD
+				UFITS 128
+				POP S5
+				.loc ../contracts/MultiScatter.tsol, 132
+				DUP
+				SECOND
+				PUSH S4
+				ADD
+				UFITS 128
+				POP S4
+			}
+			IFELSE
+			.loc ../contracts/MultiScatter.tsol, 135
+			PUSH S4
+			GTINT 0
+			PUSHCONT {
+				.loc ../contracts/MultiScatter.tsol, 136
+				PUSH S3
+				GTINT 0
+				PUSHCONT {
+					.loc ../contracts/MultiScatter.tsol, 137
+					PUSHREF {
+					}
+					.loc ../contracts/MultiScatter.tsol, 138
+					FALSE
+					PUSH S13
+					PUSHINT 0
+					PUSH S17
+					PUSH S8
+					GETGLOB 9
+					FALSE
+					NEWC
+					STSLICECONST x6_
+					STI 1
+					STSLICECONST x1_
+					STSLICE
+					PUSHINT 1
+					STUR 111
+					ROLLREV 6
+					NEWC
+					STSLICECONST x73e22143
+					STU 128
+					STSLICE
+					STU 128
+					ROLLREV 3
+					NEWC
+					STSLICE
+					STI 1
+					STREF
+					STBREFR
+					STBREFR
+				}
+				PUSHCONT {
+					.loc ../contracts/MultiScatter.tsol, 151
+					PUSH S13
+					NEWC
+					STSLICECONST x42_
+					STSLICE
+					PUSHINT 111
+					STZEROES
+				}
+				IFELSE
+				ENDC
+				PUSHPOW2 7
+				SENDRAWMSG
+				.loc ../contracts/MultiScatter.tsol, 0
+			}
+			IF
+			.loc ../contracts/MultiScatter.tsol, 0
+			OVER
+			INC
+			POP S2
+		}
+		WHILE
+		BLKDROP 5
+	}
+	PUSHCONT {
+		.loc ../contracts/MultiScatter.tsol, 156
+		DROP
+		TRUE
+	}
+	IFELSE
+	.loc ../contracts/MultiScatter.tsol, 0
+}
+IFNOT
+.loc ../contracts/MultiScatter.tsol, 160
+PUSHCONT {
+	.loc ../contracts/MultiScatter.tsol, 161
+	PUSHREF {
+	}
+	.loc ../contracts/MultiScatter.tsol, 162
+	FALSE
+	PUSH S7
+	PUSHINT 0
+	PUSH2 S11, S12
+	GETGLOB 9
+	FALSE
+	NEWC
+	STSLICECONST x6_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	PUSHINT 1
+	STUR 111
+	ROLLREV 6
+	NEWC
+	STSLICECONST x73e22143
+	STU 128
+	STSLICE
+	STU 128
+	ROLLREV 3
+	NEWC
+	STSLICE
+	STI 1
+	STREF
+	STBREFR
+	STBREFR
+	ENDC
+	PUSHPOW2 7
+	SENDRAWMSG
+	.loc ../contracts/MultiScatter.tsol, 0
+}
+IF
+.loc ../contracts/MultiScatter.tsol, 0
+BLKDROP 10
+
+.macro calculateTokensValue
+DROP
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/MultiScatter.tsol, 177
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+ENDS
+.loc ../contracts/MultiScatter.tsol, 0
+CALLREF {
+	CALL $calculateTokensValue_7d4bae4f_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2672521943
+	STUR 130
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 128
+	STU 128
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+PUSHCONT {
+	DROP
+}
+IFELSE
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.globl	calculateTokensValue_7d4bae4f_internal
+.type	calculateTokensValue_7d4bae4f_internal, @function
+CALL $calculateTokensValue_7d4bae4f_internal_macro$
+
+.macro calculateTokensValue_7d4bae4f_internal_macro
+.loc ../contracts/MultiScatter.tsol, 181
+CALLREF {
+	CALL $MultiScatterPayload_no_obj_calculateTokensValue_7d4bae4f_macro$
+}
+.loc ../contracts/MultiScatter.tsol, 0
+
+.macro proxyTokensTransfer
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/MultiScatter.tsol, 184
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDU 128
+LDU 128
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 128
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDI 1
+LDREF
+ENDS
+.loc ../contracts/MultiScatter.tsol, 0
+CALLREF {
+	CALL $proxyTokensTransfer_00745f71_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro proxyTokensTransfer_00745f71_internal_macro
+.loc ../contracts/MultiScatter.tsol, 52
+GETGLOB 9
+GETGLOB 11
+SDEQ
+THROWIFNOT 400
+.loc ../contracts/MultiScatter.tsol, 195
+ACCEPT
+.loc ../contracts/MultiScatter.tsol, 197
+REVERSE 8, 0
+NEWC
+STSLICECONST x62_
+STSLICE
+SWAP
+STGRAMS
+PUSHINT 1
+STUR 107
+ROLLREV 6
+NEWC
+STSLICECONST x73e22143
+STU 128
+STSLICE
+STU 128
+ROLLREV 3
+NEWC
+STSLICE
+STI 1
+STREF
+STBREFR
+STBREFR
+ENDC
+PUSHINT 1
+SENDRAWMSG
+.loc ../contracts/MultiScatter.tsol, 0
+
+.macro sendGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/MultiScatter.tsol, 210
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDU 128
+LDU 16
+ENDS
+.loc ../contracts/MultiScatter.tsol, 0
+CALLREF {
+	CALL $sendGas_344a5ee6_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro sendGas_344a5ee6_internal_macro
+.loc ../contracts/MultiScatter.tsol, 52
+GETGLOB 9
+GETGLOB 11
+SDEQ
+THROWIFNOT 400
+.loc ../contracts/MultiScatter.tsol, 215
+ACCEPT
+.loc ../contracts/MultiScatter.tsol, 216
+XCHG S2
+NEWC
+STSLICECONST x42_
+STSLICE
+SWAP
+STGRAMS
+PUSHINT 107
+STZEROES
+ENDC
+SWAP
+SENDRAWMSG
+.loc ../contracts/MultiScatter.tsol, 0
+
+.macro upgrade
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/MultiScatter.tsol, 219
+OVER
+PUSHCONT {
+	LDREF
+	LDU 32
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDREF
+	LDU 32
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/MultiScatter.tsol, 0
+CALLREF {
+	CALL $upgrade_fb9d1513_internal_macro$
+}
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro upgrade_fb9d1513_internal_macro
+.loc ../contracts/MultiScatter.tsol, 52
+GETGLOB 9
+GETGLOB 11
+SDEQ
+THROWIFNOT 400
+.loc ../contracts/MultiScatter.tsol, 224
+GETGLOB 13
+PUSH S2
+EQUAL
+PUSHCONT {
+	.loc ../contracts/MultiScatter.tsol, 225
+	GETPARAM 7
+	FIRST
+	DEPTH
+	ADDCONST -2
+	PICK
+	SUB
+	UFITS 128
+	PUSHINT 0
+	RAWRESERVE
+	.loc ../contracts/MultiScatter.tsol, 226
+	DUP
+	NEWC
+	STSLICECONST x62_
+	STSLICE
+	PUSHINT 111
+	STZEROES
+	ENDC
+	PUSHPOW2 7
+	ADDCONST 2
+	UFITS 8
+	SENDRAWMSG
+}
+PUSHCONT {
+	.loc ../contracts/MultiScatter.tsol, 230
+	OVER
+	GETGLOB 13
+	PUSHSLICE xc000000000000000000000000021ab754e
+	NEWC
+	STSLICE
+	STU 32
+	STU 32
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+	.loc ../contracts/MultiScatter.tsol, 232
+	GETGLOB 14
+	PUSH S2
+	GETGLOB 12
+	GETGLOB 11
+	GETGLOB 10
+	NEWC
+	STU 64
+	STSLICE
+	ROLLREV 3
+	NEWC
+	STSLICE
+	STU 32
+	STI 1
+	STBREFR
+	ENDC
+	.loc ../contracts/MultiScatter.tsol, 234
+	PUSH S3
+	SETCODE
+	.loc ../contracts/MultiScatter.tsol, 235
+	PUSH S3
+	CTOS
+	DUP
+	PUSHSLICE x8adb35
+	SDEQ
+	PUSHCONT {
+		PLDREFIDX 1
+		CTOS
+	}
+	IF
+	PLDREF
+	CTOS
+	BLESS
+	POP C3
+	.loc ../contracts/MultiScatter.tsol, 237
+	CALLREF {
+		CALL $:onCodeUpgrade$
+	}
+}
+IFELSE
+.loc ../contracts/MultiScatter.tsol, 0
+BLKDROP 3
+
+.internal-alias :onCodeUpgrade, 2
+.internal :onCodeUpgrade
+DROP
+.loc ../contracts/MultiScatter.tsol, 0
+CALLREF {
+	CALL $c7_to_c4$
+}
+COMMIT
+THROW 0
+
+.macro c4_to_c7
+PUSHROOT
+CTOS
+LDU 256 ; pubkey c4
+LDU 64 ; pubkey timestamp c4
+LDU 1 ; ctor flag
+NIP
+LDU 64
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 32
+LDI 1
+ENDS
+SETGLOB 14
+SETGLOB 13
+SETGLOB 12
+SETGLOB 11
+SETGLOB 10
+SETGLOB 3
+SETGLOB 2
+
+.macro c4_to_c7_with_init_storage
+PUSHROOT
+CTOS
+SBITS
+GTINT 1
+PUSHCONT {
+	PUSHINT 0
+	PUSHROOT
+	CTOS
+	PLDDICT ; D
+	PUSHINT 1
+	OVER
+	PUSHINT 64
+	DICTUGET
+	ZEROSWAPIFNOT
+	PUSHCONT {
+		PLDU 64
+	}
+	IF
+	PUSHREFSLICE {
+		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+	}
+	DUP
+	PUSHINT 0
+	DUP
+	SETGLOB 14
+	SETGLOB 13
+	SETGLOB 12
+	SETGLOB 11
+	SETGLOB 10
+	PUSHINT 64
+	DICTUGET
+	THROWIFNOT 61
+	PLDU 256
+	SETGLOB 2
+	PUSHINT 0 ; timestamp
+	SETGLOB 3
+}
+IFREFELSE {
+	CALL $c4_to_c7$
+}
+
+.macro c7_to_c4
+GETGLOB 14
+GETGLOB 13
+GETGLOB 12
+GETGLOB 11
+GETGLOB 10
+GETGLOB 3
+GETGLOB 2
+NEWC
+STU 256
+STU 64
+STONE
+STU 64
+STSLICE
+ROLLREV 3
+NEWC
+STSLICE
+STU 32
+STI 1
+STBREFR
+ENDC
+POPROOT
+
+.macro upd_only_time_in_c4
+PUSHROOT
+CTOS
+LDU 256
+LDU 64
+NIP
+GETGLOB 3
+ROT
+NEWC
+STU 256
+STU 64
+STSLICE
+ENDC
+POPROOT
+
+.internal-alias :main_internal, 0
+.internal :main_internal
+PUSHROOT
+CTOS
+SBITS
+NEQINT 1
+SETGLOB 6
+PUSH S2
+CTOS
+LDU 4 ; bounced tail
+LDMSGADDR ; bounced src tail
+DROP
+SETGLOB 9
+MODPOW2 1
+GETGLOB 4
+TRUE
+SETINDEXQ 1
+PUSHINT 10000000
+SETINDEXQ 2
+NULL
+SETINDEXQ 3
+PUSHINT 0
+SETINDEXQ 4
+SETGLOB 4
+IFRET
+OVER
+SEMPTY ; isEmpty
+IFJMPREF {
+	GETGLOB 6
+	THROWIFNOT 76
+}
+OVER
+LDUQ 32  ; [funcId] body' ok
+THROWIFNOT 60
+OVER
+IFNOTJMPREF {
+	GETGLOB 6
+	THROWIFNOT 76
+}
+SWAP
+CALLREF {
+	CALL $public_function_selector$
+}
+THROW 60
+
+.internal-alias :main_external, -1
+.internal :main_external
+PUSHROOT
+CTOS
+SBITS
+NEQINT 1
+SETGLOB 6
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+SETGLOB 9
+OVER
+CALLREF {
+	CALL $c4_to_c7_with_init_storage$
+}
+LDU 1 ; haveSign msgSlice
+SWAP
+PUSHCONT {
+	PUSHPOW2 9
+	LDSLICEX ; signatureSlice msgSlice
+	DUP
+	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	SWAP
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
+	SWAP
+	PUSHCONT {
+		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
+		XCHG S3
+		SWAP
+	}
+	PUSHCONT {
+		XCHG S2
+		GETGLOB 2
+	}
+	IFELSE
+	CHKSIGNU ; msgSlice isSigned
+	THROWIFNOT 40
+}
+PUSHCONT {
+	LDU 1 ; hasPubkey msgSlice
+	SWAP
+	THROWIF 58
+}
+IFELSE
+LDU 64 ; timestamp msgSlice
+SWAP
+CALL $replay_protection_macro$
+LDU 32 ; expireAt msgSlice
+SWAP
+NOW ; msgSlice expireAt now
+GREATER ; msgSlice expireAt>now
+THROWIFNOT 57
+LDU 32 ; funcId body
+SWAP
+CALLREF {
+	CALL $public_function_selector$
+}
+THROW 60
+
+.globl	MultiScatterPayload_with_obj_buildPayload_3c5f922f
+.type	MultiScatterPayload_with_obj_buildPayload_3c5f922f, @function
+CALL $MultiScatterPayload_with_obj_buildPayload_3c5f922f_macro$
+
+.macro MultiScatterPayload_with_obj_buildPayload_3c5f922f_macro
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 24
+NEWC
+OVER
+UNPAIR
+XCHG S2
+STU 32
+STDICT
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 26
+ENDC
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+
+.globl	MultiScatterPayload_no_obj_buildPayload_3c5f922f
+.type	MultiScatterPayload_no_obj_buildPayload_3c5f922f, @function
+CALL $MultiScatterPayload_no_obj_buildPayload_3c5f922f_macro$
+
+.macro MultiScatterPayload_no_obj_buildPayload_3c5f922f_macro
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 24
+NEWC
+SWAP
+UNPAIR
+XCHG S2
+STU 32
+STDICT
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 26
+ENDC
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+
+.globl	MultiScatterPayload_with_obj_decodeOnAcceptTokenTransferData_8c63b781
+.type	MultiScatterPayload_with_obj_decodeOnAcceptTokenTransferData_8c63b781, @function
+CALL $MultiScatterPayload_with_obj_decodeOnAcceptTokenTransferData_8c63b781_macro$
+
+.macro MultiScatterPayload_with_obj_decodeOnAcceptTokenTransferData_8c63b781_macro
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 50
+DUP
+CTOS
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 52
+PUSHINT 0
+BLKPUSH 3, 0
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 57
+NEWDICT
+PAIR
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 59
+PUSH S4
+SREFS
+EQINT 1
+PUSHCONT {
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 60
+	PUSH S4
+	SBITS
+	EQINT 33
+	PUSHCONT {
+		.loc ../contracts/libraries/MultiScatterPayload.tsol, 61
+		PUSHINT 60
+		POP S2
+		.loc ../contracts/libraries/MultiScatterPayload.tsol, 63
+		PUSH S5
+		CALLREF {
+			CALL $MultiScatterPayload_no_obj_decodePayload_3c8d9f35_macro$
+		}
+		NIP
+		.loc ../contracts/libraries/MultiScatterPayload.tsol, 67
+		BLKPUSH 2, 7
+		PUSH S2
+		CALLREF {
+			CALL $MultiScatterPayload_no_obj__checkOperationData_8f1d60b3_macro$
+		}
+		POP S3
+		.loc ../contracts/libraries/MultiScatterPayload.tsol, 68
+		PUSH S2
+		PUSHCONT {
+			.loc ../contracts/libraries/MultiScatterPayload.tsol, 69
+			TRUE
+			POP S4
+			.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+		}
+		IFNOT
+		.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+}
+IF
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 74
+PUSH S3
+NOT
+PUSH S3
+EQINT 0
+AND
+PUSHCONT {
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 75
+	PUSH S3
+	PUSHINT 0
+	PUSHINT 405
+	CONDSEL
+	POP S3
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+}
+IF
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 78
+ROLLREV 3
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+PUSHREF {
+}
+ROLL 5
+BLKDROP2 3, 6
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+
+.globl	MultiScatterPayload_no_obj_decodeOnAcceptTokenTransferData_8c63b781
+.type	MultiScatterPayload_no_obj_decodeOnAcceptTokenTransferData_8c63b781, @function
+CALL $MultiScatterPayload_no_obj_decodeOnAcceptTokenTransferData_8c63b781_macro$
+
+.macro MultiScatterPayload_no_obj_decodeOnAcceptTokenTransferData_8c63b781_macro
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 50
+DUP
+CTOS
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 52
+PUSHINT 0
+BLKPUSH 3, 0
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 57
+NEWDICT
+PAIR
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 59
+PUSH S4
+SREFS
+EQINT 1
+PUSHCONT {
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 60
+	PUSH S4
+	SBITS
+	EQINT 33
+	PUSHCONT {
+		.loc ../contracts/libraries/MultiScatterPayload.tsol, 61
+		PUSHINT 60
+		POP S2
+		.loc ../contracts/libraries/MultiScatterPayload.tsol, 63
+		PUSH S5
+		CALLREF {
+			CALL $MultiScatterPayload_no_obj_decodePayload_3c8d9f35_macro$
+		}
+		NIP
+		.loc ../contracts/libraries/MultiScatterPayload.tsol, 67
+		BLKPUSH 2, 7
+		PUSH S2
+		CALLREF {
+			CALL $MultiScatterPayload_no_obj__checkOperationData_8f1d60b3_macro$
+		}
+		POP S3
+		.loc ../contracts/libraries/MultiScatterPayload.tsol, 68
+		PUSH S2
+		PUSHCONT {
+			.loc ../contracts/libraries/MultiScatterPayload.tsol, 69
+			TRUE
+			POP S4
+			.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+		}
+		IFNOT
+		.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+	}
+	IF
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+}
+IF
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 74
+PUSH S3
+NOT
+PUSH S3
+EQINT 0
+AND
+PUSHCONT {
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 75
+	PUSH S3
+	PUSHINT 0
+	PUSHINT 405
+	CONDSEL
+	POP S3
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+}
+IF
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 78
+ROLLREV 3
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+PUSHREF {
+}
+ROLL 5
+BLKDROP2 4, 6
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+
+.globl	MultiScatterPayload_with_obj_decodePayload_3c8d9f35
+.type	MultiScatterPayload_with_obj_decodePayload_3c8d9f35, @function
+CALL $MultiScatterPayload_with_obj_decodePayload_3c8d9f35_macro$
+
+.macro MultiScatterPayload_with_obj_decodePayload_3c8d9f35_macro
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 32
+DUP
+CTOS
+LDU 32
+PLDDICT
+PAIR
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+
+.globl	MultiScatterPayload_no_obj_decodePayload_3c8d9f35
+.type	MultiScatterPayload_no_obj_decodePayload_3c8d9f35, @function
+CALL $MultiScatterPayload_no_obj_decodePayload_3c8d9f35_macro$
+
+.macro MultiScatterPayload_no_obj_decodePayload_3c8d9f35_macro
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 32
+CTOS
+LDU 32
+PLDDICT
+PAIR
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+
+.globl	MultiScatterPayload_with_obj__checkOperationData_8f1d60b3
+.type	MultiScatterPayload_with_obj__checkOperationData_8f1d60b3, @function
+CALL $MultiScatterPayload_with_obj__checkOperationData_8f1d60b3_macro$
+
+.macro MultiScatterPayload_with_obj__checkOperationData_8f1d60b3_macro
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 93
+DUP
+FIRST
+PUSHCONT {
+	DROP2
+	PUSHINT 401
+}
+IFNOTJMP
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 94
+DUP
+FIRST
+PUSHINT 201
+GEQ
+PUSHCONT {
+	DROP2
+	PUSHINT 402
+}
+IFJMP
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 95
+DUP
+CALLREF {
+	CALL $MultiScatterPayload_no_obj_calculateTokensValue_7d4bae4f_macro$
+}
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 97
+PUSH2 S3, S0
+FIRST
+LESS
+DUP
+PUSHCONT {
+	DROP
+	PUSH2 S3, S1
+	FIRST
+	PUSHINT 2000000000
+	MUL
+	LESS
+}
+IFNOT
+PUSHCONT {
+	BLKDROP 3
+	PUSHINT 403
+}
+IFJMP
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 98
+XCHG S1, S2
+SECOND
+LESS
+PUSHCONT {
+	DROP
+	PUSHINT 404
+}
+IFJMP
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 100
+DROP
+PUSHINT 0
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+
+.globl	MultiScatterPayload_no_obj__checkOperationData_8f1d60b3
+.type	MultiScatterPayload_no_obj__checkOperationData_8f1d60b3, @function
+CALL $MultiScatterPayload_no_obj__checkOperationData_8f1d60b3_macro$
+
+.macro MultiScatterPayload_no_obj__checkOperationData_8f1d60b3_macro
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 93
+DUP
+FIRST
+PUSHCONT {
+	BLKDROP 3
+	PUSHINT 401
+}
+IFNOTJMP
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 94
+DUP
+FIRST
+PUSHINT 201
+GEQ
+PUSHCONT {
+	BLKDROP 3
+	PUSHINT 402
+}
+IFJMP
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 95
+DUP
+CALLREF {
+	CALL $MultiScatterPayload_no_obj_calculateTokensValue_7d4bae4f_macro$
+}
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 97
+PUSH2 S3, S0
+FIRST
+LESS
+DUP
+PUSHCONT {
+	DROP
+	PUSH2 S3, S1
+	FIRST
+	PUSHINT 2000000000
+	MUL
+	LESS
+}
+IFNOT
+PUSHCONT {
+	BLKDROP 4
+	PUSHINT 403
+}
+IFJMP
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 98
+XCHG S1, S2
+SECOND
+LESS
+PUSHCONT {
+	DROP2
+	PUSHINT 404
+}
+IFJMP
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 100
+DROP2
+PUSHINT 0
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+
+.globl	MultiScatterPayload_with_obj_calculateTokensValue_7d4bae4f
+.type	MultiScatterPayload_with_obj_calculateTokensValue_7d4bae4f, @function
+CALL $MultiScatterPayload_with_obj_calculateTokensValue_7d4bae4f_macro$
+
+.macro MultiScatterPayload_with_obj_calculateTokensValue_7d4bae4f_macro
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 106
+PUSHINT 0
+PUSH2 S0, S1
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 108
+SECOND
+PUSHINT 0
+NULL
+PUSHCONT {
+	PUSH2 S1, S2
+	PUSHINT 32
+	DICTUGET
+	NULLSWAPIFNOT
+	IFREF {
+		LDMSGADDR
+		LDU 128
+		LDU 128
+		LDREF
+		ENDS
+		TUPLE 4
+	}
+	DUP
+	POP S2
+	ISNULL
+	NOT
+}
+PUSHCONT {
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 109
+	DUP
+	THIRD
+	PUSH S5
+	ADD
+	UFITS 128
+	POP S5
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 110
+	DUP
+	SECOND
+	PUSH S4
+	ADD
+	UFITS 128
+	POP S4
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+	OVER
+	INC
+	POP S2
+}
+WHILE
+BLKDROP 3
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 113
+PAIR
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+
+.globl	MultiScatterPayload_no_obj_calculateTokensValue_7d4bae4f
+.type	MultiScatterPayload_no_obj_calculateTokensValue_7d4bae4f, @function
+CALL $MultiScatterPayload_no_obj_calculateTokensValue_7d4bae4f_macro$
+
+.macro MultiScatterPayload_no_obj_calculateTokensValue_7d4bae4f_macro
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 106
+PUSHINT 0
+DUP
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 108
+ROT
+SECOND
+PUSHINT 0
+NULL
+PUSHCONT {
+	PUSH2 S1, S2
+	PUSHINT 32
+	DICTUGET
+	NULLSWAPIFNOT
+	IFREF {
+		LDMSGADDR
+		LDU 128
+		LDU 128
+		LDREF
+		ENDS
+		TUPLE 4
+	}
+	DUP
+	POP S2
+	ISNULL
+	NOT
+}
+PUSHCONT {
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 109
+	DUP
+	THIRD
+	PUSH S5
+	ADD
+	UFITS 128
+	POP S5
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 110
+	DUP
+	SECOND
+	PUSH S4
+	ADD
+	UFITS 128
+	POP S4
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+	OVER
+	INC
+	POP S2
+}
+WHILE
+BLKDROP 3
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 113
+PAIR
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
+
+.macro public_function_selector
+DUP
+PUSHINT 862638172
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 150923116
+	EQUAL
+	IFJMPREF {
+		CALL $constructor$
+	}
+	DUP
+	PUSHINT 525038295
+	EQUAL
+	IFJMPREF {
+		CALL $calculateTokensValue$
+	}
+	DUP
+	PUSHINT 739445888
+	EQUAL
+	IFJMPREF {
+		CALL $sendGas$
+	}
+	DUP
+	PUSHINT 862638172
+	EQUAL
+	IFJMPREF {
+		CALL $getDetails$
+	}
+}
+DUP
+PUSHINT 1521953953
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 872557582
+	EQUAL
+	IFJMPREF {
+		CALL $proxyTokensTransfer$
+	}
+	DUP
+	PUSHINT 1022357751
+	EQUAL
+	IFJMPREF {
+		CALL $acceptOwner$
+	}
+	DUP
+	PUSHINT 1169489870
+	EQUAL
+	IFJMPREF {
+		CALL $buildPayload$
+	}
+	DUP
+	PUSHINT 1521953953
+	EQUAL
+	IFJMPREF {
+		CALL $transferOwner$
+	}
+}
+DUP
+PUSHINT 1893244873
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 1688565960
+	EQUAL
+	IFJMPREF {
+		CALL $upgrade$
+	}
+	DUP
+	PUSHINT 1893244873
+	EQUAL
+	IFJMPREF {
+		CALL $onAcceptTokensTransfer$
+	}
+}
+
