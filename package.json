@@ -10,6 +10,8 @@
     "test:oracle-upgrade": "npx locklift test --config locklift.config.js --disable-build --network local --tests test/upgrade/5-oracle-upgrade-test.js",
     "test:order": "npx locklift test --disable-build -n local --tests v2/test/60-order.spec.ts",
     "build:test:order": "npx locklift test -n local --tests v2/test/60-order.spec.ts",
+    "test:ms": "npx locklift test --disable-build -n local --tests v2/test/61-ms-order.ts",
+    "build:test:ms": "npx locklift test -n local --tests v2/test/61-ms-order.ts",
     "deploy:account": "npx locklift run --disable-build --script v2/scripts/0-deploy-account.ts --config locklift.config.ts --network",
     "deploy:dex": "npx locklift run --disable-build --script v2/scripts/prod/deploy.ts --config locklift.config.ts --network",
     "deploy:tokens": "npx locklift run --disable-build --script v2/scripts/2-deploy-test-tokens.ts --config locklift.config.ts --network",
@@ -52,15 +54,18 @@
     "eslint": "8.17.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-prettier": "4.0.0",
+    "ever-wever": "git://github.com/broxus/ever-wever",
     "locklift": "2.5.3",
     "mocha": "10.2.0",
     "mocha-logger": "1.0.8",
     "prettier": "2.8.3",
     "prompts": "2.4.2",
     "tip3": "git://github.com/broxus/tip3#480c1b4481d1dddb028b408b20ba8c19abd1a4a4",
-    "ever-wever": "git://github.com/broxus/ever-wever",
-    "ts-node": "10.8.1",
     "ts-mocha": "10.0.0",
+    "ts-node": "10.8.1",
     "typescript": "4.9.5"
+  },
+  "dependencies": {
+    "locklift-deploy": "^1.0.3"
   }
 }

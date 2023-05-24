@@ -1022,7 +1022,7 @@ describe('OrderTest', () => {
                 EMPTY_TVM_CELL,
                 true,
                 signer1
-                )
+            )
 
             const GasAccount3 = new BigNumber(await locklift.provider.getBalance(account3.address)).shiftedBy(-9)
             const GasOrder = new BigNumber(await locklift.provider.getBalance(order.address)).shiftedBy(-9)
@@ -2214,7 +2214,7 @@ describe('OrderTest', () => {
             const order = await RootOrderBar.getEventCreateOrder(account3);
 
             const successPayload4 = await order.originalPayloadSuccess(200,  555, account3.address);
-            const cancelPayload4 = await order.originalPayloadSuccess(201,  555, account4.address);
+            const cancelPayload4 = await order.originalPayloadCancel(201,  555, account4.address);
             const payloadLO4 = await order.buildPayload(1, 0.1, account4.address, successPayload4, cancelPayload4)
 
             const expectPayload = await order.buildSuccessPayload(50, successPayload4, account4.address)
