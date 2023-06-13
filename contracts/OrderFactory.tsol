@@ -1,4 +1,4 @@
-pragma ever-solidity >= 0.62.0;
+pragma ever-solidity ^0.62.0;
 
 pragma AbiHeader time;
 pragma AbiHeader expire;
@@ -131,7 +131,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	function setEmergency(
-		bool enabled, 
+		bool enabled,
 		address orderAddress,
 		uint256 manager
 	) external view override onlyOwner() {
@@ -150,7 +150,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 				flag: MsgFlag.ALL_NOT_RESERVED,
 				bounce: false
 			}();
-		}	
+		}
 	}
 
 	function setPlatformRootOrderCodeOnce(TvmCell _orderRootPlatform) public onlyOwner() {

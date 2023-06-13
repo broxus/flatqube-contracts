@@ -1,4 +1,4 @@
-pragma ever-solidity >= 0.62.0;
+pragma ever-solidity ^0.62.0;
 
 pragma AbiHeader time;
 pragma AbiHeader expire;
@@ -413,8 +413,8 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
     }
 
     function upgrade(
-        TvmCell _code, 
-        uint32 _newVersion, 
+        TvmCell _code,
+        uint32 _newVersion,
         address _sendGasTo
     ) external override onlyFactory() {
         if (version == _newVersion) {
