@@ -1306,14 +1306,14 @@ THROW 60
 CALL $MultiScatterPayload_with_obj_buildPayload_3c5f922f_macro$
 
 .macro MultiScatterPayload_with_obj_buildPayload_3c5f922f_macro
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 24
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 20
 NEWC
 OVER
 UNPAIR
 XCHG S2
 STU 32
 STDICT
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 26
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 22
 ENDC
 .loc ../contracts/libraries/MultiScatterPayload.tsol, 0
 
@@ -1322,14 +1322,14 @@ ENDC
 CALL $MultiScatterPayload_no_obj_buildPayload_3c5f922f_macro$
 
 .macro MultiScatterPayload_no_obj_buildPayload_3c5f922f_macro
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 24
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 20
 NEWC
 SWAP
 UNPAIR
 XCHG S2
 STU 32
 STDICT
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 26
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 22
 ENDC
 .loc ../contracts/libraries/MultiScatterPayload.tsol, 0
 
@@ -1338,64 +1338,60 @@ ENDC
 CALL $MultiScatterPayload_with_obj_decodeOnAcceptTokenTransferData_8c63b781_macro$
 
 .macro MultiScatterPayload_with_obj_decodeOnAcceptTokenTransferData_8c63b781_macro
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 48
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 44
 DUP
 CTOS
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 50
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 46
 PUSHINT 0
 BLKPUSH 3, 0
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 53
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 49
 NEWDICT
 PAIR
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 55
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 51
 PUSH S4
 SREFS
 EQINT 1
+ROLL 5
+SBITS
+EQINT 33
+AND
 PUSHCONT {
-	.loc ../contracts/libraries/MultiScatterPayload.tsol, 56
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 52
+	PUSHINT 60
+	POP S2
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 54
 	PUSH S4
-	SBITS
-	EQINT 33
+	CALLREF {
+		CALL $MultiScatterPayload_no_obj_decodePayload_3c8d9f35_macro$
+	}
+	NIP
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 55
+	BLKPUSH 2, 6
+	PUSH S2
+	CALLREF {
+		CALL $MultiScatterPayload_no_obj__checkOperationData_8f1d60b3_macro$
+	}
+	POP S3
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 56
+	PUSH S2
 	PUSHCONT {
 		.loc ../contracts/libraries/MultiScatterPayload.tsol, 57
-		PUSHINT 60
-		POP S2
-		.loc ../contracts/libraries/MultiScatterPayload.tsol, 59
-		PUSH S5
-		CALLREF {
-			CALL $MultiScatterPayload_no_obj_decodePayload_3c8d9f35_macro$
-		}
-		NIP
-		.loc ../contracts/libraries/MultiScatterPayload.tsol, 63
-		BLKPUSH 2, 7
-		PUSH S2
-		CALLREF {
-			CALL $MultiScatterPayload_no_obj__checkOperationData_8f1d60b3_macro$
-		}
-		POP S3
-		.loc ../contracts/libraries/MultiScatterPayload.tsol, 64
-		PUSH S2
-		PUSHCONT {
-			.loc ../contracts/libraries/MultiScatterPayload.tsol, 65
-			TRUE
-			POP S4
-			.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
-		}
-		IFNOT
+		TRUE
+		POP S4
 		.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
 	}
-	IF
+	IFNOT
 	.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
 }
 IF
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 70
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 61
 PUSH S3
 NOT
 PUSH S3
 EQINT 0
 AND
 PUSHCONT {
-	.loc ../contracts/libraries/MultiScatterPayload.tsol, 71
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 62
 	PUSH S3
 	PUSHINT 0
 	PUSHINT 405
@@ -1404,8 +1400,8 @@ PUSHCONT {
 	.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
 }
 IF
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 74
-BLKDROP2 3, 4
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 65
+BLKDROP2 2, 4
 .loc ../contracts/libraries/MultiScatterPayload.tsol, 0
 
 .globl	MultiScatterPayload_no_obj_decodeOnAcceptTokenTransferData_8c63b781
@@ -1413,64 +1409,60 @@ BLKDROP2 3, 4
 CALL $MultiScatterPayload_no_obj_decodeOnAcceptTokenTransferData_8c63b781_macro$
 
 .macro MultiScatterPayload_no_obj_decodeOnAcceptTokenTransferData_8c63b781_macro
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 48
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 44
 DUP
 CTOS
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 50
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 46
 PUSHINT 0
 BLKPUSH 3, 0
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 53
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 49
 NEWDICT
 PAIR
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 55
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 51
 PUSH S4
 SREFS
 EQINT 1
+ROLL 5
+SBITS
+EQINT 33
+AND
 PUSHCONT {
-	.loc ../contracts/libraries/MultiScatterPayload.tsol, 56
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 52
+	PUSHINT 60
+	POP S2
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 54
 	PUSH S4
-	SBITS
-	EQINT 33
+	CALLREF {
+		CALL $MultiScatterPayload_no_obj_decodePayload_3c8d9f35_macro$
+	}
+	NIP
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 55
+	BLKPUSH 2, 6
+	PUSH S2
+	CALLREF {
+		CALL $MultiScatterPayload_no_obj__checkOperationData_8f1d60b3_macro$
+	}
+	POP S3
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 56
+	PUSH S2
 	PUSHCONT {
 		.loc ../contracts/libraries/MultiScatterPayload.tsol, 57
-		PUSHINT 60
-		POP S2
-		.loc ../contracts/libraries/MultiScatterPayload.tsol, 59
-		PUSH S5
-		CALLREF {
-			CALL $MultiScatterPayload_no_obj_decodePayload_3c8d9f35_macro$
-		}
-		NIP
-		.loc ../contracts/libraries/MultiScatterPayload.tsol, 63
-		BLKPUSH 2, 7
-		PUSH S2
-		CALLREF {
-			CALL $MultiScatterPayload_no_obj__checkOperationData_8f1d60b3_macro$
-		}
-		POP S3
-		.loc ../contracts/libraries/MultiScatterPayload.tsol, 64
-		PUSH S2
-		PUSHCONT {
-			.loc ../contracts/libraries/MultiScatterPayload.tsol, 65
-			TRUE
-			POP S4
-			.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
-		}
-		IFNOT
+		TRUE
+		POP S4
 		.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
 	}
-	IF
+	IFNOT
 	.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
 }
 IF
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 70
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 61
 PUSH S3
 NOT
 PUSH S3
 EQINT 0
 AND
 PUSHCONT {
-	.loc ../contracts/libraries/MultiScatterPayload.tsol, 71
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 62
 	PUSH S3
 	PUSHINT 0
 	PUSHINT 405
@@ -1479,8 +1471,8 @@ PUSHCONT {
 	.loc ../contracts/libraries/MultiScatterPayload.tsol, 0
 }
 IF
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 74
-BLKDROP2 4, 4
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 65
+BLKDROP2 3, 4
 .loc ../contracts/libraries/MultiScatterPayload.tsol, 0
 
 .globl	MultiScatterPayload_with_obj_decodePayload_3c8d9f35
@@ -1488,7 +1480,7 @@ BLKDROP2 4, 4
 CALL $MultiScatterPayload_with_obj_decodePayload_3c8d9f35_macro$
 
 .macro MultiScatterPayload_with_obj_decodePayload_3c8d9f35_macro
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 32
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 28
 DUP
 CTOS
 LDU 32
@@ -1501,7 +1493,7 @@ PAIR
 CALL $MultiScatterPayload_no_obj_decodePayload_3c8d9f35_macro$
 
 .macro MultiScatterPayload_no_obj_decodePayload_3c8d9f35_macro
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 32
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 28
 CTOS
 LDU 32
 PLDDICT
@@ -1513,7 +1505,7 @@ PAIR
 CALL $MultiScatterPayload_with_obj__checkOperationData_8f1d60b3_macro$
 
 .macro MultiScatterPayload_with_obj__checkOperationData_8f1d60b3_macro
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 87
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 73
 DUP
 FIRST
 PUSHCONT {
@@ -1521,7 +1513,7 @@ PUSHCONT {
 	PUSHINT 401
 }
 IFNOTJMP
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 88
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 74
 DUP
 FIRST
 PUSHINT 201
@@ -1531,12 +1523,12 @@ PUSHCONT {
 	PUSHINT 402
 }
 IFJMP
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 89
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 75
 DUP
 CALLREF {
 	CALL $MultiScatterPayload_no_obj_calculateTokensValue_7d4bae4f_macro$
 }
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 91
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 77
 PUSH2 S3, S0
 FIRST
 LESS
@@ -1555,7 +1547,7 @@ PUSHCONT {
 	PUSHINT 403
 }
 IFJMP
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 92
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 78
 XCHG S1, S2
 SECOND
 LESS
@@ -1564,7 +1556,7 @@ PUSHCONT {
 	PUSHINT 404
 }
 IFJMP
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 94
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 80
 DROP
 PUSHINT 0
 .loc ../contracts/libraries/MultiScatterPayload.tsol, 0
@@ -1574,7 +1566,7 @@ PUSHINT 0
 CALL $MultiScatterPayload_no_obj__checkOperationData_8f1d60b3_macro$
 
 .macro MultiScatterPayload_no_obj__checkOperationData_8f1d60b3_macro
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 87
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 73
 DUP
 FIRST
 PUSHCONT {
@@ -1582,7 +1574,7 @@ PUSHCONT {
 	PUSHINT 401
 }
 IFNOTJMP
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 88
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 74
 DUP
 FIRST
 PUSHINT 201
@@ -1592,12 +1584,12 @@ PUSHCONT {
 	PUSHINT 402
 }
 IFJMP
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 89
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 75
 DUP
 CALLREF {
 	CALL $MultiScatterPayload_no_obj_calculateTokensValue_7d4bae4f_macro$
 }
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 91
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 77
 PUSH2 S3, S0
 FIRST
 LESS
@@ -1616,7 +1608,7 @@ PUSHCONT {
 	PUSHINT 403
 }
 IFJMP
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 92
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 78
 XCHG S1, S2
 SECOND
 LESS
@@ -1625,7 +1617,7 @@ PUSHCONT {
 	PUSHINT 404
 }
 IFJMP
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 94
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 80
 DROP2
 PUSHINT 0
 .loc ../contracts/libraries/MultiScatterPayload.tsol, 0
@@ -1635,10 +1627,10 @@ PUSHINT 0
 CALL $MultiScatterPayload_with_obj_calculateTokensValue_7d4bae4f_macro$
 
 .macro MultiScatterPayload_with_obj_calculateTokensValue_7d4bae4f_macro
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 100
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 86
 PUSHINT 0
 PUSH2 S0, S1
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 102
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 88
 SECOND
 PUSHINT 0
 NULL
@@ -1661,14 +1653,14 @@ PUSHCONT {
 	NOT
 }
 PUSHCONT {
-	.loc ../contracts/libraries/MultiScatterPayload.tsol, 103
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 89
 	DUP
 	THIRD
 	PUSH S5
 	ADD
 	UFITS 128
 	POP S5
-	.loc ../contracts/libraries/MultiScatterPayload.tsol, 104
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 90
 	DUP
 	SECOND
 	PUSH S4
@@ -1682,7 +1674,7 @@ PUSHCONT {
 }
 WHILE
 BLKDROP 3
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 107
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 93
 PAIR
 .loc ../contracts/libraries/MultiScatterPayload.tsol, 0
 
@@ -1691,10 +1683,10 @@ PAIR
 CALL $MultiScatterPayload_no_obj_calculateTokensValue_7d4bae4f_macro$
 
 .macro MultiScatterPayload_no_obj_calculateTokensValue_7d4bae4f_macro
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 100
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 86
 PUSHINT 0
 DUP
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 102
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 88
 ROT
 SECOND
 PUSHINT 0
@@ -1718,14 +1710,14 @@ PUSHCONT {
 	NOT
 }
 PUSHCONT {
-	.loc ../contracts/libraries/MultiScatterPayload.tsol, 103
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 89
 	DUP
 	THIRD
 	PUSH S5
 	ADD
 	UFITS 128
 	POP S5
-	.loc ../contracts/libraries/MultiScatterPayload.tsol, 104
+	.loc ../contracts/libraries/MultiScatterPayload.tsol, 90
 	DUP
 	SECOND
 	PUSH S4
@@ -1739,7 +1731,7 @@ PUSHCONT {
 }
 WHILE
 BLKDROP 3
-.loc ../contracts/libraries/MultiScatterPayload.tsol, 107
+.loc ../contracts/libraries/MultiScatterPayload.tsol, 93
 PAIR
 .loc ../contracts/libraries/MultiScatterPayload.tsol, 0
 

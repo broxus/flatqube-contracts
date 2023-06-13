@@ -4,6 +4,11 @@ pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
+import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
+import "tip3/contracts/interfaces/ITokenRoot.tsol";
+import "tip3/contracts/interfaces/ITokenWallet.tsol";
+import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
+
 import "./libraries/OrderGas.tsol";
 import "./libraries/OrderErrors.tsol";
 import "./libraries/OrderPayloads.tsol";
@@ -17,11 +22,6 @@ import "./interfaces/IOrderRootCallbacks.tsol";
 import "./interfaces/IOrderRootEvents.tsol";
 
 import "./OrderPlatform.tsol";
-
-import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
-import "tip3/contracts/interfaces/ITokenRoot.tsol";
-import "tip3/contracts/interfaces/ITokenWallet.tsol";
-import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
 
 contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallback {
     address factory;
@@ -43,18 +43,12 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
     constructor() public { revert(); }
 
     modifier onlyFactory() {
-        require(
-            msg.sender.value != 0 && msg.sender == factory,
-            OrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT
-        );
+        require(msg.sender == factory, OrderErrors.NOT_FACTORY_LIMIT_ORDER_ROOT);
         _;
     }
 
     function onTokenWallet(address _wallet) external {
-        require(
-            msg.sender.value != 0 && msg.sender == spentToken,
-            OrderErrors.NOT_TOKEN1_ROOT
-        );
+        require(msg.sender == spentToken, OrderErrors.NOT_TOKEN1_ROOT);
         tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
         spentTokenWallet = _wallet;
 
@@ -90,35 +84,35 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         }
     }
 
-    function getFeeParams() override external view responsible returns (OrderFeeParams params) {
+    function getFeeParams() external view override responsible returns (OrderFeeParams params) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
 	}
 
-    function getVersion() override external view responsible returns (uint32) {
+    function getVersion() external view override responsible returns (uint32) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (version);
     }
 
-    function getVersionOrder() override external view responsible returns (uint32) {
+    function getVersionOrder() external view override responsible returns (uint32) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (versionOrder);
     }
 
-    function getSpentToken() override external view responsible returns(address) {
+    function getSpentToken() external view override responsible returns(address) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (spentToken);
     }
 
-    function getSpentWallet() override external view responsible returns (address) {
+    function getSpentWallet() external view override responsible returns (address) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (spentTokenWallet);
     }
 
-    function getFactory() override external view responsible returns(address) {
+    function getFactory() external view override responsible returns(address) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (factory);
     }
 
-    function getDeployer() override external view responsible returns(address) {
+    function getDeployer() external view override responsible returns(address) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (deployer);
     }
 
-    function getDex() override external view responsible returns(address) {
+    function getDex() external view override responsible returns(address) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (dexRoot);
     }
 
@@ -130,7 +124,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         address _receiveToken,
         uint64 timeTx,
         uint64 nowTx
-    ) override external view responsible returns (address)
+    ) external view override responsible returns (address)
     {
         return {
             value: 0,
@@ -153,7 +147,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         ));
     }
 
-    function setFeeParams(OrderFeeParams params) override external onlyFactory() {
+    function setFeeParams(OrderFeeParams params) external override onlyFactory() {
         tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
         fee = params;
         factory.transfer(
@@ -199,7 +193,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         address _remainingGasTo,
         bool _notify,
         TvmCell _payload
-    ) override external onlyFactory {
+    ) external override onlyFactory {
 
         tvm.accept();
 
@@ -220,7 +214,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         address to,
         uint128 _value,
         uint16 _flag
-    ) override external onlyFactory {
+    ) external override onlyFactory {
 
         tvm.accept();
         to.transfer({value : _value, flag : _flag, bounce : false});
@@ -407,7 +401,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         });
     }
 
-    function setOrderCode(TvmCell _code, uint32 _versionOrder) override external onlyFactory() {
+    function setOrderCode(TvmCell _code, uint32 _versionOrder) external override onlyFactory() {
         tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
 
         uint32 prevVersion = versionOrder;
@@ -422,7 +416,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
         TvmCell _code, 
         uint32 _newVersion, 
         address _sendGasTo
-    ) override external onlyFactory() {
+    ) external override onlyFactory() {
         if (version == _newVersion) {
             tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
             _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });

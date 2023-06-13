@@ -92,6 +92,13 @@ export class OrderCallbacks {
                 outputs: []
             },
             {
+                name: "onOrderStateCancelledReject",
+                inputs: [
+                  { name: 'id', type: 'uint64'},
+                ],
+                outputs: []
+            },
+            {
                 name: "onOrderReject",
                 inputs: [
                     { name: 'id', type: 'uint64' },

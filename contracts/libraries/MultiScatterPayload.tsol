@@ -8,10 +8,6 @@ import "../libraries/OrderOperationTypes.tsol";
 import "../libraries/OrderOperationStatus.tsol";
 import "../libraries/MultiScatterOperationTypes.tsol";
 
-//TODO
-import "locklift/src/console.tsol";
-//TODO
-
 pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
@@ -52,18 +48,13 @@ library MultiScatterPayload {
         uint8 op;
         IMultiScatterStructures.PayloadOrder[] _payloadsForOrders;
 
-        if (payloadSlice.refs() == 1) {
-            if (payloadSlice.bits() == 33) {
-                op = MultiScatterOperationTypes.DISTRIBUTION_FOR_ORDERS;
+        if (payloadSlice.refs() == 1 && payloadSlice.bits() == 33) {
+            op = MultiScatterOperationTypes.DISTRIBUTION_FOR_ORDERS;
 
-                (
-                    _payloadsForOrders
-                ) = decodePayload(_payload);
-
-                errorCode = _checkOperationData(msgValue, _amount, _payloadsForOrders);
-                if (errorCode == 0) {
-                    isValid = true;
-                }
+            _payloadsForOrders = decodePayload(_payload);
+            errorCode = _checkOperationData(msgValue, _amount, _payloadsForOrders);
+            if (errorCode == 0) {
+                isValid = true;
             }
         }
 
@@ -71,12 +62,7 @@ library MultiScatterPayload {
             errorCode = (!isValid ? MultiScatterErrors.INVALID_PAYLOAD : 0);
         }
 
-        return (
-            isValid,
-            errorCode,
-            op,
-            _payloadsForOrders
-        );
+        return (isValid, errorCode, op, _payloadsForOrders);
     }
 
     function _checkOperationData(

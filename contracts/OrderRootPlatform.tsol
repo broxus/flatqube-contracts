@@ -5,6 +5,7 @@ pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
+
 import "./structures/IOrderFeeParams.tsol";
 
 contract OrderRootPlatform is IOrderFeeParams {
@@ -21,7 +22,7 @@ contract OrderRootPlatform is IOrderFeeParams {
 		OrderFeeParams fee,
 		TvmCell _customParams
 	) public {
-		if (msg.sender.value != 0 && msg.sender == factory) {
+		if (msg.sender == factory) {
 			initialize(version, versionOrder, code, orderCode, sendGasTo, fee, _customParams);
 		} else {
 			sendGasTo.transfer({

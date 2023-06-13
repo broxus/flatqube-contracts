@@ -4,6 +4,9 @@ pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
+import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
+import "tip3/contracts/interfaces/ITokenWallet.tsol";
+
 import "./libraries/OrderGas.tsol";
 import "./libraries/OrderErrors.tsol";
 
@@ -17,9 +20,6 @@ import "./interfaces/IHasEmergencyMode.tsol";
 import "./structures/IOrderFeeParams.tsol";
 
 import "./OrderRootPlatform.tsol";
-
-import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
-import "tip3/contracts/interfaces/ITokenWallet.tsol";
 
 contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	uint32 static randomNonce;
@@ -54,10 +54,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	modifier onlyOwner() {
-		require(
-			(msg.sender.value != 0 && msg.sender == owner),
-			OrderErrors.NOT_LIMIT_ORDER_OWNER
-		);
+		require(msg.sender == owner, OrderErrors.NOT_LIMIT_ORDER_OWNER);
 		_;
 	}
 
@@ -67,7 +64,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		address sendGasTo
 	) external override {
 		require(
-			msg.sender.value != 0 && msg.sender == expectedAddressOrderRoot(token), 
+			msg.sender == expectedAddressOrderRoot(token),
 			OrderErrors.NOT_LIMIT_ORDER_ROOT
 		);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
@@ -79,16 +76,16 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		});
 	}
 
-	function transferOwner(address newOwner) override external responsible onlyOwner() returns (address) {
+	function transferOwner(address newOwner) external override responsible onlyOwner() returns (address) {
 		pendingOwner = newOwner;
 		emit RequestedOwnerTransfer(owner, pendingOwner);
 
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pendingOwner;
 	}
 
-	function acceptOwner() override external responsible returns (address) {
+	function acceptOwner() external override responsible returns (address) {
 		require(
-			msg.sender.value != 0 && msg.sender == pendingOwner,
+			msg.sender == pendingOwner,
 			OrderErrors.NOT_PENDING_OWNER
 		);
 
@@ -99,34 +96,34 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
 	}
 
-	function getOwner() override external view responsible returns (address) {
+	function getOwner() external view override responsible returns (address) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
 	}
 
-	function getPendingOwner() override external view responsible returns (address) {
+	function getPendingOwner() external view override responsible returns (address) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pendingOwner;
 	}
 
-	function getVersion() override external view responsible returns (uint32) {
+	function getVersion() external view override responsible returns (uint32) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } version;
 	}
 
-	function getVersionRoot() override external view responsible returns (uint32) {
+	function getVersionRoot() external view override responsible returns (uint32) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } versionOrderRoot;
 	}
 
-	function getVersionOrder() override external view responsible returns (uint32) {
+	function getVersionOrder() external view override responsible returns (uint32) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } versionOrder;
 	}
 
-	function getFeeParams() override external view responsible returns (OrderFeeParams) {
+	function getFeeParams() external view override responsible returns (OrderFeeParams) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (fee);
 	}
 
 	function getExpectedAddressOrderRoot(address token)
-	override
 	external
 	view
+	override
 	responsible
 	returns (address)
 	{
@@ -137,7 +134,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		bool enabled, 
 		address orderAddress,
 		uint256 manager
-	) override external view onlyOwner() {
+	) external view override onlyOwner() {
 		require(msg.value >= OrderGas.MANAGE_EMERGENCY_MODE_MIN_VALUE, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 
@@ -182,7 +179,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		);
 	}
 
-	function setFeeParams(OrderFeeParams params) override external onlyOwner() {
+	function setFeeParams(OrderFeeParams params) external override onlyOwner() {
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		if (params.beneficiary.value == 0){
@@ -207,7 +204,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
         address _remainingGasTo,
         bool _notify,
         TvmCell _payload
-	) override external onlyOwner() {
+	) external override onlyOwner() {
 		require(
 			msg.value >= OrderGas.PROXY_ROOT_TRANSFER_VALUE + _deployWalletValue + _gasValue, OrderErrors.VALUE_TOO_LOW
 		);
@@ -231,7 +228,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		address to,
         uint128 _value,
         uint16 _flag
-	) override external onlyOwner() {
+	) external override onlyOwner() {
 		require(msg.value >= OrderGas.SEND_GAS_ROOT_VALUE, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 
@@ -248,7 +245,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		);
 	}
 
-	function setRootFeeParams(OrderFeeParams params, address[] roots) override external onlyOwner() {
+	function setRootFeeParams(OrderFeeParams params, address[] roots) external override onlyOwner() {
 		require(msg.value >= (OrderGas.SET_FEE_PARAMS_VALUE * roots.length), OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 
@@ -271,7 +268,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		);
 	}
 
-	function setOrderFeeParams(OrderFeeParams params, address[] orders) override external onlyOwner() {
+	function setOrderFeeParams(OrderFeeParams params, address[] orders) external override onlyOwner() {
 		require(msg.value >= (OrderGas.SET_FEE_PARAMS_VALUE * orders.length), OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 
@@ -294,7 +291,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		);
 	}
 
-	function setOrderRootCode(TvmCell _orderRootCode) override external onlyOwner() {
+	function setOrderRootCode(TvmCell _orderRootCode) external override onlyOwner() {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE_FACTORY, 0);
 
 		uint32 prevVersion = versionOrderRoot;
@@ -309,7 +306,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		);
 	}
 
-	function setOrderCode(TvmCell _orderCode) override external onlyOwner() {
+	function setOrderCode(TvmCell _orderCode) external override onlyOwner() {
 		tvm.rawReserve(OrderGas.TARGET_BALANCE_FACTORY, 0);
 
 		uint32 prevVersion = versionOrder;
@@ -375,7 +372,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		uint128 deployWalletValue,
 		address tokenWallet,
 		address sendGasTo
-	) override external onlyOwner() {
+	) external override onlyOwner() {
 		require(
 			amount != 0 && recipient.value != 0 && sendGasTo.value != 0 && tokenWallet.value != 0,
 			OrderErrors.WRONG_WITHDRAW_FEE_PARAMS
@@ -397,7 +394,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		);
 	}
 
-	function createOrderRoot(address token, uint64 callbackId) override external {
+	function createOrderRoot(address token, uint64 callbackId) external override {
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		if (msg.value >= OrderGas.DEPLOY_ORDERS_ROOT + OrderGas.DEPLOY_EMPTY_WALLET_GRAMS) {
