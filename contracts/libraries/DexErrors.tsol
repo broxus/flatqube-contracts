@@ -77,4 +77,6 @@ library DexErrors {
     uint16 constant VAULT_CODE_EMPTY                 = 150;
     uint16 constant VAULT_ALREADY_SET                = 151;
     uint16 constant LP_TOKEN_PENDING_CODE_EMPTY      = 152;
+
+    uint16 constant INVALID_TOKEN_ROOTS              = 153;
 }

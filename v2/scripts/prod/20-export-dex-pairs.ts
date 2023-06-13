@@ -1,14 +1,11 @@
 import { writeFileSync } from 'fs';
-import { Address, WalletTypes } from 'locklift';
+import { Address } from 'locklift';
 import { yellowBright } from 'chalk';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { Migration } = require(process.cwd() + '/scripts/utils');
 
 const OLD_DEX_PAIR_CODE_HASH =
-  'ae78ef937336fe0076a34e1d7d63710a06519cc251d56d27de6166c4c947c54c';
-
-// const OLD_DEX_PAIR_CODE_HASH =
-//   '9bffb97d8fcb584230bfa949b6c7e8fb9881f1ffb684e13f02d6fcd9ba3306c5';
+  '97cc5eacd09228ae5c0cb5c4f727a5b1d12fe4cc322afd6a329771d678a69366';
 
 type PairEntity = {
   dexPair: Address;
@@ -41,11 +38,14 @@ async function exportDexPairs() {
         limit: 50,
       });
 
+    console.log(result);
+
     continuation = result.continuation;
     hasResults = result.accounts.length === 50;
 
     accounts.push(...result.accounts);
   }
+
 
   const promises: Promise<PairEntity | null>[] = [];
 

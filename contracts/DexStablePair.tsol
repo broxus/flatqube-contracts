@@ -938,7 +938,7 @@ contract DexStablePair is
             );
 
         for (TokenOperation op: operations) {
-            if (op.amount >= 0) {
+            if (op.amount > 0) {
                 IDexAccount(msg.sender)
                     .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                     (

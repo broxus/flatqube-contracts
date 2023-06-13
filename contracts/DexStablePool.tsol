@@ -1146,7 +1146,7 @@ contract DexStablePool is
         WithdrawResultV2 result = resultOpt.get();
 
         for (TokenOperation expected: _expected) {
-            require(expected.amount > result.amounts[tokenIndex[expected.root]], DexErrors.WRONG_LIQUIDITY);
+            require(expected.amount <= result.amounts[tokenIndex[expected.root]], DexErrors.WRONG_LIQUIDITY);
         }
 
         _applyWithdrawLiquidity(
@@ -1164,7 +1164,7 @@ contract DexStablePool is
         _sync();
 
         for (uint8 i = 0; i < N_COINS; i++) {
-            if (result.amounts[i] >= 0) {
+            if (result.amounts[i] > 0) {
                 IDexAccount(msg.sender)
                     .internalPoolTransfer{ value: DexGas.INTERNAL_PAIR_TRANSFER_VALUE, flag: MsgFlag.SENDER_PAYS_FEES }
                 (

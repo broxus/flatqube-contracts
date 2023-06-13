@@ -34,6 +34,7 @@ library DexGas {
     uint128 constant UPGRADE_VAULT_MIN_VALUE            = 5 ever;
     uint128 constant UPGRADE_TOKEN_VAULT_MIN_VALUE      = 3 ever;
 
+    uint128 constant DEPOSIT_TO_ACCOUNT_MIN_VALUE       = 0.4 ever;
     uint128 constant WITHDRAW_MIN_VALUE_BASE            = 1 ever;
     uint128 constant TRANSFER_MIN_VALUE                 = 1 ever;
     uint128 constant EXCHANGE_MIN_VALUE                 = 1 ever;

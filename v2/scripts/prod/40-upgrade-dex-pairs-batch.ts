@@ -37,7 +37,7 @@ const main = async () => {
     pool: p.dexPair,
   }));
 
-  for (const chunk of chunkify(params, 20)) {
+  for (const chunk of chunkify(params, 1000)) {
     const { traceTree } = await locklift.tracing.trace(
       dexRoot.methods
         .upgradePairs({

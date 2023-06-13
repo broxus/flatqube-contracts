@@ -761,7 +761,7 @@ describe('Check direct DexPairFooBar operations', async function () {
             const pairStart = await dexPairInfo();
             logBalances('start', dexStart, accountStart, pairStart);
 
-            let LP_AMOUNT = accountStart.lp / 2;
+            let LP_AMOUNT = new BigNumber(accountStart.lp / 2).dp(Constants.LP_DECIMALS).toString();
 
             const expected = await DexPairFooBar.call({
                 method: 'expectedWithdrawLiquidity', params: {
