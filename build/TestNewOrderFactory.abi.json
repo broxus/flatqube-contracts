@@ -42,6 +42,16 @@
 			]
 		},
 		{
+			"name": "setManager",
+			"inputs": [
+				{"name":"answerId","type":"uint32"},
+				{"name":"_newManager","type":"address"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
 			"name": "getOwner",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
@@ -52,6 +62,15 @@
 		},
 		{
 			"name": "getPendingOwner",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getManager",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
 			],
@@ -288,6 +307,15 @@
 			]
 		},
 		{
+			"name": "SetNewManager",
+			"inputs": [
+				{"name":"oldManager","type":"address"},
+				{"name":"newManager","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "OrderFactoryUpgrade",
 			"inputs": [
 				{"name":"oldVersion","type":"uint32"},
@@ -365,6 +393,7 @@
 		{"name":"versionOrder","type":"uint32"},
 		{"name":"owner","type":"address"},
 		{"name":"pendingOwner","type":"address"},
+		{"name":"manager","type":"address"},
 		{"components":[{"name":"numerator","type":"uint128"},{"name":"denominator","type":"uint128"},{"name":"matchingNumerator","type":"uint128"},{"name":"matchingDenominator","type":"uint128"},{"name":"beneficiary","type":"address"}],"name":"fee","type":"tuple"},
 		{"name":"orderRootCode","type":"cell"},
 		{"name":"orderRootPlatformCode","type":"cell"},

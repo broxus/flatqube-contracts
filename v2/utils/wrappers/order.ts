@@ -30,8 +30,8 @@ export class OrderWrapper {
         return (await this.contract.methods.currentStatus({answerId: 0}).call()).value0;
     }
 
-    async expectedSpendAmount(amount: string | number) {
-        return (await this.contract.methods.getExpectedSpendAmount({answerId: 0, amount: amount}).call()).value0;
+    async expectedSpentAmount(amount: string | number) {
+        return (await this.contract.methods.getExpectedSpentAmount({answerId: 0, amount: amount}).call()).value0;
     }
 
     async buildPayload(

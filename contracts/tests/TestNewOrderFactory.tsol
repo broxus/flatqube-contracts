@@ -31,6 +31,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 
 	address owner;
 	address pendingOwner;
+	address manager;
 
 	OrderFeeParams fee;
 
@@ -60,6 +61,11 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 			(msg.sender.value != 0 && msg.sender == owner),
 			OrderErrors.NOT_LIMIT_ORDER_OWNER
 		);
+		_;
+	}
+
+	modifier onlyOwnerOrManager() {
+		require(msg.sender == owner || msg.sender == manager, OrderErrors.NOT_LIMIT_ORDER_OWNER_OR_MANAGER);
 		_;
 	}
 
@@ -100,12 +106,22 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
 	}
 
+	function setManager(address _newManager) external override responsible onlyOwner() returns(address) {
+		emit SetNewManager(manager, _newManager);
+		manager = _newManager;
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } manager;
+	}
+
 	function getOwner() override external view responsible returns (address) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } owner;
 	}
 
 	function getPendingOwner() override external view responsible returns (address) {
 		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } pendingOwner;
+	}
+
+	function getManager() external view override responsible returns (address) {
+		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } manager;
 	}
 
 	function getVersion() override external view responsible returns (uint32) {
@@ -491,6 +507,7 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
 				versionOrder,
 				owner,
 				pendingOwner,
+				manager,
 				dexRoot,
 				orderRootCode,
 				orderCode,
@@ -515,10 +532,10 @@ contract TestNewOrderFactory is IOrderFactory, IOrderFactoryEvents {
         address sendGasTo;
 		(
 			randomNonce, oldVersion, version, versionOrderRoot, versionOrder, owner, pendingOwner,
-			dexRoot, orderRootCode, orderCode, orderRootPlatformCode, orderPlatformCode, fee, sendGasTo
+			manager, dexRoot, orderRootCode, orderCode, orderRootPlatformCode, orderPlatformCode, fee, sendGasTo
 		) = abi.decode(data,(
 			uint32, uint32, uint32, uint32, uint32, address, address,
-			address, TvmCell, TvmCell, TvmCell, TvmCell, OrderFeeParams, address)
+			address, address, TvmCell, TvmCell, TvmCell, TvmCell, OrderFeeParams, address)
 		);
 
         newTestField = "New Order Factory";
