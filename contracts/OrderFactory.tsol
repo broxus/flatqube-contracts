@@ -55,12 +55,16 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	modifier onlyOwner() {
-		require(msg.sender == owner, OrderErrors.NOT_LIMIT_ORDER_OWNER);
+		require(msg.sender.value != 0 && msg.sender == owner, OrderErrors.NOT_LIMIT_ORDER_OWNER);
 		_;
 	}
 
 	modifier onlyOwnerOrManager() {
-		require(msg.sender == owner || msg.sender == manager, OrderErrors.NOT_LIMIT_ORDER_OWNER_OR_MANAGER);
+		require(
+			msg.sender.value != 0 &&
+			(msg.sender == owner || msg.sender == manager),
+			OrderErrors.NOT_LIMIT_ORDER_OWNER_OR_MANAGER
+		);
 		_;
 	}
 
@@ -103,9 +107,21 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	}
 
 	function setManager(address _newManager) external override responsible onlyOwner() returns(address) {
+		tvm.rawReserve(address(this).balance - msg.value, 0);
 		emit SetNewManager(manager, _newManager);
 		manager = _newManager;
-		return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } manager;
+		return { value: 0, bounce: false, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS } manager;
+	}
+
+	function revokeManager() external override onlyOwner {
+		tvm.rawReserve(address(this).balance - msg.value, 0);
+		manager = address(0);
+
+		msg.sender.transfer(
+			0,
+			false,
+			MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
+		);
 	}
 
 	function getOwner() external view override responsible returns (address) {

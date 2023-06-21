@@ -1188,25 +1188,27 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
         return (expected_a_amount, a_fee);
     }
 
-    function _expectedSpentAmount(uint128 _spentAmount) internal view returns (uint128, uint128) {
+    function _expectedSpentAmount(uint128 _receiveAmount) internal view returns (uint128 _spentAmount, uint128 _fee) {
         if (fee.numerator == 0 || fee.denominator == 0) {
+            _spentAmount = math.muldivc(_receiveAmount, currentAmountReceiveToken, currentAmountSpentToken);
             return (_spentAmount, 0);
         }
 
-        uint128 _fee = math.muldivc(_spentAmount, fee.numerator, fee.denominator);
-        uint128 _expectedAmount = math.muldiv(_spentAmount - _fee, currentAmountSpentToken, currentAmountReceiveToken);
-        return (_expectedAmount, _fee);
+        uint128 amountValue = math.muldivc(_receiveAmount, currentAmountReceiveToken, currentAmountSpentToken);
+        _spentAmount = math.muldivc(amountValue, fee.denominator, (fee.denominator - fee.numerator));
+        _fee = _spentAmount - amountValue;
+        return(_spentAmount, _fee);
     }
-
-    function _expectedReceiveAmount(uint128 _receiveAmount) internal view returns (uint128, uint128) {
+    
+    function _expectedReceiveAmount(uint128 _spentAmount) internal view returns (uint128 _receiveAmount, uint128 _fee) {
         if (fee.numerator == 0 || fee.denominator == 0) {
+            _receiveAmount = math.muldiv(_spentAmount, currentAmountSpentToken, currentAmountReceiveToken);
             return (_receiveAmount, 0);
         }
 
-        uint128 amountValue = math.muldivc(_receiveAmount, currentAmountReceiveToken, currentAmountSpentToken);
-        uint128 spentAmount = math.muldivc(amountValue, fee.denominator, (fee.denominator - fee.numerator));
-        uint128 _fee = spentAmount - amountValue;
-        return(spentAmount, _fee);
+        _fee = math.muldivc(_spentAmount, fee.numerator, fee.denominator);
+        _receiveAmount = math.muldiv(_spentAmount - _fee, currentAmountSpentToken, currentAmountReceiveToken);
+        return (_receiveAmount, _fee);
     }
 
     function _expectedSpendAmountOfMatching(uint128 b_amount) internal view returns (uint128, uint128) {
