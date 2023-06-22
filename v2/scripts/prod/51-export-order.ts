@@ -11,10 +11,10 @@ async function main() {
         const result: any = await locklift.provider.getAccountsByCodeHash({
             codeHash: ORDER_CODE_HASH,
             continuation,
-            limit: 200,
+            limit: 100,
         });
         continuation = result.continuation;
-        hasResults = result.accounts.length === 200;
+        hasResults = result.accounts.length === 100;
         for (const orderAddress of result.accounts) {
             const Order = await locklift.factory.getDeployedContract(
                 'Order',
@@ -28,9 +28,14 @@ async function main() {
                     order: orderAddress,
                 });
             }
+
+            if (result.accounts == 100) {
+                continuation = orderAddress;
+            }
         }
     }
 
+    console.log(`Count orders: ${orderForUpdate.length}`);
     writeFileSync(
         './orders.json',
         JSON.stringify(orderForUpdate, null, 2),

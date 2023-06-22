@@ -30,6 +30,8 @@ async function main() {
         }
     }
 
+    console.log(`Count order roots: ${orderRootsForUpdate.length}`);
+
     writeFileSync(
         './order_roots.json',
         JSON.stringify(orderRootsForUpdate, null, 2),
