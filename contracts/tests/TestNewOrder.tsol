@@ -1260,6 +1260,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
     }
 
     function onCodeUpgrade(TvmCell data) private {
+        tvm.rawReserve(address(this).balance - msg.value, 0);
         tvm.accept();
         uint32 _oldVersion;
         TvmCell params;
