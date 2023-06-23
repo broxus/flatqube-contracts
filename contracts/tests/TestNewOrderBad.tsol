@@ -1247,7 +1247,7 @@ contract TestNewOrderBad is IAcceptTokensTransferCallback, IOrder, IOrderEvents,
 				flag : MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS
 			});
 		} else {
-			emit OrderCodeUpgraded();
+			emit OrderCodeUpgraded(version, _newVersion);
 
 			TvmCell data = abi.encode(
 				factory, root, owner, spentToken, receiveToken, timeTx, nowTx, abi.encode(dexRoot, orderPlatformCode),
