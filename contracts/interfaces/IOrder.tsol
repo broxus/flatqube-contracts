@@ -10,7 +10,9 @@ interface IOrder is IOrderFeeParams, IOrderStructures {
 
 	function getFeeParams() external view responsible returns (OrderFeeParams);
 
-	function getExpectedSpendAmount(uint128 amount) external view responsible returns(uint128, uint128);
+	function getExpectedSpentAmount(uint128 amount) external view responsible returns(uint128, uint128);
+
+	function getExpectedReceiveAmount(uint128 amount) external view responsible returns(uint128, uint128);
 
 	function getExpectedSpendAmountOfMatching(uint128 amount) external view responsible returns(uint128, uint128);
 

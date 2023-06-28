@@ -4,7 +4,6 @@ import { Address } from 'locklift';
 const { Migration } = require(process.cwd() + '/scripts/utils');
 
 async function main() {
-
   // FlatQube
   const DEX_ROOT_ADDRESS =
     '0:5eb5713ea9b4a0f3a13bc91b282cde809636eb1e68d2fcb6427b9ad78a5a9008';

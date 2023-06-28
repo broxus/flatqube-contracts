@@ -13,9 +13,15 @@ interface IOrderFactory is IOrderFeeParams {
 
     function acceptOwner() external responsible returns (address);
 
+    function setManager(address newManager) external responsible returns(address);
+
+    function revokeManager() external;
+
     function getOwner() external view responsible returns (address);
 
     function getPendingOwner() external view responsible returns (address);
+
+    function getManager() external view responsible returns (address);
 
     function getVersion()  external view responsible returns (uint32);
 

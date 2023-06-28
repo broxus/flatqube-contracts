@@ -1,8 +1,10 @@
 import { LockliftConfig, lockliftChai } from 'locklift';
 import { FactorySource } from './build/factorySource';
 import 'locklift-verifier';
-
 import { Deployments } from 'locklift-deploy';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 import chai from 'chai';
 chai.use(lockliftChai);
@@ -98,14 +100,21 @@ const config: LockliftConfig = {
       },
     },
     main: {
-      connection: 'mainnetJrpc',
-      giver: {
-        address: process.env.MAIN_GIVER_ADDRESS ?? '',
-        phrase: process.env.MAIN_GIVER_SEED ?? '',
-        accountId: 0,
+      connection: {
+        id: 1,
+        type: 'jrpc',
+        group: 'main',
+        data: {
+          endpoint: process.env.MAINNET_RPC_NETWORK_ENDPOINT ?? '',
+        },
       },
+      giver: {
+        address: process.env.MAINNET_GIVER_ADDRESS ?? '',
+        key: process.env.MAINNET_GIVER_KEY ?? '',
+      },
+      tracing: { endpoint: process.env.MAINNET_GQL_NETWORK_ENDPOINT ?? '' },
       keys: {
-        phrase: process.env.MAIN_SEED_PHRASE ?? '',
+        phrase: process.env.MAINNET_PHRASE,
         amount: 20,
       },
     },
