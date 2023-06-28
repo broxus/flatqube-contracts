@@ -725,40 +725,6 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
             );
         }
 
-        //TODO
-//        if (_op != OrderOperationTypes.MATCHING_ORDER_TRANSFER) {
-//            if (state != OrderStatus.MatchInProgress) {
-//                _transferAmount = math.muldiv(
-//                    _expectedSenderAmount,
-//                    initialAmount,
-//                    expectedAmount
-//                );
-//            } else {
-//                _transferAmount = _amountForSend;
-//            }
-//
-//            if (_transferAmount > 0) {
-//                ITokenWallet(spentWallet).transfer{
-//                    value : OrderGas.TRANSFER_MIN_VALUE,
-//                    flag : MsgFlag.SENDER_PAYS_FEES,
-//                    bounce : false
-//                }(
-//                    _transferAmount,
-//                    _sender,
-//                    (state != OrderStatus.MatchInProgress ? _deployWalletValue : 0),
-//                    _sender,
-//                    (state != OrderStatus.MatchInProgress ? _notifySuccess : true),
-//                    (state != OrderStatus.MatchInProgress ? (
-//                        _notifySuccess ? OrderPayloads.buildSuccessPayload(_op, _successPayload, _sender) : emptyPayload
-//                    ) : payloadForTransfer)
-//                );
-//            }
-//
-//            currentAmountSpentToken -= _transferAmount;
-//        } else {
-//            _transferAmount = _alienSpentAmount;
-//        }
-
         currentAmountReceiveToken -= _expectedSenderAmount;
 
         if (currentAmountSpentToken > 0) {
@@ -1255,7 +1221,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
         _fee = _spentAmount - amountValue;
         return(_spentAmount, _fee);
     }
-    
+
     function _expectedReceiveAmount(uint128 _spentAmount) internal view returns (uint128 _receiveAmount, uint128 _fee) {
         if (fee.numerator == 0 || fee.denominator == 0) {
             _receiveAmount = math.muldiv(_spentAmount, currentAmountSpentToken, currentAmountReceiveToken);

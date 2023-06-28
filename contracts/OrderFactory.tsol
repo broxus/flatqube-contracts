@@ -165,7 +165,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 	function setEmergency(
 		bool enabled,
 		address orderAddress,
-		uint256 manager
+		uint256 _manager
 	) external view override onlyOwnerOrManager() {
 		require(msg.value >= OrderGas.MANAGE_EMERGENCY_MODE_MIN_VALUE, OrderErrors.VALUE_TOO_LOW);
 		tvm.rawReserve(address(this).balance - msg.value, 0);
@@ -175,7 +175,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 				value: 0,
 				flag: MsgFlag.ALL_NOT_RESERVED,
 				bounce: false
-			}(manager);
+			}(_manager);
 		} else {
 			IHasEmergencyMode(orderAddress).disableEmergency{
 				value: 0,
@@ -373,7 +373,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		for (uint i = 0; i < listOrderRoots.length; i++) {
-			IOrderRoot(listOrderRoots[i].value).setOrderCode {
+			IOrderRoot(listOrderRoots[i]).setOrderCode {
 				value: OrderGas.UPDATE_CODE_ORDER_IN_ORDER_ROOT,
 				flag: MsgFlag.SENDER_PAYS_FEES,
 				bounce: false
@@ -388,7 +388,7 @@ contract OrderFactory is IOrderFactory, IOrderFactoryEvents {
 		tvm.rawReserve(address(this).balance - msg.value, 0);
 
 		for (uint i = 0; i < listOrders.length; i++) {
-			IOrder(listOrders[i].value).upgrade {
+			IOrder(listOrders[i]).upgrade {
 				value: OrderGas.UPDATE_ORDER,
 				flag: MsgFlag.SENDER_PAYS_FEES,
 				bounce: false

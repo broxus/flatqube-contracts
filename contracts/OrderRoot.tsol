@@ -421,7 +421,7 @@ contract OrderRoot is IOrderRoot, IOrderRootEvents, IAcceptTokensTransferCallbac
             tvm.rawReserve(OrderGas.TARGET_BALANCE_ROOT, 0);
             _sendGasTo.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
         } else {
-            emit OrderRootUpgraded(version, _newVersion);
+            emit OrderRootCodeUpgraded(_newVersion);
 
             TvmCell customParams;
             TvmCell data = abi.encode(
