@@ -38,8 +38,8 @@ export class OrderWrapper {
         callbackId: number | string,
         deployWalletValue: number | string,
         recipient: Address = zeroAddress,
-        successPayload: string = '',
-        cancelPayload: string = '',
+        successPayload: string | null = null,
+        cancelPayload: string | null = null,
         ) {
         return (await this.contract.methods.buildPayload(
             {

@@ -117,7 +117,7 @@ export class OrderFactory {
           return await locklift.tracing.trace(this.contract.methods.setEmergency({
             enabled: enabled,
             orderAddress  : orderAddress,
-            manager: manager
+            _manager: manager
           }).send({
             amount: toNano(1),
             from: this._owner.address

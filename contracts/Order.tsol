@@ -541,7 +541,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 
             callbackStateFilled(
                 owner, 0, MsgFlag.ALL_NOT_RESERVED,
-                _callbackId, _amount, _transferAmount, _senderFee
+                _callbackId, _amount - _senderFee, _transferAmount, 0
             );
         }
     }
@@ -746,7 +746,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
             }(
                 _callbackId,
                 owner,
-                _senderFee,
+                0,
                 IOrderExchangeResult.OrderExchangeResult(
                     spentToken,
                     _transferAmount,
@@ -759,16 +759,16 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
 
             if (state != OrderStatus.MatchInProgress) {
                 IOrderCallbacks(_sender).onOrderPartExchangeSuccess{
-                        value : OrderGas.OPERATION_CALLBACK_BASE,
-                        flag : MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                        bounce : false
+                    value : OrderGas.OPERATION_CALLBACK_BASE,
+                    flag : MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+                    bounce : false
                 }(
                     _callbackId,
                     owner,
-                    0,
+                    _senderFee,
                     IOrderExchangeResult.OrderExchangeResult(
                         receiveToken,
-                        _expectedSenderAmount,
+                        _expectedSenderAmount + _senderFee,
                         spentToken,
                         _transferAmount,
                         currentAmountReceiveToken,
