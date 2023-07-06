@@ -27,13 +27,6 @@ async function main() {
 
   const tokenData = Constants.tokens['wever'];
 
-  logger.log(
-    `Giver balance: ${toNano(
-      await locklift.provider.getBalance(locklift.giver.giverContract.address),
-      'ever',
-    )}`,
-  );
-
   const signer = await locklift.keystore.getSigner('1');
   const Account2 = await migration.loadAccount('Account2', '1');
 
@@ -147,12 +140,15 @@ async function main() {
 
   logger.log(`Wrap ${options.wrap_amount} EVER`);
 
-  await locklift.provider.sendMessage({
-    sender: Account2.address,
-    recipient: vault.address,
-    amount: toNano(options.wrap_amount),
-    bounce: false,
-  });
+  await locklift.transactions.waitFinalized(
+      locklift.provider.sendMessage({
+        sender: Account2.address,
+        recipient: vault.address,
+        amount: toNano(options.wrap_amount),
+        bounce: false,
+      }),
+  );
+
 
   const tokenWalletAddress = (
     await root.methods
@@ -173,12 +169,6 @@ async function main() {
     .toString();
   logger.log(`Account2 WEVER balance: ${balance}`);
 
-  logger.log(
-    `Giver balance: ${toNano(
-      await locklift.provider.getBalance(locklift.giver.giverContract.address),
-      'ever',
-    )}`,
-  );
 }
 
 main()

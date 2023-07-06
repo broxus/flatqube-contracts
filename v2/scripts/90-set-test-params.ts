@@ -57,10 +57,10 @@ async function main() {
       _roots: [foo.address, bar.address, qwe.address],
       _params: {
         beneficiary: MANAGER,
-        beneficiary_numerator: 250,
+        beneficiary_numerator: 500,
         denominator: 1000000,
         pool_numerator: 0,
-        referrer_numerator: 250,
+        referrer_numerator: 0,
         referrer_threshold: [
           [foo.address, 0],
           [bar.address, 0],
@@ -84,10 +84,10 @@ async function main() {
       _roots: [foo.address, tst.address],
       _params: {
         beneficiary: MANAGER,
-        beneficiary_numerator: 1250,
+        beneficiary_numerator: 2500,
         denominator: 1000000,
         pool_numerator: 2500,
-        referrer_numerator: 1250,
+        referrer_numerator: 0,
         referrer_threshold: [
           [foo.address, 0],
           [tst.address, 0],
