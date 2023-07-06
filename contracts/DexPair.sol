@@ -1042,9 +1042,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                             maxNestedNodesIdx = i;
                         }
                         denominator += nextStep.numerator;
-                        if (_op != DexOperationTypes.CROSS_PAIR_EXCHANGE) { // consider only next swap in case of cross_swap_v1
-                            allNestedNodes += nextStep.nestedNodes;
-                        }
+                        allNestedNodes += nextStep.nestedNodes;
                         allLeaves += nextStep.leaves;
                     }
 
@@ -1415,9 +1413,7 @@ contract DexPair is DexPairBase, INextExchangeData {
                             maxNestedNodesIdx = i;
                         }
                         denominator += nextStep.numerator;
-                        if (op != DexOperationTypes.CROSS_PAIR_EXCHANGE) { // consider only next swap in case of cross_swap_v1
-                            allNestedNodes += nextStep.nestedNodes;
-                        }
+                        allNestedNodes += nextStep.nestedNodes;
                         allLeaves += nextStep.leaves;
                     }
 

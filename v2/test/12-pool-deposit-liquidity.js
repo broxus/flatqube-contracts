@@ -226,7 +226,9 @@ describe('DexAccount interact with DexPool', async function () {
 
             const operations = [];
             const amounts = [];
+            let reward = 0;
             for (let i = 0; i < N_COINS; i++) {
+                reward += NUmber(options.amounts[i]);
                 const amount = new BigNumber(options.amounts[i]).shiftedBy(tokens[i].decimals).toString();
                 amounts.push(amount);
                 operations.push({
@@ -306,7 +308,8 @@ describe('DexAccount interact with DexPool', async function () {
             for (let i = 0; i < N_COINS; i++) {
                 expect(expectedPoolAmount[i]).to.equal(dexPoolInfoEnd.token_balances[i], 'Wrong DexPool ' + tokens[i].symbol);
             }
-            expect(expectedPoolLp).to.equal(dexPoolInfoEnd.lp_supply, 'Wrong DexPool LP supply');
+            expect(expectedPoolLp).to.equal(dexPoolInfoEnd.lp_supply, 'Wrong DexPool LP supply (expected)');
+            expect(reward.toString()).to.equal(dexPoolInfoEnd.lp_supply, 'Wrong DexPool LP supply');
         });
 
     });

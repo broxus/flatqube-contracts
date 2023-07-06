@@ -18,16 +18,17 @@ npx locklift run $NO_TRACE --script v2/scripts/4-deploy-test-dex-account.ts --ow
 npx locklift test $NO_TRACE --tests v2/test/30-install-pair-code-v2.ts --contract_name='DexStablePair' --pool_type=2
 npx locklift test $DEFAULT_PARAMS --tests v2/test/30-install-pool-code.ts --contract_name='DexStablePool' --pool_type=3
 
-npx locklift run $NO_TRACE --script v2/scripts/5-deploy-test-pair.ts --pairs='[["tst","foo"]]' --contract_name='DexPair'
+npx locklift run $NO_TRACE --script v2/scripts/5-deploy-test-pair.ts --pairs='[["bar","coin"]]' --contract_name='DexPair'
 npx locklift run $NO_TRACE --script v2/scripts/5-deploy-test-pair.ts --pairs='[["tst","bar"]]' --contract_name='DexPair'
 npx locklift run $NO_TRACE --script v2/scripts/5-deploy-test-pool.ts --pools='[["foo", "bar", "qwe"]]' --contract_name='DexStablePool'
+npx locklift run $NO_TRACE --script v2/scripts/5-deploy-test-pair.ts --pairs='[["FooBarQweLp", "tst"]]' --contract_name='DexPair'
 npx locklift run $NO_TRACE --script v2/scripts/dynamic-gas-test-account.ts
 npx locklift run $NO_TRACE --script v2/scripts/dynamic-gas-test.ts
 
-npx locklift run $NO_TRACE --script v2/scripts/6-wton-setup.ts --wrap_amount=900
-npx locklift run $NO_TRACE --script v2/scripts/7-deploy-test-swap-ever-wever-tip3-contracts.ts
-npx locklift run $NO_TRACE --script v2/scripts/5-deploy-test-pair.ts --pairs='[["tst","wever"]]' --contract_name='DexPair'
-npx locklift run $NO_TRACE --script v2/scripts/dynamic-gas-ever-wever-tip3.ts
+#npx locklift run $NO_TRACE --script v2/scripts/6-wton-setup.ts --wrap_amount=900
+#npx locklift run $NO_TRACE --script v2/scripts/7-deploy-test-swap-ever-wever-tip3-contracts.ts
+#npx locklift run $NO_TRACE --script v2/scripts/5-deploy-test-pair.ts --pairs='[["foo","wever"]]' --contract_name='DexPair'
+#npx locklift run $NO_TRACE --script v2/scripts/dynamic-gas-ever-wever-tip3.ts
 
 #npx locklift test $NO_TRACE --tests v2/test/35-upgrade-pair.ts --left='tst' --right='foo' --old_contract_name='DexPair' --new_contract_name='DexStablePair' --pool_type=2
 #

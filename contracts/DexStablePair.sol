@@ -605,9 +605,7 @@ contract DexStablePair is
                             max_nested_nodes_idx = idx;
                         }
                         denominator += next_step.numerator;
-                        if (op != DexOperationTypes.CROSS_PAIR_EXCHANGE) { // consider only next swap in case of cross_swap_v1
-                            all_nested_nodes += next_step.nestedNodes;
-                        }
+                        all_nested_nodes += next_step.nestedNodes;
                         all_leaves += next_step.leaves;
                     }
 
@@ -1305,9 +1303,7 @@ contract DexStablePair is
                         max_nested_nodes_idx = idx;
                     }
                     denominator += next_step.numerator;
-                    if (op != DexOperationTypes.CROSS_PAIR_EXCHANGE) { // consider only next swap in case of cross_swap_v1
-                        all_nested_nodes += next_step.nestedNodes;
-                    }
+                    all_nested_nodes += next_step.nestedNodes;
                     all_leaves += next_step.leaves;
                 }
 
