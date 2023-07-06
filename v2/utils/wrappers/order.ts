@@ -155,7 +155,7 @@ export class OrderWrapper {
 
             if (beautyPrint) {
                 for(let addr in traceTree?.balanceChangeInfo) {
-                    console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+                    console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toFixed());
                 }
 
                 await traceTree?.beautyPrint();
