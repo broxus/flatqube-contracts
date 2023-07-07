@@ -308,16 +308,28 @@ describe('OrderTest', () => {
             ), {allowedCodes: {compute: [60]}});
 
             const order = await RootOrderBar.getEventCreateOrder(account3);
-
             const payloadLO = await order.buildPayload(1, 0.1);
 
-            await locklift.tracing.trace(tstWallet4.transfer(
+            const {traceTree:ms1} = await locklift.tracing.trace(tstWallet4.transfer(
                 numberString(TOKENS_TO_EXCHANGE2_ACC3, tstDecimals), order.address, payloadLO, toNano(5)
             ), {allowedCodes: {compute: [60]}});
 
-            await locklift.tracing.trace(tstWallet5.transfer(
+            await ms1?.beautyPrint();
+
+            for(let addr in ms1?.balanceChangeInfo) {
+                console.log(addr + ": " + ms1?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
+
+            const {traceTree:ms2} = await locklift.tracing.trace(tstWallet5.transfer(
                 numberString(TOKENS_TO_EXCHANGE2_ACC4, tstDecimals), order.address, payloadLO, toNano(5)
             ), {allowedCodes: {compute: [60]}});
+
+
+            await ms2?.beautyPrint();
+
+            for(let addr in ms2?.balanceChangeInfo) {
+                console.log(addr + ": " + ms2?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -390,17 +402,39 @@ describe('OrderTest', () => {
             console.log(order.address);
             const payloadLO = await order.buildPayload('1', 0.1);
 
-            await locklift.tracing.trace(tstWallet4.transfer(
+
+            const {traceTree: ms1} = await locklift.tracing.trace(tstWallet4.transfer(
                 numberString(TOKENS_TO_EXCHANGE2_ACC3, tstDecimals), order.address, payloadLO, toNano(5)
             ), {allowedCodes: {compute: [60]}})
 
-            await locklift.tracing.trace(tstWallet5.transfer(
+            await ms1?.beautyPrint();
+
+            for(let addr in ms1?.balanceChangeInfo) {
+                console.log(addr + ": " + ms1?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
+
+
+            const {traceTree: ms2} = await locklift.tracing.trace(tstWallet5.transfer(
                 numberString(TOKENS_TO_EXCHANGE2_ACC4, tstDecimals), order.address, payloadLO, toNano(5)
             ), {allowedCodes: {compute: [60]}})
 
-            await locklift.tracing.trace(tstWallet6.transfer(
+            await ms2?.beautyPrint();
+
+            for(let addr in ms2?.balanceChangeInfo) {
+                console.log(addr + ": " + ms2?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
+
+
+            const {traceTree: ms3} = await locklift.tracing.trace(tstWallet6.transfer(
                 numberString(TOKENS_TO_EXCHANGE2_ACC5, tstDecimals), order.address, payloadLO, toNano(5)
             ), {allowedCodes: {compute: [60]}})
+
+
+            await ms3?.beautyPrint();
+
+            for(let addr in ms3?.balanceChangeInfo) {
+                console.log(addr + ": " + ms3?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -474,17 +508,38 @@ describe('OrderTest', () => {
             const order = await RootOrderBar.getEventCreateOrder(account3);
             const payloadLO = await order.buildPayload('1', 0.1);
 
-            await locklift.tracing.trace(tstWallet4.transfer(
+
+            const {traceTree: ms1} = await locklift.tracing.trace(tstWallet4.transfer(
                 numberString(TOKENS_TO_EXCHANGE2_ACC3, tstDecimals), order.address, payloadLO, toNano(5)
             ), {allowedCodes: {compute: [60]}});
 
-            await locklift.tracing.trace(tstWallet5.transfer(
+            await ms1?.beautyPrint();
+
+            for(let addr in ms1?.balanceChangeInfo) {
+                console.log(addr + ": " + ms1?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
+
+
+            const {traceTree: ms2} = await locklift.tracing.trace(tstWallet5.transfer(
                 numberString(TOKENS_TO_EXCHANGE2_ACC4, tstDecimals), order.address, payloadLO, toNano(5)
             ), {allowedCodes: {compute: [60]}});
 
-            await locklift.tracing.trace(tstWallet6.transfer(
+            await ms2?.beautyPrint();
+
+            for(let addr in ms2?.balanceChangeInfo) {
+                console.log(addr + ": " + ms2?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
+
+
+            const {traceTree: ms3} = await locklift.tracing.trace(tstWallet6.transfer(
                 numberString(TOKENS_TO_EXCHANGE2_ACC5, tstDecimals), order.address, payloadLO, toNano(5)
             ), {allowedCodes: {compute: [60]}});
+
+            await ms3?.beautyPrint();
+
+            for(let addr in ms3?.balanceChangeInfo) {
+                console.log(addr + ": " + ms3?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -547,7 +602,13 @@ describe('OrderTest', () => {
             ), {allowedCodes: {compute: [60]}});
 
             const order = await RootOrderBar.getEventCreateOrder(account4);
-            await order.cancel()
+            const {traceTree} = await order.cancel()
+
+            await traceTree?.beautyPrint();
+
+            for(let addr in traceTree?.balanceChangeInfo) {
+                console.log(addr + ": " + traceTree?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -596,11 +657,23 @@ describe('OrderTest', () => {
             const order = await RootOrderBar.getEventCreateOrder(account3);
             const payloadLO = await order.buildPayload('1', 0.1);
 
-            await locklift.tracing.trace(tstWallet4.transfer(
+            const {traceTree:ms1} = await locklift.tracing.trace(tstWallet4.transfer(
                 numberString(TOKENS_TO_EXCHANGE2_ACC3, tstDecimals), order.address, payloadLO, toNano(5)
             ), {allowedCodes: {compute: [60]}});
 
-            await order.cancel()
+            await ms1?.beautyPrint();
+
+            for(let addr in ms1?.balanceChangeInfo) {
+                console.log(addr + ": " + ms1?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
+
+            const {traceTree:ms2} = await order.cancel()
+
+            await ms2?.beautyPrint();
+
+            for(let addr in ms2?.balanceChangeInfo) {
+                console.log(addr + ": " + ms2?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -648,11 +721,25 @@ describe('OrderTest', () => {
             const order = await RootOrderBar.getEventCreateOrder(account3);
             const payloadLO = await order.buildPayload('1', 0.1);
 
-           await order.cancel()
+           const {traceTree:ms1} = await order.cancel()
 
-            await locklift.tracing.trace(tstWallet4.transfer(
+            await ms1?.beautyPrint();
+
+            for(let addr in ms1?.balanceChangeInfo) {
+                console.log(addr + ": " + ms1?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
+
+
+            const {traceTree: ms2} = await locklift.tracing.trace(tstWallet4.transfer(
                 numberString(TOKENS_TO_EXCHANGE2, tstDecimals), order.address, payloadLO, toNano(5)
             ), {allowedCodes: {compute: [60]}});
+
+            await ms2?.beautyPrint();
+
+            for(let addr in ms2?.balanceChangeInfo) {
+                console.log(addr + ": " + ms2?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
+
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -696,11 +783,23 @@ describe('OrderTest', () => {
             const order = await RootOrderBar.getEventCreateOrder(account3);
             const payloadLO = await order.buildPayload('1', 0.1);
 
-            await order.backendCancel(signer, 15)
+            const {traceTree: ms1} = await order.backendCancel(signer, 15)
 
-            await locklift.tracing.trace(tstWallet4.transfer(
+            await ms1?.beautyPrint();
+
+            for(let addr in ms1?.balanceChangeInfo) {
+                console.log(addr + ": " + ms1?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
+
+            const {traceTree: ms2} = await locklift.tracing.trace(tstWallet4.transfer(
                 numberString(TOKENS_TO_EXCHANGE2, tstDecimals), order.address, payloadLO, toNano(5)
             ), {allowedCodes: {compute: [60]}});
+
+            await ms2?.beautyPrint();
+
+            for(let addr in ms2?.balanceChangeInfo) {
+                console.log(addr + ": " + ms2?.balanceChangeInfo[addr].balanceDiff.shiftedBy(-9).toString());
+            }
 
             const balanceBarAcc3End = await accountTokenBalances(barWallet3, barDecimals);
             const balanceTstAcc3End = await accountTokenBalances(tstWallet3, tstDecimals);
@@ -980,8 +1079,6 @@ describe('OrderTest', () => {
             const BadOrderCode = (await locklift.factory.getContractArtifacts('TestNewOrderBad')).code
 
             await factoryOrder.setOrderCode(BadOrderCode)
-            //let roots : Address[] = [RootOrderBar.address, RootOrderTst.address];
-            //await factoryOrder.upgradeOrderInOrderRoot(roots);
 
             const payload = await RootOrderBar.buildPayloadRoot(
                 0, zeroAddress, rootTokenReceive.address, numberString(TOKENS_TO_EXCHANGE2, tstDecimals),
