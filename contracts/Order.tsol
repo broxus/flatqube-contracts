@@ -585,7 +585,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                 _senderFee,
                 fee.beneficiary,
                 0,
-                owner,
+                (state != OrderStatus.MatchInProgress ? _sender : owner),
                 false,
                 emptyPayload
             );
@@ -696,18 +696,9 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
             _expectedSenderAmount,
             owner,
             0,
-            owner,
-            true,
-            (state != OrderStatus.MatchInProgress ?
-                OrderPayloads.buildOrderOperationPartExchange(
-                    _expectedSenderAmount,
-                    buildDetails()
-                ) :
-                OrderPayloads.buildOrderOperationMatchingPart(
-                    _expectedSenderAmount,
-                    buildDetails()
-                )
-            )
+            (state != OrderStatus.MatchInProgress ? _sender : owner),
+            false,
+            emptyPayload
         );
 
         if (_senderFee > 0) {
@@ -719,7 +710,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                 _senderFee,
                 fee.beneficiary,
                 0,
-                owner,
+                (state != OrderStatus.MatchInProgress ? _sender : owner),
                 false,
                 emptyPayload
             );
@@ -836,7 +827,7 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
                 _sendGasTo,
                 _deployWalletValue,
                 _sendGasTo,
-                true,
+                false,
                 emptyPayload
             );
 
@@ -923,8 +914,8 @@ contract Order is IAcceptTokensTransferCallback, IOrder, IOrderEvents, IHasEmerg
     function swap(uint64 callbackId, uint128 deployWalletValue) external onlyActiveOrder {
         require(autoExchange, OrderErrors.NOT_AUTO_EXCHANGE);
         require(msg.value >= OrderGas.SWAP_MIN_VALUE + deployWalletValue, OrderErrors.VALUE_TOO_LOW);
-
         tvm.rawReserve(address(this).balance - msg.value, 0);
+
         _swap(callbackId, deployWalletValue, msg.sender, msg.sender, address(0), address(0), false);
     }
 
