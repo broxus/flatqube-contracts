@@ -423,7 +423,7 @@ library GasValues {
 
     function getEverWeverToTip3CrossExchangeGas(uint128 _deployWalletValue, uint32 leaves) public returns(IGasValueStructure.GasValue) {
         return IGasValueStructure.GasValue(
-            EverToTip3Gas.MINT_DEPLOY_EMPTY_WALLET_GRAMS + leaves * (EverToTip3Gas.OPERATION_CALLBACK_BASE + _deployWalletValue),
+            EverToTip3Gas.WEVER_VAULT_RECEIVE_SAFE_FEE + EverToTip3Gas.MINT_DEPLOY_EMPTY_WALLET_GRAMS + leaves * (EverToTip3Gas.OPERATION_CALLBACK_BASE + _deployWalletValue),
             EverToTip3Gas.EVER_TIP3_CROSS_SWAP_FIRST_STEP + EverToTip3Gas.EVER_WEVER_EXTRA_GAS_FIRST_STEP + leaves * EverToTip3Gas.EVER_WEVER_TIP3_LAST_STEP
         );
     }
