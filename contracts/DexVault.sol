@@ -4,21 +4,22 @@ pragma AbiHeader time;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 
-import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
-
-import "tip3/contracts/interfaces/ITokenWallet.sol";
+import "./structures/IGasValueStructure.sol";
 
 import "./abstract/DexContractBase.sol";
 
+import "tip3/contracts/interfaces/ITokenWallet.sol";
 import "./interfaces/IDexVault.sol";
 import "./interfaces/IDexAccount.sol";
 import "./interfaces/IReferralProgramCallbacks.sol";
 
+import "@broxus/contracts/contracts/libraries/MsgFlag.sol";
 import "./libraries/DexErrors.sol";
 import "./libraries/DexGas.sol";
 import "./libraries/DexOperationTypes.sol";
+import "./libraries/GasValues.sol";
 
-contract DexVault is DexContractBase, IDexVault {
+contract DexVault is DexContractBase, IDexVault, IGasValueStructure {
     uint32 private static _nonce;
 
     address private _root;
@@ -32,101 +33,6 @@ contract DexVault is DexContractBase, IDexVault {
 
     // referral program
     ReferralProgramParams _refProgramParams;
-
-    // migration START
-    uint8 constant MAX_ITERATIONS_PER_MSG = 10;
-
-    function migrateLiquidity() external onlyManagerOrOwner {
-        require(_vaultWallets.min().hasValue(), 404);
-        internalHelper(address(0));
-    }
-
-    function continueMigrateLiquidity(address _fromTokenRoot) external onlyManagerOrOwner {
-        require(_vaultWallets.exists(_fromTokenRoot), 404);
-        internalHelper(_fromTokenRoot);
-    }
-
-    function migrateToken(address _tokenRoot) external onlyManagerOrOwner {
-        require(_vaultWallets.exists(_tokenRoot), 404);
-        require(msg.value >= DexGas.DEPLOY_VAULT_MIN_VALUE + DexGas.TRANSFER_TOKENS_VALUE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS + 0.5 ever, 404);
-
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
-
-        address vaultTokenWallet = _vaultWallets.at(_tokenRoot);
-
-        _vaultWalletsToRoots[vaultTokenWallet] = _tokenRoot;
-
-        ITokenWallet(vaultTokenWallet).balance{
-            value: 0,
-            flag: MsgFlag.ALL_NOT_RESERVED,
-            callback: DexVault.onTokenBalance
-        }();
-    }
-
-    function _migrateNext(address _startTokenRoot) external {
-        require(msg.sender == address(this), 503);
-        internalHelper(_startTokenRoot);
-    }
-
-    function onTokenBalance(uint128 _amount) external view {
-        require(_vaultWalletsToRoots.exists(msg.sender));
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
-
-        address _tokenRoot = _vaultWalletsToRoots.at(msg.sender);
-
-        IDexRoot(_dexRoot()).deployTokenVault{
-            value: DexGas.DEPLOY_VAULT_MIN_VALUE + 0.05 ever,
-            flag: MsgFlag.SENDER_PAYS_FEES
-        }(_tokenRoot, _owner);
-
-        if(_amount > 0) {
-            TvmCell empty;
-
-            ITokenWallet(msg.sender).transfer{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED
-            }(
-                _amount,
-                _expectedTokenVaultAddress(_tokenRoot),
-                DexGas.DEPLOY_EMPTY_WALLET_GRAMS,
-                _owner,
-                false,
-                empty
-            );
-        } else {
-            _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
-        }
-    }
-
-    function internalHelper(address _startTokenRoot) internal {
-        tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
-        uint8 counter = 0;
-        optional(address, address) itemOpt = _vaultWallets.next(_startTokenRoot);
-
-        while (itemOpt.hasValue()) {
-            (address tokenRoot, address vaultTokenWallet) = itemOpt.get();
-            _vaultWalletsToRoots[vaultTokenWallet] = tokenRoot;
-            counter++;
-            ITokenWallet(vaultTokenWallet).balance{
-                value: DexGas.DEPLOY_VAULT_MIN_VALUE + DexGas.TRANSFER_TOKENS_VALUE + DexGas.DEPLOY_EMPTY_WALLET_GRAMS + 0.5 ever,
-                flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: DexVault.onTokenBalance
-            }();
-
-            itemOpt = _vaultWallets.next(tokenRoot);
-
-            if (!itemOpt.hasValue()) {
-                itemOpt.reset();
-                _owner.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS });
-                break;
-            } else if(counter >= MAX_ITERATIONS_PER_MSG) {
-                itemOpt.reset();
-                this._migrateNext{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(tokenRoot);
-                break;
-            }
-        }
-    }
-    //migration END
 
     modifier onlyOwner() {
         require(msg.sender == _owner, DexErrors.NOT_MY_OWNER);
@@ -273,7 +179,7 @@ contract DexVault is DexContractBase, IDexVault {
     }
 
     function upgrade(TvmCell code) public override onlyOwner {
-        require(msg.value > DexGas.UPGRADE_VAULT_MIN_VALUE, DexErrors.VALUE_TOO_LOW);
+        require(msg.value > _calcValue(GasValues.getUpgradeVaultGas()), DexErrors.VALUE_TOO_LOW);
 
         tvm.rawReserve(DexGas.VAULT_INITIAL_BALANCE, 0);
 
@@ -304,7 +210,7 @@ contract DexVault is DexContractBase, IDexVault {
 
         TvmSlice slice = _data.toSlice();
 
-        (_root,) = slice.decode(address, address);
+        (_root) = slice.decode(address);
 
         TvmCell ownersData = slice.loadRef();
         TvmSlice ownersSlice = ownersData.toSlice();
@@ -312,13 +218,9 @@ contract DexVault is DexContractBase, IDexVault {
 
         platform_code = slice.loadRef();
 
-        //ignore _lpTokenPendingCode
-        slice.loadRef();
-
-        (, _vaultWallets)  = abi.decode(slice.loadRef(), (
-            mapping(address => bool),
-            mapping(address => address)
-        ));
+        if (slice.refs() >= 1) {
+            _refProgramParams  = abi.decode(slice.loadRef(), ReferralProgramParams);
+        }
 
         // Refund remaining gas
         _owner.transfer({
@@ -359,13 +261,7 @@ contract DexVault is DexContractBase, IDexVault {
         address _remainingGasTo,
         TvmCell _payload
     ) external override {
-        tvm.rawReserve(
-            math.max(
-                DexGas.VAULT_INITIAL_BALANCE,
-                address(this).balance - msg.value
-            ),
-            0
-        );
+        tvm.rawReserve(0, 4);
 
         TvmSlice payloadSlice = _payload.toSlice();
         optional(uint8) op = payloadSlice.decodeQ(uint8);
@@ -397,12 +293,12 @@ contract DexVault is DexContractBase, IDexVault {
 
             IReferralProgramCallbacks(_refProgramParams.projectAddress)
                 .onRefLastUpdate{
-                    value: DexGas.REFERRAL_PROGRAM_CALLBACK,
+                    value: _calcValue(GasValue(DexGas.REFERRAL_REFLAST_FIXED, DexGas.REFERRAL_REFLAST_GAS)),
                     flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
                     bounce: false
                 }(_referral, _referrer, _referral);
 
-            TvmCell refPayload = abi.encode(_refProgramParams.projectId, _referrer, _referral);
+            TvmCell refPayload = abi.encode(_refProgramParams.projectId, _referral, _referrer);
 
             ITokenWallet(msg.sender)
                 .transfer{

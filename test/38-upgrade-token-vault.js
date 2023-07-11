@@ -2,7 +2,7 @@ const {expect} = require('chai');
 const logger = require('mocha-logger');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
-const {Migration, afterRun, Constants} = require(process.cwd() + '/scripts/utils');
+const {Migration, afterRun, Constants, calcValue} = require(process.cwd() + '/scripts/utils');
 const { Command } = require('commander');
 const program = new Command();
 
@@ -67,12 +67,18 @@ describe('Test DexTokenVault contract upgrade', async function () {
         oldTokenVaultData = await loadTokenVaultData(dexTokenVault);
         logger.log(`Old TokenVault(${dexTokenVault.address}) data:\n${JSON.stringify(oldTokenVaultData, null, 4)}`);
 
+        const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
+        const gas = await gasValues.call({
+            method: 'getUpgradeTokenVaultGas',
+            params: {}
+        });
+
         logger.log(`Requesting upgrade for DexTokenVault contract: ${dexTokenVault.address}`);
         await rootOwner.runTarget({
             contract: dexRoot,
             method: 'upgradeTokenVault',
             params: {_tokenRoot: tokenRoot.address, _remainingGasTo: rootOwner.address},
-            value: locklift.utils.convertCrystal(6, 'nano'),
+            value: calcValue(gas),
             keyPair: keyPair
         });
         NewDexTokenVault.setAddress(dexTokenVault.address);

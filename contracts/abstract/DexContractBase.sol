@@ -6,8 +6,10 @@ pragma AbiHeader pubkey;
 
 import "../libraries/DexPlatformTypes.sol";
 
+import "../structures/IGasValueStructure.sol";
+
 import "../DexPlatform.sol";
-import "../DexVaultLpTokenPendingV2.sol";
+import "../LpTokenPending.sol";
 
 abstract contract DexContractBase  {
     TvmCell public platform_code;
@@ -57,6 +59,10 @@ abstract contract DexContractBase  {
     }
 
     function _dexRoot() virtual internal view returns (address);
+
+    function _calcValue(IGasValueStructure.GasValue value) internal pure returns(uint128) {
+        return value.fixedValue + gasToValue(value.dynamicGas, address(this).wid);
+    }
 
     function _expectedLpTokenPendingAddress(
         uint32 _nonce,
@@ -173,7 +179,7 @@ abstract contract DexContractBase  {
         TvmCell _code
     ) internal pure returns (TvmCell) {
         return tvm.buildStateInit({
-            contr: DexVaultLpTokenPendingV2,
+            contr: LpTokenPending,
             varInit: {
                 _nonce: _nonce,
                 root: address(this),

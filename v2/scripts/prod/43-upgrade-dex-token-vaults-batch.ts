@@ -1,8 +1,10 @@
 import { Address, toNano, WalletTypes } from 'locklift';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Migration } = require(process.cwd() + '/scripts/utils');
+import { displayTx, Migration } from '../../utils/migration';
 import { yellowBright } from 'chalk';
 import tokenVaults from '../../../dex_token_vaults.json';
+
+const TRACE = false;
 
 const chunkify = <T>(arr: T[], size: number): T[][] =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
@@ -12,10 +14,8 @@ const chunkify = <T>(arr: T[], size: number): T[][] =>
 const main = async () => {
   const migration = new Migration();
 
-  const dexRoot = await locklift.factory.getDeployedContract(
-    'DexRoot',
-    migration.getAddress('DexRoot'),
-  );
+  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+
   const dexManagerAddress = await dexRoot.methods
     .getManager({ answerId: 0 })
     .call()
@@ -37,43 +37,48 @@ const main = async () => {
   }));
 
   for (const chunk of chunkify(params, 1000)) {
-    const { traceTree } = await locklift.tracing.trace(
-      dexRoot.methods
-        .upgradeTokenVaults({
-          _tokenRoots: chunk.map((p) => p.tokenRoot),
-          _offset: 0,
-          _remainingGasTo: manager.address,
-        })
-        .send({
-          from: manager.address,
-          amount: toNano(chunk.length * 5),
-        }),
-    );
-
-    //await traceTree.beautyPrint();
-
-    for (const tokenVault of chunk) {
-      const DexTokenVault = locklift.factory.getDeployedContract(
-        'DexTokenVault',
-        tokenVault.tokenVault,
-      );
-
-      const events = traceTree.findEventsForContract({
-        contract: DexTokenVault,
-        name: 'TokenVaultCodeUpgraded' as const,
+    const p = dexRoot.methods
+      .upgradeTokenVaults({
+        _tokenRoots: chunk.map((p) => p.tokenRoot),
+        _offset: 0,
+        _remainingGasTo: manager.address,
+      })
+      .send({
+        from: manager.address,
+        amount: toNano(chunk.length * 5),
       });
 
-      if (events.length > 0) {
-        console.log(
-          `DexTokenVault ${tokenVault.tokenVault} for token ${tokenVault.tokenRoot} upgraded. Current version: ${events[0].currentVersion}`,
+    if (TRACE) {
+      const { traceTree } = await locklift.tracing.trace(p);
+
+      //await traceTree.beautyPrint();
+
+      for (const tokenVault of chunk) {
+        const DexTokenVault = locklift.factory.getDeployedContract(
+          'DexTokenVault',
+          tokenVault.tokenVault,
         );
-      } else {
-        console.log(
-          yellowBright(
-            `DexTokenVault ${tokenVault.tokenVault} wasn't upgraded`,
-          ),
-        );
+
+        const events = traceTree.findEventsForContract({
+          contract: DexTokenVault,
+          name: 'TokenVaultCodeUpgraded' as const,
+        });
+
+        if (events.length > 0) {
+          console.log(
+            `DexTokenVault ${tokenVault.tokenVault} for token ${tokenVault.tokenRoot} upgraded. Current version: ${events[0].currentVersion}`,
+          );
+        } else {
+          console.log(
+            yellowBright(
+              `DexTokenVault ${tokenVault.tokenVault} wasn't upgraded`,
+            ),
+          );
+        }
       }
+    } else {
+      const tx = await locklift.transactions.waitFinalized(p);
+      displayTx(tx);
     }
   }
 };

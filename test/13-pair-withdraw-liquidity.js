@@ -3,10 +3,9 @@ const {
     Migration,
     afterRun,
     Constants,
-    getRandomNonce,
     TOKEN_CONTRACTS_PATH,
     displayTx,
-    expectedDepositLiquidity
+    calcValue
 } = require(process.cwd() + '/scripts/utils');
 const {Command} = require('commander');
 const program = new Command();
@@ -48,6 +47,7 @@ let DexAccount2;
 let FooBarLpWallet2;
 let BarWallet2;
 let FooWallet2;
+let gasValues;
 
 let IS_FOO_LEFT;
 
@@ -161,6 +161,8 @@ describe('DexAccount interact with DexPair', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
     before('Load contracts', async function () {
         keyPairs = await locklift.keys.getKeyPairs();
+
+        gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
 
         if (locklift.tracing) {
             locklift.tracing.allowCodes({compute: [100]});
@@ -300,6 +302,14 @@ describe('DexAccount interact with DexPair', async function () {
             logger.log(`Expected FOO: ${expectedFoo}`);
             logger.log(`Expected BAR: ${expectedBar}`);
 
+            const gas = await gasValues.call({
+                method: 'getPoolDirectNoFeeWithdrawGas',
+                params: {
+                    N: 2,
+                    deployWalletValue: 0
+                }
+            });
+
             let tx = await Account2.runTarget({
                 contract: FooBarLpWallet2,
                 method: 'transfer',
@@ -311,7 +321,7 @@ describe('DexAccount interact with DexPair', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal('2.3', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[1]
             });
 

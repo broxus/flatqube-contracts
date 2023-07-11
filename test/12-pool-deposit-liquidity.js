@@ -6,7 +6,8 @@ const {
     getRandomNonce,
     TOKEN_CONTRACTS_PATH,
     displayTx,
-    expectedDepositLiquidity
+    expectedDepositLiquidity,
+    calcValue
 } = require(process.cwd() + '/scripts/utils');
 const {Command} = require('commander');
 const program = new Command();
@@ -21,7 +22,8 @@ program
     .option('-r, --roots <roots>', 'pool tokens list')
     .option('-a, --amounts <amounts>', 'token amounts')
     .option('-ac, --auto_change <auto_change>', 'auto change')
-    .option('-cn, --contract_name <contract_name>', 'DexPool contract name');
+    .option('-cn, --contract_name <contract_name>', 'DexPool contract name')
+    .option('-acn, --account_contract_name <account_contract_name>', 'DexAccount contract name');
 
 program.parse(process.argv);
 
@@ -30,6 +32,7 @@ const options = program.opts();
 options.roots = options.roots ? JSON.parse(options.roots) : ['foo', 'bar', 'qwe'];
 options.amounts = options.amounts ? JSON.parse(options.amounts) : ['1000000, 1000000, 1000000'];
 options.contract_name = options.contract_name || 'DexStablePool';
+options.account_contract_name = options.account_contract_name || 'DexAccount';
 options.auto_change = options.auto_change || false;
 
 const tokens = [];
@@ -105,6 +108,7 @@ async function dexPoolInfo() {
 describe('DexAccount interact with DexPool', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
     before('Load contracts', async function () {
+        console.log(`12-pool-deposit-liquidity.js`);
         keyPairs = await locklift.keys.getKeyPairs();
 
         if (locklift.tracing) {
@@ -121,7 +125,7 @@ describe('DexAccount interact with DexPool', async function () {
         }
         poolLpRoot = await locklift.factory.getContract('TokenRootUpgradeable', TOKEN_CONTRACTS_PATH);
         Account2 = await locklift.factory.getAccount('Wallet');
-        DexAccount2 = await locklift.factory.getContract('DexAccount');
+        DexAccount2 = await locklift.factory.getContract(options.account_contract_name);
         poolLpWallet2 = await locklift.factory.getContract('TokenWalletUpgradeable', TOKEN_CONTRACTS_PATH);
         tokenWallets2 = [];
         for (let i = 0; i < N_COINS; i++) {
@@ -243,6 +247,12 @@ describe('DexAccount interact with DexPool', async function () {
                 false
             );
 
+            const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
+            const gas = await gasValues.call({
+                method: 'getAccountDepositGas',
+                params: {N: N_COINS, referrer: locklift.utils.zeroAddress}
+            });
+
             const tx = await Account2.runTarget({
                 contract: DexAccount2,
                 method: 'depositLiquidityV2',
@@ -256,7 +266,9 @@ describe('DexAccount interact with DexPool', async function () {
                     _remainingGasTo: Account2.address,
                     _referrer: locklift.utils.zeroAddress
                 },
-                value: locklift.utils.convertCrystal('1.1', 'nano'),
+                value: options.account_contract_name === 'DexAccountPrev' ?
+                    locklift.utils.convertCrystal('1.5', 'nano') :
+                    calcValue(gas),
                 keyPair: keyPairs[1]
             });
 

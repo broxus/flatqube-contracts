@@ -1,5 +1,6 @@
+echo "test_stable_pair.sh START";
+echo "PREPARE";
 #prepare pair
-echo "prepare_stable.sh START";
 
 #export DEFAULT_PARAMS="--config locklift.config.js --disable-build --network local"
 export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --external-build node_modules/tip3/build --network local"
@@ -10,6 +11,7 @@ npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='1' --balance='100'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='2' --balance='50'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='3' --balance='10'
+npx locklift run $NO_TRACE --script scripts/deploy-DexGasValues.js
 npx locklift run $NO_TRACE --script scripts/0-deploy-TokenFactory.js
 npx locklift run $NO_TRACE --script scripts/1-deploy-vault-and-root.js --vault_contract_name='DexVault' --root_contract_name='DexRoot' --pair_contract_name='DexPairPrev'
 npx locklift run $NO_TRACE --script scripts/2-deploy-test-tokens.js --tokens='["bar","foo","qwe","coin","tst"]'
@@ -41,4 +43,23 @@ npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_tok
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'qwe' --right_token_id 'tst' --left_amount '24.4143' --right_amount '57091' --auto_change 'true' --contract_name='DexPair'
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'coin' --right_token_id 'tst' --left_amount '32349017' --right_amount '718669' --auto_change 'true' --contract_name='DexPair'
 
-echo "prepare_stable.sh END";
+echo "UPGRADE";
+
+npx locklift test $DEFAULT_PARAMS --tests test/30-install-pair-code-v2.js --contract_name='DexStablePair' --pool_type=2
+npx locklift test $NO_TRACE --tests test/35-upgrade-pair.js --left='foo' --right='bar' --old_contract_name='DexPair' --new_contract_name='DexStablePair' --pool_type=2
+
+echo "TEST";
+npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'foo' --right_token_id 'bar' --left_amount '4844540' --right_amount '4813807' --contract_name='DexStablePair'
+
+npx locklift test $NO_TRACE --tests test/15-dex-account-pair-operations.js --pair_contract_name='DexStablePair' --account_contract_name='DexAccount'
+
+npx locklift test $NO_TRACE --tests test/20-pair-direct-operations.js --contract_name='DexStablePair'
+npx locklift test $NO_TRACE --tests test/20-pair-direct-operations-v2.js --contract_name='DexStablePair'
+
+npx locklift test $NO_TRACE --tests test/40-cross-pair-exchange.js --amount=10000 --route='["bar","foo","coin","qwe","tst"]' --contract_name='DexStablePair'
+npx locklift test $NO_TRACE --tests test/40-cross-pair-exchange.js --amount=100 --route='["tst","qwe","coin","bar","foo"]' --contract_name='DexStablePair'
+npx locklift test $NO_TRACE --tests test/40-cross-pair-exchange.js --amount=10000 --route='["coin","foo","bar"]' --contract_name='DexStablePair'
+
+npx locklift test $NO_TRACE --tests test/51-referrer-beneficiary-fee.js --roots='["foo", "bar"]' --pool_contract_name='DexStablePair' --fee='{"denominator": "1000000000", "pool_numerator": "0", "beneficiary_numerator": "1000000", "referrer_numerator": "2000000"}'
+
+npx locklift run $NO_TRACE --script scripts/0-backup-migration.js

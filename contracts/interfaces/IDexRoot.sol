@@ -3,6 +3,7 @@ pragma ton-solidity >= 0.62.0;
 import "../structures/IFeeParams.sol";
 import "../structures/IOracleOptions.sol";
 import "../structures/IAmplificationCoefficient.sol";
+import "../structures/IGasValueStructure.sol";
 
 import "./IUpgradable.sol";
 import "./IResetGas.sol";
@@ -262,7 +263,7 @@ interface IDexRoot is
         uint8 poolType;
     }
 
-    function upgradePairs(
+    function upgradePools(
         PairUpgradeParam[] _params,
         uint32 _offset,
         address _remainingGasTo

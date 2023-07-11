@@ -1,6 +1,6 @@
-import {Address, toNano, WalletTypes} from "locklift";
+import {Address, toNano} from "locklift";
+import {Migration, displayTx} from '../../utils/migration';
 
-const {Migration, displayTx} = require(process.cwd()+'/scripts/utils')
 const {Command} = require('commander');
 const program = new Command();
 const prompts = require('prompts');
@@ -33,7 +33,7 @@ async function main() {
     let dexRootAddress = '';
 
     if (migration.exists('DexRoot')) {
-        dexRootAddress = migration.getAddress('DexRoot').toString();
+        dexRootAddress = migration.loadContract('DexRoot', 'DexRoot').address.toString();
     } else {
         dexRootAddress = DEFAULT_DEX_ROOT_ADDRESS;
     }
@@ -96,16 +96,13 @@ async function main() {
 
     const dexRoot = await locklift.factory.getDeployedContract('DexRoot', new Address(dexRootAddress));
 
-    const account = await locklift.factory.accounts.addExistingAccount({
-        type: WalletTypes.EverWallet,
-        address: migration.getAddress('Account1')
-    });
+    const account = await migration.loadAccount('Account1', '0');
 
     if (locklift.tracing) {
         locklift.tracing.setAllowedCodesForAddress(account.address, {compute: [100]});
     }
 
-    if (roots !== undefined && roots.every((token_root) => isValidTonAddress(token_root))) {
+    if (roots !== undefined && roots.every((token_root: string) => isValidTonAddress(token_root))) {
         console.log(`Start deploy pool DexStablePool`);
 
         const tx = await dexRoot.methods.deployStablePool(

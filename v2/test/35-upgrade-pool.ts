@@ -1,11 +1,11 @@
-import {toNano, WalletTypes} from "locklift";
+import { toNano } from "locklift";
+import { Migration, Constants, displayTx } from '../utils/migration';
 
 const {expect} = require('chai');
 const logger = require('mocha-logger');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
-const {Migration, Constants, displayTx} = require(process.cwd() + '/scripts/utils');
-const { Command } = require('commander');
+import { Command } from 'commander';
 const program = new Command();
 
 const migration = new Migration();
@@ -157,18 +157,15 @@ describe('Test Dex Pool contract upgrade', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
 
     before('Load contracts', async function () {
-        account = await locklift.factory.accounts.addExistingAccount({
-            type: WalletTypes.EverWallet,
-            address: migration.getAddress('Account1')
-        });
-        dexRoot = await locklift.factory.getDeployedContract( 'DexRoot', migration.getAddress('DexRoot'));
-        dexPool = await locklift.factory.getDeployedContract(options.old_contract_name, migration.getAddress('DexPool' + poolName));
+        account = await migration.loadAccount('Account1', '0');
+        dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+        dexPool = migration.loadContract(options.old_contract_name, 'DexPool' + poolName);
 
         targetVersion = (await dexRoot.methods.getPoolVersion({ answerId: 0, pool_type: options.pool_type }).call()).value0;
 
         tokenRoots = {};
         for (let item of options.roots) {
-            tokenRoots[item] = await locklift.factory.getDeployedContract('TokenRootUpgradeable', migration.getAddress(tokens[item].symbol + 'Root'));
+            tokenRoots[item] = migration.loadContract('TokenRootUpgradeable', tokens[item].symbol + 'Root');
         }
 
         oldPoolData = await loadPoolData(dexPool, options.old_contract_name);

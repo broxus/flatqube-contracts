@@ -1,5 +1,3 @@
-npx locklift build --config locklift.config.js
-
 export DEFAULT_PARAMS="--config locklift.config.js --disable-build --enable-tracing --external-build node_modules/tip3/build --network local"
 export NO_TRACE="--config locklift.config.js --disable-build --network local"
 
@@ -7,6 +5,7 @@ npx locklift run $NO_TRACE --script scripts/0-reset-migration.js
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0' --balance='50'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='1' --balance='1000'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='2' --balance='1000'
+npx locklift run $NO_TRACE --script scripts/deploy-DexGasValues.js
 npx locklift run $NO_TRACE --script scripts/0-deploy-TokenFactory.js
 npx locklift run $NO_TRACE --script scripts/1-deploy-vault-and-root.js --pair_contract_name='DexPair' --account_contract_name='DexAccount'
 npx locklift run $NO_TRACE --script scripts/6-wton-setup.js --wrap_amount=900
@@ -39,3 +38,5 @@ npx locklift test $NO_TRACE --tests test/41-ever-split-cross-pool-exchange.js --
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='0'
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='1'
 npx locklift run $NO_TRACE --script scripts/99-get-evers-back.js --key_number='2'
+
+npx locklift run $NO_TRACE --script scripts/0-backup-migration.js

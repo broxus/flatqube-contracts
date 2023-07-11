@@ -38,7 +38,7 @@ describe('Check for correct deployment', async function () {
     DexAccount = await locklift.factory.getContract(options.account_contract_name);
     DexPair = await locklift.factory.getContract(options.pair_contract_name);
     TokenFactory = await locklift.factory.getContract('TokenFactory');
-    DexVaultLpTokenPending = await locklift.factory.getContract('DexVaultLpTokenPendingV2');
+    DexVaultLpTokenPending = await locklift.factory.getContract('LpTokenPending');
 
     dexRoot = migration.load(DexRoot, 'DexRoot');
     dexVault = migration.load(DexVault, 'DexVault');

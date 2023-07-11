@@ -22,8 +22,11 @@ import "./libraries/DexGas.sol";
 import "./libraries/DexOperationTypes.sol";
 import "./libraries/PairPayload.sol";
 import "./libraries/DirectOperationErrors.sol";
+import "./libraries/GasValues.sol";
 
-contract DexTokenVault is DexContractBase, IDexTokenVault {
+import "./structures/IGasValueStructure.sol";
+
+contract DexTokenVault is DexContractBase, IDexTokenVault, IGasValueStructure {
     address private _root;
     address private _vault;
     uint32 private _version;
@@ -196,7 +199,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
 
         ITokenWallet(_tokenWallet)
             .transfer{
-                value: DexGas.TRANSFER_TOKENS_VALUE + _deployRecipientWalletGrams,
+                value: _calcValue(GasValues.getTransferTokensGas(_deployRecipientWalletGrams)),
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 bounce: false
             }(
@@ -488,7 +491,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
     function _deployTokenWallet() private view {
         ITokenRoot(_tokenRoot)
             .deployWallet{
-                value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
+                value: _calcValue(GasValues.getDeployWalletGas()),
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexTokenVault.onTokenWallet,
                 bounce: true
@@ -499,7 +502,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
     function _deployTokenWalletForVault() private view {
         ITokenRoot(_tokenRoot)
             .deployWallet{
-                value: DexGas.DEPLOY_EMPTY_WALLET_VALUE,
+                value: _calcValue(GasValues.getDeployWalletGas()),
                 flag: MsgFlag.SENDER_PAYS_FEES,
                 callback: DexTokenVault.onVaultTokenWallet,
                 bounce: true
@@ -605,12 +608,12 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
             allLeaves += nextStep.leaves;
         }
 
-        if (errorCode == 0 && msg.value < DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * allNestedNodes + 0.1 ton) {
+        if (errorCode == 0 && msg.value < _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * allNestedNodes + _calcValue(GasValue(0, 100000))) {
             errorCode = DirectOperationErrors.VALUE_TOO_LOW;
         }
 
         if (errorCode == 0 && nextSteps.length > 0) {
-            uint128 extraValue = msg.value - DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE * allNestedNodes - 0.1 ton;
+            uint128 extraValue = msg.value - _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) * allNestedNodes - _calcValue(GasValue(0, 100000));
 
             for (uint32 i = 0; i < nextSteps.length; i++) {
                 NextExchangeData nextStep = nextSteps[i];
@@ -620,7 +623,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault {
 
                 IDexBasePool(nextStep.poolRoot)
                     .crossPoolExchange{
-                        value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * DexGas.CROSS_POOL_EXCHANGE_MIN_VALUE + currentExtraValue,
+                        value: i == maxNestedNodesIdx ? 0 : (nextStep.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) + currentExtraValue,
                         flag: i == maxNestedNodesIdx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
                     }(
                         id,

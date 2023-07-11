@@ -9,6 +9,8 @@ npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='0'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='1' --balance='100'
 npx locklift run $NO_TRACE --script scripts/0-deploy-account.js --key_number='2' --balance='100'
 
+npx locklift run $NO_TRACE --script scripts/deploy-DexGasValues.js
+
 # Init dex and tokens
 npx locklift run $NO_TRACE --script scripts/0-deploy-TokenFactory.js
 npx locklift run $NO_TRACE --script scripts/1-deploy-vault-and-root.js --pair_contract_name='DexPairPrev' --root_contract_name='DexRootPrev'
@@ -79,3 +81,5 @@ npx locklift test $NO_TRACE --tests test/09-add-pair-test.js --left='qwe' --righ
 npx locklift test $NO_TRACE --tests test/12-pair-deposit-liquidity.js --left_token_id 'qwe' --right_token_id 'tst' --left_amount '10000' --right_amount '10000' --auto_change 'true' --contract_name='DexPair'
 
 npx locklift run $NO_TRACE --script scripts/update-dexRoot.js --old_contract='DexRoot' --new_contract='TestNewDexRoot'
+
+npx locklift run $NO_TRACE --script scripts/0-backup-migration.js

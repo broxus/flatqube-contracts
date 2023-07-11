@@ -2,10 +2,10 @@ import { writeFileSync } from 'fs';
 import { Address } from 'locklift';
 import { yellowBright } from 'chalk';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Migration } = require(process.cwd() + '/scripts/utils');
+import { Migration } from '../../utils/migration';
 
 const OLD_DEX_TOKEN_VAULTS_CODE_HASH =
-  '59eed82c0d87ced3d7f27c2430b0b6e9e5384462680be7814f9a836c9f4d48e5';
+  '80cda6cdc2997c143552385d3f73a06a8d2e261eded0b1962cd548e37ad26be3';
 
 type TokenVaultEntity = {
   tokenVault: Address;
@@ -15,10 +15,7 @@ type TokenVaultEntity = {
 async function exportDexTokenVault() {
   const migration = new Migration();
 
-  const dexRoot = await locklift.factory.getDeployedContract(
-    'DexRoot',
-    migration.getAddress('DexRoot'),
-  );
+  const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
 
   console.log('DexRoot: ' + dexRoot.address);
 

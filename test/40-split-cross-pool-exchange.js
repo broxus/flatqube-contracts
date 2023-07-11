@@ -1,5 +1,5 @@
 const {expect} = require('chai');
-const {Migration, afterRun, Constants, TOKEN_CONTRACTS_PATH} = require(process.cwd() + '/scripts/utils');
+const {Migration, afterRun, Constants, TOKEN_CONTRACTS_PATH, calcValue} = require(process.cwd() + '/scripts/utils');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
 const { Command } = require('commander');
@@ -475,6 +475,17 @@ describe('Check direct operations', async function () {
             }
             logger.log(`Result payload = ${payload}`);
 
+            const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
+            const gas = await gasValues.call({
+                method: 'getPoolCrossExchangeGas',
+                params: {
+                    steps: steps.length,
+                    leaves: lastStepPools.length,
+                    deployWalletValue: locklift.utils.convertCrystal('0.05', 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             await Account3.runTarget({
                 contract: accountWallets[options.start_token],
                 method: 'transfer',
@@ -487,7 +498,7 @@ describe('Check direct operations', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal(steps.length + 3, 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 

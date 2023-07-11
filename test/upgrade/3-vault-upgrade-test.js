@@ -1,6 +1,7 @@
 const {expect} = require('chai');
 const logger = require('mocha-logger');
-const {Migration, afterRun, Constants} = require(process.cwd() + '/scripts/utils')
+const {Migration, afterRun, Constants, calcValue} = require(process.cwd() + '/scripts/utils')
+const BigNumber = require("bignumber.js");
 
 const migration = new Migration();
 
@@ -36,6 +37,7 @@ const loadVaultData = async (vault) => {
 describe('Test Dex Vault contract upgrade', async function () {
   this.timeout(Constants.TESTS_TIMEOUT);
   before('Load contracts', async function () {
+    console.log(`3-vault-upgrade-test.js`);
     account = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
     account.afterRun = afterRun;
     DexRoot = await locklift.factory.getContract('DexRoot');
@@ -43,7 +45,7 @@ describe('Test Dex Vault contract upgrade', async function () {
     DexPlatform = await locklift.factory.getContract('DexPlatform', 'precompiled');
     TokenFactory = await locklift.factory.getContract('TokenFactory');
 
-    DexVaultLpTokenPending = await locklift.factory.getContract('DexVaultLpTokenPendingV2');
+    DexVaultLpTokenPending = await locklift.factory.getContract('LpTokenPending');
     NewDexVault = await locklift.factory.getContract('TestNewDexVault');
     dexRoot = migration.load(DexRoot, 'DexRoot');
     dexVault = migration.load(DexVault, 'DexVault');
@@ -51,6 +53,13 @@ describe('Test Dex Vault contract upgrade', async function () {
 
     const [keyPair] = await locklift.keys.getKeyPairs();
     oldVaultData = await loadVaultData(dexVault);
+
+    const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
+    const gas = await gasValues.call({
+      method: 'getUpgradeVaultGas',
+      params: {}
+    });
+
     logger.log(`Upgrading DexVault contract: ${dexVault.address}`);
     await account.runTarget({
       contract: dexVault,
@@ -58,7 +67,7 @@ describe('Test Dex Vault contract upgrade', async function () {
       params: {
         code: NewDexVault.code
       },
-      value: locklift.utils.convertCrystal(6, 'nano'),
+      value: calcValue(gas),
       keyPair
     });
     NewDexVault.setAddress(dexVault.address);

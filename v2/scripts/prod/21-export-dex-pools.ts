@@ -2,10 +2,10 @@ import { writeFileSync } from 'fs';
 import { Address } from 'locklift';
 import { yellowBright } from 'chalk';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Migration } = require(process.cwd() + '/scripts/utils');
+import { Migration } from '../../utils/migration';
 
 const OLD_DEX_POOL_CODE_HASH =
-  '6a388fbce37c45774c620667a9df96507579b07d4d0cd5378c39cb30f84406b3';
+  'c186a348418ddf13dfbf70eb48c13e4a2d86d2e8495a89e924a39c81ec8903e9';
 
 type PoolEntity = {
   dexPool: Address;
@@ -15,10 +15,7 @@ type PoolEntity = {
 async function exportDexPairs() {
   const migration = new Migration();
 
-  const dexRoot = await locklift.factory.getDeployedContract(
-    'DexRoot',
-    migration.getAddress('DexRoot'),
-  );
+  const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
 
   console.log('DexRoot: ' + dexRoot.address);
 
@@ -68,7 +65,7 @@ async function exportDexPairs() {
 
           const rootString = roots.map((e) => e.toString()).join(',');
 
-          console.log(`DexStablePool ${dexPoolAddress}, left = ${rootString}`);
+          console.log(`DexStablePool ${dexPoolAddress}, roots = ${rootString}`);
 
           resolve({
             dexPool: dexPoolAddress,
