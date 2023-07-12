@@ -1,0 +1,178 @@
+pragma ever-solidity ^0.62.0;
+
+pragma AbiHeader time;
+pragma AbiHeader expire;
+pragma AbiHeader pubkey;
+
+import "./libraries/EverToTip3Gas.tsol";
+import "./libraries/EverToTip3Errors.tsol";
+import "./libraries/EverToTip3Payloads.tsol";
+import "./libraries/GasValues.tsol";
+
+import "./interfaces/IEverVault.tsol";
+import "./structures/INextExchangeData.tsol";
+import "./structures/IGasValueStructure.tsol";
+
+import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
+import "tip3/contracts/interfaces/ITokenRoot.tsol";
+import "tip3/contracts/interfaces/ITokenWallet.tsol";
+import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
+import "tip3/contracts/interfaces/IAcceptTokensBurnCallback.tsol";
+
+contract EverWeverToTip3 is IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IGasValueStructure {
+
+    uint32 static randomNonce_;
+
+    address static public weverRoot;
+    address static public weverVault;
+    address static public everToTip3;
+
+    address public weverWallet;
+
+    constructor() public {
+        tvm.accept();
+
+        tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
+
+        ITokenRoot(weverRoot).deployWallet{
+            value: _calcValue(GasValues.getDeployWalletGas()),
+            flag: MsgFlag.SENDER_PAYS_FEES,
+            callback: EverWeverToTip3.onWeverWallet
+        }(
+            address(this),
+            EverToTip3Gas.DEPLOY_EMPTY_WALLET_GRAMS
+        );
+
+        msg.sender.transfer(0, false, MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS);
+    }
+
+    // Callback deploy WEVER wallet for contract
+    function onWeverWallet(address _weverWallet) external {
+        require(msg.sender.value != 0 && msg.sender == weverRoot, EverToTip3Errors.NOT_WEVER_ROOT);
+        weverWallet = _weverWallet;
+        weverWallet.transfer(0, false, MsgFlag.REMAINING_GAS + MsgFlag.IGNORE_ERRORS);
+    }
+
+    // Payload constructor swap Ever -> Tip-3
+    function buildExchangePayload(
+        address pair,
+        uint64 id,
+        uint128 deployWalletValue,
+        uint128 expectedAmount,
+        uint128 amount,
+        address referrer,
+        optional(address) outcoming
+    ) external pure returns (TvmCell) {
+        return EverToTip3Payloads.buildExchangePayload(
+            pair,
+            id,
+            deployWalletValue,
+            expectedAmount,
+            amount,
+            referrer,
+            outcoming.hasValue() ? outcoming.get() : address(0)
+        );
+    }
+
+    // Payload constructor swap Ever -> Tip-3 via split-cross-pool
+    function buildCrossPairExchangePayload(
+        address pool,
+        uint64 id,
+        uint128 deployWalletValue,
+        uint128 expectedAmount,
+        address outcoming,
+        uint32[] nextStepIndices,
+        EverToTip3Payloads.EverToTip3ExchangeStep[] steps,
+        uint128 amount,
+        address referrer
+    ) external pure returns (TvmCell) {
+        return EverToTip3Payloads.buildCrossPairExchangePayload(
+            pool,
+            id,
+            deployWalletValue,
+            expectedAmount,
+            outcoming,
+            nextStepIndices,
+            steps,
+            amount,
+            referrer
+        );
+    }
+
+     //Callback
+    function onAcceptTokensTransfer(
+        address /*tokenRoot*/,
+        uint128 amount,
+        address sender,
+        address /*senderWallet*/,
+        address user,
+        TvmCell payload
+    )
+        override
+        external
+    {
+        require(msg.sender.value != 0);
+
+        bool needCancel = false;
+        TvmSlice payloadSlice = payload.toSlice();
+        tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
+        if (payloadSlice.bits() == 395 && msg.sender == weverWallet) {
+            (, uint128 amount_) = payloadSlice.decode(address, uint128);
+            if ((amount + msg.value - _calcValue(GasValues.getEverWeverToTip3CrossExchangeGas(0, 1))) >= amount_) {
+                ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
+                    amount,
+                    weverVault,
+                    0,
+                    user,
+                    true,
+                    payload
+                );
+            } else {
+                needCancel = true;
+            }
+        } else {
+            needCancel = true;
+        }
+
+        if (needCancel) {
+            TvmCell emptyPayload;
+            ITokenWallet(msg.sender).transfer{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
+                amount,
+                user,
+                sender != user ? 0.1 ever : 0,
+                user,
+                true,
+                emptyPayload
+            );
+        }
+    }
+
+    // Callback Burn token
+    function onAcceptTokensBurn(
+        uint128 /*amount*/,
+        address /*walletOwner*/,
+        address /*wallet*/,
+        address user,
+        TvmCell payload
+    )
+        override
+        external
+    {
+        require(msg.sender.value != 0 && msg.sender == weverRoot, EverToTip3Errors.NOT_WEVER_ROOT);
+        tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
+
+        TvmSlice payloadSlice =  payload.toSlice();
+        (, uint128 amount_) = payloadSlice.decode(address, uint128);
+
+        IEverVault(weverVault).wrap{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(
+            amount_,
+            everToTip3,
+            user,
+            payload
+        );
+    }
+
+    function _calcValue(IGasValueStructure.GasValue value) internal pure returns(uint128) {
+        return value.fixedValue + gasToValue(value.dynamicGas, address(this).wid);
+    }
+}

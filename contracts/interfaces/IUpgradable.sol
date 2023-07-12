@@ -1,5 +1,0 @@
-pragma ton-solidity >= 0.62.0;
-
-interface IUpgradable {
-    function upgrade(TvmCell code) external;
-}
