@@ -35,7 +35,7 @@ const config: LockliftConfig = {
         'TokenWalletUpgradeable',
         'TokenWalletPlatform',
       ],
-      'node_modules/ton-wton/everscale/build': [],
+      'node_modules/ever-wever/everscale/build': [],
     },
   },
   linker: { version: '0.15.48' },
