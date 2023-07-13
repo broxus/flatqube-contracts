@@ -1,0 +1,98 @@
+pragma ever-solidity ^0.62.0;
+
+import "../structures/IMultiScatterStructures.tsol";
+
+import "../libraries/OrderGas.tsol";
+import "../libraries/MultiScatterErrors.tsol";
+import "../libraries/OrderOperationTypes.tsol";
+import "../libraries/OrderOperationStatus.tsol";
+import "../libraries/MultiScatterOperationTypes.tsol";
+
+pragma AbiHeader time;
+pragma AbiHeader expire;
+pragma AbiHeader pubkey;
+
+library MultiScatterPayload {
+    function buildPayload(
+        IMultiScatterStructures.PayloadOrder[] payloadsOrders
+    ) public returns (TvmCell) {
+        TvmBuilder builder;
+        builder.store(payloadsOrders);
+
+        return builder.toCell();
+    }
+
+    function decodePayload(TvmCell _payload) public returns (
+        IMultiScatterStructures.PayloadOrder[]
+    ) {
+        return _payload.toSlice().decode(
+            IMultiScatterStructures.PayloadOrder[]
+        );
+    }
+
+    function decodeOnAcceptTokenTransferData(
+        uint128 msgValue,
+        uint128 _amount,
+        TvmCell _payload
+    ) public returns(
+        bool,
+        uint16,
+        uint8,
+        IMultiScatterStructures.PayloadOrder[]
+    ) {
+
+        TvmSlice payloadSlice = _payload.toSlice();
+
+        bool isValid;
+        uint16 errorCode;
+        uint8 op;
+        IMultiScatterStructures.PayloadOrder[] _payloadsForOrders;
+
+        if (payloadSlice.refs() == 1 && payloadSlice.bits() == 33) {
+            op = MultiScatterOperationTypes.DISTRIBUTION_FOR_ORDERS;
+
+            _payloadsForOrders = decodePayload(_payload);
+            errorCode = _checkOperationData(msgValue, _amount, _payloadsForOrders);
+            if (errorCode == 0) {
+                isValid = true;
+            }
+        }
+
+        if (!isValid && errorCode == 0) {
+            errorCode = (!isValid ? MultiScatterErrors.INVALID_PAYLOAD : 0);
+        }
+
+        return (isValid, errorCode, op, _payloadsForOrders);
+    }
+
+    function _checkOperationData(
+        uint128 msgValue,
+        uint128 amount,
+        IMultiScatterStructures.PayloadOrder[] payloadsForOrders
+    ) internal returns(uint16) {
+        if (payloadsForOrders.length == 0) return MultiScatterErrors.EMPTY_COUNT_ORDERS;
+        if (payloadsForOrders.length >= 201) return MultiScatterErrors.EXCEED_COUNT_ORDERS;
+        IMultiScatterStructures.CalculationResult calcResult = calculateTokensValue(payloadsForOrders);
+
+        if (msgValue < calcResult.everValue || msgValue < payloadsForOrders.length * OrderGas.FILL_ORDER_MIN_VALUE) return MultiScatterErrors.VALUE_TOO_LOW;
+        if (amount < calcResult.tokenAmount) return MultiScatterErrors.TOKEN_AMOUNT_TOO_LOW;
+
+        return 0;
+    }
+
+    function calculateTokensValue(
+        IMultiScatterStructures.PayloadOrder[] _payloadsForOrders
+    ) public returns (IMultiScatterStructures.CalculationResult) {
+        uint128 requiredEverValue;
+        uint128 requiredTokenAmount;
+        for (IMultiScatterStructures.PayloadOrder payloadsForOrders : _payloadsForOrders) {
+            requiredEverValue += payloadsForOrders.gasValue;
+            requiredTokenAmount += payloadsForOrders.amount;
+        }
+
+        return IMultiScatterStructures.CalculationResult({
+            everValue: requiredEverValue,
+            tokenAmount: requiredTokenAmount
+        });
+    }
+}

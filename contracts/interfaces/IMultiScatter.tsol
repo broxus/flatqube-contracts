@@ -1,0 +1,25 @@
+pragma ever-solidity ^0.62.0;
+
+import "../structures/IMultiScatterStructures.tsol";
+
+interface IMultiScatter {
+    function transferOwner(address) external responsible returns (address);
+
+    function acceptOwner() external responsible returns (address);
+
+    function getDetails() external view responsible returns(uint64, address, uint32, bool);
+
+    function buildPayload(IMultiScatterStructures.PayloadOrder[]) external pure returns (TvmCell);
+
+    function calculateTokensValue(
+        IMultiScatterStructures.PayloadOrder[]
+    ) external pure returns (IMultiScatterStructures.CalculationResult);
+
+    function proxyTokensTransfer(
+        address, uint128, uint128, address, uint128, address, bool, TvmCell
+    ) external;
+
+    function sendGas(address, uint128, uint16) external;
+
+    function upgrade(TvmCell, uint32, address) external;
+}

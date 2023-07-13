@@ -1,0 +1,54 @@
+pragma ever-solidity >=0.62.0;
+
+import "../structures/IOrderFeeParams.tsol";
+
+interface IOrderRoot is IOrderFeeParams {
+	function getVersion() external view responsible returns(uint32);
+
+	function getVersionOrder() external view responsible returns (uint32);
+
+	function getSpentToken() external view responsible returns (address);
+
+	function getSpentWallet() external view responsible returns (address);
+
+	function getFactory() external view responsible returns (address);
+
+	function getDeployer() external view responsible returns (address);
+
+	function getDex() external view responsible returns (address);
+
+	function getFeeParams() external view responsible returns (OrderFeeParams);
+
+	function expectedAddressOrder(
+		address root,
+		address factory,
+		address owner,
+		address spentToken,
+		address receiveToken,
+		uint64 timeTx,
+		uint64 nowTx
+	) external view responsible returns (address);
+
+	function setFeeParams(OrderFeeParams params) external;
+
+	function setOrderCode(TvmCell _code, uint32 _versionOrder) external;
+
+	function proxyTokensTransfer(
+        address _tokenWallet,
+        uint128 _gasValue,
+        uint128 _amount,
+        address _recipient,
+        uint128 _deployWalletValue,
+        address _remainingGasTo,
+        bool _notify,
+        TvmCell _payload
+    ) external;
+
+    function sendGas(
+        address to,
+        uint128 _value,
+        uint16 _flag
+    ) external;
+
+	function upgrade(TvmCell _code, uint32 _newVersion, address _sendGasTo) external;
+}

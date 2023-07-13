@@ -1,0 +1,381 @@
+.version sol 0.62.0
+
+.macro constructor
+DROP
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7_with_init_storage$
+}
+GETGLOB 6
+THROWIF 51
+OVER
+PUSHCONT {
+	LDU 32
+	LDU 32
+	LDREF
+	LDREF
+	LDREF
+	ENDS
+	CTOS
+	LDMSGADDR
+	LDU 128
+	LDU 128
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 32
+	LDU 32
+	LDREF
+	LDREF
+	LDMSGADDR
+	LDU 128
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+	LDU 128
+}
+IFELSE
+LDU 128
+LDMSGADDR
+ROLLREV 5
+TUPLE 5
+SWAP
+LDREF
+ENDS
+.loc ../contracts/OrderRootPlatform.tsol, 24
+GETGLOB 9
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 10
+SDEQ
+AND
+PUSHCONT {
+	.loc ../contracts/OrderRootPlatform.tsol, 25
+	BLKPUSH 7, 6
+	CALLREF {
+		CALL $initialize_e81a2cb4_internal_macro$
+	}
+}
+PUSHCONT {
+	.loc ../contracts/OrderRootPlatform.tsol, 27
+	PUSH S2
+	NEWC
+	STSLICECONST x42_
+	STSLICE
+	PUSHINT 111
+	STZEROES
+	ENDC
+	PUSHPOW2 7
+	ADDCONST 32
+	UFITS 8
+	SENDRAWMSG
+}
+IFELSE
+.loc ../contracts/OrderRootPlatform.tsol, 0
+BLKDROP 7
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.globl	initialize_e81a2cb4_internal
+.type	initialize_e81a2cb4_internal, @function
+CALL $initialize_e81a2cb4_internal_macro$
+
+.macro initialize_e81a2cb4_internal_macro
+.loc ../contracts/OrderRootPlatform.tsol, 44
+GETGLOB 12
+ROLL 6
+XCHG S2, S5
+REVERSE 4, 1
+ROLL 7
+PUSHINT 0
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+GETGLOB 11
+GETGLOB 10
+NEWC
+STSLICE
+ROLLREV 10
+NEWC
+STSLICE
+ROLLREV 9
+NEWC
+STSLICE
+STU 32
+STU 32
+STU 32
+ROLLREV 5
+NEWC
+STSLICE
+SWAP
+UNTUPLE 5
+REVERSE 6, 0
+STU 128
+STU 128
+STU 128
+ROLLREV 5
+NEWC
+STU 128
+STSLICE
+STREF
+STREF
+STREF
+STBREFR
+STBREFR
+STBREFR
+STBREFR
+ENDC
+.loc ../contracts/OrderRootPlatform.tsol, 49
+OVER
+SETCODE
+.loc ../contracts/OrderRootPlatform.tsol, 50
+SWAP
+CTOS
+DUP
+PUSHSLICE x8adb35
+SDEQ
+PUSHCONT {
+	PLDREFIDX 1
+	CTOS
+}
+IF
+PLDREF
+CTOS
+BLESS
+POP C3
+.loc ../contracts/OrderRootPlatform.tsol, 52
+CALLREF {
+	CALL $:onCodeUpgrade$
+}
+.loc ../contracts/OrderRootPlatform.tsol, 0
+
+.internal-alias :onCodeUpgrade, 2
+.internal :onCodeUpgrade
+DROP
+.loc ../contracts/OrderRootPlatform.tsol, 0
+CALLREF {
+	CALL $c7_to_c4$
+}
+COMMIT
+THROW 0
+
+.macro c4_to_c7
+PUSHROOT
+CTOS
+LDU 256 ; pubkey c4
+LDU 64 ; pubkey timestamp c4
+LDU 1 ; ctor flag
+NIP
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+SETGLOB 12
+SETGLOB 11
+SETGLOB 10
+SETGLOB 3
+SETGLOB 2
+
+.macro c4_to_c7_with_init_storage
+PUSHROOT
+CTOS
+SBITS
+GTINT 1
+PUSHCONT {
+	PUSHINT 0
+	PUSHROOT
+	CTOS
+	PLDDICT ; D
+	PUSHINT 1
+	OVER
+	PUSHINT 64
+	DICTUGET
+	PUSHCONT {
+		PUSHREFSLICE {
+			.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+		}
+	}
+	IFNOT
+	PUSHINT 2
+	PUSH S2
+	PUSHINT 64
+	DICTUGET
+	PUSHCONT {
+		PUSHREFSLICE {
+			.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+		}
+	}
+	IFNOT
+	PUSHINT 3
+	PUSH S3
+	PUSHINT 64
+	DICTUGETREF
+	PUSHCONT {
+		PUSHREF {
+		}
+	}
+	IFNOT
+	SETGLOB 12
+	SETGLOB 11
+	SETGLOB 10
+	PUSHINT 64
+	DICTUGET
+	THROWIFNOT 61
+	PLDU 256
+	SETGLOB 2
+	PUSHINT 0 ; timestamp
+	SETGLOB 3
+}
+IFREFELSE {
+	CALL $c4_to_c7$
+}
+
+.macro c7_to_c4
+GETGLOB 12
+GETGLOB 11
+GETGLOB 10
+GETGLOB 3
+GETGLOB 2
+NEWC
+STU 256
+STU 64
+STONE
+STSLICE
+ROTREV
+NEWC
+STSLICE
+STREF
+STBREFR
+ENDC
+POPROOT
+
+.macro upd_only_time_in_c4
+PUSHROOT
+CTOS
+LDU 256
+LDU 64
+NIP
+GETGLOB 3
+ROT
+NEWC
+STU 256
+STU 64
+STSLICE
+ENDC
+POPROOT
+
+.internal-alias :main_internal, 0
+.internal :main_internal
+PUSHROOT
+CTOS
+SBITS
+NEQINT 1
+SETGLOB 6
+PUSH S2
+CTOS
+LDU 4 ; bounced tail
+LDMSGADDR ; bounced src tail
+DROP
+SETGLOB 9
+MODPOW2 1
+IFRET
+OVER
+SEMPTY ; isEmpty
+IFJMPREF {
+	GETGLOB 6
+	THROWIFNOT 76
+}
+OVER
+LDUQ 32  ; [funcId] body' ok
+THROWIFNOT 60
+OVER
+IFNOTJMPREF {
+	GETGLOB 6
+	THROWIFNOT 76
+}
+SWAP
+CALLREF {
+	CALL $public_function_selector$
+}
+THROW 60
+
+.internal-alias :main_external, -1
+.internal :main_external
+PUSHROOT
+CTOS
+SBITS
+NEQINT 1
+SETGLOB 6
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+SETGLOB 9
+OVER
+CALLREF {
+	CALL $c4_to_c7_with_init_storage$
+}
+LDU 1 ; haveSign msgSlice
+SWAP
+PUSHCONT {
+	PUSHPOW2 9
+	LDSLICEX ; signatureSlice msgSlice
+	DUP
+	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	SWAP
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
+	SWAP
+	PUSHCONT {
+		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
+		XCHG S3
+		SWAP
+	}
+	PUSHCONT {
+		XCHG S2
+		GETGLOB 2
+	}
+	IFELSE
+	CHKSIGNU ; msgSlice isSigned
+	THROWIFNOT 40
+}
+PUSHCONT {
+	LDU 1 ; hasPubkey msgSlice
+	SWAP
+	THROWIF 58
+}
+IFELSE
+LDU 64 ; timestamp msgSlice
+SWAP
+CALL $replay_protection_macro$
+LDU 32 ; expireAt msgSlice
+SWAP
+NOW ; msgSlice expireAt now
+GREATER ; msgSlice expireAt>now
+THROWIFNOT 57
+LDU 32 ; funcId body
+SWAP
+CALLREF {
+	CALL $public_function_selector$
+}
+THROW 60
+
+.macro public_function_selector
+DUP
+PUSHINT 987503500
+EQUAL
+IFJMPREF {
+	CALL $constructor$
+}
+
