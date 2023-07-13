@@ -1,10 +1,6 @@
 pragma ever-solidity ^0.62.0;
 
-<<<<<<<< HEAD:contracts/LpTokenPending.tsol
 import "./structures/IGasValueStructure.tsol";
-========
-import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
->>>>>>>> limit_orders:contracts/DexVaultLpTokenPendingV2.tsol
 
 import "tip3/contracts/interfaces/ITokenRoot.tsol";
 import "tip3/contracts/interfaces/ITransferableOwnership.tsol";
@@ -15,20 +11,15 @@ import "./interfaces/ITokenFactory.tsol";
 import "./interfaces/ITokenRootDeployedCallback.tsol";
 import "./interfaces/IDexRoot.tsol";
 
-<<<<<<<< HEAD:contracts/LpTokenPending.tsol
 import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 import "./libraries/DexErrors.tsol";
 import "./libraries/DexGas.tsol";
 import "./libraries/GasValues.tsol";
-========
-import "./libraries/DexErrors.tsol";
-import "./libraries/DexGas.tsol";
->>>>>>>> limit_orders:contracts/DexVaultLpTokenPendingV2.tsol
 
 contract LpTokenPending is
-    ITokenRootDeployedCallback,
-    ITransferTokenRootOwnershipCallback,
-    IGasValueStructure
+ITokenRootDeployedCallback,
+ITransferTokenRootOwnershipCallback,
+IGasValueStructure
 {
     string LP_TOKEN_SYMBOL_PREFIX = "FlatQube-LP-";
     string LP_TOKEN_SYMBOL_SEPARATOR = "-";
@@ -85,10 +76,10 @@ contract LpTokenPending is
 
         for (uint8 i = 0; i < N_COINS; i++) {
             ITokenRoot(roots[i]).symbol{
-                value: _calcValue(GasValues.getTokenDataGas()),
-                flag: MsgFlag.SENDER_PAYS_FEES,
-                callback: onSymbol
-            }();
+                    value: _calcValue(GasValues.getTokenDataGas()),
+                    flag: MsgFlag.SENDER_PAYS_FEES,
+                    callback: onSymbol
+                }();
         }
         pending_messages+=N_COINS;
     }
@@ -126,9 +117,9 @@ contract LpTokenPending is
         mapping(address => ICallbackParamsStructure.CallbackParams) callbacks;
         callbacks[address(this)] = ICallbackParamsStructure.CallbackParams(0, empty);
         ITransferableOwnership(token_root).transferOwnership{
-            value: _calcValue(GasValues.getTransferOwnershipGas()),
-            flag:  MsgFlag.SENDER_PAYS_FEES
-        }(pool, address(this), callbacks);
+                value: _calcValue(GasValues.getTransferOwnershipGas()),
+                flag:  MsgFlag.SENDER_PAYS_FEES
+            }(pool, address(this), callbacks);
     }
 
     function onTransferTokenRootOwnership(
@@ -143,17 +134,17 @@ contract LpTokenPending is
 
         if (oldOwner == address(this) && newOwner == pool) {
             IDexRoot(root)
-                .onLiquidityTokenDeployed{
+            .onLiquidityTokenDeployed{
                     value: 0,
                     flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO,
                     bounce: false
                 }(
-                    _nonce,
-                    pool,
-                    roots,
-                    lp_token_root,
-                    send_gas_to
-                );
+                _nonce,
+                pool,
+                roots,
+                lp_token_root,
+                send_gas_to
+            );
         } else {
             _onLiquidityTokenNotDeployed();
         }
@@ -161,17 +152,17 @@ contract LpTokenPending is
 
     function _onLiquidityTokenNotDeployed() private inline view {
         IDexRoot(root)
-            .onLiquidityTokenNotDeployed{
+        .onLiquidityTokenNotDeployed{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.DESTROY_IF_ZERO,
                 bounce: false
             }(
-                _nonce,
-                pool,
-                roots,
-                lp_token_root,
-                send_gas_to
-            );
+            _nonce,
+            pool,
+            roots,
+            lp_token_root,
+            send_gas_to
+        );
     }
 
     function createLpTokenAndWallets() private {
@@ -182,9 +173,9 @@ contract LpTokenPending is
     function deployLpToken(bytes symbol, uint8 decimals) private {
         pending_messages++;
         ITokenFactory(token_factory).createToken{
-            value: DexGas.CREATE_TOKEN_VALUE,
-            flag: MsgFlag.SENDER_PAYS_FEES
-        }(
+                value: DexGas.CREATE_TOKEN_VALUE,
+                flag: MsgFlag.SENDER_PAYS_FEES
+            }(
             0,
             symbol,
             symbol,

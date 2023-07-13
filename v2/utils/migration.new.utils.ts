@@ -172,7 +172,7 @@ export const dexVaultMigration = async (
 
   const platfromArtifacts = await locklift.factory.getContractArtifacts("DexPlatform")
   const DexTokenVault = await  locklift.factory.getContractArtifacts("DexTokenVault")
-  const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts('DexVaultLpTokenPendingV2');
+  const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts('LpTokenPending');
   const DexAccount = await locklift.factory.getContractArtifacts('DexAccount');
 
   logMigrationProcess('dexVaultMigration', 'installPlatformOnce', 'installPlatformOnce...');
@@ -493,7 +493,7 @@ export const dexRootMigration = async (
   const DexPair = await locklift.factory.getContractArtifacts('DexPair');
   const DexPlatform = await locklift.factory.getContractArtifacts('DexPlatform');
   const DexAccount = await locklift.factory.getContractArtifacts('DexAccount');
-  const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts('DexVaultLpTokenPendingV2');
+  const DexVaultLpTokenPendingV2 = await locklift.factory.getContractArtifacts('LpTokenPending');
   const DexTokenVault = await locklift.factory.getContractArtifacts('DexTokenVault');
 
   logMigrationProcess('DexRoot', 'constructor', 'Deploying DexRoot...');
