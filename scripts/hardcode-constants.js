@@ -19,9 +19,9 @@ abstract contract Constants {
     address constant PROJECT_ADDRESS = address.makeAddrStd(0, 0x${account.address.substr(2).toLowerCase()});
 }`
 
-    console.log('Replace Constants.sol with');
+    console.log('Replace Constants.tsol with');
     console.log(content);
-    fs.writeFileSync(process.cwd() + '/contracts/abstract/Constants.sol', content);
+    fs.writeFileSync(process.cwd() + '/contracts/abstract/Constants.tsol', content);
 }
 
 main()

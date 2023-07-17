@@ -173,20 +173,20 @@ IGasValueStructure
     function deployLpToken(bytes symbol, uint8 decimals) private {
         pending_messages++;
         ITokenFactory(token_factory).createToken{
-                value: DexGas.CREATE_TOKEN_VALUE,
-                flag: MsgFlag.SENDER_PAYS_FEES
-            }(
-            0,
-            symbol,
-            symbol,
-            decimals,
-            address(0),
-            0,
-            0,
-            false,
-            false,
-            false,
-            address(0)
+            value: DexGas.CREATE_TOKEN_VALUE,
+            flag: MsgFlag.SENDER_PAYS_FEES
+        }(
+        0,
+        symbol,
+        symbol,
+        decimals,
+        address(0),
+        0,
+        0,
+        false,
+        false,
+        false,
+        address(0)
         );
     }
 
