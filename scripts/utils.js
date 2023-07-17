@@ -69,7 +69,7 @@ const Constants = {
     tst: {
       name: 'Tst',
       symbol: 'Tst',
-      decimals: 9,
+      decimals: 18,
       upgradeable: true
     },
     coin: {
