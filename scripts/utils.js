@@ -41,6 +41,11 @@ const displayTx = (_tx) => {
   }
 };
 
+const gasPrice = 1000;
+const calcValue = (gas) => {
+  return new BigNumber(gas.dynamicGas).plus(100000).times(gasPrice).plus(gas.fixedValue).toNumber()
+}
+
 const Constants = {
   tokens: {
     foo: {
@@ -58,13 +63,13 @@ const Constants = {
     qwe: {
       name: 'QWE',
       symbol: 'Qwe',
-      decimals: 6,
+      decimals: 18,
       upgradeable: true
     },
     tst: {
       name: 'Tst',
       symbol: 'Tst',
-      decimals: 9,
+      decimals: 18,
       upgradeable: true
     },
     coin: {
@@ -117,6 +122,10 @@ class Migration {
 
   _saveMigrationLog() {
     fs.writeFileSync(this.log_path, JSON.stringify(this.migration_log));
+  }
+
+  backup() {
+    fs.writeFileSync("migration-log-" + (new Date().getTime()) + ".json", JSON.stringify(this.migration_log));
   }
 
   exists(alias) {
@@ -345,6 +354,7 @@ async function expectedDepositLiquidityOneCoin(poolAddress, tokens, amount, spen
 module.exports = {
   Migration,
   Constants,
+  calcValue,
   getRandomNonce,
   stringToBytesArray,
   sleep,

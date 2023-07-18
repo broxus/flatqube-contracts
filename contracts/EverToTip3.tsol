@@ -10,8 +10,10 @@ import "./libraries/EverToTip3Payloads.tsol";
 import "./libraries/DexOperationTypes.tsol";
 import "./libraries/EverToTip3OperationStatus.tsol";
 import "./libraries/DexOperationStatusV2.tsol";
+import "./libraries/GasValues.tsol";
 
 import "./structures/INextExchangeData.tsol";
+import "./structures/IGasValueStructure.tsol";
 
 import "./interfaces/IEverVault.tsol";
 import "./interfaces/IEverTip3SwapEvents.tsol";
@@ -24,7 +26,7 @@ import "tip3/contracts/interfaces/IAcceptTokensMintCallback.tsol";
 import "tip3/contracts/interfaces/IAcceptTokensTransferCallback.tsol";
 import "tip3/contracts/interfaces/IAcceptTokensBurnCallback.tsol";
 
-contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTip3SwapEvents {
+contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback, IAcceptTokensBurnCallback, IEverTip3SwapEvents, IGasValueStructure{
 
     uint32 static randomNonce_;
 
@@ -39,7 +41,7 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
         tvm.rawReserve(EverToTip3Gas.TARGET_BALANCE, 0);
 
         ITokenRoot(weverRoot).deployWallet {
-            value: EverToTip3Gas.DEPLOY_EMPTY_WALLET_VALUE,
+            value: _calcValue(GasValues.getDeployWalletGas()),
             flag: MsgFlag.SENDER_PAYS_FEES,
             callback: EverToTip3.onWeverWallet
         }(
@@ -295,6 +297,10 @@ contract EverToTip3 is IAcceptTokensMintCallback, IAcceptTokensTransferCallback,
 
         emit SwapEverToTip3Cancel(user, id, amount);
         IEverTip3SwapCallbacks(user).onSwapEverToTip3Cancel{ value: EverToTip3Gas.OPERATION_CALLBACK_BASE, flag: MsgFlag.ALL_NOT_RESERVED, bounce: false }(id, amount);
+    }
+
+    function _calcValue(IGasValueStructure.GasValue value) internal pure returns(uint128) {
+        return value.fixedValue + gasToValue(value.dynamicGas, address(this).wid);
     }
 
     fallback() external pure {  }

@@ -1,7 +1,7 @@
 import { LockliftConfig, lockliftChai } from 'locklift';
 import { FactorySource } from './build/factorySource';
-import 'locklift-verifier';
-import { Deployments } from 'locklift-deploy';
+import '@broxus/locklift-verifier';
+import { Deployments } from '@broxus/locklift-deploy';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -25,14 +25,11 @@ declare module 'locklift' {
 
 const LOCAL_NETWORK_ENDPOINT = 'http://localhost:80/graphql';
 
-// const LOCAL_NETWORK_ENDPOINT =
-//   'https://evernode-no-limits.fairyfromalfeya.com/graphql';
-
 const config: LockliftConfig = {
   compiler: {
     version: '0.62.0',
     externalContracts: {
-      precompiled: ['DexPlatform', 'OrderRootPlatform', 'OrderPlatform'],
+      precompiled: ['DexPlatform'],
       'node_modules/tip3/build': [
         'TokenRootUpgradeable',
         'TokenWalletUpgradeable',
@@ -44,8 +41,8 @@ const config: LockliftConfig = {
   linker: { version: '0.15.48' },
   verifier: {
     verifierVersion: 'latest', // contract verifier binary, see https://github.com/broxus/everscan-verify/releases
-    apiKey: '',
-    secretKey: '',
+    apiKey: process.env.EVERSCAN_API_KEY ?? '',
+    secretKey: process.env.EVERSCAN_SECRET_KEY ?? '',
     // license: "AGPL-3.0-or-later", <- this is default value and can be overrided
   },
   networks: {
@@ -62,13 +59,13 @@ const config: LockliftConfig = {
       },
       giver: {
         address:
-          '0:ece57bcc6c530283becbbd8a3b24d3c5987cdddc3c8b7b33be6e4a6312490415',
+            '0:ece57bcc6c530283becbbd8a3b24d3c5987cdddc3c8b7b33be6e4a6312490415',
         key: '172af540e43a524763dd53b26a066d472a97c4de37d5498170564510608250c3',
       },
       tracing: { endpoint: LOCAL_NETWORK_ENDPOINT },
       keys: {
         phrase:
-          'action inject penalty envelope rabbit element slim tornado dinner pizza off blood',
+            'action inject penalty envelope rabbit element slim tornado dinner pizza off blood',
         amount: 20,
       },
     },

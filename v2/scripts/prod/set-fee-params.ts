@@ -1,7 +1,5 @@
-import {Address, toNano, WalletTypes} from "locklift";
-
-const {displayTx} = require(process.cwd() + '/scripts/utils')
-const {Migration} = require(process.cwd()+'/scripts/utils')
+import {Address, toNano} from "locklift";
+import {Migration, displayTx} from '../../utils/migration';
 
 const fs = require('fs');
 
@@ -14,10 +12,7 @@ if (data) dexPairs = JSON.parse(data);
 
 async function main() {
     const migration = new Migration();
-    const dexOwner = await locklift.factory.accounts.addExistingAccount({
-        type: WalletTypes.EverWallet,
-        address: migration.getAddress('Account1')
-    });
+    const dexOwner = await migration.loadAccount('Account1', '0');
 
     const dexRoot = await locklift.factory.getDeployedContract('DexRoot', new Address(DEX_ROOT_ADDRESS));
 

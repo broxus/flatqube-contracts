@@ -1,5 +1,5 @@
 const {expect} = require('chai');
-const {Migration, afterRun, Constants, TOKEN_CONTRACTS_PATH, displayTx} = require(process.cwd() + '/scripts/utils');
+const {Migration, afterRun, Constants, TOKEN_CONTRACTS_PATH, displayTx, calcValue} = require(process.cwd() + '/scripts/utils');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
 const { Command } = require('commander');
@@ -502,8 +502,20 @@ describe('Check direct operations', async function () {
             });
             logger.log(`Result payload = ${payload}`);
 
+            const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
+            let gas;
             if (options.start_token === 'wever') {
                 if(options.multi) {
+                    gas = await gasValues.call({
+                        method: 'getEverWeverToTip3CrossExchangeGas',
+                        params: {
+                            steps: steps.length,
+                            leaves: lastStepPools.length,
+                            deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
+                            referrer: locklift.utils.zeroAddress
+                        }
+                    });
+
                     const tx = await Account3.runTarget({
                         contract: accountWallets[options.start_token],
                         method: 'transfer',
@@ -516,7 +528,7 @@ describe('Check direct operations', async function () {
                             payload: payload
                         },
                         value: new BigNumber(options.amount).div(2)
-                            .plus(options.route.length * 0.5 + 5)
+                            .plus(calcValue(gas))
                             .shiftedBy(Constants.tokens[options.start_token].decimals)
                             .dp(0)
                             .toString(),
@@ -524,6 +536,16 @@ describe('Check direct operations', async function () {
                     });
                     displayTx(tx);
                 } else {
+                    gas = await gasValues.call({
+                        method: 'getEverToTip3CrossExchangeGas',
+                        params: {
+                            steps: steps.length,
+                            leaves: lastStepPools.length,
+                            deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
+                            referrer: locklift.utils.zeroAddress
+                        }
+                    });
+
                     const tx = await Account3.runTarget({
                         contract: WeverVault,
                         method: 'wrap',
@@ -533,12 +555,22 @@ describe('Check direct operations', async function () {
                             gas_back_address: Account3.address,
                             payload: payload
                         },
-                        value: locklift.utils.convertCrystal(options.amount + 5 + options.route.length * 0.5, 'nano'),
+                        value: Number(locklift.utils.convertCrystal(options.amount, 'nano')) + calcValue(gas),
                         keyPair: keyPairs[2]
                     });
                     displayTx(tx);
                 }
             } else {
+                gas = await gasValues.call({
+                    method: 'getTip3ToEverCrossExchangeGas',
+                    params: {
+                        steps: steps.length,
+                        leaves: lastStepPools.length,
+                        deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
+                        referrer: locklift.utils.zeroAddress
+                    }
+                });
+
                 const tx = await Account3.runTarget({
                     contract: accountWallets[options.start_token],
                     method: 'transfer',
@@ -550,7 +582,7 @@ describe('Check direct operations', async function () {
                         notify: true,
                         payload: payload
                     },
-                    value: locklift.utils.convertCrystal(options.route.length * 0.5 + 5, 'nano'),
+                    value: calcValue(gas),
                     keyPair: keyPairs[2]
                 });
                 displayTx(tx);

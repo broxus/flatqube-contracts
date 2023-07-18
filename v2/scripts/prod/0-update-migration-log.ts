@@ -1,7 +1,7 @@
 import { Address } from 'locklift';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Migration } = require(process.cwd() + '/scripts/utils');
+import { Migration } from '../../utils/migration';
 
 async function main() {
   // FlatQube

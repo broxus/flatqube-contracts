@@ -1,6 +1,6 @@
 const {expect} = require('chai');
 const logger = require('mocha-logger');
-const {Migration, afterRun, Constants} = require(process.cwd() + '/scripts/utils')
+const {Migration, afterRun, Constants, calcValue} = require(process.cwd() + '/scripts/utils')
 
 const migration = new Migration();
 
@@ -59,6 +59,12 @@ describe('Test Dex Root contract upgrade', async function () {
 
     oldRootData = await loadRootData(dexRoot);
 
+    const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
+    const gas = await gasValues.call({
+      method: 'getUpgradeRootGas',
+      params: {}
+    });
+
     logger.log(`Upgrading DexRoot contract: ${dexRoot.address}`);
     await account.runTarget({
       contract: dexRoot,
@@ -66,7 +72,7 @@ describe('Test Dex Root contract upgrade', async function () {
       params: {
         code: NewDexRoot.code
       },
-      value: locklift.utils.convertCrystal(11, 'nano'),
+      value: calcValue(gas),
       keyPair
     });
     NewDexRoot.setAddress(dexRoot.address);

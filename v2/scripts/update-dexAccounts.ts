@@ -1,15 +1,12 @@
-import {toNano, WalletTypes} from "locklift";
+import {toNano} from "locklift";
 import {Account} from "everscale-standalone-client/nodejs";
 
-const {Migration, displayTx} = require(process.cwd() + '/scripts/utils')
+import { displayTx, Migration } from '../utils/migration';
 const migration = new Migration();
 
 async function main() {
-  const rootOwner = await locklift.factory.accounts.addExistingAccount({
-    type: WalletTypes.EverWallet,
-    address: migration.getAddress('Account1')
-  });
-  const dexRoot = await locklift.factory.getDeployedContract('DexRoot', migration.getAddress('DexRoot'));
+  const rootOwner = await migration.loadAccount('Account1', '0');
+  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
   const DexAccount = await locklift.factory.getContractArtifacts('DexAccount');
 
   console.log(`Installing new DexAccount contract in DexRoot: ${dexRoot.address}`);
@@ -24,10 +21,7 @@ async function main() {
   await Promise.all([1, 2, 3].filter((n) => migration.exists('DexAccount' + n)).map(async (n) => {
     console.log(`Add DexAccount ${n} to upgrade`);
 
-    const account = await locklift.factory.accounts.addExistingAccount({
-      type: WalletTypes.EverWallet,
-      address: migration.getAddress('Account' + n)
-    });
+    const account = await migration.loadAccount('Account' + n, String(n - 1));
     accounts_to_force_update.push(account);
   }));
 

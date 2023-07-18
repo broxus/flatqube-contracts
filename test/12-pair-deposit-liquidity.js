@@ -6,7 +6,8 @@ const {
     getRandomNonce,
     TOKEN_CONTRACTS_PATH,
     displayTx,
-    expectedDepositLiquidity
+    expectedDepositLiquidity,
+    calcValue
 } = require(process.cwd() + '/scripts/utils');
 const {Command} = require('commander');
 const program = new Command();
@@ -115,6 +116,7 @@ async function dexPairInfo() {
 describe('DexAccount interact with DexPair', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
     before('Load contracts', async function () {
+        console.log(`12-pair-deposit-liquidity.js`);
         keyPairs = await locklift.keys.getKeyPairs();
 
         if (locklift.tracing) {
@@ -235,7 +237,13 @@ describe('DexAccount interact with DexPair', async function () {
                 options.auto_change
             );
 
-            // swap tokens' order
+            const gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
+            const gas = await gasValues.call({
+                method: 'getAccountDepositGas',
+                params: {N: 2, referrer: locklift.utils.zeroAddress}
+            });
+
+            // swap tokens
             const tx = await Account2.runTarget({
                 contract: DexAccount2,
                 method: 'depositLiquidity',
@@ -249,9 +257,13 @@ describe('DexAccount interact with DexPair', async function () {
                     auto_change: options.auto_change,
                     send_gas_to: Account2.address
                 },
-                value: locklift.utils.convertCrystal('1.1', 'nano'),
+                value: options.account_contract_name === 'DexAccountPrev' ?
+                    locklift.utils.convertCrystal('1.5', 'nano') :
+                    //extra fwd fee because locklift-v1 not support flag=1
+                    calcValue(gas),
                 keyPair: keyPairs[1]
             });
+
 
             displayTx(tx);
 

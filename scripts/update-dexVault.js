@@ -15,7 +15,7 @@ options.old_contract = options.old_contract || 'DexVaultPrev';
 options.new_contract = options.new_contract || 'DexVault';
 
 async function main() {
-  const DexVaultLpTokenPendingV2 = await locklift.factory.getContract('DexVaultLpTokenPendingV2');
+  const LpTokenPending = await locklift.factory.getContract('LpTokenPending');
 
   const account = migration.load(await locklift.factory.getAccount('Wallet'), 'Account1');
   account.afterRun = afterRun;

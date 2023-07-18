@@ -1,4 +1,4 @@
-const { Migration, afterRun, Constants, TOKEN_CONTRACTS_PATH, EMPTY_TVM_CELL, displayTx } = require(process.cwd() + '/scripts/utils');
+const { Migration, afterRun, Constants, TOKEN_CONTRACTS_PATH, EMPTY_TVM_CELL, displayTx, calcValue} = require(process.cwd() + '/scripts/utils');
 const BigNumber = require('bignumber.js');
 const { expect } = require('chai');
 BigNumber.config({ EXPONENTIAL_AT: 257 });
@@ -22,6 +22,7 @@ let wEverVaultWallet;
 let IS_WEVER_LEFT;
 let wEverWallet2
 let wEverWallet3;
+let gasValues;
 
 describe('Tests Swap Evers', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
@@ -30,6 +31,8 @@ describe('Tests Swap Evers', async function () {
         everToTip3 = migration.load(await locklift.factory.getContract('EverToTip3'), 'EverToTip3');
         tip3ToEver = migration.load(await locklift.factory.getContract('Tip3ToEver'), 'Tip3ToEver');
         everWeverToTip3 = migration.load(await locklift.factory.getContract('EverWeverToTip3'), 'EverWeverToTip3');
+
+        gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
 
         keyPairs = await locklift.keys.getKeyPairs();
         dexPair = migration.load(await locklift.factory.getContract('DexPair'), 'DexPoolTstWEVER');
@@ -127,7 +130,7 @@ describe('Tests Swap Evers', async function () {
                 pair: dexPair.address,
                 expectedAmount: expected.expected_amount,
                 deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
-                referrer: locklift.ton.zero_address
+                referrer: locklift.utils.zeroAddress
             }
 
             logger.log(`EverToTip3.buildExchangePayload(${JSON.stringify(params)})`);
@@ -148,6 +151,14 @@ describe('Tests Swap Evers', async function () {
                 gas_back_address: ${account3.address},
                 payload: {${JSON.stringify(params)}}
             )`);
+
+            const gas = await gasValues.call({
+                method: 'getEverToTip3ExchangeGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
             const tx = await account3.runTarget({
                 contract: wEverVault,
                 method: 'wrap',
@@ -157,7 +168,7 @@ describe('Tests Swap Evers', async function () {
                     gas_back_address: account3.address,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal((EVERS_TO_EXCHANGE) + 5, 'nano'),
+                value: Number(locklift.utils.convertCrystal(EVERS_TO_EXCHANGE, 'nano')) + calcValue(gas),
                 keyPair: keyPairs[2]
             });
             displayTx(tx);
@@ -194,7 +205,7 @@ describe('Tests Swap Evers', async function () {
                     pair: dexPair.address,
                     expectedAmount: new BigNumber(expected.expected_amount).times(2).toString(),
                     deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
-                    referrer: locklift.ton.zero_address
+                    referrer: locklift.utils.zeroAddress
                 }
 
                 logger.log(`EverToTip3.buildExchangePayload(${JSON.stringify(params)})`);
@@ -215,6 +226,15 @@ describe('Tests Swap Evers', async function () {
                     gas_back_address: ${account3.address},
                     payload: {${JSON.stringify(params)}}
                 )`);
+
+                const gas = await gasValues.call({
+                    method: 'getEverToTip3ExchangeGas',
+                    params: {
+                        deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
+                        referrer: locklift.utils.zeroAddress
+                    }
+                });
+
                 const tx = await account3.runTarget({
                     contract: wEverVault,
                     method: 'wrap',
@@ -224,7 +244,7 @@ describe('Tests Swap Evers', async function () {
                         gas_back_address: account3.address,
                         payload: payload
                     },
-                    value: locklift.utils.convertCrystal((EVERS_TO_EXCHANGE) + 5, 'nano'),
+                    value: Number(locklift.utils.convertCrystal((EVERS_TO_EXCHANGE), 'nano')) + calcValue(gas),
                     keyPair: keyPairs[2]
                 });
                 displayTx(tx);
@@ -267,7 +287,7 @@ describe('Tests Swap Evers', async function () {
                 id: 66,
                 pair: dexPair.address,
                 expectedAmount: new BigNumber(expected.expected_amount).times(2).toString(),
-                referrer: locklift.ton.zero_address
+                referrer: locklift.utils.zeroAddress
             }
 
             logger.log(`Tip3ToEver.buildExchangePayload(${JSON.stringify(params)})`);
@@ -285,6 +305,15 @@ describe('Tests Swap Evers', async function () {
                 notify: ${true},
                 payload: {${JSON.stringify(params)}}
             )`);
+
+            const gas = await gasValues.call({
+                method: 'getTip3ToEverExchangeGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             const tx = await account3.runTarget({
                 contract: tstWallet3,
                 method: 'transfer',
@@ -296,7 +325,7 @@ describe('Tests Swap Evers', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal(3.6, 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
             displayTx(tx);
@@ -335,7 +364,7 @@ describe('Tests Swap Evers', async function () {
                 id: 66,
                 pair: dexPair.address,
                 expectedAmount: expected.expected_amount,
-                referrer: locklift.ton.zero_address
+                referrer: locklift.utils.zeroAddress
             }
 
             logger.log(`Tip3ToEver.buildExchangePayload(${JSON.stringify(params)})`);
@@ -353,6 +382,15 @@ describe('Tests Swap Evers', async function () {
                 notify: ${true},
                 payload: {${JSON.stringify(params)}}
             )`);
+
+            const gas = await gasValues.call({
+                method: 'getTip3ToEverExchangeGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal(0.1, 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             const tx = await account3.runTarget({
                 contract: tstWallet3,
                 method: 'transfer',
@@ -364,7 +402,7 @@ describe('Tests Swap Evers', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal(3.6, 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
             displayTx(tx);
@@ -409,7 +447,7 @@ describe('Tests Swap Evers', async function () {
                 pair: dexPair.address,
                 expectedAmount: new BigNumber(expected.expected_amount).times(2).toString(),
                 deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
-                referrer: locklift.ton.zero_address
+                referrer: locklift.utils.zeroAddress
             }
 
             logger.log(`everWeverToTip3.buildExchangePayload(${JSON.stringify(params)})`);
@@ -433,6 +471,14 @@ describe('Tests Swap Evers', async function () {
                     payload: {${JSON.stringify(params)}}
                 )`);
 
+            const gas = await gasValues.call({
+                method: 'getEverWeverToTip3ExchangeGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             const tx = await account3.runTarget({
                 contract: wEverWallet3,
                 method: 'transfer',
@@ -444,7 +490,7 @@ describe('Tests Swap Evers', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal(EVERS_TO_EXCHANGE + 5, 'nano'),
+                value: Number(locklift.utils.convertCrystal(EVERS_TO_EXCHANGE, 'nano')) + calcValue(gas),
                 keyPair: keyPairs[2]
             });
             displayTx(tx);
@@ -485,7 +531,7 @@ describe('Tests Swap Evers', async function () {
                 pair: dexPair.address,
                 expectedAmount: expected.expected_amount,
                 deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
-                referrer: locklift.ton.zero_address
+                referrer: locklift.utils.zeroAddress
             }
 
             logger.log(`everWeverToTip3.buildExchangePayload(${JSON.stringify(params)})`);
@@ -509,6 +555,14 @@ describe('Tests Swap Evers', async function () {
                     payload: {${JSON.stringify(params)}}
                 )`);
 
+            const gas = await gasValues.call({
+                method: 'getEverWeverToTip3ExchangeGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.1', 'nano'),
+                    referrer: locklift.utils.zeroAddress
+                }
+            });
+
             const tx = await account3.runTarget({
                 contract: wEverWallet3,
                 method: 'transfer',
@@ -520,7 +574,7 @@ describe('Tests Swap Evers', async function () {
                     notify: true,
                     payload: payload
                 },
-                value: locklift.utils.convertCrystal(EVERS_TO_EXCHANGE + 5, 'nano'),
+                value: Number(locklift.utils.convertCrystal(EVERS_TO_EXCHANGE, 'nano')) + calcValue(gas),
                 keyPair: keyPairs[2]
             });
             displayTx(tx);

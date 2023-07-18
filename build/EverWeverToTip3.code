@@ -10,21 +10,29 @@ IFREF {
 GETGLOB 6
 THROWIF 51
 ENDS
-.loc ../contracts/EverWeverToTip3.tsol, 31
-ACCEPT
 .loc ../contracts/EverWeverToTip3.tsol, 33
+ACCEPT
+.loc ../contracts/EverWeverToTip3.tsol, 35
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/EverWeverToTip3.tsol, 35
-PUSHINT 100000000
+.loc ../contracts/EverWeverToTip3.tsol, 37
+PUSHINT 120000000
 MYADDR
+CALLREF {
+	CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+}
+CALLREF {
+	CALL $_calcValue_2fb4263c_internal_macro$
+}
 GETGLOB 11
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHINT 2868722788230934574387753789225109188247553
-STUR 143
+SWAP
+STGRAMS
+PUSHINT 1
+STUR 107
 ROTREV
 PUSHSLICE x31edd4c7282c61f5
 NEWC
@@ -35,7 +43,7 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/EverWeverToTip3.tsol, 44
+.loc ../contracts/EverWeverToTip3.tsol, 46
 GETGLOB 9
 NEWC
 STSLICECONST x42_
@@ -62,7 +70,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/EverWeverToTip3.tsol, 48
+.loc ../contracts/EverWeverToTip3.tsol, 50
 OVER
 PUSHCONT {
 	LDREF
@@ -83,7 +91,7 @@ CALLREF {
 THROW 0
 
 .macro onWeverWallet_b024d1df_internal_macro
-.loc ../contracts/EverWeverToTip3.tsol, 49
+.loc ../contracts/EverWeverToTip3.tsol, 51
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -94,10 +102,10 @@ GETGLOB 11
 SDEQ
 AND
 THROWIFNOT 200
-.loc ../contracts/EverWeverToTip3.tsol, 50
+.loc ../contracts/EverWeverToTip3.tsol, 52
 DUP
 SETGLOB 14
-.loc ../contracts/EverWeverToTip3.tsol, 51
+.loc ../contracts/EverWeverToTip3.tsol, 53
 NEWC
 STSLICECONST x42_
 STSLICE
@@ -114,7 +122,7 @@ SENDRAWMSG
 DROP
 GETGLOB 6
 THROWIFNOT 76
-.loc ../contracts/EverWeverToTip3.tsol, 55
+.loc ../contracts/EverWeverToTip3.tsol, 57
 OVER
 PUSHCONT {
 	LDREF
@@ -195,7 +203,7 @@ IFREF {
 THROW 0
 
 .macro buildExchangePayload_937165a7_internal_macro
-.loc ../contracts/EverWeverToTip3.tsol, 64
+.loc ../contracts/EverWeverToTip3.tsol, 66
 ROLLREV 6
 PUSH S6
 ISNULL
@@ -220,7 +228,7 @@ NIP
 DROP
 GETGLOB 6
 THROWIFNOT 76
-.loc ../contracts/EverWeverToTip3.tsol, 76
+.loc ../contracts/EverWeverToTip3.tsol, 78
 OVER
 PUSHCONT {
 	LDREF
@@ -284,7 +292,7 @@ IFREF {
 THROW 0
 
 .macro buildCrossPairExchangePayload_65670cca_internal_macro
-.loc ../contracts/EverWeverToTip3.tsol, 87
+.loc ../contracts/EverWeverToTip3.tsol, 89
 CALLREF {
 	CALL $EverToTip3Payloads_no_obj_buildCrossPairExchangePayload_65670cca_macro$
 }
@@ -299,7 +307,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/EverWeverToTip3.tsol, 101
+.loc ../contracts/EverWeverToTip3.tsol, 103
 OVER
 PUSHCONT {
 	LDREF
@@ -334,22 +342,22 @@ CALLREF {
 THROW 0
 
 .macro onAcceptTokensTransfer_e63f2284_internal_macro
-.loc ../contracts/EverWeverToTip3.tsol, 112
+.loc ../contracts/EverWeverToTip3.tsol, 114
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
 PLDU 256
 THROWIFNOT 100
-.loc ../contracts/EverWeverToTip3.tsol, 114
+.loc ../contracts/EverWeverToTip3.tsol, 116
 FALSE
-.loc ../contracts/EverWeverToTip3.tsol, 115
+.loc ../contracts/EverWeverToTip3.tsol, 117
 OVER
 CTOS
-.loc ../contracts/EverWeverToTip3.tsol, 116
+.loc ../contracts/EverWeverToTip3.tsol, 118
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/EverWeverToTip3.tsol, 117
+.loc ../contracts/EverWeverToTip3.tsol, 119
 DUP
 SBITS
 PUSHINT 395
@@ -359,26 +367,33 @@ GETGLOB 14
 SDEQ
 AND
 PUSHCONT {
-	.loc ../contracts/EverWeverToTip3.tsol, 118
+	.loc ../contracts/EverWeverToTip3.tsol, 120
 	DUP
 	LDMSGADDR
 	LDU 128
 	POP S3
 	NIP
-	.loc ../contracts/EverWeverToTip3.tsol, 119
+	.loc ../contracts/EverWeverToTip3.tsol, 121
 	PUSH S7
 	DEPTH
 	ADDCONST -2
 	PICK
 	ADD
 	UFITS 128
-	PUSHINT 4000000000
+	PUSHINT 0
+	PUSHINT 1
+	CALLREF {
+		CALL $GasValues_no_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb_macro$
+	}
+	CALLREF {
+		CALL $_calcValue_2fb4263c_internal_macro$
+	}
 	SUB
 	UFITS 128
 	SWAP
 	GEQ
 	PUSHCONT {
-		.loc ../contracts/EverWeverToTip3.tsol, 120
+		.loc ../contracts/EverWeverToTip3.tsol, 122
 		PUSH S2
 		TRUE
 		PUSH S5
@@ -412,7 +427,7 @@ PUSHCONT {
 		SENDRAWMSG
 	}
 	PUSHCONT {
-		.loc ../contracts/EverWeverToTip3.tsol, 129
+		.loc ../contracts/EverWeverToTip3.tsol, 131
 		TRUE
 		POP S2
 	}
@@ -420,18 +435,18 @@ PUSHCONT {
 	.loc ../contracts/EverWeverToTip3.tsol, 0
 }
 PUSHCONT {
-	.loc ../contracts/EverWeverToTip3.tsol, 132
+	.loc ../contracts/EverWeverToTip3.tsol, 134
 	TRUE
 	POP S2
 }
 IFELSE
-.loc ../contracts/EverWeverToTip3.tsol, 135
+.loc ../contracts/EverWeverToTip3.tsol, 137
 DROP
 PUSHCONT {
-	.loc ../contracts/EverWeverToTip3.tsol, 136
+	.loc ../contracts/EverWeverToTip3.tsol, 138
 	PUSHREF {
 	}
-	.loc ../contracts/EverWeverToTip3.tsol, 137
+	.loc ../contracts/EverWeverToTip3.tsol, 139
 	TRUE
 	PUSH3 S3, S5, S3
 	SDEQ
@@ -479,7 +494,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/EverWeverToTip3.tsol, 149
+.loc ../contracts/EverWeverToTip3.tsol, 151
 OVER
 PUSHCONT {
 	LDREF
@@ -510,7 +525,7 @@ CALLREF {
 THROW 0
 
 .macro onAcceptTokensBurn_07d14114_internal_macro
-.loc ../contracts/EverWeverToTip3.tsol, 159
+.loc ../contracts/EverWeverToTip3.tsol, 161
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -521,18 +536,18 @@ GETGLOB 11
 SDEQ
 AND
 THROWIFNOT 200
-.loc ../contracts/EverWeverToTip3.tsol, 160
+.loc ../contracts/EverWeverToTip3.tsol, 162
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/EverWeverToTip3.tsol, 162
+.loc ../contracts/EverWeverToTip3.tsol, 164
 DUP
 CTOS
-.loc ../contracts/EverWeverToTip3.tsol, 163
+.loc ../contracts/EverWeverToTip3.tsol, 165
 LDMSGADDR
 PLDU 128
 NIP
-.loc ../contracts/EverWeverToTip3.tsol, 165
+.loc ../contracts/EverWeverToTip3.tsol, 167
 XCHG S2
 GETGLOB 13
 ROLL 3
@@ -561,6 +576,26 @@ PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/EverWeverToTip3.tsol, 0
 BLKDROP 3
+
+.globl	_calcValue_2fb4263c_internal
+.type	_calcValue_2fb4263c_internal, @function
+CALL $_calcValue_2fb4263c_internal_macro$
+
+.macro _calcValue_2fb4263c_internal_macro
+.loc ../contracts/EverWeverToTip3.tsol, 176
+DUP
+FIRST
+SWAP
+SECOND
+MYADDR
+PARSEMSGADDR
+THIRD
+CALLREF {
+	CALL $__gasToTon_macro$
+}
+ADD
+UFITS 128
+.loc ../contracts/EverWeverToTip3.tsol, 0
 
 .macro c4_to_c7
 PUSHROOT
@@ -1490,6 +1525,84 @@ STREF
 ENDC
 BLKDROP2 2, 1
 .loc ../contracts/libraries/EverToTip3Payloads.tsol, 0
+
+.globl	GasValues_no_obj_getDeployWalletGas_38991eb4
+.type	GasValues_no_obj_getDeployWalletGas_38991eb4, @function
+CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+
+.macro GasValues_no_obj_getDeployWalletGas_38991eb4_macro
+.loc ../contracts/libraries/GasValues.tsol, 12
+PUSHINT 120000000
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_with_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb
+.type	GasValues_with_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb, @function
+CALL $GasValues_with_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb_macro$
+
+.macro GasValues_with_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb_macro
+.loc ../contracts/libraries/GasValues.tsol, 425
+PUSHINT 1000000000
+PUSHINT 100000000
+ADD
+UFITS 128
+OVER
+PUSHINT 10000000
+PUSH S4
+ADD
+UFITS 128
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 300000
+DUP
+ADD
+UFITS 128
+ROT
+PUSHINT 150000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_no_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb
+.type	GasValues_no_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb, @function
+CALL $GasValues_no_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb_macro$
+
+.macro GasValues_no_obj_getEverWeverToTip3CrossExchangeGas_c836e1eb_macro
+.loc ../contracts/libraries/GasValues.tsol, 425
+PUSHINT 1000000000
+PUSHINT 100000000
+ADD
+UFITS 128
+OVER
+PUSHINT 10000000
+ROLL 4
+ADD
+UFITS 128
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 300000
+DUP
+ADD
+UFITS 128
+ROT
+PUSHINT 150000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
 
 .globl	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7
 .type	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7, @function

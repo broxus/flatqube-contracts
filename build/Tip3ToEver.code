@@ -10,21 +10,29 @@ IFREF {
 GETGLOB 6
 THROWIF 51
 ENDS
-.loc ../contracts/Tip3ToEver.tsol, 35
-ACCEPT
 .loc ../contracts/Tip3ToEver.tsol, 37
+ACCEPT
+.loc ../contracts/Tip3ToEver.tsol, 39
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/Tip3ToEver.tsol, 39
-PUSHINT 100000000
+.loc ../contracts/Tip3ToEver.tsol, 41
+PUSHINT 120000000
 MYADDR
+CALLREF {
+	CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+}
+CALLREF {
+	CALL $_calcValue_2fb4263c_internal_macro$
+}
 GETGLOB 11
 NEWC
 STSLICECONST x62_
 STSLICE
-PUSHINT 2868722788230934574387753789225109188247553
-STUR 143
+SWAP
+STGRAMS
+PUSHINT 1
+STUR 107
 ROTREV
 PUSHSLICE x31edd4c7282c61f5
 NEWC
@@ -35,7 +43,7 @@ STBREFR
 ENDC
 PUSHINT 1
 SENDRAWMSG
-.loc ../contracts/Tip3ToEver.tsol, 48
+.loc ../contracts/Tip3ToEver.tsol, 50
 GETGLOB 9
 NEWC
 STSLICECONST x42_
@@ -62,7 +70,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Tip3ToEver.tsol, 52
+.loc ../contracts/Tip3ToEver.tsol, 54
 OVER
 PUSHCONT {
 	LDREF
@@ -83,7 +91,7 @@ CALLREF {
 THROW 0
 
 .macro onWeverWallet_b024d1df_internal_macro
-.loc ../contracts/Tip3ToEver.tsol, 53
+.loc ../contracts/Tip3ToEver.tsol, 55
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -94,10 +102,10 @@ GETGLOB 11
 SDEQ
 AND
 THROWIFNOT 200
-.loc ../contracts/Tip3ToEver.tsol, 54
+.loc ../contracts/Tip3ToEver.tsol, 56
 DUP
 SETGLOB 13
-.loc ../contracts/Tip3ToEver.tsol, 55
+.loc ../contracts/Tip3ToEver.tsol, 57
 NEWC
 STSLICECONST x42_
 STSLICE
@@ -114,7 +122,7 @@ SENDRAWMSG
 DROP
 GETGLOB 6
 THROWIFNOT 76
-.loc ../contracts/Tip3ToEver.tsol, 59
+.loc ../contracts/Tip3ToEver.tsol, 61
 OVER
 PUSHCONT {
 	LDREF
@@ -195,24 +203,24 @@ THROW 0
 CALL $buildExchangePayload_75ce4111_internal_macro$
 
 .macro buildExchangePayload_75ce4111_internal_macro
-.loc ../contracts/Tip3ToEver.tsol, 66
+.loc ../contracts/Tip3ToEver.tsol, 68
 NEWC
 DUP
-.loc ../contracts/Tip3ToEver.tsol, 69
+.loc ../contracts/Tip3ToEver.tsol, 71
 STSLICECONST x00
-.loc ../contracts/Tip3ToEver.tsol, 70
+.loc ../contracts/Tip3ToEver.tsol, 72
 PUSH S5
 STUR 64
-.loc ../contracts/Tip3ToEver.tsol, 73
+.loc ../contracts/Tip3ToEver.tsol, 75
 NEWC
 STSLICECONST x01
-.loc ../contracts/Tip3ToEver.tsol, 74
+.loc ../contracts/Tip3ToEver.tsol, 76
 PUSH S6
 STUR 64
-.loc ../contracts/Tip3ToEver.tsol, 75
+.loc ../contracts/Tip3ToEver.tsol, 77
 PUSHPOW2 7
 STZEROES
-.loc ../contracts/Tip3ToEver.tsol, 77
+.loc ../contracts/Tip3ToEver.tsol, 79
 ROLL 6
 PUSHINT 0
 ROLL 7
@@ -240,20 +248,20 @@ ENDC
 CALLREF {
 	CALL $PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro$
 }
-.loc ../contracts/Tip3ToEver.tsol, 88
+.loc ../contracts/Tip3ToEver.tsol, 90
 PUSHINT 2
 PUSH S2
 STU 8
 POP S2
-.loc ../contracts/Tip3ToEver.tsol, 89
+.loc ../contracts/Tip3ToEver.tsol, 91
 OVER
 ROLL 4
 STSLICER
 POP S2
-.loc ../contracts/Tip3ToEver.tsol, 90
+.loc ../contracts/Tip3ToEver.tsol, 92
 SWAP
 STREF
-.loc ../contracts/Tip3ToEver.tsol, 91
+.loc ../contracts/Tip3ToEver.tsol, 93
 ENDC
 NIP
 .loc ../contracts/Tip3ToEver.tsol, 0
@@ -262,7 +270,7 @@ NIP
 DROP
 GETGLOB 6
 THROWIFNOT 76
-.loc ../contracts/Tip3ToEver.tsol, 103
+.loc ../contracts/Tip3ToEver.tsol, 105
 OVER
 PUSHCONT {
 	LDREF
@@ -329,34 +337,34 @@ THROW 0
 CALL $buildCrossPairExchangePayload_62121768_internal_macro$
 
 .macro buildCrossPairExchangePayload_62121768_internal_macro
-.loc ../contracts/Tip3ToEver.tsol, 113
+.loc ../contracts/Tip3ToEver.tsol, 115
 OVER
 FIRST
 GTINT 0
 THROWIFNOT 100
-.loc ../contracts/Tip3ToEver.tsol, 115
+.loc ../contracts/Tip3ToEver.tsol, 117
 NEWC
 DUP
-.loc ../contracts/Tip3ToEver.tsol, 118
+.loc ../contracts/Tip3ToEver.tsol, 120
 STSLICECONST x00
-.loc ../contracts/Tip3ToEver.tsol, 119
+.loc ../contracts/Tip3ToEver.tsol, 121
 PUSH S8
-STUR 64
-.loc ../contracts/Tip3ToEver.tsol, 122
-NEWC
-STSLICECONST x01
-.loc ../contracts/Tip3ToEver.tsol, 123
-PUSH S9
 STUR 64
 .loc ../contracts/Tip3ToEver.tsol, 124
+NEWC
+STSLICECONST x01
+.loc ../contracts/Tip3ToEver.tsol, 125
+PUSH S9
+STUR 64
+.loc ../contracts/Tip3ToEver.tsol, 126
 PUSH S8
 STUR 128
-.loc ../contracts/Tip3ToEver.tsol, 126
+.loc ../contracts/Tip3ToEver.tsol, 128
 PUSHINT 0
 NEWDICT
 PAIR
 DUP
-.loc ../contracts/Tip3ToEver.tsol, 128
+.loc ../contracts/Tip3ToEver.tsol, 130
 PUSHINT 0
 PUSHCONT {
 	PUSH2 S0, S7
@@ -364,7 +372,7 @@ PUSHCONT {
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/Tip3ToEver.tsol, 129
+	.loc ../contracts/Tip3ToEver.tsol, 131
 	DUP2
 	PUSH S9
 	SECOND
@@ -398,7 +406,7 @@ PUSHCONT {
 	DICTUSET
 	PAIR
 	POP S2
-	.loc ../contracts/Tip3ToEver.tsol, 130
+	.loc ../contracts/Tip3ToEver.tsol, 132
 	PUSH3 S2, S0, S7
 	SECOND
 	PUSHINT 32
@@ -522,14 +530,14 @@ PUSHCONT {
 	DICTUSETB
 	PAIR
 	POP S3
-	.loc ../contracts/Tip3ToEver.tsol, 128
+	.loc ../contracts/Tip3ToEver.tsol, 130
 	INC
 	UFITS 32
 	.loc ../contracts/Tip3ToEver.tsol, 0
 }
 WHILE
 DROP
-.loc ../contracts/Tip3ToEver.tsol, 133
+.loc ../contracts/Tip3ToEver.tsol, 135
 BLKSWAP 2, 10
 PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
@@ -544,20 +552,20 @@ ENDC
 CALLREF {
 	CALL $PairPayload_no_obj_buildCrossPairExchangePayloadV2_3181478d_macro$
 }
-.loc ../contracts/Tip3ToEver.tsol, 147
+.loc ../contracts/Tip3ToEver.tsol, 149
 PUSHINT 2
 PUSH S2
 STU 8
 POP S2
-.loc ../contracts/Tip3ToEver.tsol, 148
+.loc ../contracts/Tip3ToEver.tsol, 150
 OVER
 ROLL 4
 STSLICER
 POP S2
-.loc ../contracts/Tip3ToEver.tsol, 149
+.loc ../contracts/Tip3ToEver.tsol, 151
 SWAP
 STREF
-.loc ../contracts/Tip3ToEver.tsol, 151
+.loc ../contracts/Tip3ToEver.tsol, 153
 ENDC
 NIP
 .loc ../contracts/Tip3ToEver.tsol, 0
@@ -571,7 +579,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Tip3ToEver.tsol, 155
+.loc ../contracts/Tip3ToEver.tsol, 157
 OVER
 PUSHCONT {
 	LDREF
@@ -606,29 +614,29 @@ CALLREF {
 THROW 0
 
 .macro onAcceptTokensTransfer_e63f2284_internal_macro
-.loc ../contracts/Tip3ToEver.tsol, 163
+.loc ../contracts/Tip3ToEver.tsol, 165
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
 PLDU 256
 THROWIFNOT 100
-.loc ../contracts/Tip3ToEver.tsol, 164
+.loc ../contracts/Tip3ToEver.tsol, 166
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/Tip3ToEver.tsol, 166
+.loc ../contracts/Tip3ToEver.tsol, 168
 FALSE
-.loc ../contracts/Tip3ToEver.tsol, 167
+.loc ../contracts/Tip3ToEver.tsol, 169
 SWAP
 CTOS
-.loc ../contracts/Tip3ToEver.tsol, 169
-PUSHINT 44
 .loc ../contracts/Tip3ToEver.tsol, 171
+PUSHINT 44
+.loc ../contracts/Tip3ToEver.tsol, 173
 OVER
 SBITS
 GTINT 7
 PUSHCONT {
-	.loc ../contracts/Tip3ToEver.tsol, 172
+	.loc ../contracts/Tip3ToEver.tsol, 174
 	OVER
 	LDU 8
 	POP S3
@@ -636,7 +644,7 @@ PUSHCONT {
 	.loc ../contracts/Tip3ToEver.tsol, 0
 }
 IF
-.loc ../contracts/Tip3ToEver.tsol, 175
+.loc ../contracts/Tip3ToEver.tsol, 177
 OVER
 SBITS
 PUSHINT 267
@@ -646,24 +654,35 @@ SREFS
 EQINT 1
 PUSH S2
 EQINT 2
-DEPTH
-ADDCONST -2
-PICK
-PUSHINT 3000000000
-GEQ
 AND
 AND
-AND
+DUP
 PUSHCONT {
-	.loc ../contracts/Tip3ToEver.tsol, 180
+	DROP
+	DEPTH
+	ADDCONST -2
+	PICK
+	PUSHINT 0
+	PUSHINT 1
+	CALLREF {
+		CALL $GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro$
+	}
+	CALLREF {
+		CALL $_calcValue_2fb4263c_internal_macro$
+	}
+	GEQ
+}
+IF
+PUSHCONT {
+	.loc ../contracts/Tip3ToEver.tsol, 182
 	OVER
 	LDMSGADDR
 	POP S3
-	.loc ../contracts/Tip3ToEver.tsol, 181
+	.loc ../contracts/Tip3ToEver.tsol, 183
 	PUSH S2
 	LDREF
 	POP S4
-	.loc ../contracts/Tip3ToEver.tsol, 183
+	.loc ../contracts/Tip3ToEver.tsol, 185
 	TRUE
 	PUSH S6
 	PUSHINT 0
@@ -704,14 +723,14 @@ PUSHCONT {
 	EQUAL
 	OR
 	PUSHCONT {
-		.loc ../contracts/Tip3ToEver.tsol, 193
+		.loc ../contracts/Tip3ToEver.tsol, 195
 		PUSHSLICE x8_
-		.loc ../contracts/Tip3ToEver.tsol, 194
+		.loc ../contracts/Tip3ToEver.tsol, 196
 		PUSH S2
 		SREFS
 		GTINT 0
 		PUSHCONT {
-			.loc ../contracts/Tip3ToEver.tsol, 195
+			.loc ../contracts/Tip3ToEver.tsol, 197
 			PUSH S2
 			LDREFRTOS
 			POP S2
@@ -719,14 +738,14 @@ PUSHCONT {
 			.loc ../contracts/Tip3ToEver.tsol, 0
 		}
 		IF
-		.loc ../contracts/Tip3ToEver.tsol, 198
+		.loc ../contracts/Tip3ToEver.tsol, 200
 		PUSHINT 0
-		.loc ../contracts/Tip3ToEver.tsol, 199
+		.loc ../contracts/Tip3ToEver.tsol, 201
 		OVER
 		SBITS
 		GTINT 7
 		PUSHCONT {
-			.loc ../contracts/Tip3ToEver.tsol, 200
+			.loc ../contracts/Tip3ToEver.tsol, 202
 			OVER
 			LDU 8
 			POP S3
@@ -734,7 +753,7 @@ PUSHCONT {
 			.loc ../contracts/Tip3ToEver.tsol, 0
 		}
 		IF
-		.loc ../contracts/Tip3ToEver.tsol, 203
+		.loc ../contracts/Tip3ToEver.tsol, 205
 		OVER
 		SBITS
 		PUSHINT 192
@@ -743,16 +762,16 @@ PUSHCONT {
 		EQINT 1
 		AND
 		PUSHCONT {
-			.loc ../contracts/Tip3ToEver.tsol, 207
+			.loc ../contracts/Tip3ToEver.tsol, 209
 			OVER
 			LDU 64
 			LDU 128
 			POP S4
-			.loc ../contracts/Tip3ToEver.tsol, 209
+			.loc ../contracts/Tip3ToEver.tsol, 211
 			OVER
 			NEWC
 			STU 64
-			.loc ../contracts/Tip3ToEver.tsol, 211
+			.loc ../contracts/Tip3ToEver.tsol, 213
 			BLKPUSH 2, 12
 			PUSH2 S4, S10
 			PUSHSLICE xc0000000000000000000000001
@@ -772,7 +791,7 @@ PUSHCONT {
 			ENDC
 			PUSHINT 0
 			SENDRAWMSG
-			.loc ../contracts/Tip3ToEver.tsol, 212
+			.loc ../contracts/Tip3ToEver.tsol, 214
 			BLKPUSH 2, 12
 			ROLL 4
 			PUSH S10
@@ -794,7 +813,7 @@ PUSHCONT {
 			ENDC
 			PUSHINT 1
 			SENDRAWMSG
-			.loc ../contracts/Tip3ToEver.tsol, 218
+			.loc ../contracts/Tip3ToEver.tsol, 220
 			ENDC
 			TRUE
 			PUSH S8
@@ -848,14 +867,14 @@ PUSHCONT {
 			}
 			IF
 			PUSHCONT {
-				.loc ../contracts/Tip3ToEver.tsol, 231
+				.loc ../contracts/Tip3ToEver.tsol, 233
 				OVER
 				LDU 64
 				POP S3
-				.loc ../contracts/Tip3ToEver.tsol, 233
+				.loc ../contracts/Tip3ToEver.tsol, 235
 				NEWC
 				STU 64
-				.loc ../contracts/Tip3ToEver.tsol, 235
+				.loc ../contracts/Tip3ToEver.tsol, 237
 				ENDC
 				TRUE
 				PUSH S7
@@ -889,7 +908,7 @@ PUSHCONT {
 				SENDRAWMSG
 			}
 			PUSHCONT {
-				.loc ../contracts/Tip3ToEver.tsol, 244
+				.loc ../contracts/Tip3ToEver.tsol, 246
 				TRUE
 				POP S5
 			}
@@ -900,20 +919,20 @@ PUSHCONT {
 		DROP2
 	}
 	PUSHCONT {
-		.loc ../contracts/Tip3ToEver.tsol, 247
+		.loc ../contracts/Tip3ToEver.tsol, 249
 		TRUE
 		POP S3
 	}
 	IFELSE
 }
 IFELSE
-.loc ../contracts/Tip3ToEver.tsol, 250
+.loc ../contracts/Tip3ToEver.tsol, 252
 DROP2
 PUSHCONT {
-	.loc ../contracts/Tip3ToEver.tsol, 251
+	.loc ../contracts/Tip3ToEver.tsol, 253
 	PUSHREF {
 	}
-	.loc ../contracts/Tip3ToEver.tsol, 252
+	.loc ../contracts/Tip3ToEver.tsol, 254
 	TRUE
 	PUSH3 S2, S4, S2
 	SDEQ
@@ -961,7 +980,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/Tip3ToEver.tsol, 264
+.loc ../contracts/Tip3ToEver.tsol, 266
 OVER
 PUSHCONT {
 	LDREF
@@ -992,7 +1011,7 @@ CALLREF {
 THROW 0
 
 .macro onAcceptTokensBurn_07d14114_internal_macro
-.loc ../contracts/Tip3ToEver.tsol, 271
+.loc ../contracts/Tip3ToEver.tsol, 273
 GETGLOB 9
 PARSEMSGADDR
 INDEX 3
@@ -1003,15 +1022,15 @@ GETGLOB 11
 SDEQ
 AND
 THROWIFNOT 200
-.loc ../contracts/Tip3ToEver.tsol, 272
+.loc ../contracts/Tip3ToEver.tsol, 274
 PUSHINT 1000000000
 PUSHINT 0
 RAWRESERVE
-.loc ../contracts/Tip3ToEver.tsol, 274
+.loc ../contracts/Tip3ToEver.tsol, 276
 CTOS
-.loc ../contracts/Tip3ToEver.tsol, 275
-PLDU 64
 .loc ../contracts/Tip3ToEver.tsol, 277
+PLDU 64
+.loc ../contracts/Tip3ToEver.tsol, 279
 PUSH3 S4, S0, S1
 PUSHSLICE xc00000000000000000000000007e3f6eb7
 NEWC
@@ -1022,7 +1041,7 @@ STU 128
 ENDC
 PUSHINT 0
 SENDRAWMSG
-.loc ../contracts/Tip3ToEver.tsol, 278
+.loc ../contracts/Tip3ToEver.tsol, 280
 ROLL 4
 XCHG S2
 FALSE
@@ -1040,6 +1059,26 @@ PUSHPOW2 7
 SENDRAWMSG
 .loc ../contracts/Tip3ToEver.tsol, 0
 DROP2
+
+.globl	_calcValue_2fb4263c_internal
+.type	_calcValue_2fb4263c_internal, @function
+CALL $_calcValue_2fb4263c_internal_macro$
+
+.macro _calcValue_2fb4263c_internal_macro
+.loc ../contracts/Tip3ToEver.tsol, 284
+DUP
+FIRST
+SWAP
+SECOND
+MYADDR
+PARSEMSGADDR
+THIRD
+CALLREF {
+	CALL $__gasToTon_macro$
+}
+ADD
+UFITS 128
+.loc ../contracts/Tip3ToEver.tsol, 0
 
 .macro fallback_macro
 GETGLOB 6
@@ -1338,6 +1377,210 @@ PUSHCONT {
 }
 IF
 THROW 0
+
+.globl	GasValues_no_obj_getDeployWalletGas_38991eb4
+.type	GasValues_no_obj_getDeployWalletGas_38991eb4, @function
+CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+
+.macro GasValues_no_obj_getDeployWalletGas_38991eb4_macro
+.loc ../contracts/libraries/GasValues.tsol, 12
+PUSHINT 120000000
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d
+.type	GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d, @function
+CALL $GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro$
+
+.macro GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro
+.loc ../contracts/libraries/GasValues.tsol, 411
+DUP2
+PUSHINT 10000000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 300000
+ROT
+PUSHINT 150000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d
+.type	GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d, @function
+CALL $GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro$
+
+.macro GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro
+.loc ../contracts/libraries/GasValues.tsol, 411
+TUCK
+PUSHINT 10000000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 300000
+ROT
+PUSHINT 150000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7
+.type	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7, @function
+CALL $PairPayload_with_obj_buildExchangePayloadV2_d2029fe7_macro$
+
+.macro PairPayload_with_obj_buildExchangePayloadV2_d2029fe7_macro
+.loc ../contracts/libraries/PairPayload.tsol, 55
+DUP
+ISNULL
+PUSH S2
+ISNULL
+NOT
+OR
+THROWIFNOT 148
+.loc ../contracts/libraries/PairPayload.tsol, 59
+NEWC
+STSLICECONST x06
+.loc ../contracts/libraries/PairPayload.tsol, 60
+PUSH S8
+STUR 64
+.loc ../contracts/libraries/PairPayload.tsol, 61
+ROLL 7
+STUR 128
+.loc ../contracts/libraries/PairPayload.tsol, 62
+ROLL 5
+STSLICER
+.loc ../contracts/libraries/PairPayload.tsol, 63
+ROLL 3
+STSLICER
+.loc ../contracts/libraries/PairPayload.tsol, 66
+PUSHREF {
+}
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.tsol, 68
+BLKSWAP 2, 3
+SWAP
+NEWC
+STU 128
+STSLICE
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.tsol, 70
+PUSH S2
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 71
+	PUSH2 S2, S2
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.tsol, 73
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 74
+	PUSH2 S1, S1
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.tsol, 77
+ENDC
+BLKDROP2 2, 1
+.loc ../contracts/libraries/PairPayload.tsol, 0
+
+.globl	PairPayload_no_obj_buildExchangePayloadV2_d2029fe7
+.type	PairPayload_no_obj_buildExchangePayloadV2_d2029fe7, @function
+CALL $PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro$
+
+.macro PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro
+.loc ../contracts/libraries/PairPayload.tsol, 55
+DUP
+ISNULL
+PUSH S2
+ISNULL
+NOT
+OR
+THROWIFNOT 148
+.loc ../contracts/libraries/PairPayload.tsol, 59
+NEWC
+STSLICECONST x06
+.loc ../contracts/libraries/PairPayload.tsol, 60
+ROLL 8
+STUR 64
+.loc ../contracts/libraries/PairPayload.tsol, 61
+ROLL 7
+STUR 128
+.loc ../contracts/libraries/PairPayload.tsol, 62
+ROLL 5
+STSLICER
+.loc ../contracts/libraries/PairPayload.tsol, 63
+ROLL 3
+STSLICER
+.loc ../contracts/libraries/PairPayload.tsol, 66
+PUSHREF {
+}
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.tsol, 68
+BLKSWAP 2, 3
+SWAP
+NEWC
+STU 128
+STSLICE
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.tsol, 70
+PUSH S2
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 71
+	PUSH2 S2, S2
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.tsol, 73
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 74
+	PUSH2 S1, S1
+	ISNULL
+	THROWIF 63
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IFNOT
+.loc ../contracts/libraries/PairPayload.tsol, 77
+ENDC
+BLKDROP2 2, 1
+.loc ../contracts/libraries/PairPayload.tsol, 0
 
 .globl	PairPayload_with_obj_buildCrossPairExchangePayloadV2_3181478d
 .type	PairPayload_with_obj_buildCrossPairExchangePayloadV2_3181478d, @function
@@ -1691,152 +1934,6 @@ IFNOT
 .loc ../contracts/libraries/PairPayload.tsol, 346
 ENDC
 BLKDROP2 4, 1
-.loc ../contracts/libraries/PairPayload.tsol, 0
-
-.globl	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7
-.type	PairPayload_with_obj_buildExchangePayloadV2_d2029fe7, @function
-CALL $PairPayload_with_obj_buildExchangePayloadV2_d2029fe7_macro$
-
-.macro PairPayload_with_obj_buildExchangePayloadV2_d2029fe7_macro
-.loc ../contracts/libraries/PairPayload.tsol, 55
-DUP
-ISNULL
-PUSH S2
-ISNULL
-NOT
-OR
-THROWIFNOT 148
-.loc ../contracts/libraries/PairPayload.tsol, 59
-NEWC
-STSLICECONST x06
-.loc ../contracts/libraries/PairPayload.tsol, 60
-PUSH S8
-STUR 64
-.loc ../contracts/libraries/PairPayload.tsol, 61
-ROLL 7
-STUR 128
-.loc ../contracts/libraries/PairPayload.tsol, 62
-ROLL 5
-STSLICER
-.loc ../contracts/libraries/PairPayload.tsol, 63
-ROLL 3
-STSLICER
-.loc ../contracts/libraries/PairPayload.tsol, 66
-PUSHREF {
-}
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.tsol, 68
-BLKSWAP 2, 3
-SWAP
-NEWC
-STU 128
-STSLICE
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.tsol, 70
-PUSH S2
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.tsol, 71
-	PUSH2 S2, S2
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.tsol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.tsol, 73
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.tsol, 74
-	PUSH2 S1, S1
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.tsol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.tsol, 77
-ENDC
-BLKDROP2 2, 1
-.loc ../contracts/libraries/PairPayload.tsol, 0
-
-.globl	PairPayload_no_obj_buildExchangePayloadV2_d2029fe7
-.type	PairPayload_no_obj_buildExchangePayloadV2_d2029fe7, @function
-CALL $PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro$
-
-.macro PairPayload_no_obj_buildExchangePayloadV2_d2029fe7_macro
-.loc ../contracts/libraries/PairPayload.tsol, 55
-DUP
-ISNULL
-PUSH S2
-ISNULL
-NOT
-OR
-THROWIFNOT 148
-.loc ../contracts/libraries/PairPayload.tsol, 59
-NEWC
-STSLICECONST x06
-.loc ../contracts/libraries/PairPayload.tsol, 60
-ROLL 8
-STUR 64
-.loc ../contracts/libraries/PairPayload.tsol, 61
-ROLL 7
-STUR 128
-.loc ../contracts/libraries/PairPayload.tsol, 62
-ROLL 5
-STSLICER
-.loc ../contracts/libraries/PairPayload.tsol, 63
-ROLL 3
-STSLICER
-.loc ../contracts/libraries/PairPayload.tsol, 66
-PUSHREF {
-}
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.tsol, 68
-BLKSWAP 2, 3
-SWAP
-NEWC
-STU 128
-STSLICE
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/PairPayload.tsol, 70
-PUSH S2
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.tsol, 71
-	PUSH2 S2, S2
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.tsol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.tsol, 73
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/PairPayload.tsol, 74
-	PUSH2 S1, S1
-	ISNULL
-	THROWIF 63
-	SWAP
-	STREF
-	.loc ../contracts/libraries/PairPayload.tsol, 0
-}
-IFNOT
-.loc ../contracts/libraries/PairPayload.tsol, 77
-ENDC
-BLKDROP2 2, 1
 .loc ../contracts/libraries/PairPayload.tsol, 0
 
 .globl	PairPayload_with_obj__encodeCrossPairExchangeData_a800fa17

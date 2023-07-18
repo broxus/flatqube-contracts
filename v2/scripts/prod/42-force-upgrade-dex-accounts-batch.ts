@@ -1,8 +1,10 @@
 import { Address, toNano, WalletTypes } from 'locklift';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Migration } = require(process.cwd() + '/scripts/utils');
 import { yellowBright } from 'chalk';
 import accounts from '../../../dex_accounts.json';
+import { displayTx, Migration } from '../../utils/migration';
+
+const TRACE = false;
 
 const chunkify = <T>(arr: T[], size: number): T[][] =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
@@ -12,10 +14,8 @@ const chunkify = <T>(arr: T[], size: number): T[][] =>
 const main = async () => {
   const migration = new Migration();
 
-  const dexRoot = await locklift.factory.getDeployedContract(
-    'DexRoot',
-    migration.getAddress('DexRoot'),
-  );
+  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+
   const dexManagerAddress = await dexRoot.methods
     .getManager({ answerId: 0 })
     .call()
@@ -37,39 +37,44 @@ const main = async () => {
   }));
 
   for (const chunk of chunkify(params, 1000)) {
-    const { traceTree } = await locklift.tracing.trace(
-      dexRoot.methods
-        .upgradeAccounts({
-          _accountsOwners: chunk.map((a) => new Address(a.owner)),
-          _offset: 0,
-          _remainingGasTo: manager.address,
-        })
-        .send({
-          from: manager.address,
-          amount: toNano(chunk.length * 5),
-        }),
-    );
-
-    for (const account of chunk) {
-      const DexAccount = locklift.factory.getDeployedContract(
-        'DexAccount',
-        new Address(account.account),
-      );
-
-      const events = traceTree.findEventsForContract({
-        contract: DexAccount,
-        name: 'AccountCodeUpgraded' as const,
+    const p = dexRoot.methods
+      .upgradeAccounts({
+        _accountsOwners: chunk.map((a) => new Address(a.owner)),
+        _offset: 0,
+        _remainingGasTo: manager.address,
+      })
+      .send({
+        from: manager.address,
+        amount: toNano(chunk.length * 5),
       });
 
-      if (events.length > 0) {
-        console.log(
-          `DexAccount ${account.account} upgraded. Current version: ${events[0].version}`,
+    if (TRACE) {
+      const { traceTree } = await locklift.tracing.trace(p);
+
+      for (const account of chunk) {
+        const DexAccount = locklift.factory.getDeployedContract(
+          'DexAccount',
+          new Address(account.account),
         );
-      } else {
-        console.log(
-          yellowBright(`DexAccount ${account.account} wasn't upgraded`),
-        );
+
+        const events = traceTree.findEventsForContract({
+          contract: DexAccount,
+          name: 'AccountCodeUpgraded' as const,
+        });
+
+        if (events.length > 0) {
+          console.log(
+            `DexAccount ${account.account} upgraded. Current version: ${events[0].version}`,
+          );
+        } else {
+          console.log(
+            yellowBright(`DexAccount ${account.account} wasn't upgraded`),
+          );
+        }
       }
+    } else {
+      const tx = await locklift.transactions.waitFinalized(p);
+      displayTx(tx);
     }
   }
 };

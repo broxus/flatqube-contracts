@@ -16,10 +16,6 @@ async function main() {
     });
   }
 
-  // const dexVault = await locklift.factory.getDeployedContract(
-  //   'DexVault',
-  //   migration.getAddress('DexVault'),
-  // );
   const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
 
   program
@@ -70,16 +66,18 @@ async function main() {
       pair.right + 'Root',
     );
 
-    const tx = await dexRoot.methods
-      .deployPair({
-        left_root: tokenFoo.address,
-        right_root: tokenBar.address,
-        send_gas_to: account2.address,
-      })
-      .send({
-        from: account2.address,
-        amount: toNano(15),
-      });
+    const tx = await locklift.transactions.waitFinalized(
+      dexRoot.methods
+        .deployPair({
+          left_root: tokenFoo.address,
+          right_root: tokenBar.address,
+          send_gas_to: account2.address,
+        })
+        .send({
+          from: account2.address,
+          amount: toNano(15),
+        }),
+    );
 
     displayTx(tx);
 

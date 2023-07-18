@@ -1,5 +1,5 @@
 const {expect} = require('chai');
-const {Migration, Constants, afterRun, TOKEN_CONTRACTS_PATH, getRandomNonce, displayTx} = require(process.cwd() + '/scripts/utils');
+const {Migration, Constants, afterRun, TOKEN_CONTRACTS_PATH, getRandomNonce, displayTx, calcValue} = require(process.cwd() + '/scripts/utils');
 const BigNumber = require('bignumber.js');
 const { Command } = require('commander');
 const program = new Command();
@@ -37,6 +37,7 @@ let DexAccount3;
 let FooWallet3;
 let BarWallet3;
 let FooBarLpWallet3;
+let gasValues;
 
 const EMPTY_TVM_CELL = 'te6ccgEBAQEAAgAAAA==';
 
@@ -92,6 +93,8 @@ describe('Check DEX accounts interaction', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
     before('Load contracts', async function () {
         keyPairs = await locklift.keys.getKeyPairs();
+
+        gasValues = migration.load(await locklift.factory.getContract('DexGasValues'), 'DexGasValues');
 
         DexRoot = await locklift.factory.getContract('DexRoot');
         DexPairFooBar = await locklift.factory.getContract(options.pair_contract_name);
@@ -197,6 +200,11 @@ describe('Check DEX accounts interaction', async function () {
             logger.log(`Account balance start: ${accountStart.foo} FOO, ${accountStart.bar} BAR, ` +
                 `${accountStart.lp} LP, ${accountStart.ton} TON`);
 
+            const gas = await gasValues.call({
+                method: 'getDeployAccountGas',
+                params: {}
+            });
+
             tx = await Account3.runTarget({
                 contract: DexRoot,
                 method: 'deployAccount',
@@ -204,7 +212,7 @@ describe('Check DEX accounts interaction', async function () {
                     account_owner: Account3.address,
                     send_gas_to: Account3.address
                 },
-                value: locklift.utils.convertCrystal('4', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 
@@ -247,6 +255,11 @@ describe('Check DEX accounts interaction', async function () {
             logger.log(`DexAccount#3 balance start: ` +
                 `${dexAccount3Start.foo} FOO, ${dexAccount3Start.bar} BAR, ${dexAccount3Start.lp} LP`);
 
+            const gas = await gasValues.call({
+                method: 'getAccountTransferGas',
+                params: {willing_to_deploy: false}
+            });
+
             tx = await Account2.runTarget({
                 contract: DexAccount2,
                 method: 'transfer',
@@ -258,7 +271,7 @@ describe('Check DEX accounts interaction', async function () {
                     willing_to_deploy: false,
                     send_gas_to: Account2.address
                 },
-                value: locklift.utils.convertCrystal('1.1', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[1]
             });
 
@@ -290,6 +303,11 @@ describe('Check DEX accounts interaction', async function () {
             logger.log(`DexAccount#3 balance start: ` +
                 `${dexAccount3Start.foo} FOO, ${dexAccount3Start.bar} BAR, ${dexAccount3Start.lp} LP`);
 
+            const gas = await gasValues.call({
+                method: 'getAccountTransferGas',
+                params: {willing_to_deploy: true}
+            });
+
             tx = await Account2.runTarget({
                 contract: DexAccount2,
                 method: 'transfer',
@@ -301,7 +319,7 @@ describe('Check DEX accounts interaction', async function () {
                     willing_to_deploy: true,
                     send_gas_to: Account2.address
                 },
-                value: locklift.utils.convertCrystal('1.1', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[1]
             });
 
@@ -338,6 +356,11 @@ describe('Check DEX accounts interaction', async function () {
             logger.log(`DexAccount#3 balance start: ` +
                 `${dexAccount3Start.foo} FOO, ${dexAccount3Start.bar} BAR, ${dexAccount3Start.lp} LP`);
 
+            const gas = await gasValues.call({
+                method: 'getAccountTransferGas',
+                params: {willing_to_deploy: false}
+            });
+
             tx = await Account2.runTarget({
                 contract: DexAccount2,
                 method: 'transfer',
@@ -349,7 +372,7 @@ describe('Check DEX accounts interaction', async function () {
                     willing_to_deploy: false,
                     send_gas_to: Account2.address
                 },
-                value: locklift.utils.convertCrystal('1.1', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[1]
             });
 
@@ -391,6 +414,11 @@ describe('Check DEX accounts interaction', async function () {
             logger.log(`DexAccount#3 balance start: ` +
                 `${dexAccount3Start.foo} FOO, ${dexAccount3Start.bar} BAR, ${dexAccount3Start.lp} LP`);
 
+            const gas = await gasValues.call({
+                method: 'getDepositToAccountGas',
+                params: {}
+            });
+
             tx = await Account3.runTarget({
                 contract: BarWallet3,
                 method: 'transfer',
@@ -402,7 +430,7 @@ describe('Check DEX accounts interaction', async function () {
                     notify: true,
                     payload: EMPTY_TVM_CELL
                 },
-                value: locklift.utils.convertCrystal('1.1', 'nano'),
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 
@@ -450,6 +478,13 @@ describe('Check DEX accounts interaction', async function () {
             logger.log(`Account3 wallets balance start: ${account3WalletsStart.foo} FOO, ${account3WalletsStart.bar} BAR, ` +
                 `${account3WalletsStart.lp} LP, ${account3WalletsStart.ton} TON`);
 
+            const gas = await gasValues.call({
+                method: 'getAccountWithdrawGas',
+                params: {
+                    deployWalletValue: locklift.utils.convertCrystal('0.2', 'nano'),
+                }
+            });
+
             tx = await Account3.runTarget({
                 contract: DexAccount3,
                 method: 'withdraw',
@@ -462,6 +497,7 @@ describe('Check DEX accounts interaction', async function () {
                     deploy_wallet_grams: locklift.utils.convertCrystal('0.2', 'nano'),
                     send_gas_to: Account3.address
                 },
+                value: calcValue(gas),
                 keyPair: keyPairs[2]
             });
 

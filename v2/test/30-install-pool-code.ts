@@ -3,13 +3,14 @@ import {Account} from "everscale-standalone-client/nodejs";
 import {Contract} from "everscale-inpage-provider";
 import {DexRootAbi, DexStablePoolAbi} from "../../build/factorySource";
 import {ContractData} from "locklift/internal/factory";
+import { Migration, Constants } from '../utils/migration';
 
 const {expect} = require('chai');
 const logger = require('mocha-logger');
-const {Migration, Constants} = require(process.cwd() + '/scripts/utils');
 const BigNumber = require('bignumber.js');
 BigNumber.config({EXPONENTIAL_AT: 257});
-const { Command } = require('commander');
+import { Command } from 'commander';
+
 const program = new Command();
 
 const migration = new Migration();
@@ -39,12 +40,9 @@ describe('Test Dex Pool contract upgrade', async function () {
     this.timeout(Constants.TESTS_TIMEOUT);
 
     before('Load contracts', async function () {
-        account = await locklift.factory.accounts.addExistingAccount({
-            type: WalletTypes.EverWallet,
-            address: migration.getAddress('Account1')
-        });
+        account = await migration.loadAccount('Account1', '0');
 
-        dexRoot = await locklift.factory.getDeployedContract('DexRoot', migration.getAddress('DexRoot'));
+        dexRoot = migration.loadContract('DexRoot', 'DexRoot') as Contract<DexRootAbi>;
 
         logger.log(`New contract version: ${options.contract_name}`);
         NextVersionContract = await locklift.factory.getContractArtifacts(options.contract_name);
