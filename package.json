@@ -8,6 +8,10 @@
     "migration-prod": "locklift run --config locklift.config.js --network main --script scripts/migration-prod.js && locklift test --config locklift.config.js --network main --test test/prod",
     "test": "sh test.sh",
     "test:oracle-upgrade": "npx locklift test --config locklift.config.js --disable-build --network local --tests test/upgrade/5-oracle-upgrade-test.js",
+    "test:order": "npx locklift test --disable-build -n local --tests v2/test/60-order.spec.ts",
+    "build:test:order": "npx locklift test -n local --tests v2/test/60-order.spec.ts",
+    "test:ms": "npx locklift test --disable-build -n local --tests v2/test/61-ms-order.ts",
+    "build:test:ms": "npx locklift test -n local --tests v2/test/61-ms-order.ts",
     "deploy:account": "npx locklift run --disable-build --script v2/scripts/0-deploy-account.ts --config locklift.config.ts --network",
     "deploy:dex": "npx locklift run --disable-build --script v2/scripts/prod/deploy.ts --config locklift.config.ts --network",
     "deploy:tokens": "npx locklift run --disable-build --script v2/scripts/2-deploy-test-tokens.ts --config locklift.config.ts --network",
@@ -21,7 +25,7 @@
   },
   "author": "aleksandr-hramcov <aleksandr.hramcov@gmail.com>",
   "license": "AGPL-3.0",
-  "devDependencies": {
+  "//devDependencies": {
     "@broxus/contracts": "1.1.1",
     "@tonclient/core": "1.30.0",
     "@tonclient/lib-node": "1.30.0",
@@ -35,7 +39,7 @@
     "ton-client-js": "0.28.1",
     "ever-wever": "git://github.com/broxus/ever-wever"
   },
-  "//devDependencies": {
+  "devDependencies": {
     "@broxus/contracts": "^1.1.0",
     "@types/chai": "4.3.4",
     "@types/mocha": "10.0.1",
