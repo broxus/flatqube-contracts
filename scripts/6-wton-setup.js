@@ -54,7 +54,7 @@ async function main() {
     }, locklift.utils.convertCrystal(5, 'nano'));
 
     logger.success(`Tunnel address: ${tunnel.address}`);
-    migration.store(tunnel.address, `${tokenData.symbol}Tunnel`);
+    migration.store(Tunnel, `${tokenData.symbol}Tunnel`);
 
     logger.log(`Deploying WEVER`);
 

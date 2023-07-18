@@ -1,0 +1,90 @@
+pragma ever-solidity >=0.62.0;
+
+import "../structures/IOrderFeeParams.tsol";
+
+interface IOrderFactory is IOrderFeeParams {
+    function onOrderRootDeployedCallback(
+        address orderRoot,
+        address token,
+        address sendGasTo
+    ) external;
+
+    function transferOwner(address newOwner) external responsible returns (address);
+
+    function acceptOwner() external responsible returns (address);
+
+    function setManager(address newManager) external responsible returns(address);
+
+    function revokeManager() external;
+
+    function getOwner() external view responsible returns (address);
+
+    function getPendingOwner() external view responsible returns (address);
+
+    function getManager() external view responsible returns (address);
+
+    function getVersion()  external view responsible returns (uint32);
+
+    function getVersionRoot()  external view responsible returns (uint32);
+
+    function getVersionOrder()  external view responsible returns (uint32);
+
+    function getFeeParams() external view responsible returns (OrderFeeParams);
+
+    function getExpectedAddressOrderRoot(address token)
+    external
+    view
+    responsible
+    returns (address);
+
+    function setEmergency(
+        bool enabled,
+        address orderAddress,
+        uint256 manager
+    ) external view;
+
+    function setFeeParams(OrderFeeParams params) external;
+
+    function setRootFeeParams(OrderFeeParams params, address[] root) external;
+
+    function setOrderFeeParams(OrderFeeParams params, address[] order) external;
+
+    function setOrderRootCode(TvmCell _orderRootCode) external;
+
+    function setOrderCode(TvmCell _orderCode) external;
+
+    function proxyRootTokensTransfer(
+		address root,
+	    address _tokenWallet,
+        uint128 _gasValue,
+        uint128 _amount,
+        address _recipient,
+        uint128 _deployWalletValue,
+        address _remainingGasTo,
+        bool _notify,
+        TvmCell _payload
+	) external;
+
+    function sendGasRoot(
+        address root,
+		address to,
+        uint128 _value,
+        uint16 _flag
+	) external;
+
+    function withdrawFee(
+        uint128 amount,
+        address recipient,
+        uint128 deployWalletValue,
+        address tokenWallet,
+        address sendGasTo
+    ) external;
+
+    function createOrderRoot(address token, uint64 callbackId) external;
+
+    function upgrade(
+        TvmCell newCode, 
+        uint32 newVersion,
+        address sendGasTo
+    ) external;
+}

@@ -1,0 +1,18 @@
+pragma ever-solidity ^0.62.0;
+
+import "../structures/IOrderStructures.tsol";
+
+interface IOrderEvents is IOrderStructures {
+    event StateChanged(uint8 from, uint8 to, Details);
+    event PartExchange(
+        address spentToken,
+        uint128 spentAmount,
+        address receiveToken,
+        uint128 receiveAmount,
+        uint128 currentSpentTokenAmount,
+        uint128 currentReceiveTokenAmount,
+        uint128 fee,
+        address initiator
+    );
+    event OrderCodeUpgraded(uint32 oldVersion, uint32 newVersion);
+}

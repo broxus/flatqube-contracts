@@ -13,15 +13,15 @@ async function main() {
     account.afterRun = afterRun;
 
     const content = '' +
-        `pragma ton-solidity >= 0.62.0;
+        `pragma ever-solidity ^0.62.0;
 abstract contract Constants {
     uint256 constant PROJECT_ID = 2222;
     address constant PROJECT_ADDRESS = address.makeAddrStd(0, 0x${account.address.substr(2).toLowerCase()});
 }`
 
-    console.log('Replace Constants.sol with');
+    console.log('Replace Constants.tsol with');
     console.log(content);
-    fs.writeFileSync(process.cwd() + '/contracts/abstract/Constants.sol', content);
+    fs.writeFileSync(process.cwd() + '/contracts/abstract/Constants.tsol', content);
 }
 
 main()
