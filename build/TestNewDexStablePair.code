@@ -1,4 +1,4 @@
-.version sol 0.62.0
+.version sol 0.64.0
 
 .macro constructor
 DROP
@@ -1739,9 +1739,14 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX ; signatureSlice msgSlice
+	LDSLICEX
 	DUP
-	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	MYADDR
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	HASHCU
 	SWAP
 	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
@@ -1755,7 +1760,7 @@ PUSHCONT {
 		GETGLOB 2
 	}
 	IFELSE
-	CHKSIGNU ; msgSlice isSigned
+	CHKSIGNU
 	THROWIFNOT 40
 }
 PUSHCONT {

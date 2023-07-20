@@ -1,4 +1,4 @@
-.version sol 0.62.0
+.version sol 0.64.0
 
 .macro constructor
 DROP
@@ -82,7 +82,6 @@ PUSHCONT {
 }
 IFELSE
 SENDRAWMSG
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -581,9 +580,21 @@ DROP
 GETGLOB 6
 THROWIFNOT 76
 .loc ../contracts/DexPair.tsol, 139
-LDU 64
-LDU 128
-LDU 128
+OVER
+PUSHCONT {
+	LDU 64
+	LDU 128
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 64
+	LDU 128
+	LDU 128
+}
+IFELSE
 LDU 32
 LDDICT
 ROTREV
@@ -1085,7 +1096,6 @@ ENDS
 CALLREF {
 	CALL $depositLiquidity_fd8c8ab0_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3048,7 +3058,6 @@ ENDS
 CALLREF {
 	CALL $withdrawLiquidity_6b1781e6_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4035,7 +4044,6 @@ ENDS
 CALLREF {
 	CALL $exchange_ff7e2245_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4046,17 +4054,14 @@ THROW 0
 GETGLOB 16
 THROWIFNOT 114
 .loc ../contracts/abstract/DexPairBase.tsol, 75
-PUSH S2
-.loc ../contracts/abstract/DexContractBase.tsol, 35
 GETGLOB 9
-OVER
+PUSH S3
+.loc ../contracts/abstract/DexContractBase.tsol, 35
 CALLREF {
 	CALL $_expectedAccountAddress_25e7253f_internal_macro$
 }
 SDEQ
 THROWIFNOT 105
-.loc ../contracts/abstract/DexContractBase.tsol, 36
-ROLLREV 6
 .loc ../contracts/DexPair.tsol, 751
 PUSH S4
 SECOND
@@ -4311,7 +4316,7 @@ PUSHCONT {
 }
 IFELSE
 .loc ../contracts/DexPair.tsol, 0
-BLKDROP 7
+BLKDROP 6
 
 .globl	_exchangeBase_57ab6473_internal
 .type	_exchangeBase_57ab6473_internal, @function
@@ -4866,7 +4871,6 @@ ENDS
 CALLREF {
 	CALL $crossPoolExchange_bd0becbe_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -5783,7 +5787,6 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -8806,10 +8809,10 @@ OVER
 PUSHCONT {
 	LDU 128
 	LDU 128
-	LDU 128
 	LDREF
 	ENDS
 	CTOS
+	LDU 128
 	LDU 128
 }
 PUSHCONT {
@@ -8837,7 +8840,6 @@ ENDS
 CALLREF {
 	CALL $setFeeParams_360e8671_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -8991,7 +8993,6 @@ ENDS
 CALLREF {
 	CALL $withdrawBeneficiaryFee_cf6eb742_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -9058,7 +9059,6 @@ ENDS
 CALLREF {
 	CALL $checkPair_29d167fd_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -9165,7 +9165,6 @@ ENDS
 CALLREF {
 	CALL $upgrade_8f230973_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -9346,7 +9345,6 @@ ENDS
 CALLREF {
 	CALL $liquidityTokenRootDeployed_b6e607f1_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -9526,7 +9524,6 @@ ENDS
 CALLREF {
 	CALL $liquidityTokenRootNotDeployed_4ce5331d_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -9603,7 +9600,6 @@ ENDS
 CALLREF {
 	CALL $onTokenWallet_e6d1bd58_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -11054,7 +11050,6 @@ ENDS
 CALLREF {
 	CALL $setActive_83dffa84_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -12745,7 +12740,6 @@ ENDS
 CALLREF {
 	CALL $setOracleOptions_23f5299b_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -12925,7 +12919,6 @@ ENDS
 CALLREF {
 	CALL $removeLastNPoints_1bfa458d_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -13558,7 +13551,7 @@ PUSH S4
 GTINT 0
 THROWIFNOT 134
 .loc ../contracts/abstract/TWAPOracle.tsol, 156
-BLKPUSH 2, 2
+ROTREV
 CALLREF {
 	CALL $_calculateRate_8f8f6aa6_internal_macro$
 }
@@ -13573,7 +13566,7 @@ SECOND
 PUSHINT 32
 DICTUGET
 THROWIFNOT 50
-ROLL 4
+ROT
 SDEQ
 .loc ../contracts/abstract/TWAPOracle.tsol, 164
 XCPU S1, S0
@@ -13588,8 +13581,7 @@ SETINDEXQ 1
 PUSHINT 64
 SETINDEXQ 4
 SETGLOB 4
-ROLL 4
-ROT
+ROTREV
 PUSHCONT {
 	OVER
 	SECOND
@@ -13602,7 +13594,7 @@ IFELSE
 CALLREF {
 	CALL $FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042_macro$
 }
-BLKDROP2 3, 1
+NIP
 .loc ../contracts/abstract/TWAPOracle.tsol, 0
 
 .globl	_initializeTWAPOracle_8b9c068b_internal
@@ -14972,12 +14964,17 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX ; signatureSlice msgSlice
+	LDSLICEX
 	DUP
-	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	MYADDR
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	HASHCU
 	ROT
 	GETGLOB 2
-	CHKSIGNU ; msgSlice isSigned
+	CHKSIGNU
 	THROWIFNOT 40
 }
 IF
@@ -19525,101 +19522,6 @@ STREF
 ENDC
 .loc ../contracts/libraries/PairPayload.tsol, 0
 
-.globl	FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6
-.type	FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6, @function
-CALL $FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6_macro$
-
-.macro FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6_macro
-.loc ../contracts/libraries/FixedPoint128.tsol, 25
-OVER
-CALLREF {
-	CALL $FixedPoint128_no_obj_encode_16990793_macro$
-}
-SWAP
-CALLREF {
-	CALL $FixedPoint128_no_obj_div_39f92878_macro$
-}
-.loc ../contracts/libraries/FixedPoint128.tsol, 0
-
-.globl	FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6
-.type	FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6, @function
-CALL $FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6_macro$
-
-.macro FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6_macro
-.loc ../contracts/libraries/FixedPoint128.tsol, 25
-SWAP
-CALLREF {
-	CALL $FixedPoint128_no_obj_encode_16990793_macro$
-}
-SWAP
-CALLREF {
-	CALL $FixedPoint128_no_obj_div_39f92878_macro$
-}
-.loc ../contracts/libraries/FixedPoint128.tsol, 0
-
-.globl	FixedPoint128_with_obj_encode_16990793
-.type	FixedPoint128_with_obj_encode_16990793, @function
-CALL $FixedPoint128_with_obj_encode_16990793_macro$
-
-.macro FixedPoint128_with_obj_encode_16990793_macro
-.loc ../contracts/libraries/FixedPoint128.tsol, 13
-DUP
-PUSHPOW2 128
-MUL
-.loc ../contracts/libraries/FixedPoint128.tsol, 0
-
-.globl	FixedPoint128_no_obj_encode_16990793
-.type	FixedPoint128_no_obj_encode_16990793, @function
-CALL $FixedPoint128_no_obj_encode_16990793_macro$
-
-.macro FixedPoint128_no_obj_encode_16990793_macro
-.loc ../contracts/libraries/FixedPoint128.tsol, 13
-PUSHPOW2 128
-MUL
-.loc ../contracts/libraries/FixedPoint128.tsol, 0
-
-.globl	FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042
-.type	FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042, @function
-CALL $FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042_macro$
-
-.macro FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042_macro
-.loc ../contracts/libraries/FixedPoint128.tsol, 45
-PUXC S1, S-1
-PUSHPOW2 128
-MULDIV
-UFITS 128
-.loc ../contracts/libraries/FixedPoint128.tsol, 0
-
-.globl	FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042
-.type	FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042, @function
-CALL $FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042_macro$
-
-.macro FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042_macro
-.loc ../contracts/libraries/FixedPoint128.tsol, 45
-PUSHPOW2 128
-MULDIV
-UFITS 128
-.loc ../contracts/libraries/FixedPoint128.tsol, 0
-
-.globl	FixedPoint128_with_obj_div_39f92878
-.type	FixedPoint128_with_obj_div_39f92878, @function
-CALL $FixedPoint128_with_obj_div_39f92878_macro$
-
-.macro FixedPoint128_with_obj_div_39f92878_macro
-.loc ../contracts/libraries/FixedPoint128.tsol, 33
-PUXC S1, S-1
-DIV
-.loc ../contracts/libraries/FixedPoint128.tsol, 0
-
-.globl	FixedPoint128_no_obj_div_39f92878
-.type	FixedPoint128_no_obj_div_39f92878, @function
-CALL $FixedPoint128_no_obj_div_39f92878_macro$
-
-.macro FixedPoint128_no_obj_div_39f92878_macro
-.loc ../contracts/libraries/FixedPoint128.tsol, 33
-DIV
-.loc ../contracts/libraries/FixedPoint128.tsol, 0
-
 .globl	GasValues_no_obj_getDeployWalletGas_38991eb4
 .type	GasValues_no_obj_getDeployWalletGas_38991eb4, @function
 CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
@@ -20324,6 +20226,101 @@ UFITS 128
 PUSHINT 200000
 PAIR
 .loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6
+.type	FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6, @function
+CALL $FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6_macro$
+
+.macro FixedPoint128_with_obj_encodeFromNumeratorAndDenominator_745eefc6_macro
+.loc ../contracts/libraries/FixedPoint128.tsol, 25
+OVER
+CALLREF {
+	CALL $FixedPoint128_no_obj_encode_16990793_macro$
+}
+SWAP
+CALLREF {
+	CALL $FixedPoint128_no_obj_div_39f92878_macro$
+}
+.loc ../contracts/libraries/FixedPoint128.tsol, 0
+
+.globl	FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6
+.type	FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6, @function
+CALL $FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6_macro$
+
+.macro FixedPoint128_no_obj_encodeFromNumeratorAndDenominator_745eefc6_macro
+.loc ../contracts/libraries/FixedPoint128.tsol, 25
+SWAP
+CALLREF {
+	CALL $FixedPoint128_no_obj_encode_16990793_macro$
+}
+SWAP
+CALLREF {
+	CALL $FixedPoint128_no_obj_div_39f92878_macro$
+}
+.loc ../contracts/libraries/FixedPoint128.tsol, 0
+
+.globl	FixedPoint128_with_obj_encode_16990793
+.type	FixedPoint128_with_obj_encode_16990793, @function
+CALL $FixedPoint128_with_obj_encode_16990793_macro$
+
+.macro FixedPoint128_with_obj_encode_16990793_macro
+.loc ../contracts/libraries/FixedPoint128.tsol, 13
+DUP
+PUSHPOW2 128
+MUL
+.loc ../contracts/libraries/FixedPoint128.tsol, 0
+
+.globl	FixedPoint128_no_obj_encode_16990793
+.type	FixedPoint128_no_obj_encode_16990793, @function
+CALL $FixedPoint128_no_obj_encode_16990793_macro$
+
+.macro FixedPoint128_no_obj_encode_16990793_macro
+.loc ../contracts/libraries/FixedPoint128.tsol, 13
+PUSHPOW2 128
+MUL
+.loc ../contracts/libraries/FixedPoint128.tsol, 0
+
+.globl	FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042
+.type	FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042, @function
+CALL $FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042_macro$
+
+.macro FixedPoint128_with_obj_calculateExpectedAmountByRate_c3a5c042_macro
+.loc ../contracts/libraries/FixedPoint128.tsol, 45
+PUXC S1, S-1
+PUSHPOW2 128
+MULDIV
+UFITS 128
+.loc ../contracts/libraries/FixedPoint128.tsol, 0
+
+.globl	FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042
+.type	FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042, @function
+CALL $FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042_macro$
+
+.macro FixedPoint128_no_obj_calculateExpectedAmountByRate_c3a5c042_macro
+.loc ../contracts/libraries/FixedPoint128.tsol, 45
+PUSHPOW2 128
+MULDIV
+UFITS 128
+.loc ../contracts/libraries/FixedPoint128.tsol, 0
+
+.globl	FixedPoint128_with_obj_div_39f92878
+.type	FixedPoint128_with_obj_div_39f92878, @function
+CALL $FixedPoint128_with_obj_div_39f92878_macro$
+
+.macro FixedPoint128_with_obj_div_39f92878_macro
+.loc ../contracts/libraries/FixedPoint128.tsol, 33
+PUXC S1, S-1
+DIV
+.loc ../contracts/libraries/FixedPoint128.tsol, 0
+
+.globl	FixedPoint128_no_obj_div_39f92878
+.type	FixedPoint128_no_obj_div_39f92878, @function
+CALL $FixedPoint128_no_obj_div_39f92878_macro$
+
+.macro FixedPoint128_no_obj_div_39f92878_macro
+.loc ../contracts/libraries/FixedPoint128.tsol, 33
+DIV
+.loc ../contracts/libraries/FixedPoint128.tsol, 0
 
 .macro new_array_line_1189_column_30_ast_id_3051
 PUSHINT 0

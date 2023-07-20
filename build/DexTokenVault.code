@@ -1,4 +1,4 @@
-.version sol 0.62.0
+.version sol 0.64.0
 
 .macro constructor
 DROP
@@ -81,7 +81,6 @@ ENDS
 CALLREF {
 	CALL $redeploy_0160a1d5_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -750,15 +749,12 @@ IFREF {
 .loc ../contracts/DexTokenVault.tsol, 184
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-}
-IFELSE
+IF
+LDU 64
 LDU 128
 LDMSGADDR
 LDU 128
@@ -776,7 +772,6 @@ ENDS
 CALLREF {
 	CALL $withdraw_0967fa4b_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -913,7 +908,6 @@ ENDS
 CALLREF {
 	CALL $transfer_4b27a64d_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1017,7 +1011,6 @@ ENDS
 CALLREF {
 	CALL $referralFeeTransfer_84ca93db_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1204,7 +1197,6 @@ ENDS
 CALLREF {
 	CALL $upgrade_fb9d1513_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1651,7 +1643,6 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensMint_2bd1475b_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2230,7 +2221,6 @@ ENDS
 CALLREF {
 	CALL $onTokenWallet_e6d1bd58_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3063,9 +3053,14 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX ; signatureSlice msgSlice
+	LDSLICEX
 	DUP
-	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	MYADDR
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	HASHCU
 	SWAP
 	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
@@ -3079,7 +3074,7 @@ PUSHCONT {
 		GETGLOB 2
 	}
 	IFELSE
-	CHKSIGNU ; msgSlice isSigned
+	CHKSIGNU
 	THROWIFNOT 40
 }
 PUSHCONT {
@@ -3125,41 +3120,6 @@ PUSHCONT {
 }
 IF
 THROW 0
-
-.globl	GasValues_no_obj_getDeployWalletGas_38991eb4
-.type	GasValues_no_obj_getDeployWalletGas_38991eb4, @function
-CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
-
-.macro GasValues_no_obj_getDeployWalletGas_38991eb4_macro
-.loc ../contracts/libraries/GasValues.tsol, 12
-PUSHINT 120000000
-PUSHINT 100000000
-ADD
-UFITS 128
-PUSHINT 100000
-PAIR
-.loc ../contracts/libraries/GasValues.tsol, 0
-
-.globl	GasValues_with_obj_getTransferTokensGas_9b3e08c4
-.type	GasValues_with_obj_getTransferTokensGas_9b3e08c4, @function
-CALL $GasValues_with_obj_getTransferTokensGas_9b3e08c4_macro$
-
-.macro GasValues_with_obj_getTransferTokensGas_9b3e08c4_macro
-.loc ../contracts/libraries/GasValues.tsol, 20
-DUP
-PUSHINT 200000
-PAIR
-.loc ../contracts/libraries/GasValues.tsol, 0
-
-.globl	GasValues_no_obj_getTransferTokensGas_9b3e08c4
-.type	GasValues_no_obj_getTransferTokensGas_9b3e08c4, @function
-CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
-
-.macro GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro
-.loc ../contracts/libraries/GasValues.tsol, 20
-PUSHINT 200000
-PAIR
-.loc ../contracts/libraries/GasValues.tsol, 0
 
 .globl	GasValues_with_obj_getPoolCrossExchangeStepGas_d2e7be7e
 .type	GasValues_with_obj_getPoolCrossExchangeStepGas_d2e7be7e, @function
@@ -3247,6 +3207,41 @@ ADD
 UFITS 128
 PAIR
 NIP
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_no_obj_getDeployWalletGas_38991eb4
+.type	GasValues_no_obj_getDeployWalletGas_38991eb4, @function
+CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+
+.macro GasValues_no_obj_getDeployWalletGas_38991eb4_macro
+.loc ../contracts/libraries/GasValues.tsol, 12
+PUSHINT 120000000
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_with_obj_getTransferTokensGas_9b3e08c4
+.type	GasValues_with_obj_getTransferTokensGas_9b3e08c4, @function
+CALL $GasValues_with_obj_getTransferTokensGas_9b3e08c4_macro$
+
+.macro GasValues_with_obj_getTransferTokensGas_9b3e08c4_macro
+.loc ../contracts/libraries/GasValues.tsol, 20
+DUP
+PUSHINT 200000
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_no_obj_getTransferTokensGas_9b3e08c4
+.type	GasValues_no_obj_getTransferTokensGas_9b3e08c4, @function
+CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
+
+.macro GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro
+.loc ../contracts/libraries/GasValues.tsol, 20
+PUSHINT 200000
+PAIR
 .loc ../contracts/libraries/GasValues.tsol, 0
 
 .globl	GasValues_no_obj_getReferralProgramGas_2421acc1

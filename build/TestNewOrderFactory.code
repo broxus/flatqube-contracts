@@ -1,4 +1,4 @@
-.version sol 0.62.0
+.version sol 0.64.0
 
 .macro constructor
 DROP
@@ -84,7 +84,6 @@ ENDS
 CALLREF {
 	CALL $onOrderRootDeployedCallback_267b27b3_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -232,7 +231,6 @@ PUSHCONT {
 }
 IFELSE
 SENDRAWMSG
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -357,7 +355,6 @@ PUSHCONT {
 }
 IFELSE
 SENDRAWMSG
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -496,7 +493,6 @@ PUSHCONT {
 }
 IFELSE
 SENDRAWMSG
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -575,7 +571,6 @@ ENDS
 CALLREF {
 	CALL $revokeManager_df2678ff_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1471,7 +1466,6 @@ ENDS
 CALLREF {
 	CALL $setPlatformRootOrderCodeOnce_05562495_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1540,7 +1534,6 @@ ENDS
 CALLREF {
 	CALL $setPlatformOrderCodeOnce_15be5f10_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1631,7 +1624,6 @@ ENDS
 CALLREF {
 	CALL $setOrderFeeParams_6d866363_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1783,7 +1775,6 @@ ENDS
 CALLREF {
 	CALL $proxyRootTokensTransfer_f555f3dd_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1905,7 +1896,6 @@ ENDS
 CALLREF {
 	CALL $sendGasRoot_71e75b54_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1994,7 +1984,6 @@ ENDS
 CALLREF {
 	CALL $setFeeParams_c19d7217_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2107,7 +2096,6 @@ ENDS
 CALLREF {
 	CALL $setRootFeeParams_f34c460e_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2235,7 +2223,6 @@ ENDS
 CALLREF {
 	CALL $setOrderRootCode_7f9039d7_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2308,7 +2295,6 @@ ENDS
 CALLREF {
 	CALL $setOrderCode_bfe3118d_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2707,7 +2693,6 @@ ENDS
 CALLREF {
 	CALL $withdrawFee_3092eff5_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2818,7 +2803,6 @@ ENDS
 CALLREF {
 	CALL $createOrderRoot_5595c536_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3124,7 +3108,6 @@ ENDS
 CALLREF {
 	CALL $upgrade_fb9d1513_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3720,9 +3703,14 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX ; signatureSlice msgSlice
+	LDSLICEX
 	DUP
-	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	MYADDR
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	HASHCU
 	SWAP
 	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
@@ -3736,7 +3724,7 @@ PUSHCONT {
 		GETGLOB 2
 	}
 	IFELSE
-	CHKSIGNU ; msgSlice isSigned
+	CHKSIGNU
 	THROWIFNOT 40
 }
 PUSHCONT {

@@ -25,12 +25,6 @@ async function main() {
   console.log('DexRoot:' + OrderFactory.address);
   console.log('Manager:' + manager.address);
 
-  // console.log(`Set code Order on Factory`);
-  // await OrderFactory.methods.setOrderCode({ _orderCode: Order.code }).send({
-  //   from: manager.address,
-  //   amount: toNano(0.1),
-  // });
-
   console.log(`Load list Order Roots`);
   for (const orderRootAddress of orderRoots) {
     orderRootsForUpdate.push(new Address(orderRootAddress.orderRoot));

@@ -1,4 +1,4 @@
-.version sol 0.62.0
+.version sol 0.64.0
 
 .macro constructor
 DROP
@@ -1646,6 +1646,13 @@ GETGLOB 4
 ROT
 SETINDEXQ 5
 SETGLOB 4
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
 LDU 32
 LDDICT
 ROTREV
@@ -1944,7 +1951,6 @@ ENDS
 CALLREF {
 	CALL $setVaultOnce_45313084_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2013,7 +2019,6 @@ ENDS
 CALLREF {
 	CALL $setActive_acec338a_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2144,7 +2149,6 @@ ENDS
 CALLREF {
 	CALL $setManager_d0ebdbe7_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2206,7 +2210,6 @@ ENDS
 CALLREF {
 	CALL $revokeManager_df2678ff_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2279,7 +2282,6 @@ ENDS
 CALLREF {
 	CALL $transferOwner_4fb2e45d_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2349,7 +2351,6 @@ ENDS
 CALLREF {
 	CALL $acceptOwner_ebbc4965_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2441,7 +2442,6 @@ ENDS
 CALLREF {
 	CALL $setTokenFactory_836d9889_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2529,7 +2529,6 @@ ENDS
 CALLREF {
 	CALL $installPlatformOnce_d58bd352_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2595,7 +2594,6 @@ ENDS
 CALLREF {
 	CALL $installOrUpdateAccountCode_59e89e27_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2675,7 +2673,6 @@ ENDS
 CALLREF {
 	CALL $installOrUpdatePairCode_122afc8b_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2782,7 +2779,6 @@ ENDS
 CALLREF {
 	CALL $installOrUpdatePoolCode_f336eb06_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2899,7 +2895,6 @@ ENDS
 CALLREF {
 	CALL $installOrUpdateTokenVaultCode_e4457a30_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2999,7 +2994,6 @@ ENDS
 CALLREF {
 	CALL $installOrUpdateLpTokenPendingCode_287dd447_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3088,7 +3082,6 @@ ENDS
 CALLREF {
 	CALL $upgrade_7916ae0d_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3404,7 +3397,6 @@ ENDS
 CALLREF {
 	CALL $deployTokenVault_b695c0f6_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3504,7 +3496,6 @@ ENDS
 CALLREF {
 	CALL $onTokenVaultDeployed_dd35f745_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3688,7 +3679,6 @@ ENDS
 CALLREF {
 	CALL $deployLpToken_2abd865b_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3833,7 +3823,6 @@ ENDS
 CALLREF {
 	CALL $onLiquidityTokenDeployed_589d3af6_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3961,7 +3950,6 @@ ENDS
 CALLREF {
 	CALL $onLiquidityTokenNotDeployed_b5c8275d_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4045,7 +4033,6 @@ ENDS
 CALLREF {
 	CALL $upgradeTokenVault_caf8ff30_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4113,7 +4100,6 @@ PUSHCONT {
 	ROTREV
 	PAIR
 	SWAP
-	LDU 32
 	LDREF
 	ENDS
 	CTOS
@@ -4124,16 +4110,15 @@ PUSHCONT {
 	ROTREV
 	PAIR
 	SWAP
-	LDU 32
 }
 IFELSE
+LDU 32
 LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.tsol, 0
 CALLREF {
 	CALL $upgradeTokenVaults_490f19c6_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4320,7 +4305,6 @@ ENDS
 CALLREF {
 	CALL $deployAccount_5f2807ac_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4455,7 +4439,6 @@ ENDS
 CALLREF {
 	CALL $requestUpgradeAccount_b08891f1_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4633,7 +4616,6 @@ PUSHCONT {
 	ROTREV
 	PAIR
 	SWAP
-	LDU 32
 	LDREF
 	ENDS
 	CTOS
@@ -4644,9 +4626,9 @@ PUSHCONT {
 	ROTREV
 	PAIR
 	SWAP
-	LDU 32
 }
 IFELSE
+LDU 32
 LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.tsol, 0
@@ -5105,7 +5087,6 @@ PUSHCONT {
 	ROTREV
 	PAIR
 	SWAP
-	LDU 32
 	LDREF
 	ENDS
 	CTOS
@@ -5116,9 +5097,9 @@ PUSHCONT {
 	ROTREV
 	PAIR
 	SWAP
-	LDU 32
 }
 IFELSE
+LDU 32
 LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.tsol, 0
@@ -5602,7 +5583,6 @@ PUSHCONT {
 	ROTREV
 	PAIR
 	SWAP
-	LDU 32
 	LDREF
 	ENDS
 	CTOS
@@ -5613,9 +5593,9 @@ PUSHCONT {
 	ROTREV
 	PAIR
 	SWAP
-	LDU 32
 }
 IFELSE
+LDU 32
 LDMSGADDR
 ENDS
 .loc ../contracts/DexRoot.tsol, 0
@@ -5819,7 +5799,6 @@ ENDS
 CALLREF {
 	CALL $deployPair_09c0bb93_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -6017,7 +5996,6 @@ ENDS
 CALLREF {
 	CALL $deployStablePool_50b987d0_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -6661,7 +6639,6 @@ ENDS
 CALLREF {
 	CALL $onPoolCreated_12f9a1e3_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -7585,9 +7562,14 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX ; signatureSlice msgSlice
+	LDSLICEX
 	DUP
-	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	MYADDR
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	HASHCU
 	SWAP
 	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
@@ -7601,7 +7583,7 @@ PUSHCONT {
 		GETGLOB 2
 	}
 	IFELSE
-	CHKSIGNU ; msgSlice isSigned
+	CHKSIGNU
 	THROWIFNOT 40
 }
 PUSHCONT {
