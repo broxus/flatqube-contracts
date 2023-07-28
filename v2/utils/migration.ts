@@ -1,9 +1,9 @@
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import fs, { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { Address, WalletTypes, Transaction } from 'locklift';
+import { Address, WalletTypes, Transaction, Contract } from 'locklift';
 import { FactorySource } from '../../build/factorySource';
 
-export class Migration<T extends FactorySource> {
+export class Migration {
   migrationLog: Record<string, string>;
   private readonly logPath: string;
 
@@ -29,6 +29,7 @@ export class Migration<T extends FactorySource> {
     writeFileSync(this.logPath, JSON.stringify(this.migrationLog, null, 2));
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public loadAccount = async (name: string, account: string) => {
     this._loadMigrationLog();
 
@@ -42,19 +43,19 @@ export class Migration<T extends FactorySource> {
     }
   };
 
-  public exists = async (name: string) => {
+  public exists = (name: string) => {
     return this.migrationLog[name] !== undefined;
-  }
+  };
 
-  public loadContract = <ContractName extends keyof T>(
+  public loadContract = <ContractName extends keyof FactorySource>(
     contract: ContractName,
     name: string,
-  ) => {
+  ): Contract<FactorySource[ContractName]> => {
     this._loadMigrationLog();
 
     if (this.migrationLog[name] !== undefined) {
       return locklift.factory.getDeployedContract(
-        contract as keyof FactorySource,
+        contract,
         new Address(this.migrationLog[name]),
       );
     } else {
@@ -73,6 +74,13 @@ export class Migration<T extends FactorySource> {
 
     this._saveMigrationLog();
   };
+
+  backup() {
+    fs.writeFileSync(
+      'migration-log-' + new Date().toISOString() + '.json',
+      JSON.stringify(this.migrationLog, null, 2),
+    );
+  }
 }
 
 export const displayTx = (_tx: Transaction) => {
@@ -132,7 +140,7 @@ for (let i = 0; i < 40; i++) {
     name: 'Gen' + i,
     symbol: 'GEN' + i,
     decimals: 9,
-    upgradeable: true
+    upgradeable: true,
   };
 }
 
