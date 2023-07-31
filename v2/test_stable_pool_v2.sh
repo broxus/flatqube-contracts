@@ -1,5 +1,5 @@
-export DEFAULT_PARAMS="--config ./locklift-v2.config.ts --disable-build --enable-tracing --external-build node_modules/tip3/build --network local"
-export NO_TRACE="--config ./locklift-v2.config.ts --disable-build --network local"
+export DEFAULT_PARAMS="--config ./locklift.config.ts --disable-build --enable-tracing --external-build node_modules/tip3/build --network local"
+export NO_TRACE="--config ./locklift.config.ts --disable-build --network local"
 
 #prepare pool
 npx locklift run $NO_TRACE --script v2/scripts/0-reset-migration.ts

@@ -41,12 +41,13 @@ const config: LockliftConfig = {
   linker: { version: '0.15.48' },
   verifier: {
     verifierVersion: 'latest', // contract verifier binary, see https://github.com/broxus/everscan-verify/releases
-    apiKey: process.env.EVERSCAN_API_KEY ?? '',
-    secretKey: process.env.EVERSCAN_SECRET_KEY ?? '',
+    apiKey: process.env.EVERSCAN_API_KEY!,
+    secretKey: process.env.EVERSCAN_SECRET_KEY!,
     // license: "AGPL-3.0-or-later", <- this is default value and can be overrided
   },
   networks: {
     local: {
+      deploy: ["common/", "local/"],
       connection: {
         id: 1337,
         group: 'localnet',
@@ -58,58 +59,57 @@ const config: LockliftConfig = {
         },
       },
       giver: {
-        address:
-            '0:ece57bcc6c530283becbbd8a3b24d3c5987cdddc3c8b7b33be6e4a6312490415',
-        key: '172af540e43a524763dd53b26a066d472a97c4de37d5498170564510608250c3',
+        address: process.env.LOCAL_GIVER_ADDRESS!,
+        key: process.env.LOCAL_GIVER_KEY!,
       },
       tracing: { endpoint: LOCAL_NETWORK_ENDPOINT },
       keys: {
-        phrase:
-            'action inject penalty envelope rabbit element slim tornado dinner pizza off blood',
+        phrase: process.env.LOCAL_PHRASE,
         amount: 20,
       },
     },
     test: {
-      // Specify connection settings for https://github.com/broxus/everscale-standalone-client/
+      deploy: ["common/", "test/"],
       connection: {
         id: 0,
         group: 'testnet',
         type: 'graphql',
         data: {
-          endpoints: [process.env.TESTNET_GQL_ENDPOINT],
+          endpoints: [ process.env.TESTNET_GQL_ENDPOINT! ],
           latencyDetectionInterval: 1000,
           local: false,
         },
       },
       // This giver is default local-node giverV2
       giver: {
-        address: process.env.TESTNET_GIVER_ADDRESS ?? '',
-        phrase: process.env.TESTNET_GIVER_SEED ?? '',
+        address: process.env.TESTNET_GIVER_ADDRESS!,
+        phrase: process.env.TESTNET_GIVER_SEED!,
         accountId: 0,
       },
       tracing: {
-        endpoint: process.env.TESTNET_GQL_ENDPOINT ?? '',
+        endpoint: process.env.TESTNET_GQL_ENDPOINT!,
       },
 
       keys: {
-        phrase: process.env.TESTNET_SEED_PHRASE ?? '',
+        phrase: process.env.TESTNET_GIVER_KEY!,
         amount: 20,
       },
     },
     main: {
+      deploy: ["common/", "main/"],
       connection: {
         id: 1,
         type: 'jrpc',
         group: 'main',
         data: {
-          endpoint: process.env.MAINNET_RPC_NETWORK_ENDPOINT ?? '',
+          endpoint: process.env.MAINNET_RPC_NETWORK_ENDPOINT!,
         },
       },
       giver: {
-        address: process.env.MAINNET_GIVER_ADDRESS ?? '',
-        key: process.env.MAINNET_GIVER_KEY ?? '',
+        address: process.env.MAINNET_GIVER_ADDRESS!,
+        key: process.env.MAINNET_GIVER_KEY!,
       },
-      tracing: { endpoint: process.env.MAINNET_GQL_NETWORK_ENDPOINT ?? '' },
+      tracing: { endpoint: process.env.MAINNET_GQL_NETWORK_ENDPOINT! },
       keys: {
         phrase: process.env.MAINNET_PHRASE,
         amount: 20,
