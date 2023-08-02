@@ -71,33 +71,6 @@ const config: LockliftConfig = {
         amount: 20,
       },
     },
-    test: {
-      deploy: ["common/", "test/"],
-      connection: {
-        id: 0,
-        group: "testnet",
-        type: "graphql",
-        data: {
-          endpoints: [process.env.TESTNET_GQL_ENDPOINT!],
-          latencyDetectionInterval: 1000,
-          local: false,
-        },
-      },
-      // This giver is default local-node giverV2
-      giver: {
-        address: process.env.TESTNET_GIVER_ADDRESS!,
-        phrase: process.env.TESTNET_GIVER_SEED!,
-        accountId: 0,
-      },
-      tracing: {
-        endpoint: process.env.TESTNET_GQL_ENDPOINT!,
-      },
-
-      keys: {
-        phrase: process.env.TESTNET_GIVER_KEY!,
-        amount: 20,
-      },
-    },
     main: {
       deploy: ["common/", "main/"],
       connection: {

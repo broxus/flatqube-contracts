@@ -1,33 +1,33 @@
-import { getRandomNonce, toNano } from 'locklift';
+import { getRandomNonce, toNano } from "locklift";
 
 import {
   TestWeverVaultAbi,
   TokenRootUpgradeableAbi,
-} from 'build/factorySource';
+} from "build/factorySource";
 
 export default async () => {
   await locklift.deployments.load();
-  console.log('deploying testnet WEVER');
-  const weverOwner = locklift.deployments.getAccount('DexOwner');
+  console.log("deploying testnet WEVER");
+  const weverOwner = locklift.deployments.getAccount("DexOwner");
 
   await locklift.deployments.saveContract({
-    deploymentName: 'weverRoot',
+    deploymentName: "weverRoot",
     address:
-      '0:a49cd4e158a9a15555e624759e2e4e766d22600b7800d891e46f9291f044a93d',
-    contractName: 'TokenRootUpgradeable',
+      "0:a49cd4e158a9a15555e624759e2e4e766d22600b7800d891e46f9291f044a93d",
+    contractName: "TokenRootUpgradeable",
   });
 
   await locklift.deployments.saveContract({
-    deploymentName: 'weverVault',
+    deploymentName: "weverVault",
     address:
-      '0:557957cba74ab1dc544b4081be81f1208ad73997d74ab3b72d95864a41b779a4',
-    contractName: 'TestWeverVault',
+      "0:557957cba74ab1dc544b4081be81f1208ad73997d74ab3b72d95864a41b779a4",
+    contractName: "TestWeverVault",
   });
 
   const root =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>('weverRoot');
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("weverRoot");
   const weverVault =
-    locklift.deployments.getContract<TestWeverVaultAbi>('weverVault');
+    locklift.deployments.getContract<TestWeverVaultAbi>("weverVault");
 
   console.log(`root address: ${root.address}`);
 
@@ -48,7 +48,7 @@ export default async () => {
   // Tunnel
   // - Deploy tunnel
   const { contract: tunnel } = await locklift.factory.deployContract({
-    contract: 'TestWeverTunnel',
+    contract: "TestWeverTunnel",
     publicKey: weverOwner.signer.publicKey,
     value: toNano(2),
     initParams: {
@@ -66,9 +66,9 @@ export default async () => {
   const { extTransaction: everToTip3 } =
     await locklift.transactions.waitFinalized(
       locklift.deployments.deploy({
-        deploymentName: 'EverToTip3',
+        deploymentName: "EverToTip3",
         deployConfig: {
-          contract: 'EverToTip3',
+          contract: "EverToTip3",
           initParams: {
             randomNonce_: getRandomNonce(),
             weverRoot: root.address,
@@ -84,9 +84,9 @@ export default async () => {
   const { extTransaction: everWeverToTip3 } =
     await locklift.transactions.waitFinalized(
       locklift.deployments.deploy({
-        deploymentName: 'EverWeverToTip3',
+        deploymentName: "EverWeverToTip3",
         deployConfig: {
-          contract: 'EverWeverToTip3',
+          contract: "EverWeverToTip3",
           constructorParams: {},
           initParams: {
             randomNonce_: getRandomNonce(),
@@ -191,4 +191,4 @@ export default async () => {
   console.log(`wever contracts deployed!`);
 };
 
-export const tag = 'wever';
+export const tag = "wever";

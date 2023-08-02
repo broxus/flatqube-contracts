@@ -1,18 +1,18 @@
-import { toNano } from 'locklift';
+import { toNano } from "locklift";
 
-import { TestWeverVaultAbi } from '../../../build/factorySource';
-import { WEVER_WALLET_AMOUNT } from '../../common/commonAccounts';
+import { TestWeverVaultAbi } from "../../../build/factorySource";
+import { WEVER_WALLET_AMOUNT } from "../../common/commonAccounts";
 
 export default async () => {
-  const weverOwner = locklift.deployments.getAccount('DexOwner');
+  const weverOwner = locklift.deployments.getAccount("DexOwner");
   const weverVault =
-    locklift.deployments.getContract<TestWeverVaultAbi>('weverVault');
+    locklift.deployments.getContract<TestWeverVaultAbi>("weverVault");
 
-  console.log('wrapping tokens...');
+  console.log("wrapping tokens...");
 
   await weverVault.methods
     .wrap({
-      payload: '',
+      payload: "",
       gas_back_address: weverOwner.account.address,
       tokens: toNano(WEVER_WALLET_AMOUNT),
       owner_address: weverOwner.account.address,
@@ -24,7 +24,9 @@ export default async () => {
 
   const balance = await weverVault.methods.total_wrapped().call();
 
-  console.log(balance, 'tokens are wrapped local');
+  console.log(balance, "tokens are wrapped local");
 };
 
-export const tag = 'wrap-ever';
+export const tag = "wrap-ever";
+
+export const dependencies = ["wever"];

@@ -6,7 +6,7 @@ export default async () => {
   const owner = locklift.deployments.getAccount("DexOwner").account;
 
   const token =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>("wever");
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("weverRoot");
 
   const ownerWalletAddress = (
     await token.methods

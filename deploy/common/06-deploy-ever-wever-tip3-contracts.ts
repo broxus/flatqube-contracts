@@ -9,7 +9,7 @@ export default async () => {
   const weverVault =
     locklift.deployments.getContract<TestWeverVaultAbi>("weverVault");
   const weverRoot =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>("wever");
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("weverRoot");
 
   console.log(`Deploying EverToTip3 contract...`);
 
@@ -21,8 +21,8 @@ export default async () => {
           constructorParams: {},
           initParams: {
             randomNonce_: getRandomNonce(),
-            weverRoot: weverRoot,
-            weverVault: weverVault,
+            weverRoot: weverRoot.address,
+            weverVault: weverVault.address,
           },
           publicKey: signer.publicKey,
           value: toNano(2),
@@ -32,7 +32,7 @@ export default async () => {
       }),
     );
   console.log(
-    `EverToTip3 deploing end. Address: ${everToTip3.contract.address}`,
+    `EverToTip3 deploying end. Address: ${everToTip3.contract.address}`,
   );
 
   console.log(`Deploying Tip3ToEver...`);
@@ -45,8 +45,8 @@ export default async () => {
           constructorParams: {},
           initParams: {
             randomNonce_: getRandomNonce(),
-            weverRoot: weverRoot,
-            weverVault: weverVault,
+            weverRoot: weverRoot.address,
+            weverVault: weverVault.address,
           },
           publicKey: signer.publicKey,
           value: toNano(2),
@@ -68,8 +68,8 @@ export default async () => {
           constructorParams: {},
           initParams: {
             randomNonce_: getRandomNonce(),
-            weverRoot: weverRoot,
-            weverVault: weverVault,
+            weverRoot: weverRoot.address,
+            weverVault: weverVault.address,
             everToTip3: everToTip3.contract.address,
           },
           publicKey: signer.publicKey,
