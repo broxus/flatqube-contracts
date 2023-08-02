@@ -1,40 +1,40 @@
-import { getRandomNonce, toNano, zeroAddress } from 'locklift';
-import { DexVaultAbi, DexRootAbi } from '../../build/factorySource';
-import { displayTx } from '../../v2/utils/migration';
+import { getRandomNonce, toNano, zeroAddress } from "locklift";
+import { DexVaultAbi, DexRootAbi } from "../../build/factorySource";
+import { displayTx } from "../../v2/utils/migration";
 
 export default async () => {
   locklift.tracing.setAllowedCodes({ compute: [60] });
-  const signer = await locklift.keystore.getSigner('0');
-  const owner = locklift.deployments.getAccount('DexOwner').account;
+  const signer = await locklift.keystore.getSigner("0");
+  const owner = locklift.deployments.getAccount("DexOwner").account;
   const tokenFactory =
-    locklift.deployments.getContract<DexRootAbi>('TokenFactory');
+    locklift.deployments.getContract<DexRootAbi>("TokenFactory");
 
   locklift.tracing.setAllowedCodesForAddress(owner.address, {
     compute: [100],
   });
 
   const DexPlatform = await locklift.factory.getContractArtifacts(
-    'DexPlatform',
+    "DexPlatform",
   );
-  const DexAccount = await locklift.factory.getContractArtifacts('DexAccount');
-  const DexPair = await locklift.factory.getContractArtifacts('DexPair');
+  const DexAccount = await locklift.factory.getContractArtifacts("DexAccount");
+  const DexPair = await locklift.factory.getContractArtifacts("DexPair");
   const DexStablePair = await locklift.factory.getContractArtifacts(
-    'DexStablePair',
+    "DexStablePair",
   );
   const DexStablePool = await locklift.factory.getContractArtifacts(
-    'DexStablePool',
+    "DexStablePool",
   );
   const LpTokenPending = await locklift.factory.getContractArtifacts(
-    'LpTokenPending',
+    "LpTokenPending",
   );
   const DexTokenVault = await locklift.factory.getContractArtifacts(
-    'DexTokenVault',
+    "DexTokenVault",
   );
 
   await locklift.transactions.waitFinalized(
     locklift.deployments.deploy({
       deployConfig: {
-        contract: 'DexRoot',
+        contract: "DexRoot",
         constructorParams: {
           initial_owner: owner.address,
           initial_vault: zeroAddress,
@@ -45,17 +45,17 @@ export default async () => {
         publicKey: signer.publicKey,
         value: toNano(2),
       },
-      deploymentName: 'DexRoot',
+      deploymentName: "DexRoot",
       enableLogs: true,
     }),
   );
 
-  const dexRoot = locklift.deployments.getContract<DexRootAbi>('DexRoot');
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   await locklift.transactions.waitFinalized(
     locklift.deployments.deploy({
       deployConfig: {
-        contract: 'DexVault',
+        contract: "DexVault",
         constructorParams: {
           owner_: owner.address,
           root_: dexRoot.address,
@@ -66,12 +66,12 @@ export default async () => {
         publicKey: signer.publicKey,
         value: toNano(2),
       },
-      deploymentName: 'DexVault',
+      deploymentName: "DexVault",
       enableLogs: true,
     }),
   );
 
-  const dexVault = locklift.deployments.getContract<DexVaultAbi>('DexVault');
+  const dexVault = locklift.deployments.getContract<DexVaultAbi>("DexVault");
 
   console.log(`DexVault address: ${dexVault.address}`);
 
@@ -93,7 +93,7 @@ export default async () => {
     });
   displayTx(tx);
 
-  console.log('DexRoot: installing vault code...');
+  console.log("DexRoot: installing vault code...");
   tx = await dexRoot.methods
     .installOrUpdateTokenVaultCode({
       _newCode: DexTokenVault.code,
@@ -105,7 +105,7 @@ export default async () => {
     });
   displayTx(tx);
 
-  console.log('DexRoot: installing lp pending code...');
+  console.log("DexRoot: installing lp pending code...");
   tx = await dexRoot.methods
     .installOrUpdateLpTokenPendingCode({
       _newCode: LpTokenPending.code,
@@ -117,7 +117,7 @@ export default async () => {
     });
   displayTx(tx);
 
-  console.log('DexRoot: set Token Factory...');
+  console.log("DexRoot: set Token Factory...");
   tx = await dexRoot.methods
     .setTokenFactory({
       _newTokenFactory: tokenFactory.address,
@@ -182,6 +182,6 @@ export default async () => {
   displayTx(tx);
 };
 
-export const tag = 'dex-root';
+export const tag = "dex-root";
 
-export const dependencies = ['owner-account', 'token-factory'];
+export const dependencies = ["owner-account", "token-factory"];

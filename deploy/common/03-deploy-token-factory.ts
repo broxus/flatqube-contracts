@@ -1,25 +1,25 @@
-import { getRandomNonce, toNano } from 'locklift';
-import { TokenFactoryAbi } from '../../build/factorySource';
-import { displayTx } from '../../v2/utils/migration';
+import { getRandomNonce, toNano } from "locklift";
+import { TokenFactoryAbi } from "../../build/factorySource";
+import { displayTx } from "../../v2/utils/migration";
 
 export default async () => {
-  const signer = await locklift.keystore.getSigner('0');
-  const owner = locklift.deployments.getAccount('DexOwner').account;
+  const signer = await locklift.keystore.getSigner("0");
+  const owner = locklift.deployments.getAccount("DexOwner").account;
 
   const TokenRoot = locklift.factory.getContractArtifacts(
-    'TokenRootUpgradeable',
+    "TokenRootUpgradeable",
   );
   const TokenWallet = locklift.factory.getContractArtifacts(
-    'TokenWalletUpgradeable',
+    "TokenWalletUpgradeable",
   );
   const TokenWalletPlatform = locklift.factory.getContractArtifacts(
-    'TokenWalletPlatform',
+    "TokenWalletPlatform",
   );
 
   await locklift.transactions.waitFinalized(
     locklift.deployments.deploy({
       deployConfig: {
-        contract: 'TokenFactory',
+        contract: "TokenFactory",
         constructorParams: {
           _owner: owner.address,
         },
@@ -29,13 +29,13 @@ export default async () => {
         publicKey: signer.publicKey,
         value: toNano(2),
       },
-      deploymentName: 'TokenFactory',
+      deploymentName: "TokenFactory",
       enableLogs: true,
     }),
   );
 
   const tokenFactory =
-    locklift.deployments.getContract<TokenFactoryAbi>('TokenFactory');
+    locklift.deployments.getContract<TokenFactoryAbi>("TokenFactory");
   console.log(`TokenFactory: ${tokenFactory.address}`);
 
   console.log(`TokenFactory.setRootCode...`);
@@ -66,6 +66,6 @@ export default async () => {
   displayTx(tx);
 };
 
-export const tag = 'token-factory';
+export const tag = "token-factory";
 
-export const dependencies = ['owner-account'];
+export const dependencies = ["owner-account"];

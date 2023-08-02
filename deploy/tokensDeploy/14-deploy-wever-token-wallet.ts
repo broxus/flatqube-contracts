@@ -1,12 +1,12 @@
-import { toNano } from 'locklift';
-import { ACCOUNTS_N } from '../common/commonAccounts';
-import { TokenRootUpgradeableAbi } from '../../build/factorySource';
+import { toNano } from "locklift";
+import { ACCOUNTS_N } from "../common/commonAccounts";
+import { TokenRootUpgradeableAbi } from "../../build/factorySource";
 
 export default async () => {
-  const owner = locklift.deployments.getAccount('DexOwner').account;
+  const owner = locklift.deployments.getAccount("DexOwner").account;
 
   const token =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>('wever');
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("wever");
 
   const ownerWalletAddress = (
     await token.methods
@@ -18,12 +18,12 @@ export default async () => {
   ).value0;
 
   const ownerWallet = locklift.factory.getDeployedContract(
-    'TokenWalletUpgradeable',
+    "TokenWalletUpgradeable",
     ownerWalletAddress,
   );
 
   await locklift.deployments.saveContract({
-    contractName: 'TokenWalletUpgradeable',
+    contractName: "TokenWalletUpgradeable",
     deploymentName: `ownerWallet-wever`,
     address: ownerWallet.address,
   });
@@ -33,10 +33,10 @@ export default async () => {
 
   for (let j = 0; j < ACCOUNTS_N; j++) {
     const account = locklift.deployments.getAccount(
-      'commonAccount-' + j,
+      "commonAccount-" + j,
     ).account;
 
-    const wallet: Promise<string> = new Promise(async (resolve) => {
+    const wallet: Promise<string> = new Promise(async resolve => {
       ownerWallet.methods
         .transfer({
           amount: 50,
@@ -44,7 +44,7 @@ export default async () => {
           deployWalletValue: toNano(0.1),
           remainingGasTo: owner.address,
           notify: false,
-          payload: '',
+          payload: "",
         })
         .send({
           from: owner.address,
@@ -61,7 +61,7 @@ export default async () => {
           ).value0;
 
           await locklift.deployments.saveContract({
-            contractName: 'TokenWalletUpgradeable',
+            contractName: "TokenWalletUpgradeable",
             deploymentName: `wallet-wever-${j}`,
             address: walletAddress,
           });
@@ -87,5 +87,5 @@ export default async () => {
   await resolvePromisesSeq(arrOfWallets);
 };
 
-export const tag = 'wever-wallets';
-export const dependencies = ['owner-account', 'tokens', 'common-accounts'];
+export const tag = "wever-wallets";
+export const dependencies = ["owner-account", "tokens", "common-accounts"];
