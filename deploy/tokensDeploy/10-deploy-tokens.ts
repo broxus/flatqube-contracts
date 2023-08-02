@@ -1,15 +1,15 @@
-import { toNano, zeroAddress } from 'locklift';
+import { toNano, zeroAddress } from "locklift";
 export const TOKENS_N = 1;
 export const TOKENS_DECIMALS = [6, 9, 18];
 
 export default async () => {
-  const signer = await locklift.keystore.getSigner('0');
-  const owner = locklift.deployments.getAccount('DexOwner').account;
+  const signer = await locklift.keystore.getSigner("0");
+  const owner = locklift.deployments.getAccount("DexOwner").account;
   const walletArtifacts = locklift.factory.getContractArtifacts(
-    'TokenWalletUpgradeable',
+    "TokenWalletUpgradeable",
   );
   const platformArtifacts = locklift.factory.getContractArtifacts(
-    'TokenWalletPlatform',
+    "TokenWalletPlatform",
   );
 
   for (let i = 0; i < TOKENS_DECIMALS.length; i++) {
@@ -17,7 +17,7 @@ export default async () => {
       await locklift.transactions.waitFinalized(
         locklift.deployments.deploy({
           deployConfig: {
-            contract: 'TokenRootUpgradeable',
+            contract: "TokenRootUpgradeable",
             publicKey: signer.publicKey,
             initParams: {
               randomNonce_: locklift.utils.getRandomNonce(),
@@ -48,5 +48,5 @@ export default async () => {
   }
 };
 
-export const tag = 'tokens';
-export const dependencies = ['owner-account'];
+export const tag = "tokens";
+export const dependencies = ["owner-account"];

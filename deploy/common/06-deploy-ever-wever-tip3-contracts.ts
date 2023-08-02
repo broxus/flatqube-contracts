@@ -1,15 +1,15 @@
-import { toNano, getRandomNonce, zeroAddress } from 'locklift';
+import { toNano, getRandomNonce } from "locklift";
 import {
   TokenRootUpgradeableAbi,
   TestWeverVaultAbi,
-} from '../../build/factorySource';
+} from "../../build/factorySource";
 
 export default async () => {
-  const signer = await locklift.keystore.getSigner('0');
+  const signer = await locklift.keystore.getSigner("0");
   const weverVault =
-    locklift.deployments.getContract<TestWeverVaultAbi>('weverVault');
+    locklift.deployments.getContract<TestWeverVaultAbi>("weverVault");
   const weverRoot =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>('wever');
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("wever");
 
   console.log(`Deploying EverToTip3 contract...`);
 
@@ -17,7 +17,7 @@ export default async () => {
     await locklift.transactions.waitFinalized(
       await locklift.deployments.deploy({
         deployConfig: {
-          contract: 'EverToTip3',
+          contract: "EverToTip3",
           constructorParams: {},
           initParams: {
             randomNonce_: getRandomNonce(),
@@ -27,7 +27,7 @@ export default async () => {
           publicKey: signer.publicKey,
           value: toNano(2),
         },
-        deploymentName: 'EverToTip3',
+        deploymentName: "EverToTip3",
         enableLogs: true,
       }),
     );
@@ -41,7 +41,7 @@ export default async () => {
     await locklift.transactions.waitFinalized(
       await locklift.deployments.deploy({
         deployConfig: {
-          contract: 'Tip3ToEver',
+          contract: "Tip3ToEver",
           constructorParams: {},
           initParams: {
             randomNonce_: getRandomNonce(),
@@ -51,7 +51,7 @@ export default async () => {
           publicKey: signer.publicKey,
           value: toNano(2),
         },
-        deploymentName: 'Tip3ToEver',
+        deploymentName: "Tip3ToEver",
         enableLogs: true,
       }),
     );
@@ -64,7 +64,7 @@ export default async () => {
     await locklift.transactions.waitFinalized(
       await locklift.deployments.deploy({
         deployConfig: {
-          contract: 'EverWeverToTip3',
+          contract: "EverWeverToTip3",
           constructorParams: {},
           initParams: {
             randomNonce_: getRandomNonce(),
@@ -75,7 +75,7 @@ export default async () => {
           publicKey: signer.publicKey,
           value: toNano(2),
         },
-        deploymentName: 'EverWeverToTip3',
+        deploymentName: "EverWeverToTip3",
         enableLogs: true,
       }),
     );
@@ -84,6 +84,6 @@ export default async () => {
   );
 };
 
-export const tag = 'ever-wever-tip3';
+export const tag = "ever-wever-tip3";
 
-export const dependencies = ['wever'];
+export const dependencies = ["wever"];

@@ -1,25 +1,25 @@
-import { toNano, getRandomNonce } from 'locklift';
-import { DexRootAbi } from '../../build/factorySource';
+import { toNano, getRandomNonce } from "locklift";
+import { DexRootAbi } from "../../build/factorySource";
 
 export default async () => {
-  const signer = await locklift.keystore.getSigner('0');
-  const account = locklift.deployments.getAccount('DexOwner').account;
-  const dexRoot = locklift.deployments.getContract<DexRootAbi>('DexRoot');
+  const signer = await locklift.keystore.getSigner("0");
+  const account = locklift.deployments.getAccount("DexOwner").account;
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   const PlatformRootOrder = await locklift.factory.getContractArtifacts(
-    'OrderRootPlatform',
+    "OrderRootPlatform",
   );
   const PlatformOrder = await locklift.factory.getContractArtifacts(
-    'OrderPlatform',
+    "OrderPlatform",
   );
-  const RootOrder = await locklift.factory.getContractArtifacts('OrderRoot');
-  const Order = await locklift.factory.getContractArtifacts('Order');
+  const RootOrder = await locklift.factory.getContractArtifacts("OrderRoot");
+  const Order = await locklift.factory.getContractArtifacts("Order");
 
   const { extTransaction: factoryOrder } =
     await locklift.transactions.waitFinalized(
       await locklift.deployments.deploy({
         deployConfig: {
-          contract: 'OrderFactory',
+          contract: "OrderFactory",
           constructorParams: {
             _owner: account.address,
             _version: 1,
@@ -31,7 +31,7 @@ export default async () => {
           publicKey: signer.publicKey,
           value: toNano(5),
         },
-        deploymentName: 'OrderFactory',
+        deploymentName: "OrderFactory",
         enableLogs: true,
       }),
     );
@@ -96,6 +96,6 @@ export default async () => {
   //   });
 };
 
-export const tag = 'factory-order';
+export const tag = "factory-order";
 
-export const dependencies = ['owner-account', 'dex-root'];
+export const dependencies = ["owner-account", "dex-root"];

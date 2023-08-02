@@ -1,10 +1,10 @@
-import { toNano } from 'locklift';
-import { ACCOUNTS_N } from '../common/commonAccounts';
-import { TOKENS_N, TOKENS_DECIMALS } from './10-deploy-tokens';
-import { TokenRootUpgradeableAbi } from '../../build/factorySource';
+import { toNano } from "locklift";
+import { ACCOUNTS_N } from "../common/commonAccounts";
+import { TOKENS_N, TOKENS_DECIMALS } from "./10-deploy-tokens";
+import { TokenRootUpgradeableAbi } from "../../build/factorySource";
 
 export default async () => {
-  const owner = locklift.deployments.getAccount('DexOwner').account;
+  const owner = locklift.deployments.getAccount("DexOwner").account;
 
   for (let i = 0; i < TOKENS_DECIMALS.length; i++) {
     for (let k = 0; k < TOKENS_N; k++) {
@@ -22,12 +22,12 @@ export default async () => {
       ).value0;
 
       const ownerWallet = await locklift.factory.getDeployedContract(
-        'TokenWalletUpgradeable',
+        "TokenWalletUpgradeable",
         ownerWalletAddress,
       );
 
       await locklift.deployments.saveContract({
-        contractName: 'TokenWalletUpgradeable',
+        contractName: "TokenWalletUpgradeable",
         deploymentName: `ownerWallet-${i}-${k}`,
         address: ownerWallet.address,
       });
@@ -37,10 +37,10 @@ export default async () => {
 
       for (let j = 0; j < ACCOUNTS_N; j++) {
         const account = locklift.deployments.getAccount(
-          'commonAccount-' + j,
+          "commonAccount-" + j,
         ).account;
 
-        const wallet: Promise<string> = new Promise(async (resolve) => {
+        const wallet: Promise<string> = new Promise(async resolve => {
           ownerWallet.methods
             .transfer({
               amount: 10 ** 14,
@@ -48,7 +48,7 @@ export default async () => {
               deployWalletValue: toNano(0.1),
               remainingGasTo: owner.address,
               notify: false,
-              payload: '',
+              payload: "",
             })
             .send({
               from: owner.address,
@@ -65,7 +65,7 @@ export default async () => {
               ).value0;
 
               await locklift.deployments.saveContract({
-                contractName: 'TokenWalletUpgradeable',
+                contractName: "TokenWalletUpgradeable",
                 deploymentName: `wallet-${i}-${k}-${j}`,
                 address: walletAddress,
               });
@@ -93,5 +93,5 @@ export default async () => {
   }
 };
 
-export const tag = 'token-wallets';
-export const dependencies = ['owner-account', 'tokens', 'common-accounts'];
+export const tag = "token-wallets";
+export const dependencies = ["owner-account", "tokens", "common-accounts"];

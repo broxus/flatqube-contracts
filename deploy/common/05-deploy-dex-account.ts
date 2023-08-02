@@ -1,10 +1,10 @@
-import { toNano } from 'locklift';
-import { DexRootAbi } from '../../build/factorySource';
-import { displayTx } from '../../v2/utils/migration';
+import { toNano } from "locklift";
+import { DexRootAbi } from "../../build/factorySource";
+import { displayTx } from "../../v2/utils/migration";
 
 export default async () => {
-  const owner = locklift.deployments.getAccount('DexOwner').account;
-  const dexRoot = locklift.deployments.getContract<DexRootAbi>('DexRoot');
+  const owner = locklift.deployments.getAccount("DexOwner").account;
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   const tx = await locklift.transactions.waitFinalized(
     dexRoot.methods
@@ -30,12 +30,12 @@ export default async () => {
   ).value0;
 
   await locklift.deployments.saveContract({
-    contractName: 'DexAccount',
+    contractName: "DexAccount",
     deploymentName: `OwnerDexAccount`,
     address: dexAccountNAddress,
   });
 };
 
-export const tag = 'dex-account';
+export const tag = "dex-account";
 
-export const dependencies = ['owner-account', 'token-factory'];
+export const dependencies = ["owner-account", "token-factory"];
