@@ -1,5 +1,5 @@
 import { Address, toNano, WalletTypes } from 'locklift';
-import orderRoots from '../../order_roots.json';
+import orderRoots from '../../../../order_roots.json';
 
 const ORDER_FACTORY_ADDRESS =
   '0:3c8d39684cabbb780ff77710b02923c59ea2be84e211b09c3258eef344d394a4';

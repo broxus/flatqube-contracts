@@ -30,10 +30,13 @@ async function main() {
   console.log('Manager:' + manager.address);
 
   const params = orders.map((a) => ({
-    orderAddress: a.orderRoot,
+    orderAddress: a.order,
   }));
 
   for (const chunk of chunkify(params, 10)) {
+
+    console.log(chunk)
+
     const { traceTree } = await locklift.tracing.trace(
       OrderFactory.methods
         .upgradeOrder({

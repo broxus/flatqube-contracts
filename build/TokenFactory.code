@@ -1,4 +1,4 @@
-.version sol 0.64.0
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -526,6 +526,7 @@ ENDS
 CALLREF {
 	CALL $createToken_d96d19b0_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -772,6 +773,7 @@ PUSHCONT {
 }
 IFELSE
 SENDRAWMSG
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -876,6 +878,7 @@ PUSHCONT {
 }
 IFELSE
 SENDRAWMSG
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -929,6 +932,7 @@ ENDS
 CALLREF {
 	CALL $setRootCode_1773faee_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -982,6 +986,7 @@ ENDS
 CALLREF {
 	CALL $setWalletCode_fe914c81_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1035,6 +1040,7 @@ ENDS
 CALLREF {
 	CALL $setWalletPlatformCode_3d5aba96_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1088,6 +1094,7 @@ ENDS
 CALLREF {
 	CALL $upgrade_7916ae0d_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1346,17 +1353,12 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX
+	LDSLICEX ; signatureSlice msgSlice
 	DUP
-	MYADDR
-	NEWC
-	STSLICE
-	STSLICE
-	ENDC
-	HASHCU
+	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	ROT
 	GETGLOB 2
-	CHKSIGNU
+	CHKSIGNU ; msgSlice isSigned
 	THROWIFNOT 40
 }
 IF

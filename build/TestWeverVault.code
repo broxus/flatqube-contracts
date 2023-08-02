@@ -1,4 +1,4 @@
-.version sol 0.64.0
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -134,6 +134,7 @@ ENDS
 CALLREF {
 	CALL $receiveTokenWalletAddress_9b3a57ad_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -173,6 +174,7 @@ ENDS
 CALLREF {
 	CALL $drain_ece53132_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -250,6 +252,7 @@ ENDS
 CALLREF {
 	CALL $setConfiguration_c60c0015_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -308,6 +311,7 @@ ENDS
 CALLREF {
 	CALL $withdraw_02387a7b_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -377,6 +381,7 @@ ENDS
 CALLREF {
 	CALL $grant_db9ef357_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -533,6 +538,7 @@ ENDS
 CALLREF {
 	CALL $wrap_5cfc8dfa_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -632,6 +638,7 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -741,6 +748,7 @@ ENDS
 CALLREF {
 	CALL $transferOwnership_f2fde38b_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -790,6 +798,7 @@ ENDS
 CALLREF {
 	CALL $renounceOwnership_715018a6_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1022,14 +1031,9 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX
+	LDSLICEX ; signatureSlice msgSlice
 	DUP
-	MYADDR
-	NEWC
-	STSLICE
-	STSLICE
-	ENDC
-	HASHCU
+	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
 	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
@@ -1045,7 +1049,7 @@ PUSHCONT {
 	IFELSE
 	DUP
 	SETGLOB 5
-	CHKSIGNU
+	CHKSIGNU ; msgSlice isSigned
 	THROWIFNOT 40
 }
 PUSHCONT {

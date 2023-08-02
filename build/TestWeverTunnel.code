@@ -1,4 +1,4 @@
-.version sol 0.64.0
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -16,6 +16,11 @@ PUSHCONT {
 	ROTREV
 	PAIR
 	SWAP
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
 	LDREF
 	ENDS
 	CTOS
@@ -26,13 +31,13 @@ PUSHCONT {
 	ROTREV
 	PAIR
 	SWAP
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
 }
 IFELSE
-LDU 32
-LDDICT
-ROTREV
-PAIR
-SWAP
 LDMSGADDR
 ENDS
 .loc ../node_modules/ever-wever/everscale/contracts/Tunnel.tsol, 34
@@ -311,6 +316,7 @@ ENDS
 CALLREF {
 	CALL $__updateTunnel_d05b973d_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -367,6 +373,7 @@ ENDS
 CALLREF {
 	CALL $__removeTunnel_58a31cae_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -415,6 +422,7 @@ ENDS
 CALLREF {
 	CALL $pause_8456cb59_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -473,6 +481,7 @@ ENDS
 CALLREF {
 	CALL $unpause_3f4ba83a_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -566,6 +575,7 @@ ENDS
 CALLREF {
 	CALL $transferOwnership_f2fde38b_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -615,6 +625,7 @@ ENDS
 CALLREF {
 	CALL $renounceOwnership_715018a6_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -810,14 +821,9 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX
+	LDSLICEX ; signatureSlice msgSlice
 	DUP
-	MYADDR
-	NEWC
-	STSLICE
-	STSLICE
-	ENDC
-	HASHCU
+	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
 	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
@@ -833,7 +839,7 @@ PUSHCONT {
 	IFELSE
 	DUP
 	SETGLOB 5
-	CHKSIGNU
+	CHKSIGNU ; msgSlice isSigned
 	THROWIFNOT 40
 }
 PUSHCONT {
