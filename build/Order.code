@@ -1,4 +1,4 @@
-.version sol 0.62.0
+.version sol 0.64.0
 
 .macro constructor
 DROP
@@ -37,7 +37,6 @@ ENDS
 CALLREF {
 	CALL $onTokenWalletReceive_aebd8150_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -71,7 +70,6 @@ ENDS
 CALLREF {
 	CALL $onDexPair_f01a7bbd_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -128,7 +126,6 @@ ENDS
 CALLREF {
 	CALL $onDexPairTokenRoots_efaa2889_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -169,7 +166,6 @@ ENDS
 CALLREF {
 	CALL $onSpentWallet_72e299c2_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -212,7 +208,6 @@ ENDS
 CALLREF {
 	CALL $onReceiveWallet_9a86c53f_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -370,10 +365,10 @@ THROWIFNOT 76
 .loc ../contracts/Order.tsol, 168
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
+	LDU 64
 	LDU 128
 	LDMSGADDR
 	LDI 1
@@ -1200,7 +1195,6 @@ ENDS
 CALLREF {
 	CALL $setFeeParams_c19d7217_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1275,7 +1269,6 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2933,13 +2926,19 @@ IFREF {
 	CALL $c4_to_c7$
 }
 .loc ../contracts/Order.tsol, 854
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
 LDU 64
 ENDS
 .loc ../contracts/Order.tsol, 0
 CALLREF {
 	CALL $cancel_4c125e79_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3116,13 +3115,19 @@ IFREF {
 	CALL $c4_to_c7$
 }
 .loc ../contracts/Order.tsol, 909
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
 LDU 64
 ENDS
 .loc ../contracts/Order.tsol, 0
 CALLREF {
 	CALL $backendSwap_beb18340_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3176,22 +3181,18 @@ IFREF {
 .loc ../contracts/Order.tsol, 914
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-}
-IFELSE
+IF
+LDU 64
 LDU 128
 ENDS
 .loc ../contracts/Order.tsol, 0
 CALLREF {
 	CALL $swap_95c939ac_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3316,22 +3317,18 @@ IFREF {
 .loc ../contracts/Order.tsol, 960
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-}
-IFELSE
+IF
+LDU 64
 LDMSGADDR
 ENDS
 .loc ../contracts/Order.tsol, 0
 CALLREF {
 	CALL $backendMatching_ae31c208_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3465,15 +3462,12 @@ IFREF {
 .loc ../contracts/Order.tsol, 978
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-}
-IFELSE
+IF
+LDU 64
 LDU 128
 LDMSGADDR
 LDREF
@@ -3487,7 +3481,6 @@ ENDS
 CALLREF {
 	CALL $matching_dd9931cc_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3633,15 +3626,12 @@ IFREF {
 .loc ../contracts/Order.tsol, 1014
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-}
-IFELSE
+IF
+LDU 64
 LDU 128
 LDMSGADDR
 LDREF
@@ -3708,7 +3698,6 @@ ENDS
 CALLREF {
 	CALL $matchingCheck_7bbc4bb5_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4084,7 +4073,6 @@ ENDS
 CALLREF {
 	CALL $matchingCancel_5f4b298b_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4687,7 +4675,6 @@ ENDS
 CALLREF {
 	CALL $enableEmergency_df0128f6_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4825,7 +4812,6 @@ ENDS
 CALLREF {
 	CALL $disableEmergency_d59b7807_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -5190,7 +5176,6 @@ ENDS
 CALLREF {
 	CALL $upgrade_fb9d1513_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -6026,9 +6011,14 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX ; signatureSlice msgSlice
+	LDSLICEX
 	DUP
-	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	MYADDR
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	HASHCU
 	SWAP
 	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
@@ -6044,7 +6034,7 @@ PUSHCONT {
 	IFELSE
 	DUP
 	SETGLOB 5
-	CHKSIGNU ; msgSlice isSigned
+	CHKSIGNU
 	THROWIFNOT 40
 }
 PUSHCONT {
