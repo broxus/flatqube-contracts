@@ -1,4 +1,4 @@
-import { getRandomNonce, toNano, WalletTypes } from 'locklift';
+import { getRandomNonce, toNano, WalletTypes } from "locklift";
 
 export const ACCOUNTS_N = 5;
 export const ACCOUNT_WALLET_AMOUNT = 100;
@@ -6,8 +6,10 @@ export const ACCOUNT_WALLET_AMOUNT = 100;
 export const EVER_WALLET_AMOUNT = 2000;
 export const WEVER_WALLET_AMOUNT = 1500;
 
+export const WEVER_DEXPAIR_AMOUNT = 200;
+
 export default async () => {
-  console.log('Starting creating User Accounts...');
+  console.log("Starting creating User Accounts...");
 
   await locklift.deployments.deployAccounts(
     Array.from({ length: ACCOUNTS_N }, (_, i) => ({
@@ -17,11 +19,11 @@ export default async () => {
         value: toNano(ACCOUNT_WALLET_AMOUNT),
         nonce: getRandomNonce(),
       },
-      signerId: '0',
+      signerId: "0",
     })),
   );
 
-  console.log('User Accounts deployed!');
+  console.log("User Accounts deployed!");
 
   for (let j = 0; j < ACCOUNTS_N; j++) {
     const account = locklift.deployments.getAccount(
@@ -39,4 +41,4 @@ export default async () => {
   }
 };
 
-export const tag = 'common-accounts';
+export const tag = "common-accounts";

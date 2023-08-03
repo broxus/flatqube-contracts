@@ -6,6 +6,8 @@ import { TokenRootUpgradeableAbi } from "../../build/factorySource";
 export default async () => {
   const owner = locklift.deployments.getAccount("DexOwner").account;
 
+  // creating tokens wallets like: token-6-1-2
+  // where 6 - decimal, 1 - token num, 2 - account num
   for (let i = 0; i < TOKENS_DECIMALS.length; i++) {
     for (let k = 0; k < TOKENS_N; k++) {
       const token = locklift.deployments.getContract<TokenRootUpgradeableAbi>(

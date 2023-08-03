@@ -19,7 +19,7 @@ async function main() {
       "ever-wever-tip3",
       "wever-wallets",
       "wrap-ever",
-      "dex-pairs",
+      "dex-stable",
     ],
   });
 }

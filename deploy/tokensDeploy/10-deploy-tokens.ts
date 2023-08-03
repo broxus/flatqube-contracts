@@ -1,5 +1,5 @@
-import { toNano, zeroAddress } from "locklift";
-export const TOKENS_N = 1;
+import { toNano, zeroAddress, getRandomNonce } from "locklift";
+export const TOKENS_N = 2;
 export const TOKENS_DECIMALS = [6, 9, 18];
 
 export default async () => {
@@ -20,7 +20,7 @@ export default async () => {
             contract: "TokenRootUpgradeable",
             publicKey: signer.publicKey,
             initParams: {
-              randomNonce_: locklift.utils.getRandomNonce(),
+              randomNonce_: getRandomNonce(),
               deployer_: zeroAddress,
               name_: `TST-${TOKENS_DECIMALS[i]}-${k}`,
               symbol_: `TST-${TOKENS_DECIMALS[i]}-${k}`,

@@ -24,11 +24,11 @@ export default async () => {
 
   await locklift.deployments.saveContract({
     contractName: "TokenWalletUpgradeable",
-    deploymentName: `ownerWallet-wever`,
+    deploymentName: `ownerWallet-weverRoot`,
     address: ownerWallet.address,
   });
 
-  console.log(`ownerWallet-wever deployed`);
+  console.log(`ownerWallet-weverRoot deployed`);
   const arrOfWallets = [];
 
   for (let j = 0; j < ACCOUNTS_N; j++) {
@@ -62,11 +62,11 @@ export default async () => {
 
           await locklift.deployments.saveContract({
             contractName: "TokenWalletUpgradeable",
-            deploymentName: `wallet-wever-${j}`,
+            deploymentName: `wallet-weverRoot-${j}`,
             address: walletAddress,
           });
 
-          resolve(`wallet-wever-${j}: ${walletAddress}`);
+          resolve(`wallet-weverRoot-${j}: ${walletAddress}`);
         });
     });
 

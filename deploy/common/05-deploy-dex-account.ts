@@ -20,7 +20,7 @@ export default async () => {
 
   displayTx(tx.extTransaction);
 
-  const dexAccountNAddress = (
+  const dexAccountAddress = (
     await dexRoot.methods
       .getExpectedAccountAddress({
         answerId: 0,
@@ -32,7 +32,7 @@ export default async () => {
   await locklift.deployments.saveContract({
     contractName: "DexAccount",
     deploymentName: `OwnerDexAccount`,
-    address: dexAccountNAddress,
+    address: dexAccountAddress,
   });
 };
 
