@@ -2,23 +2,26 @@ import { toNano } from "locklift";
 import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
 import { displayTx } from "../../v2/utils/migration";
 
-const LEFT = "token-6-0";
-const RIGHT = "token-6-1";
+const FIRST = "token-6-0";
+const SECOND = "token-9-0";
+const THIRD = "token-18-0";
 
 export default async () => {
   const account = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
-  const tokenRootLeft =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>(LEFT);
-  const tokenRootRight =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>(RIGHT);
+  const tokenFirst =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>(FIRST);
+  const tokenSecond =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>(SECOND);
+  const tokenThird =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>(THIRD);
 
   const { extTransaction: dataDeploy } =
     await locklift.transactions.waitFinalized(
       await dexRoot.methods
         .deployStablePool({
-          roots: [tokenRootLeft.address, tokenRootRight.address],
+          roots: [tokenFirst.address, tokenSecond.address, tokenThird.address],
           send_gas_to: account.address,
         })
         .send({
@@ -33,7 +36,7 @@ export default async () => {
     await dexRoot.methods
       .getExpectedPoolAddress({
         answerId: 0,
-        _roots: [tokenRootLeft.address, tokenRootRight.address],
+        _roots: [tokenFirst.address, tokenSecond.address, tokenThird.address],
       })
       .call()
   ).value0;
@@ -49,7 +52,7 @@ export default async () => {
 
   await locklift.deployments.saveContract({
     contractName: "DexStablePool",
-    deploymentName: `DexStablePool_${LEFT}_${RIGHT}`,
+    deploymentName: `DexStablePool_${tokenFirst}_${tokenSecond}_${tokenThird}`,
     address: DexPool.address,
   });
 
