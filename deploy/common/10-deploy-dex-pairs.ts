@@ -15,8 +15,8 @@ export default async () => {
 
   const dexOwner = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
-  const dexAccount =
-    locklift.deployments.getContract<DexAccountAbi>("OwnerDexAccount");
+  // const dexAccount =
+  //   locklift.deployments.getContract<DexAccountAbi>("OwnerDexAccount");
 
   locklift.tracing.setAllowedCodesForAddress(dexOwner.address, {
     compute: [100],
@@ -52,19 +52,19 @@ export default async () => {
       const leftSplit = pair.left.split("-");
       const rightSplit = pair.right.split("-");
 
-      // taking decimal of token + number of
-      const tokenFooOwner =
-        locklift.deployments.getContract<TokenWalletUpgradeableAbi>(
-          `ownerWallet-${leftSplit[leftSplit.length - 2]}-${
-            leftSplit[leftSplit.length - 1]
-          }`,
-        );
-      const tokenBarOwner =
-        locklift.deployments.getContract<TokenWalletUpgradeableAbi>(
-          `ownerWallet-${rightSplit[rightSplit.length - 2]}-${
-            rightSplit[rightSplit.length - 1]
-          }`,
-        );
+      // // taking decimal of token + number of
+      // const tokenFooOwner =
+      //   locklift.deployments.getContract<TokenWalletUpgradeableAbi>(
+      //     `ownerWallet-${leftSplit[leftSplit.length - 2]}-${
+      //       leftSplit[leftSplit.length - 1]
+      //     }`,
+      //   );
+      // const tokenBarOwner =
+      //   locklift.deployments.getContract<TokenWalletUpgradeableAbi>(
+      //     `ownerWallet-${rightSplit[rightSplit.length - 2]}-${
+      //       rightSplit[rightSplit.length - 1]
+      //     }`,
+      //   );
 
       // deploying real PAIR
       const tx = await locklift.transactions.waitFinalized(
@@ -82,21 +82,21 @@ export default async () => {
 
       displayTx(tx.extTransaction, "deploy pair");
 
-      // adding PAIR to dexAccount for liquidity
-      const txAddPair = await locklift.transactions.waitFinalized(
-        dexAccount.methods
-          .addPair({
-            left_root: tokenFoo.address,
-            right_root: tokenBar.address,
-          })
-          .send({
-            from: dexOwner.address,
-            amount: toNano(5),
-          }),
-      );
-
-      console.log("txAddPair created");
-      displayTx(txAddPair.extTransaction, "pair create tx");
+      // // adding PAIR to dexAccount for liquidity
+      // const txAddPair = await locklift.transactions.waitFinalized(
+      //   dexAccount.methods
+      //     .addPair({
+      //       left_root: tokenFoo.address,
+      //       right_root: tokenBar.address,
+      //     })
+      //     .send({
+      //       from: dexOwner.address,
+      //       amount: toNano(5),
+      //     }),
+      // );
+      //
+      // console.log("txAddPair created");
+      // displayTx(txAddPair.extTransaction, "pair create tx");
 
       const dexPairFooBarAddress = await dexRoot.methods
         .getExpectedPairAddress({
@@ -164,68 +164,68 @@ export default async () => {
       //       .call()
       //   ).value0,
       // );
-
-      // sending tokens to DEX account + deposit liq
-      const txTransferFoo = await locklift.transactions.waitFinalized(
-        tokenFooOwner.methods
-          .transfer({
-            amount: 10 ** 16,
-            recipient: dexAccount.address,
-            deployWalletValue: 0,
-            remainingGasTo: dexOwner.address,
-            notify: true,
-            payload: null,
-          })
-          .send({
-            from: dexOwner.address,
-            amount: toNano(2),
-          }),
-      );
-
-      const txTransferBar = await locklift.transactions.waitFinalized(
-        tokenBarOwner.methods
-          .transfer({
-            amount: 10 ** 16,
-            recipient: dexAccount.address,
-            deployWalletValue: 0,
-            remainingGasTo: dexOwner.address,
-            notify: true,
-            payload: null,
-          })
-          .send({
-            from: dexOwner.address,
-            amount: toNano(2),
-          }),
-      );
-
-      displayTx(txTransferFoo.extTransaction);
-      displayTx(txTransferBar.extTransaction);
-
-      const txDepositLiq = await locklift.transactions.waitFinalized(
-        dexAccount.methods
-          .depositLiquidityV2({
-            _callId: 123,
-            _operations: [
-              { amount: 10 ** 16, root: tokenFoo.address },
-              { amount: 10 ** 16, root: tokenBar.address },
-            ],
-            _expected: { amount: "0", root: FooBarLpRoot.address },
-            _autoChange: false,
-            _remainingGasTo: dexOwner.address,
-            _referrer: dexOwner.address,
-          })
-          .send({
-            from: dexOwner.address,
-            amount: toNano(4),
-          }),
-      );
-
-      console.log("______txDepositLiq______");
-      displayTx(txDepositLiq.extTransaction);
-      console.log("______txDepositLiq______");
-
-      // sending tokens to DEX account + deposit liq
-
+      //
+      // // sending tokens to DEX account + deposit liq
+      // const txTransferFoo = await locklift.transactions.waitFinalized(
+      //   tokenFooOwner.methods
+      //     .transfer({
+      //       amount: 10 ** 16,
+      //       recipient: dexAccount.address,
+      //       deployWalletValue: 0,
+      //       remainingGasTo: dexOwner.address,
+      //       notify: true,
+      //       payload: null,
+      //     })
+      //     .send({
+      //       from: dexOwner.address,
+      //       amount: toNano(2),
+      //     }),
+      // );
+      //
+      // const txTransferBar = await locklift.transactions.waitFinalized(
+      //   tokenBarOwner.methods
+      //     .transfer({
+      //       amount: 10 ** 16,
+      //       recipient: dexAccount.address,
+      //       deployWalletValue: 0,
+      //       remainingGasTo: dexOwner.address,
+      //       notify: true,
+      //       payload: null,
+      //     })
+      //     .send({
+      //       from: dexOwner.address,
+      //       amount: toNano(2),
+      //     }),
+      // );
+      //
+      // displayTx(txTransferFoo.extTransaction);
+      // displayTx(txTransferBar.extTransaction);
+      //
+      // const txDepositLiq = await locklift.transactions.waitFinalized(
+      //   dexAccount.methods
+      //     .depositLiquidityV2({
+      //       _callId: 123,
+      //       _operations: [
+      //         { amount: 10 ** 16, root: tokenFoo.address },
+      //         { amount: 10 ** 16, root: tokenBar.address },
+      //       ],
+      //       _expected: { amount: "0", root: FooBarLpRoot.address },
+      //       _autoChange: false,
+      //       _remainingGasTo: dexOwner.address,
+      //       _referrer: dexOwner.address,
+      //     })
+      //     .send({
+      //       from: dexOwner.address,
+      //       amount: toNano(4),
+      //     }),
+      // );
+      //
+      // console.log("______txDepositLiq______");
+      // displayTx(txDepositLiq.extTransaction);
+      // console.log("______txDepositLiq______");
+      //
+      // // sending tokens to DEX account + deposit liq
+      //
       const FooBarLpPairWallet = locklift.factory.getDeployedContract(
         "TokenWalletUpgradeable",
         (
@@ -300,16 +300,16 @@ export default async () => {
             .call()
         ).value0,
       );
-
-      const pairContract = locklift.deployments.getContract<DexPairAbi>(
-        `DexPair_${pair.left}_${pair.right}`,
-      );
-
-      const pairBalances = await pairContract.methods
-        .getBalances({ answerId: 0 })
-        .call();
-
-      console.log("Pair balances: ", pairBalances.value0);
+      //
+      // const pairContract = locklift.deployments.getContract<DexPairAbi>(
+      //   `DexPair_${pair.left}_${pair.right}`,
+      // );
+      //
+      // const pairBalances = await pairContract.methods
+      //   .getBalances({ answerId: 0 })
+      //   .call();
+      //
+      // console.log("Pair balances: ", pairBalances.value0);
       console.log("05-deploy-dex-pairs.js END");
 
       locklift.deployments.deploymentsStore = {
@@ -366,7 +366,6 @@ export const tag = "dex-pairs";
 export const dependencies = [
   "owner-account",
   "token-factory",
-  "token-wallets",
   "tokens",
   "dex-root",
 ];
