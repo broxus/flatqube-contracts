@@ -22,9 +22,9 @@ export default async () => {
             initParams: {
               randomNonce_: locklift.utils.getRandomNonce(),
               deployer_: zeroAddress,
-              name_: `TST-${i}-${k}`,
-              symbol_: `TST-${i}-${k}`,
-              decimals_: 9,
+              name_: `TST-${TOKENS_DECIMALS[i]}-${k}`,
+              symbol_: `TST-${TOKENS_DECIMALS[i]}-${k}`,
+              decimals_: TOKENS_DECIMALS[i],
               walletCode_: walletArtifacts.code,
               rootOwner_: owner.address,
               platformCode_: platformArtifacts.code,
@@ -40,7 +40,7 @@ export default async () => {
             },
             value: toNano(10),
           },
-          deploymentName: `token-${i}-${k}`,
+          deploymentName: `token-${TOKENS_DECIMALS[i]}-${k}`,
           enableLogs: true,
         }),
       );

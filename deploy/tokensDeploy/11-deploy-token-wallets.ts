@@ -9,7 +9,7 @@ export default async () => {
   for (let i = 0; i < TOKENS_DECIMALS.length; i++) {
     for (let k = 0; k < TOKENS_N; k++) {
       const token = locklift.deployments.getContract<TokenRootUpgradeableAbi>(
-        `token-${i}-${k}`,
+        `token-${TOKENS_DECIMALS[i]}-${k}`,
       );
 
       const ownerWalletAddress = (
@@ -28,7 +28,7 @@ export default async () => {
 
       await locklift.deployments.saveContract({
         contractName: "TokenWalletUpgradeable",
-        deploymentName: `ownerWallet-${i}-${k}`,
+        deploymentName: `ownerWallet-${TOKENS_DECIMALS[i]}-${k}`,
         address: ownerWallet.address,
       });
 
@@ -66,11 +66,13 @@ export default async () => {
 
               await locklift.deployments.saveContract({
                 contractName: "TokenWalletUpgradeable",
-                deploymentName: `wallet-${i}-${k}-${j}`,
+                deploymentName: `wallet-${TOKENS_DECIMALS[i]}-${k}-${j}`,
                 address: walletAddress,
               });
 
-              resolve(`wallet-${i}-${k}-${j}: ${walletAddress}`);
+              resolve(
+                `wallet-${TOKENS_DECIMALS[i]}-${k}-${j}: ${walletAddress}`,
+              );
             });
         });
 

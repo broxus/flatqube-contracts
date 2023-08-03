@@ -50,9 +50,9 @@ const config: LockliftConfig = {
   },
   networks: {
     local: {
-      deploy: ["common/", "local/"],
+      deploy: ['common/', 'local/', 'tokensDeploy/'],
       connection: {
-        id: 1337,
+        id: 1,
         group: "localnet",
         type: "graphql",
         data: {
