@@ -52,9 +52,13 @@ export default async () => {
 
   await locklift.deployments.saveContract({
     contractName: "DexStablePool",
-    deploymentName: `DexStablePool_${tokenFirst}_${tokenSecond}_${tokenThird}`,
+    deploymentName: `DexStablePool_${FIRST}_${SECOND}_${THIRD}`,
     address: DexPool.address,
   });
+
+  console.log(
+    `Stable pool deployed: DexStablePool_${FIRST}_${SECOND}_${THIRD}`,
+  );
 
   const version = (await DexPool.methods.getVersion({ answerId: 0 }).call())
     .version;

@@ -341,7 +341,7 @@ export default async () => {
 
   Array.from({ length: TOKENS_N }).map(async (_, iLeft) => {
     Array.from({ length: TOKENS_N }).map(async (_, iRight) => {
-      TOKENS_DECIMALS.slice(-2).map(async decimals => {
+      TOKENS_DECIMALS.map(async decimals => {
         if (iLeft === iRight) return;
         if (iLeft > iRight) return;
         allPairs.push([
