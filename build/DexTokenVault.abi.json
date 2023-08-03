@@ -1,0 +1,254 @@
+{
+	"ABI version": 2,
+	"version": "2.2",
+	"header": ["pubkey", "time", "expire"],
+	"functions": [
+		{
+			"name": "constructor",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "redeploy",
+			"id": "0x15A038FB",
+			"inputs": [
+				{"name":"value0","type":"cell"},
+				{"name":"value1","type":"uint32"},
+				{"name":"value2","type":"address"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getDexRoot",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getVersion",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint32"}
+			]
+		},
+		{
+			"name": "getPlatformCode",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"cell"}
+			]
+		},
+		{
+			"name": "getTokenRoot",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getTokenWallet",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getVault",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "getTargetBalance",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint128"}
+			]
+		},
+		{
+			"name": "withdraw",
+			"inputs": [
+				{"name":"_callId","type":"uint64"},
+				{"name":"_amount","type":"uint128"},
+				{"name":"_recipient","type":"address"},
+				{"name":"_deployRecipientWalletGrams","type":"uint128"},
+				{"name":"_accountOwner","type":"address"},
+				{"name":"value5","type":"uint32"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "transfer",
+			"inputs": [
+				{"name":"_amount","type":"uint128"},
+				{"name":"_recipient","type":"address"},
+				{"name":"_deployRecipientWalletGrams","type":"uint128"},
+				{"name":"_notifyRecipient","type":"bool"},
+				{"name":"_payload","type":"cell"},
+				{"name":"_poolTokenRoots","type":"address[]"},
+				{"name":"value6","type":"uint32"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "referralFeeTransfer",
+			"inputs": [
+				{"name":"_amount","type":"uint128"},
+				{"name":"_referrer","type":"address"},
+				{"name":"_referral","type":"address"},
+				{"name":"_poolTokenRoots","type":"address[]"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "resetGas",
+			"inputs": [
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "upgrade",
+			"inputs": [
+				{"name":"_newCode","type":"cell"},
+				{"name":"_newVersion","type":"uint32"},
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onAcceptTokensMint",
+			"inputs": [
+				{"name":"value0","type":"address"},
+				{"name":"_amount","type":"uint128"},
+				{"name":"_remainingGasTo","type":"address"},
+				{"name":"_payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onTokenWallet",
+			"inputs": [
+				{"name":"_wallet","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onVaultTokenWallet",
+			"inputs": [
+				{"name":"_wallet","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "platform_code",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"platform_code","type":"cell"}
+			]
+		}
+	],
+	"data": [
+	],
+	"events": [
+		{
+			"name": "TokenVaultCodeUpgraded",
+			"inputs": [
+				{"name":"currentVersion","type":"uint32"},
+				{"name":"previousVersion","type":"uint32"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "TokenWalletSet",
+			"inputs": [
+				{"name":"wallet","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "VaultTokenWalletDeployed",
+			"inputs": [
+				{"name":"wallet","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "WithdrawTokens",
+			"inputs": [
+				{"name":"amount","type":"uint128"},
+				{"name":"accountOwner","type":"address"},
+				{"name":"recipient","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "PairTransferTokens",
+			"inputs": [
+				{"name":"amount","type":"uint128"},
+				{"name":"poolTokenRoots","type":"address[]"},
+				{"name":"recipient","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "ReferralFeeTransfer",
+			"inputs": [
+				{"name":"amount","type":"uint128"},
+				{"name":"poolTokenRoots","type":"address[]"},
+				{"name":"referrer","type":"address"},
+				{"name":"referral","type":"address"}
+			],
+			"outputs": [
+			]
+		}
+	],
+	"fields": [
+		{"name":"_pubkey","type":"uint256"},
+		{"name":"_timestamp","type":"uint64"},
+		{"name":"_constructorFlag","type":"bool"},
+		{"name":"platform_code","type":"cell"},
+		{"name":"_root","type":"address"},
+		{"name":"_vault","type":"address"},
+		{"name":"_version","type":"uint32"},
+		{"name":"_tokenRoot","type":"address"},
+		{"name":"_tokenWallet","type":"address"},
+		{"name":"_remainingGasToAfterDeploy","type":"address"}
+	]
+}
