@@ -1,13 +1,13 @@
 import { BigNumber } from "bignumber.js";
 import { Contract } from "locklift";
-import { DexGasValuesAbi } from "../build/factorySource";
+import { DexGasValuesAbi } from "../../build/factorySource";
 
 const gasPrice = 1000;
 
 export const calcValue = (
   gas: (ReturnType<
     ReturnType<
-      Contract<DexGasValuesAbi>["methods"]["getDeployClusterValue"]
+      Contract<DexGasValuesAbi>["methods"]["getSetFeeParamsGas"]
     >["call"]
   > extends Promise<infer T>
     ? T
