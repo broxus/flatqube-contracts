@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Address, Contract, zeroAddress } from "locklift";
+import { Contract, zeroAddress } from "locklift";
 import { Account } from "everscale-standalone-client/nodejs";
 
 import {
@@ -8,7 +8,6 @@ import {
   DexPairAbi,
   DexStablePoolAbi,
 } from "../../build/factorySource";
-import { displayTx } from "../utils/migration";
 import { calcValue } from "../utils/gas.utils";
 
 describe("Check DexAccount add Pair", () => {
@@ -23,7 +22,7 @@ describe("Check DexAccount add Pair", () => {
 
   before("Load contracts", async () => {
     await locklift.deployments.fixture({
-      include: ["dex-stable", "dex-pairs", "dex-gas-values"],
+      include: ["dex-gas-values", "dex-accounts", "dex-pairs"],
     });
     owner = locklift.deployments.getAccount("DexOwner").account;
 
@@ -48,7 +47,7 @@ describe("Check DexAccount add Pair", () => {
         .then(a => a.value0);
 
       const roots = await pair.methods.getTokenRoots({ answerId: 0 }).call();
-      const tx = await locklift.transactions.waitFinalized(
+      await locklift.transactions.waitFinalized(
         dexAccount.methods
           .addPair({ left_root: roots.left, right_root: roots.right })
           .send({ from: owner.address, amount: calcValue(gas) }),

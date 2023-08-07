@@ -1,17 +1,16 @@
 import { getRandomNonce, toNano, zeroAddress } from "locklift";
-import { DexVaultAbi, DexRootAbi } from "../../build/factorySource";
+import {
+  DexVaultAbi,
+  DexRootAbi,
+  TokenFactoryAbi,
+} from "../../build/factorySource";
 import { displayTx } from "../../v2/utils/migration";
 
 export default async () => {
-  locklift.tracing.setAllowedCodes({ compute: [60] });
   const signer = await locklift.keystore.getSigner("0");
   const owner = locklift.deployments.getAccount("DexOwner").account;
   const tokenFactory =
-    locklift.deployments.getContract<DexRootAbi>("TokenFactory");
-
-  locklift.tracing.setAllowedCodesForAddress(owner.address, {
-    compute: [100],
-  });
+    locklift.deployments.getContract<TokenFactoryAbi>("TokenFactory");
 
   const DexPlatform = await locklift.factory.getContractArtifacts(
     "DexPlatform",

@@ -1,12 +1,12 @@
 import { Address, toNano } from "locklift";
 import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
 
-export const FIRST = "token-6-0";
-export const SECOND = "token-9-0";
-export const STABLE_DEX_PAIR = "DexStablePair_lp";
+const FIRST = "token-6-0";
+const SECOND = "token-9-0";
 const THIRD = "token-18-0";
+export const DEX_STABLE_POOL_LP = "DexStablePool_lp";
 
-interface IFee {
+export interface IFee {
   denominator: number;
   pool_numerator: number;
   beneficiary_numerator: number;
@@ -34,8 +34,8 @@ export default async () => {
     tokenThird.address,
   ];
 
-  // deploying 2 tokens pool
-  console.log(`Start deploy DOUBLE pool DexStablePool`);
+  // deploying stable pair
+  console.log(`Start deploy DexStablePair`);
   await locklift.transactions.waitFinalized(
     dexRoot.methods
       .deployPair({
@@ -63,7 +63,7 @@ export default async () => {
       }),
   );
 
-  const dexPoolAddressDouble = (
+  const dexStablePairAddress = (
     await dexRoot.methods
       .getExpectedPoolAddress({
         answerId: 0,
@@ -72,31 +72,21 @@ export default async () => {
       .call()
   ).value0;
 
-  console.log(`DexDOUBLE_Pool address = ${dexPoolAddressDouble}`);
+  console.log(`Dex_Stable_Pair address = ${dexStablePairAddress}`);
 
-  const DexPoolDouble = locklift.factory.getDeployedContract(
+  const DexStablePair = locklift.factory.getDeployedContract(
     "DexStablePair",
-    dexPoolAddressDouble,
+    dexStablePairAddress,
   );
-
-  const lpToken = await DexPoolDouble.methods
-    .getTokenRoots({ answerId: 0 })
-    .call();
-
-  await locklift.deployments.saveContract({
-    contractName: "TokenRootUpgradeable",
-    deploymentName: STABLE_DEX_PAIR,
-    address: lpToken.lp,
-  });
-  console.log(lpToken, "lpToken");
 
   await locklift.deployments.saveContract({
     contractName: "DexStablePair",
-    deploymentName: `DexStablePool_${FIRST}_${SECOND}`,
-    address: DexPoolDouble.address,
+    deploymentName: `DexStablePair_${FIRST}_${SECOND}`,
+    address: DexStablePair.address,
   });
 
-  // deploying 3 tokens pool
+  // deploying 3 tokens stable pool
+  console.log(`Start deploy DexStablePool`);
   await locklift.transactions.waitFinalized(
     await dexRoot.methods
       .deployStablePool({
@@ -109,7 +99,7 @@ export default async () => {
       }),
   );
 
-  const dexPoolAddress = (
+  const dexStablePoolAddress = (
     await dexRoot.methods
       .getExpectedPoolAddress({
         answerId: 0,
@@ -118,19 +108,28 @@ export default async () => {
       .call()
   ).value0;
 
-  console.log(`Start deploy TRIPLE pool DexStablePair`);
+  console.log(`Dex_Stable_Pool address = ${dexStablePoolAddress}`);
 
-  console.log(`DexTRIPLE_Pool address = ${dexPoolAddress}`);
-
-  const DexPool = locklift.factory.getDeployedContract(
-    "DexStablePair",
-    dexPoolAddress,
+  const DexStablePool = locklift.factory.getDeployedContract(
+    "DexStablePool",
+    dexStablePoolAddress,
   );
 
+  const tokenRoots = await DexStablePool.methods
+    .getTokenRoots({ answerId: 0 })
+    .call();
+
   await locklift.deployments.saveContract({
-    contractName: "DexStablePair",
+    contractName: "TokenRootUpgradeable",
+    deploymentName: DEX_STABLE_POOL_LP,
+    address: tokenRoots.lp,
+  });
+  console.log(tokenRoots.lp, "lpToken");
+
+  await locklift.deployments.saveContract({
+    contractName: "DexStablePool",
     deploymentName: `DexStablePool_${FIRST}_${SECOND}_${THIRD}`,
-    address: DexPool.address,
+    address: DexStablePool.address,
   });
 
   console.log(
@@ -169,19 +168,25 @@ export default async () => {
       amount: toNano(1.5),
     });
 
-  console.log(`SetPairFeeParams done for Double and Triple pool`);
+  console.log(`SetPairFeeParams done for DexStablePair and DexStablePool`);
 
-  const version = (await DexPool.methods.getVersion({ answerId: 0 }).call())
-    .version;
+  const version = (
+    await DexStablePool.methods.getVersion({ answerId: 0 }).call()
+  ).version;
   console.log(`DexPool version = ${version}`);
 
   // await new Promise(resolve => setTimeout(resolve, 10000));
 
-  const active = (await DexPool.methods.isActive({ answerId: 0 }).call())
+  const active = (await DexStablePool.methods.isActive({ answerId: 0 }).call())
     .value0;
   console.log(`DexPool active = ${active}`);
 };
 
 export const tag = "dex-stable";
 
-export const dependencies = ["owner-account", "dex-root", "tokens"];
+export const dependencies = [
+  "owner-account",
+  "common-accounts",
+  "dex-root",
+  "tokens",
+];

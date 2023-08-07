@@ -95,7 +95,7 @@ export default async () => {
   await resolvePromisesSeq(commonWallets);
 };
 
-export const tag = "dex-account";
+export const tag = "dex-accounts";
 
 export const dependencies = [
   "owner-account",

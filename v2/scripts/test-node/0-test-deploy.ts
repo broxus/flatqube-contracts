@@ -14,7 +14,7 @@ async function main() {
       "common-accounts",
       "token-factory",
       "dex-root",
-      "dex-account",
+      "dex-accounts",
       "wever",
       "ever-wever-tip3",
       "wever-wallets",

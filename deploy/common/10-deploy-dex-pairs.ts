@@ -2,18 +2,24 @@ import { toNano } from "locklift";
 import { Constants, displayTx } from "../../v2/utils/migration";
 import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
 import { TOKENS_N, TOKENS_DECIMALS } from "../tokensDeploy/10-deploy-tokens";
-import { SECOND, STABLE_DEX_PAIR } from "./08-deploy-dex-stable-pool";
+import { DEX_STABLE_POOL_LP, IFee } from "./08-deploy-dex-stable-pool";
 
 export default async () => {
   console.log("10-deploy-dex-pairs.js");
-  await locklift.deployments.load();
 
   const dexOwner = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
+  const commonAcc = locklift.deployments.getAccount("commonAccount-0").account;
 
-  locklift.tracing.setAllowedCodesForAddress(dexOwner.address, {
-    compute: [100],
-  });
+  const feeParams = {
+    denominator: 1000000,
+    pool_numerator: 3000,
+    beneficiary_numerator: 7000,
+    referrer_numerator: 0,
+    beneficiary: commonAcc.address,
+    threshold: [],
+    referrer_threshold: [],
+  } as IFee;
 
   const deployDexPairFunc = async (lToken = "foo", rToken = "bar") => {
     const pairs = [[lToken, rToken]];
@@ -82,6 +88,17 @@ export default async () => {
         address: dexPairFooBarAddress,
       });
 
+      await dexRoot.methods
+        .setPairFeeParams({
+          _roots: [tokenFoo.address, tokenBar.address],
+          _params: feeParams,
+          _remainingGasTo: dexOwner.address,
+        })
+        .send({
+          from: dexOwner.address,
+          amount: toNano(1.5),
+        });
+
       const version = (
         await dexPairFooBar.methods.getVersion({ answerId: 0 }).call()
       ).version;
@@ -115,9 +132,12 @@ export default async () => {
     await deployDexPairFunc(allPairs[i][0], allPairs[i][1]);
   }
 
-  // deploy lp-token-0 pair
+  // deploy lp-token-1 pair
   const lpToken =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>(STABLE_DEX_PAIR);
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>(
+      DEX_STABLE_POOL_LP,
+    );
+  const SECOND = "token-9-1";
   const tokenBar =
     locklift.deployments.getContract<TokenRootUpgradeableAbi>(SECOND);
 
@@ -144,7 +164,9 @@ export default async () => {
     .call()
     .then(r => r.value0);
 
-  console.log(`DexPair_lp_${SECOND} deployed: ${dexPairFooBarAddress}`);
+  console.log(
+    `DexPair_${DEX_STABLE_POOL_LP}_${SECOND} deployed: ${dexPairFooBarAddress}`,
+  );
 
   const dexPairFooBar = locklift.factory.getDeployedContract(
     "DexPair",
@@ -153,18 +175,18 @@ export default async () => {
 
   await locklift.deployments.saveContract({
     contractName: "DexPair",
-    deploymentName: `DexPair_lp_${SECOND}`,
+    deploymentName: `DexPair_${DEX_STABLE_POOL_LP}_${SECOND}`,
     address: dexPairFooBarAddress,
   });
 
   const version = (
     await dexPairFooBar.methods.getVersion({ answerId: 0 }).call()
   ).version;
-  console.log(`DexPair_lp_${SECOND} version = ${version}`);
+  console.log(`DexPair_${DEX_STABLE_POOL_LP}_${SECOND} version = ${version}`);
 
   const active = (await dexPairFooBar.methods.isActive({ answerId: 0 }).call())
     .value0;
-  console.log(`DexPair_lp_${SECOND} active = ${active}`);
+  console.log(`DexPair_${DEX_STABLE_POOL_LP}_${SECOND} active = ${active}`);
   console.log("10-deploy-dex-pairs.js END");
 };
 
@@ -172,8 +194,6 @@ export const tag = "dex-pairs";
 
 export const dependencies = [
   "owner-account",
-  "token-factory",
-  "token-wallets",
   "tokens",
   "dex-root",
   "dex-stable",
