@@ -3,6 +3,7 @@ import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
 
 export const FIRST = "token-6-0";
 export const SECOND = "token-9-0";
+export const STABLE_DEX_PAIR = "DexStablePair_lp";
 const THIRD = "token-18-0";
 
 interface IFee {
@@ -74,7 +75,7 @@ export default async () => {
   console.log(`DexDOUBLE_Pool address = ${dexPoolAddressDouble}`);
 
   const DexPoolDouble = locklift.factory.getDeployedContract(
-    "DexStablePool",
+    "DexStablePair",
     dexPoolAddressDouble,
   );
 
@@ -82,10 +83,15 @@ export default async () => {
     .getTokenRoots({ answerId: 0 })
     .call();
 
+  await locklift.deployments.saveContract({
+    contractName: "TokenRootUpgradeable",
+    deploymentName: STABLE_DEX_PAIR,
+    address: lpToken.lp,
+  });
   console.log(lpToken, "lpToken");
 
   await locklift.deployments.saveContract({
-    contractName: "DexStablePool",
+    contractName: "DexStablePair",
     deploymentName: `DexStablePool_${FIRST}_${SECOND}`,
     address: DexPoolDouble.address,
   });
@@ -112,17 +118,17 @@ export default async () => {
       .call()
   ).value0;
 
-  console.log(`Start deploy TRIPLE pool DexStablePool`);
+  console.log(`Start deploy TRIPLE pool DexStablePair`);
 
   console.log(`DexTRIPLE_Pool address = ${dexPoolAddress}`);
 
   const DexPool = locklift.factory.getDeployedContract(
-    "DexStablePool",
+    "DexStablePair",
     dexPoolAddress,
   );
 
   await locklift.deployments.saveContract({
-    contractName: "DexStablePool",
+    contractName: "DexStablePair",
     deploymentName: `DexStablePool_${FIRST}_${SECOND}_${THIRD}`,
     address: DexPool.address,
   });

@@ -2,7 +2,7 @@ import { toNano } from "locklift";
 import { Constants, displayTx } from "../../v2/utils/migration";
 import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
 import { TOKENS_N, TOKENS_DECIMALS } from "../tokensDeploy/10-deploy-tokens";
-// import { FIRST, SECOND } from "./08-deploy-dex-stable-pool";
+import { SECOND, STABLE_DEX_PAIR } from "./08-deploy-dex-stable-pool";
 
 export default async () => {
   console.log("10-deploy-dex-pairs.js");
@@ -82,10 +82,6 @@ export default async () => {
         address: dexPairFooBarAddress,
       });
 
-      locklift.deployments.deploymentsStore = {
-        [`DexPair_${pair.left}_${pair.right}`]: dexPairFooBar,
-      };
-
       const version = (
         await dexPairFooBar.methods.getVersion({ answerId: 0 }).call()
       ).version;
@@ -95,8 +91,6 @@ export default async () => {
         await dexPairFooBar.methods.isActive({ answerId: 0 }).call()
       ).value0;
       console.log(`DexPair_${pair.left}_${pair.right} active = ${active}`);
-
-      console.log("05-deploy-dex-pairs.js END");
     }
   };
 
@@ -122,9 +116,56 @@ export default async () => {
   }
 
   // deploy lp-token-0 pair
-  // const stablePool = locklift.deployments.getContract<DexRootAbi>(
-  //   `DexStablePool_${FIRST}_${SECOND}`,
-  // );
+  const lpToken =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>(STABLE_DEX_PAIR);
+  const tokenBar =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>(SECOND);
+
+  // deploying real PAIR
+  await locklift.transactions.waitFinalized(
+    dexRoot.methods
+      .deployPair({
+        left_root: lpToken.address,
+        right_root: tokenBar.address,
+        send_gas_to: dexOwner.address,
+      })
+      .send({
+        from: dexOwner.address,
+        amount: toNano(15),
+      }),
+  );
+
+  const dexPairFooBarAddress = await dexRoot.methods
+    .getExpectedPairAddress({
+      answerId: 0,
+      left_root: lpToken.address,
+      right_root: tokenBar.address,
+    })
+    .call()
+    .then(r => r.value0);
+
+  console.log(`DexPair_lp_${SECOND} deployed: ${dexPairFooBarAddress}`);
+
+  const dexPairFooBar = locklift.factory.getDeployedContract(
+    "DexPair",
+    dexPairFooBarAddress,
+  );
+
+  await locklift.deployments.saveContract({
+    contractName: "DexPair",
+    deploymentName: `DexPair_lp_${SECOND}`,
+    address: dexPairFooBarAddress,
+  });
+
+  const version = (
+    await dexPairFooBar.methods.getVersion({ answerId: 0 }).call()
+  ).version;
+  console.log(`DexPair_lp_${SECOND} version = ${version}`);
+
+  const active = (await dexPairFooBar.methods.isActive({ answerId: 0 }).call())
+    .value0;
+  console.log(`DexPair_lp_${SECOND} active = ${active}`);
+  console.log("10-deploy-dex-pairs.js END");
 };
 
 export const tag = "dex-pairs";
