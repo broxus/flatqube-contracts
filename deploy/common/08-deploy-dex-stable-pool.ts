@@ -1,20 +1,11 @@
-import { Address, toNano } from "locklift";
+import { toNano } from "locklift";
 import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
+import { IFee } from "../../utils/wrappers";
 
 const FIRST = "token-6-0";
 const SECOND = "token-9-0";
 const THIRD = "token-18-0";
 export const DEX_STABLE_POOL_LP = "DexStablePool_lp";
-
-export interface IFee {
-  denominator: number;
-  pool_numerator: number;
-  beneficiary_numerator: number;
-  referrer_numerator: number;
-  beneficiary: Address;
-  threshold: [Address, string | number][];
-  referrer_threshold: [Address, string | number][];
-}
 
 export default async () => {
   const account = locklift.deployments.getAccount("DexOwner").account;
