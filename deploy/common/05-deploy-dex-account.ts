@@ -74,18 +74,20 @@ export default async () => {
     address: dexAccountAddress,
   });
 
-  console.log("DexRoot main account deployed");
+  console.log(`OwnerDexAccount deployed: ${dexAccountAddress}`);
 
   const resolvePromisesSeq = async (walletsData: Promise<IDexAcc>[]) => {
     for (const data of walletsData) {
       const result = await data;
 
       if (result) {
-        console.log(`OwnerDexAccount-commonAccount-${result.index} created!`);
+        console.log(
+          `commonDexAccount-${result.index} created: ${result.address}`,
+        );
 
         await locklift.deployments.saveContract({
           contractName: "DexAccount",
-          deploymentName: `OwnerDexAccount-commonAccount-${result.index}`,
+          deploymentName: `commonDexAccount-${result.index}`,
           address: result.address,
         });
       }
