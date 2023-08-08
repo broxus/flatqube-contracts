@@ -2,7 +2,8 @@ import { toNano } from "locklift";
 import { Constants, displayTx } from "../../v2/utils/migration";
 import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
 import { TOKENS_N, TOKENS_DECIMALS } from "../tokensDeploy/10-deploy-tokens";
-import { DEX_STABLE_POOL_LP, IFee } from "./08-deploy-dex-stable-pool";
+import { DEX_STABLE_POOL_LP } from "./08-deploy-dex-stable-pool";
+import { IFee } from "../../utils/wrappers";
 
 export default async () => {
   console.log("10-deploy-dex-pairs.js");

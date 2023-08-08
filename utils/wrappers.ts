@@ -1,5 +1,13 @@
-import { Address, toNano } from "locklift";
-import { DexRootAbi, DexVaultAbi } from "../build/factorySource";
+import { Address, Contract, toNano } from "locklift";
+import {
+  DexRootAbi,
+  DexVaultAbi,
+  DexAccountAbi,
+  DexPairAbi,
+  DexStablePairAbi,
+  DexStablePoolAbi,
+  TokenWalletUpgradeableAbi,
+} from "../build/factorySource";
 import { BigNumber } from "bignumber.js";
 
 export interface IFee {
@@ -10,6 +18,11 @@ export interface IFee {
   beneficiary: Address;
   threshold: [Address, string | number][];
   referrer_threshold: [Address, string | number][];
+}
+
+export interface ITokens {
+  root: Address;
+  amount: string | number;
 }
 
 export const setPairFeeParams = async (roots: Address[], fees: IFee) => {
@@ -263,4 +276,165 @@ export const getDexData = async (tokens: Address[]) => {
   );
 
   return balances;
+};
+
+export const transferWrapper = async (
+  sender: Address,
+  recipient: Address,
+  deployWalletValue: string | number,
+  transferData: ITokens[],
+) => {
+  for (let i = 0; i < transferData.length; i++) {
+    const tokenRoot = locklift.factory.getDeployedContract(
+      "TokenRootUpgradeable",
+      transferData[i].root,
+    );
+
+    const ownerWalletAddress = (
+      await tokenRoot.methods
+        .walletOf({
+          answerId: 0,
+          walletOwner: sender,
+        })
+        .call()
+    ).value0;
+
+    const ownerWallet = locklift.factory.getDeployedContract(
+      "TokenWalletUpgradeable",
+      ownerWalletAddress,
+    );
+
+    ownerWallet.methods
+      .transfer({
+        amount: transferData[i].amount,
+        recipient: recipient,
+        deployWalletValue: deployWalletValue,
+        remainingGasTo: sender,
+        notify: true,
+        payload: null,
+      })
+      .send({
+        from: sender,
+        amount: toNano(2),
+      });
+  }
+};
+
+export const depositLiquidity = async (
+  dexOwner: Address,
+  dexAccount: Contract<DexAccountAbi>,
+  pairContract:
+    | Contract<DexPairAbi>
+    | Contract<DexStablePairAbi>
+    | Contract<DexStablePoolAbi>,
+  depositData: ITokens[],
+) => {
+  const ownerWallets: Contract<TokenWalletUpgradeableAbi>[] = [];
+
+  for (let i = 0; i < depositData.length; i++) {
+    const tokenRoot = locklift.factory.getDeployedContract(
+      "TokenRootUpgradeable",
+      depositData[i].root,
+    );
+
+    const ownerWalletAddress = (
+      await tokenRoot.methods
+        .walletOf({
+          answerId: 0,
+          walletOwner: dexOwner,
+        })
+        .call()
+    ).value0;
+
+    const ownerWallet = locklift.factory.getDeployedContract(
+      "TokenWalletUpgradeable",
+      ownerWalletAddress,
+    );
+
+    ownerWallets.push(ownerWallet);
+  }
+
+  //
+  if (ownerWallets.length === 2) {
+    await locklift.transactions.waitFinalized(
+      dexAccount.methods
+        .addPair({
+          left_root: depositData[0].root,
+          right_root: depositData[1].root,
+        })
+        .send({
+          from: dexOwner,
+          amount: toNano(5),
+        }),
+    );
+
+    const dexPairFooBar = pairContract;
+
+    const FooBarLpRoot = locklift.factory.getDeployedContract(
+      "TokenRootUpgradeable",
+      (await dexPairFooBar.methods.getTokenRoots({ answerId: 0 }).call()).lp,
+    );
+
+    // sending tokens to DEX account + deposit liq
+    await locklift.transactions.waitFinalized(
+      ownerWallets[0].methods
+        .transfer({
+          amount: 10 ** 16,
+          recipient: dexAccount.address,
+          deployWalletValue: 0,
+          remainingGasTo: dexOwner,
+          notify: true,
+          payload: null,
+        })
+        .send({
+          from: dexOwner,
+          amount: toNano(2),
+        }),
+    );
+
+    console.log("transfer left done");
+
+    await locklift.transactions.waitFinalized(
+      ownerWallets[1].methods
+        .transfer({
+          amount: 10 ** 16,
+          recipient: dexAccount.address,
+          deployWalletValue: 0,
+          remainingGasTo: dexOwner,
+          notify: true,
+          payload: null,
+        })
+        .send({
+          from: dexOwner,
+          amount: toNano(2),
+        }),
+    );
+
+    console.log("transfer right done");
+
+    await locklift.transactions.waitFinalized(
+      dexAccount.methods
+        .depositLiquidityV2({
+          _callId: 123,
+          _operations: [
+            { amount: 10 ** 16, root: depositData[0].root },
+            { amount: 10 ** 16, root: depositData[1].root },
+          ],
+          _expected: { amount: "0", root: FooBarLpRoot.address },
+          _autoChange: false,
+          _remainingGasTo: dexOwner,
+          _referrer: dexOwner,
+        })
+        .send({
+          from: dexOwner,
+          amount: toNano(4),
+        }),
+    );
+
+    const pairBalances = await pairContract.methods
+      .getBalances({ answerId: 0 })
+      .call();
+
+    console.log("Pair balances: ", pairBalances.value0);
+  }
 };
