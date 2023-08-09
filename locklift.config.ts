@@ -27,7 +27,7 @@ const LOCAL_NETWORK_ENDPOINT = 'http://localhost:80/graphql';
 
 const config: LockliftConfig = {
   compiler: {
-    version: '0.62.0',
+    version: '0.64.0',
     externalContracts: {
       precompiled: ['DexPlatform'],
       'node_modules/tip3/build': [
@@ -42,7 +42,7 @@ const config: LockliftConfig = {
       ],
     },
   },
-  linker: { version: '0.15.48' },
+  linker: { version: '0.16.5' },
   verifier: {
     verifierVersion: 'latest', // contract verifier binary, see https://github.com/broxus/everscan-verify/releases
     apiKey: process.env.EVERSCAN_API_KEY ?? '',
@@ -117,6 +117,28 @@ const config: LockliftConfig = {
       keys: {
         phrase: process.env.MAINNET_PHRASE,
         amount: 20,
+      },
+    },
+    venom_testnet: {
+      connection: {
+        id: 1000,
+        type: 'jrpc',
+        group: 'dev',
+        data: {
+          endpoint: process.env.VENOM_TESTNET_RPC_NETWORK_ENDPOINT ?? '',
+        },
+      },
+      giver: {
+        address: process.env.VENOM_TESTNET_GIVER_ADDRESS ?? '',
+        phrase: process.env.VENOM_TESTNET_GIVER_PHRASE ?? '',
+        accountId: 0,
+      },
+      tracing: {
+        endpoint: process.env.VENOM_TESTNET_GQL_NETWORK_ENDPOINT ?? '',
+      },
+      keys: {
+        phrase: process.env.VENOM_TESTNET_PHRASE,
+        amount: 100,
       },
     },
   },

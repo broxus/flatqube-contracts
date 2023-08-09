@@ -1,6 +1,6 @@
 import { Address, toNano, WalletTypes } from 'locklift';
 import { yellowBright } from 'chalk';
-import orders from '../../orders.json';
+import orders from '../../../../orders.json';
 
 const ORDER_FACTORY_ADDRESS =
   '0:3c8d39684cabbb780ff77710b02923c59ea2be84e211b09c3258eef344d394a4';
@@ -26,7 +26,7 @@ async function main() {
     address: limitOrdersManager,
   });
 
-  console.log('DexRoot:' + OrderFactory.address);
+  console.log('Order Factory:' + OrderFactory.address);
   console.log('Manager:' + manager.address);
 
   const params = orders.map((a) => ({
@@ -34,6 +34,9 @@ async function main() {
   }));
 
   for (const chunk of chunkify(params, 10)) {
+
+    console.log(chunk)
+
     const { traceTree } = await locklift.tracing.trace(
       OrderFactory.methods
         .upgradeOrder({

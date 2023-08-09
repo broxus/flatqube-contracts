@@ -1,4 +1,4 @@
-.version sol 0.62.0
+.version sol 0.64.0
 
 .macro constructor
 DROP
@@ -96,7 +96,6 @@ ENDS
 CALLREF {
 	CALL $dexPairDepositLiquiditySuccess_fd9f0723_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -195,7 +194,6 @@ ENDS
 CALLREF {
 	CALL $dexPairDepositLiquiditySuccessV2_599c25a3_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -244,7 +242,6 @@ ENDS
 CALLREF {
 	CALL $dexPairExchangeSuccess_8d6a631b_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -294,7 +291,6 @@ ENDS
 CALLREF {
 	CALL $dexPairExchangeSuccessV2_9012de54_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -341,7 +337,6 @@ ENDS
 CALLREF {
 	CALL $dexPairWithdrawSuccess_046a6629_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -440,7 +435,6 @@ ENDS
 CALLREF {
 	CALL $dexPairWithdrawSuccessV2_9bb37f8a_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -467,7 +461,6 @@ ENDS
 CALLREF {
 	CALL $dexPairOperationCancelled_a108ea6b_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -515,7 +508,6 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -555,7 +547,6 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensMint_2bd1475b_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -593,7 +584,6 @@ ENDS
 CALLREF {
 	CALL $onTokenRootDeployed_82e1526b_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -635,7 +625,6 @@ ENDS
 CALLREF {
 	CALL $onRefLastUpdate_6ed33f63_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -662,7 +651,6 @@ ENDS
 CALLREF {
 	CALL $dexAccountOnSuccess_022415a5_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -690,7 +678,6 @@ ENDS
 CALLREF {
 	CALL $dexAccountOnBounce_432c3f52_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -807,7 +794,6 @@ ENDS
 CALLREF {
 	CALL $transferOwnership_d23e8489_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -962,14 +948,19 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX ; signatureSlice msgSlice
+	LDSLICEX
 	DUP
-	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	MYADDR
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	HASHCU
 	ROT
 	GETGLOB 2
 	DUP
 	SETGLOB 5
-	CHKSIGNU ; msgSlice isSigned
+	CHKSIGNU
 	THROWIFNOT 40
 }
 IF

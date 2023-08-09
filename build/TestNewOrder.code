@@ -1,4 +1,4 @@
-.version sol 0.62.0
+.version sol 0.64.0
 
 .macro constructor
 DROP
@@ -37,7 +37,6 @@ ENDS
 CALLREF {
 	CALL $onTokenWalletReceive_aebd8150_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -71,7 +70,6 @@ ENDS
 CALLREF {
 	CALL $onDexPair_f01a7bbd_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -134,7 +132,6 @@ ENDS
 CALLREF {
 	CALL $onDexPairTokenRoots_efaa2889_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -181,7 +178,6 @@ ENDS
 CALLREF {
 	CALL $onBeginData_6afdd659_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -299,7 +295,6 @@ ENDS
 CALLREF {
 	CALL $onBalanceReceiveWallet_dd22fc8d_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1085,7 +1080,6 @@ ENDS
 CALLREF {
 	CALL $setFeeParams_c19d7217_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1166,7 +1160,6 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2776,13 +2769,19 @@ IFREF {
 	CALL $c4_to_c7$
 }
 .loc ../contracts/tests/TestNewOrder.tsol, 781
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
 LDU 64
 ENDS
 .loc ../contracts/tests/TestNewOrder.tsol, 0
 CALLREF {
 	CALL $cancel_4c125e79_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2895,13 +2894,19 @@ IFREF {
 	CALL $c4_to_c7$
 }
 .loc ../contracts/tests/TestNewOrder.tsol, 814
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
 LDU 64
 ENDS
 .loc ../contracts/tests/TestNewOrder.tsol, 0
 CALLREF {
 	CALL $backendSwap_beb18340_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2962,22 +2967,18 @@ IFREF {
 .loc ../contracts/tests/TestNewOrder.tsol, 820
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-}
-IFELSE
+IF
+LDU 64
 LDU 128
 ENDS
 .loc ../contracts/tests/TestNewOrder.tsol, 0
 CALLREF {
 	CALL $swap_95c939ac_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3104,22 +3105,18 @@ IFREF {
 .loc ../contracts/tests/TestNewOrder.tsol, 866
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-}
-IFELSE
+IF
+LDU 64
 LDMSGADDR
 ENDS
 .loc ../contracts/tests/TestNewOrder.tsol, 0
 CALLREF {
 	CALL $backendMatching_ae31c208_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3258,15 +3255,12 @@ IFREF {
 .loc ../contracts/tests/TestNewOrder.tsol, 881
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-}
-IFELSE
+IF
+LDU 64
 LDU 128
 LDMSGADDR
 LDREF
@@ -3280,7 +3274,6 @@ ENDS
 CALLREF {
 	CALL $matching_dd9931cc_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3426,15 +3419,12 @@ IFREF {
 .loc ../contracts/tests/TestNewOrder.tsol, 917
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-}
-IFELSE
+IF
+LDU 64
 LDU 128
 LDMSGADDR
 LDREF
@@ -3501,7 +3491,6 @@ ENDS
 CALLREF {
 	CALL $matchingCheck_7bbc4bb5_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3839,7 +3828,6 @@ ENDS
 CALLREF {
 	CALL $matchingCancel_5f4b298b_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4418,7 +4406,6 @@ ENDS
 CALLREF {
 	CALL $enableEmergency_df0128f6_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4562,7 +4549,6 @@ ENDS
 CALLREF {
 	CALL $disableEmergency_d59b7807_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -4985,7 +4971,6 @@ ENDS
 CALLREF {
 	CALL $upgrade_fb9d1513_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -5659,9 +5644,14 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX ; signatureSlice msgSlice
+	LDSLICEX
 	DUP
-	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	MYADDR
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	HASHCU
 	SWAP
 	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
@@ -5677,7 +5667,7 @@ PUSHCONT {
 	IFELSE
 	DUP
 	SETGLOB 5
-	CHKSIGNU ; msgSlice isSigned
+	CHKSIGNU
 	THROWIFNOT 40
 }
 PUSHCONT {
@@ -5700,678 +5690,6 @@ CALLREF {
 	CALL $public_function_selector$
 }
 THROW 60
-
-.globl	OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
-.type	OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
-CALL $OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
-
-.macro OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 257
-OVER
-CTOS
-.loc ../contracts/libraries/OrderPayloads.tsol, 258
-DUP
-SREFS
-.loc ../contracts/libraries/OrderPayloads.tsol, 260
-PUSHINT 0
-DUP
-.loc ../contracts/libraries/OrderPayloads.tsol, 263
-PUSHREF {
-}
-DUP
-.loc ../contracts/libraries/OrderPayloads.tsol, 266
-ROLL 6
-NEQINT 50
-PUSH S5
-EQINT 0
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 267
-	XCHG S1, S2
-	BLKDROP2 2, 4
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IFJMP
-.loc ../contracts/libraries/OrderPayloads.tsol, 270
-PUSH S4
-GTINT 0
-POP S4
-.loc ../contracts/libraries/OrderPayloads.tsol, 271
-ROLL 4
-GTINT 1
-POP S3
-.loc ../contracts/libraries/OrderPayloads.tsol, 273
-PUSH S3
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 273
-	PUSH S4
-	LDREF
-	POP S6
-	POP S2
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IF
-.loc ../contracts/libraries/OrderPayloads.tsol, 274
-PUSH S2
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 274
-	PUSH S4
-	LDREF
-	POP S6
-	NIP
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IF
-.loc ../contracts/libraries/OrderPayloads.tsol, 276
-XCHG S1, S2
-BLKDROP2 1, 4
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
-.type	OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
-CALL $OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
-
-.macro OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 257
-SWAP
-CTOS
-.loc ../contracts/libraries/OrderPayloads.tsol, 258
-DUP
-SREFS
-.loc ../contracts/libraries/OrderPayloads.tsol, 260
-PUSHINT 0
-DUP
-.loc ../contracts/libraries/OrderPayloads.tsol, 263
-PUSHREF {
-}
-DUP
-.loc ../contracts/libraries/OrderPayloads.tsol, 266
-ROLL 6
-NEQINT 50
-PUSH S5
-EQINT 0
-OR
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 267
-	XCHG S1, S2
-	BLKDROP2 2, 4
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IFJMP
-.loc ../contracts/libraries/OrderPayloads.tsol, 270
-PUSH S4
-GTINT 0
-POP S4
-.loc ../contracts/libraries/OrderPayloads.tsol, 271
-ROLL 4
-GTINT 1
-POP S3
-.loc ../contracts/libraries/OrderPayloads.tsol, 273
-PUSH S3
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 273
-	PUSH S4
-	LDREF
-	POP S6
-	POP S2
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IF
-.loc ../contracts/libraries/OrderPayloads.tsol, 274
-PUSH S2
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 274
-	PUSH S4
-	LDREF
-	POP S6
-	NIP
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IF
-.loc ../contracts/libraries/OrderPayloads.tsol, 276
-XCHG S1, S2
-BLKDROP2 1, 4
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildSuccessPayload_ca821d98
-.type	OrderPayloads_with_obj_buildSuccessPayload_ca821d98, @function
-CALL $OrderPayloads_with_obj_buildSuccessPayload_ca821d98_macro$
-
-.macro OrderPayloads_with_obj_buildSuccessPayload_ca821d98_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 288
-NEWC
-STSLICECONST xcb
-.loc ../contracts/libraries/OrderPayloads.tsol, 289
-PUSH S3
-STUR 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 290
-XCHG S1, S2
-STREF
-.loc ../contracts/libraries/OrderPayloads.tsol, 293
-SWAP
-NEWC
-STSLICE
-.loc ../contracts/libraries/OrderPayloads.tsol, 295
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/OrderPayloads.tsol, 297
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildSuccessPayload_ca821d98
-.type	OrderPayloads_no_obj_buildSuccessPayload_ca821d98, @function
-CALL $OrderPayloads_no_obj_buildSuccessPayload_ca821d98_macro$
-
-.macro OrderPayloads_no_obj_buildSuccessPayload_ca821d98_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 288
-NEWC
-STSLICECONST xcb
-.loc ../contracts/libraries/OrderPayloads.tsol, 289
-ROLL 3
-STUR 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 290
-XCHG S1, S2
-STREF
-.loc ../contracts/libraries/OrderPayloads.tsol, 293
-SWAP
-NEWC
-STSLICE
-.loc ../contracts/libraries/OrderPayloads.tsol, 295
-ENDC
-SWAP
-STREF
-.loc ../contracts/libraries/OrderPayloads.tsol, 297
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildCancelPayload_bb10a79a
-.type	OrderPayloads_with_obj_buildCancelPayload_bb10a79a, @function
-CALL $OrderPayloads_with_obj_buildCancelPayload_bb10a79a_macro$
-
-.macro OrderPayloads_with_obj_buildCancelPayload_bb10a79a_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 304
-NEWC
-STSLICECONST xcc
-.loc ../contracts/libraries/OrderPayloads.tsol, 305
-PUSH S2
-STUR 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 306
-STREF
-.loc ../contracts/libraries/OrderPayloads.tsol, 308
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildCancelPayload_bb10a79a
-.type	OrderPayloads_no_obj_buildCancelPayload_bb10a79a, @function
-CALL $OrderPayloads_no_obj_buildCancelPayload_bb10a79a_macro$
-
-.macro OrderPayloads_no_obj_buildCancelPayload_bb10a79a_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 304
-NEWC
-STSLICECONST xcc
-.loc ../contracts/libraries/OrderPayloads.tsol, 305
-XCHG S1, S2
-STU 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 306
-STREF
-.loc ../contracts/libraries/OrderPayloads.tsol, 308
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c
-.type	OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c, @function
-CALL $OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 341
-PUSHINT 1
-OVER
-NULL
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c
-.type	OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c, @function
-CALL $OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 341
-PUSHINT 1
-SWAP
-NULL
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4
-.type	OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4, @function
-CALL $OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 329
-PUSH S2
-NEWC
-STU 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 331
-NULL
-.loc ../contracts/libraries/OrderPayloads.tsol, 333
-PUSH2 S1, S2
-ISNULL
-PUSHCONT {
-	PUSH S3
-}
-PUSHCONT {
-	OVER
-}
-IFELSE
-PUSH S5
-CALLREF {
-	CALL $OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro$
-}
-STREFR
-BLKDROP2 2, 1
-.loc ../contracts/libraries/OrderPayloads.tsol, 334
-ROT
-CALLREF {
-	CALL $OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro$
-}
-STREFR
-.loc ../contracts/libraries/OrderPayloads.tsol, 336
-ENDC
-NIP
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4
-.type	OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4, @function
-CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 329
-ROT
-NEWC
-STU 8
-.loc ../contracts/libraries/OrderPayloads.tsol, 331
-NULL
-.loc ../contracts/libraries/OrderPayloads.tsol, 333
-PUSH2 S1, S2
-ISNULL
-PUSHCONT {
-	PUSH S3
-}
-PUSHCONT {
-	OVER
-}
-IFELSE
-PUSH S5
-CALLREF {
-	CALL $OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro$
-}
-STREFR
-BLKDROP2 2, 1
-.loc ../contracts/libraries/OrderPayloads.tsol, 334
-ROT
-CALLREF {
-	CALL $OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro$
-}
-STREFR
-.loc ../contracts/libraries/OrderPayloads.tsol, 336
-ENDC
-NIP
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d
-.type	OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d, @function
-CALL $OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 345
-PUSHINT 3
-XCPU S1, S2
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d
-.type	OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d, @function
-CALL $OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 345
-PUSHINT 3
-XCHG S2
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b
-.type	OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b, @function
-CALL $OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 349
-PUSHINT 2
-XCPU S1, S2
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b
-.type	OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b, @function
-CALL $OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 349
-PUSHINT 2
-XCHG S2
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperationAMM_980a8964
-.type	OrderPayloads_with_obj_buildOrderOperationAMM_980a8964, @function
-CALL $OrderPayloads_with_obj_buildOrderOperationAMM_980a8964_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperationAMM_980a8964_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 353
-PUSHINT 3
-XCPU S1, S2
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperationAMM_980a8964
-.type	OrderPayloads_no_obj_buildOrderOperationAMM_980a8964, @function
-CALL $OrderPayloads_no_obj_buildOrderOperationAMM_980a8964_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperationAMM_980a8964_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 353
-PUSHINT 3
-XCHG S2
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d
-.type	OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d, @function
-CALL $OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 358
-PUSHINT 4
-OVER
-NULL
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d
-.type	OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d, @function
-CALL $OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 358
-PUSHINT 4
-SWAP
-NULL
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d
-.type	OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d, @function
-CALL $OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 362
-PUSHINT 2
-XCPU S1, S2
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d
-.type	OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d, @function
-CALL $OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 362
-PUSHINT 2
-XCHG S2
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_buildOrderOperationCancel_d24062cb
-.type	OrderPayloads_with_obj_buildOrderOperationCancel_d24062cb, @function
-CALL $OrderPayloads_with_obj_buildOrderOperationCancel_d24062cb_macro$
-
-.macro OrderPayloads_with_obj_buildOrderOperationCancel_d24062cb_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 367
-PUSHINT 6
-OVER
-NULL
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_buildOrderOperationCancel_d24062cb
-.type	OrderPayloads_no_obj_buildOrderOperationCancel_d24062cb, @function
-CALL $OrderPayloads_no_obj_buildOrderOperationCancel_d24062cb_macro$
-
-.macro OrderPayloads_no_obj_buildOrderOperationCancel_d24062cb_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 367
-PUSHINT 6
-SWAP
-NULL
-CALLREF {
-	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
-}
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_infoOrderBlock_841a3ec0
-.type	OrderPayloads_with_obj_infoOrderBlock_841a3ec0, @function
-CALL $OrderPayloads_with_obj_infoOrderBlock_841a3ec0_macro$
-
-.macro OrderPayloads_with_obj_infoOrderBlock_841a3ec0_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 371
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 380
-	DUP
-	INDEX 13
-	OVER
-	INDEX 12
-	PUSH S2
-	INDEX 11
-	ROLL 3
-	INDEX 10
-	NEWC
-	STU 128
-	STU 128
-	STU 128
-	STU 128
-	ENDC
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 372
-	DUP
-	INDEX 13
-	OVER
-	INDEX 12
-	PUSH S2
-	INDEX 11
-	ROLL 3
-	INDEX 10
-	PUSH2 S4, S4
-	ISNULL
-	THROWIF 63
-	NEWC
-	STU 128
-	STU 128
-	STU 128
-	STU 128
-	STU 128
-	ENDC
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IFELSE
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_infoOrderBlock_841a3ec0
-.type	OrderPayloads_no_obj_infoOrderBlock_841a3ec0, @function
-CALL $OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro$
-
-.macro OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 371
-OVER
-ISNULL
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 380
-	DUP
-	INDEX 13
-	OVER
-	INDEX 12
-	PUSH S2
-	INDEX 11
-	ROLL 3
-	INDEX 10
-	NEWC
-	STU 128
-	STU 128
-	STU 128
-	STU 128
-	ENDC
-	NIP
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-PUSHCONT {
-	.loc ../contracts/libraries/OrderPayloads.tsol, 372
-	DUP
-	INDEX 13
-	OVER
-	INDEX 12
-	PUSH S2
-	INDEX 11
-	ROLL 3
-	INDEX 10
-	ROLL 4
-	DUP
-	ISNULL
-	THROWIF 63
-	NEWC
-	STU 128
-	STU 128
-	STU 128
-	STU 128
-	STU 128
-	ENDC
-	.loc ../contracts/libraries/OrderPayloads.tsol, 0
-}
-IFELSE
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_with_obj_initDataOrderBlock_4c347cdf
-.type	OrderPayloads_with_obj_initDataOrderBlock_4c347cdf, @function
-CALL $OrderPayloads_with_obj_initDataOrderBlock_4c347cdf_macro$
-
-.macro OrderPayloads_with_obj_initDataOrderBlock_4c347cdf_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 390
-DUP
-INDEX 4
-OVER
-INDEX 3
-PUSH S2
-INDEX 7
-PUSH S3
-INDEX 6
-PUSH S4
-THIRD
-PUSH S5
-SECOND
-PUSH S6
-FIRST
-NEWC
-STSLICE
-ROLLREV 6
-NEWC
-STSLICE
-ROLLREV 5
-NEWC
-STSLICE
-ROLLREV 4
-NEWC
-STSLICE
-ROLLREV 3
-NEWC
-STSLICE
-STU 64
-STU 64
-STBREFR
-STBREFR
-STBREFR
-STBREFR
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
-
-.globl	OrderPayloads_no_obj_initDataOrderBlock_4c347cdf
-.type	OrderPayloads_no_obj_initDataOrderBlock_4c347cdf, @function
-CALL $OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro$
-
-.macro OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro
-.loc ../contracts/libraries/OrderPayloads.tsol, 390
-DUP
-INDEX 4
-OVER
-INDEX 3
-PUSH S2
-INDEX 7
-PUSH S3
-INDEX 6
-PUSH S4
-THIRD
-PUSH S5
-SECOND
-ROLL 6
-FIRST
-NEWC
-STSLICE
-ROLLREV 6
-NEWC
-STSLICE
-ROLLREV 5
-NEWC
-STSLICE
-ROLLREV 4
-NEWC
-STSLICE
-ROLLREV 3
-NEWC
-STSLICE
-STU 64
-STU 64
-STBREFR
-STBREFR
-STBREFR
-STBREFR
-ENDC
-.loc ../contracts/libraries/OrderPayloads.tsol, 0
 
 .globl	OrderPayloads_with_obj_buildSwapExchangePayload_c1150383
 .type	OrderPayloads_with_obj_buildSwapExchangePayload_c1150383, @function
@@ -7137,6 +6455,678 @@ BLKSWAP 3, 8
 ROLL 8
 BLKSWAP 7, 4
 BLKDROP2 2, 11
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
+.type	OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
+CALL $OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
+
+.macro OrderPayloads_with_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 257
+OVER
+CTOS
+.loc ../contracts/libraries/OrderPayloads.tsol, 258
+DUP
+SREFS
+.loc ../contracts/libraries/OrderPayloads.tsol, 260
+PUSHINT 0
+DUP
+.loc ../contracts/libraries/OrderPayloads.tsol, 263
+PUSHREF {
+}
+DUP
+.loc ../contracts/libraries/OrderPayloads.tsol, 266
+ROLL 6
+NEQINT 50
+PUSH S5
+EQINT 0
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 267
+	XCHG S1, S2
+	BLKDROP2 2, 4
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IFJMP
+.loc ../contracts/libraries/OrderPayloads.tsol, 270
+PUSH S4
+GTINT 0
+POP S4
+.loc ../contracts/libraries/OrderPayloads.tsol, 271
+ROLL 4
+GTINT 1
+POP S3
+.loc ../contracts/libraries/OrderPayloads.tsol, 273
+PUSH S3
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 273
+	PUSH S4
+	LDREF
+	POP S6
+	POP S2
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IF
+.loc ../contracts/libraries/OrderPayloads.tsol, 274
+PUSH S2
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 274
+	PUSH S4
+	LDREF
+	POP S6
+	NIP
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IF
+.loc ../contracts/libraries/OrderPayloads.tsol, 276
+XCHG S1, S2
+BLKDROP2 1, 4
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3
+.type	OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3, @function
+CALL $OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro$
+
+.macro OrderPayloads_no_obj_decodeOnAcceptTokensTransferPayloads_00e0e0b3_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 257
+SWAP
+CTOS
+.loc ../contracts/libraries/OrderPayloads.tsol, 258
+DUP
+SREFS
+.loc ../contracts/libraries/OrderPayloads.tsol, 260
+PUSHINT 0
+DUP
+.loc ../contracts/libraries/OrderPayloads.tsol, 263
+PUSHREF {
+}
+DUP
+.loc ../contracts/libraries/OrderPayloads.tsol, 266
+ROLL 6
+NEQINT 50
+PUSH S5
+EQINT 0
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 267
+	XCHG S1, S2
+	BLKDROP2 2, 4
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IFJMP
+.loc ../contracts/libraries/OrderPayloads.tsol, 270
+PUSH S4
+GTINT 0
+POP S4
+.loc ../contracts/libraries/OrderPayloads.tsol, 271
+ROLL 4
+GTINT 1
+POP S3
+.loc ../contracts/libraries/OrderPayloads.tsol, 273
+PUSH S3
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 273
+	PUSH S4
+	LDREF
+	POP S6
+	POP S2
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IF
+.loc ../contracts/libraries/OrderPayloads.tsol, 274
+PUSH S2
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 274
+	PUSH S4
+	LDREF
+	POP S6
+	NIP
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IF
+.loc ../contracts/libraries/OrderPayloads.tsol, 276
+XCHG S1, S2
+BLKDROP2 1, 4
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildSuccessPayload_ca821d98
+.type	OrderPayloads_with_obj_buildSuccessPayload_ca821d98, @function
+CALL $OrderPayloads_with_obj_buildSuccessPayload_ca821d98_macro$
+
+.macro OrderPayloads_with_obj_buildSuccessPayload_ca821d98_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 288
+NEWC
+STSLICECONST xcb
+.loc ../contracts/libraries/OrderPayloads.tsol, 289
+PUSH S3
+STUR 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 290
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/OrderPayloads.tsol, 293
+SWAP
+NEWC
+STSLICE
+.loc ../contracts/libraries/OrderPayloads.tsol, 295
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/OrderPayloads.tsol, 297
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildSuccessPayload_ca821d98
+.type	OrderPayloads_no_obj_buildSuccessPayload_ca821d98, @function
+CALL $OrderPayloads_no_obj_buildSuccessPayload_ca821d98_macro$
+
+.macro OrderPayloads_no_obj_buildSuccessPayload_ca821d98_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 288
+NEWC
+STSLICECONST xcb
+.loc ../contracts/libraries/OrderPayloads.tsol, 289
+ROLL 3
+STUR 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 290
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/OrderPayloads.tsol, 293
+SWAP
+NEWC
+STSLICE
+.loc ../contracts/libraries/OrderPayloads.tsol, 295
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/OrderPayloads.tsol, 297
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildCancelPayload_bb10a79a
+.type	OrderPayloads_with_obj_buildCancelPayload_bb10a79a, @function
+CALL $OrderPayloads_with_obj_buildCancelPayload_bb10a79a_macro$
+
+.macro OrderPayloads_with_obj_buildCancelPayload_bb10a79a_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 304
+NEWC
+STSLICECONST xcc
+.loc ../contracts/libraries/OrderPayloads.tsol, 305
+PUSH S2
+STUR 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 306
+STREF
+.loc ../contracts/libraries/OrderPayloads.tsol, 308
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildCancelPayload_bb10a79a
+.type	OrderPayloads_no_obj_buildCancelPayload_bb10a79a, @function
+CALL $OrderPayloads_no_obj_buildCancelPayload_bb10a79a_macro$
+
+.macro OrderPayloads_no_obj_buildCancelPayload_bb10a79a_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 304
+NEWC
+STSLICECONST xcc
+.loc ../contracts/libraries/OrderPayloads.tsol, 305
+XCHG S1, S2
+STU 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 306
+STREF
+.loc ../contracts/libraries/OrderPayloads.tsol, 308
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c
+.type	OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c, @function
+CALL $OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperationFullExchange_06774b6c_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 341
+PUSHINT 1
+OVER
+NULL
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c
+.type	OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c, @function
+CALL $OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperationFullExchange_06774b6c_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 341
+PUSHINT 1
+SWAP
+NULL
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4
+.type	OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4, @function
+CALL $OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperation_a0c2ffa4_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 329
+PUSH S2
+NEWC
+STU 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 331
+NULL
+.loc ../contracts/libraries/OrderPayloads.tsol, 333
+PUSH2 S1, S2
+ISNULL
+PUSHCONT {
+	PUSH S3
+}
+PUSHCONT {
+	OVER
+}
+IFELSE
+PUSH S5
+CALLREF {
+	CALL $OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro$
+}
+STREFR
+BLKDROP2 2, 1
+.loc ../contracts/libraries/OrderPayloads.tsol, 334
+ROT
+CALLREF {
+	CALL $OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro$
+}
+STREFR
+.loc ../contracts/libraries/OrderPayloads.tsol, 336
+ENDC
+NIP
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4
+.type	OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4, @function
+CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 329
+ROT
+NEWC
+STU 8
+.loc ../contracts/libraries/OrderPayloads.tsol, 331
+NULL
+.loc ../contracts/libraries/OrderPayloads.tsol, 333
+PUSH2 S1, S2
+ISNULL
+PUSHCONT {
+	PUSH S3
+}
+PUSHCONT {
+	OVER
+}
+IFELSE
+PUSH S5
+CALLREF {
+	CALL $OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro$
+}
+STREFR
+BLKDROP2 2, 1
+.loc ../contracts/libraries/OrderPayloads.tsol, 334
+ROT
+CALLREF {
+	CALL $OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro$
+}
+STREFR
+.loc ../contracts/libraries/OrderPayloads.tsol, 336
+ENDC
+NIP
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d
+.type	OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d, @function
+CALL $OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperationChange_636ddc5d_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 345
+PUSHINT 3
+XCPU S1, S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d
+.type	OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d, @function
+CALL $OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperationChange_636ddc5d_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 345
+PUSHINT 3
+XCHG S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b
+.type	OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b, @function
+CALL $OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperationPartExchange_61f3870b_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 349
+PUSHINT 2
+XCPU S1, S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b
+.type	OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b, @function
+CALL $OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperationPartExchange_61f3870b_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 349
+PUSHINT 2
+XCHG S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperationAMM_980a8964
+.type	OrderPayloads_with_obj_buildOrderOperationAMM_980a8964, @function
+CALL $OrderPayloads_with_obj_buildOrderOperationAMM_980a8964_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperationAMM_980a8964_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 353
+PUSHINT 3
+XCPU S1, S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperationAMM_980a8964
+.type	OrderPayloads_no_obj_buildOrderOperationAMM_980a8964, @function
+CALL $OrderPayloads_no_obj_buildOrderOperationAMM_980a8964_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperationAMM_980a8964_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 353
+PUSHINT 3
+XCHG S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d
+.type	OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d, @function
+CALL $OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperationMatchingFull_519c560d_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 358
+PUSHINT 4
+OVER
+NULL
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d
+.type	OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d, @function
+CALL $OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperationMatchingFull_519c560d_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 358
+PUSHINT 4
+SWAP
+NULL
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d
+.type	OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d, @function
+CALL $OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperationMatchingPart_acc70f9d_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 362
+PUSHINT 2
+XCPU S1, S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d
+.type	OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d, @function
+CALL $OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperationMatchingPart_acc70f9d_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 362
+PUSHINT 2
+XCHG S2
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_buildOrderOperationCancel_d24062cb
+.type	OrderPayloads_with_obj_buildOrderOperationCancel_d24062cb, @function
+CALL $OrderPayloads_with_obj_buildOrderOperationCancel_d24062cb_macro$
+
+.macro OrderPayloads_with_obj_buildOrderOperationCancel_d24062cb_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 367
+PUSHINT 6
+OVER
+NULL
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_buildOrderOperationCancel_d24062cb
+.type	OrderPayloads_no_obj_buildOrderOperationCancel_d24062cb, @function
+CALL $OrderPayloads_no_obj_buildOrderOperationCancel_d24062cb_macro$
+
+.macro OrderPayloads_no_obj_buildOrderOperationCancel_d24062cb_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 367
+PUSHINT 6
+SWAP
+NULL
+CALLREF {
+	CALL $OrderPayloads_no_obj_buildOrderOperation_a0c2ffa4_macro$
+}
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_infoOrderBlock_841a3ec0
+.type	OrderPayloads_with_obj_infoOrderBlock_841a3ec0, @function
+CALL $OrderPayloads_with_obj_infoOrderBlock_841a3ec0_macro$
+
+.macro OrderPayloads_with_obj_infoOrderBlock_841a3ec0_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 371
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 380
+	DUP
+	INDEX 13
+	OVER
+	INDEX 12
+	PUSH S2
+	INDEX 11
+	ROLL 3
+	INDEX 10
+	NEWC
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	ENDC
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 372
+	DUP
+	INDEX 13
+	OVER
+	INDEX 12
+	PUSH S2
+	INDEX 11
+	ROLL 3
+	INDEX 10
+	PUSH2 S4, S4
+	ISNULL
+	THROWIF 63
+	NEWC
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	ENDC
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IFELSE
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_infoOrderBlock_841a3ec0
+.type	OrderPayloads_no_obj_infoOrderBlock_841a3ec0, @function
+CALL $OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro$
+
+.macro OrderPayloads_no_obj_infoOrderBlock_841a3ec0_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 371
+OVER
+ISNULL
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 380
+	DUP
+	INDEX 13
+	OVER
+	INDEX 12
+	PUSH S2
+	INDEX 11
+	ROLL 3
+	INDEX 10
+	NEWC
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	ENDC
+	NIP
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+PUSHCONT {
+	.loc ../contracts/libraries/OrderPayloads.tsol, 372
+	DUP
+	INDEX 13
+	OVER
+	INDEX 12
+	PUSH S2
+	INDEX 11
+	ROLL 3
+	INDEX 10
+	ROLL 4
+	DUP
+	ISNULL
+	THROWIF 63
+	NEWC
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	STU 128
+	ENDC
+	.loc ../contracts/libraries/OrderPayloads.tsol, 0
+}
+IFELSE
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_with_obj_initDataOrderBlock_4c347cdf
+.type	OrderPayloads_with_obj_initDataOrderBlock_4c347cdf, @function
+CALL $OrderPayloads_with_obj_initDataOrderBlock_4c347cdf_macro$
+
+.macro OrderPayloads_with_obj_initDataOrderBlock_4c347cdf_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 390
+DUP
+INDEX 4
+OVER
+INDEX 3
+PUSH S2
+INDEX 7
+PUSH S3
+INDEX 6
+PUSH S4
+THIRD
+PUSH S5
+SECOND
+PUSH S6
+FIRST
+NEWC
+STSLICE
+ROLLREV 6
+NEWC
+STSLICE
+ROLLREV 5
+NEWC
+STSLICE
+ROLLREV 4
+NEWC
+STSLICE
+ROLLREV 3
+NEWC
+STSLICE
+STU 64
+STU 64
+STBREFR
+STBREFR
+STBREFR
+STBREFR
+ENDC
+.loc ../contracts/libraries/OrderPayloads.tsol, 0
+
+.globl	OrderPayloads_no_obj_initDataOrderBlock_4c347cdf
+.type	OrderPayloads_no_obj_initDataOrderBlock_4c347cdf, @function
+CALL $OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro$
+
+.macro OrderPayloads_no_obj_initDataOrderBlock_4c347cdf_macro
+.loc ../contracts/libraries/OrderPayloads.tsol, 390
+DUP
+INDEX 4
+OVER
+INDEX 3
+PUSH S2
+INDEX 7
+PUSH S3
+INDEX 6
+PUSH S4
+THIRD
+PUSH S5
+SECOND
+ROLL 6
+FIRST
+NEWC
+STSLICE
+ROLLREV 6
+NEWC
+STSLICE
+ROLLREV 5
+NEWC
+STSLICE
+ROLLREV 4
+NEWC
+STSLICE
+ROLLREV 3
+NEWC
+STSLICE
+STU 64
+STU 64
+STBREFR
+STBREFR
+STBREFR
+STBREFR
+ENDC
 .loc ../contracts/libraries/OrderPayloads.tsol, 0
 
 .globl	PairPayload_with_obj_buildExchangePayloadV2_0d450309

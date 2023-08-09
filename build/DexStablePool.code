@@ -1,4 +1,4 @@
-.version sol 0.62.0
+.version sol 0.64.0
 
 .macro constructor
 DROP
@@ -1293,7 +1293,6 @@ ENDS
 CALLREF {
 	CALL $setActive_83dffa84_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1371,7 +1370,6 @@ ENDS
 CALLREF {
 	CALL $setAmplificationCoefficient_12ba17dc_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1452,7 +1450,6 @@ ENDS
 CALLREF {
 	CALL $setFeeParams_360e8671_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1600,7 +1597,6 @@ ENDS
 CALLREF {
 	CALL $withdrawBeneficiaryFee_cf6eb742_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1650,10 +1646,10 @@ THROWIFNOT 76
 .loc ../contracts/DexStablePool.tsol, 246
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
+	LDU 64
 	LDU 128
 	LDU 128
 	LDMSGADDR
@@ -1770,10 +1766,10 @@ THROWIFNOT 76
 .loc ../contracts/DexStablePool.tsol, 270
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
+	LDU 64
 	LDU 128
 	LDU 128
 	LDMSGADDR
@@ -1872,10 +1868,10 @@ IFREF {
 .loc ../contracts/DexStablePool.tsol, 290
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
+	LDU 64
 	LDU 128
 	LDU 32
 	LDDICT
@@ -2001,10 +1997,10 @@ THROWIFNOT 76
 .loc ../contracts/DexStablePool.tsol, 314
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
+	LDU 64
 	LDU 128
 	LDU 128
 	LDMSGADDR
@@ -2127,10 +2123,10 @@ IFREF {
 .loc ../contracts/DexStablePool.tsol, 338
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
+	LDU 64
 	LDU 128
 	LDU 128
 	LDMSGADDR
@@ -2357,7 +2353,6 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -5768,6 +5763,13 @@ GETGLOB 4
 ROT
 SETINDEXQ 5
 SETGLOB 4
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
 LDU 32
 LDDICT
 ROTREV
@@ -6183,25 +6185,17 @@ IFREF {
 .loc ../contracts/DexStablePool.tsol, 1057
 OVER
 PUSHCONT {
-	LDU 64
-	LDU 32
-	LDDICT
-	ROTREV
-	PAIR
-	SWAP
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-	LDU 32
-	LDDICT
-	ROTREV
-	PAIR
-	SWAP
-}
-IFELSE
+IF
+LDU 64
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
 LDU 128
 LDMSGADDR
 ROTREV
@@ -6226,7 +6220,6 @@ ENDS
 CALLREF {
 	CALL $depositLiquidity_fd8c8ab0_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -7327,15 +7320,12 @@ IFREF {
 .loc ../contracts/DexStablePool.tsol, 1195
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-}
-IFELSE
+IF
+LDU 64
 LDU 128
 LDMSGADDR
 ROTREV
@@ -7360,7 +7350,6 @@ ENDS
 CALLREF {
 	CALL $withdrawLiquidity_6b1781e6_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -8054,15 +8043,12 @@ IFREF {
 .loc ../contracts/DexStablePool.tsol, 1312
 OVER
 PUSHCONT {
-	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-}
-IFELSE
+IF
+LDU 64
 LDU 128
 LDMSGADDR
 ROTREV
@@ -8090,7 +8076,6 @@ ENDS
 CALLREF {
 	CALL $exchange_ff7e2245_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -8983,19 +8968,14 @@ IFREF {
 .loc ../contracts/DexStablePool.tsol, 1411
 OVER
 PUSHCONT {
-	LDU 64
-	LDU 32
-	LDU 8
 	LDREF
 	ENDS
 	CTOS
 }
-PUSHCONT {
-	LDU 64
-	LDU 32
-	LDU 8
-}
-IFELSE
+IF
+LDU 64
+LDU 32
+LDU 8
 LDU 32
 LDDICT
 ROTREV
@@ -9032,7 +9012,6 @@ ENDS
 CALLREF {
 	CALL $crossPoolExchange_272257a6_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -10803,7 +10782,6 @@ ENDS
 CALLREF {
 	CALL $checkPair_29d167fd_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -10881,7 +10859,6 @@ ENDS
 CALLREF {
 	CALL $upgrade_8f230973_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -12267,7 +12244,6 @@ ENDS
 CALLREF {
 	CALL $onTokenWallet_e6d1bd58_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -12461,7 +12437,6 @@ ENDS
 CALLREF {
 	CALL $onTokenDecimals_7d1e9aa6_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -13027,7 +13002,6 @@ ENDS
 CALLREF {
 	CALL $liquidityTokenRootDeployed_b6e607f1_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -13170,7 +13144,6 @@ ENDS
 CALLREF {
 	CALL $liquidityTokenRootNotDeployed_4ce5331d_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -20658,9 +20631,14 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX ; signatureSlice msgSlice
+	LDSLICEX
 	DUP
-	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	MYADDR
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	HASHCU
 	SWAP
 	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
@@ -20674,7 +20652,7 @@ PUSHCONT {
 		GETGLOB 2
 	}
 	IFELSE
-	CHKSIGNU ; msgSlice isSigned
+	CHKSIGNU
 	THROWIFNOT 40
 }
 PUSHCONT {

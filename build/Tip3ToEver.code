@@ -1,4 +1,4 @@
-.version sol 0.62.0
+.version sol 0.64.0
 
 .macro constructor
 DROP
@@ -84,7 +84,6 @@ ENDS
 CALLREF {
 	CALL $onWeverWallet_b024d1df_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -609,7 +608,6 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1006,7 +1004,6 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensBurn_07d14114_internal_macro$
 }
-DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1277,9 +1274,14 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX ; signatureSlice msgSlice
+	LDSLICEX
 	DUP
-	HASHSU ; signatureSlice msgSlice hashMsgSlice
+	MYADDR
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	HASHCU
 	SWAP
 	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
@@ -1293,7 +1295,7 @@ PUSHCONT {
 		GETGLOB 2
 	}
 	IFELSE
-	CHKSIGNU ; msgSlice isSigned
+	CHKSIGNU
 	THROWIFNOT 40
 }
 PUSHCONT {
@@ -1391,6 +1393,50 @@ PUSHINT 100000000
 ADD
 UFITS 128
 PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d
+.type	GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d, @function
+CALL $GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro$
+
+.macro GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro
+.loc ../contracts/libraries/GasValues.tsol, 411
+DUP2
+PUSHINT 10000000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 300000
+ROT
+PUSHINT 150000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d
+.type	GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d, @function
+CALL $GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro$
+
+.macro GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro
+.loc ../contracts/libraries/GasValues.tsol, 411
+TUCK
+PUSHINT 10000000
+MUL
+UFITS 128
+ADD
+UFITS 128
+PUSHINT 300000
+ROT
+PUSHINT 150000
+MUL
+UFITS 128
+ADD
+UFITS 128
 PAIR
 .loc ../contracts/libraries/GasValues.tsol, 0
 
@@ -2355,50 +2401,6 @@ PUSHCONT {
 IFELSE
 BLKDROP2 2, 3
 .loc ../contracts/libraries/PairPayload.tsol, 0
-
-.globl	GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d
-.type	GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d, @function
-CALL $GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro$
-
-.macro GasValues_with_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro
-.loc ../contracts/libraries/GasValues.tsol, 411
-DUP2
-PUSHINT 10000000
-MUL
-UFITS 128
-ADD
-UFITS 128
-PUSHINT 300000
-ROT
-PUSHINT 150000
-MUL
-UFITS 128
-ADD
-UFITS 128
-PAIR
-.loc ../contracts/libraries/GasValues.tsol, 0
-
-.globl	GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d
-.type	GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d, @function
-CALL $GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro$
-
-.macro GasValues_no_obj_getTip3ToEverCrossExchangeGas_4cd4f15d_macro
-.loc ../contracts/libraries/GasValues.tsol, 411
-TUCK
-PUSHINT 10000000
-MUL
-UFITS 128
-ADD
-UFITS 128
-PUSHINT 300000
-ROT
-PUSHINT 150000
-MUL
-UFITS 128
-ADD
-UFITS 128
-PAIR
-.loc ../contracts/libraries/GasValues.tsol, 0
 
 .macro public_function_selector
 DUP
