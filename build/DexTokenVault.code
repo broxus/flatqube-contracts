@@ -1440,9 +1440,13 @@ SDEQ
 AND
 THROWIFNOT 101
 .loc ../contracts/DexTokenVault.tsol, 383
+GETGLOB 12
 GETGLOB 17
 GETGLOB 16
 GETGLOB 15
+NEWC
+STSLICE
+ROLLREV 3
 NEWC
 STSLICE
 ROTREV
@@ -1453,33 +1457,34 @@ NEWC
 STSLICE
 STBREFR
 STBREFR
+STBREFR
 ENDC
-.loc ../contracts/DexTokenVault.tsol, 391
+.loc ../contracts/DexTokenVault.tsol, 392
 GETGLOB 11
 NEWC
 STSLICE
-.loc ../contracts/DexTokenVault.tsol, 392
+.loc ../contracts/DexTokenVault.tsol, 393
 GETGLOB 13
 STSLICER
-.loc ../contracts/DexTokenVault.tsol, 393
+.loc ../contracts/DexTokenVault.tsol, 394
 GETGLOB 14
 STUR 32
-.loc ../contracts/DexTokenVault.tsol, 394
+.loc ../contracts/DexTokenVault.tsol, 395
 ROLL 3
 STUR 32
-.loc ../contracts/DexTokenVault.tsol, 395
+.loc ../contracts/DexTokenVault.tsol, 396
 XCHG S1, S2
 STSLICE
-.loc ../contracts/DexTokenVault.tsol, 397
+.loc ../contracts/DexTokenVault.tsol, 398
 GETGLOB 10
 SWAP
 STREF
-.loc ../contracts/DexTokenVault.tsol, 398
+.loc ../contracts/DexTokenVault.tsol, 399
 STREF
-.loc ../contracts/DexTokenVault.tsol, 400
+.loc ../contracts/DexTokenVault.tsol, 401
 OVER
 SETCODE
-.loc ../contracts/DexTokenVault.tsol, 401
+.loc ../contracts/DexTokenVault.tsol, 402
 SWAP
 CTOS
 DUP
@@ -1494,7 +1499,7 @@ PLDREF
 CTOS
 BLESS
 POP C3
-.loc ../contracts/DexTokenVault.tsol, 403
+.loc ../contracts/DexTokenVault.tsol, 404
 ENDC
 CALLREF {
 	CALL $:onCodeUpgrade$
@@ -1503,7 +1508,7 @@ CALLREF {
 
 .internal-alias :onCodeUpgrade, 2
 .internal :onCodeUpgrade
-.loc ../contracts/DexTokenVault.tsol, 407
+.loc ../contracts/DexTokenVault.tsol, 408
 PUSHREF {
 }
 SETGLOB 10
@@ -1533,35 +1538,35 @@ PUSHREFSLICE {
 	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
 }
 SETGLOB 17
-.loc ../contracts/DexTokenVault.tsol, 409
+.loc ../contracts/DexTokenVault.tsol, 410
 DUP
 CTOS
-.loc ../contracts/DexTokenVault.tsol, 411
+.loc ../contracts/DexTokenVault.tsol, 412
 LDMSGADDR
 LDMSGADDR
 PLDU 32
-.loc ../contracts/DexTokenVault.tsol, 421
+.loc ../contracts/DexTokenVault.tsol, 422
 ROT
 SETGLOB 11
-.loc ../contracts/DexTokenVault.tsol, 422
+.loc ../contracts/DexTokenVault.tsol, 423
 SWAP
 SETGLOB 13
-.loc ../contracts/DexTokenVault.tsol, 424
+.loc ../contracts/DexTokenVault.tsol, 425
 PUSHCONT {
-	.loc ../contracts/DexTokenVault.tsol, 428
+	.loc ../contracts/DexTokenVault.tsol, 429
 	DUP
 	CALLREF {
 		CALL $_onUpgrade_a17d3901_internal_macro$
 	}
 }
 PUSHCONT {
-	.loc ../contracts/DexTokenVault.tsol, 425
+	.loc ../contracts/DexTokenVault.tsol, 426
 	CALLREF {
 		CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
 	}
 	PUSHINT 0
 	RAWRESERVE
-	.loc ../contracts/DexTokenVault.tsol, 426
+	.loc ../contracts/DexTokenVault.tsol, 427
 	DUP
 	CALLREF {
 		CALL $_onPlatformUpgrade_b294e6d4_internal_macro$
@@ -1581,9 +1586,9 @@ THROW 0
 CALL $_onPlatformUpgrade_b294e6d4_internal_macro$
 
 .macro _onPlatformUpgrade_b294e6d4_internal_macro
-.loc ../contracts/DexTokenVault.tsol, 434
+.loc ../contracts/DexTokenVault.tsol, 435
 CTOS
-.loc ../contracts/DexTokenVault.tsol, 436
+.loc ../contracts/DexTokenVault.tsol, 437
 DUP
 LDMSGADDR
 LDMSGADDR
@@ -1592,18 +1597,18 @@ LDU 32
 LDMSGADDR
 POP S6
 BLKDROP2 3, 2
-.loc ../contracts/DexTokenVault.tsol, 450
+.loc ../contracts/DexTokenVault.tsol, 451
 OVER
 SETGLOB 14
-.loc ../contracts/DexTokenVault.tsol, 451
+.loc ../contracts/DexTokenVault.tsol, 452
 DUP
 SETGLOB 17
-.loc ../contracts/DexTokenVault.tsol, 452
+.loc ../contracts/DexTokenVault.tsol, 453
 PUSH S2
 LDREF
 POP S4
 SETGLOB 10
-.loc ../contracts/DexTokenVault.tsol, 453
+.loc ../contracts/DexTokenVault.tsol, 454
 ROT
 LDREFRTOS
 NIP
@@ -1611,12 +1616,12 @@ LDMSGADDR
 DROP
 DUP
 SETGLOB 15
-.loc ../contracts/DexTokenVault.tsol, 455
+.loc ../contracts/DexTokenVault.tsol, 456
 PARSEMSGADDR
 INDEX 3
 PLDU 256
 PUSHCONT {
-	.loc ../contracts/DexTokenVault.tsol, 458
+	.loc ../contracts/DexTokenVault.tsol, 459
 	PUSHINT 0
 	PUSH S2
 	PUSHSLICE xc000000000000000000000000063e20591
@@ -1627,15 +1632,15 @@ PUSHCONT {
 	ENDC
 	PUSHINT 0
 	SENDRAWMSG
-	.loc ../contracts/DexTokenVault.tsol, 463
+	.loc ../contracts/DexTokenVault.tsol, 464
 	CALLREF {
 		CALL $_deployTokenWallet_0cf4c37a_internal_macro$
 	}
-	.loc ../contracts/DexTokenVault.tsol, 464
+	.loc ../contracts/DexTokenVault.tsol, 465
 	CALLREF {
 		CALL $_deployTokenWalletForVault_07ed59d9_internal_macro$
 	}
-	.loc ../contracts/DexTokenVault.tsol, 466
+	.loc ../contracts/DexTokenVault.tsol, 467
 	DUP
 	NEWC
 	STSLICECONST x42_
@@ -1660,9 +1665,9 @@ DROP2
 CALL $_onUpgrade_a17d3901_internal_macro$
 
 .macro _onUpgrade_a17d3901_internal_macro
-.loc ../contracts/DexTokenVault.tsol, 476
+.loc ../contracts/DexTokenVault.tsol, 477
 CTOS
-.loc ../contracts/DexTokenVault.tsol, 478
+.loc ../contracts/DexTokenVault.tsol, 479
 DUP
 LDMSGADDR
 LDMSGADDR
@@ -1671,15 +1676,15 @@ LDU 32
 LDMSGADDR
 POP S6
 BLKDROP2 2, 3
-.loc ../contracts/DexTokenVault.tsol, 492
+.loc ../contracts/DexTokenVault.tsol, 493
 OVER
 SETGLOB 14
-.loc ../contracts/DexTokenVault.tsol, 493
+.loc ../contracts/DexTokenVault.tsol, 494
 PUSH S3
 LDREF
 POP S5
 SETGLOB 10
-.loc ../contracts/DexTokenVault.tsol, 494
+.loc ../contracts/DexTokenVault.tsol, 495
 ROLL 3
 PLDREF
 CTOS
@@ -1697,7 +1702,7 @@ XCHG S2
 SETGLOB 15
 SETGLOB 16
 SETGLOB 17
-.loc ../contracts/DexTokenVault.tsol, 504
+.loc ../contracts/DexTokenVault.tsol, 505
 ROTREV
 PUSHSLICE xc000000000000000000000000063e20591
 NEWC
@@ -1707,7 +1712,7 @@ STU 32
 ENDC
 PUSHINT 0
 SENDRAWMSG
-.loc ../contracts/DexTokenVault.tsol, 509
+.loc ../contracts/DexTokenVault.tsol, 510
 NEWC
 STSLICECONST x42_
 STSLICE
@@ -1725,7 +1730,7 @@ SENDRAWMSG
 CALL $_dexRoot_8347403b_internal_macro$
 
 .macro _dexRoot_8347403b_internal_macro
-.loc ../contracts/DexTokenVault.tsol, 528
+.loc ../contracts/DexTokenVault.tsol, 529
 GETGLOB 11
 .loc ../contracts/DexTokenVault.tsol, 0
 
@@ -1734,7 +1739,7 @@ GETGLOB 11
 CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
 
 .macro _getTargetBalanceInternal_141d6ea7_internal_macro
-.loc ../contracts/DexTokenVault.tsol, 537
+.loc ../contracts/DexTokenVault.tsol, 538
 PUSHINT 1000000000
 .loc ../contracts/DexTokenVault.tsol, 0
 
@@ -1743,7 +1748,7 @@ PUSHINT 1000000000
 CALL $_deployTokenWallet_0cf4c37a_internal_macro$
 
 .macro _deployTokenWallet_0cf4c37a_internal_macro
-.loc ../contracts/DexTokenVault.tsol, 543
+.loc ../contracts/DexTokenVault.tsol, 544
 PUSHINT 120000000
 MYADDR
 CALLREF {
@@ -1780,7 +1785,7 @@ SENDRAWMSG
 CALL $_deployTokenWalletForVault_07ed59d9_internal_macro$
 
 .macro _deployTokenWalletForVault_07ed59d9_internal_macro
-.loc ../contracts/DexTokenVault.tsol, 554
+.loc ../contracts/DexTokenVault.tsol, 555
 PUSHINT 120000000
 GETGLOB 13
 CALLREF {
@@ -1817,12 +1822,12 @@ SENDRAWMSG
 CALL $_destroySelf_2707059e_internal_macro$
 
 .macro _destroySelf_2707059e_internal_macro
-.loc ../contracts/DexTokenVault.tsol, 564
+.loc ../contracts/DexTokenVault.tsol, 565
 PUSHINT 0
 DUP
 .loc ../contracts/DexTokenVault.tsol, 72
 RAWRESERVE
-.loc ../contracts/DexTokenVault.tsol, 565
+.loc ../contracts/DexTokenVault.tsol, 566
 GETGLOB 17
 NEWC
 STSLICECONST x42_
@@ -1845,7 +1850,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexTokenVault.tsol, 578
+.loc ../contracts/DexTokenVault.tsol, 579
 OVER
 PUSHCONT {
 	LDREF
@@ -1871,7 +1876,7 @@ CALLREF {
 THROW 0
 
 .macro onAcceptTokensMint_2bd1475b_internal_macro
-.loc ../contracts/DexTokenVault.tsol, 578
+.loc ../contracts/DexTokenVault.tsol, 579
 CALLREF {
 	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
 }
@@ -1892,16 +1897,16 @@ AND
 THROWIFNOT 145
 .loc ../contracts/DexTokenVault.tsol, 68
 ROLLREV 4
-.loc ../contracts/DexTokenVault.tsol, 589
+.loc ../contracts/DexTokenVault.tsol, 590
 DUP
 CTOS
-.loc ../contracts/DexTokenVault.tsol, 590
+.loc ../contracts/DexTokenVault.tsol, 591
 PUSHINT 9
-.loc ../contracts/DexTokenVault.tsol, 592
+.loc ../contracts/DexTokenVault.tsol, 593
 OVER
 LDREF
 POP S3
-.loc ../contracts/DexTokenVault.tsol, 594
+.loc ../contracts/DexTokenVault.tsol, 595
 DUP
 CTOS
 LDU 64
@@ -1929,21 +1934,21 @@ PAIR
 SWAP
 LDI 1
 ENDS
-.loc ../contracts/DexTokenVault.tsol, 618
+.loc ../contracts/DexTokenVault.tsol, 619
 PUSHREF {
 }
 PUSH2 S0, S13
-.loc ../contracts/DexTokenVault.tsol, 621
+.loc ../contracts/DexTokenVault.tsol, 622
 SREFS
 GTINT 0
-.loc ../contracts/DexTokenVault.tsol, 622
+.loc ../contracts/DexTokenVault.tsol, 623
 PUSH S15
 SREFS
 GTINT 1
-.loc ../contracts/DexTokenVault.tsol, 624
+.loc ../contracts/DexTokenVault.tsol, 625
 OVER
 PUSHCONT {
-	.loc ../contracts/DexTokenVault.tsol, 625
+	.loc ../contracts/DexTokenVault.tsol, 626
 	PUSH S16
 	LDREF
 	POP S18
@@ -1951,10 +1956,10 @@ PUSHCONT {
 	.loc ../contracts/DexTokenVault.tsol, 0
 }
 IF
-.loc ../contracts/DexTokenVault.tsol, 628
+.loc ../contracts/DexTokenVault.tsol, 629
 DUP
 PUSHCONT {
-	.loc ../contracts/DexTokenVault.tsol, 629
+	.loc ../contracts/DexTokenVault.tsol, 630
 	PUSH S16
 	LDREF
 	POP S18
@@ -1962,28 +1967,28 @@ PUSHCONT {
 	.loc ../contracts/DexTokenVault.tsol, 0
 }
 IF
-.loc ../contracts/DexTokenVault.tsol, 632
+.loc ../contracts/DexTokenVault.tsol, 633
 PUSHINT 0
 PUSH2 S0, S11
-.loc ../contracts/DexTokenVault.tsol, 635
+.loc ../contracts/DexTokenVault.tsol, 636
 CALLREF {
 	CALL $_expectedPoolAddress_95044983_internal_macro$
 }
-.loc ../contracts/DexTokenVault.tsol, 636
+.loc ../contracts/DexTokenVault.tsol, 637
 PUSH S8
 FIRST
 UFITS 32
-.loc ../contracts/DexTokenVault.tsol, 637
+.loc ../contracts/DexTokenVault.tsol, 638
 PUSHINT 0
 BLKPUSH 3, 0
-.loc ../contracts/DexTokenVault.tsol, 641
+.loc ../contracts/DexTokenVault.tsol, 642
 PUSHCONT {
 	PUSH2 S0, S13
 	FIRST
 	LESS
 }
 PUSHCONT {
-	.loc ../contracts/DexTokenVault.tsol, 642
+	.loc ../contracts/DexTokenVault.tsol, 643
 	PUSH2 S0, S13
 	SECOND
 	PUSHINT 32
@@ -1998,7 +2003,7 @@ PUSHCONT {
 		ENDS
 		TUPLE 5
 	}
-	.loc ../contracts/DexTokenVault.tsol, 644
+	.loc ../contracts/DexTokenVault.tsol, 645
 	DUP
 	SECOND
 	PARSEMSGADDR
@@ -2019,58 +2024,58 @@ PUSHCONT {
 	OR
 	OR
 	PUSHCONT {
-		.loc ../contracts/DexTokenVault.tsol, 650
+		.loc ../contracts/DexTokenVault.tsol, 651
 		PUSHINT 111
 		POP S9
-		.loc ../contracts/DexTokenVault.tsol, 651
+		.loc ../contracts/DexTokenVault.tsol, 652
 		DROP
 		RETALT
 		.loc ../contracts/DexTokenVault.tsol, 0
 	}
 	IFJMP
-	.loc ../contracts/DexTokenVault.tsol, 654
+	.loc ../contracts/DexTokenVault.tsol, 655
 	DUP
 	INDEX 3
 	PUSH S4
 	GREATER
 	PUSHCONT {
-		.loc ../contracts/DexTokenVault.tsol, 655
+		.loc ../contracts/DexTokenVault.tsol, 656
 		DUP
 		INDEX 3
 		POP S4
-		.loc ../contracts/DexTokenVault.tsol, 656
+		.loc ../contracts/DexTokenVault.tsol, 657
 		OVER
 		POP S3
 		.loc ../contracts/DexTokenVault.tsol, 0
 	}
 	IF
-	.loc ../contracts/DexTokenVault.tsol, 659
+	.loc ../contracts/DexTokenVault.tsol, 660
 	DUP
 	FIRST
 	PUSH S8
 	ADD
 	POP S8
-	.loc ../contracts/DexTokenVault.tsol, 660
+	.loc ../contracts/DexTokenVault.tsol, 661
 	DUP
 	INDEX 3
 	PUSH S6
 	ADD
 	UFITS 32
 	POP S6
-	.loc ../contracts/DexTokenVault.tsol, 661
+	.loc ../contracts/DexTokenVault.tsol, 662
 	INDEX 4
 	PUSH S4
 	ADD
 	UFITS 32
 	POP S4
-	.loc ../contracts/DexTokenVault.tsol, 641
+	.loc ../contracts/DexTokenVault.tsol, 642
 	INC
 	UFITS 32
 	.loc ../contracts/DexTokenVault.tsol, 0
 }
 WHILEBRK
 DROP
-.loc ../contracts/DexTokenVault.tsol, 664
+.loc ../contracts/DexTokenVault.tsol, 665
 PUSH S6
 EQINT 0
 DUP
@@ -2101,13 +2106,13 @@ PUSHCONT {
 }
 IF
 PUSHCONT {
-	.loc ../contracts/DexTokenVault.tsol, 665
+	.loc ../contracts/DexTokenVault.tsol, 666
 	PUSHINT 103
 	POP S7
 	.loc ../contracts/DexTokenVault.tsol, 0
 }
 IF
-.loc ../contracts/DexTokenVault.tsol, 668
+.loc ../contracts/DexTokenVault.tsol, 669
 PUSH S6
 EQINT 0
 PUSH S13
@@ -2115,7 +2120,7 @@ FIRST
 GTINT 0
 AND
 PUSHCONT {
-	.loc ../contracts/DexTokenVault.tsol, 669
+	.loc ../contracts/DexTokenVault.tsol, 670
 	DEPTH
 	ADDCONST -2
 	PICK
@@ -2139,7 +2144,7 @@ PUSHCONT {
 	}
 	SUB
 	UFITS 128
-	.loc ../contracts/DexTokenVault.tsol, 671
+	.loc ../contracts/DexTokenVault.tsol, 672
 	PUSHINT 0
 	PUSHCONT {
 		PUSH2 S0, S14
@@ -2147,7 +2152,7 @@ PUSHCONT {
 		LESS
 	}
 	PUSHCONT {
-		.loc ../contracts/DexTokenVault.tsol, 672
+		.loc ../contracts/DexTokenVault.tsol, 673
 		PUSH2 S0, S14
 		SECOND
 		PUSHINT 32
@@ -2162,20 +2167,20 @@ PUSHCONT {
 			ENDS
 			TUPLE 5
 		}
-		.loc ../contracts/DexTokenVault.tsol, 674
+		.loc ../contracts/DexTokenVault.tsol, 675
 		PUSH S29
 		OVER
 		FIRST
 		PUSH S10
 		MULDIV
 		UFITS 128
-		.loc ../contracts/DexTokenVault.tsol, 675
+		.loc ../contracts/DexTokenVault.tsol, 676
 		OVER
 		INDEX 4
 		PUSH2 S4, S7
 		MULDIV
 		UFITS 128
-		.loc ../contracts/DexTokenVault.tsol, 677
+		.loc ../contracts/DexTokenVault.tsol, 678
 		PUSH3 S14, S12, S15
 		PUSH S16
 		PUSH S6
@@ -2274,7 +2279,7 @@ PUSHCONT {
 		SENDRAWMSG
 		.loc ../contracts/DexTokenVault.tsol, 0
 		DROP
-		.loc ../contracts/DexTokenVault.tsol, 671
+		.loc ../contracts/DexTokenVault.tsol, 672
 		INC
 		UFITS 32
 		.loc ../contracts/DexTokenVault.tsol, 0
@@ -2283,14 +2288,14 @@ PUSHCONT {
 	DROP2
 }
 PUSHCONT {
-	.loc ../contracts/DexTokenVault.tsol, 709
+	.loc ../contracts/DexTokenVault.tsol, 710
 	PUSH S12
 	FIRST
 	EQINT 0
-	.loc ../contracts/DexTokenVault.tsol, 711
+	.loc ../contracts/DexTokenVault.tsol, 712
 	DUP
 	PUSHCONT {
-		.loc ../contracts/DexTokenVault.tsol, 712
+		.loc ../contracts/DexTokenVault.tsol, 713
 		PUSH S16
 		PUSH S19
 		PUSH S29
@@ -2309,7 +2314,7 @@ PUSHCONT {
 		SENDRAWMSG
 	}
 	PUSHCONT {
-		.loc ../contracts/DexTokenVault.tsol, 718
+		.loc ../contracts/DexTokenVault.tsol, 719
 		PUSH S21
 		PUSHINT 10000000
 		ADDCONST 44
@@ -2331,12 +2336,12 @@ PUSHCONT {
 		ADDCONST 2
 		UFITS 8
 		SENDRAWMSG
-		.loc ../contracts/DexTokenVault.tsol, 725
+		.loc ../contracts/DexTokenVault.tsol, 726
 		PUSH S16
 		PUSH S18
 		SDEQ
 		PUSHCONT {
-			.loc ../contracts/DexTokenVault.tsol, 726
+			.loc ../contracts/DexTokenVault.tsol, 727
 			PUSH S21
 			PUSH S17
 			FALSE
@@ -2358,7 +2363,7 @@ PUSHCONT {
 		IFNOT
 	}
 	IFELSE
-	.loc ../contracts/DexTokenVault.tsol, 735
+	.loc ../contracts/DexTokenVault.tsol, 736
 	DUP
 	PUSHCONT {
 		PUSH S23
@@ -2432,7 +2437,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexTokenVault.tsol, 752
+.loc ../contracts/DexTokenVault.tsol, 753
 OVER
 PUSHCONT {
 	LDREF
@@ -2452,7 +2457,7 @@ CALLREF {
 THROW 0
 
 .macro onTokenWallet_e6d1bd58_internal_macro
-.loc ../contracts/DexTokenVault.tsol, 752
+.loc ../contracts/DexTokenVault.tsol, 753
 CALLREF {
 	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
 }
@@ -2470,7 +2475,7 @@ GETGLOB 15
 SDEQ
 AND
 THROWIFNOT 135
-.loc ../contracts/DexTokenVault.tsol, 757
+.loc ../contracts/DexTokenVault.tsol, 758
 DUP
 PARSEMSGADDR
 INDEX 3
@@ -2487,13 +2492,13 @@ PUSHCONT {
 }
 IF
 PUSHCONT {
-	.loc ../contracts/DexTokenVault.tsol, 760
+	.loc ../contracts/DexTokenVault.tsol, 761
 	GETGLOB 16
 	PARSEMSGADDR
 	INDEX 3
 	PLDU 256
 	PUSHCONT {
-		.loc ../contracts/DexTokenVault.tsol, 777
+		.loc ../contracts/DexTokenVault.tsol, 778
 		GETGLOB 17
 		NEWC
 		STSLICECONST x42_
@@ -2506,10 +2511,10 @@ PUSHCONT {
 		UFITS 8
 	}
 	PUSHCONT {
-		.loc ../contracts/DexTokenVault.tsol, 761
+		.loc ../contracts/DexTokenVault.tsol, 762
 		DUP
 		SETGLOB 16
-		.loc ../contracts/DexTokenVault.tsol, 763
+		.loc ../contracts/DexTokenVault.tsol, 764
 		DUP
 		PUSHSLICE xc0000000000000000000000000657e2fe4
 		NEWC
@@ -2518,7 +2523,7 @@ PUSHCONT {
 		ENDC
 		PUSHINT 0
 		SENDRAWMSG
-		.loc ../contracts/DexTokenVault.tsol, 765
+		.loc ../contracts/DexTokenVault.tsol, 766
 		GETGLOB 17
 		GETGLOB 16
 		GETGLOB 15
@@ -2568,7 +2573,7 @@ ISNULL
 IFREF {
 	CALL $c4_to_c7$
 }
-.loc ../contracts/DexTokenVault.tsol, 788
+.loc ../contracts/DexTokenVault.tsol, 789
 OVER
 PUSHCONT {
 	LDREF
@@ -2588,7 +2593,7 @@ IFREF {
 THROW 0
 
 .macro onVaultTokenWallet_a255247d_internal_macro
-.loc ../contracts/DexTokenVault.tsol, 788
+.loc ../contracts/DexTokenVault.tsol, 789
 CALLREF {
 	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
 }
@@ -2606,7 +2611,7 @@ GETGLOB 15
 SDEQ
 AND
 THROWIFNOT 135
-.loc ../contracts/DexTokenVault.tsol, 794
+.loc ../contracts/DexTokenVault.tsol, 795
 PUSHSLICE xc00000000000000000000000005643203d
 NEWC
 STSLICE
@@ -2614,7 +2619,7 @@ STSLICE
 ENDC
 PUSHINT 0
 SENDRAWMSG
-.loc ../contracts/DexTokenVault.tsol, 796
+.loc ../contracts/DexTokenVault.tsol, 797
 GETGLOB 17
 NEWC
 STSLICECONST x42_
@@ -2653,9 +2658,9 @@ GETGLOB 15
 SDEQ
 AND
 THROWIFNOT 135
-.loc ../contracts/DexTokenVault.tsol, 810
+.loc ../contracts/DexTokenVault.tsol, 811
 PLDU 32
-.loc ../contracts/DexTokenVault.tsol, 813
+.loc ../contracts/DexTokenVault.tsol, 814
 PUSHINT 837670087
 EQUAL
 DUP
