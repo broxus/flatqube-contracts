@@ -1,6 +1,9 @@
 import { toNano, zeroAddress, getRandomNonce } from "locklift";
+import BigNumber from "bignumber.js";
 export const TOKENS_N = 2;
 export const TOKENS_DECIMALS = [6, 9, 18];
+
+BigNumber.config({ EXPONENTIAL_AT: 257 });
 
 export default async () => {
   const signer = await locklift.keystore.getSigner("0");
@@ -31,7 +34,7 @@ export default async () => {
             },
             constructorParams: {
               initialSupplyTo: owner.address,
-              initialSupply: 10 ** 18,
+              initialSupply: new BigNumber(1).shiftedBy(30).toString(),
               deployWalletValue: toNano(0.5),
               mintDisabled: false,
               burnByRootDisabled: true,

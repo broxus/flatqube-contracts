@@ -154,7 +154,7 @@ describe("Check DexAccounts interaction", () => {
           .transfer({
             amount: deposit,
             recipient: dexAccount.address,
-            deployWalletValue: toNano(0.1),
+            deployWalletValue: 0,
             remainingGasTo: owner.address,
             notify: true,
             payload: null,
@@ -193,43 +193,6 @@ describe("Check DexAccounts interaction", () => {
   });
 
   describe("Check internal transfer", () => {
-    it("Check transfer to non exists account (revert)", async () => {
-      const dexAccountBalanceStart = await dexAccount.methods
-        .getWalletData({ answerId: 0, token_root: tokenRoot.address })
-        .call()
-        .then(a => a.balance);
-
-      const gas = await gasValues.methods
-        .getAccountTransferGas({ willing_to_deploy: true })
-        .call()
-        .then(a => a.value0);
-
-      const amount = new BigNumber(1).shiftedBy(8).toString();
-
-      dexAccount.methods
-        .transfer({
-          call_id: 3,
-          amount: amount,
-          token_root: tokenRoot.address,
-          recipient: pair.address,
-          willing_to_deploy: true,
-          send_gas_to: owner.address,
-        })
-        .send({
-          from: owner.address,
-          amount: calcValue(gas),
-        });
-
-      const dexAccountBalanceEnd = await dexAccount.methods
-        .getWalletData({ answerId: 0, token_root: tokenRoot.address })
-        .call()
-        .then(a => a.balance);
-      expect(dexAccountBalanceStart).to.equal(
-        dexAccountBalanceEnd,
-        "DexAccount has wrong balance",
-      );
-    });
-
     it("Check transfer to another DexAccount, willing_to_deploy = false (revert)", async () => {
       const dexAccountBalanceStart = await dexAccount.methods
         .getWalletData({ answerId: 0, token_root: tokenRoot.address })
@@ -349,6 +312,96 @@ describe("Check DexAccounts interaction", () => {
         "Recipient's DexAccount has wrong balance",
       );
     });
+
+    it("Check transfer to non exists account (revert)", async () => {
+      const dexAccountBalanceStart = await dexAccount.methods
+        .getWalletData({ answerId: 0, token_root: tokenRoot.address })
+        .call()
+        .then(a => a.balance);
+
+      const gas = await gasValues.methods
+        .getAccountTransferGas({ willing_to_deploy: true })
+        .call()
+        .then(a => a.value0);
+
+      const amount = new BigNumber(1).shiftedBy(8).toString();
+
+      dexAccount.methods
+        .transfer({
+          call_id: 3,
+          amount: amount,
+          token_root: tokenRoot.address,
+          recipient: pair.address,
+          willing_to_deploy: true,
+          send_gas_to: owner.address,
+        })
+        .send({
+          from: owner.address,
+          amount: calcValue(gas),
+        });
+
+      const dexAccountBalanceEnd = await dexAccount.methods
+        .getWalletData({ answerId: 0, token_root: tokenRoot.address })
+        .call()
+        .then(a => a.balance);
+      expect(dexAccountBalanceStart).to.equal(
+        dexAccountBalanceEnd,
+        "DexAccount has wrong balance",
+      );
+    });
+
+    it("Check transfer in case of zero account balance (revert)", async () => {
+      const zeroTokenRoot =
+        locklift.deployments.getContract<TokenRootUpgradeableAbi>(pairRoots[1]);
+
+      const dexAccountBalanceStart = await dexAccount.methods
+        .getWalletData({ answerId: 0, token_root: zeroTokenRoot.address })
+        .call()
+        .then(a => a.balance);
+      const dexAccount1BalanceStart = await dexAccount1.methods
+        .getWalletData({ answerId: 0, token_root: zeroTokenRoot.address })
+        .call()
+        .then(a => a.balance);
+
+      const gas = await gasValues.methods
+        .getAccountTransferGas({ willing_to_deploy: true })
+        .call()
+        .then(a => a.value0);
+
+      const amount = new BigNumber(1).shiftedBy(8).toString();
+
+      dexAccount.methods
+        .transfer({
+          call_id: 3,
+          amount: amount,
+          token_root: zeroTokenRoot.address,
+          recipient: dexAccount1.address,
+          willing_to_deploy: true,
+          send_gas_to: owner.address,
+        })
+        .send({
+          from: owner.address,
+          amount: calcValue(gas),
+        });
+
+      const dexAccountBalanceEnd = await dexAccount.methods
+        .getWalletData({ answerId: 0, token_root: zeroTokenRoot.address })
+        .call()
+        .then(a => a.balance);
+      const dexAccount1BalanceEnd = await dexAccount1.methods
+        .getWalletData({ answerId: 0, token_root: zeroTokenRoot.address })
+        .call()
+        .then(a => a.balance);
+
+      expect(dexAccountBalanceStart).to.equal(
+        dexAccountBalanceEnd,
+        "Sender's DexAccount has wrong balance",
+      );
+      expect(dexAccount1BalanceStart).to.equal(
+        dexAccount1BalanceEnd,
+        "Recipient's DexAccount has wrong balance",
+      );
+    });
   });
 
   describe("Check withdrawal from dexAccount", () => {
@@ -412,6 +465,58 @@ describe("Check DexAccounts interaction", () => {
         (-amount).toString(),
         "Dex wallet has wrong balance",
       );
+    });
+
+    it("Check withdrawal in case of zero account balance (revert)", async () => {
+      const zeroTokenRoot =
+        locklift.deployments.getContract<TokenRootUpgradeableAbi>(pairRoots[1]);
+
+      const dexAccountBalanceStart = await dexAccount.methods
+        .getWalletData({ answerId: 0, token_root: zeroTokenRoot.address })
+        .call()
+        .then(a => a.balance);
+
+      const gas = await gasValues.methods
+        .getAccountWithdrawGas({ deployWalletValue: 0 })
+        .call()
+        .then(a => a.value0);
+
+      const amount = new BigNumber(1).shiftedBy(8).toString();
+
+      const { traceTree } = await locklift.tracing.trace(
+        dexAccount.methods
+          .withdraw({
+            call_id: 4,
+            amount: amount,
+            token_root: zeroTokenRoot.address,
+            recipient_address: owner.address,
+            deploy_wallet_grams: 0,
+            send_gas_to: owner.address,
+          })
+          .send({
+            from: owner.address,
+            amount: calcValue(gas),
+          }),
+        {
+          allowedCodes: {
+            compute: [118],
+          },
+        },
+      );
+
+      const dexAccountBalanceEnd = await dexAccount.methods
+        .getWalletData({ answerId: 0, token_root: zeroTokenRoot.address })
+        .call()
+        .then(a => a.balance);
+      expect(dexAccountBalanceStart).to.equal(
+        dexAccountBalanceEnd,
+        "DexAccount has wrong balance",
+      );
+
+      const dexBalanceChange = traceTree?.tokens.getTokenBalanceChange(
+        dexTokenVaultWallet.address,
+      );
+      expect(dexBalanceChange).to.equal("0", "Dex wallet has wrong balance");
     });
   });
 });

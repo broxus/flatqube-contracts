@@ -167,7 +167,7 @@ export const getWallet = async (user: Address, tokenRoot: Address) => {
 
   return {
     isDeployed,
-    walletContract: ownerWalletAddress,
+    walletContract: wallet,
   };
 };
 
