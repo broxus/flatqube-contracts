@@ -7,7 +7,7 @@ import {
 import {
   TokenRootUpgradeableAbi,
   DexAccountAbi,
-  DexStablePoolAbi,
+  DexStablePairAbi,
 } from "../../../build/factorySource";
 // npx locklift run --config locklift.config.ts --network local --script v2/scripts/test-node/0-swaps.ts
 
@@ -37,13 +37,11 @@ async function main() {
   //   ],
   // });
 
-  const dexOwnerCommon =
-    locklift.deployments.getAccount("commonAccount-0").account;
   const dexOwnerMain = locklift.deployments.getAccount("DexOwner").account;
   const dexAccount =
     locklift.deployments.getContract<DexAccountAbi>("OwnerDexAccount");
-  const dexPair = locklift.deployments.getContract<DexStablePoolAbi>(
-    "DexStablePool_token-6-0_token-9-0_token-18-0",
+  const dexPair = locklift.deployments.getContract<DexStablePairAbi>(
+    "DexStablePair_token-6-0_token-9-0",
   );
 
   const token2 =
@@ -51,10 +49,10 @@ async function main() {
   const token3 =
     locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-18-0");
   const res = await getWallet(mainAcc.address, token.address);
-  console.log(res, "----res");
+  console.log(res.walletContract.address, "----res");
 
   const resDeposit = await depositLiquidity(
-    dexOwnerCommon.address,
+    dexOwnerMain.address,
     dexAccount,
     dexPair,
     [
@@ -64,11 +62,7 @@ async function main() {
       },
       {
         root: token2.address,
-        amount: 100,
-      },
-      {
-        root: token3.address,
-        amount: 100,
+        amount: 100000,
       },
     ],
   );

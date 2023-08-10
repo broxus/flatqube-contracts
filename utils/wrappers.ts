@@ -460,26 +460,8 @@ export const depositLiquidity = async (
     (await dexPairFooBar.methods.getTokenRoots({ answerId: 0 }).call()).lp,
   );
 
-  for (let i = 0; i < ownerWallets.length; i++) {
-    // sending tokens to DEX account + deposit liq
-    await locklift.transactions.waitFinalized(
-      ownerWallets[i].methods
-        .transfer({
-          amount: depositData[i].amount,
-          recipient: dexAccount.address,
-          deployWalletValue: 0,
-          remainingGasTo: dexOwner,
-          notify: true,
-          payload: null,
-        })
-        .send({
-          from: dexOwner,
-          amount: toNano(2),
-        }),
-    );
-  }
+  await transferWrapper(dexOwner, dexAccount.address, 0, depositData);
 
-  console.log("depositLiquidityV2");
   await locklift.transactions.waitFinalized(
     dexAccount.methods
       .depositLiquidityV2({
