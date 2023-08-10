@@ -7,6 +7,7 @@ import { IFee } from "../../utils/wrappers";
 
 export default async () => {
   console.log("10-deploy-dex-pairs.js");
+  await locklift.deployments.load();
 
   const dexOwner = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");

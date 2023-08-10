@@ -1,10 +1,14 @@
-import { getWallet, depositLiquidity } from "../../../utils/wrappers";
+import {
+  getWallet,
+  depositLiquidity,
+  getAccountData,
+  getPoolData,
+} from "../../../utils/wrappers";
 import {
   TokenRootUpgradeableAbi,
   DexAccountAbi,
-  DexPairAbi,
+  DexStablePoolAbi,
 } from "../../../build/factorySource";
-import { Address } from "locklift";
 // npx locklift run --config locklift.config.ts --network local --script v2/scripts/test-node/0-swaps.ts
 
 // only for testing
@@ -33,36 +37,51 @@ async function main() {
   //   ],
   // });
 
-  const dexOwner = locklift.deployments.getAccount("DexOwner").account;
+  const dexOwnerCommon =
+    locklift.deployments.getAccount("commonAccount-0").account;
+  const dexOwnerMain = locklift.deployments.getAccount("DexOwner").account;
   const dexAccount =
     locklift.deployments.getContract<DexAccountAbi>("OwnerDexAccount");
-  const dexPair = locklift.deployments.getContract<DexPairAbi>(
-    "DexPair_token-6-0_token-6-1",
+  const dexPair = locklift.deployments.getContract<DexStablePoolAbi>(
+    "DexStablePool_token-6-0_token-9-0_token-18-0",
   );
 
+  const token2 =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-9-0");
+  const token3 =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-18-0");
   const res = await getWallet(mainAcc.address, token.address);
   console.log(res, "----res");
 
   const resDeposit = await depositLiquidity(
-    dexOwner.address,
+    dexOwnerCommon.address,
     dexAccount,
     dexPair,
     [
       {
-        root: new Address(
-          "0:13e73b5dd2e43358534f12e2e0bf0206c34480637ad032526191617c140043a2",
-        ),
+        root: token.address,
         amount: 100,
       },
       {
-        root: new Address(
-          "0:05982b345afc429e86e597971034f066ef9f8ebca0ff4ef8b3ae0c8a4b2fdd4b",
-        ),
+        root: token2.address,
+        amount: 100,
+      },
+      {
+        root: token3.address,
         amount: 100,
       },
     ],
   );
+
+  const res3 = await getPoolData(dexPair);
+  console.log(res3, "res3");
+
   console.log(resDeposit, "----resDeposit");
+  const res4 = await getAccountData(
+    [token2.address, token3.address],
+    dexOwnerMain.address,
+  );
+  console.log(res4, "res4");
 }
 
 main()
