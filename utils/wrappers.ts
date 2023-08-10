@@ -25,6 +25,17 @@ export interface ITokens {
   amount: string | number;
 }
 
+export interface IBalPool {
+  balances: string[];
+  lp_supply: string;
+}
+
+export interface IBalPair {
+  left_balance: string;
+  right_balance: string;
+  lp_supply: string;
+}
+
 export const setPairFeeParams = async (roots: Address[], fees: IFee) => {
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
   const mainAcc = locklift.deployments.getAccount("DexOwner").account;
@@ -359,9 +370,22 @@ export const getPoolData = async (
     | Contract<DexStablePairAbi>
     | Contract<DexStablePoolAbi>,
 ) => {
-  const balanceLp = await pairContract.methods
+  const balancesData = await pairContract.methods
     .getBalances({ answerId: 0 })
     .call();
+
+  let balances: string[] = [];
+
+  if (balancesData.value0.hasOwnProperty("balances")) {
+    balances = (balancesData.value0 as IBalPool).balances;
+  }
+
+  if (balancesData.value0.hasOwnProperty("left_balance")) {
+    const left = (balancesData.value0 as IBalPair).left_balance;
+    const right = (balancesData.value0 as IBalPair).right_balance;
+    balances = [left, right];
+  }
+
   const fees = await pairContract.methods
     .getAccumulatedFees({ answerId: 0 })
     .call();
@@ -376,7 +400,8 @@ export const getPoolData = async (
     .call();
 
   return {
-    lpSupply: balanceLp.value0.lp_supply,
+    balances: balances,
+    lpSupply: balancesData.value0.lp_supply,
     accumulatedFees: fees.accumulatedFees,
     actualTotalSupply: actualSupply.value0,
   };
