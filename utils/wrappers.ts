@@ -41,6 +41,7 @@ export interface IDepositLiquidity {
   lpReward: string;
   poolFees: string[];
   beneficiaryFees: string[];
+  fees?: ITokens[];
 }
 
 export const setPairFeeParams = async (roots: Address[], fees: IFee) => {
@@ -520,6 +521,10 @@ export async function expectedDepositLiquidity(
       beneficiaryFees: expected.beneficiary_fees,
       poolFees: expected.pool_fees,
       amounts: amounts,
+      fees: expected.pool_fees.map((_, key) => ({
+        root: tokenRoots.roots[key],
+        amount: _,
+      })),
     };
   }
 
@@ -556,9 +561,55 @@ export async function expectedDepositLiquidity(
       poolFees: [expected.step_1_left_deposit, expected.step_2_fee],
       amounts: [amounts.left, amounts.right],
     };
-
-    console.log(expected, "expected");
   }
 
   return depositLiquidity;
+}
+
+export async function expectedExchange(
+  pairAddress: Address,
+  contractName: "DexStablePool" | "DexStablePair" | "DexPair",
+  spent_token_root: Address,
+  receive_token_root: Address,
+  amount: string,
+) {
+  let benFee = new BigNumber(0);
+  let poolFee = new BigNumber(0);
+  let result = "0";
+
+  if (contractName === "DexStablePool") {
+    const pair = locklift.factory.getDeployedContract(
+      contractName,
+      pairAddress,
+    );
+
+    const expected = await pair.methods
+      .expectedExchange({
+        answerId: 0,
+        amount,
+        spent_token_root,
+        receive_token_root,
+      })
+      .call();
+
+    const feesData = await pair.methods
+      .getFeeParams({ answerId: 0 })
+      .call()
+      .then(r => r.value0);
+
+    const numerator = new BigNumber(feesData.pool_numerator).plus(
+      feesData.beneficiary_numerator,
+    );
+
+    benFee = new BigNumber(expected.expected_fee)
+      .times(feesData.beneficiary_numerator)
+      .div(numerator);
+    poolFee = new BigNumber(expected.expected_fee).minus(benFee);
+    result = new BigNumber(expected.expected_fee)
+      .div(benFee)
+      .div(poolFee)
+      .toString();
+  }
+
+  return result;
 }

@@ -4,6 +4,7 @@ import {
   getAccountData,
   getPoolData,
   expectedDepositLiquidity,
+  expectedExchange,
 } from "../../../utils/wrappers";
 import {
   TokenRootUpgradeableAbi,
@@ -80,7 +81,6 @@ async function main() {
     [token2.address, token3.address],
     dexOwnerMain.address,
   );
-
   console.log(res4, "res4");
 
   const res5 = await expectedDepositLiquidity(
@@ -102,6 +102,14 @@ async function main() {
     ],
   );
   console.log(res5, "res5");
+  const res6 = await expectedExchange(
+    dexPool.address,
+    "DexStablePool",
+    token.address,
+    token2.address,
+    "100",
+  );
+  console.log(res6, "res6");
 }
 
 main()
