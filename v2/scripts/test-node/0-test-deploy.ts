@@ -11,6 +11,7 @@ import {
   DexAccountAbi,
   DexStablePairAbi,
   DexStablePoolAbi,
+  DexPairAbi,
 } from "../../../build/factorySource";
 // npx locklift run --config locklift.config.ts --network local --script v2/scripts/test-node/0-swaps.ts
 
@@ -21,6 +22,8 @@ async function main() {
   const mainAcc = locklift.deployments.getAccount("DexOwner").account;
   const token =
     locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-6-0");
+  const token_1 =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-6-1");
 
   // await locklift.deployments.fixture({
   //   include: [
@@ -43,7 +46,10 @@ async function main() {
   const dexOwnerMain = locklift.deployments.getAccount("DexOwner").account;
   const dexAccount =
     locklift.deployments.getContract<DexAccountAbi>("OwnerDexAccount");
-  const dexPair = locklift.deployments.getContract<DexStablePairAbi>(
+  const dexPair = locklift.deployments.getContract<DexPairAbi>(
+    "DexPair_token-6-0_token-6-1",
+  );
+  const dexStablePair = locklift.deployments.getContract<DexStablePairAbi>(
     "DexStablePair_token-6-0_token-9-0",
   );
   const dexPool = locklift.deployments.getContract<DexStablePoolAbi>(
@@ -60,7 +66,7 @@ async function main() {
   const resDeposit = await depositLiquidity(
     dexOwnerMain.address,
     dexAccount,
-    dexPair,
+    dexStablePair,
     [
       {
         root: token.address,
@@ -73,7 +79,7 @@ async function main() {
     ],
   );
 
-  const res3 = await getPoolData(dexPair);
+  const res3 = await getPoolData(dexStablePair);
   console.log(res3, "res3");
 
   console.log(resDeposit, "----resDeposit");
@@ -83,31 +89,23 @@ async function main() {
   );
   console.log(res4, "res4");
 
-  const res5 = await expectedDepositLiquidity(
-    dexPool.address,
-    "DexStablePool",
-    [
-      {
-        root: token3.address,
-        amount: 100000000000,
-      },
-      {
-        root: token2.address,
-        amount: 100000,
-      },
-      {
-        root: token.address,
-        amount: 100,
-      },
-    ],
-  );
+  const res5 = await expectedDepositLiquidity(dexPair.address, "DexPair", [
+    {
+      root: token_1.address,
+      amount: 100,
+    },
+    {
+      root: token.address,
+      amount: 100,
+    },
+  ]);
   console.log(res5, "res5");
   const res6 = await expectedExchange(
     dexPool.address,
     "DexStablePool",
+    "100",
     token.address,
     token2.address,
-    "100",
   );
   console.log(res6, "res6");
 }

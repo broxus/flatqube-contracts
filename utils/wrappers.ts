@@ -493,12 +493,103 @@ export const depositLiquidity = async (
   console.log("Pair balances: ", pairBalances.value0);
 };
 
+export async function expectedExchange(
+  pairAddress: Address,
+  contractName: "DexStablePool" | "DexStablePair" | "DexPair",
+  amount: string | number,
+  spent_token_root: Address,
+  receive_token_root?: Address,
+) {
+  let benFee = new BigNumber(0);
+  let poolFee = new BigNumber(0);
+  let result = "0";
+
+  const pair = locklift.factory.getDeployedContract(contractName, pairAddress);
+
+  const expected =
+    contractName === "DexStablePool"
+      ? await pair.methods
+          .expectedExchange({
+            answerId: 0,
+            amount,
+            spent_token_root,
+            receive_token_root,
+          })
+          .call()
+      : await pair.methods
+          .expectedExchange({
+            answerId: 0,
+            amount,
+            spent_token_root,
+          })
+          .call();
+
+  const feesData = await pair.methods
+    .getFeeParams({ answerId: 0 })
+    .call()
+    .then(r => r.value0);
+
+  const numerator = new BigNumber(feesData.pool_numerator).plus(
+    feesData.beneficiary_numerator,
+  );
+
+  benFee = new BigNumber(expected.expected_fee)
+    .times(feesData.beneficiary_numerator)
+    .div(numerator);
+  poolFee = new BigNumber(expected.expected_fee).minus(benFee);
+  result = new BigNumber(expected.expected_fee)
+    .div(benFee)
+    .div(poolFee)
+    .toString();
+
+  return {
+    benFee: benFee.toString(),
+    poolFee: poolFee.toString(),
+    result,
+  };
+}
+
 export async function expectedDepositLiquidity(
   pairAddress: Address,
   contractName: "DexStablePool" | "DexStablePair" | "DexPair",
   tokens: ITokens[],
 ) {
   let depositLiquidity: IDepositLiquidity;
+
+  if (contractName === "DexStablePair") {
+    const pair = locklift.factory.getDeployedContract(
+      contractName,
+      pairAddress,
+    );
+    const tokenRoots = await pair.methods.getTokenRoots({ answerId: 0 }).call();
+    const tokenPair = {
+      left: tokens.find(
+        token => token.root.toString() === tokenRoots.left.toString(),
+      ),
+      right: tokens.find(
+        token => token.root.toString() === tokenRoots.right.toString(),
+      ),
+    };
+
+    const expected = await pair.methods
+      .expectedDepositLiquidityV2({
+        answerId: 0,
+        amounts: [tokenPair.left.amount, tokenPair.right.amount],
+      })
+      .call()
+      .then(r => r.value0);
+
+    depositLiquidity = {
+      lpReward: new BigNumber(expected.lp_reward).shiftedBy(-9).toString(),
+      beneficiaryFees: expected.beneficiary_fees,
+      poolFees: expected.pool_fees,
+      amounts: [tokenPair.left.amount, tokenPair.right.amount],
+      fees: expected.pool_fees.map((_, key) => ({
+        root: key == 0 ? tokenPair.left.root : tokenPair.right.root,
+        amount: _,
+      })),
+    };
+  }
 
   if (contractName === "DexStablePool") {
     const pair = locklift.factory.getDeployedContract(
@@ -528,88 +619,52 @@ export async function expectedDepositLiquidity(
     };
   }
 
-  if (contractName === "DexPair" || contractName === "DexStablePair") {
+  if (contractName === "DexPair") {
     const pair = locklift.factory.getDeployedContract(
       contractName,
       pairAddress,
     );
     const tokenRoots = await pair.methods.getTokenRoots({ answerId: 0 }).call();
-    const amounts = {
+    const tokenPair = {
       left: tokens.find(
         token => token.root.toString() === tokenRoots.left.toString(),
-      ).amount,
+      ),
       right: tokens.find(
         token => token.root.toString() === tokenRoots.right.toString(),
-      ).amount,
+      ),
     };
 
-    const expected = await pair.methods
+    const expectedLiq = await pair.methods
       .expectedDepositLiquidity({
         answerId: 0,
-        left_amount: amounts.left,
-        right_amount: amounts.right,
+        left_amount: tokenPair.left.amount,
+        right_amount: tokenPair.right.amount,
         auto_change: false,
       })
       .call()
       .then(r => r.value0);
 
+    const expected = await expectedExchange(
+      pair.address,
+      contractName,
+      tokenPair.left.amount,
+      tokenPair.left.root,
+    );
+
+    const resultStepFee = new BigNumber(expectedLiq.step_2_fee)
+      .div(expected.benFee)
+      .div(expected.poolFee)
+      .toString();
+
     depositLiquidity = {
-      lpReward: new BigNumber(expected.step_3_lp_reward)
+      lpReward: new BigNumber(expectedLiq.step_3_lp_reward)
         .shiftedBy(-9)
         .toString(),
-      beneficiaryFees: [expected.step_1_left_deposit, expected.step_2_fee],
-      poolFees: [expected.step_1_left_deposit, expected.step_2_fee],
-      amounts: [amounts.left, amounts.right],
+      beneficiaryFees: [resultStepFee.toString(), "0"],
+      poolFees: [resultStepFee.toString(), "0"],
+      amounts: [tokenPair.left.amount, tokenPair.right.amount],
     };
   }
 
   return depositLiquidity;
-}
-
-export async function expectedExchange(
-  pairAddress: Address,
-  contractName: "DexStablePool" | "DexStablePair" | "DexPair",
-  spent_token_root: Address,
-  receive_token_root: Address,
-  amount: string,
-) {
-  let benFee = new BigNumber(0);
-  let poolFee = new BigNumber(0);
-  let result = "0";
-
-  if (contractName === "DexStablePool") {
-    const pair = locklift.factory.getDeployedContract(
-      contractName,
-      pairAddress,
-    );
-
-    const expected = await pair.methods
-      .expectedExchange({
-        answerId: 0,
-        amount,
-        spent_token_root,
-        receive_token_root,
-      })
-      .call();
-
-    const feesData = await pair.methods
-      .getFeeParams({ answerId: 0 })
-      .call()
-      .then(r => r.value0);
-
-    const numerator = new BigNumber(feesData.pool_numerator).plus(
-      feesData.beneficiary_numerator,
-    );
-
-    benFee = new BigNumber(expected.expected_fee)
-      .times(feesData.beneficiary_numerator)
-      .div(numerator);
-    poolFee = new BigNumber(expected.expected_fee).minus(benFee);
-    result = new BigNumber(expected.expected_fee)
-      .div(benFee)
-      .div(poolFee)
-      .toString();
-  }
-
-  return result;
 }
