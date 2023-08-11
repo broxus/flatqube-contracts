@@ -36,6 +36,13 @@ export interface IBalPair {
   lp_supply: string;
 }
 
+export interface IDepositLiquidity {
+  amounts: (string | number)[];
+  lpReward: string;
+  poolFees: string[];
+  beneficiaryFees: string[];
+}
+
 export const setPairFeeParams = async (roots: Address[], fees: IFee) => {
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
   const mainAcc = locklift.deployments.getAccount("DexOwner").account;
@@ -484,3 +491,74 @@ export const depositLiquidity = async (
 
   console.log("Pair balances: ", pairBalances.value0);
 };
+
+export async function expectedDepositLiquidity(
+  pairAddress: Address,
+  contractName: "DexStablePool" | "DexStablePair" | "DexPair",
+  tokens: ITokens[],
+) {
+  let depositLiquidity: IDepositLiquidity;
+
+  if (contractName === "DexStablePool") {
+    const pair = locklift.factory.getDeployedContract(
+      contractName,
+      pairAddress,
+    );
+    const tokenRoots = await pair.methods.getTokenRoots({ answerId: 0 }).call();
+    const amounts = tokenRoots.roots.map(_ => {
+      return tokens.find(token => token.root.toString() === _.toString())
+        .amount;
+    });
+
+    const expected = await pair.methods
+      .expectedDepositLiquidityV2({ answerId: 0, amounts })
+      .call()
+      .then(r => r.value0);
+
+    depositLiquidity = {
+      lpReward: new BigNumber(expected.lp_reward).shiftedBy(-9).toString(),
+      beneficiaryFees: expected.beneficiary_fees,
+      poolFees: expected.pool_fees,
+      amounts: amounts,
+    };
+  }
+
+  if (contractName === "DexPair" || contractName === "DexStablePair") {
+    const pair = locklift.factory.getDeployedContract(
+      contractName,
+      pairAddress,
+    );
+    const tokenRoots = await pair.methods.getTokenRoots({ answerId: 0 }).call();
+    const amounts = {
+      left: tokens.find(
+        token => token.root.toString() === tokenRoots.left.toString(),
+      ).amount,
+      right: tokens.find(
+        token => token.root.toString() === tokenRoots.right.toString(),
+      ).amount,
+    };
+
+    const expected = await pair.methods
+      .expectedDepositLiquidity({
+        answerId: 0,
+        left_amount: amounts.left,
+        right_amount: amounts.right,
+        auto_change: false,
+      })
+      .call()
+      .then(r => r.value0);
+
+    depositLiquidity = {
+      lpReward: new BigNumber(expected.step_3_lp_reward)
+        .shiftedBy(-9)
+        .toString(),
+      beneficiaryFees: [expected.step_1_left_deposit, expected.step_2_fee],
+      poolFees: [expected.step_1_left_deposit, expected.step_2_fee],
+      amounts: [amounts.left, amounts.right],
+    };
+
+    console.log(expected, "expected");
+  }
+
+  return depositLiquidity;
+}
