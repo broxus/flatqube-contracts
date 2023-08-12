@@ -616,7 +616,7 @@ contract DexAccount is
         require(!_tmpOperations.exists(_callId), DexErrors.OPERATION_ALREADY_IN_PROGRESS);
         uint8 N = uint8(_operations.length);
         require(N > 1, DexErrors.WRONG_PAIR);
-        require(msg.value >= _calcValue(GasValues.getAccountDepositGas(N, _referrer)), DexErrors.VALUE_TOO_LOW);
+        require(msg.value >= _calcValue(GasValues.getAccountDepositGas(N, _referrer, _autoChange)), DexErrors.VALUE_TOO_LOW);
         require(_wallets.exists(_expected.root) && _balances.exists(_expected.root), DexErrors.UNKNOWN_TOKEN_ROOT);
         for (TokenOperation operation : _operations) {
             require(_wallets.exists(operation.root) && _balances.exists(operation.root), DexErrors.UNKNOWN_TOKEN_ROOT);

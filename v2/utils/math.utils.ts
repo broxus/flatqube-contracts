@@ -1,15 +1,29 @@
-import { ViewTracingTree } from 'locklift/internal/tracing/viewTraceTree/viewTracingTree';
-import { ViewTraceTree } from 'locklift/src/internal/tracing/types';
-import { Address, TraceType, DecodedAbiFunctionOutputs } from 'locklift';
-import logger from 'mocha-logger-ts';
-import BigNumber from 'bignumber.js';
+import { ViewTracingTree } from "locklift/internal/tracing/viewTraceTree/viewTracingTree";
+import { ViewTraceTree } from "locklift/src/internal/tracing/types";
+import {
+  Address,
+  TraceType,
+  DecodedAbiFunctionOutputs,
+  Contract,
+} from "locklift";
+import logger from "mocha-logger-ts";
+import BigNumber from "bignumber.js";
 
-import { Constants } from './migration';
+import { Constants } from "./migration";
 import {
   DexPairAbi,
+  DexStablePairAbi,
   DexStablePoolAbi,
-  FactorySource,
-} from '../../build/factorySource';
+} from "../../build/factorySource";
+import { ITokens } from "../../utils/wrappers";
+import { addressComparator } from "./addresses.util";
+
+export interface IDepositLiquidity {
+  lpReward: string;
+  poolFees: Record<string, string>;
+  beneficiaryFees: Record<string, string>;
+  amounts: Record<string, string>;
+}
 
 export function calculateMaxCWi(traceTree: ViewTracingTree) {
   function calculateCwi(viewTraceTree: ViewTraceTree, currentCWi: number) {
@@ -33,13 +47,13 @@ export function calculateMaxCWi(traceTree: ViewTracingTree) {
 
 type ExpectedDeposit = DecodedAbiFunctionOutputs<
   DexPairAbi,
-  'expectedDepositLiquidity'
->['value0'];
+  "expectedDepositLiquidity"
+>["value0"];
 
 type ExpectedDepositV2 = DecodedAbiFunctionOutputs<
   DexStablePoolAbi,
-  'expectedDepositLiquidityV2'
->['value0'];
+  "expectedDepositLiquidityV2"
+>["value0"];
 
 function logExpectedDepositV2(
   expected: ExpectedDepositV2,
@@ -239,47 +253,295 @@ function logExpectedDeposit(
 }
 
 export async function expectedDepositLiquidity(
-  pairAddress: Address,
-  contractName: keyof FactorySource,
-  tokens: { decimals: number; symbol: string }[],
-  amounts: (string | number)[],
+  poolContract:
+    | Contract<DexPairAbi>
+    | Contract<DexStablePairAbi>
+    | Contract<DexStablePoolAbi>,
+  tokens: ITokens[],
   autoChange: boolean,
-) {
-  const pair = locklift.factory.getDeployedContract(contractName, pairAddress);
+): Promise<IDepositLiquidity> {
+  const poolType = await poolContract.methods
+    .getPoolType({ answerId: 0 })
+    .call()
+    .then(a => Number(a.value0));
 
-  let LP_REWARD: string;
+  // prevent mutation of the original array
+  const sortedTokens = [...tokens].sort((a, b) =>
+    addressComparator(a.root, b.root),
+  );
 
-  if (
-    contractName === 'DexStablePair' ||
-    contractName === 'DexStablePool' ||
-    contractName === 'DexStablePoolPrev'
-  ) {
-    const expected = await pair.methods
-      .expectedDepositLiquidityV2({ answerId: 0, amounts })
+  // stablePair or stablePool
+  if (poolType === 2 || poolType === 3) {
+    const expected = await (poolContract as Contract<DexStablePairAbi>).methods
+      .expectedDepositLiquidityV2({
+        answerId: 0,
+        amounts: sortedTokens.map(a => a.amount),
+      })
       .call()
-      .then((r) => r.value0);
+      .then(r => r.value0);
 
-    LP_REWARD = new BigNumber(expected.lp_reward).shiftedBy(-9).toString();
+    const beneficiaryFees: Record<string, string> = {};
+    expected.beneficiary_fees.forEach(
+      (fee, i) => (beneficiaryFees[sortedTokens[i].root.toString()] = fee),
+    );
 
-    logExpectedDepositV2(expected, tokens);
-  } else {
-    const expected = await pair.methods
+    const poolFees: Record<string, string> = {};
+    expected.pool_fees.forEach(
+      (fee, i) => (poolFees[sortedTokens[i].root.toString()] = fee),
+    );
+
+    const amounts: Record<string, string> = {};
+    expected.amounts.forEach(
+      (a, i) => (poolFees[sortedTokens[i].root.toString()] = a),
+    );
+
+    return {
+      lpReward: expected.lp_reward,
+      beneficiaryFees,
+      poolFees,
+      amounts,
+    };
+  }
+
+  // pair
+  if (poolType === 1) {
+    const expectedLiq = await (poolContract as Contract<DexPairAbi>).methods
       .expectedDepositLiquidity({
         answerId: 0,
-        left_amount: amounts[0],
-        right_amount: amounts[1],
+        left_amount: sortedTokens[0].amount,
+        right_amount: sortedTokens[1].amount,
         auto_change: autoChange,
       })
       .call()
-      .then((r) => r.value0);
+      .then(r => r.value0);
 
-    LP_REWARD = new BigNumber(expected.step_1_lp_reward)
-      .plus(expected.step_3_lp_reward)
-      .shiftedBy(-9)
+    const { beneficiaryFee, poolFee } = await getFeesFromTotalFee(
+      poolContract,
+      expectedLiq.step_2_fee,
+      false,
+    );
+
+    let leftAmount = new BigNumber(expectedLiq.step_1_left_deposit).toString();
+    let rightAmount = new BigNumber(
+      expectedLiq.step_1_right_deposit,
+    ).toString();
+
+    if (expectedLiq.step_2_left_to_right) {
+      leftAmount = new BigNumber(leftAmount)
+        .plus(expectedLiq.step_2_spent)
+        .plus(expectedLiq.step_3_left_deposit)
+        .toString();
+    } else if (expectedLiq.step_2_right_to_left) {
+      rightAmount = new BigNumber(rightAmount)
+        .plus(expectedLiq.step_2_spent)
+        .plus(expectedLiq.step_3_right_deposit)
+        .toString();
+    }
+
+    return {
+      lpReward: new BigNumber(expectedLiq.step_1_lp_reward)
+        .plus(expectedLiq.step_3_lp_reward)
+        .toString(),
+      beneficiaryFees: Object.fromEntries([
+        [
+          expectedLiq.step_2_left_to_right
+            ? sortedTokens[0].root.toString()
+            : sortedTokens[1].root.toString(),
+          beneficiaryFee,
+        ],
+        [
+          expectedLiq.step_2_left_to_right
+            ? sortedTokens[1].root.toString()
+            : sortedTokens[0].root.toString(),
+          0,
+        ],
+      ]),
+      poolFees: Object.fromEntries([
+        [
+          expectedLiq.step_2_left_to_right
+            ? sortedTokens[0].root.toString()
+            : sortedTokens[1].root.toString(),
+          poolFee,
+        ],
+        [
+          expectedLiq.step_2_left_to_right
+            ? sortedTokens[1].root.toString()
+            : sortedTokens[0].root.toString(),
+          0,
+        ],
+      ]),
+      amounts: Object.fromEntries([
+        [sortedTokens[0].root.toString(), leftAmount],
+        [sortedTokens[1].root.toString(), rightAmount],
+      ]),
+    };
+  }
+}
+
+export async function expectedExchange(
+  poolContract:
+    | Contract<DexPairAbi>
+    | Contract<DexStablePairAbi>
+    | Contract<DexStablePoolAbi>,
+  amount: string | number,
+  spent_token_root: Address,
+  receive_token_root?: Address,
+) {
+  const poolType = await poolContract.methods
+    .getPoolType({ answerId: 0 })
+    .call()
+    .then(a => Number(a.value0));
+
+  const expected =
+    poolType === 3 // stablePool
+      ? await poolContract.methods
+          .expectedExchange({
+            answerId: 0,
+            amount,
+            spent_token_root,
+            receive_token_root,
+          })
+          .call()
+      : await (poolContract as Contract<DexPairAbi>).methods // pair, stablePair
+          .expectedExchange({
+            answerId: 0,
+            amount,
+            spent_token_root,
+          })
+          .call();
+
+  const { beneficiaryFee, poolFee } = await getFeesFromTotalFee(
+    poolContract,
+    expected.expected_fee,
+    false,
+  );
+
+  return {
+    receivedAmount: expected.expected_amount,
+    beneficiaryFee,
+    poolFee,
+  };
+}
+
+export async function getFeesFromTotalFee(
+  poolContract:
+    | Contract<DexPairAbi>
+    | Contract<DexStablePairAbi>
+    | Contract<DexStablePoolAbi>,
+  totalFee: string,
+  isReferrer: boolean,
+) {
+  const feesData = await poolContract.methods
+    .getFeeParams({ answerId: 0 })
+    .call()
+    .then(r => r.value0);
+
+  if (isReferrer) {
+    const numerator = new BigNumber(feesData.pool_numerator)
+      .plus(feesData.beneficiary_numerator)
+      .plus(feesData.referrer_numerator);
+
+    const referrerFee = new BigNumber(totalFee)
+      .times(feesData.referrer_numerator)
+      .div(numerator)
+      .dp(0, BigNumber.ROUND_CEIL)
+      .toString();
+    const poolFee = new BigNumber(totalFee)
+      .times(feesData.pool_numerator)
+      .div(numerator)
+      .dp(0, BigNumber.ROUND_CEIL)
+      .toString();
+    const beneficiaryFee = new BigNumber(totalFee)
+      .minus(referrerFee)
+      .minus(poolFee)
       .toString();
 
-    logExpectedDeposit(expected, tokens);
+    return { beneficiaryFee, poolFee, referrerFee };
   }
 
-  return LP_REWARD;
+  const numerator = new BigNumber(feesData.pool_numerator).plus(
+    feesData.beneficiary_numerator,
+  );
+
+  const poolFee = new BigNumber(totalFee)
+    .times(feesData.pool_numerator)
+    .div(numerator)
+    .dp(0, BigNumber.ROUND_CEIL)
+    .toString();
+  const beneficiaryFee = new BigNumber(totalFee).minus(poolFee).toString();
+
+  return { beneficiaryFee, poolFee, referrerFee: 0 };
+}
+
+export async function expectedWithdrawLiquidity(
+  poolContract:
+    | Contract<DexPairAbi>
+    | Contract<DexStablePairAbi>
+    | Contract<DexStablePoolAbi>,
+  lpAmount: string,
+) {
+  const tokenRoots = await poolContract.methods
+    .getTokenRoots({ answerId: 0 })
+    .call();
+
+  const expected = await poolContract.methods
+    .expectedWithdrawLiquidity({
+      answerId: 0,
+      lp_amount: lpAmount,
+    })
+    .call();
+
+  const amounts: Record<string, string> = {};
+  if (expected.hasOwnProperty("expected_left_amount")) {
+    amounts[tokenRoots.left.toString()] = expected.expected_left_amount;
+    amounts[tokenRoots.right.toString()] = expected.expected_right_amount;
+  } else {
+    expected.value0.amounts.forEach(
+      (a, i) => (amounts[tokenRoots.roots[i].toString()] = a),
+    );
+  }
+
+  return { amounts };
+}
+
+export async function expectedWithdrawLiquidityOneCoin(
+  poolContract: Contract<DexStablePoolAbi>,
+  lpAmount: string,
+  receivedToken: Address,
+) {
+  const expected = await poolContract.methods
+    .expectedWithdrawLiquidityOneCoin({
+      answerId: 0,
+      lp_amount: lpAmount,
+      outcoming: receivedToken,
+    })
+    .call();
+
+  const receivedAmount = expected.value0.amounts.find(a => a !== "0") || 0;
+  const beneficiaryFee =
+    expected.value0.beneficiary_fees.find(a => a !== "0") || 0;
+  const poolFee = expected.value0.pool_fees.find(a => a !== "0") || 0;
+
+  return { receivedAmount, beneficiaryFee, poolFee };
+}
+
+export async function expectedDepositLiquidityOneCoin(
+  poolContract: Contract<DexStablePoolAbi>,
+  amount: string,
+  spentToken: Address,
+) {
+  const expected = await poolContract.methods
+    .expectedDepositLiquidityOneCoin({
+      answerId: 0,
+      amount: amount,
+      spent_token_root: spentToken,
+    })
+    .call();
+
+  const lpReward = expected.value0.lp_reward;
+  const beneficiaryFee =
+    expected.value0.beneficiary_fees.find(a => a !== "0") || 0;
+  const poolFee = expected.value0.pool_fees.find(a => a !== "0") || 0;
+
+  return { lpReward, beneficiaryFee, poolFee };
 }

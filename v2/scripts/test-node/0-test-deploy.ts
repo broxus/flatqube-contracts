@@ -1,7 +1,7 @@
 import {
   getWallet,
   depositLiquidity,
-  getAccountData,
+  getDexAccountData,
   getPoolData,
   expectedDepositLiquidity,
   expectedExchange,
@@ -83,7 +83,7 @@ async function main() {
   console.log(res3, "res3");
 
   console.log(resDeposit, "----resDeposit");
-  const res4 = await getAccountData(
+  const res4 = await getDexAccountData(
     [token2.address, token3.address],
     dexOwnerMain.address,
   );

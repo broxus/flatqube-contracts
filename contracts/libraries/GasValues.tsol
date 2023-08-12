@@ -228,18 +228,25 @@ library GasValues {
         );
     }
 
-    function getAccountDepositGas(uint8 N, address referrer) public returns(IGasValueStructure.GasValue) {
+    function getAccountDepositGas(
+        uint8 N,
+        address referrer,
+        bool autoChange
+    ) public returns(IGasValueStructure.GasValue) {
         IGasValueStructure.GasValue mintToken = getMintTokensGas(DexGas.DEPLOY_EMPTY_WALLET_GRAMS);
         IGasValueStructure.GasValue referralProgram = getReferralProgramGas();
+        IGasValueStructure.GasValue internalPairTransfer = getInternalPairTransferGas();
 
         return IGasValueStructure.GasValue(
             DexGas.DEX_POOL_COMPENSATION +
             DexGas.OPERATION_CALLBACK +
             mintToken.fixedValue +
+            (autoChange == false ? internalPairTransfer.fixedValue : 0) +
             (referrer.value != 0 ? N * referralProgram.fixedValue : 0),
 
             DexGas.ACCOUNT_DEPOSIT_EXTRA_GAS +
             mintToken.dynamicGas +
+            (autoChange == false ? internalPairTransfer.dynamicGas : 0) +
             (referrer.value != 0 ? N * referralProgram.dynamicGas : 0)
         );
     }

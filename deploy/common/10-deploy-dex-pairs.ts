@@ -1,4 +1,4 @@
-import { toNano } from "locklift";
+import { toNano, zeroAddress } from "locklift";
 import { Constants, displayTx } from "../../v2/utils/migration";
 import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
 import { TOKENS_N, TOKENS_DECIMALS } from "../tokensDeploy/10-deploy-tokens";
@@ -18,7 +18,7 @@ export default async () => {
     pool_numerator: 3000,
     beneficiary_numerator: 7000,
     referrer_numerator: 0,
-    beneficiary: commonAcc.address,
+    beneficiary: zeroAddress, // or commonAcc.address
     threshold: [],
     referrer_threshold: [],
   } as IFee;

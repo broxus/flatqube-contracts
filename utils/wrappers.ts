@@ -36,14 +36,6 @@ export interface IBalPair {
   lp_supply: string;
 }
 
-export interface IDepositLiquidity {
-  amounts: (string | number)[];
-  lpReward: string;
-  poolFees: string[];
-  beneficiaryFees: string[];
-  fees?: ITokens[];
-}
-
 export const setPairFeeParams = async (roots: Address[], fees: IFee) => {
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
   const mainAcc = locklift.deployments.getAccount("DexOwner").account;
@@ -189,34 +181,21 @@ export const getWallet = async (user: Address, tokenRoot: Address) => {
   };
 };
 
-export const getAccountData = async (
+export const getDexAccountData = async (
   tokenRoot: Address[],
-  dexAccount: Address,
+  dexAccount: Contract<DexAccountAbi>,
 ) => {
   const arrBalances = await Promise.all(
     tokenRoot.map(async _ => {
-      const token = locklift.factory.getDeployedContract(
-        "TokenRootUpgradeable",
-        _,
-      );
+      const balance = await dexAccount.methods
+        .getWalletData({
+          answerId: 0,
+          token_root: _,
+        })
+        .call()
+        .then(a => a.balance);
 
-      const ownerWalletAddress = (
-        await token.methods
-          .walletOf({
-            answerId: 0,
-            walletOwner: dexAccount,
-          })
-          .call()
-      ).value0;
-
-      const wallet = locklift.factory.getDeployedContract(
-        "TokenWalletUpgradeable",
-        ownerWalletAddress,
-      );
-
-      const balance = await wallet.methods.balance({ answerId: 0 }).call();
-
-      return balance.value0;
+      return balance;
     }),
   );
 
@@ -356,7 +335,7 @@ export const transferWrapper = async (
       ownerWalletAddress,
     );
 
-    ownerWallet.methods
+    await ownerWallet.methods
       .transfer({
         amount: transferData[i].amount,
         recipient: recipient,
@@ -373,34 +352,42 @@ export const transferWrapper = async (
 };
 
 export const getPoolData = async (
-  pairContract:
+  poolContract:
     | Contract<DexPairAbi>
     | Contract<DexStablePairAbi>
     | Contract<DexStablePoolAbi>,
 ) => {
-  const balancesData = await pairContract.methods
+  const balancesData = await poolContract.methods
     .getBalances({ answerId: 0 })
     .call();
+  const tokenRoots = await poolContract.methods
+    .getTokenRoots({ answerId: 0 })
+    .call();
+  const roots = tokenRoots.hasOwnProperty("roots")
+    ? tokenRoots.roots.map(root => root.toString())
+    : [tokenRoots.left.toString(), tokenRoots.right.toString()];
 
-  let balances: string[] = [];
+  let balances: Record<string, string> = {};
 
   if (balancesData.value0.hasOwnProperty("balances")) {
-    balances = (balancesData.value0 as IBalPool).balances;
+    (balancesData.value0 as IBalPool).balances.forEach(
+      (bal, i) => (balances[roots[i]] = bal),
+    );
   }
 
   if (balancesData.value0.hasOwnProperty("left_balance")) {
-    const left = (balancesData.value0 as IBalPair).left_balance;
-    const right = (balancesData.value0 as IBalPair).right_balance;
-    balances = [left, right];
+    balances[roots[0]] = (balancesData.value0 as IBalPair).left_balance;
+    balances[roots[1]] = (balancesData.value0 as IBalPair).right_balance;
   }
 
-  const fees = await pairContract.methods
-    .getAccumulatedFees({ answerId: 0 })
-    .call();
+  let fees: Record<string, string> = {};
+  (
+    await poolContract.methods.getAccumulatedFees({ answerId: 0 }).call()
+  ).accumulatedFees.forEach((fee, i) => (fees[roots[i]] = fee));
 
   const FooBarLpRoot = locklift.factory.getDeployedContract(
     "TokenRootUpgradeable",
-    (await pairContract.methods.getTokenRoots({ answerId: 0 }).call()).lp,
+    tokenRoots.lp,
   );
 
   const actualSupply = await FooBarLpRoot.methods
@@ -410,7 +397,7 @@ export const getPoolData = async (
   return {
     balances: balances,
     lpSupply: balancesData.value0.lp_supply,
-    accumulatedFees: fees.accumulatedFees,
+    accumulatedFees: fees,
     actualTotalSupply: actualSupply.value0,
   };
 };
@@ -418,7 +405,7 @@ export const getPoolData = async (
 export const depositLiquidity = async (
   dexOwner: Address,
   dexAccount: Contract<DexAccountAbi>,
-  pairContract:
+  poolContract:
     | Contract<DexPairAbi>
     | Contract<DexStablePairAbi>
     | Contract<DexStablePoolAbi>,
@@ -461,7 +448,7 @@ export const depositLiquidity = async (
       }),
   );
 
-  const dexPairFooBar = pairContract;
+  const dexPairFooBar = poolContract;
 
   const FooBarLpRoot = locklift.factory.getDeployedContract(
     "TokenRootUpgradeable",
@@ -486,199 +473,9 @@ export const depositLiquidity = async (
       }),
   );
 
-  const pairBalances = await pairContract.methods
+  const poolBalances = await poolContract.methods
     .getBalances({ answerId: 0 })
     .call();
 
-  console.log("Pair balances: ", pairBalances.value0);
+  console.log("Pool balances: ", poolBalances.value0);
 };
-
-export async function countPoolFee(
-  pairAddress: Address,
-  contractName: "DexStablePool" | "DexStablePair" | "DexPair",
-  expectedFee: string,
-) {
-  let benFee = new BigNumber(0);
-  let poolFee = new BigNumber(0);
-  let result = "0";
-
-  const pair = locklift.factory.getDeployedContract(contractName, pairAddress);
-
-  const feesData = await pair.methods
-    .getFeeParams({ answerId: 0 })
-    .call()
-    .then(r => r.value0);
-
-  const numerator = new BigNumber(feesData.pool_numerator).plus(
-    feesData.beneficiary_numerator,
-  );
-
-  benFee = new BigNumber(expectedFee)
-    .times(feesData.beneficiary_numerator)
-    .div(numerator);
-  poolFee = new BigNumber(expectedFee).minus(benFee);
-  result = new BigNumber(expectedFee).div(benFee).div(poolFee).toString();
-
-  return {
-    benFee: benFee.toString(),
-    poolFee: poolFee.toString(),
-    result,
-  };
-}
-
-export async function expectedExchange(
-  pairAddress: Address,
-  contractName: "DexStablePool" | "DexStablePair" | "DexPair",
-  amount: string | number,
-  spent_token_root: Address,
-  receive_token_root?: Address,
-) {
-  const pair = locklift.factory.getDeployedContract(contractName, pairAddress);
-
-  const expected =
-    contractName === "DexStablePool"
-      ? await pair.methods
-          .expectedExchange({
-            answerId: 0,
-            amount,
-            spent_token_root,
-            receive_token_root,
-          })
-          .call()
-      : await pair.methods
-          .expectedExchange({
-            answerId: 0,
-            amount,
-            spent_token_root,
-          })
-          .call();
-
-  const resData = await countPoolFee(
-    pairAddress,
-    contractName,
-    expected.expected_fee,
-  );
-
-  return {
-    expectedAmount: expected.expected_amount,
-    expectedFee: expected.expected_fee,
-    poolFee: resData.result,
-  };
-}
-
-export async function expectedDepositLiquidity(
-  pairAddress: Address,
-  contractName: "DexStablePool" | "DexStablePair" | "DexPair",
-  tokens: ITokens[],
-) {
-  let depositLiquidity: IDepositLiquidity;
-
-  if (contractName === "DexStablePair") {
-    const pair = locklift.factory.getDeployedContract(
-      contractName,
-      pairAddress,
-    );
-    const tokenRoots = await pair.methods.getTokenRoots({ answerId: 0 }).call();
-    const tokenPair = {
-      left: tokens.find(
-        token => token.root.toString() === tokenRoots.left.toString(),
-      ),
-      right: tokens.find(
-        token => token.root.toString() === tokenRoots.right.toString(),
-      ),
-    };
-
-    const expected = await pair.methods
-      .expectedDepositLiquidityV2({
-        answerId: 0,
-        amounts: [tokenPair.left.amount, tokenPair.right.amount],
-      })
-      .call()
-      .then(r => r.value0);
-
-    depositLiquidity = {
-      lpReward: new BigNumber(expected.lp_reward).shiftedBy(-9).toString(),
-      beneficiaryFees: expected.beneficiary_fees,
-      poolFees: expected.pool_fees,
-      amounts: [tokenPair.left.amount, tokenPair.right.amount],
-      fees: expected.pool_fees.map((_, key) => ({
-        root: key == 0 ? tokenPair.left.root : tokenPair.right.root,
-        amount: _,
-      })),
-    };
-  }
-
-  if (contractName === "DexStablePool") {
-    const pair = locklift.factory.getDeployedContract(
-      contractName,
-      pairAddress,
-    );
-    const tokenRoots = await pair.methods.getTokenRoots({ answerId: 0 }).call();
-    const amounts = tokenRoots.roots.map(_ => {
-      return tokens.find(token => token.root.toString() === _.toString())
-        .amount;
-    });
-
-    const expected = await pair.methods
-      .expectedDepositLiquidityV2({ answerId: 0, amounts })
-      .call()
-      .then(r => r.value0);
-
-    depositLiquidity = {
-      lpReward: new BigNumber(expected.lp_reward).shiftedBy(-9).toString(),
-      beneficiaryFees: expected.beneficiary_fees,
-      poolFees: expected.pool_fees,
-      amounts: amounts,
-      fees: expected.pool_fees.map((_, key) => ({
-        root: tokenRoots.roots[key],
-        amount: _,
-      })),
-    };
-  }
-
-  if (contractName === "DexPair") {
-    const pair = locklift.factory.getDeployedContract(
-      contractName,
-      pairAddress,
-    );
-    const tokenRoots = await pair.methods.getTokenRoots({ answerId: 0 }).call();
-    const tokenPair = {
-      left: tokens.find(
-        token => token.root.toString() === tokenRoots.left.toString(),
-      ),
-      right: tokens.find(
-        token => token.root.toString() === tokenRoots.right.toString(),
-      ),
-    };
-
-    const expectedLiq = await pair.methods
-      .expectedDepositLiquidity({
-        answerId: 0,
-        left_amount: tokenPair.left.amount,
-        right_amount: tokenPair.right.amount,
-        auto_change: false,
-      })
-      .call()
-      .then(r => r.value0);
-
-    const expected = await countPoolFee(
-      pair.address,
-      contractName,
-      expectedLiq.step_2_fee,
-    );
-    console.log(expected, "EXPTECTED");
-    console.log(expectedLiq, "EXPTECTED2");
-
-    depositLiquidity = {
-      lpReward: new BigNumber(expectedLiq.step_3_lp_reward)
-        .plus(expectedLiq.step_1_lp_reward)
-        .shiftedBy(-9)
-        .toString(),
-      beneficiaryFees: [expected.benFee, "0"],
-      poolFees: [expected.poolFee, "0"],
-      amounts: [tokenPair.left.amount, tokenPair.right.amount],
-    };
-  }
-
-  return depositLiquidity;
-}
