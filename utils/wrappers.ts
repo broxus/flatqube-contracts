@@ -493,6 +493,39 @@ export const depositLiquidity = async (
   console.log("Pair balances: ", pairBalances.value0);
 };
 
+export async function countPoolFee(
+  pairAddress: Address,
+  contractName: "DexStablePool" | "DexStablePair" | "DexPair",
+  expectedFee: string,
+) {
+  let benFee = new BigNumber(0);
+  let poolFee = new BigNumber(0);
+  let result = "0";
+
+  const pair = locklift.factory.getDeployedContract(contractName, pairAddress);
+
+  const feesData = await pair.methods
+    .getFeeParams({ answerId: 0 })
+    .call()
+    .then(r => r.value0);
+
+  const numerator = new BigNumber(feesData.pool_numerator).plus(
+    feesData.beneficiary_numerator,
+  );
+
+  benFee = new BigNumber(expectedFee)
+    .times(feesData.beneficiary_numerator)
+    .div(numerator);
+  poolFee = new BigNumber(expectedFee).minus(benFee);
+  result = new BigNumber(expectedFee).div(benFee).div(poolFee).toString();
+
+  return {
+    benFee: benFee.toString(),
+    poolFee: poolFee.toString(),
+    result,
+  };
+}
+
 export async function expectedExchange(
   pairAddress: Address,
   contractName: "DexStablePool" | "DexStablePair" | "DexPair",
@@ -500,10 +533,6 @@ export async function expectedExchange(
   spent_token_root: Address,
   receive_token_root?: Address,
 ) {
-  let benFee = new BigNumber(0);
-  let poolFee = new BigNumber(0);
-  let result = "0";
-
   const pair = locklift.factory.getDeployedContract(contractName, pairAddress);
 
   const expected =
@@ -524,28 +553,16 @@ export async function expectedExchange(
           })
           .call();
 
-  const feesData = await pair.methods
-    .getFeeParams({ answerId: 0 })
-    .call()
-    .then(r => r.value0);
-
-  const numerator = new BigNumber(feesData.pool_numerator).plus(
-    feesData.beneficiary_numerator,
+  const resData = await countPoolFee(
+    pairAddress,
+    contractName,
+    expected.expected_fee,
   );
 
-  benFee = new BigNumber(expected.expected_fee)
-    .times(feesData.beneficiary_numerator)
-    .div(numerator);
-  poolFee = new BigNumber(expected.expected_fee).minus(benFee);
-  result = new BigNumber(expected.expected_fee)
-    .div(benFee)
-    .div(poolFee)
-    .toString();
-
   return {
-    benFee: benFee.toString(),
-    poolFee: poolFee.toString(),
-    result,
+    expectedAmount: expected.expected_amount,
+    expectedFee: expected.expected_fee,
+    poolFee: resData.result,
   };
 }
 
@@ -644,24 +661,21 @@ export async function expectedDepositLiquidity(
       .call()
       .then(r => r.value0);
 
-    const expected = await expectedExchange(
+    const expected = await countPoolFee(
       pair.address,
       contractName,
-      tokenPair.left.amount,
-      tokenPair.left.root,
+      expectedLiq.step_2_fee,
     );
-
-    const resultStepFee = new BigNumber(expectedLiq.step_2_fee)
-      .div(expected.benFee)
-      .div(expected.poolFee)
-      .toString();
+    console.log(expected, "EXPTECTED");
+    console.log(expectedLiq, "EXPTECTED2");
 
     depositLiquidity = {
       lpReward: new BigNumber(expectedLiq.step_3_lp_reward)
+        .plus(expectedLiq.step_1_lp_reward)
         .shiftedBy(-9)
         .toString(),
-      beneficiaryFees: [resultStepFee.toString(), "0"],
-      poolFees: [resultStepFee.toString(), "0"],
+      beneficiaryFees: [expected.benFee, "0"],
+      poolFees: [expected.poolFee, "0"],
       amounts: [tokenPair.left.amount, tokenPair.right.amount],
     };
   }
