@@ -271,7 +271,7 @@ export async function expectedDepositLiquidity(
   );
 
   // stablePair or stablePool
-  if (poolType === 2 || poolType === 3) {
+  if ([2, 3].includes(poolType)) {
     const expected = await (poolContract as Contract<DexStablePairAbi>).methods
       .expectedDepositLiquidityV2({
         answerId: 0,

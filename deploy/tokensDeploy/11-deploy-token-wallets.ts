@@ -1,6 +1,6 @@
 import { toNano } from "locklift";
-import { ACCOUNTS_N } from "../common/commonAccounts";
-import { TOKENS_N, TOKENS_DECIMALS } from "./10-deploy-tokens";
+import { ACCOUNTS_N } from "../../utils/consts";
+import { TOKENS_N, TOKENS_DECIMALS } from "../../utils/consts";
 import { TokenRootUpgradeableAbi } from "../../build/factorySource";
 
 export default async () => {

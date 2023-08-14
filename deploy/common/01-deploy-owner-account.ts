@@ -1,5 +1,5 @@
 import { WalletTypes, toNano } from "locklift";
-import { EVER_WALLET_AMOUNT } from "./commonAccounts";
+import { EVER_WALLET_AMOUNT } from "../../utils/consts";
 
 export default async () => {
   await locklift.deployments.deployAccounts(

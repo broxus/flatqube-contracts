@@ -1,49 +1,71 @@
-import { Migration } from '../utils/migration';
-import {toNano, getRandomNonce} from "locklift";
+import { toNano, getRandomNonce } from "locklift";
 
 async function main() {
-  const migration = new Migration();
-
-  const signer = await locklift.keystore.getSigner('0');
-  const account = await migration.loadAccount('Account1', '0');
+  const signer = await locklift.keystore.getSigner("0");
+  const account = locklift.deployments.getAccount("Account1").account;
 
   if (locklift.tracing) {
-    locklift.tracing.setAllowedCodesForAddress(account.address, {compute: [100]});
+    locklift.tracing.setAllowedCodesForAddress(account.address, {
+      compute: [100],
+    });
   }
 
-  const TokenRoot = await locklift.factory.getContractArtifacts('TokenRootUpgradeable');
-  const TokenWallet = await locklift.factory.getContractArtifacts('TokenWalletUpgradeable');
-  const TokenWalletPlatform = await locklift.factory.getContractArtifacts('TokenWalletPlatform');
+  const TokenRoot = locklift.factory.getContractArtifacts(
+    "TokenRootUpgradeable",
+  );
+  const TokenWallet = locklift.factory.getContractArtifacts(
+    "TokenWalletUpgradeable",
+  );
+  const TokenWalletPlatform = locklift.factory.getContractArtifacts(
+    "TokenWalletPlatform",
+  );
 
-  const {contract: tokenFactory} = await locklift.factory.deployContract({
-    contract: 'TokenFactory',
-    constructorParams: {
-      _owner: account.address
-    },
-    initParams: {
-      randomNonce_: getRandomNonce(),
-    },
-    publicKey: signer!.publicKey,
-    value: toNano(2),
+  const {
+    extTransaction: { contract: tokenFactory },
+  } = await locklift.transactions.waitFinalized(
+    locklift.deployments.deploy({
+      deployConfig: {
+        contract: "TokenFactory",
+        constructorParams: {
+          _owner: account.address,
+        },
+        initParams: {
+          _nonce: getRandomNonce(),
+        },
+        publicKey: signer.publicKey,
+        value: toNano(2),
+      },
+      deploymentName: "DexRoot",
+      enableLogs: true,
+    }),
+  );
+
+  await locklift.deployments.saveContract({
+    contractName: "TokenFactory",
+    deploymentName: `TokenFactory`,
+    address: tokenFactory.address,
   });
-  migration.store(tokenFactory, 'TokenFactory');
 
   console.log(`TokenFactory: ${tokenFactory.address}`);
 
-  await tokenFactory.methods.setRootCode({_rootCode: TokenRoot.code}).send({
+  await tokenFactory.methods.setRootCode({ _rootCode: TokenRoot.code }).send({
     from: account.address,
-    amount: toNano(2)
+    amount: toNano(2),
   });
 
-  await tokenFactory.methods.setWalletCode({_walletCode: TokenWallet.code}).send({
-    from: account.address,
-    amount: toNano(2)
-  });
+  await tokenFactory.methods
+    .setWalletCode({ _walletCode: TokenWallet.code })
+    .send({
+      from: account.address,
+      amount: toNano(2),
+    });
 
-  await tokenFactory.methods.setWalletPlatformCode({_walletPlatformCode: TokenWalletPlatform.code}).send({
-    from: account.address,
-    amount: toNano(2)
-  });
+  await tokenFactory.methods
+    .setWalletPlatformCode({ _walletPlatformCode: TokenWalletPlatform.code })
+    .send({
+      from: account.address,
+      amount: toNano(2),
+    });
 }
 
 main()

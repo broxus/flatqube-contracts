@@ -1,4 +1,4 @@
-import { Migration } from '../utils/migration';
+import { Migration } from "../utils/migration";
 
 const migration = new Migration();
 

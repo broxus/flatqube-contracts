@@ -6,14 +6,11 @@ export default async () => {
   const account = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
-  const PlatformRootOrder = await locklift.factory.getContractArtifacts(
-    "OrderRootPlatform",
-  );
-  const PlatformOrder = await locklift.factory.getContractArtifacts(
-    "OrderPlatform",
-  );
-  const RootOrder = await locklift.factory.getContractArtifacts("OrderRoot");
-  const Order = await locklift.factory.getContractArtifacts("Order");
+  const PlatformRootOrder =
+    locklift.factory.getContractArtifacts("OrderRootPlatform");
+  const PlatformOrder = locklift.factory.getContractArtifacts("OrderPlatform");
+  const RootOrder = locklift.factory.getContractArtifacts("OrderRoot");
+  const Order = locklift.factory.getContractArtifacts("Order");
 
   const { extTransaction: factoryOrder } =
     await locklift.transactions.waitFinalized(

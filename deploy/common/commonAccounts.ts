@@ -1,12 +1,6 @@
 import { getRandomNonce, toNano, WalletTypes } from "locklift";
-
-export const ACCOUNTS_N = 5;
-export const ACCOUNT_WALLET_AMOUNT = 100;
-
-export const EVER_WALLET_AMOUNT = 2000;
-export const WEVER_WALLET_AMOUNT = 1500;
-
 export const WEVER_DEXPAIR_AMOUNT = 200;
+import { ACCOUNTS_N, ACCOUNT_WALLET_AMOUNT } from "../../utils/consts";
 
 export default async () => {
   console.log("Starting creating User Accounts...");

@@ -34,6 +34,7 @@ const config: LockliftConfig = {
     externalContracts: {
       precompiled: ["DexPlatform"],
       "node_modules/tip3/build": [
+        "TokenRoot",
         "TokenRootUpgradeable",
         "TokenWalletUpgradeable",
         "TokenWalletPlatform",

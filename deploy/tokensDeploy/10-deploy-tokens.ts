@@ -1,7 +1,6 @@
 import { toNano, zeroAddress, getRandomNonce } from "locklift";
 import BigNumber from "bignumber.js";
-export const TOKENS_N = 2;
-export const TOKENS_DECIMALS = [6, 9, 18];
+import { TOKENS_N, TOKENS_DECIMALS } from "../../utils/consts";
 
 BigNumber.config({ EXPONENTIAL_AT: 257 });
 

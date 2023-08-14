@@ -1,7 +1,7 @@
 import { toNano } from "locklift";
 
 import { TestWeverVaultAbi } from "../../../build/factorySource";
-import { WEVER_WALLET_AMOUNT } from "../../common/commonAccounts";
+import { WEVER_WALLET_AMOUNT } from "../../../utils/consts";
 
 export default async () => {
   const weverOwner = locklift.deployments.getAccount("DexOwner");

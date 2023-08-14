@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract, toNano, zeroAddress } from "locklift";
+import { Contract, toNano } from "locklift";
 import { Account } from "everscale-standalone-client/nodejs";
 
 import {

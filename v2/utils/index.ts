@@ -1,7 +1,4 @@
-export {
-  accountMigration,
-  tokenRootMigration
-} from './migration.new.utils';
+export { accountMigration, tokenRootMigration } from "./migration.new.utils";
 
 export {
   logAndExitWithSuccess,
@@ -9,4 +6,4 @@ export {
   logMigrationSuccess,
   logMigrationProcess,
   logMigrationParams,
-} from './log.utils';
+} from "./log.utils";

@@ -1,9 +1,11 @@
 import { toNano, zeroAddress } from "locklift";
 import { Constants, displayTx } from "../../v2/utils/migration";
 import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
-import { TOKENS_N, TOKENS_DECIMALS } from "../tokensDeploy/10-deploy-tokens";
+import { TOKENS_N, TOKENS_DECIMALS } from "../../utils/consts";
 import { DEX_STABLE_POOL_LP } from "./08-deploy-dex-stable-pool";
 import { IFee } from "../../utils/wrappers";
+
+const SECOND = "token-9-1";
 
 export default async () => {
   console.log("10-deploy-dex-pairs.js");
@@ -11,7 +13,7 @@ export default async () => {
 
   const dexOwner = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
-  const commonAcc = locklift.deployments.getAccount("commonAccount-0").account;
+  // const commonAcc = locklift.deployments.getAccount("commonAccount-0").account;
 
   const feeParams = {
     denominator: 1000000,
@@ -113,7 +115,7 @@ export default async () => {
     }
   };
 
-  // creating 25 pairs of tokens, 5 tokens, token-1 --- token-any
+  // creating (TOKENS_N / 2) * TOKENS_DECIMALS.length pairs
   const allPairs: [string, string][] = [];
 
   Array.from({ length: TOKENS_N }).map(async (_, iLeft) => {
@@ -139,7 +141,6 @@ export default async () => {
     locklift.deployments.getContract<TokenRootUpgradeableAbi>(
       DEX_STABLE_POOL_LP,
     );
-  const SECOND = "token-9-1";
   const tokenBar =
     locklift.deployments.getContract<TokenRootUpgradeableAbi>(SECOND);
 

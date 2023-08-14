@@ -1,7 +1,7 @@
 import { toNano } from "locklift";
 import { Constants, displayTx } from "../../v2/utils/migration";
 import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
-import { TOKENS_N } from "../tokensDeploy/10-deploy-tokens";
+import { TOKENS_N } from "../../utils/consts";
 
 const TOKEN_DECIMAL = 6;
 

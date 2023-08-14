@@ -10,7 +10,7 @@ export const DEX_STABLE_POOL_LP = "DexStablePool_lp";
 export default async () => {
   const account = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
-  const commonAcc = locklift.deployments.getAccount("commonAccount-0").account;
+  // const commonAcc = locklift.deployments.getAccount("commonAccount-0").account;
 
   const tokenFirst =
     locklift.deployments.getContract<TokenRootUpgradeableAbi>(FIRST);

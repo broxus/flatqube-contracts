@@ -1,88 +1,95 @@
-import { toNano, zeroAddress, getRandomNonce } from 'locklift';
-import { Migration, Constants } from '../utils/migration';
-import { Command } from 'commander';
+import { toNano, zeroAddress, getRandomNonce } from "locklift";
+import { Constants, TToken } from "../../utils/consts";
+import { Command } from "commander";
 
 const program = new Command();
 
 async function main() {
-  const migration = new Migration();
-
-  const signer = await locklift.keystore.getSigner('0');
-  const account = await migration.loadAccount('Account1', '0');
+  const signer = await locklift.keystore.getSigner("0");
+  const account = locklift.deployments.getAccount("Account1").account;
   if (locklift.tracing) {
     locklift.tracing.setAllowedCodesForAddress(account.address, {
       compute: [100],
     });
   }
 
+  // ex: --tokens='["qwa"]'
   program
     .allowUnknownOption()
-    .option('-t, --tokens <tokens>', 'tokens to deploy');
+    .option("-t, --tokens <tokens>", "tokens to deploy");
 
   program.parse(process.argv);
 
   const options = program.opts();
 
-  const tokens: string[] = options.tokens
+  const tokens: TToken[] = options.tokens
     ? JSON.parse(options.tokens)
-    : ['foo', 'bar', 'tst'];
+    : ["foo", "bar", "tst"];
 
-  const TokenWalletUpgradeable = await locklift.factory.getContractArtifacts(
-    'TokenWalletUpgradeable',
+  const TokenWalletUpgradeable = locklift.factory.getContractArtifacts(
+    "TokenWalletUpgradeable",
   );
-  const TokenWalletPlatform = await locklift.factory.getContractArtifacts(
-    'TokenWalletPlatform',
+  const TokenWalletPlatform = locklift.factory.getContractArtifacts(
+    "TokenWalletPlatform",
   );
   // const TokenRoot = await locklift.factory.getContractArtifacts('TokenRoot');
-  const TokenWallet = await locklift.factory.getContractArtifacts(
-    'TokenWallet',
+  const TokenWallet = locklift.factory.getContractArtifacts(
+    "TokenWalletUpgradeable",
   );
 
   for (const tokenId of tokens) {
-    const tokenData = Constants.tokens[tokenId];
-    const { contract: tokenRoot } = await locklift.factory.deployContract({
-      contract: tokenData.upgradeable ? 'TokenRootUpgradeable' : 'TokenRoot',
-      constructorParams: {
-        initialSupplyTo: zeroAddress,
-        initialSupply: '0',
-        deployWalletValue: '0',
-        mintDisabled: false,
-        burnByRootDisabled: true,
-        burnPaused: true,
-        remainingGasTo: zeroAddress,
-      },
-      initParams: {
-        randomNonce_: getRandomNonce(),
-        deployer_: zeroAddress,
-        name_: tokenData.name,
-        symbol_: tokenData.symbol,
-        decimals_: tokenData.decimals,
-        walletCode_: tokenData.upgradeable
-          ? TokenWalletUpgradeable.code
-          : TokenWallet.code,
-        rootOwner_: account.address,
-        platformCode_: tokenData.upgradeable
-          ? TokenWalletPlatform.code
-          : undefined,
-      },
-      publicKey: signer.publicKey,
-      value: toNano(3),
-    });
+    const tokenData = Constants.tokens[tokenId] ?? {
+      name: tokenId,
+      symbol: tokenId,
+      decimals: 6,
+      upgradeable: true,
+    };
+
+    const {
+      extTransaction: { contract: tokenRoot },
+    } = await locklift.transactions.waitFinalized(
+      locklift.deployments.deploy({
+        deployConfig: {
+          contract: tokenData.upgradeable
+            ? "TokenRootUpgradeable"
+            : "TokenRoot",
+          constructorParams: {
+            initialSupplyTo: zeroAddress,
+            initialSupply: "0",
+            deployWalletValue: "0",
+            mintDisabled: false,
+            burnByRootDisabled: true,
+            burnPaused: true,
+            remainingGasTo: zeroAddress,
+          },
+          initParams: {
+            randomNonce_: getRandomNonce(),
+            deployer_: zeroAddress,
+            name_: tokenData.name,
+            symbol_: tokenData.symbol,
+            decimals_: tokenData.decimals,
+            walletCode_: tokenData.upgradeable
+              ? TokenWalletUpgradeable.code
+              : TokenWallet.code,
+            rootOwner_: account.address,
+            platformCode_: tokenData.upgradeable
+              ? TokenWalletPlatform.code
+              : undefined,
+          },
+          publicKey: signer.publicKey,
+          value: toNano(3),
+        },
+        deploymentName: `${tokenData.symbol}Root`,
+      }),
+    );
 
     console.log(`Token ${tokenData.name}: ${tokenRoot.address}`);
-    migration.store(
-      {
-        name: tokenData.symbol + 'Root',
-        address: tokenRoot.address,
-      },
-      `${tokenData.symbol}Root`,
-    );
   }
 }
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

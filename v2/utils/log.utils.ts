@@ -1,4 +1,9 @@
-import chalk from 'chalk';
+import chalk from "chalk";
+import { Transaction } from "locklift";
+
+export const displayTx = (_tx: Transaction, describe?: string) => {
+  console.log(`txId ${describe ?? ""}: ${_tx.id.hash ? _tx.id.hash : _tx.id}`);
+};
 
 /**
  * Prints green success message and exit with 0 status code
@@ -25,7 +30,7 @@ export const logMigrationProcess = (
 ): void =>
   console.log(
     new Date().toLocaleTimeString(undefined, { hour12: false }),
-    '--',
+    "--",
     `${chalk.bold.blue(`[Migration][${contract}][${method}]`)}`,
     chalk.cyan(message),
   );
@@ -37,10 +42,10 @@ export const logMigrationSuccess = (
 ): void =>
   console.log(
     new Date().toLocaleTimeString(undefined, { hour12: false }),
-    '--',
+    "--",
     `${chalk.bold.blue(`[Migration][${contract}][${method}]`)}`,
     chalk.green(message),
-    '\n',
+    "\n",
   );
 
 export const logTestProcessing = (
@@ -49,10 +54,10 @@ export const logTestProcessing = (
 ): void =>
   console.log(
     new Date().toLocaleTimeString(undefined, { hour12: false }),
-    '--',
+    "--",
     `${chalk.bold.blue(`[LOG][${functionName}]`)}`,
     chalk.green(message),
-    '\n',
+    "\n",
   );
 
 export const logSuccess = (
@@ -62,17 +67,17 @@ export const logSuccess = (
 ): void =>
   console.log(
     new Date().toLocaleTimeString(undefined, { hour12: false }),
-    '--',
+    "--",
     `${chalk.bold.blue(`[${contract}][${method}]`)}`,
     chalk.green(message),
-    '\n',
+    "\n",
   );
 
 export const logMigrationParams = (params: Record<string, unknown>): void =>
   console.log(
     new Date().toLocaleTimeString(undefined, { hour12: false }),
-    '--',
-    '--',
-    chalk.bgMagenta('[Params]'),
+    "--",
+    "--",
+    chalk.bgMagenta("[Params]"),
     JSON.stringify(params),
   );

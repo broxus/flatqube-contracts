@@ -1,5 +1,5 @@
 import { toNano } from "locklift";
-import { ACCOUNTS_N } from "../common/commonAccounts";
+import { ACCOUNTS_N } from "../../utils/consts";
 import { TokenRootUpgradeableAbi } from "../../build/factorySource";
 
 export default async () => {

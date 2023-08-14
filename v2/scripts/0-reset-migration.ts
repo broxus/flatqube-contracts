@@ -1,4 +1,4 @@
-import { Migration } from '../utils/migration';
+import { Migration } from "../utils/migration";
 
 async function main() {
   const migration = new Migration();
@@ -7,7 +7,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });
