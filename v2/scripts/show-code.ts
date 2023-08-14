@@ -1,20 +1,18 @@
-import { Command } from 'commander';
+import { Command } from "commander";
 
 async function main() {
   const program = new Command();
 
   program
     .allowUnknownOption()
-    .option('-cn, --contract_name <contract_name>', 'Contract name');
+    .option("-cn, --contract_name <contract_name>", "Contract name");
 
   program.parse(process.argv);
 
   const options = program.opts();
-  options.contract_name = options.contract_name || 'DexVaultLpTokenPending';
+  options.contract_name = options.contract_name || "DexVaultLpTokenPending";
 
-  const Contract = await locklift.factory.getContractArtifacts(
-    options.contract_name,
-  );
+  const Contract = locklift.factory.getContractArtifacts(options.contract_name);
 
   console.log(`${options.contract_name} code:`);
   console.log(`${Contract.code}`);
@@ -22,7 +20,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

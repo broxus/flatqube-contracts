@@ -1,18 +1,13 @@
-import { displayTx, Migration } from '../utils/migration';
-import { toNano } from 'locklift';
+import { toNano } from "locklift";
+import { displayTx } from "../../utils/helpers";
+import { DexGasValuesAbi } from "../../build/factorySource";
 
 async function main() {
-  const migration = new Migration();
+  const account = locklift.deployments.getAccount("Account1").account;
+  const dexGasPrev =
+    locklift.deployments.getContract<DexGasValuesAbi>("DexVault");
 
-  const signer = await locklift.keystore.getSigner('0');
-  const account = await migration.loadAccount('Account1', '0');
-
-  const dexGasPrev = await migration.loadContract(
-    'DexGasValues',
-    'DexGasValues',
-  );
-
-  const DexGas = await locklift.factory.getContractArtifacts('DexGasValues');
+  const DexGas = await locklift.factory.getContractArtifacts("DexGasValues");
 
   const tx = await dexGasPrev.methods
     .upgrade({
@@ -28,7 +23,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

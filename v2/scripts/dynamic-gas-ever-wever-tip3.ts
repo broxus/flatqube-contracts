@@ -1,10 +1,16 @@
+import { toNano, zeroAddress } from "locklift";
+import { EMPTY_TVM_CELL, Constants, TTokenName } from "../../utils/consts";
+import { displayTx } from "../../utils/helpers";
 import {
-  Migration,
-  displayTx,
-  EMPTY_TVM_CELL,
-  Constants,
-} from "../utils/migration";
-import { Address, toNano, zeroAddress } from "locklift";
+  DexAccountAbi,
+  DexPairAbi,
+  DexRootAbi,
+  DexStablePoolAbi,
+  EverWeverToTip3Abi,
+  TokenRootUpgradeableAbi,
+  TokenWalletUpgradeableAbi,
+} from "../../build/factorySource";
+import { IFee } from "utils/wrappers";
 
 const deposits = [
   { tokenId: "foo", amount: "100000000000000000000000" },
@@ -15,55 +21,51 @@ const deposits = [
 ];
 
 async function main() {
-  const migration = new Migration();
-  const mainAccount = await migration.loadAccount("Account1", "0");
-  const additionalAccount = await migration.loadAccount("Account3", "2");
-  const owner = await migration.loadAccount("Account2", "1");
+  const mainAccount = locklift.deployments.getAccount("Account1").account;
+  const additionalAccount = locklift.deployments.getAccount("Account3").account;
+  const owner = locklift.deployments.getAccount("Account2").account;
+  const emptyAccount = locklift.deployments.getAccount("Account4").account;
 
-  const emptyAccount = await migration.loadAccount("Account4", "3");
+  const everWeverToTip3 =
+    locklift.deployments.getContract<EverWeverToTip3Abi>("EverWeverToTip3");
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
-  const everToTip3 = migration.loadContract("EverToTip3", "EverToTip3");
-  const tip3ToEver = migration.loadContract("Tip3ToEver", "Tip3ToEver");
-  const everWeverToTip3 = migration.loadContract(
-    "EverWeverToTip3",
-    "EverWeverToTip3",
-  );
-
-  const dexRoot = migration.loadContract("DexRoot", "DexRoot");
-
-  const dexAccountN = migration.loadContract("DexAccount", "DexAccount" + 2);
-  const wEverWallet2 = migration.loadContract(
-    "TokenWalletUpgradeable",
-    "WEVERWallet2",
-  );
-  const dexPool = migration.loadContract("DexStablePool", "DexPoolFooBarQwe");
-  const dexPairFooWever = migration.loadContract("DexPair", "DexPoolFooWEVER");
-  const DexPoolFooBarQweLpTst = migration.loadContract(
-    "DexPair",
+  const dexAccountN =
+    locklift.deployments.getContract<DexAccountAbi>("DexAccount");
+  const wEverWallet2 =
+    locklift.deployments.getContract<TokenWalletUpgradeableAbi>("WEVERWallet2");
+  const dexPool =
+    locklift.deployments.getContract<DexStablePoolAbi>("DexPoolFooBarQwe");
+  const dexPairFooWever =
+    locklift.deployments.getContract<DexPairAbi>("DexPoolFooWEVER");
+  const DexPoolFooBarQweLpTst = locklift.deployments.getContract<DexPairAbi>(
     "DexPoolFooBarQweLpTst",
   );
-  const dexPairTstBar = migration.loadContract("DexPair", "DexPoolTstBar");
-  const dexPairBarCoin = migration.loadContract("DexPair", "DexPoolBarCoin");
+  const dexPairTstBar =
+    locklift.deployments.getContract<DexPairAbi>("DexPoolTstBar");
+  const dexPairBarCoin =
+    locklift.deployments.getContract<DexPairAbi>("DexPoolBarCoin");
 
-  const fooWeverLpRoot = migration.loadContract(
-    "TokenRootUpgradeable",
-    "FooWEVERLpRoot",
-  );
-  const poolLpRoot = migration.loadContract(
-    "TokenRootUpgradeable",
-    "FooBarQweLpRoot",
-  );
+  const fooWeverLpRoot =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("FooWEVERLpRoot");
+  const poolLpRoot =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>(
+      "FooBarQweLpRoot",
+    );
 
-  const wEverRoot = migration.loadContract("TokenRootUpgradeable", "WEVERRoot");
-  const wEverVault = migration.loadContract("TestWeverVault", "WEVERVault");
+  const wEverRoot =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("WEVERRoot");
+  //   const wEverVault =
+  //     locklift.deployments.getContract<TokenRootUpgradeableAbi>("WEVERVault");
 
   const token_roots = [];
   const symbols = [];
   for (const deposit of deposits) {
-    const symbol = Constants.tokens[deposit.tokenId].symbol;
+    const symbol = Constants.tokens[deposit.tokenId as TTokenName].symbol;
     symbols.push(symbol);
     token_roots.push(
-      migration.loadContract("TokenRootUpgradeable", symbol + "Root"),
+      locklift.deployments.getContract<TokenRootUpgradeableAbi>(symbol + "Root")
+        .address,
     );
   }
 
@@ -74,15 +76,15 @@ async function main() {
     referrer_numerator: "5000",
     beneficiary: additionalAccount.address,
     threshold: [
-      [token_roots[0].address, "500000000000"],
+      [token_roots[0], "500000000000"],
       [wEverRoot.address, "500"],
     ],
     referrer_threshold: [],
-  };
+  } as IFee;
 
   await dexRoot.methods
     .setPairFeeParams({
-      _roots: [token_roots[0].address, wEverRoot.address],
+      _roots: [token_roots[0], wEverRoot.address],
       _params: fee,
       _remainingGasTo: mainAccount.address,
     })
@@ -92,7 +94,7 @@ async function main() {
     });
 
   await dexAccountN.methods
-    .addPool({ _roots: [token_roots[0].address, wEverRoot.address] })
+    .addPool({ _roots: [token_roots[0], wEverRoot.address] })
     .send({
       from: owner.address,
       amount: toNano(4),
@@ -106,7 +108,6 @@ async function main() {
       remainingGasTo: owner.address,
       notify: true,
       payload: EMPTY_TVM_CELL,
-      // @ts-ignore
     })
     .send({
       from: owner.address,
@@ -120,7 +121,7 @@ async function main() {
       _callId: 123,
       _operations: [
         { amount: "500000000000", root: wEverRoot.address },
-        { amount: "5000000000000000000000", root: token_roots[0].address },
+        { amount: "5000000000000000000000", root: token_roots[0] },
       ],
       _expected: { amount: "0", root: fooWeverLpRoot.address },
       _autoChange: false,
@@ -292,7 +293,6 @@ async function main() {
       remainingGasTo: emptyAccount.address,
       notify: true,
       payload: payload,
-      // @ts-ignore
     })
     .send({
       from: owner.address,

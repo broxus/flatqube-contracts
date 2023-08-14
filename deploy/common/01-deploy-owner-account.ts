@@ -9,7 +9,7 @@ export default async () => {
         deploymentName: "DexOwner",
         signerId: "0",
         accountSettings: {
-          type: WalletTypes.HighLoadWalletV2,
+          type: WalletTypes.EverWallet,
           value: toNano(EVER_WALLET_AMOUNT),
         },
       },

@@ -1,12 +1,12 @@
-import { toNano } from 'locklift';
+import { toNano } from "locklift";
+import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
 
-import { displayTx, Migration } from '../utils/migration';
-const migration = new Migration();
+import { displayTx } from "../../utils/helpers";
 
 async function main() {
-  const account = await migration.loadAccount('Account1', '0');
-  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
-  const NewDexPair = await locklift.factory.getContractArtifacts('DexPair');
+  const account = locklift.deployments.getAccount("Account1").account;
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
+  const NewDexPair = locklift.factory.getContractArtifacts("DexPair");
 
   console.log(`Installing new DexPair contract in DexRoot: ${dexRoot.address}`);
   await locklift.transactions.waitFinalized(
@@ -20,37 +20,31 @@ async function main() {
 
   const pairs_to_update = [
     {
-      left: migration.loadContract(
-        'TokenRootUpgradeable',
-        'CoinRoot'
+      left: locklift.deployments.getContract<TokenRootUpgradeableAbi>(
+        "CoinRoot",
       ),
-      right: migration.loadContract(
-        'TokenRootUpgradeable',
-        'FooRoot'
-      ),
+      right:
+        locklift.deployments.getContract<TokenRootUpgradeableAbi>("FooRoot"),
     },
     // {
     //   left: await locklift.factory.getDeployedContract('TokenRootUpgradeable', migration.getAddress('FooRoot')),
     //   right: await locklift.factory.getDeployedContract('TokenRootUpgradeable', migration.getAddress('BarRoot'))
     // },
     {
-      left: migration.loadContract(
-        'TokenRootUpgradeable',
-        'TstRoot'
+      left: locklift.deployments.getContract<TokenRootUpgradeableAbi>(
+        "CoinRoot",
       ),
-      right: migration.loadContract(
-        'TokenRootUpgradeable',
-        'FooRoot'
-      ),
+      right:
+        locklift.deployments.getContract<TokenRootUpgradeableAbi>("FooRoot"),
     },
   ];
   await Promise.all(
-    pairs_to_update.map(async (pair) => {
+    pairs_to_update.map(async pair => {
       console.log(
         `Upgrading DexPair contract:\n\t- left=${pair.left.address}\n\t- right=${pair.right.address}`,
       );
 
-      const tx = await locklift.transactions.waitFinalized(
+      const { extTransaction: tx } = await locklift.transactions.waitFinalized(
         dexRoot.methods
           .upgradePair({
             left_root: pair.left.address,
@@ -70,7 +64,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

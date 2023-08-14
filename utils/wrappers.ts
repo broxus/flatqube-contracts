@@ -11,10 +11,10 @@ import {
 import { BigNumber } from "bignumber.js";
 
 export interface IFee {
-  denominator: number;
-  pool_numerator: number;
-  beneficiary_numerator: number;
-  referrer_numerator: number;
+  denominator: number | string;
+  pool_numerator: number | string;
+  beneficiary_numerator: number | string;
+  referrer_numerator: number | string;
   beneficiary: Address;
   threshold: [Address, string | number][];
   referrer_threshold: [Address, string | number][];
