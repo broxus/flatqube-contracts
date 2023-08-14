@@ -18,7 +18,7 @@ export default async () => {
   });
 
   await locklift.deployments.saveContract({
-    deploymentName: "weverVault",
+    deploymentName: "wever",
     address:
       "0:557957cba74ab1dc544b4081be81f1208ad73997d74ab3b72d95864a41b779a4",
     contractName: "TestWeverVault",

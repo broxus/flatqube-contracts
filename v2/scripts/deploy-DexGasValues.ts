@@ -1,11 +1,8 @@
-import { Migration } from '../utils/migration';
-import { toNano, getRandomNonce } from 'locklift';
+import { toNano, getRandomNonce } from "locklift";
 
 async function main() {
-  const migration = new Migration();
-
-  const signer = await locklift.keystore.getSigner('0');
-  const account = await migration.loadAccount('Account1', '0');
+  const signer = await locklift.keystore.getSigner("0");
+  const account = locklift.deployments.getAccount("Account1").account;
 
   if (locklift.tracing) {
     locklift.tracing.setAllowedCodesForAddress(account.address, {
@@ -13,25 +10,31 @@ async function main() {
     });
   }
 
-  const { contract: gasValues } = await locklift.factory.deployContract({
-    contract: 'DexGasValues',
-    constructorParams: {
-      owner_: account.address,
-    },
-    initParams: {
-      _nonce: getRandomNonce(),
-    },
-    publicKey: signer!.publicKey,
-    value: toNano(2),
-  });
-  migration.store(gasValues, 'DexGasValues');
+  const {
+    extTransaction: { contract: gasValues },
+  } = await locklift.transactions.waitFinalized(
+    locklift.deployments.deploy({
+      deployConfig: {
+        contract: "DexGasValues",
+        constructorParams: {
+          owner_: account.address,
+        },
+        initParams: {
+          _nonce: getRandomNonce(),
+        },
+        publicKey: signer.publicKey,
+        value: toNano(2),
+      },
+      deploymentName: "DexGasValues",
+    }),
+  );
 
   console.log(`DexGasValues: ${gasValues.address}`);
 }
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

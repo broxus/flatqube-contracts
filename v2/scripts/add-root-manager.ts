@@ -1,15 +1,14 @@
-import { Migration, displayTx } from '../utils/migration';
-import { Address, toNano } from 'locklift';
+import { displayTx } from "../../utils/helpers";
+import { Address, toNano } from "locklift";
+import { DexRootAbi } from "../../build/factorySource";
 
 const MANAGER = new Address(
-  '0:30b833a0dbb28f79d461e6a1d5818b748c20eb9ab32286c03a7652a555d9a996',
+  "0:30b833a0dbb28f79d461e6a1d5818b748c20eb9ab32286c03a7652a555d9a996",
 );
 
 async function main() {
-  const migration = new Migration();
-  const owner = await migration.loadAccount('Account1', '0');
-
-  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+  const owner = locklift.deployments.getAccount("Account1").account;
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   const tx = await dexRoot.methods.setManager({ _newManager: MANAGER }).send({
     from: owner.address,
@@ -21,7 +20,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

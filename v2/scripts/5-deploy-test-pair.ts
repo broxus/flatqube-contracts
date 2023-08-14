@@ -1,14 +1,14 @@
-import { toNano } from 'locklift';
-import { Migration, Constants, displayTx } from '../utils/migration';
-import { Command } from 'commander';
+import { toNano } from "locklift";
+import { displayTx } from "../../utils/helpers";
+import { Constants, TTokenName } from "../../utils/consts";
+import { Command } from "commander";
+import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
 
 const program = new Command();
 
 async function main() {
-  console.log('5-deploy-test-pair.js');
-  const migration = new Migration();
-
-  const account2 = await migration.loadAccount('Account1', '0');
+  console.log("5-deploy-test-pair.js");
+  const account2 = locklift.deployments.getAccount("Account1").account;
 
   if (locklift.tracing) {
     locklift.tracing.setAllowedCodesForAddress(account2.address, {
@@ -16,26 +16,28 @@ async function main() {
     });
   }
 
-  const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   program
     .allowUnknownOption()
-    .option('-p, --pairs <pairs>', 'pairs to deploy')
+    .option("-p, --pairs <pairs>", "pairs to deploy")
     .option(
-      '-cn, --contract_name <contract_name>',
-      'New version of contract name',
+      "-cn, --contract_name <contract_name>",
+      "New version of contract name",
     );
 
   program.parse(process.argv);
 
   const options = program.opts();
-  options.contract_name = options.contract_name || 'DexPair';
+  options.contract_name = options.contract_name || "DexPair";
 
-  const pairs = options.pairs ? JSON.parse(options.pairs) : [['foo', 'bar']];
+  const pairs: TTokenName[][] = options.pairs
+    ? JSON.parse(options.pairs)
+    : [["foo", "bar"]];
 
   for (const p of pairs) {
     const tokenLeft =
-      p[0].slice(-2) === 'Lp'
+      p[0].slice(-2) === "Lp"
         ? {
             name: p[0],
             symbol: p[0],
@@ -44,7 +46,7 @@ async function main() {
           }
         : Constants.tokens[p[0]];
     const tokenRight =
-      p[1].slice(-2) === 'Lp'
+      p[1].slice(-2) === "Lp"
         ? {
             name: [p[1]],
             symbol: p[1],
@@ -57,16 +59,14 @@ async function main() {
 
     console.log(`Start deploy pair DexPair${pair.left}${pair.right}`);
 
-    const tokenFoo = await migration.loadContract(
-      'TokenRootUpgradeable',
-      pair.left + 'Root',
+    const tokenFoo = locklift.deployments.getContract<TokenRootUpgradeableAbi>(
+      pair.left + "Root",
     );
-    const tokenBar = await migration.loadContract(
-      'TokenRootUpgradeable',
-      pair.right + 'Root',
+    const tokenBar = locklift.deployments.getContract<TokenRootUpgradeableAbi>(
+      pair.right + "Root",
     );
 
-    const tx = await locklift.transactions.waitFinalized(
+    const { extTransaction: tx } = await locklift.transactions.waitFinalized(
       dexRoot.methods
         .deployPair({
           left_root: tokenFoo.address,
@@ -88,15 +88,19 @@ async function main() {
         right_root: tokenBar.address,
       })
       .call()
-      .then((r) => r.value0);
+      .then(r => r.value0);
 
     console.log(`DexPool${pair.left}${pair.right}: ${dexPairFooBarAddress}`);
 
-    const dexPairFooBar = await locklift.factory.getDeployedContract(
-      'DexPair',
+    const dexPairFooBar = locklift.factory.getDeployedContract(
+      "DexPair",
       dexPairFooBarAddress,
     );
-    migration.store(dexPairFooBar, 'DexPool' + pair.left + pair.right);
+    await locklift.deployments.saveContract({
+      contractName: "DexPair",
+      deploymentName: "DexPool" + pair.left + pair.right,
+      address: dexPairFooBar.address,
+    });
 
     const version = (
       await dexPairFooBar.methods.getVersion({ answerId: 0 }).call()
@@ -109,14 +113,14 @@ async function main() {
     console.log(`DexPool${pair.left}${pair.right} active = ${active}`);
 
     const FooBarLpRoot = await locklift.factory.getDeployedContract(
-      'TokenRootUpgradeable',
+      "TokenRootUpgradeable",
       (
         await dexPairFooBar.methods.getTokenRoots({ answerId: 0 }).call()
       ).lp,
     );
 
     const FooPairWallet = await locklift.factory.getDeployedContract(
-      'TokenWalletUpgradeable',
+      "TokenWalletUpgradeable",
       (
         await tokenFoo.methods
           .walletOf({
@@ -128,7 +132,7 @@ async function main() {
     );
 
     const BarPairWallet = await locklift.factory.getDeployedContract(
-      'TokenWalletUpgradeable',
+      "TokenWalletUpgradeable",
       (
         await tokenBar.methods
           .walletOf({
@@ -140,7 +144,7 @@ async function main() {
     );
 
     const FooBarLpPairWallet = await locklift.factory.getDeployedContract(
-      'TokenWalletUpgradeable',
+      "TokenWalletUpgradeable",
       (
         await FooBarLpRoot.methods
           .walletOf({
@@ -161,7 +165,7 @@ async function main() {
     ).value0;
 
     const FooVaultWallet = await locklift.factory.getDeployedContract(
-      'TokenWalletUpgradeable',
+      "TokenWalletUpgradeable",
       (
         await tokenFoo.methods
           .walletOf({
@@ -182,7 +186,7 @@ async function main() {
     ).value0;
 
     const BarVaultWallet = await locklift.factory.getDeployedContract(
-      'TokenWalletUpgradeable',
+      "TokenWalletUpgradeable",
       (
         await tokenBar.methods
           .walletOf({
@@ -203,7 +207,7 @@ async function main() {
     ).value0;
 
     const FooBarLpVaultWallet = await locklift.factory.getDeployedContract(
-      'TokenWalletUpgradeable',
+      "TokenWalletUpgradeable",
       (
         await FooBarLpRoot.methods
           .walletOf({
@@ -214,31 +218,33 @@ async function main() {
       ).value0,
     );
 
-    migration.store(FooBarLpRoot, pair.left + pair.right + 'LpRoot');
-    migration.store(
-      FooPairWallet,
-      pair.left + pair.right + 'Pool_' + pair.left + 'Wallet',
-    );
-    migration.store(
-      BarPairWallet,
-      pair.left + pair.right + 'Pool_' + pair.right + 'Wallet',
-    );
-    migration.store(
-      FooBarLpPairWallet,
-      pair.left + pair.right + 'Pool_LpWallet',
-    );
-    migration.store(FooVaultWallet, pair.left + 'VaultWallet');
-    migration.store(BarVaultWallet, pair.right + 'VaultWallet');
-    migration.store(
-      FooBarLpVaultWallet,
-      pair.left + pair.right + 'LpVaultWallet',
-    );
+    locklift.deployments.deploymentsStore = {
+      ["DexPool" + pair.left + pair.right]: FooBarLpPairWallet,
+    };
+    locklift.deployments.deploymentsStore = {
+      [pair.left + pair.right + "Pool_" + pair.left + "Wallet"]: FooPairWallet,
+    };
+    locklift.deployments.deploymentsStore = {
+      [pair.left + pair.right + "Pool_" + pair.right + "Wallet"]: BarPairWallet,
+    };
+    locklift.deployments.deploymentsStore = {
+      [pair.left + pair.right + "Pool_LpWallet"]: FooBarLpPairWallet,
+    };
+    locklift.deployments.deploymentsStore = {
+      [pair.left + "VaultWallet"]: FooVaultWallet,
+    };
+    locklift.deployments.deploymentsStore = {
+      [pair.right + "VaultWallet"]: BarVaultWallet,
+    };
+    locklift.deployments.deploymentsStore = {
+      [pair.left + pair.right + "LpVaultWallet"]: FooBarLpVaultWallet,
+    };
   }
 }
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

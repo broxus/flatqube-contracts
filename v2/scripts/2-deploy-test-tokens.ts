@@ -1,5 +1,5 @@
 import { toNano, zeroAddress, getRandomNonce } from "locklift";
-import { Constants, TToken } from "../../utils/consts";
+import { Constants, TTokenName } from "../../utils/consts";
 import { Command } from "commander";
 
 const program = new Command();
@@ -22,7 +22,7 @@ async function main() {
 
   const options = program.opts();
 
-  const tokens: TToken[] = options.tokens
+  const tokens: TTokenName[] = options.tokens
     ? JSON.parse(options.tokens)
     : ["foo", "bar", "tst"];
 
@@ -32,7 +32,6 @@ async function main() {
   const TokenWalletPlatform = locklift.factory.getContractArtifacts(
     "TokenWalletPlatform",
   );
-  // const TokenRoot = await locklift.factory.getContractArtifacts('TokenRoot');
   const TokenWallet = locklift.factory.getContractArtifacts(
     "TokenWalletUpgradeable",
   );

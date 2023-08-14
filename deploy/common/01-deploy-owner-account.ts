@@ -1,6 +1,7 @@
 import { WalletTypes, toNano } from "locklift";
 import { EVER_WALLET_AMOUNT } from "../../utils/consts";
 
+//npx locklift deploy --network local --disable-build --force
 export default async () => {
   await locklift.deployments.deployAccounts(
     [

@@ -1,4 +1,11 @@
 import chalk from "chalk";
+import { Transaction } from "locklift";
+
+// LOGS
+
+export const displayTx = (_tx: Transaction, describe?: string) => {
+  console.log(`txId ${describe ?? ""}: ${_tx.id.hash ? _tx.id.hash : _tx.id}`);
+};
 
 /**
  * Prints green success message and exit with 0 status code

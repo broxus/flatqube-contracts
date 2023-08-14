@@ -1,14 +1,18 @@
-import { toNano } from 'locklift';
-import { Migration, Constants, displayTx } from '../utils/migration';
+import { toNano } from "locklift";
+import { displayTx } from "../../utils/helpers";
+import { Constants, TTokenName } from "../../utils/consts";
+import {
+  DexRootAbi,
+  TokenRootAbi,
+  TokenRootUpgradeableAbi,
+} from "../../build/factorySource";
 
-import { Command } from 'commander';
+import { Command } from "commander";
 const program = new Command();
 
 async function main() {
-  console.log('5-deploy-test-pool.js');
-  const migration = new Migration();
-
-  const account = await migration.loadAccount('Account1', '0');
+  console.log("6-deploy-test-pool.js");
+  const account = locklift.deployments.getAccount("Account1").account;
 
   if (locklift.tracing) {
     locklift.tracing.setAllowedCodesForAddress(account.address, {
@@ -16,30 +20,30 @@ async function main() {
     });
   }
 
-  const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   program
     .allowUnknownOption()
-    .option('-p, --pools <pools>', 'pools to deploy')
+    .option("-p, --pools <pools>", "pools to deploy")
     .option(
-      '-cn, --contract_name <contract_name>',
-      'New version of contract name',
+      "-cn, --contract_name <contract_name>",
+      "New version of contract name",
     );
 
   program.parse(process.argv);
 
   const options = program.opts();
-  options.contract_name = options.contract_name || 'DexStablePool';
+  options.contract_name = options.contract_name || "DexStablePool";
 
-  const pools = options.pools
+  const pools: TTokenName[][] = options.pools
     ? JSON.parse(options.pools)
-    : [['foo', 'bar', 'qwe']];
+    : [["foo", "bar", "qwe"]];
 
   for (const p of pools) {
     const N_COINS = p.length;
 
     const tokens = [];
-    let poolName = '';
+    let poolName = "";
     for (const item of p) {
       tokens.push(Constants.tokens[item]);
       poolName += Constants.tokens[item].symbol;
@@ -51,15 +55,17 @@ async function main() {
     const tokenAddresses = [];
 
     for (const token of tokens) {
-      const tokenContract = await migration.loadContract(
-        token.upgradeable ? 'TokenRootUpgradeable' : 'TokenRoot',
-        token.symbol + 'Root',
-      );
+      const tokenContract = token.upgradeable
+        ? locklift.deployments.getContract<TokenRootUpgradeableAbi>(
+            token.symbol + "Root",
+          )
+        : locklift.deployments.getContract<TokenRootAbi>(token.symbol + "Root");
+
       tokenContracts.push(tokenContract);
       tokenAddresses.push(tokenContract.address);
     }
 
-    const tx = await locklift.transactions.waitFinalized(
+    const { extTransaction: tx } = await locklift.transactions.waitFinalized(
       dexRoot.methods
         .deployStablePool({
           roots: tokenAddresses,
@@ -84,34 +90,37 @@ async function main() {
 
     console.log(`DexPool${poolName}: ${dexPoolAddress}`);
 
-    const DexPool = await locklift.factory.getDeployedContract<'DexStablePool'>(
+    const DexPool = await locklift.factory.getDeployedContract<"DexStablePool">(
       options.contract_name,
       dexPoolAddress,
     );
-    migration.store(DexPool, 'DexPool' + poolName);
+    await locklift.deployments.saveContract({
+      contractName: "DexStablePool",
+      deploymentName: "DexPool" + poolName,
+      address: DexPool.address,
+    });
 
     const version = (await DexPool.methods.getVersion({ answerId: 0 }).call())
       .version;
     console.log(`DexPool${poolName} version = ${version}`);
 
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+    await new Promise(resolve => setTimeout(resolve, 10000));
 
     const active = (await DexPool.methods.isActive({ answerId: 0 }).call())
       .value0;
     console.log(`DexPool${poolName} active = ${active}`);
 
-    const DexPoolLpRoot = await locklift.factory.getDeployedContract(
-      'TokenRootUpgradeable',
-      (
-        await DexPool.methods.getTokenRoots({ answerId: 0 }).call()
-      ).lp,
+    const DexPoolLpRoot = locklift.factory.getDeployedContract(
+      "TokenRootUpgradeable",
+      (await DexPool.methods.getTokenRoots({ answerId: 0 }).call()).lp,
     );
 
-    migration.store(DexPoolLpRoot, poolName + 'LpRoot');
-
+    locklift.deployments.deploymentsStore = {
+      [poolName + "LpRoot"]: DexPoolLpRoot,
+    };
     for (let i = 0; i < N_COINS; i++) {
-      const tokenWallet = await locklift.factory.getDeployedContract(
-        'TokenWalletUpgradeable',
+      const tokenWallet = locklift.factory.getDeployedContract(
+        "TokenWalletUpgradeable",
         (
           await tokenContracts[i].methods
             .walletOf({
@@ -122,10 +131,9 @@ async function main() {
         ).value0,
       );
 
-      migration.store(
-        tokenWallet,
-        poolName + 'Pool_' + tokens[i].symbol + 'Wallet',
-      );
+      locklift.deployments.deploymentsStore = {
+        [poolName + "Pool_" + tokens[i].symbol + "Wallet"]: tokenWallet,
+      };
 
       const coinTokenVault = (
         await dexRoot.methods
@@ -137,7 +145,7 @@ async function main() {
       ).value0;
 
       const tokenVaultWallet = await locklift.factory.getDeployedContract(
-        'TokenWalletUpgradeable',
+        "TokenWalletUpgradeable",
         (
           await tokenContracts[i].methods
             .walletOf({
@@ -148,11 +156,13 @@ async function main() {
         ).value0,
       );
 
-      migration.store(tokenVaultWallet, tokens[i].symbol + 'VaultWallet');
+      locklift.deployments.deploymentsStore = {
+        [tokens[i].symbol + "VaultWallet"]: tokenVaultWallet,
+      };
     }
 
     const DexPoolLpPoolWallet = await locklift.factory.getDeployedContract(
-      'TokenWalletUpgradeable',
+      "TokenWalletUpgradeable",
       (
         await DexPoolLpRoot.methods
           .walletOf({
@@ -163,7 +173,9 @@ async function main() {
       ).value0,
     );
 
-    migration.store(DexPoolLpPoolWallet, poolName + 'Pool_LpWallet');
+    locklift.deployments.deploymentsStore = {
+      [poolName + "Pool_LpWallet"]: DexPoolLpPoolWallet,
+    };
 
     const dexPoolLpTokenVault = (
       await dexRoot.methods
@@ -175,7 +187,7 @@ async function main() {
     ).value0;
 
     const DexPoolLpVaultWallet = await locklift.factory.getDeployedContract(
-      'TokenWalletUpgradeable',
+      "TokenWalletUpgradeable",
       (
         await DexPoolLpRoot.methods
           .walletOf({
@@ -186,13 +198,15 @@ async function main() {
       ).value0,
     );
 
-    migration.store(DexPoolLpVaultWallet, poolName + 'LpVaultWallet');
+    locklift.deployments.deploymentsStore = {
+      [poolName + "LpVaultWallet"]: DexPoolLpVaultWallet,
+    };
   }
 }
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

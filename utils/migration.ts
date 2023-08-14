@@ -1,13 +1,13 @@
-import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
-import { Address, WalletTypes } from 'locklift';
-import { FactorySource } from '../build/factorySource';
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import { join } from "path";
+import { Address, WalletTypes } from "locklift";
+import { FactorySource } from "../build/factorySource";
 
 export class Migration<T extends FactorySource> {
   private migrationLog: Record<string, string>;
   private readonly logPath: string;
 
-  constructor(logPath = 'locklift.migration.json') {
+  constructor(logPath = "locklift.migration.json") {
     this.logPath = join(process.cwd(), logPath);
     this.migrationLog = {};
     this._loadMigrationLog();
@@ -15,7 +15,7 @@ export class Migration<T extends FactorySource> {
 
   private _loadMigrationLog = () => {
     if (existsSync(this.logPath)) {
-      const data = readFileSync(this.logPath, 'utf8');
+      const data = readFileSync(this.logPath, "utf8");
       if (data) this.migrationLog = JSON.parse(data);
     }
   };

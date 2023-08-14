@@ -1,30 +1,25 @@
-import { Command } from 'commander';
-import { Address, fromNano } from 'locklift';
+import { Command } from "commander";
+import { Address, fromNano } from "locklift";
 
-import { Migration } from '../utils/migration';
-
-const migration = new Migration();
 const program = new Command();
 
 program
   .allowUnknownOption()
-  .option('-n, --key_number <key_number>', 'count of accounts');
+  .option("-n, --key_number <key_number>", "count of accounts");
 
 program.parse(process.argv);
 
 const main = async () => {
   const options = program.opts();
-  const key_number = +(options.key_number || '0');
-
-  const accountAddress = await migration.loadAccount(
+  const key_number = +(options.key_number || "0");
+  const accountAddress = locklift.deployments.getAccount(
     `Account${key_number + 1}`,
-    (key_number + 1).toString(),
-  );
+  ).account;
   const pubKey = await locklift.keystore
     .getSigner(key_number.toString())
-    .then((s) => s.publicKey);
+    .then(s => s.publicKey);
   const account = locklift.factory.getDeployedContract(
-    'EverWallet',
+    "EverWallet",
     accountAddress.address,
   );
 
@@ -38,7 +33,7 @@ const main = async () => {
         value: 0,
         bounce: false,
         flags: 128,
-        payload: '',
+        payload: "",
       })
       .sendExternal({ publicKey: pubKey }),
   );
@@ -54,7 +49,7 @@ const main = async () => {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

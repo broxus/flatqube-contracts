@@ -363,11 +363,12 @@ export const getPoolData = async (
   const tokenRoots = await poolContract.methods
     .getTokenRoots({ answerId: 0 })
     .call();
-  const roots = tokenRoots.hasOwnProperty("roots")
-    ? tokenRoots.roots.map(root => root.toString())
-    : [tokenRoots.left.toString(), tokenRoots.right.toString()];
+  const roots =
+    "roots" in tokenRoots
+      ? tokenRoots.roots.map(root => root.toString())
+      : [tokenRoots.left.toString(), tokenRoots.right.toString()];
 
-  let balances: Record<string, string> = {};
+  const balances: Record<string, string> = {};
 
   if (balancesData.value0.hasOwnProperty("balances")) {
     (balancesData.value0 as IBalPool).balances.forEach(
@@ -380,7 +381,7 @@ export const getPoolData = async (
     balances[roots[1]] = (balancesData.value0 as IBalPair).right_balance;
   }
 
-  let fees: Record<string, string> = {};
+  const fees: Record<string, string> = {};
   (
     await poolContract.methods.getAccumulatedFees({ answerId: 0 }).call()
   ).accumulatedFees.forEach((fee, i) => (fees[roots[i]] = fee));

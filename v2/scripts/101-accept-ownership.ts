@@ -1,44 +1,42 @@
-import {toNano, WalletTypes} from "locklift";
+import { toNano } from "locklift";
+import { displayTx } from "../../utils/helpers";
+import { Command } from "commander";
+import { DexRootAbi } from "../../build/factorySource";
 
-const { Migration, displayTx } = require(process.cwd()+'/scripts/utils')
-import { Command } from 'commander';
 const program = new Command();
 
 program
-    .allowUnknownOption()
-    .option('-rcn, --root_contract_name <root_contract_name>', 'DexRoot contract name')
+  .allowUnknownOption()
+  .option(
+    "-rcn, --root_contract_name <root_contract_name>",
+    "DexRoot contract name",
+  );
 
 program.parse(process.argv);
 
 const options = program.opts();
-options.root_contract_name = options.root_contract_name || 'DexRoot';
+options.root_contract_name = options.root_contract_name || "DexRoot";
 
 let tx;
 
 async function main() {
-    const migration = new Migration();
-    const account = await locklift.factory.accounts.addExistingAccount({
-        type: WalletTypes.EverWallet,
-        address: migration.getAddress('Account1')
-    });
+  const account = locklift.deployments.getAccount("Account1").account;
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
-    const dexRoot = await locklift.factory.getDeployedContract(options.root_contract_name, migration.getAddress('DexRoot'));
+  console.log(`Account address: ${account.address}`);
+  console.log(`DexRoot address: ${dexRoot.address}`);
 
-    console.log(`Account address: ${account.address}`);
-    console.log(`DexRoot address: ${dexRoot.address}`);
-
-    console.log(`Accepting DEX ownership from by ${account.address}`);
-    // @ts-ignore
-    tx = await dexRoot.methods.acceptOwner().send({
-        from: account.address,
-        amount: toNano(1)
-    });
-    displayTx(tx);
+  console.log(`Accepting DEX ownership from by ${account.address}`);
+  tx = await dexRoot.methods.acceptOwner().send({
+    from: account.address,
+    amount: toNano(1),
+  });
+  displayTx(tx);
 }
 
 main()
-    .then(() => process.exit(0))
-    .catch(e => {
-        console.log(e);
-        process.exit(1);
-    });
+  .then(() => process.exit(0))
+  .catch(e => {
+    console.log(e);
+    process.exit(1);
+  });

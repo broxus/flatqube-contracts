@@ -1,20 +1,22 @@
-import { toNano } from 'locklift';
-import { Migration, Constants, EMPTY_TVM_CELL } from '../utils/migration';
+import { toNano } from "locklift";
+import { Command } from "commander";
+import { BigNumber } from "bignumber.js";
+import { Constants, EMPTY_TVM_CELL, TTokenName } from "../../utils/consts";
+import {
+  TokenRootAbi,
+  TokenRootUpgradeableAbi,
+} from "../../build/factorySource";
 
-import { Command } from 'commander';
 const program = new Command();
-import { BigNumber } from 'bignumber.js';
 BigNumber.config({ EXPONENTIAL_AT: 257 });
 
 async function main() {
-  const migration = new Migration();
-
-  const rootOwner = await migration.loadAccount('Account1', '0');
+  const rootOwner = locklift.deployments.getAccount("Account1").account;
 
   program
     .allowUnknownOption()
-    .option('-m, --mints <mints>', 'mint params')
-    .option('-t, --to <to>', 'mint params');
+    .option("-m, --mints <mints>", "mint params")
+    .option("-t, --to <to>", "mint params");
 
   program.parse(process.argv);
 
@@ -25,24 +27,25 @@ async function main() {
     : [
         {
           amount: 20000,
-          token: 'foo',
+          token: "foo",
         },
       ];
 
   const to =
     options.to ||
-    '0:0000000000000000000000000000000000000000000000000000000000000000';
+    "0:0000000000000000000000000000000000000000000000000000000000000000";
 
   for (const mint of mints) {
-    const token = Constants.tokens[mint.token];
+    const token = Constants.tokens[mint.token as TTokenName];
     const amount = new BigNumber(mint.amount)
       .shiftedBy(token.decimals)
       .toFixed();
 
-    const tokenRoot = migration.loadContract(
-      token.upgradeable ? 'TokenRootUpgradeable' : 'TokenRoot',
-      token.symbol + 'Root',
-    );
+    const tokenRoot = token.upgradeable
+      ? locklift.deployments.getContract<TokenRootUpgradeableAbi>(
+          token.symbol + "Root",
+        )
+      : locklift.deployments.getContract<TokenRootAbi>(token.symbol + "Root");
 
     await tokenRoot.methods
       .mint({
@@ -62,7 +65,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

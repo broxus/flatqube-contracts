@@ -1,47 +1,39 @@
-import { toNano, WalletTypes } from 'locklift';
+import { toNano } from "locklift";
+import { Command } from "commander";
 
-import { Migration, displayTx } from '../utils/migration';
-import { Command } from 'commander';
+import { DexRootAbi, DexVaultAbi } from "../../build/factorySource";
+
 const program = new Command();
 
 program
   .allowUnknownOption()
   .option(
-    '-rcn, --root_contract_name <root_contract_name>',
-    'DexRoot contract name',
+    "-rcn, --root_contract_name <root_contract_name>",
+    "DexRoot contract name",
   )
   .option(
-    '-pcn, --pair_contract_name <pair_contract_name>',
-    'DexPair contract name',
+    "-pcn, --pair_contract_name <pair_contract_name>",
+    "DexPair contract name",
   )
   .option(
-    '-acn, --account_contract_name <account_contract_name>',
-    'DexAccount contract name',
+    "-acn, --account_contract_name <account_contract_name>",
+    "DexAccount contract name",
   )
-  .option('-o, --new_owner <new_owner>', 'DexAccount contract name');
+  .option("-o, --new_owner <new_owner>", "DexAccount contract name");
 
 program.parse(process.argv);
 
 const options = program.opts();
-options.root_contract_name = options.root_contract_name || 'DexRoot';
-options.vault_contract_name = options.vault_contract_name || 'DexVault';
-options.pair_contract_name = options.pair_contract_name || 'DexPair';
-options.account_contract_name = options.account_contract_name || 'DexAccount';
-
-let tx;
+options.root_contract_name = options.root_contract_name || "DexRoot";
+options.vault_contract_name = options.vault_contract_name || "DexVault";
+options.pair_contract_name = options.pair_contract_name || "DexPair";
+options.account_contract_name = options.account_contract_name || "DexAccount";
 
 async function main() {
   if (options.new_owner) {
-    const migration = new Migration();
-    const account = await migration.loadAccount('Account1', '0');
-    const dexRoot = migration.loadContract(
-      options.root_contract_name,
-      'DexRoot',
-    );
-    const dexVault = migration.loadContract(
-      options.vault_contract_name,
-      'DexVault',
-    );
+    const account = locklift.deployments.getAccount("Account1").account;
+    const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
+    const dexVault = locklift.deployments.getContract<DexVaultAbi>("DexVault");
 
     console.log(`Account address: ${account.address}`);
     console.log(`DexRoot address: ${dexRoot.address}`);
@@ -71,13 +63,13 @@ async function main() {
         amount: toNano(1),
       });
   } else {
-    console.log('REQUIRED: --new_owner <new_owner>');
+    console.log("REQUIRED: --new_owner <new_owner>");
   }
 }
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

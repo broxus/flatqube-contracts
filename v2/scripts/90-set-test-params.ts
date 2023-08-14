@@ -1,25 +1,27 @@
-import { Migration } from '../utils/migration';
-import { Address, toNano } from 'locklift';
+import {
+  DexRootAbi,
+  DexVaultAbi,
+  TokenRootUpgradeableAbi,
+} from "../../build/factorySource";
+import { Address, toNano } from "locklift";
+
+const MANAGER = new Address(
+  "0:33478651d9c7b44c1b45c2dfe85edf7a5d24692f5222f0a25c176b1abfd95e51",
+);
 
 async function main() {
-  const MANAGER = new Address(
-    '0:33478651d9c7b44c1b45c2dfe85edf7a5d24692f5222f0a25c176b1abfd95e51',
-  );
-  const migration = new Migration();
-  const owner = await migration.loadAccount('Account1', '0');
-  // migration.store(
-  //   {
-  //     address: MANAGER,
-  //   },
-  //   'Account2',
-  // );
+  const owner = locklift.deployments.getAccount("Account1").account;
 
-  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
-  const dexVault = migration.loadContract('DexVault', 'DexVault');
-  const foo = migration.loadContract('TokenRootUpgradeable', 'FooRoot');
-  const bar = migration.loadContract('TokenRootUpgradeable', 'BarRoot');
-  const qwe = migration.loadContract('TokenRootUpgradeable', 'QweRoot');
-  const tst = migration.loadContract('TokenRootUpgradeable', 'TstRoot');
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
+  const dexVault = locklift.deployments.getContract<DexVaultAbi>("DexRoot");
+  const foo =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("FooRoot");
+  const bar =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("BarRoot");
+  const qwe =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("QweRoot");
+  const tst =
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("TstRoot");
 
   console.log(`DexRoot.setManager(${MANAGER})`);
   await dexRoot.methods.setManager({ _newManager: MANAGER }).send({
@@ -37,12 +39,12 @@ async function main() {
   await dexVault.methods
     .setReferralProgramParams({
       params: {
-        projectId: '0',
+        projectId: "0",
         systemAddress: new Address(
-          '0:1cf8f1dee31e3c74888d1adac9a013ed4bfe1ddf5b431e0c5b1d4e1dd5192217',
+          "0:1cf8f1dee31e3c74888d1adac9a013ed4bfe1ddf5b431e0c5b1d4e1dd5192217",
         ),
         projectAddress: new Address(
-          '0:a642ad3ab35551f8a45b12984611bf90b6a884a50b2dd8d9e0fc306b278e1cc6',
+          "0:a642ad3ab35551f8a45b12984611bf90b6a884a50b2dd8d9e0fc306b278e1cc6",
         ),
       },
     })
@@ -107,7 +109,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

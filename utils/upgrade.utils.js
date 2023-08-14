@@ -1,4 +1,4 @@
-const logger = require('mocha-logger');
+const logger = require("mocha-logger");
 
 /**
  * Upgrades DEX pair's code
@@ -17,26 +17,26 @@ const upgradePair = async (
   newPair,
   poolType = 1,
 ) => {
-  logger.log('[DexRoot] installOrUpdatePairCode...');
+  logger.log("[DexRoot] installOrUpdatePairCode...");
   await account.runTarget({
     contract: dexRoot,
-    method: 'installOrUpdatePairCode',
+    method: "installOrUpdatePairCode",
     params: { code: newPair.code, pool_type: poolType },
-    value: locklift.utils.convertCrystal(10, 'nano'),
+    value: locklift.utils.convertCrystal(10, "nano"),
     keyPair: account.keyPair,
   });
 
-  logger.log('[DexRoot] upgradePair...');
+  logger.log("[DexRoot] upgradePair...");
   const tx = await account.runTarget({
     contract: dexRoot,
-    method: 'upgradePair',
+    method: "upgradePair",
     params: {
       left_root: leftRoot,
       right_root: rightRoot,
       send_gas_to: account.address,
       pool_type: poolType,
     },
-    value: locklift.utils.convertCrystal(10, 'nano'),
+    value: locklift.utils.convertCrystal(10, "nano"),
     keyPair: account.keyPair,
   });
 
@@ -49,17 +49,13 @@ const upgradePair = async (
  * @param dexRoot DexRoot contract with address
  * @param newRoot a new DexRoot contract
  */
-const upgradeRoot = async (
-  account,
-  dexRoot,
-  newRoot,
-) => {
-  logger.log('[DexRoot] upgrade...');
+const upgradeRoot = async (account, dexRoot, newRoot) => {
+  logger.log("[DexRoot] upgrade...");
   const tx = await account.runTarget({
     contract: dexRoot,
-    method: 'upgrade',
+    method: "upgrade",
     params: { code: newRoot.code },
-    value: locklift.utils.convertCrystal(10, 'nano'),
+    value: locklift.utils.convertCrystal(10, "nano"),
     keyPair: account.keyPair,
   });
 

@@ -1,6 +1,6 @@
 import { toNano, getRandomNonce, zeroAddress } from "locklift";
 import { TokenFactoryAbi } from "../../build/factorySource";
-import { displayTx } from "../utils/log.utils";
+import { displayTx } from "../../utils/helpers";
 
 import { Command } from "commander";
 const program = new Command();

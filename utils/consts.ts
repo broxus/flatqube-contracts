@@ -8,7 +8,7 @@ export const WEVER_DEXPAIR_AMOUNT = 200;
 // tokens consts
 export const TOKENS_N = 2;
 export const TOKENS_DECIMALS = [6, 9, 18];
-export type TToken = "foo" | "bar" | "qwe" | "tst" | "coin" | "wever";
+export type TTokenName = "foo" | "bar" | "qwe" | "tst" | "coin" | "wever";
 
 export interface ITokenItem {
   name: string;
@@ -18,7 +18,7 @@ export interface ITokenItem {
 }
 
 export interface ITokenConst {
-  tokens: Record<TToken, ITokenItem>;
+  tokens: Record<TTokenName, ITokenItem>;
   LP_DECIMALS: number;
   TESTS_TIMEOUT: number;
 }
@@ -65,3 +65,5 @@ export const Constants: ITokenConst = {
   LP_DECIMALS: 9,
   TESTS_TIMEOUT: 120000,
 };
+
+export const EMPTY_TVM_CELL = "te6ccgEBAQEAAgAAAA==";
