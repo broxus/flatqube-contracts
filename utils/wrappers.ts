@@ -1,4 +1,10 @@
-import { Address, Contract, toNano } from "locklift";
+import {
+  Address,
+  Contract,
+  getRandomNonce,
+  toNano,
+  zeroAddress,
+} from "locklift";
 import {
   DexRootAbi,
   DexVaultAbi,
@@ -461,12 +467,12 @@ export const depositLiquidity = async (
   await locklift.transactions.waitFinalized(
     dexAccount.methods
       .depositLiquidityV2({
-        _callId: 123,
+        _callId: getRandomNonce(),
         _operations: depositData,
         _expected: { amount: "0", root: FooBarLpRoot.address },
         _autoChange: false,
         _remainingGasTo: dexOwner,
-        _referrer: dexOwner,
+        _referrer: zeroAddress,
       })
       .send({
         from: dexOwner,

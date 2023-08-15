@@ -97,7 +97,6 @@ describe("Check DexAccount add Pair", () => {
         "DexStablePool_" + poolsData.stablePool.tokens.join("_"),
       );
 
-    // add pools to DexAccount + transfer to dexAccount
     for (const pool in poolsData) {
       poolsData[pool].roots = poolsData[pool].tokens.map((token: string) =>
         locklift.deployments.getContract<TokenRootUpgradeableAbi>(token),
@@ -111,6 +110,8 @@ describe("Check DexAccount add Pair", () => {
         };
       }
     }
+
+    // add pools to DexAccount + transfer to dexAccount
     for (let pool in poolsData) {
       await dexAccount.methods
         .addPool({
