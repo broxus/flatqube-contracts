@@ -1,8 +1,8 @@
-import { Address, toNano, WalletTypes } from 'locklift';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-import { yellowBright } from 'chalk';
-import accounts from '../../../dex_accounts.json';
-import { displayTx, Migration } from '../../utils/migration';
+import { Address, toNano, WalletTypes } from "locklift";
+import { yellowBright } from "chalk";
+import { displayTx } from "../../utils/migration";
+import { DexRootAbi } from "build/factorySource";
+import accounts from "../../../dex_accounts.json";
 
 const TRACE = false;
 
@@ -12,26 +12,24 @@ const chunkify = <T>(arr: T[], size: number): T[][] =>
   );
 
 const main = async () => {
-  const migration = new Migration();
-
-  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   const dexManagerAddress = await dexRoot.methods
     .getManager({ answerId: 0 })
     .call()
-    .then((m) => m.value0);
+    .then(m => m.value0);
 
   const manager = await locklift.factory.accounts.addExistingAccount({
     type: WalletTypes.EverWallet,
     address: dexManagerAddress,
   });
 
-  console.log('DexRoot:' + dexRoot.address);
-  console.log('Manager:' + manager.address);
+  console.log("DexRoot:" + dexRoot.address);
+  console.log("Manager:" + manager.address);
 
   console.log(`Start force upgrade DexAccounts. Count = ${accounts.length}`);
 
-  const params = accounts.map((a) => ({
+  const params = accounts.map(a => ({
     owner: a.owner,
     account: a.dexAccount,
   }));
@@ -39,7 +37,7 @@ const main = async () => {
   for (const chunk of chunkify(params, 1000)) {
     const p = dexRoot.methods
       .upgradeAccounts({
-        _accountsOwners: chunk.map((a) => new Address(a.owner)),
+        _accountsOwners: chunk.map(a => new Address(a.owner)),
         _offset: 0,
         _remainingGasTo: manager.address,
       })
@@ -53,13 +51,13 @@ const main = async () => {
 
       for (const account of chunk) {
         const DexAccount = locklift.factory.getDeployedContract(
-          'DexAccount',
+          "DexAccount",
           new Address(account.account),
         );
 
         const events = traceTree.findEventsForContract({
           contract: DexAccount,
-          name: 'AccountCodeUpgraded' as const,
+          name: "AccountCodeUpgraded" as const,
         });
 
         if (events.length > 0) {
@@ -81,7 +79,7 @@ const main = async () => {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

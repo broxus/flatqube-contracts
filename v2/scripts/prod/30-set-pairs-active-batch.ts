@@ -1,9 +1,9 @@
-import { Address, toNano, WalletTypes } from 'locklift';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Migration } = require(process.cwd() + '/scripts/utils');
-import { yellowBright } from 'chalk';
-import prompts from 'prompts';
-import pairs from '../../../dex_pairs.json';
+import { Address, toNano, WalletTypes } from "locklift";
+import { yellowBright } from "chalk";
+import prompts from "prompts";
+import { DexRootAbi } from "build/factorySource";
+
+import pairs from "../../../dex_pairs.json";
 
 const chunkify = <T>(arr: T[], size: number): T[][] =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
@@ -11,26 +11,22 @@ const chunkify = <T>(arr: T[], size: number): T[][] =>
   );
 
 const main = async (isActive: boolean) => {
-  const migration = new Migration();
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
-  const dexRoot = await locklift.factory.getDeployedContract(
-    'DexRoot',
-    migration.getAddress('DexRoot'),
-  );
   const dexManagerAddress = await dexRoot.methods
     .getManager({ answerId: 0 })
     .call()
-    .then((m) => m.value0);
+    .then(m => m.value0);
 
   const manager = await locklift.factory.accounts.addExistingAccount({
     type: WalletTypes.EverWallet,
     address: dexManagerAddress,
   });
 
-  console.log('DexRoot:' + dexRoot.address);
-  console.log('Manager:' + manager.address);
+  console.log("DexRoot:" + dexRoot.address);
+  console.log("Manager:" + manager.address);
 
-  const params = pairs.map((p) => ({
+  const params = pairs.map(p => ({
     tokenRoots: [new Address(p.left), new Address(p.right)],
     newActive: isActive,
     pool: p.dexPair,
@@ -40,7 +36,7 @@ const main = async (isActive: boolean) => {
     const { traceTree } = await locklift.tracing.trace(
       dexRoot.methods
         .setPoolsActive({
-          _params: chunk.map((p) => ({
+          _params: chunk.map(p => ({
             tokenRoots: p.tokenRoots,
             newActive: p.newActive,
           })),
@@ -57,13 +53,13 @@ const main = async (isActive: boolean) => {
 
     for (const pair of chunk) {
       const DexPair = locklift.factory.getDeployedContract(
-        'DexPair',
+        "DexPair",
         new Address(pair.pool),
       );
 
       const events = traceTree.findEventsForContract({
         contract: DexPair,
-        name: 'ActiveStatusUpdated' as const,
+        name: "ActiveStatusUpdated" as const,
       });
 
       if (events.length > 0) {
@@ -79,10 +75,10 @@ const main = async (isActive: boolean) => {
   }
 };
 
-prompts({ type: 'toggle', name: 'isActive', message: 'Activate DEX pairs?' })
-  .then((p) => main(p.isActive))
+prompts({ type: "toggle", name: "isActive", message: "Activate DEX pairs?" })
+  .then(p => main(p.isActive))
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

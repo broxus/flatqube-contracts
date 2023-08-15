@@ -1,11 +1,10 @@
-import { writeFileSync } from 'fs';
-import { Address } from 'locklift';
-import { yellowBright } from 'chalk';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-import { Migration } from '../../utils/migration';
+import { writeFileSync } from "fs";
+import { Address } from "locklift";
+import { yellowBright } from "chalk";
+import { DexRootAbi } from "build/factorySource";
 
 const OLD_DEX_TOKEN_VAULTS_CODE_HASH =
-  '80cda6cdc2997c143552385d3f73a06a8d2e261eded0b1962cd548e37ad26be3';
+  "80cda6cdc2997c143552385d3f73a06a8d2e261eded0b1962cd548e37ad26be3";
 
 type TokenVaultEntity = {
   tokenVault: Address;
@@ -13,11 +12,9 @@ type TokenVaultEntity = {
 };
 
 async function exportDexTokenVault() {
-  const migration = new Migration();
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
-  const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
-
-  console.log('DexRoot: ' + dexRoot.address);
+  console.log("DexRoot: " + dexRoot.address);
 
   let continuation = undefined;
   let hasResults = true;
@@ -43,19 +40,19 @@ async function exportDexTokenVault() {
 
   for (const addr of accounts) {
     promises.push(
-      new Promise(async (resolve) => {
+      new Promise(async resolve => {
         const DexTokenVault = await locklift.factory.getDeployedContract(
-          'DexTokenVault',
+          "DexTokenVault",
           addr,
         );
 
         const root = await DexTokenVault.methods
           .getDexRoot({ answerId: 0 })
           .call({})
-          .then((r) => r.value0.toString())
-          .catch((e) => {
+          .then(r => r.value0.toString())
+          .catch(e => {
             console.error(e);
-            return '';
+            return "";
           });
 
         if (root === dexRoot.address.toString()) {
@@ -84,9 +81,9 @@ async function exportDexTokenVault() {
   console.log(`Export took ${(Date.now() - start) / 1000} seconds`);
 
   writeFileSync(
-    './dex_token_vaults.json',
+    "./dex_token_vaults.json",
     JSON.stringify(
-      pairs.filter((v) => !!v),
+      pairs.filter(v => !!v),
       null,
       2,
     ),
@@ -95,7 +92,7 @@ async function exportDexTokenVault() {
 
 exportDexTokenVault()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

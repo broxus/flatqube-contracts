@@ -78,7 +78,7 @@ async function main() {
         .walletOf({ answerId: 0, walletOwner: account.address })
         .call()
     ).value0;
-    const tokenWallet = await locklift.factory.getDeployedContract(
+    const tokenWallet = locklift.factory.getDeployedContract(
       "TokenWalletUpgradeable",
       tokenWalletAddress,
     );

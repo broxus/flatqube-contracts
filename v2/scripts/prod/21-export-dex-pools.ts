@@ -1,11 +1,10 @@
-import { writeFileSync } from 'fs';
-import { Address } from 'locklift';
-import { yellowBright } from 'chalk';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-import { Migration } from '../../utils/migration';
+import { writeFileSync } from "fs";
+import { Address } from "locklift";
+import { yellowBright } from "chalk";
+import { DexRootAbi } from "build/factorySource";
 
 const OLD_DEX_POOL_CODE_HASH =
-  'c186a348418ddf13dfbf70eb48c13e4a2d86d2e8495a89e924a39c81ec8903e9';
+  "c186a348418ddf13dfbf70eb48c13e4a2d86d2e8495a89e924a39c81ec8903e9";
 
 type PoolEntity = {
   dexPool: Address;
@@ -13,11 +12,9 @@ type PoolEntity = {
 };
 
 async function exportDexPairs() {
-  const migration = new Migration();
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
-  const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
-
-  console.log('DexRoot: ' + dexRoot.address);
+  console.log("DexRoot: " + dexRoot.address);
 
   let continuation = undefined;
   let hasResults = true;
@@ -43,19 +40,19 @@ async function exportDexPairs() {
 
   for (const dexPoolAddress of accounts) {
     promises.push(
-      new Promise(async (resolve) => {
-        const DexStablePool = await locklift.factory.getDeployedContract(
-          'DexStablePool',
+      new Promise(async resolve => {
+        const DexStablePool = locklift.factory.getDeployedContract(
+          "DexStablePool",
           dexPoolAddress,
         );
 
         const root = await DexStablePool.methods
           .getRoot({ answerId: 0 })
           .call({})
-          .then((r) => r.dex_root.toString())
-          .catch((e) => {
+          .then(r => r.dex_root.toString())
+          .catch(e => {
             console.error(e);
-            return '';
+            return "";
           });
 
         if (root === dexRoot.address.toString()) {
@@ -63,7 +60,7 @@ async function exportDexPairs() {
             await DexStablePool.methods.getTokenRoots({ answerId: 0 }).call()
           ).roots;
 
-          const rootString = roots.map((e) => e.toString()).join(',');
+          const rootString = roots.map(e => e.toString()).join(",");
 
           console.log(`DexStablePool ${dexPoolAddress}, roots = ${rootString}`);
 
@@ -88,9 +85,9 @@ async function exportDexPairs() {
   console.log(`Export took ${(Date.now() - start) / 1000} seconds`);
 
   writeFileSync(
-    './dex_pools.json',
+    "./dex_pools.json",
     JSON.stringify(
-      pairs.filter((v) => !!v),
+      pairs.filter(v => !!v),
       null,
       2,
     ),
@@ -99,7 +96,7 @@ async function exportDexPairs() {
 
 exportDexPairs()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

@@ -1,22 +1,16 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Migration, displayTx } = require(process.cwd() + '/scripts/utils');
-import { Command } from 'commander';
+import { Command } from "commander";
 import {
   toNano,
   WalletTypes,
   getRandomNonce,
   zeroAddress,
   Address,
-} from 'locklift';
+} from "locklift";
+import { displayTx } from "utils/helpers";
 
 async function main() {
   const program = new Command();
-  const migration = new Migration();
-
-  migration.reset();
-
-  program.allowUnknownOption().option('-o, --owner <owner>', 'owner');
-
+  program.allowUnknownOption().option("-o, --owner <owner>", "owner");
   program.parse(process.argv);
 
   const options = program.opts();
@@ -25,14 +19,25 @@ async function main() {
 
   // ============ DEPLOYER ACCOUNT ============
 
-  const signer = await locklift.keystore.getSigner('0');
-  const account = (
-    await locklift.factory.accounts.addNewAccount({
-      type: WalletTypes.EverWallet,
-      value: toNano(10),
-      publicKey: signer.publicKey,
-    })
-  ).account;
+  const signer = await locklift.keystore.getSigner("0");
+  const name = `Account1`;
+
+  await locklift.deployments.deployAccounts(
+    [
+      {
+        deploymentName: name,
+        accountSettings: {
+          type: WalletTypes.EverWallet,
+          value: toNano(10),
+          nonce: getRandomNonce(),
+        },
+        signerId: "0",
+      },
+    ],
+    true,
+  );
+
+  const account = locklift.deployments.getAccount(name).account;
 
   await locklift.provider.sendMessage({
     sender: account.address,
@@ -41,8 +46,6 @@ async function main() {
     bounce: false,
   });
 
-  const name = `Account1`;
-  migration.store(account, name);
   console.log(`${name}: ${account.address}`);
 
   // ============ TOKEN FACTORY ============
@@ -50,28 +53,34 @@ async function main() {
   //   'TokenFactory',
   // );
 
-  const TokenRoot = await locklift.factory.getContractArtifacts(
-    'TokenRootUpgradeable',
+  const TokenRoot = locklift.factory.getContractArtifacts(
+    "TokenRootUpgradeable",
   );
-  const TokenWallet = await locklift.factory.getContractArtifacts(
-    'TokenWalletUpgradeable',
+  const TokenWallet = locklift.factory.getContractArtifacts(
+    "TokenWalletUpgradeable",
   );
-  const TokenWalletPlatform = await locklift.factory.getContractArtifacts(
-    'TokenWalletPlatform',
+  const TokenWalletPlatform = locklift.factory.getContractArtifacts(
+    "TokenWalletPlatform",
   );
 
-  const { contract: tokenFactory } = await locklift.factory.deployContract({
-    contract: 'TokenFactory',
-    constructorParams: {
-      _owner: account.address,
-    },
-    initParams: {
-      randomNonce_: getRandomNonce(),
-    },
-    publicKey: signer.publicKey,
-    value: toNano(2),
-  });
-  migration.store(tokenFactory, 'TokenFactory');
+  const {
+    extTransaction: { contract: tokenFactory },
+  } = await locklift.transactions.waitFinalized(
+    locklift.deployments.deploy({
+      deployConfig: {
+        contract: "TokenFactory",
+        constructorParams: {
+          _owner: account.address,
+        },
+        initParams: {
+          randomNonce_: getRandomNonce(),
+        },
+        publicKey: signer.publicKey,
+        value: toNano(2),
+      },
+      deploymentName: "TokenFactory",
+    }),
+  );
 
   console.log(`TokenFactory: ${tokenFactory.address}`);
 
@@ -99,56 +108,69 @@ async function main() {
 
   // ============ ROOT AND VAULT ============
   const DexPlatform = await locklift.factory.getContractArtifacts(
-    'DexPlatform',
+    "DexPlatform",
   );
-  const DexAccount = await locklift.factory.getContractArtifacts('DexAccount');
-  const DexPair = await locklift.factory.getContractArtifacts('DexPair');
+  const DexAccount = await locklift.factory.getContractArtifacts("DexAccount");
+  const DexPair = await locklift.factory.getContractArtifacts("DexPair");
   const DexStablePair = await locklift.factory.getContractArtifacts(
-    'DexStablePair',
+    "DexStablePair",
   );
   const DexStablePool = await locklift.factory.getContractArtifacts(
-    'DexStablePool',
+    "DexStablePool",
   );
   const DexTokenVault = await locklift.factory.getContractArtifacts(
-    'DexTokenVault',
+    "DexTokenVault",
   );
   const LpTokenPending = await locklift.factory.getContractArtifacts(
-    'LpTokenPending',
+    "LpTokenPending",
   );
 
   console.log(`Deploying DexGasValues...`);
-  const { contract: gasValues, tx: gasTx } =
-    await locklift.factory.deployContract({
-      contract: 'DexGasValues',
-      constructorParams: {
-        owner_: account.address,
-      },
-      initParams: {
-        _nonce: getRandomNonce(),
-      },
-      publicKey: signer.publicKey,
-      value: toNano(2),
-    });
-  migration.store(gasValues, 'DexGasValues');
-  console.log(`DexGasValues: ${gasValues.address}`);
-  displayTx(gasTx.transaction);
+
+  const { extTransaction: gasValues } =
+    await locklift.transactions.waitFinalized(
+      locklift.deployments.deploy({
+        deployConfig: {
+          contract: "DexGasValues",
+          constructorParams: {
+            owner_: account.address,
+          },
+          initParams: {
+            _nonce: getRandomNonce(),
+          },
+          publicKey: signer.publicKey,
+          value: toNano(2),
+        },
+        deploymentName: "DexGasValues",
+      }),
+    );
+  console.log(`DexGasValues: ${gasValues.contract.address}`);
+  displayTx(gasValues.tx.transaction);
 
   console.log(`Deploying DexRoot...`);
-  const { contract: dexRoot, tx: dexTx } =
-    await locklift.factory.deployContract({
-      contract: 'DexRoot',
-      constructorParams: {
-        initial_owner: account.address,
-        initial_vault: zeroAddress,
+  const {
+    extTransaction: { contract: dexRoot },
+    extTransaction: dexRootTx,
+  } = await locklift.transactions.waitFinalized(
+    locklift.deployments.deploy({
+      deployConfig: {
+        contract: "DexRoot",
+        constructorParams: {
+          initial_owner: account.address,
+          initial_vault: zeroAddress,
+        },
+        initParams: {
+          _nonce: getRandomNonce(),
+        },
+        publicKey: signer.publicKey,
+        value: toNano(2),
       },
-      initParams: { _nonce: getRandomNonce() },
-      publicKey: signer.publicKey,
-      value: toNano(2),
-    });
-  migration.store(dexRoot, 'DexRoot');
-  displayTx(dexTx.transaction);
-  console.log(`DexRoot address: ${dexRoot.address}`);
+      deploymentName: "DexRoot",
+    }),
+  );
 
+  displayTx(dexRootTx.tx.transaction);
+  console.log(`DexRoot address: ${dexRoot.address}`);
   console.log(`DexRoot: installing Platform code...`);
 
   let tx = await dexRoot.methods
@@ -212,7 +234,7 @@ async function main() {
     });
   displayTx(tx);
 
-  console.log('DexRoot: installing token vault code...');
+  console.log("DexRoot: installing token vault code...");
 
   tx = await dexRoot.methods
     .installOrUpdateTokenVaultCode({
@@ -237,20 +259,27 @@ async function main() {
   displayTx(tx);
 
   console.log(`Deploying DexVault...`);
-  const { contract: dexVault } = await locklift.factory.deployContract({
-    contract: 'DexVault',
-    constructorParams: {
-      owner_: account.address,
-      root_: dexRoot.address,
-    },
-    initParams: {
-      _nonce: getRandomNonce(),
-    },
-    publicKey: signer.publicKey,
-    value: toNano(2),
-  });
+
+  const {
+    extTransaction: { contract: dexVault },
+  } = await locklift.transactions.waitFinalized(
+    locklift.deployments.deploy({
+      deployConfig: {
+        contract: "DexVault",
+        constructorParams: {
+          owner_: account.address,
+          root_: dexRoot.address,
+        },
+        initParams: {
+          _nonce: getRandomNonce(),
+        },
+        publicKey: signer.publicKey,
+        value: toNano(2),
+      },
+      deploymentName: "DexVault",
+    }),
+  );
   console.log(`DexVault address: ${dexVault.address}`);
-  migration.store(dexVault, 'DexVault');
 
   console.log(`DexVault: installing Platform code...`);
 
@@ -331,8 +360,8 @@ async function main() {
       });
     displayTx(tx);
 
-    console.log(`Transfer for DexGasValues: ${gasValues.address}`);
-    tx = await gasValues.methods
+    console.log(`Transfer for DexGasValues: ${gasValues.contract.address}`);
+    tx = await gasValues.contract.methods
       .transferOwner({
         new_owner: newOwner,
       })
@@ -342,17 +371,11 @@ async function main() {
       });
     displayTx(tx);
   }
-
-  console.log('='.repeat(64));
-  for (const alias in migration.migration_log) {
-    console.log(`${alias}: ${migration.migration_log[alias].address}`);
-  }
-  console.log('='.repeat(64));
 }
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

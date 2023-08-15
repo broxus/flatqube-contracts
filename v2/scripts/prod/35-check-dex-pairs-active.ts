@@ -1,6 +1,6 @@
-import { Address } from 'locklift';
-import { BigNumber } from 'bignumber.js';
-import pairs from '../../../dex_pairs.json';
+import { Address } from "locklift";
+import { BigNumber } from "bignumber.js";
+import pairs from "../../../dex_fees.json";
 
 BigNumber.config({ EXPONENTIAL_AT: 257 });
 
@@ -12,8 +12,8 @@ async function main() {
   for (const indx in pairs) {
     const pairData = pairs[indx];
 
-    const DexPair = await locklift.factory.getDeployedContract(
-      'DexPair',
+    const DexPair = locklift.factory.getDeployedContract(
+      "DexPair",
       new Address(pairData.dexPair),
     );
 
@@ -22,7 +22,7 @@ async function main() {
 
     if (active) {
       activeCount++;
-      console.log('Pair active: ' + pairData.dexPair);
+      console.log("Pair active: " + pairData.dexPair);
     }
   }
   console.log(`Active pairs count = ${activeCount}`);
@@ -30,7 +30,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

@@ -1,13 +1,11 @@
-import { Address } from 'locklift';
-import manifest from '../../../manifest.json';
-import { Migration } from '../../utils/migration';
-
-const migration = new Migration();
+import { OrderFactoryAbi } from "build/factorySource";
+import { Address } from "locklift";
+import manifest from "../../../manifest.json";
 
 async function main() {
-  const factoryOrder = migration.loadContract('OrderFactory', 'OrderFactory');
-
-  const account = await migration.loadAccount('Account1', '0');
+  const factoryOrder =
+    locklift.deployments.getContract<OrderFactoryAbi>("OrderFactory");
+  const account = locklift.deployments.getAccount("Account1").account;
 
   for (const elTokens of manifest.tokens) {
     await factoryOrder.methods
@@ -21,7 +19,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

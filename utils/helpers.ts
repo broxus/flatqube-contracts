@@ -83,3 +83,6 @@ export const logMigrationParams = (params: Record<string, unknown>): void =>
     chalk.bgMagenta("[Params]"),
     JSON.stringify(params),
   );
+
+export const isValidEverAddress = (address: string) =>
+  /^(?:-1|0):[0-9a-fA-F]{64}$/.test(address);

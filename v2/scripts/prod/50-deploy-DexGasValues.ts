@@ -1,19 +1,18 @@
-import { displayTx, Migration } from '../../utils/migration';
-import { toNano, getRandomNonce, Address } from 'locklift';
-import { Command } from 'commander';
+import { displayTx } from "../../utils/migration";
+import { toNano, getRandomNonce, Address } from "locklift";
+import { Command } from "commander";
 
 async function main() {
   const program = new Command();
-  const migration = new Migration();
 
-  program.allowUnknownOption().option('-o, --owner <owner>', 'owner');
+  program.allowUnknownOption().option("-o, --owner <owner>", "owner");
   program.parse(process.argv);
   const options = program.opts();
 
   const newOwner = new Address(options.owner);
 
-  const signer = await locklift.keystore.getSigner('0');
-  const account = await migration.loadAccount('Account1', '0');
+  const signer = await locklift.keystore.getSigner("0");
+  const account = locklift.deployments.getAccount("Account1").account;
 
   if (locklift.tracing) {
     locklift.tracing.setAllowedCodesForAddress(account.address, {
@@ -21,18 +20,30 @@ async function main() {
     });
   }
 
-  const { contract: gasValues } = await locklift.factory.deployContract({
-    contract: 'DexGasValues',
-    constructorParams: {
-      owner_: account.address,
-    },
-    initParams: {
-      _nonce: getRandomNonce(),
-    },
-    publicKey: signer!.publicKey,
-    value: toNano(2),
+  const {
+    extTransaction: { contract: gasValues },
+  } = await locklift.transactions.waitFinalized(
+    locklift.deployments.deploy({
+      deployConfig: {
+        contract: "DexGasValues",
+        constructorParams: {
+          owner_: account.address,
+        },
+        initParams: {
+          _nonce: getRandomNonce(),
+        },
+        publicKey: signer.publicKey,
+        value: toNano(2),
+      },
+      deploymentName: "DexGasValues",
+    }),
+  );
+
+  await locklift.deployments.saveContract({
+    contractName: "DexGasValues",
+    deploymentName: "DexGasValues",
+    address: gasValues.address,
   });
-  migration.store(gasValues, 'DexGasValues');
 
   console.log(`DexGasValues: ${gasValues.address}`);
 
@@ -50,7 +61,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

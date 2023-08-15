@@ -1,59 +1,59 @@
-import { toNano, getRandomNonce } from 'locklift';
-import prompts from 'prompts';
-import { Migration } from '../../utils/migration';
-
-const isValidEverAddress = (address: any) =>
-  /^(?:-1|0):[0-9a-fA-F]{64}$/.test(address);
-
-const migration = new Migration();
+import { toNano, getRandomNonce } from "locklift";
+import { isValidEverAddress } from "utils/helpers";
+import prompts from "prompts";
 
 async function main() {
   const response = await prompts([
     {
-      type: 'text',
-      name: 'owner',
-      message: 'OrderFactory owner',
+      type: "text",
+      name: "owner",
+      message: "OrderFactory owner",
       validate: (value: any) =>
-        isValidEverAddress(value) || value === ''
+        isValidEverAddress(value) || value === ""
           ? true
-          : 'Invalid Everscale address',
+          : "Invalid Everscale address",
     },
     {
-      type: 'text',
-      name: 'dexRoot',
-      message: 'OrderFactory DexRoot',
+      type: "text",
+      name: "dexRoot",
+      message: "OrderFactory DexRoot",
       validate: (value: any) =>
-        isValidEverAddress(value) || value === ''
+        isValidEverAddress(value) || value === ""
           ? true
-          : 'Invalid Everscale address',
+          : "Invalid Everscale address",
     },
   ]);
 
-  const signer = await locklift.keystore.getSigner('0');
-  const account = await migration.loadAccount('Account1', '0');
+  const signer = await locklift.keystore.getSigner("0");
+  const account = locklift.deployments.getAccount("Account1").account;
 
-  const PlatformRootOrder = await locklift.factory.getContractArtifacts(
-    'OrderRootPlatform',
-  );
-  const PlatformOrder = await locklift.factory.getContractArtifacts(
-    'OrderPlatform',
-  );
-  const RootOrder = await locklift.factory.getContractArtifacts('OrderRoot');
-  const Order = await locklift.factory.getContractArtifacts('Order');
+  const PlatformRootOrder =
+    locklift.factory.getContractArtifacts("OrderRootPlatform");
+  const PlatformOrder = locklift.factory.getContractArtifacts("OrderPlatform");
+  const RootOrder = locklift.factory.getContractArtifacts("OrderRoot");
+  const Order = locklift.factory.getContractArtifacts("Order");
 
-  const { contract: factoryOrder } = await locklift.factory.deployContract({
-    contract: 'OrderFactory',
-    constructorParams: {
-      _owner: account.address,
-      _version: 1,
-    },
-    initParams: {
-      randomNonce: getRandomNonce(),
-      dexRoot: response.dexRoot,
-    },
-    publicKey: signer.publicKey,
-    value: toNano(5),
-  });
+  const {
+    extTransaction: { contract: factoryOrder },
+  } = await locklift.transactions.waitFinalized(
+    locklift.deployments.deploy({
+      deployConfig: {
+        contract: "OrderFactory",
+        constructorParams: {
+          _owner: account.address,
+          _version: 1,
+        },
+        initParams: {
+          randomNonce: getRandomNonce(),
+          dexRoot: response.dexRoot,
+        },
+        publicKey: signer.publicKey,
+        value: toNano(5),
+      },
+      deploymentName: "OrderFactory",
+    }),
+  );
+
   console.log(`Order Factory address: ${factoryOrder.address}`);
 
   console.log(`Set code OrderRootPlatform`);
@@ -111,13 +111,11 @@ async function main() {
       from: account.address,
       amount: toNano(0.1),
     });
-
-  migration.store(factoryOrder, 'OrderFactory');
 }
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

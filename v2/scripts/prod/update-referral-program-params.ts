@@ -1,18 +1,16 @@
-import { Address, toNano, WalletTypes } from 'locklift';
+import { Address, toNano } from "locklift";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Migration, displayTx } = require(process.cwd() + '/scripts/utils');
-import { Command } from 'commander';
+import { displayTx } from "utils/helpers";
+import { Command } from "commander";
 const program = new Command();
-const migration = new Migration();
 
 program
   .allowUnknownOption()
-  .option('-id, --project_id <project_id>', 'Project Id')
-  .option('-proj, --project_address <project_address>', 'Project address')
+  .option("-id, --project_id <project_id>", "Project Id")
+  .option("-proj, --project_address <project_address>", "Project address")
   .option(
-    '-ref_sys, --ref_system_address <ref_system_address>',
-    'Referral system address',
+    "-ref_sys, --ref_system_address <ref_system_address>",
+    "Referral system address",
   );
 
 program.parse(process.argv);
@@ -20,16 +18,17 @@ program.parse(process.argv);
 const options = program.opts();
 
 const DEX_VAULT_ADDRESS =
-  '0:6fa537fa97adf43db0206b5bec98eb43474a9836c016a190ac8b792feb852230';
+  "0:6fa537fa97adf43db0206b5bec98eb43474a9836c016a190ac8b792feb852230";
 
 async function main() {
-  const account = await locklift.factory.accounts.addExistingAccount({
-    type: WalletTypes.EverWallet,
-    address: migration.getAddress('Account1'),
-  });
+  // const account = await locklift.factory.accounts.addExistingAccount({
+  //   type: WalletTypes.EverWallet,
+  //   address: migration.getAddress("Account1"),
+  // });
+  const account = locklift.deployments.getAccount("Account1").account;
 
-  const dexVault = await locklift.factory.getDeployedContract(
-    'DexVault',
+  const dexVault = locklift.factory.getDeployedContract(
+    "DexVault",
     new Address(DEX_VAULT_ADDRESS),
   );
 
@@ -59,7 +58,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

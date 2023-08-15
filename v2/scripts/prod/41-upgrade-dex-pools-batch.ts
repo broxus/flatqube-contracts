@@ -1,9 +1,9 @@
-import { Address, toNano, WalletTypes } from 'locklift';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-// const { Migration } = require(process.cwd() + '/scripts/utils');
-import { yellowBright } from 'chalk';
-import pools from '../../../dex_pools.json';
-import { displayTx, Migration } from '../../utils/migration';
+import { Address, toNano, WalletTypes } from "locklift";
+import { yellowBright } from "chalk";
+import { DexRootAbi } from "build/factorySource";
+
+import { displayTx } from "../../../utils/helpers";
+import pools from "../../../dex_pools.json";
 
 const TRACE = false;
 
@@ -13,27 +13,25 @@ const chunkify = <T>(arr: T[], size: number): T[][] =>
   );
 
 const main = async () => {
-  const migration = new Migration();
-
-  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   const dexManagerAddress = await dexRoot.methods
     .getManager({ answerId: 0 })
     .call()
-    .then((m) => m.value0);
+    .then(m => m.value0);
 
   const manager = await locklift.factory.accounts.addExistingAccount({
     type: WalletTypes.EverWallet,
     address: dexManagerAddress,
   });
 
-  console.log('DexRoot:' + dexRoot.address);
-  console.log('Manager:' + manager.address);
+  console.log("DexRoot:" + dexRoot.address);
+  console.log("Manager:" + manager.address);
 
   console.log(`Start force upgrade DexPools. Count = ${pools.length}`);
 
-  const params = pools.map((p) => ({
-    tokenRoots: p.tokenRoots.map((tr) => new Address(tr)),
+  const params = pools.map(p => ({
+    tokenRoots: p.tokenRoots.map(tr => new Address(tr)),
     poolType: 3,
     pool: p.dexPool,
   }));
@@ -41,7 +39,7 @@ const main = async () => {
   for (const chunk of chunkify(params, 1000)) {
     const p = dexRoot.methods
       .upgradePools({
-        _params: chunk.map((p) => ({
+        _params: chunk.map(p => ({
           tokenRoots: p.tokenRoots,
           poolType: p.poolType,
         })),
@@ -58,13 +56,13 @@ const main = async () => {
 
       for (const pair of chunk) {
         const DexPool = locklift.factory.getDeployedContract(
-          'DexStablePool',
+          "DexStablePool",
           new Address(pair.pool),
         );
 
         const events = traceTree.findEventsForContract({
           contract: DexPool,
-          name: 'PoolCodeUpgraded' as const,
+          name: "PoolCodeUpgraded" as const,
         });
 
         if (events.length > 0) {
@@ -86,7 +84,7 @@ const main = async () => {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

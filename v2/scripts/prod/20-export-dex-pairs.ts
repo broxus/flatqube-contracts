@@ -1,11 +1,10 @@
-import { writeFileSync } from 'fs';
-import { Address } from 'locklift';
-import { yellowBright } from 'chalk';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-import { Migration } from '../../utils/migration';
+import { writeFileSync } from "fs";
+import { Address } from "locklift";
+import { yellowBright } from "chalk";
+import { DexRootAbi } from "build/factorySource";
 
 const OLD_DEX_PAIR_CODE_HASH =
-  '8129f75b7cd80a2492e1fff5f58eb76d62d819dec288eb7233cc6fcc57a1557c';
+  "8129f75b7cd80a2492e1fff5f58eb76d62d819dec288eb7233cc6fcc57a1557c";
 
 type PairEntity = {
   dexPair: Address;
@@ -15,11 +14,9 @@ type PairEntity = {
 };
 
 async function exportDexPairs() {
-  const migration = new Migration();
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
-  const dexRoot = await migration.loadContract('DexRoot', 'DexRoot');
-
-  console.log('DexRoot: ' + dexRoot.address);
+  console.log("DexRoot: " + dexRoot.address);
 
   let continuation = undefined;
   let hasResults = true;
@@ -47,19 +44,19 @@ async function exportDexPairs() {
 
   for (const dexPairAddress of accounts) {
     promises.push(
-      new Promise(async (resolve) => {
+      new Promise(async resolve => {
         const DexPair = await locklift.factory.getDeployedContract(
-          'DexPair',
+          "DexPair",
           dexPairAddress,
         );
 
         const root = await DexPair.methods
           .getRoot({ answerId: 0 })
           .call({})
-          .then((r) => r.dex_root.toString())
-          .catch((e) => {
+          .then(r => r.dex_root.toString())
+          .catch(e => {
             console.error(e);
-            return '';
+            return "";
           });
 
         if (root === dexRoot.address.toString()) {
@@ -92,9 +89,9 @@ async function exportDexPairs() {
   console.log(`Export took ${(Date.now() - start) / 1000} seconds`);
 
   writeFileSync(
-    './dex_pairs.json',
+    "./dex_pairs.json",
     JSON.stringify(
-      pairs.filter((v) => !!v),
+      pairs.filter(v => !!v),
       null,
       2,
     ),
@@ -103,7 +100,7 @@ async function exportDexPairs() {
 
 exportDexPairs()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

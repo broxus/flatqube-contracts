@@ -31,7 +31,6 @@ export class Migration<T extends FactorySource> {
       const signer = await locklift.keystore.getSigner(account);
 
       return locklift.factory.accounts.addExistingAccount({
-        // @ts-ignore
         publicKey: signer.publicKey,
         type: WalletTypes.WalletV3,
       });
