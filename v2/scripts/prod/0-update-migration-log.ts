@@ -30,10 +30,26 @@ async function main() {
     new Address(DEX_VAULT_ADDRESS),
   );
 
-  migration.store(dexRoot, "DexRoot");
-  migration.store(dexRootPrev, "DexRootPrev");
-  migration.store(dexVault, "DexVault");
-  migration.store(dexVaultPrev, "DexVaultPrev");
+  await locklift.deployments.saveContract({
+    contractName: "DexRoot",
+    deploymentName: "DexRoot",
+    address: dexRoot.address,
+  });
+  await locklift.deployments.saveContract({
+    contractName: "DexRootPrev",
+    deploymentName: "DexRootPrev",
+    address: dexRootPrev.address,
+  });
+  await locklift.deployments.saveContract({
+    contractName: "DexVault",
+    deploymentName: "DexVault",
+    address: dexVault.address,
+  });
+  await locklift.deployments.saveContract({
+    contractName: "DexVaultPrev",
+    deploymentName: "DexVaultPrev",
+    address: dexVaultPrev.address,
+  });
 }
 
 main()
