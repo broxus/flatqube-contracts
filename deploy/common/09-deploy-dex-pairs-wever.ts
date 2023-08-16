@@ -84,10 +84,6 @@ export default async () => {
         address: dexPairFooBarAddress,
       });
 
-      locklift.deployments.deploymentsStore = {
-        [`DexPair_${pair.left}_${pair.right}`]: dexPairFooBar,
-      };
-
       const version = (
         await dexPairFooBar.methods.getVersion({ answerId: 0 }).call()
       ).version;
@@ -107,7 +103,7 @@ export default async () => {
   const allWeverPairs: [string, string][] = [];
 
   Array.from({ length: TOKENS_N }).map(async (_, iRight) => {
-    allWeverPairs.push([`weverRoot`, `token-${TOKEN_DECIMAL}-${iRight}`]);
+    allWeverPairs.push([`wever`, `token-${TOKEN_DECIMAL}-${iRight}`]);
   });
 
   for (let i = 0; i < allWeverPairs.length; i++) {
@@ -121,7 +117,6 @@ export const tag = "dex-pairs-wever";
 export const dependencies = [
   "owner-account",
   "token-factory",
-  "token-wallets",
   "tokens",
   "dex-root",
 ];

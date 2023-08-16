@@ -37,7 +37,8 @@ export default async () => {
         value: toNano(10),
         publicKey: weverOwner.signer.publicKey,
       },
-      deploymentName: "weverRoot",
+      deploymentName: "wever",
+      enableLogs: true,
     }),
   );
 
@@ -93,10 +94,9 @@ export default async () => {
           },
           publicKey: weverOwner.signer.publicKey,
         },
+        enableLogs: true,
       }),
     );
-
-  console.log(`weverVault address: ${weverVault.contract.address}`);
 
   const { extTransaction: everToTip3 } =
     await locklift.transactions.waitFinalized(
@@ -113,29 +113,47 @@ export default async () => {
           value: toNano(2),
           publicKey: weverOwner.signer.publicKey,
         },
+        enableLogs: true,
       }),
     );
 
-  const { extTransaction: everWeverToTip3 } =
-    await locklift.transactions.waitFinalized(
-      locklift.deployments.deploy({
-        deploymentName: "EverWeverToTip3",
-        deployConfig: {
-          contract: "EverWeverToTip3",
-          constructorParams: {},
-          initParams: {
-            randomNonce_: getRandomNonce(),
-            weverRoot: root.contract.address,
-            weverVault: weverVault.contract.address,
-            everToTip3: everToTip3.contract.address,
-          },
-          value: toNano(2),
-          publicKey: weverOwner.signer.publicKey,
+  await locklift.transactions.waitFinalized(
+    locklift.deployments.deploy({
+      deploymentName: "EverWeverToTip3",
+      deployConfig: {
+        contract: "EverWeverToTip3",
+        constructorParams: {},
+        initParams: {
+          randomNonce_: getRandomNonce(),
+          weverRoot: root.contract.address,
+          weverVault: weverVault.contract.address,
+          everToTip3: everToTip3.contract.address,
         },
-      }),
-    );
+        value: toNano(2),
+        publicKey: weverOwner.signer.publicKey,
+      },
+      enableLogs: true,
+    }),
+  );
 
-  console.log(`everWeverToTip3 address: ${everWeverToTip3.contract.address}`);
+  await locklift.transactions.waitFinalized(
+    locklift.deployments.deploy({
+      deploymentName: "Tip3ToEver",
+      deployConfig: {
+        contract: "Tip3ToEver",
+        constructorParams: {},
+        initParams: {
+          randomNonce_: getRandomNonce(),
+          weverRoot: root.contract.address,
+          weverVault: weverVault.contract.address,
+        },
+        value: toNano(2),
+        publicKey: weverOwner.signer.publicKey,
+      },
+      enableLogs: true,
+    }),
+  );
+
   // Proxy token transfer
   // - Deploy proxy token transfer
   //

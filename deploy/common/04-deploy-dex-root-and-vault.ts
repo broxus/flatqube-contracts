@@ -72,8 +72,6 @@ export default async () => {
 
   const dexVault = locklift.deployments.getContract<DexVaultAbi>("DexVault");
 
-  console.log(`DexVault address: ${dexVault.address}`);
-
   console.log(`DexVault: installing Platform code...`);
   let tx = await dexVault.methods
     .installPlatformOnce({ code: DexPlatform.code })

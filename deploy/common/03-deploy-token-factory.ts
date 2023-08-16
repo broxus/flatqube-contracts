@@ -36,7 +36,6 @@ export default async () => {
 
   const tokenFactory =
     locklift.deployments.getContract<TokenFactoryAbi>("TokenFactory");
-  console.log(`TokenFactory: ${tokenFactory.address}`);
 
   console.log(`TokenFactory.setRootCode...`);
   let tx = await tokenFactory.methods
