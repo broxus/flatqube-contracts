@@ -15,8 +15,8 @@ interface IAccountData {
   vault: Address;
   current_version: string;
   platform_code: string;
-  wallets: [Address, Address][];
-  balances: [Address, string][];
+  wallets: (readonly [Address, Address])[];
+  balances: (readonly [Address, string])[];
   owner: Address;
 }
 
@@ -33,7 +33,7 @@ let newAccountData: IAccountData = {} as IAccountData;
 const loadAccountData = async (
   account: Contract<TestNewDexAccountAbi> | Contract<DexAccountAbi>,
 ) => {
-  const data: any = {};
+  const data = {} as IAccountData;
 
   data.root = (await account.methods.getRoot({ answerId: 0 }).call()).value0;
   data.vault = (
@@ -97,6 +97,11 @@ describe("Test Dex Account contract upgrade", async function () {
         from: rootOwner.address,
         amount: toNano(6),
       });
+
+    NewDexAccount = locklift.factory.getDeployedContract(
+      "TestNewDexAccount",
+      dexAccount.address,
+    );
 
     // NewDexAccountArt.setAddress(dexAccount.address);
     newAccountData = await loadAccountData(NewDexAccount);

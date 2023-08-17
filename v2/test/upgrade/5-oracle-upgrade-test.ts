@@ -1,15 +1,20 @@
-const { expect } = require("chai");
-const { accountMigration, createDex } = require("../../utils/migration.utils");
-const { upgradePair, upgradeRoot } = require("../../utils/upgrade.utils");
-const {
+import { accountMigration, createDex } from "utils/migration.utils";
+import { upgradePair, upgradeRoot } from "utils/upgrade.utils";
+import {
   convertBigNumberValuesToStrings,
   convertToFixedPoint128,
-} = require("../../utils/math.utils");
-const {
+} from "utils/math.utils";
+
+import {
   POINTS_MOCK,
   FIRST_POINT_TIMESTAMP,
   LAST_POINT_TIMESTAMP,
-} = require("../mocks/oracle-points.mock");
+} from "../mocks/oracle-points.mock";
+
+import { expect } from "chai";
+import { Account } from "everscale-standalone-client";
+import { Contract } from "locklift";
+import { DexPairAbi } from "../../../build/factorySource";
 
 const TOKENS = [
   { name: "Token ABC", symbol: "ABC" },
@@ -17,13 +22,12 @@ const TOKENS = [
 ];
 
 const PAIRS = [{ left: "ABC", right: "XYZ" }];
-
 describe("Oracle Upgrade", function () {
   this.timeout(1_000_000);
 
-  let account;
-  let pair;
-  let root;
+  let account: Account;
+  let pair: Contract<DexPairAbi>;
+  let root: Account;
   let tokens;
   let leftTokenAddress;
   let rightTokenAddress;
