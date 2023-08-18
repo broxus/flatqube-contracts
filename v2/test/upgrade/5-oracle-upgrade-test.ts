@@ -1,5 +1,5 @@
-import { accountMigration, createDex } from "utils/migration.utils";
 import { upgradePair, upgradeRoot } from "utils/upgrade.utils";
+import { accountMigration, createDex } from "utils/wrappers.utils";
 import {
   convertBigNumberValuesToStrings,
   convertToFixedPoint128,
@@ -13,8 +13,14 @@ import {
 
 import { expect } from "chai";
 import { Account } from "everscale-standalone-client";
-import { Contract } from "locklift";
-import { DexPairAbi } from "../../../build/factorySource";
+import { Address, Contract, toNano } from "locklift";
+import {
+  DexPairAbi,
+  DexRootAbi,
+  DexStablePairAbi,
+  TestNewDexPairAbi,
+  TestOracleDexPairAbi,
+} from "../../../build/factorySource";
 
 const TOKENS = [
   { name: "Token ABC", symbol: "ABC" },
@@ -26,11 +32,15 @@ describe("Oracle Upgrade", function () {
   this.timeout(1_000_000);
 
   let account: Account;
-  let pair: Contract<DexPairAbi>;
-  let root: Account;
-  let tokens;
-  let leftTokenAddress;
-  let rightTokenAddress;
+  let pair:
+    | Contract<DexPairAbi>
+    | Contract<TestOracleDexPairAbi>
+    | Contract<TestNewDexPairAbi>
+    | Contract<DexStablePairAbi>;
+  let root: Contract<DexRootAbi>;
+  let tokens: Record<string, Address>;
+  let leftTokenAddress: Address;
+  let rightTokenAddress: Address;
 
   before("deploy and load prev DEX", async () => {
     account = await accountMigration("100000");
@@ -38,36 +48,43 @@ describe("Oracle Upgrade", function () {
     const dex = await createDex(account, TOKENS, PAIRS, true);
 
     // Unpack DEX contracts
-    root = dex[0];
-    tokens = dex[1];
-    pair = dex[2]["ABCXYZ"];
+    root = dex[0] as Contract<DexRootAbi>;
+    tokens = dex[1] as Record<string, Address>;
+    pair = (
+      dex[2] as Record<
+        string,
+        Contract<DexPairAbi> | Contract<TestOracleDexPairAbi>
+      >
+    )["ABCXYZ"];
 
-    const roots = await pair.call({ method: "getTokenRoots" });
+    const roots = await pair.methods.getTokenRoots({ answerId: 0 }).call();
+
     leftTokenAddress = roots.left;
     rightTokenAddress = roots.right;
   });
 
   describe("check previous pair data", () => {
     it("should check pair code in root", async () => {
-      const DexPairPrev = await locklift.factory.getContract("DexPairPrev");
-      const code = await root.call({
-        method: "getPairCode",
-        params: { pool_type: 1 },
-      });
+      const DexPairPrev =
+        locklift.factory.getContractArtifacts("TestNewDexPair");
+      const code = await root.methods
+        .getPairCode({ answerId: 0, pool_type: 1 })
+        .call();
 
       expect(code).to.be.equal(DexPairPrev.code);
     });
 
     it("should throw for oracle function", async () => {
-      const cardinality = await pair
-        .call({ method: "getCardinality" })
+      const cardinality = await (pair as Contract<TestOracleDexPairAbi>).methods
+        .getCardinality({ answerId: 0 })
+        .call()
         .catch(() => 0);
 
       expect(cardinality).to.be.equal(0);
     });
 
     it("should check tokens roots", async () => {
-      const roots = await pair.call({ method: "getTokenRoots" });
+      const roots = await pair.methods.getTokenRoots({ answerId: 0 }).call();
 
       expect(roots).to.include({
         left: leftTokenAddress,
@@ -78,26 +95,30 @@ describe("Oracle Upgrade", function () {
 
   describe("upgrade and check current pair", () => {
     it("should upgrade and check pair code in root", async () => {
-      const DexPair = await locklift.factory.getContract("TestOracleDexPair");
+      const DexPairCode =
+        locklift.factory.getContractArtifacts("TestOracleDexPair");
       await upgradePair(
         account,
         root,
-        tokens["ABC"].address,
-        tokens["XYZ"].address,
-        DexPair,
+        tokens["ABC"],
+        tokens["XYZ"],
+        DexPairCode,
       );
-      DexPair.setAddress(pair.address);
-      pair = DexPair;
-      const code = await root.call({
-        method: "getPairCode",
-        params: { pool_type: 1 },
-      });
+      const DexPair = locklift.factory.getDeployedContract(
+        "DexPair",
+        pair.address,
+      );
 
-      expect(code).to.be.equal(DexPair.code);
+      pair = DexPair;
+      const code = await root.methods
+        .getPairCode({ answerId: 0, pool_type: 1 })
+        .call();
+
+      expect(code).to.be.equal(DexPairCode.code);
     });
 
     it("should check tokens roots", async () => {
-      const roots = await pair.call({ method: "getTokenRoots" });
+      const roots = await pair.methods.getTokenRoots({ answerId: 0 }).call();
 
       expect(roots).to.include({
         left: leftTokenAddress,
@@ -106,8 +127,9 @@ describe("Oracle Upgrade", function () {
     });
 
     it("should check oracle options", async () => {
-      const options = await pair
-        .call({ method: "getOracleOptions" })
+      const options = await (pair as Contract<TestOracleDexPairAbi>).methods
+        .getOracleOptions({ answerId: 0 })
+        .call()
         .then(convertBigNumberValuesToStrings);
 
       expect(options).to.deep.equal({
@@ -121,19 +143,16 @@ describe("Oracle Upgrade", function () {
 
   describe("upgrade root and change oracle params", () => {
     it("should upgrade root", async () => {
-      const DexRoot = await locklift.factory.getContract("DexRoot");
+      const DexRoot = locklift.factory.getContractArtifacts("DexRoot");
       await upgradeRoot(account, root, DexRoot);
-      DexRoot.setAddress(root.address);
-      root = DexRoot;
+      root = locklift.factory.getDeployedContract("DexRoot", root.address);
     });
 
     it("should update cardinality", async () => {
-      await account.runTarget({
-        contract: root,
-        method: "setOracleOptions",
-        params: {
-          _leftRoot: tokens["ABC"].address,
-          _rightRoot: tokens["XYZ"].address,
+      const options = await root.methods
+        .setOracleOptions({
+          _leftRoot: tokens["ABC"],
+          _rightRoot: tokens["XYZ"],
           _options: {
             cardinality: "1100",
             minInterval: "15",
@@ -141,13 +160,11 @@ describe("Oracle Upgrade", function () {
             minRateDeltaDenominator: "100",
           },
           _remainingGasTo: account.address,
-        },
-        value: locklift.utils.convertCrystal("2", "nano"),
-        keyPair: account.keyPair,
-      });
-
-      const options = await pair
-        .call({ method: "getOracleOptions" })
+        })
+        .send({
+          from: account.address,
+          amount: toNano(2),
+        })
         .then(convertBigNumberValuesToStrings);
 
       expect(options).to.deep.equal({
@@ -159,12 +176,10 @@ describe("Oracle Upgrade", function () {
     });
 
     it("should update minimum interval", async () => {
-      await account.runTarget({
-        contract: root,
-        method: "setOracleOptions",
-        params: {
-          _leftRoot: tokens["ABC"].address,
-          _rightRoot: tokens["XYZ"].address,
+      await root.methods
+        .setOracleOptions({
+          _leftRoot: tokens["ABC"],
+          _rightRoot: tokens["XYZ"],
           _options: {
             cardinality: "1100",
             minInterval: "5",
@@ -172,14 +187,19 @@ describe("Oracle Upgrade", function () {
             minRateDeltaDenominator: "100",
           },
           _remainingGasTo: account.address,
-        },
-        value: locklift.utils.convertCrystal("2", "nano"),
-        keyPair: account.keyPair,
-      });
-
-      const options = await pair
-        .call({ method: "getOracleOptions" })
+        })
+        .send({
+          from: account.address,
+          amount: toNano(2),
+        })
         .then(convertBigNumberValuesToStrings);
+
+      const options = await (pair as Contract<TestOracleDexPairAbi>).methods
+        .getOracleOptions({
+          answerId: 0,
+        })
+        .call()
+        .then(val => convertBigNumberValuesToStrings(val.value0));
 
       expect(options).to.deep.equal({
         cardinality: "1100",
@@ -190,12 +210,10 @@ describe("Oracle Upgrade", function () {
     });
 
     it("should update minimum rate delta", async () => {
-      await account.runTarget({
-        contract: root,
-        method: "setOracleOptions",
-        params: {
-          _leftRoot: tokens["ABC"].address,
-          _rightRoot: tokens["XYZ"].address,
+      await root.methods
+        .setOracleOptions({
+          _leftRoot: tokens["ABC"],
+          _rightRoot: tokens["XYZ"],
           _options: {
             cardinality: "1100",
             minInterval: "5",
@@ -203,14 +221,19 @@ describe("Oracle Upgrade", function () {
             minRateDeltaDenominator: "100",
           },
           _remainingGasTo: account.address,
-        },
-        value: locklift.utils.convertCrystal("2", "nano"),
-        keyPair: account.keyPair,
-      });
+        })
+        .send({
+          from: account.address,
+          amount: toNano(2),
+        })
+        .then(val => convertBigNumberValuesToStrings(val));
 
-      const options = await pair
-        .call({ method: "getOracleOptions" })
-        .then(convertBigNumberValuesToStrings);
+      const options = await (pair as Contract<TestOracleDexPairAbi>).methods
+        .getOracleOptions({
+          answerId: 0,
+        })
+        .call()
+        .then(val => convertBigNumberValuesToStrings(val.value0));
 
       expect(options).to.deep.equal({
         cardinality: "1100",
@@ -221,65 +244,79 @@ describe("Oracle Upgrade", function () {
     });
 
     it("should update points", async () => {
-      await account.runTarget({
-        contract: pair,
-        method: "setPoints",
-        params: { _newPoints: POINTS_MOCK, _newLength: 1000 },
-        value: locklift.utils.convertCrystal("20", "nano"),
-        keyPair: account.keyPair,
-      });
+      await (pair as Contract<TestOracleDexPairAbi>).methods
+        .setPoints({
+          _newPoints: POINTS_MOCK,
+          _newLength: 1000,
+          answerId: 0,
+        })
+        .send({
+          from: account.address,
+          amount: toNano(20),
+        });
     });
   });
 
   describe("upgrade and check next pair", () => {
     it("should upgrade and check pair code in root", async () => {
-      const NewDexPair = await locklift.factory.getContract("TestNewDexPair");
+      const NewDexPair =
+        locklift.factory.getContractArtifacts("TestNewDexPair");
       await upgradePair(
         account,
         root,
-        tokens["ABC"].address,
-        tokens["XYZ"].address,
+        tokens["ABC"],
+        tokens["XYZ"],
         NewDexPair,
       );
-      NewDexPair.setAddress(pair.address);
-      pair = NewDexPair;
-      const code = await root.call({
-        method: "getPairCode",
-        params: { pool_type: 1 },
-      });
+      pair = locklift.factory.getDeployedContract(
+        "TestNewDexPair",
+        pair.address,
+      );
+      const code = await root.methods
+        .getPairCode({ answerId: 0, pool_type: 1 })
+        .call();
 
-      expect(code).to.be.equal(NewDexPair.code);
+      expect(code.value0).to.be.equal(NewDexPair.code);
     });
 
     it("should check cardinality", async () => {
-      const cardinality = await pair.call({ method: "getCardinality" });
-      expect(cardinality.toNumber()).to.be.equal(1100);
+      const cardinality = await (pair as Contract<TestNewDexPairAbi>).methods
+        .getCardinality({ answerId: 0 })
+        .call();
+      expect(cardinality.value0).to.be.equal("1100");
     });
 
     it("should check minimum interval", async () => {
-      const minInterval = await pair.call({ method: "getMinInterval" });
-      expect(minInterval.toNumber()).to.be.equal(5);
+      const minInterval = await (pair as Contract<TestNewDexPairAbi>).methods
+        .getMinInterval({ answerId: 0 })
+        .call();
+      expect(minInterval.value0).to.be.equal("5");
     });
 
     it("should check length", async () => {
-      const length = await pair.call({ method: "getLength" });
-      expect(length.toNumber()).to.be.equal(1000);
+      const length = await (pair as Contract<TestNewDexPairAbi>).methods
+        .getLength({ answerId: 0 })
+        .call();
+      expect(length.value0).to.be.equal("1000");
     });
 
     it("should check minimum rate delta", async () => {
-      const minRateDelta = await pair.call({ method: "getMinRateDelta" });
-      expect(minRateDelta).to.deep.equal(
+      const minRateDelta = await (pair as Contract<TestNewDexPairAbi>).methods
+        .getMinRateDelta({ answerId: 0 })
+        .call();
+      expect(minRateDelta.value0).to.deep.equal(
         convertToFixedPoint128("5").dividedToIntegerBy("100"),
       );
     });
 
     it("should check first point", async () => {
-      const point = await pair
-        .call({
-          method: "getPoint",
-          params: { _timestamp: FIRST_POINT_TIMESTAMP },
+      const point = await (pair as Contract<TestNewDexPairAbi>).methods
+        .getPoint({
+          answerId: 0,
+          _timestamp: FIRST_POINT_TIMESTAMP,
         })
-        .then(convertBigNumberValuesToStrings);
+        .call()
+        .then(val => convertBigNumberValuesToStrings(val.value0));
 
       expect(point).to.deep.equal({
         price0To1Cumulative:
@@ -289,12 +326,13 @@ describe("Oracle Upgrade", function () {
     });
 
     it("should check last point", async () => {
-      const point = await pair
-        .call({
-          method: "getPoint",
-          params: { _timestamp: LAST_POINT_TIMESTAMP },
+      const point = await (pair as Contract<TestNewDexPairAbi>).methods
+        .getPoint({
+          _timestamp: LAST_POINT_TIMESTAMP,
+          answerId: 0,
         })
-        .then(convertBigNumberValuesToStrings);
+        .call()
+        .then(val => convertBigNumberValuesToStrings(val.value0));
 
       expect(point).to.deep.equal({
         price0To1Cumulative:
@@ -304,28 +342,31 @@ describe("Oracle Upgrade", function () {
     });
 
     it("should check new func", async () => {
-      const str = await pair.call({ method: "newFunc" });
-      expect(str).to.be.equal("New Pair");
+      const str = await (pair as Contract<TestNewDexPairAbi>).methods
+        .newFunc()
+        .call();
+      expect(str.value0).to.be.equal("New Pair");
     });
   });
 
   describe("upgrade and check stable pair", () => {
     it("should upgrade and check pair code in root", async () => {
-      const NewDexPair = await locklift.factory.getContract("DexStablePair");
+      const NewDexPair = locklift.factory.getContractArtifacts("DexStablePair");
       await upgradePair(
         account,
         root,
-        tokens["ABC"].address,
-        tokens["XYZ"].address,
+        tokens["ABC"],
+        tokens["XYZ"],
         NewDexPair,
         2,
       );
-      NewDexPair.setAddress(pair.address);
-      pair = NewDexPair;
-      const code = await root.call({
-        method: "getPairCode",
-        params: { pool_type: 2 },
-      });
+      pair = locklift.factory.getDeployedContract(
+        "DexStablePair",
+        pair.address,
+      );
+      const code = await root.methods
+        .getPairCode({ answerId: 0, pool_type: 2 })
+        .call();
 
       expect(code).to.be.equal(NewDexPair.code);
     });

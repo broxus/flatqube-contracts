@@ -1,6 +1,12 @@
 import { Account } from "everscale-standalone-client";
 import { Address, Contract, toNano } from "locklift";
-import { DexPairAbi, DexRootAbi } from "../build/factorySource";
+import {
+  DexPairAbi,
+  DexRootAbi,
+  DexStablePairAbi,
+  TestNewDexPairAbi,
+  TestOracleDexPairAbi,
+} from "../build/factorySource";
 import { ContractData } from "locklift/internal/factory";
 
 /**
@@ -17,7 +23,11 @@ export const upgradePair = async (
   dexRoot: Contract<DexRootAbi>,
   leftRoot: Address,
   rightRoot: Address,
-  newPair: ContractData<DexPairAbi>,
+  newPair:
+    | ContractData<DexPairAbi>
+    | ContractData<TestOracleDexPairAbi>
+    | ContractData<TestNewDexPairAbi>
+    | ContractData<DexStablePairAbi>,
   poolType = 1,
 ) => {
   console.log("[DexRoot] installOrUpdatePairCode...");

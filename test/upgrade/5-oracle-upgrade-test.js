@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { accountMigration, createDex } = require("../../utils/migration.utils");
+const { accountMigration, createDex } = require("../../utils/wrappers.utils");
 const { upgradePair, upgradeRoot } = require("../../utils/upgrade.utils");
 const {
   convertBigNumberValuesToStrings,
