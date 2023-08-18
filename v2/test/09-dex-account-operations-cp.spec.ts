@@ -127,7 +127,7 @@ describe("Check DexAccount add Pair", () => {
       );
 
       const amounts = pairRoots.map(root =>
-        new BigNumber(1)
+        new BigNumber(10)
           .shiftedBy(tokensData[root.address.toString()].decimals)
           .toString(),
       );
@@ -196,7 +196,7 @@ describe("Check DexAccount add Pair", () => {
 
       const amounts = [1, 2].map((amount, i) =>
         new BigNumber(amount)
-          .shiftedBy(tokensData[pairRoots[i].address.toString()].decimals - 3)
+          .shiftedBy(tokensData[pairRoots[i].address.toString()].decimals)
           .toString(),
       );
       const expectedDepositData = await expectedDepositLiquidity(
@@ -280,7 +280,7 @@ describe("Check DexAccount add Pair", () => {
 
       const amounts = [1, 2].map((amount, i) =>
         new BigNumber(amount)
-          .shiftedBy(tokensData[pairRoots[i].address.toString()].decimals - 3)
+          .shiftedBy(tokensData[pairRoots[i].address.toString()].decimals)
           .toString(),
       );
       const expectedDepositData = await expectedDepositLiquidity(
@@ -370,7 +370,7 @@ describe("Check DexAccount add Pair", () => {
         return {
           root: pairRoots[i].address,
           amount: new BigNumber(amount)
-            .shiftedBy(tokensData[pairRoots[i].address.toString()].decimals - 3)
+            .shiftedBy(tokensData[pairRoots[i].address.toString()].decimals)
             .toString(),
         };
       });
@@ -567,7 +567,7 @@ describe("Check DexAccount add Pair", () => {
         dexAccount,
       );
 
-      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS - 3).toString();
+      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS).toString();
 
       await dexAccount.methods
         .withdrawLiquidity({
@@ -618,7 +618,7 @@ describe("Check DexAccount add Pair", () => {
         dexAccount,
       );
 
-      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS - 3).toString();
+      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS).toString();
 
       const expected = await expectedWithdrawLiquidity(pair, lpAmount);
 
@@ -674,7 +674,7 @@ describe("Check DexAccount add Pair", () => {
         dexAccount,
       );
 
-      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS - 3).toString();
+      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS).toString();
 
       const expected = await expectedWithdrawLiquidity(pair, lpAmount);
       expected.amounts[pairRoots[0].address.toString()] = new BigNumber(

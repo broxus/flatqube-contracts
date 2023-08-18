@@ -158,14 +158,14 @@ describe("Check DexAccount add Pair", () => {
         .depositLiquidity({
           call_id: getRandomNonce(),
           left_root: poolsData.stablePair.roots[0].address,
-          left_amount: new BigNumber(1)
+          left_amount: new BigNumber(10)
             .shiftedBy(
               tokensData[poolsData.stablePair.roots[0].address.toString()]
                 .decimals,
             )
             .toString(),
           right_root: poolsData.stablePair.roots[1].address,
-          right_amount: new BigNumber(1)
+          right_amount: new BigNumber(10)
             .shiftedBy(
               tokensData[poolsData.stablePair.roots[1].address.toString()]
                 .decimals + 1,
@@ -207,7 +207,7 @@ describe("Check DexAccount add Pair", () => {
       const operations = poolsData.stablePool.roots.map(root => {
         return {
           root: root.address,
-          amount: new BigNumber(1)
+          amount: new BigNumber(10)
             .shiftedBy(tokensData[root.address.toString()].decimals)
             .toString(),
         };
@@ -256,11 +256,11 @@ describe("Check DexAccount add Pair", () => {
       );
 
       const amounts = poolsData.stablePair.roots.map(root =>
-        new BigNumber(1)
+        new BigNumber(10)
           .shiftedBy(tokensData[root.address.toString()].decimals)
           .toString(),
       );
-      const expectedLpAmount = new BigNumber(2)
+      const expectedLpAmount = new BigNumber(20)
         .shiftedBy(LP_DECIMALS)
         .toString();
 
@@ -328,12 +328,12 @@ describe("Check DexAccount add Pair", () => {
       const operations = poolsData.stablePool.roots.map(root => {
         return {
           root: root.address,
-          amount: new BigNumber(1)
+          amount: new BigNumber(10)
             .shiftedBy(tokensData[root.address.toString()].decimals)
             .toString(),
         };
       });
-      const expectedLpAmount = new BigNumber(3)
+      const expectedLpAmount = new BigNumber(30)
         .shiftedBy(LP_DECIMALS)
         .toString();
 
@@ -407,7 +407,7 @@ describe("Check DexAccount add Pair", () => {
         new BigNumber(amount)
           .shiftedBy(
             tokensData[poolsData.stablePair.roots[i].address.toString()]
-              .decimals - 3,
+              .decimals,
           )
           .toString(),
       );
@@ -500,7 +500,7 @@ describe("Check DexAccount add Pair", () => {
           amount: new BigNumber(amount)
             .shiftedBy(
               tokensData[poolsData.stablePair.roots[i].address.toString()]
-                .decimals - 3,
+                .decimals,
             )
             .toString(),
         };
@@ -571,7 +571,7 @@ describe("Check DexAccount add Pair", () => {
           amount: new BigNumber(amount)
             .shiftedBy(
               tokensData[poolsData.stablePool.roots[i].address.toString()]
-                .decimals - 3,
+                .decimals,
             )
             .toString(),
         };
@@ -666,7 +666,7 @@ describe("Check DexAccount add Pair", () => {
           amount: new BigNumber(amount)
             .shiftedBy(
               tokensData[poolsData.stablePool.roots[i].address.toString()]
-                .decimals - 3,
+                .decimals,
             )
             .toString(),
         };
@@ -1103,7 +1103,7 @@ describe("Check DexAccount add Pair", () => {
         dexAccount,
       );
 
-      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS - 3).toString();
+      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS).toString();
 
       const expected = await expectedWithdrawLiquidity(
         poolsData.stablePair.contract,
@@ -1164,7 +1164,7 @@ describe("Check DexAccount add Pair", () => {
         dexAccount,
       );
 
-      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS - 3).toString();
+      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS).toString();
 
       const expected = await expectedWithdrawLiquidity(
         poolsData.stablePair.contract,
@@ -1220,7 +1220,7 @@ describe("Check DexAccount add Pair", () => {
       await transferWrapper(owner.address, dexAccount.address, 0, [
         {
           root: poolsData.stablePool.lp.address,
-          amount: new BigNumber(1).shiftedBy(LP_DECIMALS).toString(),
+          amount: new BigNumber(10).shiftedBy(LP_DECIMALS).toString(),
         },
       ]);
 
@@ -1232,7 +1232,7 @@ describe("Check DexAccount add Pair", () => {
         dexAccount,
       );
 
-      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS - 3).toString();
+      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS).toString();
 
       const expected = await expectedWithdrawLiquidity(
         poolsData.stablePool.contract,
@@ -1299,7 +1299,7 @@ describe("Check DexAccount add Pair", () => {
         dexAccount,
       );
 
-      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS - 3).toString();
+      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS).toString();
 
       const expected = await expectedWithdrawLiquidity(
         poolsData.stablePool.contract,
@@ -1405,7 +1405,7 @@ describe("Check DexAccount add Pair", () => {
         await getDexAccountData([poolsData.stablePool.lp.address], dexAccount)
       )[0];
 
-      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS - 3).toString();
+      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS).toString();
       const receivedTokenAddress = poolsData.stablePool.roots[0].address;
 
       const expected = await expectedWithdrawLiquidityOneCoin(
@@ -1488,7 +1488,7 @@ describe("Check DexAccount add Pair", () => {
         await getDexAccountData([poolsData.stablePool.lp.address], dexAccount)
       )[0];
 
-      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS - 3).toString();
+      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS).toString();
       const receivedTokenAddress = poolsData.stablePool.roots[0].address;
 
       const expected = await expectedWithdrawLiquidityOneCoin(
@@ -1555,7 +1555,7 @@ describe("Check DexAccount add Pair", () => {
         await getDexAccountData([poolsData.stablePool.lp.address], dexAccount)
       )[0];
 
-      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS - 3).toString();
+      const lpAmount = new BigNumber(1).shiftedBy(LP_DECIMALS).toString();
       const receivedTokenAddress = roots[0];
 
       await dexAccount.methods

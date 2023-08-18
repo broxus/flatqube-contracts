@@ -1,13 +1,7 @@
 import { BigNumber } from "bignumber.js";
 import { expect } from "chai";
 import { Account } from "everscale-standalone-client/nodejs";
-import {
-  Contract,
-  fromNano,
-  getRandomNonce,
-  toNano,
-  zeroAddress,
-} from "locklift";
+import { Contract, getRandomNonce, toNano, zeroAddress } from "locklift";
 
 import {
   DexAccountAbi,
@@ -18,14 +12,8 @@ import {
   TestWeverVaultAbi,
   Tip3ToEverAbi,
   TokenRootUpgradeableAbi,
-  TokenWalletUpgradeableAbi,
 } from "../../build/factorySource";
-import {
-  depositLiquidity,
-  getDexData,
-  getPoolData,
-  getWallet,
-} from "../../utils/wrappers";
+import { depositLiquidity, getWallet } from "../../utils/wrappers";
 import { expectedExchange } from "../utils/math.utils";
 import { calcValue } from "../utils/gas.utils";
 
