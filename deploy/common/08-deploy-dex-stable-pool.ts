@@ -25,8 +25,8 @@ export default async () => {
     tokenThird.address,
   ];
 
-  // deploying stable pair
-  console.log(`Start deploy DexStablePair`);
+  // deploying first stable pair
+  console.log(`Start deploy DexStablePair_${FIRST}_${SECOND}`);
   await locklift.transactions.waitFinalized(
     dexRoot.methods
       .deployPair({
@@ -54,7 +54,7 @@ export default async () => {
       }),
   );
 
-  const dexStablePairAddress = (
+  const dexStablePairAddressFirst = (
     await dexRoot.methods
       .getExpectedPoolAddress({
         answerId: 0,
@@ -63,17 +63,72 @@ export default async () => {
       .call()
   ).value0;
 
-  console.log(`Dex_Stable_Pair address = ${dexStablePairAddress}`);
+  console.log(
+    `Dex_Stable_Pair_${FIRST}_${SECOND} address = ${dexStablePairAddressFirst}`,
+  );
 
-  const DexStablePair = locklift.factory.getDeployedContract(
+  const DexStablePairFirst = locklift.factory.getDeployedContract(
     "DexStablePair",
-    dexStablePairAddress,
+    dexStablePairAddressFirst,
   );
 
   await locklift.deployments.saveContract({
     contractName: "DexStablePair",
     deploymentName: `DexStablePair_${FIRST}_${SECOND}`,
-    address: DexStablePair.address,
+    address: DexStablePairFirst.address,
+  });
+
+  // deploying second stable pair
+  console.log(`Start deploy DexStablePair_${SECOND}_${THIRD}`);
+  await locklift.transactions.waitFinalized(
+    dexRoot.methods
+      .deployPair({
+        left_root: tokenSecond.address,
+        right_root: tokenThird.address,
+        send_gas_to: account.address,
+      })
+      .send({
+        from: account.address,
+        amount: toNano(15),
+      }),
+  );
+
+  await locklift.transactions.waitFinalized(
+    await dexRoot.methods
+      .upgradePair({
+        left_root: tokenSecond.address,
+        right_root: tokenThird.address,
+        pool_type: 2,
+        send_gas_to: account.address,
+      })
+      .send({
+        from: account.address,
+        amount: toNano(6),
+      }),
+  );
+
+  const dexStablePairAddressSecond = (
+    await dexRoot.methods
+      .getExpectedPoolAddress({
+        answerId: 0,
+        _roots: [tokenSecond.address, tokenThird.address],
+      })
+      .call()
+  ).value0;
+
+  console.log(
+    `Dex_Stable_Pair_${SECOND}_${THIRD} address = ${dexStablePairAddressSecond}`,
+  );
+
+  const DexStablePairSecond = locklift.factory.getDeployedContract(
+    "DexStablePair",
+    dexStablePairAddressSecond,
+  );
+
+  await locklift.deployments.saveContract({
+    contractName: "DexStablePair",
+    deploymentName: `DexStablePair_${SECOND}_${THIRD}`,
+    address: DexStablePairSecond.address,
   });
 
   // deploying 3 tokens stable pool
@@ -151,6 +206,17 @@ export default async () => {
   await dexRoot.methods
     .setPairFeeParams({
       _roots: [tokenFirst.address, tokenSecond.address],
+      _params: feeParams,
+      _remainingGasTo: account.address,
+    })
+    .send({
+      from: account.address,
+      amount: toNano(1.5),
+    });
+
+  await dexRoot.methods
+    .setPairFeeParams({
+      _roots: [tokenSecond.address, tokenThird.address],
       _params: feeParams,
       _remainingGasTo: account.address,
     })

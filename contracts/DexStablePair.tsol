@@ -1233,7 +1233,7 @@ contract DexStablePair is
 
             if (dy_result.amount < expected_amount) {
                 errorCode = DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
-            } {
+            } else {
                 tokenData[i].balance += spent_amount - dy_result.beneficiary_fee - referrer_fee;
                 tokenData[j].balance -= dy_result.amount;
 
@@ -1400,20 +1400,20 @@ contract DexStablePair is
         }
 
         if (errorCode != 0) {
-            IDexPairOperationCallback(sender_address).dexPairOperationCancelled{
-                value: DexGas.OPERATION_CALLBACK_BASE + 44,
-                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                bounce: false
-            }(id);
-
-            if (recipient != sender_address) {
-                IDexPairOperationCallback(recipient).dexPairOperationCancelled{
-                    value: DexGas.OPERATION_CALLBACK_BASE + 44,
-                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
-                    bounce: false
-                }(id);
-            }
-
+//            IDexPairOperationCallback(sender_address).dexPairOperationCancelled{
+//                value: DexGas.OPERATION_CALLBACK_BASE + 44,
+//                flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+//                bounce: false
+//            }(id);
+//
+//            if (recipient != sender_address) {
+//                IDexPairOperationCallback(recipient).dexPairOperationCancelled{
+//                    value: DexGas.OPERATION_CALLBACK_BASE + 44,
+//                    flag: MsgFlag.SENDER_PAYS_FEES + MsgFlag.IGNORE_ERRORS,
+//                    bounce: false
+//                }(id);
+//            }
+//
             IDexTokenVault(_expectedTokenVaultAddress(spent_token_root)).transfer{
                 value: 0,
                 flag: MsgFlag.ALL_NOT_RESERVED

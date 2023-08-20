@@ -118,9 +118,9 @@ export default async () => {
   // creating (TOKENS_N / 2) * TOKENS_DECIMALS.length pairs
   const allPairs: [string, string][] = [];
 
-  Array.from({ length: TOKENS_N }).map(async (_, iLeft) => {
-    Array.from({ length: TOKENS_N }).map(async (_, iRight) => {
-      TOKENS_DECIMALS.map(async decimals => {
+  Array.from({ length: TOKENS_N }).map((_, iLeft) => {
+    Array.from({ length: TOKENS_N }).map((_, iRight) => {
+      TOKENS_DECIMALS.forEach(decimals => {
         if (iLeft === iRight) return;
         if (iLeft > iRight) return;
         allPairs.push([
@@ -129,6 +129,11 @@ export default async () => {
         ]);
       });
     });
+  });
+
+  TOKENS_DECIMALS.forEach((decimals, i) => {
+    if (i === 0) return;
+    allPairs.push([`token-${TOKENS_DECIMALS[i - 1]}-1`, `token-${decimals}-1`]);
   });
 
   for (let i = 0; i < allPairs.length; i++) {
