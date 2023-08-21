@@ -22,6 +22,7 @@ export interface IDepositLiquidity {
   lpReward: string;
   poolFees: Record<string, string>;
   beneficiaryFees: Record<string, string>;
+  referrerFees: Record<string, string>;
   amounts: Record<string, string>;
 }
 
@@ -259,6 +260,7 @@ export async function expectedDepositLiquidity(
     | Contract<DexStablePoolAbi>,
   tokens: ITokens[],
   autoChange: boolean,
+  isReferrer?: boolean,
 ): Promise<IDepositLiquidity> {
   const poolType = await poolContract.methods
     .getPoolType({ answerId: 0 })
@@ -281,14 +283,22 @@ export async function expectedDepositLiquidity(
       .then(r => r.value0);
 
     const beneficiaryFees: Record<string, string> = {};
-    expected.beneficiary_fees.forEach(
-      (fee, i) => (beneficiaryFees[sortedTokens[i].root.toString()] = fee),
-    );
-
     const poolFees: Record<string, string> = {};
-    expected.pool_fees.forEach(
-      (fee, i) => (poolFees[sortedTokens[i].root.toString()] = fee),
-    );
+    const referrerFees: Record<string, string> = {};
+
+    for (let i = 0; i < sortedTokens.length; i++) {
+      const { beneficiaryFee, poolFee, referrerFee } =
+        await getFeesFromTotalFee(
+          poolContract,
+          new BigNumber(expected.beneficiary_fees[i])
+            .plus(expected.pool_fees[i])
+            .toString(),
+          isReferrer,
+        );
+      beneficiaryFees[sortedTokens[i].root.toString()] = beneficiaryFee;
+      poolFees[sortedTokens[i].root.toString()] = poolFee;
+      referrerFees[sortedTokens[i].root.toString()] = referrerFee;
+    }
 
     const amounts: Record<string, string> = {};
     expected.amounts.forEach(
@@ -299,6 +309,7 @@ export async function expectedDepositLiquidity(
       lpReward: expected.lp_reward,
       beneficiaryFees,
       poolFees,
+      referrerFees,
       amounts,
     };
   }
@@ -315,10 +326,10 @@ export async function expectedDepositLiquidity(
       .call()
       .then(r => r.value0);
 
-    const { beneficiaryFee, poolFee } = await getFeesFromTotalFee(
+    const { beneficiaryFee, poolFee, referrerFee } = await getFeesFromTotalFee(
       poolContract,
       expectedLiq.step_2_fee,
-      false,
+      isReferrer,
     );
 
     let leftAmount = new BigNumber(expectedLiq.step_1_left_deposit).toString();
@@ -370,6 +381,20 @@ export async function expectedDepositLiquidity(
           0,
         ],
       ]),
+      referrerFees: Object.fromEntries([
+        [
+          expectedLiq.step_2_left_to_right
+            ? sortedTokens[0].root.toString()
+            : sortedTokens[1].root.toString(),
+          referrerFee,
+        ],
+        [
+          expectedLiq.step_2_left_to_right
+            ? sortedTokens[1].root.toString()
+            : sortedTokens[0].root.toString(),
+          0,
+        ],
+      ]),
       amounts: Object.fromEntries([
         [sortedTokens[0].root.toString(), leftAmount],
         [sortedTokens[1].root.toString(), rightAmount],
@@ -386,6 +411,7 @@ export async function expectedExchange(
   amount: string | number,
   spent_token_root: Address,
   receive_token_root?: Address,
+  isReferrer?: boolean,
 ) {
   const poolType = await poolContract.methods
     .getPoolType({ answerId: 0 })
@@ -410,16 +436,17 @@ export async function expectedExchange(
           })
           .call();
 
-  const { beneficiaryFee, poolFee } = await getFeesFromTotalFee(
+  const { beneficiaryFee, poolFee, referrerFee } = await getFeesFromTotalFee(
     poolContract,
     expected.expected_fee,
-    false,
+    isReferrer,
   );
 
   return {
     receivedAmount: expected.expected_amount,
     beneficiaryFee,
     poolFee,
+    referrerFee,
   };
 }
 
@@ -470,7 +497,7 @@ export async function getFeesFromTotalFee(
     .toString();
   const beneficiaryFee = new BigNumber(totalFee).minus(poolFee).toString();
 
-  return { beneficiaryFee, poolFee, referrerFee: 0 };
+  return { beneficiaryFee, poolFee, referrerFee: "0" };
 }
 
 export async function expectedWithdrawLiquidity(
@@ -508,6 +535,7 @@ export async function expectedWithdrawLiquidityOneCoin(
   poolContract: Contract<DexStablePoolAbi>,
   lpAmount: string,
   receivedToken: Address,
+  isReferrer?: boolean,
 ) {
   const expected = await poolContract.methods
     .expectedWithdrawLiquidityOneCoin({
@@ -518,17 +546,23 @@ export async function expectedWithdrawLiquidityOneCoin(
     .call();
 
   const receivedAmount = expected.value0.amounts.find(a => a !== "0") || 0;
-  const beneficiaryFee =
-    expected.value0.beneficiary_fees.find(a => a !== "0") || 0;
-  const poolFee = expected.value0.pool_fees.find(a => a !== "0") || 0;
+  const benFee = expected.value0.beneficiary_fees.find(a => a !== "0") || 0;
+  const pFee = expected.value0.pool_fees.find(a => a !== "0") || 0;
 
-  return { receivedAmount, beneficiaryFee, poolFee };
+  const { beneficiaryFee, poolFee, referrerFee } = await getFeesFromTotalFee(
+    poolContract,
+    new BigNumber(benFee).plus(pFee).toString(),
+    isReferrer,
+  );
+
+  return { receivedAmount, beneficiaryFee, poolFee, referrerFee };
 }
 
 export async function expectedDepositLiquidityOneCoin(
   poolContract: Contract<DexStablePoolAbi>,
   amount: string,
   spentToken: Address,
+  isReferrer?: boolean,
 ) {
   const expected = await poolContract.methods
     .expectedDepositLiquidityOneCoin({
@@ -539,9 +573,14 @@ export async function expectedDepositLiquidityOneCoin(
     .call();
 
   const lpReward = expected.value0.lp_reward;
-  const beneficiaryFee =
-    expected.value0.beneficiary_fees.find(a => a !== "0") || 0;
-  const poolFee = expected.value0.pool_fees.find(a => a !== "0") || 0;
+  const benFee = expected.value0.beneficiary_fees.find(a => a !== "0") || 0;
+  const pFee = expected.value0.pool_fees.find(a => a !== "0") || 0;
 
-  return { lpReward, beneficiaryFee, poolFee };
+  const { beneficiaryFee, poolFee, referrerFee } = await getFeesFromTotalFee(
+    poolContract,
+    new BigNumber(benFee).plus(pFee).toString(),
+    isReferrer,
+  );
+
+  return { lpReward, beneficiaryFee, poolFee, referrerFee };
 }
