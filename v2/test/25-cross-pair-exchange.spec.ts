@@ -6,8 +6,9 @@ import {
   zeroAddress,
 } from "locklift";
 
-const { expect } = require("chai");
-const BigNumber = require("bignumber.js");
+import { expect } from "chai";
+import BigNumber from "bignumber.js";
+
 BigNumber.config({ EXPONENTIAL_AT: 257 });
 import { TOKENS_N, TOKENS_DECIMALS } from "../../utils/consts";
 import {
