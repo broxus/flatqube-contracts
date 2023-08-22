@@ -37,32 +37,24 @@ export default async () => {
   const tokenFactory =
     locklift.deployments.getContract<TokenFactoryAbi>("TokenFactory");
 
-  console.log(`TokenFactory.setRootCode...`);
-  let tx = await tokenFactory.methods
-    .setRootCode({ _rootCode: TokenRoot.code })
-    .send({
-      from: owner.address,
-      amount: toNano(2),
-    });
-  displayTx(tx);
+  await tokenFactory.methods.setRootCode({ _rootCode: TokenRoot.code }).send({
+    from: owner.address,
+    amount: toNano(2),
+  });
 
-  console.log(`TokenFactory.setWalletCode...`);
-  tx = await tokenFactory.methods
+  await tokenFactory.methods
     .setWalletCode({ _walletCode: TokenWallet.code })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
-  displayTx(tx);
 
-  console.log(`TokenFactory.setWalletPlatformCode...`);
-  tx = await tokenFactory.methods
+  await tokenFactory.methods
     .setWalletPlatformCode({ _walletPlatformCode: TokenWalletPlatform.code })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
-  displayTx(tx);
 };
 
 export const tag = "token-factory";

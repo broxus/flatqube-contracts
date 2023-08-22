@@ -32,9 +32,7 @@ export default async () => {
         enableLogs: true,
       }),
     );
-  console.log(`Order Factory address: ${factoryOrder.contract.address}`);
 
-  console.log(`Set code OrderRootPlatform`);
   await factoryOrder.contract.methods
     .setPlatformRootOrderCodeOnce({
       _orderRootPlatform: PlatformRootOrder.code,
@@ -44,7 +42,6 @@ export default async () => {
       amount: toNano(0.1),
     });
 
-  console.log(`Set code OrderPlatform`);
   await factoryOrder.contract.methods
     .setPlatformOrderCodeOnce({ _orderPlatform: PlatformOrder.code })
     .send({
@@ -52,7 +49,6 @@ export default async () => {
       amount: toNano(0.1),
     });
 
-  console.log(`Set code OrderRoot`);
   await factoryOrder.contract.methods
     .setOrderRootCode({ _orderRootCode: RootOrder.code })
     .send({
@@ -60,7 +56,6 @@ export default async () => {
       amount: toNano(0.1),
     });
 
-  console.log(`Set code Order`);
   await factoryOrder.contract.methods
     .setOrderCode({ _orderCode: Order.code })
     .send({
@@ -68,7 +63,6 @@ export default async () => {
       amount: toNano(0.1),
     });
 
-  console.log(`Set FeeParams`);
   await factoryOrder.contract.methods
     .setFeeParams({
       params: {

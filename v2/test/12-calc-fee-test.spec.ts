@@ -10,8 +10,8 @@ import {
   TokenRootUpgradeableAbi,
 } from "../../build/factorySource";
 import { depositLiquidity } from "../../utils/wrappers";
-import { expectedExchange } from "utils/expected.utils";
-import { addressComparator } from "utils/helpers";
+import { expectedExchange } from "../../utils/expected.utils";
+import { addressComparator } from "../../utils/helpers";
 import BigNumber from "bignumber.js";
 
 interface FeeParams {

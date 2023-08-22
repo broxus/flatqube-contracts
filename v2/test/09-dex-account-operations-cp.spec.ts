@@ -20,7 +20,7 @@ import {
   expectedDepositLiquidity,
   expectedExchange,
   expectedWithdrawLiquidity,
-} from "utils/expected.utils";
+} from "../../utils/expected.utils";
 
 const LP_DECIMALS = 9;
 

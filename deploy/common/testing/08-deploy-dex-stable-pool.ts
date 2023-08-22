@@ -1,6 +1,9 @@
 import { toNano, zeroAddress } from "locklift";
-import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
-import { IFee } from "../../utils/wrappers";
+import {
+  DexRootAbi,
+  TokenRootUpgradeableAbi,
+} from "../../../build/factorySource";
+import { getThresholdForAllTokens, IFee } from "../../../utils/wrappers";
 
 const FIRST = "token-6-0";
 const SECOND = "token-9-0";
@@ -10,7 +13,7 @@ export const DEX_STABLE_POOL_LP = "DexStablePool_lp";
 export default async () => {
   const account = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
-  // const commonAcc = locklift.deployments.getAccount("commonAccount-0").account;
+  const commonAcc = locklift.deployments.getAccount("commonAccount-0").account;
 
   const tokenFirst =
     locklift.deployments.getContract<TokenRootUpgradeableAbi>(FIRST);
@@ -26,7 +29,6 @@ export default async () => {
   ];
 
   // deploying first stable pair
-  console.log(`Start deploy DexStablePair_${FIRST}_${SECOND}`);
   await locklift.transactions.waitFinalized(
     dexRoot.methods
       .deployPair({
@@ -79,7 +81,6 @@ export default async () => {
   });
 
   // deploying second stable pair
-  console.log(`Start deploy DexStablePair_${SECOND}_${THIRD}`);
   await locklift.transactions.waitFinalized(
     dexRoot.methods
       .deployPair({
@@ -132,7 +133,6 @@ export default async () => {
   });
 
   // deploying 3 tokens stable pool
-  console.log(`Start deploy DexStablePool`);
   await locklift.transactions.waitFinalized(
     await dexRoot.methods
       .deployStablePool({
@@ -170,7 +170,7 @@ export default async () => {
     deploymentName: DEX_STABLE_POOL_LP,
     address: tokenRoots.lp,
   });
-  console.log(tokenRoots.lp, "lpToken");
+  console.log("StablePoolLpToken address: ", tokenRoots.lp.toString());
 
   await locklift.deployments.saveContract({
     contractName: "DexStablePool",
@@ -187,8 +187,8 @@ export default async () => {
     pool_numerator: 3000,
     beneficiary_numerator: 7000,
     referrer_numerator: 0,
-    beneficiary: zeroAddress, // or commonAcc.address
-    threshold: [],
+    beneficiary: commonAcc.address,
+    threshold: getThresholdForAllTokens(),
     referrer_threshold: [],
   } as IFee;
 
@@ -224,8 +224,6 @@ export default async () => {
       from: account.address,
       amount: toNano(1.5),
     });
-
-  console.log(`SetPairFeeParams done for DexStablePair and DexStablePool`);
 
   const version = (
     await DexStablePool.methods.getVersion({ answerId: 0 }).call()

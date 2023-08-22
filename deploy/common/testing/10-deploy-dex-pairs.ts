@@ -1,9 +1,12 @@
-import { toNano, zeroAddress } from "locklift";
-import { Constants, displayTx } from "../../v2/utils/migration";
-import { DexRootAbi, TokenRootUpgradeableAbi } from "../../build/factorySource";
-import { TOKENS_N, TOKENS_DECIMALS } from "../../utils/consts";
+import { toNano } from "locklift";
+import { Constants, displayTx } from "../../../v2/utils/migration";
+import {
+  DexRootAbi,
+  TokenRootUpgradeableAbi,
+} from "../../../build/factorySource";
+import { TOKENS_N, TOKENS_DECIMALS } from "../../../utils/consts";
 import { DEX_STABLE_POOL_LP } from "./08-deploy-dex-stable-pool";
-import { IFee } from "../../utils/wrappers";
+import { getThresholdForAllTokens, IFee } from "../../../utils/wrappers";
 
 const SECOND = "token-9-1";
 
@@ -13,15 +16,15 @@ export default async () => {
 
   const dexOwner = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
-  // const commonAcc = locklift.deployments.getAccount("commonAccount-0").account;
+  const commonAcc = locklift.deployments.getAccount("commonAccount-0").account;
 
   const feeParams = {
     denominator: 1000000,
     pool_numerator: 3000,
     beneficiary_numerator: 7000,
     referrer_numerator: 0,
-    beneficiary: zeroAddress, // or commonAcc.address
-    threshold: [],
+    beneficiary: commonAcc.address,
+    threshold: getThresholdForAllTokens(),
     referrer_threshold: [],
   } as IFee;
 
@@ -45,8 +48,6 @@ export default async () => {
 
       const pair = { left: tokenLeft.symbol, right: tokenRight.symbol };
 
-      console.log(`Start deploy pair DexPair_${pair.left}_${pair.right}`);
-
       const tokenFoo =
         locklift.deployments.getContract<TokenRootUpgradeableAbi>(pair.left);
       const tokenBar =
@@ -65,8 +66,6 @@ export default async () => {
             amount: toNano(15),
           }),
       );
-
-      displayTx(tx.extTransaction, "deploy pair");
 
       const dexPairFooBarAddress = await dexRoot.methods
         .getExpectedPairAddress({

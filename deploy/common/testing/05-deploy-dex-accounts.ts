@@ -1,6 +1,6 @@
 import { Address, toNano } from "locklift";
-import { DexRootAbi } from "../../build/factorySource";
-import { ACCOUNTS_N } from "../../utils/consts";
+import { DexRootAbi } from "../../../build/factorySource";
+import { ACCOUNTS_N } from "../../../utils/consts";
 
 interface IDexAcc {
   address: Address;

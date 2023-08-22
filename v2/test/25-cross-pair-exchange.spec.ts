@@ -26,7 +26,7 @@ import {
   getPoolData,
   getWallet,
 } from "../../utils/wrappers";
-import { expectedExchange } from "utils/expected.utils";
+import { expectedExchange } from "../../utils/expected.utils";
 import { calcValue } from "../utils/gas.utils";
 
 describe("Check direct CrossPairExchange v1", async function () {
@@ -124,36 +124,47 @@ describe("Check direct CrossPairExchange v1", async function () {
       const receivedToken = steps[i].root;
 
       let spentAmount;
-      if (failedStepIndex !== undefined && i >= failedStepIndex) {
-        spentAmount = "0";
-      } else if (i === 0) {
+      if (i === 0) {
         spentAmount = startAmount;
       } else {
         spentAmount = steps[i - 1].amount;
       }
-      const receivedAmount =
-        failedStepIndex !== undefined && i >= failedStepIndex
-          ? "0"
-          : steps[i].amount;
+      const receivedAmount = steps[i].amount;
 
-      expect(
-        new BigNumber(poolsDataStart[i].balances[spentToken.toString()])
-          .plus(spentAmount)
-          .minus(expectedData[i].beneficiaryFee)
-          .toString(),
-      ).to.equal(poolsDataEnd[i].balances[spentToken.toString()]);
+      if (failedStepIndex !== undefined && i >= failedStepIndex) {
+        expect(poolsDataStart[i].balances[spentToken.toString()]).to.equal(
+          poolsDataEnd[i].balances[spentToken.toString()],
+        );
 
-      expect(
-        new BigNumber(poolsDataStart[i].accumulatedFees[spentToken.toString()])
-          .plus(expectedData[i].beneficiaryFee)
-          .toString(),
-      ).to.equal(poolsDataEnd[i].accumulatedFees[spentToken.toString()]);
+        expect(
+          poolsDataStart[i].accumulatedFees[spentToken.toString()],
+        ).to.equal(poolsDataEnd[i].accumulatedFees[spentToken.toString()]);
 
-      expect(
-        new BigNumber(poolsDataStart[i].balances[receivedToken.toString()])
-          .minus(receivedAmount)
-          .toString(),
-      ).to.equal(poolsDataEnd[i].balances[receivedToken.toString()]);
+        expect(poolsDataStart[i].balances[receivedToken.toString()]).to.equal(
+          poolsDataEnd[i].balances[receivedToken.toString()],
+        );
+      } else {
+        expect(
+          new BigNumber(poolsDataStart[i].balances[spentToken.toString()])
+            .plus(spentAmount)
+            .minus(expectedData[i].beneficiaryFee)
+            .toString(),
+        ).to.equal(poolsDataEnd[i].balances[spentToken.toString()]);
+
+        expect(
+          new BigNumber(
+            poolsDataStart[i].accumulatedFees[spentToken.toString()],
+          )
+            .plus(expectedData[i].beneficiaryFee)
+            .toString(),
+        ).to.equal(poolsDataEnd[i].accumulatedFees[spentToken.toString()]);
+
+        expect(
+          new BigNumber(poolsDataStart[i].balances[receivedToken.toString()])
+            .minus(receivedAmount)
+            .toString(),
+        ).to.equal(poolsDataEnd[i].balances[receivedToken.toString()]);
+      }
     });
 
     let lastStepIndex;

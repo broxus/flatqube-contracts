@@ -3,8 +3,6 @@ export const WEVER_DEXPAIR_AMOUNT = 200;
 import { ACCOUNTS_N, ACCOUNT_WALLET_AMOUNT } from "../../utils/consts";
 
 export default async () => {
-  console.log("Starting creating User Accounts...");
-
   await locklift.deployments.deployAccounts(
     Array.from({ length: ACCOUNTS_N }, (_, i) => ({
       deploymentName: `commonAccount-${i}`,
@@ -15,24 +13,23 @@ export default async () => {
       },
       signerId: "0",
     })),
+    true,
   );
-
-  console.log("User Accounts deployed!");
-
-  for (let j = 0; j < ACCOUNTS_N; j++) {
-    const account = locklift.deployments.getAccount(
-      `commonAccount-${j}`,
-    ).account;
-
-    await locklift.provider.sendMessage({
-      sender: account.address,
-      recipient: account.address,
-      amount: toNano(1),
-      bounce: false,
-    });
-
-    console.log(`${j} account initialized`);
-  }
+  //
+  // console.log("User Accounts deployed!");
+  //
+  // for (let j = 0; j < ACCOUNTS_N; j++) {
+  //   const account = locklift.deployments.getAccount(
+  //     `commonAccount-${j}`,
+  //   ).account;
+  //
+  //   await locklift.provider.sendMessage({
+  //     sender: account.address,
+  //     recipient: account.address,
+  //     amount: toNano(1),
+  //     bounce: false,
+  //   });
+  // }
 };
 
 export const tag = "common-accounts";

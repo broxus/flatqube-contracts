@@ -1456,6 +1456,7 @@ describe("Check DexAccount add Pair", () => {
       expect(
         new BigNumber(poolDataStart.balances[receivedTokenAddress.toString()])
           .minus(expected.receivedAmount)
+          .minus(expected.beneficiaryFee)
           .toString(),
       ).to.equal(
         poolDataEnd.balances[receivedTokenAddress.toString()],

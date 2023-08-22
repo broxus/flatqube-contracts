@@ -72,26 +72,21 @@ export default async () => {
 
   const dexVault = locklift.deployments.getContract<DexVaultAbi>("DexVault");
 
-  console.log(`DexVault: installing Platform code...`);
   let tx = await dexVault.methods
     .installPlatformOnce({ code: DexPlatform.code })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
-  displayTx(tx);
 
-  console.log(`DexRoot: installing vault address...`);
-  tx = await dexRoot.methods
+  let tx = await dexRoot.methods
     .setVaultOnce({ new_vault: dexVault.address })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
-  displayTx(tx);
 
-  console.log("DexRoot: installing vault code...");
-  tx = await dexRoot.methods
+  let tx = await dexRoot.methods
     .installOrUpdateTokenVaultCode({
       _newCode: DexTokenVault.code,
       _remainingGasTo: owner.address,
@@ -100,10 +95,8 @@ export default async () => {
       from: owner.address,
       amount: toNano(2),
     });
-  displayTx(tx);
 
-  console.log("DexRoot: installing lp pending code...");
-  tx = await dexRoot.methods
+  let tx = await dexRoot.methods
     .installOrUpdateLpTokenPendingCode({
       _newCode: LpTokenPending.code,
       _remainingGasTo: owner.address,
@@ -112,10 +105,8 @@ export default async () => {
       from: owner.address,
       amount: toNano(2),
     });
-  displayTx(tx);
 
-  console.log("DexRoot: set Token Factory...");
-  tx = await dexRoot.methods
+  let tx = await dexRoot.methods
     .setTokenFactory({
       _newTokenFactory: tokenFactory.address,
       _remainingGasTo: owner.address,
@@ -124,59 +115,46 @@ export default async () => {
       from: owner.address,
       amount: toNano(2),
     });
-  displayTx(tx);
 
-  console.log(`DexRoot: installing Platform code...`);
-  tx = await dexRoot.methods
+  let tx = await dexRoot.methods
     .installPlatformOnce({ code: DexPlatform.code })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
-  displayTx(tx);
 
-  console.log(`DexRoot: installing DexAccount code...`);
-  tx = await dexRoot.methods
+  let tx = await dexRoot.methods
     .installOrUpdateAccountCode({ code: DexAccount.code })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
-  displayTx(tx);
 
-  console.log(`DexRoot: installing DexPair CONSTANT_PRODUCT code...`);
-  tx = await dexRoot.methods
+  let tx = await dexRoot.methods
     .installOrUpdatePairCode({ code: DexPair.code, pool_type: 1 })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
-  displayTx(tx);
 
-  console.log(`DexRoot: installing DexStablePool code...`);
-  tx = await dexRoot.methods
+  let tx = await dexRoot.methods
     .installOrUpdatePoolCode({ code: DexStablePool.code, pool_type: 3 })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
-  displayTx(tx);
 
-  console.log(`DexRoot: installing DexPair STABLESWAP code...`);
-  tx = await dexRoot.methods
+  let tx = await dexRoot.methods
     .installOrUpdatePairCode({ code: DexStablePair.code, pool_type: 2 })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
-  displayTx(tx);
 
-  console.log(`DexRoot: set Dex is active...`);
-  tx = await dexRoot.methods.setActive({ new_active: true }).send({
+  let tx = await dexRoot.methods.setActive({ new_active: true }).send({
     from: owner.address,
     amount: toNano(2),
   });
-  displayTx(tx);
 };
 
 export const tag = "dex-root";

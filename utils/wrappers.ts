@@ -13,8 +13,10 @@ import {
   DexStablePairAbi,
   DexStablePoolAbi,
   TokenWalletUpgradeableAbi,
+  TokenRootUpgradeableAbi,
 } from "../build/factorySource";
 import { BigNumber } from "bignumber.js";
+import { TOKENS_DECIMALS, TOKENS_N } from "./consts";
 
 export interface IFee {
   denominator: number | string;
@@ -95,6 +97,23 @@ export const createDexPair = async (
   );
 
   return dexPairFooBarAddress;
+};
+
+export const getThresholdForAllTokens = () => {
+  const threshold: [Address, string | number][] = [];
+
+  Array.from({ length: TOKENS_N }).map((_, i) => {
+    TOKENS_DECIMALS.forEach(decimals => {
+      const token = locklift.deployments.getContract<TokenRootUpgradeableAbi>(
+        `token-${decimals}-${i}`,
+      );
+      threshold.push([
+        token.address,
+        new BigNumber(100).shiftedBy(decimals).toString(),
+      ]);
+    });
+  });
+  return threshold;
 };
 
 export const createStablePool = async (roots: Address[], fees: IFee) => {

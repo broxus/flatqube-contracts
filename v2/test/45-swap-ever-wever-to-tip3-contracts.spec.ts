@@ -14,7 +14,7 @@ import {
   TokenRootUpgradeableAbi,
 } from "../../build/factorySource";
 import { depositLiquidity, getWallet } from "../../utils/wrappers";
-import { expectedExchange } from "utils/expected.utils";
+import { expectedExchange } from "../../utils/expected.utils";
 import { calcValue } from "../utils/gas.utils";
 
 BigNumber.config({ EXPONENTIAL_AT: 257 });

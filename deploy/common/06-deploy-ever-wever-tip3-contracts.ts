@@ -11,8 +11,6 @@ export default async () => {
   const weverRoot =
     locklift.deployments.getContract<TokenRootUpgradeableAbi>("weverRoot");
 
-  console.log(`Deploying EverToTip3 contract...`);
-
   const { extTransaction: everToTip3 } =
     await locklift.transactions.waitFinalized(
       await locklift.deployments.deploy({
@@ -31,56 +29,42 @@ export default async () => {
         enableLogs: true,
       }),
     );
-  console.log(
-    `EverToTip3 deploying end. Address: ${everToTip3.contract.address}`,
+
+  await locklift.transactions.waitFinalized(
+    await locklift.deployments.deploy({
+      deployConfig: {
+        contract: "Tip3ToEver",
+        constructorParams: {},
+        initParams: {
+          randomNonce_: getRandomNonce(),
+          weverRoot: weverRoot.address,
+          weverVault: weverVault.address,
+        },
+        publicKey: signer.publicKey,
+        value: toNano(2),
+      },
+      deploymentName: "Tip3ToEver",
+      enableLogs: true,
+    }),
   );
 
-  console.log(`Deploying Tip3ToEver...`);
-
-  const { extTransaction: tip3ToEver } =
-    await locklift.transactions.waitFinalized(
-      await locklift.deployments.deploy({
-        deployConfig: {
-          contract: "Tip3ToEver",
-          constructorParams: {},
-          initParams: {
-            randomNonce_: getRandomNonce(),
-            weverRoot: weverRoot.address,
-            weverVault: weverVault.address,
-          },
-          publicKey: signer.publicKey,
-          value: toNano(2),
+  await locklift.transactions.waitFinalized(
+    await locklift.deployments.deploy({
+      deployConfig: {
+        contract: "EverWeverToTip3",
+        constructorParams: {},
+        initParams: {
+          randomNonce_: getRandomNonce(),
+          weverRoot: weverRoot.address,
+          weverVault: weverVault.address,
+          everToTip3: everToTip3.contract.address,
         },
-        deploymentName: "Tip3ToEver",
-        enableLogs: true,
-      }),
-    );
-  console.log(
-    `Tip3ToEver deploying end. Address: ${tip3ToEver.contract.address}`,
-  );
-
-  console.log(`Deploying EverWeverToTip3...`);
-  const { extTransaction: everWEverToTIP3 } =
-    await locklift.transactions.waitFinalized(
-      await locklift.deployments.deploy({
-        deployConfig: {
-          contract: "EverWeverToTip3",
-          constructorParams: {},
-          initParams: {
-            randomNonce_: getRandomNonce(),
-            weverRoot: weverRoot.address,
-            weverVault: weverVault.address,
-            everToTip3: everToTip3.contract.address,
-          },
-          publicKey: signer.publicKey,
-          value: toNano(2),
-        },
-        deploymentName: "EverWeverToTip3",
-        enableLogs: true,
-      }),
-    );
-  console.log(
-    `EverWeverToTip3 deploing end. Address: ${everWEverToTIP3.contract.address}`,
+        publicKey: signer.publicKey,
+        value: toNano(2),
+      },
+      deploymentName: "EverWeverToTip3",
+      enableLogs: true,
+    }),
   );
 };
 

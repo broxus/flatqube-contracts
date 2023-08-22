@@ -2,7 +2,6 @@ import { getRandomNonce, toNano, zeroAddress } from "locklift";
 
 export default async () => {
   await locklift.deployments.load();
-  console.log("deploying local/broxus WEVER");
   const weverOwner = locklift.deployments.getAccount("DexOwner");
 
   const { code: tokenWalletCode } = locklift.factory.getContractArtifacts(
@@ -240,8 +239,6 @@ export default async () => {
       from: weverOwner.account.address,
       amount: toNano(6),
     });
-
-  console.log(`wever contracts deployed!`);
 };
 
 export const tag = "wever";
