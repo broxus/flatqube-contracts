@@ -1,11 +1,17 @@
 import chalk from "chalk";
-import { Transaction } from "locklift";
+import { Address, Transaction } from "locklift";
+import { BigNumber } from "bignumber.js";
 
 // LOGS
 
 export const displayTx = (_tx: Transaction, describe?: string) => {
   console.log(`txId ${describe ?? ""}: ${_tx.id.hash ? _tx.id.hash : _tx.id}`);
 };
+
+export const addressComparator = (a: Address, b: Address): number =>
+  new BigNumber(a.toString().replace(":", "x"))
+    .minus(new BigNumber(b.toString().replace(":", "x")))
+    .toNumber();
 
 /**
  * Prints green success message and exit with 0 status code

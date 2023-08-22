@@ -22,7 +22,7 @@ import {
   expectedExchange,
   expectedWithdrawLiquidity,
   expectedWithdrawLiquidityOneCoin,
-} from "../utils/math.utils";
+} from "utils/expected.utils";
 
 const LP_DECIMALS = 9;
 

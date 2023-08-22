@@ -7,7 +7,7 @@ import {
 import {
   expectedDepositLiquidity,
   expectedExchange,
-} from "../../utils/math.utils";
+} from "utils/expected.utils";
 import {
   TokenRootUpgradeableAbi,
   DexAccountAbi,

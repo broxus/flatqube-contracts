@@ -1,8 +1,9 @@
 import { expect } from "chai";
-import { Contract, getRandomNonce, zeroAddress } from "locklift";
+import { Contract, getRandomNonce, toNano, zeroAddress } from "locklift";
 import { Constants } from "utils/consts";
 import { IFee } from "utils/wrappers";
 import { displayTx } from "utils/helpers";
+import { expectedDepositLiquidity } from "utils/expected.utils";
 import BigNumber from "bignumber.js";
 import { Account } from "everscale-standalone-client";
 import {
@@ -52,7 +53,7 @@ let DexAccount2: Contract<DexAccountAbi>;
 let poolLpWallet2: Contract<TokenWalletUpgradeableAbi>;
 let tokenWallets2: Contract<TokenWalletUpgradeableAbi>[];
 let DexAccount3: Contract<DexAccountAbi>;
-let poolLpWallet3: Contract<TokenWalletUpgradeableAbi>;
+// let poolLpWallet3: Contract<TokenWalletUpgradeableAbi>;
 let tokenWallets3: Contract<TokenWalletUpgradeableAbi>[];
 let tokenWallets4: Contract<TokenWalletUpgradeableAbi>[];
 let DexVault: Contract<DexVaultAbi>;
@@ -238,9 +239,9 @@ describe(`Test beneficiary fee`, async function () {
     DexRoot = locklift.deployments.getContract("DexRoot");
     DexVault = locklift.deployments.getContract("DexVault");
 
-    Account1 = locklift.deployments.getAccount("Wallet").account;
-    Account2 = locklift.deployments.getAccount("Wallet").account;
-    Account3 = locklift.deployments.getAccount("Wallet").account;
+    Account1 = locklift.deployments.getAccount("commonAccount-0").account;
+    Account2 = locklift.deployments.getAccount("commonAccount-2").account;
+    Account3 = locklift.deployments.getAccount("commonAccount-3").account;
     Account4 = locklift.deployments.getAccount("commonAccount-1").account;
 
     feeParams.beneficiary =
@@ -281,7 +282,7 @@ describe(`Test beneficiary fee`, async function () {
       [tokenRoots[2].address.toString()]: "TST-18-0",
     }; // address to symbol
 
-    // for (let i = 0; i < N_COINS; i++) {
+    // for (let i = 0; i < N_COINS.length; i++) {
     //   let symbol = Constants.tokens[options.roots[i]].symbol;
     //   migration.load(tempTokenRoots[i], symbol + "Root");
     //   tokenData[tempTokenRoots[i].address] = options.roots[i];
@@ -303,14 +304,14 @@ describe(`Test beneficiary fee`, async function () {
       tokens.push(token);
     }
 
-    // for (let i = 0; i < N_COINS; i++) {
-    //   options.fee.threshold[tokenRoots[i].address] = new BigNumber(2)
+    // for (let i = 0; i < N_COINS.length; i++) {
+    //   feeParams.threshold[tokenRoots[i].address] = new BigNumber(2)
     //     .shiftedBy(tokens[i].decimals)
     //     .toString();
     // }
 
-    // for (let i = 0; i < N_COINS; i++) {
-    //     options.fee.referrer_threshold[tokenRoots[i].address] = new BigNumber(1).shiftedBy(tokens[i].decimals).toString();
+    // for (let i = 0; i < N_COINS.length; i++) {
+    //     feeParams.referrer_threshold[tokenRoots[i].address] = new BigNumber(1).shiftedBy(tokens[i].decimals).toString();
     // }
 
     DexAccount2 = locklift.deployments.getContract("DexAccount");
@@ -377,78 +378,66 @@ describe(`Test beneficiary fee`, async function () {
       `Set referral program params:\n      -project_id: ${projectId}\n      -project_address: ${projectAddress}\n      -ref_system_address: ${refSystemAddress}`,
     );
 
-    Account1.m;
+    const tx = await DexVault.methods
+      .setReferralProgramParams({
+        params: {
+          projectId: projectId,
+          projectAddress: projectAddress,
+          systemAddress: refSystemAddress,
+        },
+      })
+      .send({
+        amount: toNano(1),
+        from: Account1.address,
+      });
 
-    const tx = await Account1.runTarget({
-      contract: DexVault,
-      method: "updateReferralProgramParams",
-      params: {
-        project_id: projectId,
-        project_address: projectAddress,
-        ref_system_address: refSystemAddress,
-      },
-      value: locklift.utils.convertCrystal(1, "nano"),
-      keyPair: keyPairs[0],
-    });
     displayTx(tx);
   });
 
   describe("Configure fee params", async function () {
     it("Set fee params", async function () {
-      console.log("#################################################");
-      console.log(
-        `# DexRoot.setPairFeeParams(${JSON.stringify(options.fee)}, ${
-          Account1.address
-        })`,
-      );
-
-      const feeParamsStart = await DexPool.call({
-        method: "getFeeParams",
-        params: {},
-      });
+      const feeParamsStart = await DexPool.methods
+        .getFeeParams({
+          answerId: 0,
+        })
+        .call();
       console.log(
         `# Fee params start:`,
         JSON.stringify(feeParamsStart, null, 2),
       );
 
       const roots = Object.values(tokenRoots).map(elem => elem.address);
-      await Account1.runTarget({
-        contract: DexRoot,
-        method: "setPairFeeParams",
-        params: {
+      DexRoot.methods
+        .setPairFeeParams({
           _roots: roots,
-          _params: options.fee,
+          _params: feeParams,
           _remainingGasTo: Account1.address,
-        },
-        keyPair: keyPairs[0],
-      });
+        })
+        .call();
 
-      const feeParamsEnd = await DexPool.call({
-        method: "getFeeParams",
-        params: {},
-      });
+      const feeParamsEnd = (
+        await DexPool.methods.getFeeParams({ answerId: 0 }).call()
+      ).value0;
       console.log(`# Fee params end:`, JSON.stringify(feeParamsEnd, null, 2));
 
-      await migration.logGas();
-
       expect(feeParamsEnd.beneficiary).to.equal(
-        options.fee.beneficiary,
+        feeParams.beneficiary,
         "WRONG fee.beneficiary",
       );
-      expect(feeParamsEnd.denominator.toFixed()).to.equal(
-        options.fee.denominator,
+      expect(feeParamsEnd.denominator).to.equal(
+        feeParams.denominator,
         "WRONG fee.denominator",
       );
-      expect(feeParamsEnd.pool_numerator.toFixed()).to.equal(
-        options.fee.pool_numerator,
+      expect(feeParamsEnd.pool_numerator).to.equal(
+        feeParams.pool_numerator,
         "WRONG fee.pool_numerator",
       );
-      expect(feeParamsEnd.beneficiary_numerator.toFixed()).to.equal(
-        options.fee.beneficiary_numerator,
+      expect(feeParamsEnd.beneficiary_numerator).to.equal(
+        feeParams.beneficiary_numerator,
         "WRONG fee.beneficiary_numerator",
       );
-      expect(feeParamsEnd.referrer_numerator.toFixed()).to.equal(
-        options.fee.referrer_numerator,
+      expect(feeParamsEnd.referrer_numerator).to.equal(
+        feeParams.referrer_numerator,
         "WRONG fee.referrer_numerator",
       );
     });
@@ -464,7 +453,7 @@ describe(`Test beneficiary fee`, async function () {
       const referrerStart = await account4balances();
 
       let logs = `DexAccount#2 balance start: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${dexAccount2Start.accountBalances[i]} ${tokens[i].symbol}, `;
       }
       logs += `${dexAccount2Start.lp} LP`;
@@ -473,14 +462,14 @@ describe(`Test beneficiary fee`, async function () {
       console.log(`Account#2 LP start: ${dexAccount2Start.walletLp}`);
 
       logs = `DexAccount#3 balance start: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${dexAccount3Start.accountBalances[i]} ${tokens[i].symbol}, `;
       }
       logs += `${dexAccount3Start.lp} LP`;
       console.log(logs);
 
       logs = `DexPool start: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${dexPoolInfoStart.token_balances[i]} ${tokens[i].symbol}, `;
         logs += `${dexPoolInfoStart.token_fees[i]} ${tokens[i].symbol} FEE, `;
       }
@@ -490,63 +479,35 @@ describe(`Test beneficiary fee`, async function () {
       console.log(logs);
 
       logs = `Account#4 balance start: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${referrerStart.token_balances[i] || 0} ${tokens[i].symbol}, `;
       }
       console.log(logs);
 
-      const deposits = new Array(N_COINS);
-      const amounts = new Array(N_COINS);
+      const deposits = N_COINS;
+      const amounts = N_COINS;
       const operations = [];
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         deposits[i] = i % 2 ? 1000 : 9000;
         amounts[i] = new BigNumber(deposits[i])
           .shiftedBy(tokens[i].decimals)
-          .toString();
+          .toNumber();
         operations.push({
           amount: amounts[i],
           root: tokenRoots[i].address,
         });
       }
 
-      let LP_REWARD;
-      let expected;
-      if (
-        options.pool_contract_name === "DexStablePair" ||
-        options.pool_contract_name === "DexStablePool"
-      ) {
-        expected = await DexPool.call({
-          method: "expectedDepositLiquidityV2",
-          params: {
-            amounts,
-          },
-        });
+      const expected = await expectedDepositLiquidity(
+        DexPool,
+        operations,
+        true,
+      );
 
-        LP_REWARD = new BigNumber(expected.lp_reward).shiftedBy(-9).toString();
+      const LP_REWARD = expected.lpReward;
 
-        logExpectedDepositV2(expected, tokens);
-      } else {
-        expected = await DexPool.call({
-          method: "expectedDepositLiquidity",
-          params: {
-            left_amount: amounts[0],
-            right_amount: amounts[1],
-            auto_change: true,
-          },
-        });
-
-        LP_REWARD = new BigNumber(expected.step_1_lp_reward)
-          .plus(expected.step_3_lp_reward)
-          .shiftedBy(-9)
-          .toString();
-
-        logExpectedDeposit(expected, tokens);
-      }
-
-      const tx = await Account2.runTarget({
-        contract: DexAccount2,
-        method: "depositLiquidityV2",
-        params: {
+      const tx = await DexAccount2.methods
+        .depositLiquidityV2({
           _callId: getRandomNonce(),
           _operations: operations,
           _expected: {
@@ -558,10 +519,11 @@ describe(`Test beneficiary fee`, async function () {
           _autoChange: true,
           _remainingGasTo: Account2.address,
           _referrer: Account2.address,
-        },
-        value: locklift.utils.convertCrystal("5", "nano"),
-        keyPair: keyPairs[1],
-      });
+        })
+        .send({
+          amount: toNano(5),
+          from: Account2.address,
+        });
 
       displayTx(tx);
 
@@ -571,7 +533,7 @@ describe(`Test beneficiary fee`, async function () {
       const referrerEnd = await account4balances();
 
       logs = `DexAccount#2 balance end: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${dexAccount2End.accountBalances[i]} ${tokens[i].symbol}, `;
       }
       logs += `${dexAccount2End.lp} LP`;
@@ -580,14 +542,14 @@ describe(`Test beneficiary fee`, async function () {
       console.log(`Account#2 LP end: ${dexAccount2End.walletLp}`);
 
       logs = `DexAccount#3 balance end: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${dexAccount3End.accountBalances[i]} ${tokens[i].symbol}, `;
       }
       logs += `${dexAccount3End.lp} LP`;
       console.log(logs);
 
       logs = `DexPool end: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${dexPoolInfoEnd.token_balances[i]} ${tokens[i].symbol}, `;
         logs += `${dexPoolInfoEnd.token_fees[i]} ${tokens[i].symbol} FEE, `;
       }
@@ -597,53 +559,53 @@ describe(`Test beneficiary fee`, async function () {
       console.log(logs);
 
       logs = `Account#4 balance end: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${referrerEnd.token_balances[i] || 0} ${tokens[i].symbol}, `;
       }
       console.log(logs);
 
-      await migration.logGas();
-
-      let expectedAccount2TokenBalances = [];
-      for (let i = 0; i < N_COINS; i++) {
+      const expectedAccount2TokenBalances = [];
+      for (let i = 0; i < N_COINS.length; i++) {
         expectedAccount2TokenBalances.push(
           new BigNumber(dexAccount2Start.accountBalances[i])
             .minus(deposits[i])
             .toString(),
         );
       }
-      let expectedDexAccount2Lp = new BigNumber(dexAccount2Start.lp).toString();
-      let expectedAccount2Lp = new BigNumber(dexAccount2Start.walletLp)
+      const expectedDexAccount2Lp = new BigNumber(
+        dexAccount2Start.lp,
+      ).toString();
+      const expectedAccount2Lp = new BigNumber(dexAccount2Start.walletLp)
         .plus(LP_REWARD)
         .toString();
 
-      let expectedPoolTokenBalances = [];
-      let expectedPoolLp = new BigNumber(dexPoolInfoStart.lp_supply)
+      const expectedPoolTokenBalances = [];
+      const expectedPoolLp = new BigNumber(dexPoolInfoStart.lp_supply)
         .plus(LP_REWARD)
         .toString();
-      let expectedDexAccount3TokenBalances = [];
+      const expectedDexAccount3TokenBalances = [];
       let expectedReferrerBalance = [];
       if (
         options.pool_contract_name === "DexStablePool" ||
         options.pool_contract_name === "DexStablePair"
       ) {
-        let fee_numerator = new BigNumber(options.fee.pool_numerator)
-          .plus(options.fee.beneficiary_numerator)
-          .plus(options.fee.referrer_numerator)
+        const fee_numerator = new BigNumber(feeParams.pool_numerator)
+          .plus(feeParams.beneficiary_numerator)
+          .plus(feeParams.referrer_numerator)
           .multipliedBy(options.roots.length)
           .dividedBy(4 * (options.roots.length - 1));
 
-        for (let i = 0; i < N_COINS; i++) {
-          let expectedBeneficiary = new BigNumber(expected.differences[i])
+        for (let i = 0; i < N_COINS.length; i++) {
+          const expectedBeneficiary = new BigNumber(expected.differences[i])
             .shiftedBy(-tokens[i].decimals)
             .times(fee_numerator)
-            .div(options.fee.denominator)
+            .div(feeParams.denominator)
             .dp(tokens[i].decimals, BigNumber.ROUND_CEIL)
-            .times(options.fee.beneficiary_numerator)
+            .times(feeParams.beneficiary_numerator)
             .div(
-              new BigNumber(options.fee.pool_numerator)
-                .plus(options.fee.beneficiary_numerator)
-                .plus(options.fee.referrer_numerator),
+              new BigNumber(feeParams.pool_numerator)
+                .plus(feeParams.beneficiary_numerator)
+                .plus(feeParams.referrer_numerator),
             )
             .dp(tokens[i].decimals, BigNumber.ROUND_FLOOR);
 
@@ -656,13 +618,13 @@ describe(`Test beneficiary fee`, async function () {
           let expectedReferrer = new BigNumber(expected.differences[i])
             .shiftedBy(-tokens[i].decimals)
             .times(fee_numerator)
-            .div(options.fee.denominator)
+            .div(feeParams.denominator)
             .dp(tokens[i].decimals, BigNumber.ROUND_CEIL)
-            .times(options.fee.referrer_numerator)
+            .times(feeParams.referrer_numerator)
             .div(
-              new BigNumber(options.fee.pool_numerator)
-                .plus(options.fee.beneficiary_numerator)
-                .plus(options.fee.referrer_numerator),
+              new BigNumber(feeParams.pool_numerator)
+                .plus(feeParams.beneficiary_numerator)
+                .plus(feeParams.referrer_numerator),
             )
             .dp(tokens[i].decimals, BigNumber.ROUND_FLOOR);
 
@@ -695,17 +657,17 @@ describe(`Test beneficiary fee`, async function () {
         let expectedBeneficiary = new BigNumber(expected.step_2_spent)
           .shiftedBy(-tokens[0].decimals)
           .times(
-            new BigNumber(options.fee.pool_numerator)
-              .plus(options.fee.beneficiary_numerator)
-              .plus(options.fee.referrer_numerator),
+            new BigNumber(feeParams.pool_numerator)
+              .plus(feeParams.beneficiary_numerator)
+              .plus(feeParams.referrer_numerator),
           )
-          .div(options.fee.denominator)
+          .div(feeParams.denominator)
           .dp(tokens[0].decimals, BigNumber.ROUND_CEIL)
-          .times(options.fee.beneficiary_numerator)
+          .times(feeParams.beneficiary_numerator)
           .div(
-            new BigNumber(options.fee.pool_numerator)
-              .plus(options.fee.beneficiary_numerator)
-              .plus(options.fee.referrer_numerator),
+            new BigNumber(feeParams.pool_numerator)
+              .plus(feeParams.beneficiary_numerator)
+              .plus(feeParams.referrer_numerator),
           )
           .dp(tokens[0].decimals, BigNumber.ROUND_FLOOR);
 
@@ -714,17 +676,17 @@ describe(`Test beneficiary fee`, async function () {
         let expectedReferrer = new BigNumber(expected.step_2_spent)
           .shiftedBy(-tokens[0].decimals)
           .times(
-            new BigNumber(options.fee.pool_numerator)
-              .plus(options.fee.beneficiary_numerator)
-              .plus(options.fee.referrer_numerator),
+            new BigNumber(feeParams.pool_numerator)
+              .plus(feeParams.beneficiary_numerator)
+              .plus(feeParams.referrer_numerator),
           )
-          .div(options.fee.denominator)
+          .div(feeParams.denominator)
           .dp(tokens[0].decimals, BigNumber.ROUND_CEIL)
-          .times(options.fee.referrer_numerator)
+          .times(feeParams.referrer_numerator)
           .div(
-            new BigNumber(options.fee.pool_numerator)
-              .plus(options.fee.beneficiary_numerator)
-              .plus(options.fee.referrer_numerator),
+            new BigNumber(feeParams.pool_numerator)
+              .plus(feeParams.beneficiary_numerator)
+              .plus(feeParams.referrer_numerator),
           )
           .dp(tokens[0].decimals, BigNumber.ROUND_FLOOR);
 
@@ -763,7 +725,7 @@ describe(`Test beneficiary fee`, async function () {
         dexPoolInfoEnd.lp_supply,
         "Wrong LP supply",
       );
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         expect(expectedAccount2TokenBalances[i]).to.equal(
           dexAccount2End.accountBalances[i],
           `Wrong DexAccount#2 ${tokens[i].symbol}`,
@@ -777,7 +739,7 @@ describe(`Test beneficiary fee`, async function () {
         dexAccount2End.walletLp,
         "Wrong Account#2 LP",
       );
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         expect(
           new BigNumber(expectedPoolTokenBalances[i]).toNumber(),
         ).to.approximately(
@@ -790,7 +752,7 @@ describe(`Test beneficiary fee`, async function () {
         dexPoolInfoEnd.lp_supply,
         "Wrong DexPool LP supply",
       );
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         expect(expectedDexAccount3TokenBalances[i]).to.equal(
           new BigNumber(dexAccount3End.accountBalances[i])
             .plus(dexPoolInfoEnd.token_fees[i])
@@ -799,7 +761,7 @@ describe(`Test beneficiary fee`, async function () {
         );
       }
       console.log("expectedReferrerBalance: ", expectedReferrerBalance);
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         if (expectedReferrerBalance[i]) {
           expect(
             new BigNumber(expectedReferrerBalance[i]).toNumber(),
@@ -852,7 +814,7 @@ describe(`Test beneficiary fee`, async function () {
           `LP SUPPLY (ACTUAL): ${dexPoolInfoStart.lp_supply_actual} LP`,
       );
       let logs = `Account#4 balance start: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${referrerStart.token_balances[i] || 0} ${tokens[i].symbol}, `;
       }
       console.log(logs);
@@ -994,7 +956,7 @@ describe(`Test beneficiary fee`, async function () {
           `LP SUPPLY (ACTUAL): ${dexPoolInfoEnd.lp_supply_actual} LP`,
       );
       logs = `Account#4 balance end: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${referrerEnd.token_balances[i] || 0} ${tokens[i].symbol}, `;
       }
       console.log(logs);
@@ -1027,17 +989,17 @@ describe(`Test beneficiary fee`, async function () {
         let expectedBeneficiary = new BigNumber(expected.step_2_spent)
           .shiftedBy(-tokens[1].decimals)
           .times(
-            new BigNumber(options.fee.pool_numerator)
-              .plus(options.fee.beneficiary_numerator)
-              .plus(options.fee.referrer_numerator),
+            new BigNumber(feeParams.pool_numerator)
+              .plus(feeParams.beneficiary_numerator)
+              .plus(feeParams.referrer_numerator),
           )
-          .div(options.fee.denominator)
+          .div(feeParams.denominator)
           .dp(tokens[1].decimals, BigNumber.ROUND_CEIL)
-          .times(options.fee.beneficiary_numerator)
+          .times(feeParams.beneficiary_numerator)
           .div(
-            new BigNumber(options.fee.pool_numerator)
-              .plus(options.fee.beneficiary_numerator)
-              .plus(options.fee.referrer_numerator),
+            new BigNumber(feeParams.pool_numerator)
+              .plus(feeParams.beneficiary_numerator)
+              .plus(feeParams.referrer_numerator),
           )
           .dp(tokens[1].decimals, BigNumber.ROUND_FLOOR);
 
@@ -1046,17 +1008,17 @@ describe(`Test beneficiary fee`, async function () {
         let expectedReferrer = new BigNumber(expected.step_2_spent)
           .shiftedBy(-tokens[1].decimals)
           .times(
-            new BigNumber(options.fee.pool_numerator)
-              .plus(options.fee.beneficiary_numerator)
-              .plus(options.fee.referrer_numerator),
+            new BigNumber(feeParams.pool_numerator)
+              .plus(feeParams.beneficiary_numerator)
+              .plus(feeParams.referrer_numerator),
           )
-          .div(options.fee.denominator)
+          .div(feeParams.denominator)
           .dp(tokens[1].decimals, BigNumber.ROUND_CEIL)
-          .times(options.fee.referrer_numerator)
+          .times(feeParams.referrer_numerator)
           .div(
-            new BigNumber(options.fee.pool_numerator)
-              .plus(options.fee.beneficiary_numerator)
-              .plus(options.fee.referrer_numerator),
+            new BigNumber(feeParams.pool_numerator)
+              .plus(feeParams.beneficiary_numerator)
+              .plus(feeParams.referrer_numerator),
           )
           .dp(tokens[1].decimals, BigNumber.ROUND_FLOOR);
 
@@ -1075,7 +1037,7 @@ describe(`Test beneficiary fee`, async function () {
             .toString(),
         );
 
-        for (let i = 0; i < N_COINS; i++) {
+        for (let i = 0; i < N_COINS.length; i++) {
           expectedDexAccount3TokenBalances[i] = new BigNumber(
             i === 1 ? expectedBeneficiary : 0,
           )
@@ -1093,23 +1055,23 @@ describe(`Test beneficiary fee`, async function () {
           .plus(LP_REWARD)
           .toString();
 
-        let fee_numerator = new BigNumber(options.fee.pool_numerator)
-          .plus(options.fee.beneficiary_numerator)
-          .plus(options.fee.referrer_numerator)
+        let fee_numerator = new BigNumber(feeParams.pool_numerator)
+          .plus(feeParams.beneficiary_numerator)
+          .plus(feeParams.referrer_numerator)
           .multipliedBy(options.roots.length)
           .dividedBy(4 * (options.roots.length - 1));
 
-        for (let i = 0; i < N_COINS; i++) {
+        for (let i = 0; i < N_COINS.length; i++) {
           let expectedBeneficiary = new BigNumber(expected.differences[i])
             .shiftedBy(-tokens[i].decimals)
             .times(fee_numerator)
-            .div(options.fee.denominator)
+            .div(feeParams.denominator)
             .dp(tokens[i].decimals, BigNumber.ROUND_CEIL)
-            .times(options.fee.beneficiary_numerator)
+            .times(feeParams.beneficiary_numerator)
             .div(
-              new BigNumber(options.fee.pool_numerator)
-                .plus(options.fee.beneficiary_numerator)
-                .plus(options.fee.referrer_numerator),
+              new BigNumber(feeParams.pool_numerator)
+                .plus(feeParams.beneficiary_numerator)
+                .plus(feeParams.referrer_numerator),
             )
             .dp(tokens[i].decimals, BigNumber.ROUND_FLOOR);
 
@@ -1122,13 +1084,13 @@ describe(`Test beneficiary fee`, async function () {
           let expectedReferrer = new BigNumber(expected.differences[i])
             .shiftedBy(-tokens[i].decimals)
             .times(fee_numerator)
-            .div(options.fee.denominator)
+            .div(feeParams.denominator)
             .dp(tokens[i].decimals, BigNumber.ROUND_CEIL)
-            .times(options.fee.referrer_numerator)
+            .times(feeParams.referrer_numerator)
             .div(
-              new BigNumber(options.fee.pool_numerator)
-                .plus(options.fee.beneficiary_numerator)
-                .plus(options.fee.referrer_numerator),
+              new BigNumber(feeParams.pool_numerator)
+                .plus(feeParams.beneficiary_numerator)
+                .plus(feeParams.referrer_numerator),
             )
             .dp(tokens[i].decimals, BigNumber.ROUND_FLOOR);
 
@@ -1165,17 +1127,17 @@ describe(`Test beneficiary fee`, async function () {
         let expectedBeneficiary = new BigNumber(amounts[1])
           .shiftedBy(-tokens[1].decimals)
           .times(
-            new BigNumber(options.fee.pool_numerator)
-              .plus(options.fee.beneficiary_numerator)
-              .plus(options.fee.referrer_numerator),
+            new BigNumber(feeParams.pool_numerator)
+              .plus(feeParams.beneficiary_numerator)
+              .plus(feeParams.referrer_numerator),
           )
-          .div(options.fee.denominator)
+          .div(feeParams.denominator)
           .dp(tokens[1].decimals, BigNumber.ROUND_CEIL)
-          .times(options.fee.beneficiary_numerator)
+          .times(feeParams.beneficiary_numerator)
           .div(
-            new BigNumber(options.fee.pool_numerator)
-              .plus(options.fee.beneficiary_numerator)
-              .plus(options.fee.referrer_numerator),
+            new BigNumber(feeParams.pool_numerator)
+              .plus(feeParams.beneficiary_numerator)
+              .plus(feeParams.referrer_numerator),
           )
           .dp(tokens[1].decimals, BigNumber.ROUND_FLOOR);
 
@@ -1184,17 +1146,17 @@ describe(`Test beneficiary fee`, async function () {
         let expectedReferrer = new BigNumber(amounts[1])
           .shiftedBy(-tokens[1].decimals)
           .times(
-            new BigNumber(options.fee.pool_numerator)
-              .plus(options.fee.beneficiary_numerator)
-              .plus(options.fee.referrer_numerator),
+            new BigNumber(feeParams.pool_numerator)
+              .plus(feeParams.beneficiary_numerator)
+              .plus(feeParams.referrer_numerator),
           )
-          .div(options.fee.denominator)
+          .div(feeParams.denominator)
           .dp(tokens[1].decimals, BigNumber.ROUND_CEIL)
-          .times(options.fee.referrer_numerator)
+          .times(feeParams.referrer_numerator)
           .div(
-            new BigNumber(options.fee.pool_numerator)
-              .plus(options.fee.beneficiary_numerator)
-              .plus(options.fee.referrer_numerator),
+            new BigNumber(feeParams.pool_numerator)
+              .plus(feeParams.beneficiary_numerator)
+              .plus(feeParams.referrer_numerator),
           )
           .dp(tokens[1].decimals, BigNumber.ROUND_FLOOR);
 
@@ -1209,7 +1171,7 @@ describe(`Test beneficiary fee`, async function () {
           .minus(expectedReferrer)
           .toString();
 
-        for (let i = 0; i < N_COINS; i++) {
+        for (let i = 0; i < N_COINS.length; i++) {
           expectedDexAccount3TokenBalances[i] = new BigNumber(
             i === 1 ? expectedBeneficiary : 0,
           )
@@ -1228,7 +1190,7 @@ describe(`Test beneficiary fee`, async function () {
         dexPoolInfoEnd.lp_supply,
         "Wrong LP supply",
       );
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         expect(
           new BigNumber(accountEnd.token_balances[i]).toNumber(),
         ).to.approximately(
@@ -1241,7 +1203,7 @@ describe(`Test beneficiary fee`, async function () {
         expectedAccountLp,
         "Wrong Account#2 LP balance",
       );
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         expect(
           new BigNumber(expectedPoolTokenBalances[i]).toNumber(),
         ).to.approximately(
@@ -1254,7 +1216,7 @@ describe(`Test beneficiary fee`, async function () {
         dexPoolInfoEnd.lp_supply,
         "Wrong DexPool LP supply",
       );
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         expect(
           new BigNumber(expectedDexAccount3TokenBalances[i]).toNumber(),
         ).to.approximately(
@@ -1265,7 +1227,7 @@ describe(`Test beneficiary fee`, async function () {
           "Wrong beneficiary fee",
         );
       }
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         expect(
           new BigNumber(expectedReferrerBalance[i]).toNumber(),
         ).to.approximately(
@@ -1322,7 +1284,7 @@ describe(`Test beneficiary fee`, async function () {
         `DEXVault start: ${dexStart.token_balances[0]} ${tokens[0].symbol}, ${dexStart.token_balances[1]} ${tokens[1].symbol}`,
       );
       let logs = `Account#4 balance start: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${referrerStart.token_balances[i] || 0} ${tokens[i].symbol}, `;
       }
       console.log(logs);
@@ -1451,7 +1413,7 @@ describe(`Test beneficiary fee`, async function () {
         `DEXVault start: ${dexStart.token_balances[0]} ${tokens[0].symbol}, ${dexStart.token_balances[1]} ${tokens[1].symbol}`,
       );
       logs = `Account#4 balance end: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${referrerEnd.token_balances[i] || 0} ${tokens[i].symbol}, `;
       }
       console.log(logs);
@@ -1461,17 +1423,17 @@ describe(`Test beneficiary fee`, async function () {
       let expectedBeneficiary = new BigNumber(TOKENS_TO_EXCHANGE)
         .shiftedBy(tokens[1].decimals)
         .times(
-          new BigNumber(options.fee.pool_numerator)
-            .plus(options.fee.beneficiary_numerator)
-            .plus(options.fee.referrer_numerator),
+          new BigNumber(feeParams.pool_numerator)
+            .plus(feeParams.beneficiary_numerator)
+            .plus(feeParams.referrer_numerator),
         )
-        .div(options.fee.denominator)
+        .div(feeParams.denominator)
         .dp(0, BigNumber.ROUND_CEIL)
-        .times(options.fee.beneficiary_numerator)
+        .times(feeParams.beneficiary_numerator)
         .div(
-          new BigNumber(options.fee.pool_numerator)
-            .plus(options.fee.beneficiary_numerator)
-            .plus(options.fee.referrer_numerator),
+          new BigNumber(feeParams.pool_numerator)
+            .plus(feeParams.beneficiary_numerator)
+            .plus(feeParams.referrer_numerator),
         )
         .dp(0, BigNumber.ROUND_FLOOR)
         .shiftedBy(-tokens[1].decimals);
@@ -1481,17 +1443,17 @@ describe(`Test beneficiary fee`, async function () {
       let expectedReferrer = new BigNumber(TOKENS_TO_EXCHANGE)
         .shiftedBy(tokens[1].decimals)
         .times(
-          new BigNumber(options.fee.pool_numerator)
-            .plus(options.fee.beneficiary_numerator)
-            .plus(options.fee.referrer_numerator),
+          new BigNumber(feeParams.pool_numerator)
+            .plus(feeParams.beneficiary_numerator)
+            .plus(feeParams.referrer_numerator),
         )
-        .div(options.fee.denominator)
+        .div(feeParams.denominator)
         .dp(0, BigNumber.ROUND_CEIL)
-        .times(options.fee.referrer_numerator)
+        .times(feeParams.referrer_numerator)
         .div(
-          new BigNumber(options.fee.pool_numerator)
-            .plus(options.fee.beneficiary_numerator)
-            .plus(options.fee.referrer_numerator),
+          new BigNumber(feeParams.pool_numerator)
+            .plus(feeParams.beneficiary_numerator)
+            .plus(feeParams.referrer_numerator),
         )
         .dp(0, BigNumber.ROUND_FLOOR)
         .shiftedBy(-tokens[1].decimals);
@@ -1625,7 +1587,7 @@ describe(`Test beneficiary fee`, async function () {
         `DEXVault start: ${dexStart.token_balances[0]} ${tokens[0].symbol}, ${dexStart.token_balances[1]} ${tokens[1].symbol}`,
       );
       let logs = `Account#4 balance start: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${referrerStart.token_balances[i] || 0} ${tokens[i].symbol}, `;
       }
       console.log(logs);
@@ -1752,7 +1714,7 @@ describe(`Test beneficiary fee`, async function () {
         `DEXVault start: ${dexStart.token_balances[0]} ${tokens[0].symbol}, ${dexStart.token_balances[1]} ${tokens[1].symbol}`,
       );
       logs = `Account#4 balance end: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs += `${referrerEnd.token_balances[i] || 0} ${tokens[i].symbol}, `;
       }
       console.log(logs);
@@ -1761,17 +1723,17 @@ describe(`Test beneficiary fee`, async function () {
 
       let expectedBeneficiary = new BigNumber(expected.expected_amount)
         .times(
-          new BigNumber(options.fee.pool_numerator)
-            .plus(options.fee.beneficiary_numerator)
-            .plus(options.fee.referrer_numerator),
+          new BigNumber(feeParams.pool_numerator)
+            .plus(feeParams.beneficiary_numerator)
+            .plus(feeParams.referrer_numerator),
         )
-        .div(options.fee.denominator)
+        .div(feeParams.denominator)
         .dp(0, BigNumber.ROUND_CEIL)
-        .times(options.fee.beneficiary_numerator)
+        .times(feeParams.beneficiary_numerator)
         .div(
-          new BigNumber(options.fee.pool_numerator)
-            .plus(options.fee.beneficiary_numerator)
-            .plus(options.fee.referrer_numerator),
+          new BigNumber(feeParams.pool_numerator)
+            .plus(feeParams.beneficiary_numerator)
+            .plus(feeParams.referrer_numerator),
         )
         .dp(0, BigNumber.ROUND_FLOOR)
         .shiftedBy(-tokens[0].decimals);
@@ -1780,17 +1742,17 @@ describe(`Test beneficiary fee`, async function () {
 
       let expectedReferrer = new BigNumber(expected.expected_amount)
         .times(
-          new BigNumber(options.fee.pool_numerator)
-            .plus(options.fee.beneficiary_numerator)
-            .plus(options.fee.referrer_numerator),
+          new BigNumber(feeParams.pool_numerator)
+            .plus(feeParams.beneficiary_numerator)
+            .plus(feeParams.referrer_numerator),
         )
-        .div(options.fee.denominator)
+        .div(feeParams.denominator)
         .dp(0, BigNumber.ROUND_CEIL)
-        .times(options.fee.referrer_numerator)
+        .times(feeParams.referrer_numerator)
         .div(
-          new BigNumber(options.fee.pool_numerator)
-            .plus(options.fee.beneficiary_numerator)
-            .plus(options.fee.referrer_numerator),
+          new BigNumber(feeParams.pool_numerator)
+            .plus(feeParams.beneficiary_numerator)
+            .plus(feeParams.referrer_numerator),
         )
         .dp(0, BigNumber.ROUND_FLOOR)
         .shiftedBy(-tokens[0].decimals);
@@ -1897,14 +1859,14 @@ describe(`Test beneficiary fee`, async function () {
       const dexAccount3Start = await dexAccountBalances(DexAccount3);
 
       let logs = "DexAccount#3 balance start: ";
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs +=
           `${dexAccount3Start.accountBalances[i]} ${tokens[i].symbol}` +
           (i === N_COINS - 1 ? "" : ", ");
       }
       console.log(logs);
       logs = "";
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs +=
           `${dexPoolInfoStart.token_fees[i]} ${tokens[i].symbol} FEE` +
           (i === N_COINS - 1 ? "" : ", ");
@@ -1927,14 +1889,14 @@ describe(`Test beneficiary fee`, async function () {
       const dexAccount3End = await dexAccountBalances(DexAccount3);
 
       logs = `DexAccount#3 balance end: `;
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs +=
           `${dexAccount3End.accountBalances[i]} ${tokens[i].symbol}` +
           (i === N_COINS - 1 ? "" : ", ");
       }
       console.log(logs);
       logs = "";
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         logs +=
           `${dexPoolInfoEnd.token_fees[i]} ${tokens[i].symbol} FEE` +
           (i === N_COINS - 1 ? "" : ", ");
@@ -1943,13 +1905,13 @@ describe(`Test beneficiary fee`, async function () {
 
       await migration.logGas();
 
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         expect(dexPoolInfoEnd.token_fees[i]).to.equal(
           "0",
           `Wrong ${tokens[i].symbol} pool fee`,
         );
       }
-      for (let i = 0; i < N_COINS; i++) {
+      for (let i = 0; i < N_COINS.length; i++) {
         expect(
           new BigNumber(dexAccount3Start.accountBalances[i])
             .plus(dexPoolInfoStart.token_fees[i])

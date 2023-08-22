@@ -1,22 +1,17 @@
 import { ViewTracingTree } from "locklift/internal/tracing/viewTraceTree/viewTracingTree";
 import { ViewTraceTree } from "locklift/src/internal/tracing/types";
-import {
-  Address,
-  TraceType,
-  DecodedAbiFunctionOutputs,
-  Contract,
-} from "locklift";
-import logger from "mocha-logger-ts";
+import { Address, TraceType, Contract } from "locklift";
+// import logger from "mocha-logger-ts";
 import BigNumber from "bignumber.js";
 
-import { Constants } from "./migration";
+// import { Constants } from "utils/consts";
 import {
   DexPairAbi,
   DexStablePairAbi,
   DexStablePoolAbi,
-} from "../../build/factorySource";
-import { ITokens } from "../../utils/wrappers";
-import { addressComparator } from "./addresses.util";
+} from "build/factorySource";
+import { ITokens } from "utils/wrappers";
+import { addressComparator } from "./helpers";
 
 export interface IDepositLiquidity {
   lpReward: string;
@@ -46,212 +41,212 @@ export function calculateMaxCWi(traceTree: ViewTracingTree) {
   return calculateCwi(traceTree.viewTraceTree, 1);
 }
 
-type ExpectedDeposit = DecodedAbiFunctionOutputs<
-  DexPairAbi,
-  "expectedDepositLiquidity"
->["value0"];
+// type ExpectedDeposit = DecodedAbiFunctionOutputs<
+//   DexPairAbi,
+//   "expectedDepositLiquidity"
+// >["value0"];
+//
+// type ExpectedDepositV2 = DecodedAbiFunctionOutputs<
+//   DexStablePoolAbi,
+//   "expectedDepositLiquidityV2"
+// >["value0"];
 
-type ExpectedDepositV2 = DecodedAbiFunctionOutputs<
-  DexStablePoolAbi,
-  "expectedDepositLiquidityV2"
->["value0"];
-
-function logExpectedDepositV2(
-  expected: ExpectedDepositV2,
-  tokens: { decimals: number; symbol: string }[],
-) {
-  const N_COINS = tokens.length;
-
-  logger.log(`Deposit: `);
-
-  for (let i = 0; i < N_COINS; i++) {
-    if (new BigNumber(expected.amounts[i]).gt(0)) {
-      logger.log(
-        `    ` +
-          `${new BigNumber(expected.amounts[i])
-            .shiftedBy(-tokens[i].decimals)
-            .toFixed(tokens[i].decimals)} ${tokens[i].symbol}`,
-      );
-    }
-  }
-
-  logger.log(`Expected LP reward:`);
-  logger.log(
-    `${new BigNumber(expected.lp_reward)
-      .shiftedBy(-Constants.LP_DECIMALS)
-      .toFixed(Constants.LP_DECIMALS)}`,
-  );
-
-  logger.log(`Fees: `);
-
-  for (let i = 0; i < N_COINS; i++) {
-    if (new BigNumber(expected.pool_fees[i]).gt(0)) {
-      logger.log(
-        `     Pool fee ` +
-          `${new BigNumber(expected.pool_fees[i])
-            .shiftedBy(-tokens[i].decimals)
-            .toFixed(tokens[i].decimals)} ${tokens[i].symbol}`,
-      );
-    }
-    if (new BigNumber(expected.beneficiary_fees[i]).gt(0)) {
-      logger.log(
-        `     DAO fee ` +
-          `${new BigNumber(expected.beneficiary_fees[i])
-            .shiftedBy(-tokens[i].decimals)
-            .toFixed(tokens[i].decimals)} ${tokens[i].symbol}`,
-      );
-    }
-  }
-
-  logger.log(` ---DEBUG--- `);
-  logger.log(`Invariant: ${expected.invariant}`);
-
-  for (let i = 0; i < N_COINS; i++) {
-    logger.log(`${tokens[i].symbol}:`);
-    logger.log(
-      `     old_balances: ` +
-        `${new BigNumber(expected.old_balances[i])
-          .shiftedBy(-tokens[i].decimals)
-          .toFixed(tokens[i].decimals)}`,
-    );
-    logger.log(
-      `     result_balances: ` +
-        `${new BigNumber(expected.result_balances[i])
-          .shiftedBy(-tokens[i].decimals)
-          .toFixed(tokens[i].decimals)}`,
-    );
-    logger.log(
-      `     old_balances: ` +
-        `${new BigNumber(expected.old_balances[i])
-          .shiftedBy(-tokens[i].decimals)
-          .toFixed(tokens[i].decimals)}`,
-    );
-    logger.log(
-      `     change: ` +
-        `${new BigNumber(expected.result_balances[i])
-          .minus(expected.old_balances[i])
-          .shiftedBy(-tokens[i].decimals)
-          .toFixed(tokens[i].decimals)}`,
-    );
-    logger.log(
-      `     differences: ` +
-        `${new BigNumber(expected.differences[i])
-          .shiftedBy(-tokens[i].decimals)
-          .toFixed(tokens[i].decimals)}`,
-    );
-    logger.log(
-      `     pool_fees: ` +
-        `${new BigNumber(expected.pool_fees[i])
-          .shiftedBy(-tokens[i].decimals)
-          .toFixed(tokens[i].decimals)}`,
-    );
-    logger.log(
-      `     beneficiary_fees: ` +
-        `${new BigNumber(expected.beneficiary_fees[i])
-          .shiftedBy(-tokens[i].decimals)
-          .toFixed(tokens[i].decimals)}`,
-    );
-    logger.log(`     sell: ${expected.sell[i]}`);
-  }
-}
-
-function logExpectedDeposit(
-  expected: ExpectedDeposit,
-  tokens: { decimals: number }[],
-) {
-  const left_decimals = tokens[0].decimals;
-  const right_decimals = tokens[1].decimals;
-
-  logger.log(`Expected result: `);
-
-  if (new BigNumber(expected.step_1_lp_reward).isZero()) {
-    logger.log(`    Step 1: skipped`);
-  } else {
-    logger.log(`    Step 1: `);
-    logger.log(
-      `        Left deposit = ${new BigNumber(expected.step_1_left_deposit)
-        .shiftedBy(-left_decimals)
-        .toFixed(left_decimals)}`,
-    );
-    logger.log(
-      `        Right deposit = ${new BigNumber(expected.step_1_right_deposit)
-        .shiftedBy(-right_decimals)
-        .toFixed(right_decimals)}`,
-    );
-    logger.log(
-      `        LP reward = ${new BigNumber(expected.step_1_lp_reward)
-        .shiftedBy(-Constants.LP_DECIMALS)
-        .toFixed(Constants.LP_DECIMALS)}`,
-    );
-  }
-
-  if (expected.step_2_left_to_right) {
-    logger.log(`    Step 2: `);
-    logger.log(
-      `        Left amount for change = ${new BigNumber(expected.step_2_spent)
-        .shiftedBy(-left_decimals)
-        .toFixed(left_decimals)}`,
-    );
-    logger.log(
-      `        Left fee = ${new BigNumber(expected.step_2_fee)
-        .shiftedBy(-left_decimals)
-        .toFixed(left_decimals)}`,
-    );
-    logger.log(
-      `        Right received amount = ${new BigNumber(expected.step_2_received)
-        .shiftedBy(-right_decimals)
-        .toFixed(right_decimals)}`,
-    );
-  } else if (expected.step_2_right_to_left) {
-    logger.log(`    Step 2: `);
-    logger.log(
-      `        Right amount for change = ${new BigNumber(expected.step_2_spent)
-        .shiftedBy(-right_decimals)
-        .toFixed(right_decimals)}`,
-    );
-    logger.log(
-      `        Right fee = ${new BigNumber(expected.step_2_fee)
-        .shiftedBy(-right_decimals)
-        .toFixed(right_decimals)}`,
-    );
-    logger.log(
-      `        Left received amount = ${new BigNumber(expected.step_2_received)
-        .shiftedBy(-left_decimals)
-        .toFixed(left_decimals)}`,
-    );
-  } else {
-    logger.log(`    Step 2: skipped`);
-  }
-
-  if (new BigNumber(expected.step_3_lp_reward).isZero()) {
-    logger.log(`    Step 3: skipped`);
-  } else {
-    logger.log(`    Step 3: `);
-    logger.log(
-      `        Left deposit = ${new BigNumber(expected.step_3_left_deposit)
-        .shiftedBy(-left_decimals)
-        .toFixed(left_decimals)}`,
-    );
-    logger.log(
-      `        Right deposit = ${new BigNumber(expected.step_3_right_deposit)
-        .shiftedBy(-right_decimals)
-        .toFixed(right_decimals)}`,
-    );
-    logger.log(
-      `        LP reward = ${new BigNumber(expected.step_3_lp_reward)
-        .shiftedBy(-Constants.LP_DECIMALS)
-        .toFixed(Constants.LP_DECIMALS)}`,
-    );
-  }
-
-  logger.log(`    TOTAL: `);
-  logger.log(
-    `        LP reward = ${new BigNumber(expected.step_1_lp_reward)
-      .plus(expected.step_3_lp_reward)
-      .shiftedBy(-Constants.LP_DECIMALS)
-      .toFixed(Constants.LP_DECIMALS)}`,
-  );
-}
+// function logExpectedDepositV2(
+//   expected: ExpectedDepositV2,
+//   tokens: { decimals: number; symbol: string }[],
+// ) {
+//   const N_COINS = tokens.length;
+//
+//   logger.log(`Deposit: `);
+//
+//   for (let i = 0; i < N_COINS; i++) {
+//     if (new BigNumber(expected.amounts[i]).gt(0)) {
+//       logger.log(
+//         `    ` +
+//           `${new BigNumber(expected.amounts[i])
+//             .shiftedBy(-tokens[i].decimals)
+//             .toFixed(tokens[i].decimals)} ${tokens[i].symbol}`,
+//       );
+//     }
+//   }
+//
+//   logger.log(`Expected LP reward:`);
+//   logger.log(
+//     `${new BigNumber(expected.lp_reward)
+//       .shiftedBy(-Constants.LP_DECIMALS)
+//       .toFixed(Constants.LP_DECIMALS)}`,
+//   );
+//
+//   logger.log(`Fees: `);
+//
+//   for (let i = 0; i < N_COINS; i++) {
+//     if (new BigNumber(expected.pool_fees[i]).gt(0)) {
+//       logger.log(
+//         `     Pool fee ` +
+//           `${new BigNumber(expected.pool_fees[i])
+//             .shiftedBy(-tokens[i].decimals)
+//             .toFixed(tokens[i].decimals)} ${tokens[i].symbol}`,
+//       );
+//     }
+//     if (new BigNumber(expected.beneficiary_fees[i]).gt(0)) {
+//       logger.log(
+//         `     DAO fee ` +
+//           `${new BigNumber(expected.beneficiary_fees[i])
+//             .shiftedBy(-tokens[i].decimals)
+//             .toFixed(tokens[i].decimals)} ${tokens[i].symbol}`,
+//       );
+//     }
+//   }
+//
+//   logger.log(` ---DEBUG--- `);
+//   logger.log(`Invariant: ${expected.invariant}`);
+//
+//   for (let i = 0; i < N_COINS; i++) {
+//     logger.log(`${tokens[i].symbol}:`);
+//     logger.log(
+//       `     old_balances: ` +
+//         `${new BigNumber(expected.old_balances[i])
+//           .shiftedBy(-tokens[i].decimals)
+//           .toFixed(tokens[i].decimals)}`,
+//     );
+//     logger.log(
+//       `     result_balances: ` +
+//         `${new BigNumber(expected.result_balances[i])
+//           .shiftedBy(-tokens[i].decimals)
+//           .toFixed(tokens[i].decimals)}`,
+//     );
+//     logger.log(
+//       `     old_balances: ` +
+//         `${new BigNumber(expected.old_balances[i])
+//           .shiftedBy(-tokens[i].decimals)
+//           .toFixed(tokens[i].decimals)}`,
+//     );
+//     logger.log(
+//       `     change: ` +
+//         `${new BigNumber(expected.result_balances[i])
+//           .minus(expected.old_balances[i])
+//           .shiftedBy(-tokens[i].decimals)
+//           .toFixed(tokens[i].decimals)}`,
+//     );
+//     logger.log(
+//       `     differences: ` +
+//         `${new BigNumber(expected.differences[i])
+//           .shiftedBy(-tokens[i].decimals)
+//           .toFixed(tokens[i].decimals)}`,
+//     );
+//     logger.log(
+//       `     pool_fees: ` +
+//         `${new BigNumber(expected.pool_fees[i])
+//           .shiftedBy(-tokens[i].decimals)
+//           .toFixed(tokens[i].decimals)}`,
+//     );
+//     logger.log(
+//       `     beneficiary_fees: ` +
+//         `${new BigNumber(expected.beneficiary_fees[i])
+//           .shiftedBy(-tokens[i].decimals)
+//           .toFixed(tokens[i].decimals)}`,
+//     );
+//     logger.log(`     sell: ${expected.sell[i]}`);
+//   }
+// }
+//
+// function logExpectedDeposit(
+//   expected: ExpectedDeposit,
+//   tokens: { decimals: number }[],
+// ) {
+//   const left_decimals = tokens[0].decimals;
+//   const right_decimals = tokens[1].decimals;
+//
+//   logger.log(`Expected result: `);
+//
+//   if (new BigNumber(expected.step_1_lp_reward).isZero()) {
+//     logger.log(`    Step 1: skipped`);
+//   } else {
+//     logger.log(`    Step 1: `);
+//     logger.log(
+//       `        Left deposit = ${new BigNumber(expected.step_1_left_deposit)
+//         .shiftedBy(-left_decimals)
+//         .toFixed(left_decimals)}`,
+//     );
+//     logger.log(
+//       `        Right deposit = ${new BigNumber(expected.step_1_right_deposit)
+//         .shiftedBy(-right_decimals)
+//         .toFixed(right_decimals)}`,
+//     );
+//     logger.log(
+//       `        LP reward = ${new BigNumber(expected.step_1_lp_reward)
+//         .shiftedBy(-Constants.LP_DECIMALS)
+//         .toFixed(Constants.LP_DECIMALS)}`,
+//     );
+//   }
+//
+//   if (expected.step_2_left_to_right) {
+//     logger.log(`    Step 2: `);
+//     logger.log(
+//       `        Left amount for change = ${new BigNumber(expected.step_2_spent)
+//         .shiftedBy(-left_decimals)
+//         .toFixed(left_decimals)}`,
+//     );
+//     logger.log(
+//       `        Left fee = ${new BigNumber(expected.step_2_fee)
+//         .shiftedBy(-left_decimals)
+//         .toFixed(left_decimals)}`,
+//     );
+//     logger.log(
+//       `        Right received amount = ${new BigNumber(expected.step_2_received)
+//         .shiftedBy(-right_decimals)
+//         .toFixed(right_decimals)}`,
+//     );
+//   } else if (expected.step_2_right_to_left) {
+//     logger.log(`    Step 2: `);
+//     logger.log(
+//       `        Right amount for change = ${new BigNumber(expected.step_2_spent)
+//         .shiftedBy(-right_decimals)
+//         .toFixed(right_decimals)}`,
+//     );
+//     logger.log(
+//       `        Right fee = ${new BigNumber(expected.step_2_fee)
+//         .shiftedBy(-right_decimals)
+//         .toFixed(right_decimals)}`,
+//     );
+//     logger.log(
+//       `        Left received amount = ${new BigNumber(expected.step_2_received)
+//         .shiftedBy(-left_decimals)
+//         .toFixed(left_decimals)}`,
+//     );
+//   } else {
+//     logger.log(`    Step 2: skipped`);
+//   }
+//
+//   if (new BigNumber(expected.step_3_lp_reward).isZero()) {
+//     logger.log(`    Step 3: skipped`);
+//   } else {
+//     logger.log(`    Step 3: `);
+//     logger.log(
+//       `        Left deposit = ${new BigNumber(expected.step_3_left_deposit)
+//         .shiftedBy(-left_decimals)
+//         .toFixed(left_decimals)}`,
+//     );
+//     logger.log(
+//       `        Right deposit = ${new BigNumber(expected.step_3_right_deposit)
+//         .shiftedBy(-right_decimals)
+//         .toFixed(right_decimals)}`,
+//     );
+//     logger.log(
+//       `        LP reward = ${new BigNumber(expected.step_3_lp_reward)
+//         .shiftedBy(-Constants.LP_DECIMALS)
+//         .toFixed(Constants.LP_DECIMALS)}`,
+//     );
+//   }
+//
+//   logger.log(`    TOTAL: `);
+//   logger.log(
+//     `        LP reward = ${new BigNumber(expected.step_1_lp_reward)
+//       .plus(expected.step_3_lp_reward)
+//       .shiftedBy(-Constants.LP_DECIMALS)
+//       .toFixed(Constants.LP_DECIMALS)}`,
+//   );
+// }
 
 export async function expectedDepositLiquidity(
   poolContract:
@@ -507,11 +502,12 @@ export async function expectedWithdrawLiquidity(
     | Contract<DexStablePoolAbi>,
   lpAmount: string,
 ) {
-  const tokenRoots = await poolContract.methods
+  // todo types
+  const tokenRoots: any = await poolContract.methods
     .getTokenRoots({ answerId: 0 })
     .call();
 
-  const expected = await poolContract.methods
+  const expected: any = await poolContract.methods
     .expectedWithdrawLiquidity({
       answerId: 0,
       lp_amount: lpAmount,
@@ -524,7 +520,7 @@ export async function expectedWithdrawLiquidity(
     amounts[tokenRoots.right.toString()] = expected.expected_right_amount;
   } else {
     expected.value0.amounts.forEach(
-      (a, i) => (amounts[tokenRoots.roots[i].toString()] = a),
+      (a: any, i: any) => (amounts[tokenRoots.roots[i].toString()] = a),
     );
   }
 

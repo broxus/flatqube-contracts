@@ -26,7 +26,7 @@ import {
   getPoolData,
   getWallet,
 } from "../../utils/wrappers";
-import { expectedExchange } from "../utils/math.utils";
+import { expectedExchange } from "utils/expected.utils";
 import { calcValue } from "../utils/gas.utils";
 
 describe("Check direct CrossPairExchange v1", async function () {
