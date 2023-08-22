@@ -16,7 +16,7 @@ import {
   expectedDepositLiquidity,
   expectedExchange,
   expectedWithdrawLiquidity,
-} from "../utils/math.utils";
+} from "../../utils/expected.utils";
 import { getWallet } from "../../utils/wrappers";
 
 describe("Check DexAccount add Pair", () => {
@@ -141,7 +141,7 @@ describe("Check DexAccount add Pair", () => {
   });
 
   describe("Direct deposit to pair v1", () => {
-    it.skip("Deposit first token to DexStablePair", async () => {
+    it("Deposit first token to DexStablePair", async () => {
       const gas = await getPoolDepositGas(2, 2);
 
       const poolDataStart = await getPoolData(poolsData.stablePair.contract);
@@ -243,7 +243,7 @@ describe("Check DexAccount add Pair", () => {
         "Pool LP balance is not equal to LP_Root total supply",
       );
     });
-    it.skip("Deposit second token to DexStablePair", async () => {
+    it("Deposit second token to DexStablePair", async () => {
       const gas = await getPoolDepositGas(2, 2);
       const poolDataStart = await getPoolData(poolsData.stablePair.contract);
 
@@ -265,7 +265,7 @@ describe("Check DexAccount add Pair", () => {
             amount: amountSecondToken,
           },
         ],
-        false,
+        true,
       );
 
       const firstTokenWallet = await getWallet(
@@ -336,7 +336,7 @@ describe("Check DexAccount add Pair", () => {
         (-amountSecondToken).toString(),
       );
       expect(
-        new BigNumber(poolDataEnd.lpSupply)
+        new BigNumber(poolDataStart.lpSupply)
           .plus(expectedDepositSecondData.lpReward)
           .toString(),
       ).to.equal(poolDataEnd.lpSupply, "Pool has wrong LP balance");
@@ -346,7 +346,7 @@ describe("Check DexAccount add Pair", () => {
       );
     });
 
-    it.skip("Deposit first token to DexPair", async () => {
+    it("Deposit first token to DexPair", async () => {
       const gas = await getPoolDepositGas(2, 1);
       const poolDataStart = await getPoolData(poolsData.pair.contract);
 
@@ -368,7 +368,7 @@ describe("Check DexAccount add Pair", () => {
             amount: "0",
           },
         ],
-        false,
+        true,
       );
       const firstTokenWallet = await getWallet(
         owner.address,
@@ -448,7 +448,7 @@ describe("Check DexAccount add Pair", () => {
         "Pool LP balance is not equal to LP_Root total supply",
       );
     });
-    it.skip("Deposit second token to DexPair", async () => {
+    it("Deposit second token to DexPair", async () => {
       const gas = await getPoolDepositGas(2, 1);
       const poolDataStart = await getPoolData(poolsData.pair.contract);
 
@@ -459,7 +459,7 @@ describe("Check DexAccount add Pair", () => {
         .toString();
 
       const expectedDepositSecondData = await expectedDepositLiquidity(
-        poolsData.stablePair.contract,
+        poolsData.pair.contract,
         [
           {
             root: poolsData.pair.roots[0].address,
@@ -470,7 +470,7 @@ describe("Check DexAccount add Pair", () => {
             amount: amountSecondToken,
           },
         ],
-        false,
+        true,
       );
       const firstTokenWallet = await getWallet(
         owner.address,
@@ -536,7 +536,7 @@ describe("Check DexAccount add Pair", () => {
         (-amountSecondToken).toString(),
       );
       expect(
-        new BigNumber(poolDataEnd.lpSupply)
+        new BigNumber(poolDataStart.lpSupply)
           .plus(expectedDepositSecondData.lpReward)
           .toString(),
       ).to.equal(poolDataEnd.lpSupply, "Pool has wrong LP balance");
