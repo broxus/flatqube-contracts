@@ -7,14 +7,14 @@ import {
 import {
   expectedDepositLiquidity,
   expectedExchange,
-} from "utils/expected.utils";
+} from "../../../utils/expected.utils";
 import {
   TokenRootUpgradeableAbi,
   DexAccountAbi,
   DexStablePairAbi,
   DexStablePoolAbi,
   DexPairAbi,
-} from "../../../build/factorySource";
+} from "build/factorySource";
 // npx locklift run --config locklift.config.ts --network local --script v2/scripts/test-node/0-swaps.ts
 
 // only for testing

@@ -22,7 +22,7 @@ import {
   expectedExchange,
   expectedWithdrawLiquidity,
   expectedWithdrawLiquidityOneCoin,
-} from "utils/expected.utils";
+} from "../../utils/expected.utils";
 
 const LP_DECIMALS = 9;
 
@@ -31,7 +31,7 @@ describe("Check DexAccount add Pair", () => {
   let dexAccount: Contract<DexAccountAbi>;
   let gasValues: Contract<DexGasValuesAbi>;
 
-  let poolsData: Record<
+  const poolsData: Record<
     string,
     {
       contract: Contract<DexStablePairAbi> | Contract<DexStablePoolAbi>;
@@ -54,7 +54,7 @@ describe("Check DexAccount add Pair", () => {
     },
   };
 
-  let tokensData: Record<string, { decimals: number }> = {};
+  const tokensData: Record<string, { decimals: number }> = {};
 
   async function getDepositGas(N: number) {
     return gasValues.methods
@@ -101,7 +101,7 @@ describe("Check DexAccount add Pair", () => {
       poolsData[pool].roots = poolsData[pool].tokens.map((token: string) =>
         locklift.deployments.getContract<TokenRootUpgradeableAbi>(token),
       );
-      for (let root of poolsData[pool].roots) {
+      for (const root of poolsData[pool].roots) {
         tokensData[root.address.toString()] = {
           decimals: await root.methods
             .decimals({ answerId: 0 })
@@ -112,7 +112,7 @@ describe("Check DexAccount add Pair", () => {
     }
 
     // add pools to DexAccount + transfer to dexAccount
-    for (let pool in poolsData) {
+    for (const pool in poolsData) {
       await dexAccount.methods
         .addPool({
           _roots: poolsData[pool].roots.map(

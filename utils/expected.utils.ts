@@ -41,6 +41,7 @@ export function calculateMaxCWi(traceTree: ViewTracingTree) {
   return calculateCwi(traceTree.viewTraceTree, 1);
 }
 
+// todo: its doesnt using anywhere currently, possibly need to remove
 // type ExpectedDeposit = DecodedAbiFunctionOutputs<
 //   DexPairAbi,
 //   "expectedDepositLiquidity"
@@ -520,7 +521,7 @@ export async function expectedWithdrawLiquidity(
     amounts[tokenRoots.right.toString()] = expected.expected_right_amount;
   } else {
     expected.value0.amounts.forEach(
-      (a: any, i: any) => (amounts[tokenRoots.roots[i].toString()] = a),
+      (a: string, i: number) => (amounts[tokenRoots.roots[i].toString()] = a),
     );
   }
 
