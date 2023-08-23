@@ -183,7 +183,7 @@ describe("Check DexAccount add Pair", () => {
         .buildDepositLiquidityPayloadV2({
           _id: getRandomNonce(),
           _deployWalletGrams: toNano(0.1),
-          _expectedAmount: amountFirstToken.toString(),
+          _expectedAmount: expectedDepositFirstData.lpReward,
           _recipient: owner.address,
           _referrer: zeroAddress,
           _cancelPayload: null,
@@ -289,7 +289,7 @@ describe("Check DexAccount add Pair", () => {
         .buildDepositLiquidityPayloadV2({
           _id: getRandomNonce(),
           _deployWalletGrams: toNano(0.1),
-          _expectedAmount: amountSecondToken.toString(),
+          _expectedAmount: expectedDepositSecondData.lpReward,
           _recipient: zeroAddress,
           _referrer: zeroAddress,
           _cancelPayload: null,
@@ -396,7 +396,7 @@ describe("Check DexAccount add Pair", () => {
         .buildDepositLiquidityPayloadV2({
           _id: getRandomNonce(),
           _deployWalletGrams: toNano(0.1),
-          _expectedAmount: amountFirstToken.toString(),
+          _expectedAmount: expectedDepositFirstData.lpReward,
           _recipient: owner.address,
           _referrer: zeroAddress,
           _cancelPayload: null,
@@ -498,7 +498,7 @@ describe("Check DexAccount add Pair", () => {
         .buildDepositLiquidityPayloadV2({
           _id: getRandomNonce(),
           _deployWalletGrams: toNano(0.1),
-          _expectedAmount: amountSecondToken.toString(),
+          _expectedAmount: expectedDepositSecondData.lpReward,
           _recipient: owner.address,
           _referrer: zeroAddress,
           _cancelPayload: null,
@@ -593,7 +593,7 @@ describe("Check DexAccount add Pair", () => {
         .buildExchangePayloadV2({
           _id: getRandomNonce(),
           _deployWalletGrams: toNano(0.1),
-          _expectedAmount: amountFirstToken.toString(),
+          _expectedAmount: expectedExchangeData.receivedAmount,
           _recipient: zeroAddress,
           _referrer: zeroAddress,
           _cancelPayload: null,
@@ -687,7 +687,7 @@ describe("Check DexAccount add Pair", () => {
         .buildExchangePayloadV2({
           _id: getRandomNonce(),
           _deployWalletGrams: toNano(0.1),
-          _expectedAmount: amountSecondToken.toString(),
+          _expectedAmount: expectedExchangeData.receivedAmount,
           _recipient: zeroAddress,
           _referrer: zeroAddress,
           _cancelPayload: null,
@@ -780,7 +780,7 @@ describe("Check DexAccount add Pair", () => {
         .buildExchangePayloadV2({
           _id: getRandomNonce(),
           _deployWalletGrams: toNano(0.1),
-          _expectedAmount: amountFirstToken.toString(),
+          _expectedAmount: expectedExchangeData.receivedAmount,
           _recipient: zeroAddress,
           _referrer: zeroAddress,
           _cancelPayload: null,
@@ -810,6 +810,7 @@ describe("Check DexAccount add Pair", () => {
           poolDataStart.balances[poolsData.pair.roots[0].address.toString()],
         )
           .plus(amountFirstToken)
+          .minus(expectedExchangeData.beneficiaryFee)
           .toString(),
       ).to.equal(
         poolDataEnd.balances[poolsData.pair.roots[0].address.toString()],
@@ -868,7 +869,7 @@ describe("Check DexAccount add Pair", () => {
         .buildExchangePayloadV2({
           _id: getRandomNonce(),
           _deployWalletGrams: toNano(0.1),
-          _expectedAmount: amountSecondToken.toString(),
+          _expectedAmount: expectedExchangeData.receivedAmount,
           _recipient: zeroAddress,
           _referrer: zeroAddress,
           _cancelPayload: null,
@@ -898,6 +899,7 @@ describe("Check DexAccount add Pair", () => {
           poolDataStart.balances[poolsData.pair.roots[1].address.toString()],
         )
           .plus(amountSecondToken)
+          .minus(expectedExchangeData.beneficiaryFee)
           .toString(),
       ).to.equal(
         poolDataEnd.balances[poolsData.pair.roots[1].address.toString()],
@@ -958,14 +960,8 @@ describe("Check DexAccount add Pair", () => {
         .buildWithdrawLiquidityPayloadV2({
           _id: getRandomNonce(),
           _deployWalletGrams: toNano(0.1),
-          _expectedLeftAmount:
-            expectedWithdrawData.amounts[
-              poolsData.stablePair.roots[0].address.toString()
-            ],
-          _expectedRightAmount:
-            expectedWithdrawData.amounts[
-              poolsData.stablePair.roots[1].address.toString()
-            ],
+          _expectedLeftAmount: Object.values(expectedWithdrawData.amounts)[0],
+          _expectedRightAmount: Object.values(expectedWithdrawData.amounts)[1],
           _recipient: zeroAddress,
           _referrer: zeroAddress,
           _cancelPayload: null,
@@ -1078,14 +1074,8 @@ describe("Check DexAccount add Pair", () => {
         .buildWithdrawLiquidityPayloadV2({
           _id: getRandomNonce(),
           _deployWalletGrams: toNano(0.1),
-          _expectedLeftAmount:
-            expectedWithdrawData.amounts[
-              poolsData.stablePair.roots[0].address.toString()
-            ],
-          _expectedRightAmount:
-            expectedWithdrawData.amounts[
-              poolsData.stablePair.roots[1].address.toString()
-            ],
+          _expectedLeftAmount: Object.values(expectedWithdrawData.amounts)[0],
+          _expectedRightAmount: Object.values(expectedWithdrawData.amounts)[1],
           _recipient: zeroAddress,
           _referrer: zeroAddress,
           _cancelPayload: null,
