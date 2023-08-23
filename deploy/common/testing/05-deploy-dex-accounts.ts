@@ -103,4 +103,5 @@ export const dependencies = [
   "owner-account",
   "token-factory",
   "common-accounts",
+  "dex-root",
 ];

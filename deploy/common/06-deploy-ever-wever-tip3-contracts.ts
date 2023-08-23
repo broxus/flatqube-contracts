@@ -70,4 +70,4 @@ export default async () => {
 
 export const tag = "ever-wever-tip3";
 
-export const dependencies = ["wever"];
+export const dependencies = ["wever", "wrap-ever"];
