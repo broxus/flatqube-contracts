@@ -88,4 +88,9 @@ export default async () => {
 };
 
 export const tag = "wever-wallets";
-export const dependencies = ["owner-account", "tokens", "common-accounts"];
+export const dependencies = [
+  "owner-account",
+  "tokens",
+  "common-accounts",
+  "wever",
+];

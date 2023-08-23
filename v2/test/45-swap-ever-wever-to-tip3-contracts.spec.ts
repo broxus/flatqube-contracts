@@ -60,7 +60,7 @@ describe("Tests Swap Evers ", () => {
       "DexPair_wever_token-6-0",
     );
     wEverRoot =
-      locklift.deployments.getContract<TokenRootUpgradeableAbi>("wever");
+      locklift.deployments.getContract<TokenRootUpgradeableAbi>("weverRoot");
     tokenRoot =
       locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-6-0");
     wEverVault =

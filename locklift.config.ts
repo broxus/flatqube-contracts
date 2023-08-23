@@ -10,6 +10,7 @@ import { FactorySource } from "./build/factorySource";
 dotenv.config();
 
 import chai from "chai";
+
 chai.use(lockliftChai);
 
 declare global {

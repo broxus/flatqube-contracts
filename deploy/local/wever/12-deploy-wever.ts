@@ -1,4 +1,5 @@
 import { getRandomNonce, toNano, zeroAddress } from "locklift";
+import { TokenRootUpgradeableAbi } from "../../../build/factorySource";
 
 export default async () => {
   await locklift.deployments.load();
@@ -36,7 +37,7 @@ export default async () => {
         value: toNano(10),
         publicKey: weverOwner.signer.publicKey,
       },
-      deploymentName: "wever",
+      deploymentName: "weverRoot",
       enableLogs: true,
     }),
   );
@@ -242,3 +243,5 @@ export default async () => {
 };
 
 export const tag = "wever";
+
+export const dependencies = ["owner-account"];
