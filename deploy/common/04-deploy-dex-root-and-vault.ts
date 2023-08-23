@@ -79,14 +79,14 @@ export default async () => {
       amount: toNano(2),
     });
 
-  let tx = await dexRoot.methods
+  tx = await dexRoot.methods
     .setVaultOnce({ new_vault: dexVault.address })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
 
-  let tx = await dexRoot.methods
+  tx = await dexRoot.methods
     .installOrUpdateTokenVaultCode({
       _newCode: DexTokenVault.code,
       _remainingGasTo: owner.address,
@@ -96,7 +96,7 @@ export default async () => {
       amount: toNano(2),
     });
 
-  let tx = await dexRoot.methods
+  tx = await dexRoot.methods
     .installOrUpdateLpTokenPendingCode({
       _newCode: LpTokenPending.code,
       _remainingGasTo: owner.address,
@@ -106,7 +106,7 @@ export default async () => {
       amount: toNano(2),
     });
 
-  let tx = await dexRoot.methods
+  tx = await dexRoot.methods
     .setTokenFactory({
       _newTokenFactory: tokenFactory.address,
       _remainingGasTo: owner.address,
@@ -116,42 +116,42 @@ export default async () => {
       amount: toNano(2),
     });
 
-  let tx = await dexRoot.methods
+  tx = await dexRoot.methods
     .installPlatformOnce({ code: DexPlatform.code })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
 
-  let tx = await dexRoot.methods
+  tx = await dexRoot.methods
     .installOrUpdateAccountCode({ code: DexAccount.code })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
 
-  let tx = await dexRoot.methods
+  tx = await dexRoot.methods
     .installOrUpdatePairCode({ code: DexPair.code, pool_type: 1 })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
 
-  let tx = await dexRoot.methods
+  tx = await dexRoot.methods
     .installOrUpdatePoolCode({ code: DexStablePool.code, pool_type: 3 })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
 
-  let tx = await dexRoot.methods
+  tx = await dexRoot.methods
     .installOrUpdatePairCode({ code: DexStablePair.code, pool_type: 2 })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
 
-  let tx = await dexRoot.methods.setActive({ new_active: true }).send({
+  tx = await dexRoot.methods.setActive({ new_active: true }).send({
     from: owner.address,
     amount: toNano(2),
   });
