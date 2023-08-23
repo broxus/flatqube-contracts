@@ -1018,7 +1018,7 @@ describe("Check DexAccount add Pair", () => {
       ).then(a => a.walletContract);
 
       const payload = await (
-        poolsData.stablePair.contract as Contract<DexStablePairAbi>
+        poolsData.stablePair.contract as Contract<DexPairAbi>
       ).methods
         .buildWithdrawLiquidityPayload({
           id: getRandomNonce(),
