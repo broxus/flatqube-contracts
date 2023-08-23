@@ -1,0 +1,1156 @@
+.version sol 0.64.0
+
+.macro constructor
+DROP
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7_with_init_storage$
+}
+GETGLOB 6
+THROWIF 51
+ENDS
+.loc ../node_modules/@broxus/contracts/contracts/utils/CheckPubKey.tsol, 9
+GETGLOB 5
+DUP
+ISNULL
+PUSHCONT {
+	DROP
+	PUSHINT 0
+}
+IF
+GETGLOB 2
+EQUAL
+THROWIFNOT 1103
+.loc ../node_modules/@broxus/contracts/contracts/wallets/Account.tsol, 18
+ACCEPT
+.loc ../node_modules/@broxus/contracts/contracts/wallets/Account.tsol, 20
+GETGLOB 5
+DUP
+ISNULL
+PUSHCONT {
+	DROP
+	PUSHINT 0
+}
+IF
+CALLREF {
+	CALL $setOwnership_3e1af783_internal_macro$
+}
+.loc ../node_modules/@broxus/contracts/contracts/utils/CheckPubKey.tsol, 0
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro dexPairDepositLiquiditySuccess
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 21
+OVER
+PUSHCONT {
+	LDU 64
+	LDI 1
+	LDU 128
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+	LDU 128
+	LDI 1
+	LDI 1
+	LDU 128
+	LDU 128
+	LDU 128
+	LDU 128
+}
+PUSHCONT {
+	LDU 64
+	LDI 1
+	LDU 128
+	LDU 128
+	LDU 128
+	LDI 1
+	LDI 1
+	LDU 128
+	LDU 128
+	LDU 128
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+IFELSE
+LDU 128
+LDU 128
+ROLLREV 11
+TUPLE 11
+SWAP
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $dexPairDepositLiquiditySuccess_fd9f0723_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro dexPairDepositLiquiditySuccess_fd9f0723_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 21
+BLKDROP 3
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro dexPairDepositLiquiditySuccessV2
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 24
+OVER
+PUSHCONT {
+	LDU 64
+	LDI 1
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
+	LDU 128
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
+	LDREF
+	ENDS
+	CTOS
+	LDU 128
+}
+PUSHCONT {
+	LDU 64
+	LDI 1
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
+	LDU 128
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+IFELSE
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+ROLLREV 9
+TUPLE 9
+SWAP
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $dexPairDepositLiquiditySuccessV2_599c25a3_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro dexPairDepositLiquiditySuccessV2_599c25a3_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 24
+BLKDROP 3
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro dexPairExchangeSuccess
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 27
+OVER
+PUSHCONT {
+	LDU 64
+	LDI 1
+	LDI 1
+	LDU 128
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 64
+	LDI 1
+	LDI 1
+	LDU 128
+	LDU 128
+}
+IFELSE
+LDU 128
+ROLLREV 4
+TUPLE 4
+SWAP
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $dexPairExchangeSuccess_8d6a631b_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro dexPairExchangeSuccess_8d6a631b_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 27
+BLKDROP 3
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro dexPairExchangeSuccessV2
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 30
+OVER
+PUSHCONT {
+	LDU 64
+	LDI 1
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 64
+	LDI 1
+}
+IFELSE
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 128
+LDU 128
+LDU 128
+ROLLREV 5
+TUPLE 5
+SWAP
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $dexPairExchangeSuccessV2_9012de54_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro dexPairExchangeSuccessV2_9012de54_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 30
+BLKDROP 3
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro dexPairWithdrawSuccess
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 33
+OVER
+PUSHCONT {
+	LDU 64
+	LDI 1
+	LDU 128
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 64
+	LDI 1
+	LDU 128
+	LDU 128
+}
+IFELSE
+LDU 128
+ROLLREV 3
+TRIPLE
+SWAP
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $dexPairWithdrawSuccess_046a6629_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro dexPairWithdrawSuccess_046a6629_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 33
+BLKDROP 3
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro dexPairWithdrawSuccessV2
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 36
+OVER
+PUSHCONT {
+	LDU 64
+	LDI 1
+	LDU 128
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
+	LDREF
+	ENDS
+	CTOS
+	LDU 128
+}
+PUSHCONT {
+	LDU 64
+	LDI 1
+	LDU 128
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
+	LDU 32
+	LDDICT
+	ROTREV
+	PAIR
+	SWAP
+	LDU 128
+	LDREF
+	ENDS
+	CTOS
+}
+IFELSE
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+ROLLREV 9
+TUPLE 9
+SWAP
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $dexPairWithdrawSuccessV2_9bb37f8a_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro dexPairWithdrawSuccessV2_9bb37f8a_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 36
+BLKDROP 3
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro dexPairOperationCancelled
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 39
+LDU 64
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $dexPairOperationCancelled_a108ea6b_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro dexPairOperationCancelled_a108ea6b_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 39
+DROP
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro onAcceptTokensTransfer
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 42
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDU 128
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro onAcceptTokensTransfer_e63f2284_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 42
+BLKDROP 6
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro onAcceptTokensMint
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 51
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDU 128
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $onAcceptTokensMint_2bd1475b_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro onAcceptTokensMint_2bd1475b_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 51
+BLKDROP 4
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro onTokenRootDeployed
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 58
+OVER
+PUSHCONT {
+	LDU 32
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDU 32
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $onTokenRootDeployed_82e1526b_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro onTokenRootDeployed_82e1526b_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 58
+DROP2
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro onRefLastUpdate
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 60
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $onRefLastUpdate_6ed33f63_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro onRefLastUpdate_6ed33f63_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 60
+BLKDROP 3
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro dexAccountOnSuccess
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 66
+LDU 64
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $dexAccountOnSuccess_022415a5_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro dexAccountOnSuccess_022415a5_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 66
+DROP
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro dexAccountOnBounce
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/tests/Wallet.tsol, 67
+LDU 64
+LDU 32
+ENDS
+.loc ../contracts/tests/Wallet.tsol, 0
+CALLREF {
+	CALL $dexAccountOnBounce_432c3f52_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro dexAccountOnBounce_432c3f52_internal_macro
+.loc ../contracts/tests/Wallet.tsol, 67
+DROP2
+.loc ../contracts/tests/Wallet.tsol, 0
+
+.macro sendTransaction
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../node_modules/@broxus/contracts/contracts/wallets/Account.tsol, 31
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDU 128
+LDI 1
+LDU 8
+LDREF
+ENDS
+.loc ../node_modules/@broxus/contracts/contracts/wallets/Account.tsol, 0
+CALLREF {
+	CALL $sendTransaction_c96c9ed1_internal_macro$
+}
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.globl	sendTransaction_c96c9ed1_internal
+.type	sendTransaction_c96c9ed1_internal, @function
+CALL $sendTransaction_c96c9ed1_internal_macro$
+
+.macro sendTransaction_c96c9ed1_internal_macro
+.loc ../node_modules/@broxus/contracts/contracts/access/ExternalOwner.tsol, 14
+GETGLOB 5
+DUP
+ISNULL
+PUSHCONT {
+	DROP
+	PUSHINT 0
+}
+IF
+GETGLOB 10
+EQUAL
+THROWIFNOT 1101
+.loc ../node_modules/@broxus/contracts/contracts/wallets/Account.tsol, 42
+ACCEPT
+.loc ../node_modules/@broxus/contracts/contracts/wallets/Account.tsol, 44
+ROLL 3
+BLKSWAP 2, 3
+NEWC
+STSLICECONST x6_
+STI 1
+STSLICECONST x1_
+STSLICE
+SWAP
+STGRAMS
+PUSHINT 1
+STUR 107
+STREF
+ENDC
+SWAP
+SENDRAWMSG
+.loc ../node_modules/@broxus/contracts/contracts/wallets/Account.tsol, 0
+
+.globl	setOwnership_3e1af783_internal
+.type	setOwnership_3e1af783_internal, @function
+CALL $setOwnership_3e1af783_internal_macro$
+
+.macro setOwnership_3e1af783_internal_macro
+.loc ../node_modules/@broxus/contracts/contracts/access/ExternalOwner.tsol, 23
+GETGLOB 10
+.loc ../node_modules/@broxus/contracts/contracts/access/ExternalOwner.tsol, 25
+OVER
+SETGLOB 10
+.loc ../node_modules/@broxus/contracts/contracts/access/ExternalOwner.tsol, 27
+PUSHSLICE xc0000000000000000000000000536cd3f2
+NEWC
+STSLICE
+STU 256
+STU 256
+ENDC
+PUSHINT 0
+SENDRAWMSG
+.loc ../node_modules/@broxus/contracts/contracts/access/ExternalOwner.tsol, 0
+
+.macro transferOwnership
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../node_modules/@broxus/contracts/contracts/access/ExternalOwner.tsol, 33
+LDU 256
+ENDS
+.loc ../node_modules/@broxus/contracts/contracts/access/ExternalOwner.tsol, 0
+CALLREF {
+	CALL $transferOwnership_d23e8489_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro transferOwnership_d23e8489_internal_macro
+.loc ../node_modules/@broxus/contracts/contracts/access/ExternalOwner.tsol, 14
+GETGLOB 5
+DUP
+ISNULL
+PUSHCONT {
+	DROP
+	PUSHINT 0
+}
+IF
+GETGLOB 10
+EQUAL
+THROWIFNOT 1101
+.loc ../node_modules/@broxus/contracts/contracts/access/ExternalOwner.tsol, 36
+DUP
+THROWIFNOT 1102
+.loc ../node_modules/@broxus/contracts/contracts/access/ExternalOwner.tsol, 37
+ACCEPT
+.loc ../node_modules/@broxus/contracts/contracts/access/ExternalOwner.tsol, 39
+CALLREF {
+	CALL $setOwnership_3e1af783_internal_macro$
+}
+.loc ../node_modules/@broxus/contracts/contracts/access/ExternalOwner.tsol, 0
+
+.macro c4_to_c7
+PUSHROOT
+CTOS
+LDU 256 ; pubkey c4
+LDU 64 ; pubkey timestamp c4
+LDU 1 ; ctor flag
+NIP
+LDU 256
+LDU 256
+ENDS
+SETGLOB 11
+SETGLOB 10
+SETGLOB 3
+SETGLOB 2
+
+.macro c4_to_c7_with_init_storage
+PUSHROOT
+CTOS
+SBITS
+GTINT 1
+PUSHCONT {
+	PUSHINT 0
+	PUSHROOT
+	CTOS
+	PLDDICT ; D
+	PUSHINT 0
+	PUSHINT 1
+	PUSH S2
+	PUSHINT 64
+	DICTUGET
+	ZEROSWAPIFNOT
+	PUSHCONT {
+		PLDU 256
+	}
+	IF
+	SETGLOB 11
+	SETGLOB 10
+	PUSHINT 64
+	DICTUGET
+	THROWIFNOT 61
+	PLDU 256
+	SETGLOB 2
+	PUSHINT 0 ; timestamp
+	SETGLOB 3
+}
+IFREFELSE {
+	CALL $c4_to_c7$
+}
+
+.macro c7_to_c4
+GETGLOB 11
+GETGLOB 10
+GETGLOB 3
+GETGLOB 2
+NEWC
+STU 256
+STU 64
+STONE
+STU 256
+STU 256
+ENDC
+POPROOT
+
+.macro upd_only_time_in_c4
+PUSHROOT
+CTOS
+LDU 256
+LDU 64
+NIP
+GETGLOB 3
+ROT
+NEWC
+STU 256
+STU 64
+STSLICE
+ENDC
+POPROOT
+
+.internal-alias :main_internal, 0
+.internal :main_internal
+PUSHROOT
+CTOS
+SBITS
+NEQINT 1
+SETGLOB 6
+PUSH S2
+CTOS
+PLDU 4
+MODPOW2 1
+IFRET
+OVER
+SEMPTY ; isEmpty
+IFJMPREF {
+	GETGLOB 6
+	THROWIFNOT 76
+}
+OVER
+LDUQ 32  ; [funcId] body' ok
+THROWIFNOT 60
+OVER
+IFNOTJMPREF {
+	GETGLOB 6
+	THROWIFNOT 76
+}
+SWAP
+CALLREF {
+	CALL $public_function_selector$
+}
+THROW 60
+
+.internal-alias :main_external, -1
+.internal :main_external
+PUSHROOT
+CTOS
+SBITS
+NEQINT 1
+SETGLOB 6
+OVER
+CALLREF {
+	CALL $c4_to_c7_with_init_storage$
+}
+LDU 1 ; haveSign msgSlice
+SWAP
+PUSHCONT {
+	PUSHPOW2 9
+	LDSLICEX
+	DUP
+	MYADDR
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	HASHCU
+	ROT
+	GETGLOB 2
+	DUP
+	SETGLOB 5
+	CHKSIGNU
+	THROWIFNOT 40
+}
+IF
+LDU 64 ; timestamp msgSlice
+SWAP
+CALL $replay_protection_macro$
+LDU 32 ; funcId body
+SWAP
+CALLREF {
+	CALL $public_function_selector$
+}
+THROW 60
+
+.macro owner
+DROP
+ENDS
+CALLREF {
+	CALL $c4_to_c7$
+}
+GETGLOB 10
+OVER
+PUSHCONT {
+	PUSHSLICE xc00000000000000000000000009178e9bd
+	NEWC
+	STSLICE
+	STU 256
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+IF
+THROW 0
+
+.macro _randomNonce
+DROP
+ENDS
+CALLREF {
+	CALL $c4_to_c7$
+}
+GETGLOB 11
+OVER
+PUSHCONT {
+	PUSHSLICE xc0000000000000000000000000bb53331f
+	NEWC
+	STSLICE
+	STU 256
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+IF
+THROW 0
+
+.macro public_function_selector
+DUP
+PUSHINT 1786579400
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 148957012
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 78039503
+		EQUAL
+		IFJMPREF {
+			CALL $dexPairDepositLiquiditySuccessV2$
+		}
+		DUP
+		PUSHINT 82002256
+		EQUAL
+		IFJMPREF {
+			CALL $dexPairExchangeSuccess$
+		}
+		DUP
+		PUSHINT 141658120
+		EQUAL
+		IFJMPREF {
+			CALL $dexAccountOnSuccess$
+		}
+		DUP
+		PUSHINT 148957012
+		EQUAL
+		IFJMPREF {
+			CALL $onTokenRootDeployed$
+		}
+	}
+	DUP
+	PUSHINT 788086293
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 201988358
+		EQUAL
+		IFJMPREF {
+			CALL $dexPairOperationCancelled$
+		}
+		DUP
+		PUSHINT 293136829
+		EQUAL
+		IFJMPREF {
+			CALL $owner$
+		}
+		DUP
+		PUSHINT 556460801
+		EQUAL
+		IFJMPREF {
+			CALL $dexPairWithdrawSuccess$
+		}
+		DUP
+		PUSHINT 788086293
+		EQUAL
+		IFJMPREF {
+			CALL $dexAccountOnBounce$
+		}
+	}
+	DUP
+	PUSHINT 1486944450
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 995308319
+		EQUAL
+		IFJMPREF {
+			CALL $_randomNonce$
+		}
+		DUP
+		PUSHINT 1290691692
+		EQUAL
+		IFJMPREF {
+			CALL $sendTransaction$
+		}
+		DUP
+		PUSHINT 1482330212
+		EQUAL
+		IFJMPREF {
+			CALL $transferOwnership$
+		}
+		DUP
+		PUSHINT 1486944450
+		EQUAL
+		IFJMPREF {
+			CALL $dexPairExchangeSuccessV2$
+		}
+	}
+	DUP
+	PUSHINT 1786579400
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 1555681373
+		EQUAL
+		IFJMPREF {
+			CALL $dexPairDepositLiquiditySuccess$
+		}
+		DUP
+		PUSHINT 1564629882
+		EQUAL
+		IFJMPREF {
+			CALL $dexPairWithdrawSuccessV2$
+		}
+		DUP
+		PUSHINT 1756716863
+		EQUAL
+		IFJMPREF {
+			CALL $constructor$
+		}
+		DUP
+		PUSHINT 1786579400
+		EQUAL
+		IFJMPREF {
+			CALL $onRefLastUpdate$
+		}
+	}
+}
+DUP
+PUSHINT 2057231915
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 1893244873
+	EQUAL
+	IFJMPREF {
+		CALL $onAcceptTokensTransfer$
+	}
+	DUP
+	PUSHINT 2057231915
+	EQUAL
+	IFJMPREF {
+		CALL $onAcceptTokensMint$
+	}
+}
+

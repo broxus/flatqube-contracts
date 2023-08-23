@@ -1,0 +1,3971 @@
+.version sol 0.64.0
+
+.macro constructor
+DROP
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7_with_init_storage$
+}
+GETGLOB 6
+THROWIF 51
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 97
+THROW 100
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro receive_macro
+GETGLOB 6
+THROWIFNOT 76
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 72
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 88
+GETGLOB 9
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 0
+DUP
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+
+.macro fallback_macro
+GETGLOB 6
+THROWIFNOT 76
+.loc ../contracts/DexTokenVault.tsol, 95
+THROW 100
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro redeploy
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 99
+OVER
+PUSHCONT {
+	LDREF
+	LDU 32
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDREF
+	LDU 32
+}
+IFELSE
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $redeploy_0160a1d5_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro redeploy_0160a1d5_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 99
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 72
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 48
+GETGLOB 11
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 11
+SDEQ
+AND
+THROWIFNOT 101
+.loc ../contracts/DexTokenVault.tsol, 111
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 0
+BLKDROP 3
+
+.macro getDexRoot
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 124
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $getDexRoot_1235abd1_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST xcb2b2cce
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getDexRoot_1235abd1_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 129
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+PUSHINT 64
+SETINDEXQ 4
+FALSE
+SETINDEXQ 1
+SETGLOB 4
+GETGLOB 11
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro getVersion
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 132
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $getVersion_0d8e6e2c_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2913553711
+	STUR 130
+	STU 32
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 106
+	STZEROES
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STU 32
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getVersion_0d8e6e2c_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 137
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+PUSHINT 64
+SETINDEXQ 4
+FALSE
+SETINDEXQ 1
+SETGLOB 4
+GETGLOB 14
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro getPlatformCode
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 140
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $getPlatformCode_dd193ec1_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 2973835615
+	STUR 130
+	STREF
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 106
+	STZEROES
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STREF
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getPlatformCode_dd193ec1_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 145
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+PUSHINT 64
+SETINDEXQ 4
+FALSE
+SETINDEXQ 1
+SETGLOB 4
+GETGLOB 10
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro getTokenRoot
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 148
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $getTokenRoot_92427c27_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST xa1457ccc
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getTokenRoot_92427c27_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 153
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+PUSHINT 64
+SETINDEXQ 4
+FALSE
+SETINDEXQ 1
+SETGLOB 4
+GETGLOB 15
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro getTokenWallet
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 156
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $getTokenWallet_6dbf7219_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST xc7b47004
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getTokenWallet_6dbf7219_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 161
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+PUSHINT 64
+SETINDEXQ 4
+FALSE
+SETINDEXQ 1
+SETGLOB 4
+GETGLOB 16
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro getVault
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 164
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $getVault_8d928af8_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST xbd1bd325
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getVault_8d928af8_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 169
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+PUSHINT 64
+SETINDEXQ 4
+FALSE
+SETINDEXQ 1
+SETGLOB 4
+GETGLOB 13
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro getWeverVaultTokenRoot
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 172
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $getWeverVaultTokenRoot_93a40de3_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 1
+	STUR 98
+	SWAP
+	NEWC
+	STSLICECONST x9cd0115d
+	STSLICE
+	STBREFR
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 1
+	STUR 106
+	SWAP
+	NEWC
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STSLICE
+	STBREFR
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getWeverVaultTokenRoot_93a40de3_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 177
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+PUSHINT 64
+SETINDEXQ 4
+FALSE
+SETINDEXQ 1
+SETGLOB 4
+GETGLOB 12
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro getTargetBalance
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 180
+LDU 32
+GETGLOB 4
+ROT
+SETINDEXQ 5
+SETGLOB 4
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $getTargetBalance_eb175b7e_internal_macro$
+}
+OVER
+PUSHCONT {
+	PUSH S3
+	CTOS
+	LDU 2
+	LDMSGADDR
+	DROP
+	NIP
+	NEWC
+	STSLICECONST xc
+	STSLICE
+	PUSHINT 4252195830
+	STUR 130
+	STU 128
+	ENDC
+	PUSHINT 0
+}
+PUSHCONT {
+	GETGLOB 4
+	DUP
+	INDEX 3
+	OVER
+	THIRD
+	GETGLOB 9
+	ROLL 3
+	SECOND
+	NEWC
+	STSLICECONST x2_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	SWAP
+	STGRAMS
+	STDICT
+	PUSHINT 106
+	STZEROES
+	GETGLOB 4
+	INDEX 5
+	STUR 32
+	STU 128
+	ENDC
+	GETGLOB 4
+	INDEX 4
+}
+IFELSE
+SENDRAWMSG
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro getTargetBalance_eb175b7e_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 185
+GETGLOB 4
+PUSHINT 0
+SETINDEXQ 2
+PUSHINT 64
+SETINDEXQ 4
+FALSE
+SETINDEXQ 1
+SETGLOB 4
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro withdraw
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 194
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDU 64
+LDU 128
+LDMSGADDR
+LDU 128
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 32
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $withdraw_0967fa4b_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro withdraw_0967fa4b_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 194
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 72
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 73
+GETGLOB 9
+PUSH S3
+.loc ../contracts/abstract/DexContractBase.tsol, 35
+CALLREF {
+	CALL $_expectedAccountAddress_25e7253f_internal_macro$
+}
+SDEQ
+THROWIFNOT 105
+.loc ../contracts/DexTokenVault.tsol, 208
+PUSHREF {
+}
+.loc ../contracts/DexTokenVault.tsol, 210
+FALSE
+ROT
+PUSH3 S5, S6, S7
+ROLL 8
+CALLREF {
+	CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
+}
+CALLREF {
+	CALL $_calcValue_2fb4263c_internal_macro$
+}
+GETGLOB 16
+FALSE
+NEWC
+STSLICECONST x6_
+STI 1
+STSLICECONST x1_
+STSLICE
+SWAP
+STGRAMS
+PUSHINT 1
+STUR 107
+ROLLREV 6
+NEWC
+STSLICECONST x73e22143
+STU 128
+STSLICE
+STU 128
+ROLLREV 3
+NEWC
+STSLICE
+STI 1
+STREF
+STBREFR
+STBREFR
+ENDC
+PUSHINT 1
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 224
+DROP
+ROLL 3
+GETGLOB 9
+FALSE
+NEWC
+STSLICECONST x6_
+STI 1
+STSLICECONST x1_
+STSLICE
+PUSHINT 286467590
+STUR 143
+STU 64
+ENDC
+PUSHPOW2 7
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 231
+ROT
+PUSHSLICE xc0000000000000000000000001
+NEWC
+STSLICE
+ROLLREV 3
+NEWC
+STSLICECONST x39c0e243
+STU 128
+STSLICE
+SWAP
+NEWC
+STSLICE
+STBREFR
+STBREFR
+ENDC
+PUSHINT 0
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro transfer
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 238
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDU 128
+LDMSGADDR
+LDU 128
+LDI 1
+LDREF
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+LDU 32
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDI 1
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $transfer_00a2c89b_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro transfer_00a2c89b_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 238
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 72
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 73
+GETGLOB 9
+PUSH S4
+.loc ../contracts/abstract/DexContractBase.tsol, 40
+CALLREF {
+	CALL $_expectedPoolAddress_95044983_internal_macro$
+}
+SDEQ
+THROWIFNOT 106
+.loc ../contracts/DexTokenVault.tsol, 254
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 12
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	NEQINT 0
+	GETGLOB 15
+	GETGLOB 12
+	SDEQ
+	AND
+}
+IF
+PUSHCONT {
+	.loc ../contracts/DexTokenVault.tsol, 259
+	PUSH3 S3, S6, S0
+	PUSH S10
+	GETGLOB 16
+	FALSE
+	NEWC
+	STSLICECONST x6_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	PUSHINT 1
+	STUR 111
+	ROLLREV 4
+	NEWC
+	STSLICECONST x562548ad
+	STU 128
+	STSLICE
+	ROTREV
+	NEWC
+	STSLICE
+}
+PUSHCONT {
+	.loc ../contracts/DexTokenVault.tsol, 271
+	PUSH3 S3, S4, S0
+	PUSH3 S8, S9, S10
+	GETGLOB 16
+	FALSE
+	NEWC
+	STSLICECONST x6_
+	STI 1
+	STSLICECONST x1_
+	STSLICE
+	PUSHINT 1
+	STUR 111
+	ROLLREV 6
+	NEWC
+	STSLICECONST x73e22143
+	STU 128
+	STSLICE
+	STU 128
+	ROLLREV 3
+	NEWC
+	STSLICE
+	STI 1
+}
+IFELSE
+STREF
+STBREFR
+STBREFR
+ENDC
+PUSHPOW2 7
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 286
+DROP2
+BLKSWAP 2, 4
+ROTREV
+PUSHSLICE xc000000000000000000000000057d7828e
+NEWC
+STSLICE
+STU 128
+SWAP
+UNPAIR
+XCHG S2
+STU 32
+STDICT
+STSLICE
+ENDC
+PUSHINT 0
+SENDRAWMSG
+BLKDROP 3
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro referralFeeTransfer
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 293
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDU 128
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $referralFeeTransfer_84ca93db_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro referralFeeTransfer_84ca93db_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 293
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 72
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 73
+GETGLOB 9
+OVER
+.loc ../contracts/abstract/DexContractBase.tsol, 40
+CALLREF {
+	CALL $_expectedPoolAddress_95044983_internal_macro$
+}
+SDEQ
+THROWIFNOT 106
+.loc ../contracts/DexTokenVault.tsol, 306
+NEWC
+STSLICECONST x0a
+.loc ../contracts/DexTokenVault.tsol, 307
+PUSH2 S2, S3
+NEWC
+PUSH S4
+UNPAIR
+XCHG S2
+STU 32
+STDICT
+STSLICE
+SWAP
+NEWC
+STSLICE
+STBREFR
+STBREFR
+.loc ../contracts/DexTokenVault.tsol, 309
+ENDC
+TRUE
+PUSH S3
+PUSHINT 0
+GETGLOB 13
+PUSH S8
+GETGLOB 16
+FALSE
+NEWC
+STSLICECONST x6_
+STI 1
+STSLICECONST x1_
+STSLICE
+PUSHINT 1
+STUR 111
+ROLLREV 6
+NEWC
+STSLICECONST x73e22143
+STU 128
+STSLICE
+STU 128
+ROLLREV 3
+NEWC
+STSLICE
+STI 1
+STREF
+STBREFR
+STBREFR
+ENDC
+PUSHPOW2 7
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 323
+SWAP
+XCHG S3
+PUSHSLICE xc0000000000000000000000001
+NEWC
+STSLICE
+ROLLREV 4
+NEWC
+STSLICECONST x1f1faf45
+STU 128
+SWAP
+UNPAIR
+XCHG S2
+STU 32
+STDICT
+STSLICE
+SWAP
+NEWC
+STSLICE
+STBREFR
+STBREFR
+ENDC
+PUSHINT 0
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro resetGas
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 331
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $resetGas_0cada961_internal_macro$
+}
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro resetGas_0cada961_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 331
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 72
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 48
+GETGLOB 11
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 11
+SDEQ
+AND
+THROWIFNOT 101
+.loc ../contracts/DexTokenVault.tsol, 338
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro setWeverVaultTokenRoot
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 345
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $setWeverVaultTokenRoot_184590c4_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro setWeverVaultTokenRoot_184590c4_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 345
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 72
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 48
+GETGLOB 11
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 11
+SDEQ
+AND
+THROWIFNOT 101
+.loc ../contracts/DexTokenVault.tsol, 354
+GETGLOB 12
+.loc ../contracts/DexTokenVault.tsol, 356
+PUSH S2
+SETGLOB 12
+.loc ../contracts/DexTokenVault.tsol, 358
+ROT
+PUSHSLICE xc0000000000000000000000001
+NEWC
+STSLICE
+ROTREV
+NEWC
+STSLICECONST x23bf5fcc
+STSLICE
+SWAP
+NEWC
+STSLICE
+STBREFR
+STBREFR
+ENDC
+PUSHINT 0
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 360
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro upgrade
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 373
+OVER
+PUSHCONT {
+	LDREF
+	LDU 32
+	LDREF
+	ENDS
+	CTOS
+}
+PUSHCONT {
+	LDREF
+	LDU 32
+}
+IFELSE
+LDMSGADDR
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $upgrade_fb9d1513_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro upgrade_fb9d1513_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 373
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 72
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 48
+GETGLOB 11
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 11
+SDEQ
+AND
+THROWIFNOT 101
+.loc ../contracts/DexTokenVault.tsol, 383
+GETGLOB 12
+GETGLOB 17
+GETGLOB 16
+GETGLOB 15
+NEWC
+STSLICE
+ROLLREV 3
+NEWC
+STSLICE
+ROTREV
+NEWC
+STSLICE
+SWAP
+NEWC
+STSLICE
+STBREFR
+STBREFR
+STBREFR
+ENDC
+.loc ../contracts/DexTokenVault.tsol, 392
+GETGLOB 11
+NEWC
+STSLICE
+.loc ../contracts/DexTokenVault.tsol, 393
+GETGLOB 13
+STSLICER
+.loc ../contracts/DexTokenVault.tsol, 394
+GETGLOB 14
+STUR 32
+.loc ../contracts/DexTokenVault.tsol, 395
+ROLL 3
+STUR 32
+.loc ../contracts/DexTokenVault.tsol, 396
+XCHG S1, S2
+STSLICE
+.loc ../contracts/DexTokenVault.tsol, 398
+GETGLOB 10
+SWAP
+STREF
+.loc ../contracts/DexTokenVault.tsol, 399
+STREF
+.loc ../contracts/DexTokenVault.tsol, 401
+OVER
+SETCODE
+.loc ../contracts/DexTokenVault.tsol, 402
+SWAP
+CTOS
+DUP
+PUSHSLICE x8adb35
+SDEQ
+PUSHCONT {
+	PLDREFIDX 1
+	CTOS
+}
+IF
+PLDREF
+CTOS
+BLESS
+POP C3
+.loc ../contracts/DexTokenVault.tsol, 404
+ENDC
+CALLREF {
+	CALL $:onCodeUpgrade$
+}
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.internal-alias :onCodeUpgrade, 2
+.internal :onCodeUpgrade
+.loc ../contracts/DexTokenVault.tsol, 408
+PUSHREF {
+}
+SETGLOB 10
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+SETGLOB 11
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+SETGLOB 12
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+SETGLOB 13
+PUSHINT 0
+SETGLOB 14
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+SETGLOB 15
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+SETGLOB 16
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+SETGLOB 17
+.loc ../contracts/DexTokenVault.tsol, 410
+DUP
+CTOS
+.loc ../contracts/DexTokenVault.tsol, 412
+LDMSGADDR
+LDMSGADDR
+PLDU 32
+.loc ../contracts/DexTokenVault.tsol, 422
+ROT
+SETGLOB 11
+.loc ../contracts/DexTokenVault.tsol, 423
+SWAP
+SETGLOB 13
+.loc ../contracts/DexTokenVault.tsol, 425
+PUSHCONT {
+	.loc ../contracts/DexTokenVault.tsol, 429
+	DUP
+	CALLREF {
+		CALL $_onUpgrade_a17d3901_internal_macro$
+	}
+}
+PUSHCONT {
+	.loc ../contracts/DexTokenVault.tsol, 426
+	CALLREF {
+		CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+	}
+	PUSHINT 0
+	RAWRESERVE
+	.loc ../contracts/DexTokenVault.tsol, 427
+	DUP
+	CALLREF {
+		CALL $_onPlatformUpgrade_b294e6d4_internal_macro$
+	}
+}
+IFELSE
+.loc ../contracts/DexTokenVault.tsol, 0
+DROP
+CALLREF {
+	CALL $c7_to_c4$
+}
+COMMIT
+THROW 0
+
+.globl	_onPlatformUpgrade_b294e6d4_internal
+.type	_onPlatformUpgrade_b294e6d4_internal, @function
+CALL $_onPlatformUpgrade_b294e6d4_internal_macro$
+
+.macro _onPlatformUpgrade_b294e6d4_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 435
+CTOS
+.loc ../contracts/DexTokenVault.tsol, 437
+DUP
+LDMSGADDR
+LDMSGADDR
+LDU 32
+LDU 32
+LDMSGADDR
+POP S6
+BLKDROP2 3, 2
+.loc ../contracts/DexTokenVault.tsol, 451
+OVER
+SETGLOB 14
+.loc ../contracts/DexTokenVault.tsol, 452
+DUP
+SETGLOB 17
+.loc ../contracts/DexTokenVault.tsol, 453
+PUSH S2
+LDREF
+POP S4
+SETGLOB 10
+.loc ../contracts/DexTokenVault.tsol, 454
+ROT
+LDREFRTOS
+NIP
+LDMSGADDR
+DROP
+DUP
+SETGLOB 15
+.loc ../contracts/DexTokenVault.tsol, 456
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+PUSHCONT {
+	.loc ../contracts/DexTokenVault.tsol, 459
+	PUSHINT 0
+	PUSH S2
+	PUSHSLICE xc000000000000000000000000063e20591
+	NEWC
+	STSLICE
+	STU 32
+	STU 32
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+	.loc ../contracts/DexTokenVault.tsol, 464
+	CALLREF {
+		CALL $_deployTokenWallet_0cf4c37a_internal_macro$
+	}
+	.loc ../contracts/DexTokenVault.tsol, 465
+	CALLREF {
+		CALL $_deployTokenWalletForVault_07ed59d9_internal_macro$
+	}
+	.loc ../contracts/DexTokenVault.tsol, 467
+	DUP
+	NEWC
+	STSLICECONST x42_
+	STSLICE
+	PUSHINT 111
+	STZEROES
+	ENDC
+	PUSHPOW2 7
+	ADDCONST 2
+	UFITS 8
+	SENDRAWMSG
+	.loc ../contracts/DexTokenVault.tsol, 0
+}
+IFELSEREF {
+	CALL $_destroySelf_2707059e_internal_macro$
+}
+DROP2
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.globl	_onUpgrade_a17d3901_internal
+.type	_onUpgrade_a17d3901_internal, @function
+CALL $_onUpgrade_a17d3901_internal_macro$
+
+.macro _onUpgrade_a17d3901_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 477
+CTOS
+.loc ../contracts/DexTokenVault.tsol, 479
+DUP
+LDMSGADDR
+LDMSGADDR
+LDU 32
+LDU 32
+LDMSGADDR
+POP S6
+BLKDROP2 2, 3
+.loc ../contracts/DexTokenVault.tsol, 493
+OVER
+SETGLOB 14
+.loc ../contracts/DexTokenVault.tsol, 494
+PUSH S3
+LDREF
+POP S5
+SETGLOB 10
+.loc ../contracts/DexTokenVault.tsol, 495
+ROLL 3
+PLDREF
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+ENDS
+XCHG S2
+SETGLOB 15
+SETGLOB 16
+SETGLOB 17
+.loc ../contracts/DexTokenVault.tsol, 505
+ROTREV
+PUSHSLICE xc000000000000000000000000063e20591
+NEWC
+STSLICE
+STU 32
+STU 32
+ENDC
+PUSHINT 0
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 510
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.globl	_dexRoot_8347403b_internal
+.type	_dexRoot_8347403b_internal, @function
+CALL $_dexRoot_8347403b_internal_macro$
+
+.macro _dexRoot_8347403b_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 529
+GETGLOB 11
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.globl	_getTargetBalanceInternal_141d6ea7_internal
+.type	_getTargetBalanceInternal_141d6ea7_internal, @function
+CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+
+.macro _getTargetBalanceInternal_141d6ea7_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 538
+PUSHINT 1000000000
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.globl	_deployTokenWallet_0cf4c37a_internal
+.type	_deployTokenWallet_0cf4c37a_internal, @function
+CALL $_deployTokenWallet_0cf4c37a_internal_macro$
+
+.macro _deployTokenWallet_0cf4c37a_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 544
+PUSHINT 120000000
+MYADDR
+CALLREF {
+	CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+}
+CALLREF {
+	CALL $_calcValue_2fb4263c_internal_macro$
+}
+GETGLOB 15
+TRUE
+NEWC
+STSLICECONST x6_
+STI 1
+STSLICECONST x1_
+STSLICE
+SWAP
+STGRAMS
+PUSHINT 1
+STUR 107
+ROTREV
+PUSHSLICE x31edd4c749b2f6d7
+NEWC
+STSLICE
+STSLICE
+STU 128
+STBREFR
+ENDC
+PUSHINT 1
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.globl	_deployTokenWalletForVault_07ed59d9_internal
+.type	_deployTokenWalletForVault_07ed59d9_internal, @function
+CALL $_deployTokenWalletForVault_07ed59d9_internal_macro$
+
+.macro _deployTokenWalletForVault_07ed59d9_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 555
+PUSHINT 120000000
+GETGLOB 13
+CALLREF {
+	CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+}
+CALLREF {
+	CALL $_calcValue_2fb4263c_internal_macro$
+}
+GETGLOB 15
+TRUE
+NEWC
+STSLICECONST x6_
+STI 1
+STSLICECONST x1_
+STSLICE
+SWAP
+STGRAMS
+PUSHINT 1
+STUR 107
+ROTREV
+PUSHSLICE x31edd4c722a6cedd
+NEWC
+STSLICE
+STSLICE
+STU 128
+STBREFR
+ENDC
+PUSHINT 1
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.globl	_destroySelf_2707059e_internal
+.type	_destroySelf_2707059e_internal, @function
+CALL $_destroySelf_2707059e_internal_macro$
+
+.macro _destroySelf_2707059e_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 565
+PUSHINT 0
+DUP
+.loc ../contracts/DexTokenVault.tsol, 72
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 566
+GETGLOB 17
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+ADDCONST 32
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro onAcceptTokensMint
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 579
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+LDU 128
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $onAcceptTokensMint_2bd1475b_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro onAcceptTokensMint_2bd1475b_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 579
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 72
+DUP
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 64
+GETGLOB 16
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 16
+SDEQ
+AND
+THROWIFNOT 145
+.loc ../contracts/DexTokenVault.tsol, 68
+ROLLREV 4
+.loc ../contracts/DexTokenVault.tsol, 590
+DUP
+CTOS
+.loc ../contracts/DexTokenVault.tsol, 591
+PUSHINT 9
+.loc ../contracts/DexTokenVault.tsol, 593
+OVER
+LDREF
+POP S3
+.loc ../contracts/DexTokenVault.tsol, 595
+DUP
+CTOS
+LDU 64
+LDU 32
+LDU 8
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 128
+LDU 32
+LDDICT
+ROTREV
+PAIR
+SWAP
+LDI 1
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 619
+PUSHREF {
+}
+PUSH2 S0, S13
+.loc ../contracts/DexTokenVault.tsol, 622
+SREFS
+GTINT 0
+.loc ../contracts/DexTokenVault.tsol, 623
+PUSH S15
+SREFS
+GTINT 1
+.loc ../contracts/DexTokenVault.tsol, 625
+OVER
+PUSHCONT {
+	.loc ../contracts/DexTokenVault.tsol, 626
+	PUSH S16
+	LDREF
+	POP S18
+	POP S4
+	.loc ../contracts/DexTokenVault.tsol, 0
+}
+IF
+.loc ../contracts/DexTokenVault.tsol, 629
+DUP
+PUSHCONT {
+	.loc ../contracts/DexTokenVault.tsol, 630
+	PUSH S16
+	LDREF
+	POP S18
+	POP S3
+	.loc ../contracts/DexTokenVault.tsol, 0
+}
+IF
+.loc ../contracts/DexTokenVault.tsol, 633
+PUSHINT 0
+PUSH2 S0, S11
+.loc ../contracts/DexTokenVault.tsol, 636
+CALLREF {
+	CALL $_expectedPoolAddress_95044983_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 637
+PUSH S8
+FIRST
+UFITS 32
+.loc ../contracts/DexTokenVault.tsol, 638
+PUSHINT 0
+BLKPUSH 3, 0
+.loc ../contracts/DexTokenVault.tsol, 642
+PUSHCONT {
+	PUSH2 S0, S13
+	FIRST
+	LESS
+}
+PUSHCONT {
+	.loc ../contracts/DexTokenVault.tsol, 643
+	PUSH2 S0, S13
+	SECOND
+	PUSHINT 32
+	DICTUGET
+	THROWIFNOT 50
+	CALLREF {
+		LDU 128
+		LDMSGADDR
+		LDREF
+		LDU 32
+		LDU 32
+		ENDS
+		TUPLE 5
+	}
+	.loc ../contracts/DexTokenVault.tsol, 645
+	DUP
+	SECOND
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	EQINT 0
+	OVER
+	SECOND
+	PUSH S8
+	SDEQ
+	PUSH S2
+	FIRST
+	EQINT 0
+	PUSH S3
+	INDEX 4
+	EQINT 0
+	OR
+	OR
+	OR
+	PUSHCONT {
+		.loc ../contracts/DexTokenVault.tsol, 651
+		PUSHINT 111
+		POP S9
+		.loc ../contracts/DexTokenVault.tsol, 652
+		DROP
+		RETALT
+		.loc ../contracts/DexTokenVault.tsol, 0
+	}
+	IFJMP
+	.loc ../contracts/DexTokenVault.tsol, 655
+	DUP
+	INDEX 3
+	PUSH S4
+	GREATER
+	PUSHCONT {
+		.loc ../contracts/DexTokenVault.tsol, 656
+		DUP
+		INDEX 3
+		POP S4
+		.loc ../contracts/DexTokenVault.tsol, 657
+		OVER
+		POP S3
+		.loc ../contracts/DexTokenVault.tsol, 0
+	}
+	IF
+	.loc ../contracts/DexTokenVault.tsol, 660
+	DUP
+	FIRST
+	PUSH S8
+	ADD
+	POP S8
+	.loc ../contracts/DexTokenVault.tsol, 661
+	DUP
+	INDEX 3
+	PUSH S6
+	ADD
+	UFITS 32
+	POP S6
+	.loc ../contracts/DexTokenVault.tsol, 662
+	INDEX 4
+	PUSH S4
+	ADD
+	UFITS 32
+	POP S4
+	.loc ../contracts/DexTokenVault.tsol, 642
+	INC
+	UFITS 32
+	.loc ../contracts/DexTokenVault.tsol, 0
+}
+WHILEBRK
+DROP
+.loc ../contracts/DexTokenVault.tsol, 665
+PUSH S6
+EQINT 0
+DUP
+PUSHCONT {
+	DROP
+	DEPTH
+	ADDCONST -2
+	PICK
+	PUSH S15
+	CALLREF {
+		CALL $GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
+	}
+	CALLREF {
+		CALL $_calcValue_2fb4263c_internal_macro$
+	}
+	PUSH S5
+	MUL
+	UFITS 128
+	PUSHINT 0
+	PUSHINT 100000
+	PAIR
+	CALLREF {
+		CALL $_calcValue_2fb4263c_internal_macro$
+	}
+	ADD
+	UFITS 128
+	LESS
+}
+IF
+PUSHCONT {
+	.loc ../contracts/DexTokenVault.tsol, 666
+	PUSHINT 103
+	POP S7
+	.loc ../contracts/DexTokenVault.tsol, 0
+}
+IF
+.loc ../contracts/DexTokenVault.tsol, 669
+PUSH S6
+EQINT 0
+PUSH S13
+FIRST
+GTINT 0
+AND
+PUSHCONT {
+	.loc ../contracts/DexTokenVault.tsol, 670
+	DEPTH
+	ADDCONST -2
+	PICK
+	PUSH S15
+	CALLREF {
+		CALL $GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
+	}
+	CALLREF {
+		CALL $_calcValue_2fb4263c_internal_macro$
+	}
+	PUSH S5
+	MUL
+	UFITS 128
+	SUB
+	UFITS 128
+	PUSHINT 0
+	PUSHINT 100000
+	PAIR
+	CALLREF {
+		CALL $_calcValue_2fb4263c_internal_macro$
+	}
+	SUB
+	UFITS 128
+	.loc ../contracts/DexTokenVault.tsol, 672
+	PUSHINT 0
+	PUSHCONT {
+		PUSH2 S0, S14
+		FIRST
+		LESS
+	}
+	PUSHCONT {
+		.loc ../contracts/DexTokenVault.tsol, 673
+		PUSH2 S0, S14
+		SECOND
+		PUSHINT 32
+		DICTUGET
+		THROWIFNOT 50
+		CALLREF {
+			LDU 128
+			LDMSGADDR
+			LDREF
+			LDU 32
+			LDU 32
+			ENDS
+			TUPLE 5
+		}
+		.loc ../contracts/DexTokenVault.tsol, 675
+		PUSH S29
+		OVER
+		FIRST
+		PUSH S10
+		MULDIV
+		UFITS 128
+		.loc ../contracts/DexTokenVault.tsol, 676
+		OVER
+		INDEX 4
+		PUSH2 S4, S7
+		MULDIV
+		UFITS 128
+		.loc ../contracts/DexTokenVault.tsol, 678
+		PUSH3 S14, S12, S15
+		PUSH S16
+		PUSH S6
+		THIRD
+		PUSH S23
+		PUSH S36
+		PUSH S23
+		PUSH S27
+		PUSH S29
+		PUSH S31
+		ROLL 12
+		GETGLOB 15
+		PUSH S39
+		PUSH S35
+		PUSH S37
+		PUSH S39
+		PUSH S41
+		PUSH S20
+		PUSH S23
+		EQUAL
+		ZEROSWAPIF
+		PUSHCONT {
+			PUSH S19
+			INDEX 3
+			INC
+			UFITS 32
+			PUSH S37
+			CALLREF {
+				CALL $GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
+			}
+			CALLREF {
+				CALL $_calcValue_2fb4263c_internal_macro$
+			}
+			MUL
+			UFITS 128
+			PUSH S19
+			ADD
+			UFITS 128
+		}
+		IFNOT
+		PUSHINT 20
+		ROLLX
+		SECOND
+		NEWC
+		STSLICECONST x62_
+		STSLICE
+		SWAP
+		STGRAMS
+		PUSHINT 1
+		STUR 107
+		PUSHINT 18
+		ROLLREVX
+		NEWC
+		STSLICECONST x3ceebd98
+		STU 64
+		STU 32
+		STU 8
+		SWAP
+		UNPAIR
+		XCHG S2
+		STU 32
+		STDICT
+		STU 8
+		STSLICE
+		STU 128
+		ROLLREV 11
+		NEWC
+		STSLICE
+		ROLLREV 10
+		NEWC
+		STSLICE
+		ROLLREV 9
+		NEWC
+		STSLICE
+		STI 1
+		ROLLREV 7
+		NEWC
+		STSLICE
+		STU 128
+		STREF
+		STI 1
+		STREF
+		STI 1
+		STREF
+		STBREFR
+		STBREFR
+		STBREFR
+		STBREFR
+		STBREFR
+		ENDC
+		PUSH2 S2, S4
+		EQUAL
+		PUSHPOW2 7
+		PUSHINT 1
+		CONDSEL
+		SENDRAWMSG
+		.loc ../contracts/DexTokenVault.tsol, 0
+		DROP
+		.loc ../contracts/DexTokenVault.tsol, 672
+		INC
+		UFITS 32
+		.loc ../contracts/DexTokenVault.tsol, 0
+	}
+	WHILE
+	DROP2
+}
+PUSHCONT {
+	.loc ../contracts/DexTokenVault.tsol, 710
+	PUSH S12
+	FIRST
+	EQINT 0
+	.loc ../contracts/DexTokenVault.tsol, 712
+	DUP
+	PUSHCONT {
+		.loc ../contracts/DexTokenVault.tsol, 713
+		PUSH S16
+		PUSH S19
+		PUSH S29
+		PUSHSLICE xc000000000000000000000000057d7828e
+		NEWC
+		STSLICE
+		STU 128
+		SWAP
+		UNPAIR
+		XCHG S2
+		STU 32
+		STDICT
+		STSLICE
+		ENDC
+		PUSHINT 0
+		SENDRAWMSG
+	}
+	PUSHCONT {
+		.loc ../contracts/DexTokenVault.tsol, 719
+		PUSH S21
+		PUSHINT 10000000
+		ADDCONST 44
+		UFITS 128
+		PUSH S19
+		FALSE
+		NEWC
+		STSLICECONST x6_
+		STI 1
+		STSLICECONST x1_
+		STSLICE
+		SWAP
+		STGRAMS
+		PUSHINT 201988358
+		STUR 139
+		STU 64
+		ENDC
+		PUSHINT 1
+		ADDCONST 2
+		UFITS 8
+		SENDRAWMSG
+		.loc ../contracts/DexTokenVault.tsol, 726
+		PUSH S16
+		PUSH S18
+		SDEQ
+		PUSHCONT {
+			.loc ../contracts/DexTokenVault.tsol, 727
+			PUSH S21
+			PUSH S17
+			FALSE
+			NEWC
+			STSLICECONST x6_
+			STI 1
+			STSLICECONST x1_
+			STSLICE
+			PUSHINT 42045022170482489768618347945393405442361463019782
+			STUR 167
+			STU 64
+			ENDC
+			PUSHINT 1
+			ADDCONST 2
+			UFITS 8
+			SENDRAWMSG
+			.loc ../contracts/DexTokenVault.tsol, 0
+		}
+		IFNOT
+	}
+	IFELSE
+	.loc ../contracts/DexTokenVault.tsol, 736
+	DUP
+	PUSHCONT {
+		PUSH S23
+		PUSH S12
+		PUSH S19
+		CALLREF {
+			CALL $PairPayload_no_obj_buildSuccessPayload_ca821d98_macro$
+		}
+	}
+	PUSHCONT {
+		PUSH S23
+		PUSH3 S8, S11, S14
+		CALLREF {
+			CALL $PairPayload_no_obj_buildCancelPayload_d16d279d_macro$
+		}
+	}
+	IFELSE
+	OVER
+	PUSHCONT {
+		PUSH S10
+	}
+	PUSHCONT {
+		PUSH S9
+	}
+	IFELSE
+	PUSH S28
+	PUSH S17
+	ROLL 4
+	PUSHCONT {
+		PUSH S19
+	}
+	PUSHCONT {
+		PUSH S20
+	}
+	IFELSE
+	PUSH S31
+	GETGLOB 16
+	NEWC
+	STSLICECONST x62_
+	STSLICE
+	PUSHINT 1
+	STUR 111
+	ROLLREV 6
+	NEWC
+	STSLICECONST x73e22143
+	STU 128
+	STSLICE
+	STU 128
+	ROLLREV 3
+	NEWC
+	STSLICE
+	STI 1
+	STREF
+	STBREFR
+	STBREFR
+	ENDC
+	PUSHPOW2 7
+	SENDRAWMSG
+}
+IFELSE
+.loc ../contracts/DexTokenVault.tsol, 0
+PUSHINT 29
+DROPX
+
+.macro onTokenWallet
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 753
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $onTokenWallet_e6d1bd58_internal_macro$
+}
+CALLREF {
+	CALL $c7_to_c4$
+}
+THROW 0
+
+.macro onTokenWallet_e6d1bd58_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 753
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 72
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 56
+GETGLOB 15
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 15
+SDEQ
+AND
+THROWIFNOT 135
+.loc ../contracts/DexTokenVault.tsol, 758
+DUP
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+EQINT 0
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 16
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	EQINT 0
+}
+IF
+PUSHCONT {
+	.loc ../contracts/DexTokenVault.tsol, 761
+	GETGLOB 16
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	PUSHCONT {
+		.loc ../contracts/DexTokenVault.tsol, 778
+		GETGLOB 17
+		NEWC
+		STSLICECONST x42_
+		STSLICE
+		PUSHINT 111
+		STZEROES
+		ENDC
+		PUSHPOW2 7
+		ADDCONST 2
+		UFITS 8
+	}
+	PUSHCONT {
+		.loc ../contracts/DexTokenVault.tsol, 762
+		DUP
+		SETGLOB 16
+		.loc ../contracts/DexTokenVault.tsol, 764
+		DUP
+		PUSHSLICE xc0000000000000000000000000657e2fe4
+		NEWC
+		STSLICE
+		STSLICE
+		ENDC
+		PUSHINT 0
+		SENDRAWMSG
+		.loc ../contracts/DexTokenVault.tsol, 766
+		GETGLOB 17
+		GETGLOB 16
+		GETGLOB 15
+		GETGLOB 14
+		GETGLOB 11
+		FALSE
+		NEWC
+		STSLICECONST x6_
+		STI 1
+		STSLICECONST x1_
+		STSLICE
+		PUSHINT 1
+		STUR 111
+		ROLLREV 4
+		NEWC
+		STSLICECONST x118a7a95
+		STU 32
+		STSLICE
+		ROTREV
+		NEWC
+		STSLICE
+		SWAP
+		NEWC
+		STSLICE
+		STBREFR
+		STBREFR
+		STBREFR
+		ENDC
+		PUSHPOW2 7
+	}
+	IFELSE
+	SENDRAWMSG
+	.loc ../contracts/DexTokenVault.tsol, 0
+}
+IFREFELSE {
+	CALL $_destroySelf_2707059e_internal_macro$
+}
+DROP
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro onVaultTokenWallet
+DROP
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+.loc ../contracts/DexTokenVault.tsol, 789
+OVER
+PUSHCONT {
+	LDREF
+	ENDS
+	CTOS
+}
+IF
+LDMSGADDR
+ENDS
+.loc ../contracts/DexTokenVault.tsol, 0
+CALLREF {
+	CALL $onVaultTokenWallet_a255247d_internal_macro$
+}
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+THROW 0
+
+.macro onVaultTokenWallet_a255247d_internal_macro
+.loc ../contracts/DexTokenVault.tsol, 789
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 72
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 56
+GETGLOB 15
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 15
+SDEQ
+AND
+THROWIFNOT 135
+.loc ../contracts/DexTokenVault.tsol, 795
+PUSHSLICE xc00000000000000000000000005643203d
+NEWC
+STSLICE
+STSLICE
+ENDC
+PUSHINT 0
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 797
+GETGLOB 17
+NEWC
+STSLICECONST x42_
+STSLICE
+PUSHINT 111
+STZEROES
+ENDC
+PUSHPOW2 7
+ADDCONST 2
+UFITS 8
+SENDRAWMSG
+.loc ../contracts/DexTokenVault.tsol, 0
+
+.macro on_bounce_macro
+GETGLOB 6
+THROWIFNOT 76
+GETGLOB 2
+ISNULL
+IFREF {
+	CALL $c4_to_c7$
+}
+CALLREF {
+	CALL $_getTargetBalanceInternal_141d6ea7_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 72
+PUSHINT 0
+RAWRESERVE
+.loc ../contracts/DexTokenVault.tsol, 56
+GETGLOB 15
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+NEQINT 0
+GETGLOB 9
+GETGLOB 15
+SDEQ
+AND
+THROWIFNOT 135
+.loc ../contracts/DexTokenVault.tsol, 811
+PLDU 32
+.loc ../contracts/DexTokenVault.tsol, 814
+PUSHINT 837670087
+EQUAL
+DUP
+PUSHCONT {
+	DROP
+	GETGLOB 16
+	PARSEMSGADDR
+	INDEX 3
+	PLDU 256
+	EQINT 0
+}
+IF
+IFREF {
+	CALL $_destroySelf_2707059e_internal_macro$
+}
+.loc ../contracts/DexTokenVault.tsol, 0
+DUP
+IFREF {
+	CALL $upd_only_time_in_c4$
+}
+
+.globl	_calcValue_2fb4263c_internal
+.type	_calcValue_2fb4263c_internal, @function
+CALL $_calcValue_2fb4263c_internal_macro$
+
+.macro _calcValue_2fb4263c_internal_macro
+.loc ../contracts/abstract/DexContractBase.tsol, 64
+DUP
+FIRST
+SWAP
+SECOND
+MYADDR
+PARSEMSGADDR
+THIRD
+CALLREF {
+	CALL $__gasToTon_macro$
+}
+ADD
+UFITS 128
+.loc ../contracts/abstract/DexContractBase.tsol, 0
+
+.globl	_expectedLpTokenPendingAddress_db127a1c_internal
+.type	_expectedLpTokenPendingAddress_db127a1c_internal, @function
+CALL $_expectedLpTokenPendingAddress_db127a1c_internal_macro$
+
+.macro _expectedLpTokenPendingAddress_db127a1c_internal_macro
+.loc ../contracts/abstract/DexContractBase.tsol, 73
+CALLREF {
+	CALL $_buildLpTokenPendingInitData_6415a6cd_internal_macro$
+}
+HASHCU
+NEWC
+STSLICECONST x801_
+STU 256
+ENDC
+CTOS
+.loc ../contracts/abstract/DexContractBase.tsol, 0
+
+.globl	_expectedAccountAddress_25e7253f_internal
+.type	_expectedAccountAddress_25e7253f_internal, @function
+CALL $_expectedAccountAddress_25e7253f_internal_macro$
+
+.macro _expectedAccountAddress_25e7253f_internal_macro
+.loc ../contracts/abstract/DexContractBase.tsol, 86
+PUSHINT 1
+SWAP
+CALLREF {
+	CALL $_buildAccountParams_aabfc73f_internal_macro$
+}
+CALLREF {
+	CALL $_buildInitData_65db94e9_internal_macro$
+}
+HASHCU
+NEWC
+STSLICECONST x801_
+STU 256
+ENDC
+CTOS
+.loc ../contracts/abstract/DexContractBase.tsol, 0
+
+.globl	_expectedPoolAddress_95044983_internal
+.type	_expectedPoolAddress_95044983_internal, @function
+CALL $_expectedPoolAddress_95044983_internal_macro$
+
+.macro _expectedPoolAddress_95044983_internal_macro
+.loc ../contracts/abstract/DexContractBase.tsol, 97
+PUSHINT 2
+SWAP
+CALLREF {
+	CALL $_buildPairParams_623f79c1_internal_macro$
+}
+CALLREF {
+	CALL $_buildInitData_65db94e9_internal_macro$
+}
+HASHCU
+NEWC
+STSLICECONST x801_
+STU 256
+ENDC
+CTOS
+.loc ../contracts/abstract/DexContractBase.tsol, 0
+
+.globl	_expectedTokenVaultAddress_3a7b5f9b_internal
+.type	_expectedTokenVaultAddress_3a7b5f9b_internal, @function
+CALL $_expectedTokenVaultAddress_3a7b5f9b_internal_macro$
+
+.macro _expectedTokenVaultAddress_3a7b5f9b_internal_macro
+.loc ../contracts/abstract/DexContractBase.tsol, 108
+PUSHINT 3
+SWAP
+CALLREF {
+	CALL $_buildTokenVaultParams_0c367c47_internal_macro$
+}
+CALLREF {
+	CALL $_buildInitData_65db94e9_internal_macro$
+}
+HASHCU
+NEWC
+STSLICECONST x801_
+STU 256
+ENDC
+CTOS
+.loc ../contracts/abstract/DexContractBase.tsol, 0
+
+.globl	_buildAccountParams_aabfc73f_internal
+.type	_buildAccountParams_aabfc73f_internal, @function
+CALL $_buildAccountParams_aabfc73f_internal_macro$
+
+.macro _buildAccountParams_aabfc73f_internal_macro
+.loc ../contracts/abstract/DexContractBase.tsol, 121
+NEWC
+STSLICE
+.loc ../contracts/abstract/DexContractBase.tsol, 123
+ENDC
+.loc ../contracts/abstract/DexContractBase.tsol, 0
+
+.globl	_buildTokenVaultParams_0c367c47_internal
+.type	_buildTokenVaultParams_0c367c47_internal, @function
+CALL $_buildTokenVaultParams_0c367c47_internal_macro$
+
+.macro _buildTokenVaultParams_0c367c47_internal_macro
+.loc ../contracts/abstract/DexContractBase.tsol, 129
+NEWC
+STSLICE
+.loc ../contracts/abstract/DexContractBase.tsol, 131
+ENDC
+.loc ../contracts/abstract/DexContractBase.tsol, 0
+
+.globl	_buildPairParams_623f79c1_internal
+.type	_buildPairParams_623f79c1_internal, @function
+CALL $_buildPairParams_623f79c1_internal_macro$
+
+.macro _buildPairParams_623f79c1_internal_macro
+.loc ../contracts/abstract/DexContractBase.tsol, 135
+NEWDICT
+.loc ../contracts/abstract/DexContractBase.tsol, 137
+OVER
+SECOND
+PUSHINT 0
+NULL
+PUSHCONT {
+	PUSH2 S1, S2
+	PUSHINT 32
+	DICTUGET
+	NULLSWAPIFNOT
+	DROP
+	DUP
+	POP S2
+	ISNULL
+	NOT
+}
+PUSHCONT {
+	.loc ../contracts/abstract/DexContractBase.tsol, 138
+	PUSH2 S0, S3
+	PUSHINT 267
+	DICTGET
+	NULLSWAPIFNOT
+	NIP
+	THROWIF 153
+	.loc ../contracts/abstract/DexContractBase.tsol, 139
+	PUSH2 S0, S3
+	NEWC
+	STSLICECONST x00
+	ROTREV
+	PUSHINT 267
+	DICTSETB
+	POP S4
+	.loc ../contracts/abstract/DexContractBase.tsol, 0
+	OVER
+	INC
+	POP S2
+}
+WHILE
+BLKDROP 3
+.loc ../contracts/abstract/DexContractBase.tsol, 142
+SWAP
+FIRST
+LESSINT 3
+PUSHCONT {
+	.loc ../contracts/abstract/DexContractBase.tsol, 143
+	NEWC
+	.loc ../contracts/abstract/DexContractBase.tsol, 145
+	XCPU S1, S0
+	PUSHINT 267
+	DICTMIN
+	PUSHCONT {
+		DUP
+		ROT
+		PLDU 8
+	}
+	PUSHCONT {
+		NULL
+		BLKPUSH 2, 0
+	}
+	IFELSE
+	PUSHCONT {
+		PUSH S2
+		ISNULL
+		NOT
+	}
+	PUSHCONT {
+		.loc ../contracts/abstract/DexContractBase.tsol, 146
+		PUSH2 S1, S4
+		STSLICE
+		POP S5
+		.loc ../contracts/abstract/DexContractBase.tsol, 0
+		PUSH2 S2, S3
+		PUSHINT 267
+		DICTGETNEXT
+		PUSHCONT {
+			DUP
+			ROT
+			PLDU 8
+		}
+		PUSHCONT {
+			NULL
+			BLKPUSH 2, 0
+		}
+		IFELSE
+		BLKDROP2 3, 3
+	}
+	WHILE
+	BLKDROP 4
+	.loc ../contracts/abstract/DexContractBase.tsol, 149
+	ENDC
+	.loc ../contracts/abstract/DexContractBase.tsol, 0
+}
+PUSHCONT {
+	.loc ../contracts/abstract/DexContractBase.tsol, 151
+	PUSHINT 0
+	NEWDICT
+	PAIR
+	.loc ../contracts/abstract/DexContractBase.tsol, 152
+	XCPU S1, S0
+	PUSHINT 267
+	DICTMIN
+	PUSHCONT {
+		DUP
+		ROT
+		PLDU 8
+	}
+	PUSHCONT {
+		NULL
+		BLKPUSH 2, 0
+	}
+	IFELSE
+	PUSHCONT {
+		PUSH S2
+		ISNULL
+		NOT
+	}
+	PUSHCONT {
+		.loc ../contracts/abstract/DexContractBase.tsol, 153
+		PUSH2 S1, S4
+		UNPAIR
+		OVER
+		INC
+		ROLLREV 3
+		PUSHINT 32
+		DICTUSET
+		PAIR
+		POP S5
+		.loc ../contracts/abstract/DexContractBase.tsol, 0
+		PUSH2 S2, S3
+		PUSHINT 267
+		DICTGETNEXT
+		PUSHCONT {
+			DUP
+			ROT
+			PLDU 8
+		}
+		PUSHCONT {
+			NULL
+			BLKPUSH 2, 0
+		}
+		IFELSE
+		BLKDROP2 3, 3
+	}
+	WHILE
+	BLKDROP 4
+	.loc ../contracts/abstract/DexContractBase.tsol, 155
+	NEWC
+	SWAP
+	UNPAIR
+	XCHG S2
+	STU 32
+	STDICT
+	ENDC
+	.loc ../contracts/abstract/DexContractBase.tsol, 0
+}
+IFELSE
+.loc ../contracts/abstract/DexContractBase.tsol, 0
+
+.globl	_buildInitData_65db94e9_internal
+.type	_buildInitData_65db94e9_internal, @function
+CALL $_buildInitData_65db94e9_internal_macro$
+
+.macro _buildInitData_65db94e9_internal_macro
+.loc ../contracts/abstract/DexContractBase.tsol, 163
+PUSHINT 0
+NEWC
+STU 256
+PUSHINT 0
+NEWDICT
+PUSHINT 64
+DICTUSETB
+CALLREF {
+	CALL $_dexRoot_8347403b_internal_macro$
+}
+PUSHINT 1
+ROT
+PUSHINT 64
+DICTUSET
+ROT
+NEWC
+STU 8
+PUSHINT 2
+ROT
+PUSHINT 64
+DICTUSETB
+SWAP
+PUSHINT 3
+ROT
+PUSHINT 64
+DICTUSETREF
+NEWC
+STDICT
+ENDC
+GETGLOB 10
+NEWC
+STSLICECONST x2_
+STOPTREF
+STOPTREF
+STZERO
+ENDC
+.loc ../contracts/abstract/DexContractBase.tsol, 0
+
+.globl	_buildLpTokenPendingInitData_6415a6cd_internal
+.type	_buildLpTokenPendingInitData_6415a6cd_internal, @function
+CALL $_buildLpTokenPendingInitData_6415a6cd_internal_macro$
+
+.macro _buildLpTokenPendingInitData_6415a6cd_internal_macro
+.loc ../contracts/abstract/DexContractBase.tsol, 181
+PUSHINT 0
+NEWC
+STU 256
+PUSHINT 0
+NEWDICT
+PUSHINT 64
+DICTUSETB
+ROLL 4
+NEWC
+STU 32
+PUSHINT 1
+ROT
+PUSHINT 64
+DICTUSETB
+MYADDR
+PUSHINT 2
+ROT
+PUSHINT 64
+DICTUSET
+ROLL 3
+PUSHINT 3
+ROT
+PUSHINT 64
+DICTUSET
+NEWC
+ROLL 3
+UNPAIR
+XCHG S2
+STU 32
+STDICT
+PUSHINT 4
+ROT
+PUSHINT 64
+DICTUSETB
+NEWC
+STDICT
+ENDC
+SWAP
+NEWC
+STSLICECONST x2_
+STOPTREF
+STOPTREF
+STZERO
+ENDC
+.loc ../contracts/abstract/DexContractBase.tsol, 0
+
+.macro c4_to_c7
+PUSHROOT
+CTOS
+LDU 256 ; pubkey c4
+LDU 64 ; pubkey timestamp c4
+LDU 1 ; ctor flag
+NIP
+LDREF
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDU 32
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+LDREF
+ENDS
+CTOS
+LDMSGADDR
+ENDS
+SETGLOB 17
+SETGLOB 16
+SETGLOB 15
+SETGLOB 14
+SETGLOB 13
+SETGLOB 12
+SETGLOB 11
+SETGLOB 10
+SETGLOB 3
+SETGLOB 2
+
+.macro c4_to_c7_with_init_storage
+PUSHROOT
+CTOS
+SBITS
+GTINT 1
+PUSHCONT {
+	PUSHINT 0
+	PUSHROOT
+	CTOS
+	PLDDICT ; D
+	PUSHREF {
+	}
+	PUSHREFSLICE {
+		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+	}
+	BLKPUSH 2, 0
+	PUSHINT 0
+	PUSHREFSLICE {
+		.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+	}
+	BLKPUSH 2, 0
+	SETGLOB 17
+	SETGLOB 16
+	SETGLOB 15
+	SETGLOB 14
+	SETGLOB 13
+	SETGLOB 12
+	SETGLOB 11
+	SETGLOB 10
+	PUSHINT 64
+	DICTUGET
+	THROWIFNOT 61
+	PLDU 256
+	SETGLOB 2
+	PUSHINT 0 ; timestamp
+	SETGLOB 3
+}
+IFREFELSE {
+	CALL $c4_to_c7$
+}
+
+.macro c7_to_c4
+GETGLOB 17
+GETGLOB 16
+GETGLOB 15
+GETGLOB 14
+GETGLOB 13
+GETGLOB 12
+GETGLOB 11
+GETGLOB 10
+GETGLOB 3
+GETGLOB 2
+NEWC
+STU 256
+STU 64
+STONE
+STREF
+STSLICE
+ROLLREV 6
+NEWC
+STSLICE
+ROLLREV 5
+NEWC
+STSLICE
+STU 32
+ROLLREV 3
+NEWC
+STSLICE
+ROTREV
+NEWC
+STSLICE
+SWAP
+NEWC
+STSLICE
+STBREFR
+STBREFR
+STBREFR
+STBREFR
+STBREFR
+ENDC
+POPROOT
+
+.macro upd_only_time_in_c4
+PUSHROOT
+CTOS
+LDU 256
+LDU 64
+NIP
+GETGLOB 3
+ROT
+NEWC
+STU 256
+STU 64
+STSLICE
+ENDC
+POPROOT
+
+.internal-alias :main_internal, 0
+.internal :main_internal
+PUSHROOT
+CTOS
+SBITS
+NEQINT 1
+SETGLOB 6
+PUSH S2
+CTOS
+LDU 4 ; bounced tail
+LDMSGADDR ; bounced src tail
+DROP
+SETGLOB 9
+MODPOW2 1
+GETGLOB 4
+TRUE
+SETINDEXQ 1
+PUSHINT 10000000
+SETINDEXQ 2
+NULL
+SETINDEXQ 3
+PUSHINT 0
+SETINDEXQ 4
+SETGLOB 4
+IFJMPREF {
+	OVER
+	LDSLICE 32
+	NIP
+	CALL $on_bounce_macro$
+}
+OVER
+SEMPTY ; isEmpty
+DUP
+PUSHCONT {
+	DROP
+	OVER
+	LDUQ 32  ; [funcId] body' ok
+	PUSHCONT {
+		DROP
+		CALLREF {
+			CALL $fallback_macro$
+		}
+		THROW 0
+	}
+	IFNOT
+	OVER
+	EQINT 0 ; funcId body' isZero
+	DUP
+	PUSHCONT {
+		BLKDROP2 2, 1
+	}
+	IF
+}
+IFNOT
+IFJMPREF {
+	CALL $receive_macro$
+}
+SWAP
+CALLREF {
+	CALL $public_function_selector$
+}
+DROP2
+CALLREF {
+	CALL $fallback_macro$
+}
+
+.internal-alias :main_external, -1
+.internal :main_external
+PUSHROOT
+CTOS
+SBITS
+NEQINT 1
+SETGLOB 6
+PUSHREFSLICE {
+	.blob x8000000000000000000000000000000000000000000000000000000000000000001_
+}
+SETGLOB 9
+OVER
+CALLREF {
+	CALL $c4_to_c7_with_init_storage$
+}
+LDU 1 ; haveSign msgSlice
+SWAP
+PUSHCONT {
+	PUSHPOW2 9
+	LDSLICEX
+	DUP
+	MYADDR
+	NEWC
+	STSLICE
+	STSLICE
+	ENDC
+	HASHCU
+	SWAP
+	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
+	SWAP
+	PUSHCONT {
+		LDU 256 ; signatureSlice hashMsgSlice pubkey msgSlice
+		XCHG S3
+		SWAP
+	}
+	PUSHCONT {
+		XCHG S2
+		GETGLOB 2
+	}
+	IFELSE
+	CHKSIGNU
+	THROWIFNOT 40
+}
+PUSHCONT {
+	LDU 1 ; hasPubkey msgSlice
+	SWAP
+	THROWIF 58
+}
+IFELSE
+LDU 64 ; timestamp msgSlice
+SWAP
+CALL $replay_protection_macro$
+LDU 32 ; expireAt msgSlice
+SWAP
+NOW ; msgSlice expireAt now
+GREATER ; msgSlice expireAt>now
+THROWIFNOT 57
+LDU 32 ; funcId body
+SWAP
+CALLREF {
+	CALL $public_function_selector$
+}
+DROP2
+CALLREF {
+	CALL $fallback_macro$
+}
+
+.macro platform_code
+DROP
+ENDS
+CALLREF {
+	CALL $c4_to_c7$
+}
+GETGLOB 10
+OVER
+PUSHCONT {
+	PUSHSLICE xc0000000000000000000000000e6d44df5
+	NEWC
+	STSLICE
+	STREF
+	ENDC
+	PUSHINT 0
+	SENDRAWMSG
+}
+IF
+THROW 0
+
+.globl	GasValues_no_obj_getDeployWalletGas_38991eb4
+.type	GasValues_no_obj_getDeployWalletGas_38991eb4, @function
+CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+
+.macro GasValues_no_obj_getDeployWalletGas_38991eb4_macro
+.loc ../contracts/libraries/GasValues.tsol, 12
+PUSHINT 120000000
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_with_obj_getTransferTokensGas_9b3e08c4
+.type	GasValues_with_obj_getTransferTokensGas_9b3e08c4, @function
+CALL $GasValues_with_obj_getTransferTokensGas_9b3e08c4_macro$
+
+.macro GasValues_with_obj_getTransferTokensGas_9b3e08c4_macro
+.loc ../contracts/libraries/GasValues.tsol, 20
+DUP
+PUSHINT 200000
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_no_obj_getTransferTokensGas_9b3e08c4
+.type	GasValues_no_obj_getTransferTokensGas_9b3e08c4, @function
+CALL $GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro$
+
+.macro GasValues_no_obj_getTransferTokensGas_9b3e08c4_macro
+.loc ../contracts/libraries/GasValues.tsol, 20
+PUSHINT 200000
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_with_obj_getPoolCrossExchangeStepGas_d2e7be7e
+.type	GasValues_with_obj_getPoolCrossExchangeStepGas_d2e7be7e, @function
+CALL $GasValues_with_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
+
+.macro GasValues_with_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro
+.loc ../contracts/libraries/GasValues.tsol, 363
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.tsol, 364
+PUSHINT 20200000
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSH S2
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ZEROSWAPIFNOT
+PUSHCONT {
+	OVER
+	FIRST
+}
+IF
+ADD
+UFITS 128
+PUSHINT 300000
+PUSH S3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH S2
+	SECOND
+}
+IF
+ADD
+UFITS 128
+PAIR
+NIP
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e
+.type	GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e, @function
+CALL $GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro$
+
+.macro GasValues_no_obj_getPoolCrossExchangeStepGas_d2e7be7e_macro
+.loc ../contracts/libraries/GasValues.tsol, 363
+CALLREF {
+	CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+}
+.loc ../contracts/libraries/GasValues.tsol, 364
+PUSHINT 20200000
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSH S2
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ZEROSWAPIFNOT
+PUSHCONT {
+	OVER
+	FIRST
+}
+IF
+ADD
+UFITS 128
+PUSHINT 300000
+ROLL 3
+PARSEMSGADDR
+INDEX 3
+PLDU 256
+ZEROSWAPIFNOT
+PUSHCONT {
+	PUSH S2
+	SECOND
+}
+IF
+ADD
+UFITS 128
+PAIR
+NIP
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	GasValues_no_obj_getReferralProgramGas_2421acc1
+.type	GasValues_no_obj_getReferralProgramGas_2421acc1, @function
+CALL $GasValues_no_obj_getReferralProgramGas_2421acc1_macro$
+
+.macro GasValues_no_obj_getReferralProgramGas_2421acc1_macro
+.loc ../contracts/libraries/GasValues.tsol, 76
+PUSHINT 10000000
+PUSHINT 1000000
+ADD
+UFITS 128
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSHINT 150000
+DUP
+ADD
+UFITS 128
+PUSHINT 470000
+ADD
+UFITS 128
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
+
+.globl	PairPayload_with_obj_buildCancelPayload_d16d279d
+.type	PairPayload_with_obj_buildCancelPayload_d16d279d, @function
+CALL $PairPayload_with_obj_buildCancelPayload_d16d279d_macro$
+
+.macro PairPayload_with_obj_buildCancelPayload_d16d279d_macro
+.loc ../contracts/libraries/PairPayload.tsol, 699
+PUSH S3
+EQINT 1
+PUSH S4
+EQINT 2
+PUSH S5
+EQINT 3
+PUSH S6
+EQINT 4
+OR
+OR
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 704
+	DROP
+	NIP
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IFJMP
+.loc ../contracts/libraries/PairPayload.tsol, 709
+NEWC
+STSLICECONST xc9
+.loc ../contracts/libraries/PairPayload.tsol, 710
+PUSH S4
+STUR 8
+.loc ../contracts/libraries/PairPayload.tsol, 711
+ROLL 3
+STUR 16
+.loc ../contracts/libraries/PairPayload.tsol, 712
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/PairPayload.tsol, 714
+PUSH S2
+EQINT 9
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 718
+	OVER
+	FIRST
+	PUSHINT 0
+	PUSHINT 1
+	CONDSEL
+	.loc ../contracts/libraries/PairPayload.tsol, 719
+	PUSH S2
+	SECOND
+	PUSHINT 0
+	NULL
+	PUSHCONT {
+		PUSH2 S1, S2
+		PUSHINT 32
+		DICTUGET
+		NULLSWAPIFNOT
+		IFREF {
+			LDU 128
+			LDMSGADDR
+			LDREF
+			LDU 32
+			LDU 32
+			ENDS
+			TUPLE 5
+		}
+		DUP
+		POP S2
+		ISNULL
+		NOT
+	}
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.tsol, 720
+		DUP
+		INDEX 4
+		PUSH S4
+		ADD
+		UFITS 32
+		POP S4
+		.loc ../contracts/libraries/PairPayload.tsol, 0
+		OVER
+		INC
+		POP S2
+	}
+	WHILE
+	BLKDROP 3
+	.loc ../contracts/libraries/PairPayload.tsol, 723
+	NEWC
+	STU 32
+	.loc ../contracts/libraries/PairPayload.tsol, 725
+	ENDC
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.tsol, 726
+	NEWC
+	PUSH S2
+	UNPAIR
+	XCHG S2
+	STU 32
+	STDICT
+	ENDC
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IF
+.loc ../contracts/libraries/PairPayload.tsol, 729
+ENDC
+NIP
+.loc ../contracts/libraries/PairPayload.tsol, 0
+
+.globl	PairPayload_no_obj_buildCancelPayload_d16d279d
+.type	PairPayload_no_obj_buildCancelPayload_d16d279d, @function
+CALL $PairPayload_no_obj_buildCancelPayload_d16d279d_macro$
+
+.macro PairPayload_no_obj_buildCancelPayload_d16d279d_macro
+.loc ../contracts/libraries/PairPayload.tsol, 699
+PUSH S3
+EQINT 1
+PUSH S4
+EQINT 2
+PUSH S5
+EQINT 3
+PUSH S6
+EQINT 4
+OR
+OR
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 704
+	DROP
+	BLKDROP2 2, 1
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IFJMP
+.loc ../contracts/libraries/PairPayload.tsol, 709
+NEWC
+STSLICECONST xc9
+.loc ../contracts/libraries/PairPayload.tsol, 710
+PUSH S4
+STUR 8
+.loc ../contracts/libraries/PairPayload.tsol, 711
+ROLL 3
+STUR 16
+.loc ../contracts/libraries/PairPayload.tsol, 712
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/PairPayload.tsol, 714
+ROT
+EQINT 9
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 718
+	OVER
+	FIRST
+	PUSHINT 0
+	PUSHINT 1
+	CONDSEL
+	.loc ../contracts/libraries/PairPayload.tsol, 719
+	PUSH S2
+	SECOND
+	PUSHINT 0
+	NULL
+	PUSHCONT {
+		PUSH2 S1, S2
+		PUSHINT 32
+		DICTUGET
+		NULLSWAPIFNOT
+		IFREF {
+			LDU 128
+			LDMSGADDR
+			LDREF
+			LDU 32
+			LDU 32
+			ENDS
+			TUPLE 5
+		}
+		DUP
+		POP S2
+		ISNULL
+		NOT
+	}
+	PUSHCONT {
+		.loc ../contracts/libraries/PairPayload.tsol, 720
+		DUP
+		INDEX 4
+		PUSH S4
+		ADD
+		UFITS 32
+		POP S4
+		.loc ../contracts/libraries/PairPayload.tsol, 0
+		OVER
+		INC
+		POP S2
+	}
+	WHILE
+	BLKDROP 3
+	.loc ../contracts/libraries/PairPayload.tsol, 723
+	NEWC
+	STU 32
+	.loc ../contracts/libraries/PairPayload.tsol, 725
+	ENDC
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.tsol, 726
+	NEWC
+	PUSH S2
+	UNPAIR
+	XCHG S2
+	STU 32
+	STDICT
+	ENDC
+	SWAP
+	STREF
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IF
+.loc ../contracts/libraries/PairPayload.tsol, 729
+ENDC
+NIP
+.loc ../contracts/libraries/PairPayload.tsol, 0
+
+.globl	PairPayload_with_obj_buildSuccessPayload_ca821d98
+.type	PairPayload_with_obj_buildSuccessPayload_ca821d98, @function
+CALL $PairPayload_with_obj_buildSuccessPayload_ca821d98_macro$
+
+.macro PairPayload_with_obj_buildSuccessPayload_ca821d98_macro
+.loc ../contracts/libraries/PairPayload.tsol, 737
+PUSH S2
+EQINT 1
+PUSH S3
+EQINT 2
+PUSH S4
+EQINT 3
+PUSH S5
+EQINT 4
+OR
+OR
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 742
+	DROP
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IFJMP
+.loc ../contracts/libraries/PairPayload.tsol, 747
+NEWC
+STSLICECONST xc8
+.loc ../contracts/libraries/PairPayload.tsol, 748
+PUSH S3
+STUR 8
+.loc ../contracts/libraries/PairPayload.tsol, 749
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/PairPayload.tsol, 752
+SWAP
+NEWC
+STSLICE
+.loc ../contracts/libraries/PairPayload.tsol, 754
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.tsol, 756
+ENDC
+.loc ../contracts/libraries/PairPayload.tsol, 0
+
+.globl	PairPayload_no_obj_buildSuccessPayload_ca821d98
+.type	PairPayload_no_obj_buildSuccessPayload_ca821d98, @function
+CALL $PairPayload_no_obj_buildSuccessPayload_ca821d98_macro$
+
+.macro PairPayload_no_obj_buildSuccessPayload_ca821d98_macro
+.loc ../contracts/libraries/PairPayload.tsol, 737
+PUSH S2
+EQINT 1
+PUSH S3
+EQINT 2
+PUSH S4
+EQINT 3
+PUSH S5
+EQINT 4
+OR
+OR
+OR
+PUSHCONT {
+	.loc ../contracts/libraries/PairPayload.tsol, 742
+	DROP
+	NIP
+	.loc ../contracts/libraries/PairPayload.tsol, 0
+}
+IFJMP
+.loc ../contracts/libraries/PairPayload.tsol, 747
+NEWC
+STSLICECONST xc8
+.loc ../contracts/libraries/PairPayload.tsol, 748
+ROLL 3
+STUR 8
+.loc ../contracts/libraries/PairPayload.tsol, 749
+XCHG S1, S2
+STREF
+.loc ../contracts/libraries/PairPayload.tsol, 752
+SWAP
+NEWC
+STSLICE
+.loc ../contracts/libraries/PairPayload.tsol, 754
+ENDC
+SWAP
+STREF
+.loc ../contracts/libraries/PairPayload.tsol, 756
+ENDC
+.loc ../contracts/libraries/PairPayload.tsol, 0
+
+.macro public_function_selector
+DUP
+PUSHINT 1688565960
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 362821883
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 29799464
+		EQUAL
+		IFJMPREF {
+			CALL $setWeverVaultTokenRoot$
+		}
+		DUP
+		PUSHINT 115515182
+		EQUAL
+		IFJMPREF {
+			CALL $resetGas$
+		}
+		DUP
+		PUSHINT 177799075
+		EQUAL
+		IFJMPREF {
+			CALL $transfer$
+		}
+		DUP
+		PUSHINT 362821883
+		EQUAL
+		IFJMPREF {
+			CALL $redeploy$
+		}
+	}
+	DUP
+	PUSHINT 681515484
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 483397981
+		EQUAL
+		IFJMPREF {
+			CALL $getWeverVaultTokenRoot$
+		}
+		DUP
+		PUSHINT 558202060
+		EQUAL
+		IFJMPREF {
+			CALL $getTokenRoot$
+		}
+		DUP
+		PUSHINT 581357277
+		EQUAL
+		IFJMPREF {
+			CALL $onVaultTokenWallet$
+		}
+		DUP
+		PUSHINT 681515484
+		EQUAL
+		IFJMPREF {
+			CALL $referralFeeTransfer$
+		}
+	}
+	DUP
+	PUSHINT 1203007492
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 766070063
+		EQUAL
+		IFJMPREF {
+			CALL $getVersion$
+		}
+		DUP
+		PUSHINT 826351967
+		EQUAL
+		IFJMPREF {
+			CALL $getPlatformCode$
+		}
+		DUP
+		PUSHINT 1025233701
+		EQUAL
+		IFJMPREF {
+			CALL $getVault$
+		}
+		DUP
+		PUSHINT 1203007492
+		EQUAL
+		IFJMPREF {
+			CALL $getTokenWallet$
+		}
+	}
+	DUP
+	PUSHINT 1688565960
+	LEQ
+	IFJMPREF {
+		DUP
+		PUSHINT 1236465367
+		EQUAL
+		IFJMPREF {
+			CALL $onTokenWallet$
+		}
+		DUP
+		PUSHINT 1261120718
+		EQUAL
+		IFJMPREF {
+			CALL $getDexRoot$
+		}
+		DUP
+		PUSHINT 1614646717
+		EQUAL
+		IFJMPREF {
+			CALL $withdraw$
+		}
+		DUP
+		PUSHINT 1688565960
+		EQUAL
+		IFJMPREF {
+			CALL $upgrade$
+		}
+	}
+}
+DUP
+PUSHINT 2104712182
+LEQ
+IFJMPREF {
+	DUP
+	PUSHINT 1725189621
+	EQUAL
+	IFJMPREF {
+		CALL $platform_code$
+	}
+	DUP
+	PUSHINT 1756716863
+	EQUAL
+	IFJMPREF {
+		CALL $constructor$
+	}
+	DUP
+	PUSHINT 2057231915
+	EQUAL
+	IFJMPREF {
+		CALL $onAcceptTokensMint$
+	}
+	DUP
+	PUSHINT 2104712182
+	EQUAL
+	IFJMPREF {
+		CALL $getTargetBalance$
+	}
+}
+

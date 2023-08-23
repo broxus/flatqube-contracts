@@ -1,4 +1,4 @@
-pragma ever-solidity ^0.62.0;
+pragma ever-solidity 0.64.0;
 
 import "../structures/IFeeParams.tsol";
 import "../structures/IOracleOptions.tsol";
@@ -324,6 +324,12 @@ interface IDexRoot is
         address _leftRoot,
         address _rightRoot,
         uint16 _count,
+        address _remainingGasTo
+    ) external view;
+
+    function setWeverInDexTokenVault(
+        address _dexTokenVault,
+        address _newWeverVaultTokenRoot,
         address _remainingGasTo
     ) external view;
 }

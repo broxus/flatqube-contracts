@@ -1,11 +1,8 @@
+import { LockliftConfig, lockliftChai } from "locklift";
+import { FactorySource } from "./build/factorySource";
 import "@broxus/locklift-verifier";
-import "@broxus/locklift-deploy";
-
-import { lockliftChai, LockliftConfig } from "locklift";
 import { Deployments } from "@broxus/locklift-deploy";
 import * as dotenv from "dotenv";
-
-import { FactorySource } from "./build/factorySource";
 
 dotenv.config();
 
@@ -30,19 +27,22 @@ const LOCAL_NETWORK_ENDPOINT = "http://localhost:80/graphql";
 
 const config: LockliftConfig = {
   compiler: {
-    version: "0.62.0",
+    version: "0.64.0",
     externalContracts: {
       precompiled: ["DexPlatform"],
       "node_modules/tip3/build": [
-        "TokenRoot",
         "TokenRootUpgradeable",
         "TokenWalletUpgradeable",
         "TokenWalletPlatform",
       ],
       "node_modules/ever-wever/everscale/build": [],
+      "node_modules/@broxus/wever/build": [
+        "VaultTokenRoot_V1",
+        "VaultTokenWallet_V1",
+      ],
     },
   },
-  linker: { version: "0.15.48" },
+  linker: { version: "0.16.5" },
   verifier: {
     verifierVersion: "latest", // contract verifier binary, see https://github.com/broxus/everscan-verify/releases
     apiKey: process.env.EVERSCAN_API_KEY!,
@@ -51,7 +51,6 @@ const config: LockliftConfig = {
   },
   networks: {
     local: {
-      deploy: ["common/", "local/", "tokensDeploy/"],
       connection: {
         id: 1337,
         group: "localnet",
@@ -63,17 +62,44 @@ const config: LockliftConfig = {
         },
       },
       giver: {
-        address: process.env.LOCAL_GIVER_ADDRESS!,
-        key: process.env.LOCAL_GIVER_KEY!,
+        address:
+          "0:ece57bcc6c530283becbbd8a3b24d3c5987cdddc3c8b7b33be6e4a6312490415",
+        key: "172af540e43a524763dd53b26a066d472a97c4de37d5498170564510608250c3",
       },
       tracing: { endpoint: LOCAL_NETWORK_ENDPOINT },
       keys: {
-        phrase: process.env.LOCAL_PHRASE,
+        phrase:
+          "action inject penalty envelope rabbit element slim tornado dinner pizza off blood",
+        amount: 20,
+      },
+    },
+    test: {
+      // Specify connection settings for https://github.com/broxus/everscale-standalone-client/
+      connection: {
+        id: 0,
+        group: "testnet",
+        type: "graphql",
+        data: {
+          endpoints: [process.env.TESTNET_GQL_ENDPOINT!],
+          latencyDetectionInterval: 1000,
+          local: false,
+        },
+      },
+      // This giver is default local-node giverV2
+      giver: {
+        address: process.env.TESTNET_GIVER_ADDRESS!,
+        phrase: process.env.TESTNET_GIVER_SEED!,
+        accountId: 0,
+      },
+      tracing: {
+        endpoint: process.env.TESTNET_GQL_ENDPOINT!,
+      },
+      keys: {
+        phrase: process.env.TESTNET_SEED_PHRASE!,
         amount: 20,
       },
     },
     main: {
-      deploy: ["common/", "main/"],
       connection: {
         id: 1,
         type: "jrpc",
@@ -90,6 +116,28 @@ const config: LockliftConfig = {
       keys: {
         phrase: process.env.MAINNET_PHRASE,
         amount: 20,
+      },
+    },
+    venom_testnet: {
+      connection: {
+        id: 1000,
+        type: "jrpc",
+        group: "dev",
+        data: {
+          endpoint: process.env.VENOM_TESTNET_RPC_NETWORK_ENDPOINT!,
+        },
+      },
+      giver: {
+        address: process.env.VENOM_TESTNET_GIVER_ADDRESS!,
+        phrase: process.env.VENOM_TESTNET_GIVER_PHRASE!,
+        accountId: 0,
+      },
+      tracing: {
+        endpoint: process.env.VENOM_TESTNET_GQL_NETWORK_ENDPOINT!,
+      },
+      keys: {
+        phrase: process.env.VENOM_TESTNET_PHRASE,
+        amount: 100,
       },
     },
   },

@@ -13,7 +13,7 @@ async function main() {
     account.afterRun = afterRun;
 
     const content = '' +
-        `pragma ever-solidity ^0.62.0;
+        `pragma ever-solidity ^0.64.0;
 abstract contract Constants {
     uint256 constant PROJECT_ID = 2222;
     address constant PROJECT_ADDRESS = address.makeAddrStd(0, 0x${account.address.substr(2).toLowerCase()});

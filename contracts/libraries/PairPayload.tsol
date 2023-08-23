@@ -1,4 +1,4 @@
-pragma ever-solidity ^0.62.0;
+pragma ever-solidity 0.64.0;
 
 import "../structures/IExchangeStepStructure.tsol";
 import "../structures/ITokenOperationStructure.tsol";
@@ -50,7 +50,8 @@ library PairPayload {
         address _outcoming,
         address _referrer,
         optional(TvmCell) _successPayload,
-        optional(TvmCell) _cancelPayload
+        optional(TvmCell) _cancelPayload,
+        optional(bool) _toNative
     ) public returns (TvmCell) {
         require(!_cancelPayload.hasValue() || _successPayload.hasValue(), DexErrors.INVALID_SUCCESS_PAYLOAD);
 
@@ -63,6 +64,7 @@ library PairPayload {
         builder.store(_referrer);
 
         TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(_toNative.hasValue() ? _toNative.get() : false);
         builder.store(otherDataBuilder.toCell()); // ref1
 
         builder.store(abi.encode(_expectedAmount, _outcoming)); // ref2
@@ -172,7 +174,8 @@ library PairPayload {
         address _recipient,
         address _referrer,
         optional(TvmCell) _successPayload,
-        optional(TvmCell) _cancelPayload
+        optional(TvmCell) _cancelPayload,
+        optional(bool) _toNative
     ) public returns (TvmCell) {
         require(!_cancelPayload.hasValue() || _successPayload.hasValue(), DexErrors.INVALID_SUCCESS_PAYLOAD);
 
@@ -185,6 +188,7 @@ library PairPayload {
         builder.store(_referrer);
 
         TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(_toNative.hasValue() ? _toNative.get() : false);
         builder.store(otherDataBuilder.toCell()); // ref1
 
         builder.store(abi.encode(_expectedAmounts)); // ref2
@@ -212,7 +216,8 @@ library PairPayload {
         address _outcoming,
         address _referrer,
         optional(TvmCell) _successPayload,
-        optional(TvmCell) _cancelPayload
+        optional(TvmCell) _cancelPayload,
+        optional(bool) _toNative
     ) public returns (TvmCell) {
         require(!_cancelPayload.hasValue() || _successPayload.hasValue(), DexErrors.INVALID_SUCCESS_PAYLOAD);
 
@@ -225,6 +230,7 @@ library PairPayload {
         builder.store(_referrer);
 
         TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(_toNative);
         builder.store(otherDataBuilder.toCell()); // ref1
 
         builder.store(abi.encode(_expectedAmount, _outcoming)); // ref2
@@ -303,7 +309,8 @@ library PairPayload {
         address[] _pools,
         address _referrer,
         optional(TvmCell) _successPayload,
-        optional(TvmCell) _cancelPayload
+        optional(TvmCell) _cancelPayload,
+        optional(bool) _toNative
     ) public returns (TvmCell) {
         require(_steps.length > 0, DexErrors.INVALID_NEXT_STEPS);
         require(!_cancelPayload.hasValue() || _successPayload.hasValue(), DexErrors.INVALID_SUCCESS_PAYLOAD);
@@ -331,6 +338,7 @@ library PairPayload {
         }
 
         TvmBuilder otherDataBuilder;
+        otherDataBuilder.store(_toNative);
         builder.store(otherDataBuilder.toCell()); // ref1
 
         TvmCell nextStepsCell = abi.encode(_expectedAmount, _outcoming, nextSteps);
@@ -387,6 +395,7 @@ library PairPayload {
      * @return uint128 Expected amount or expected left amount for liquidity withdrawal
      * @return uint128 Expected right amount for liquidity withdrawal
      * @return address Next TokenRoot address for cross-pair exchange
+     * @return bool Whether or not return EVER instead of WEVER
      */
     function decodeOnAcceptTokensTransferData(TvmCell _payload) public returns (
         bool,
@@ -397,7 +406,8 @@ library PairPayload {
         uint128[],
         address,
         INextExchangeData.NextExchangeData[],
-        address
+        address,
+        bool
     ) {
         TvmSlice slice = _payload.toSlice();
 
@@ -428,7 +438,8 @@ library PairPayload {
         uint128[],
         address,
         INextExchangeData.NextExchangeData[],
-        address
+        address,
+        bool
     ) {
         TvmSlice slice = _payload.toSlice();
 
@@ -484,7 +495,8 @@ library PairPayload {
             expectedAmounts,
             address(0), //outcoming
             nextSteps,
-            address(0) // referrer
+            address(0), // referrer
+            false       // toNative
         );
     }
 
@@ -497,7 +509,8 @@ library PairPayload {
         uint128[],
         address,
         INextExchangeData.NextExchangeData[],
-        address
+        address,
+        bool
     ) {
         TvmSlice slice = _payload.toSlice();
 
@@ -514,6 +527,7 @@ library PairPayload {
         uint128[] expectedAmounts;
         INextExchangeData.NextExchangeData[] nextSteps;
         address referrer;
+        bool toNative;
 
         if (isValid) {
             (
@@ -531,7 +545,11 @@ library PairPayload {
             );
 
             if (slice.refs() >= 1) {
-                slice.loadRef(); // ref1
+                optional(bool) toNativeOpt = slice.loadRefAsSlice().decodeQ(bool); // ref1
+
+                if (toNativeOpt.hasValue()) {
+                    toNative = toNativeOpt.get();
+                }
             }
 
             if (slice.refs() >= 1) {
@@ -563,7 +581,8 @@ library PairPayload {
             expectedAmount.hasValue() ? [expectedAmount.get()] : expectedAmounts,
             outcoming,
             nextSteps,
-            referrer
+            referrer,
+            toNative
         );
     }
 

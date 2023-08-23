@@ -1,5 +1,5 @@
 import { Address, toNano, WalletTypes } from 'locklift';
-import orderRoots from '../../order_roots.json';
+import orderRoots from '../../../../order_roots.json';
 
 const ORDER_FACTORY_ADDRESS =
   '0:3c8d39684cabbb780ff77710b02923c59ea2be84e211b09c3258eef344d394a4';
@@ -24,12 +24,6 @@ async function main() {
 
   console.log('DexRoot:' + OrderFactory.address);
   console.log('Manager:' + manager.address);
-
-  // console.log(`Set code Order on Factory`);
-  // await OrderFactory.methods.setOrderCode({ _orderCode: Order.code }).send({
-  //   from: manager.address,
-  //   amount: toNano(0.1),
-  // });
 
   console.log(`Load list Order Roots`);
   for (const orderRootAddress of orderRoots) {

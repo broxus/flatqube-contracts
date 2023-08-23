@@ -1,4 +1,4 @@
-pragma ever-solidity ^0.62.0;
+pragma ever-solidity 0.64.0;
 
 import "tip3/contracts/interfaces/IAcceptTokensMintCallback.tsol";
 
@@ -42,6 +42,11 @@ interface IDexTokenVault is
         address referral
     );
 
+    event WeverVaultTokenRootChanged(
+        address current,
+        address previous
+    );
+
     function getDexRoot() external view responsible returns (address);
 
     function getVersion() external view responsible returns (uint32);
@@ -53,6 +58,8 @@ interface IDexTokenVault is
     function getTokenWallet() external view responsible returns (address);
 
     function getVault() external view responsible returns (address);
+
+    function getWeverVaultTokenRoot() external view responsible returns (address);
 
     function getTargetBalance() external view responsible returns (uint128);
 
@@ -68,6 +75,7 @@ interface IDexTokenVault is
     ) external;
 
     /// @notice Transfers token from DEX vault to recipient
+    /// @param _toNative Only for WEVER DexTokenVault. true - unwrap WEVER to EVER for recipient
     function transfer(
         uint128 _amount,
         address _recipient,
@@ -76,7 +84,8 @@ interface IDexTokenVault is
         TvmCell _payload,
         address[] _poolTokenRoots,
         uint32 _poolVersion,
-        address _remainingGasTo
+        address _remainingGasTo,
+        bool _toNative
     ) external;
 
     /// @notice Transfers referral fees to vault
@@ -94,4 +103,9 @@ interface IDexTokenVault is
         address _vault,
         address _remainingGasTo
     ) external functionID(0x15a038fb);
+
+    function setWeverVaultTokenRoot(
+        address _newWeverVaultTokenRoot,
+        address _remainingGasTo
+    ) external;
 }
