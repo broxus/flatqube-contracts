@@ -9,7 +9,7 @@ export default async () => {
   const weverVault =
     locklift.deployments.getContract<TestWeverVaultAbi>("weverVault");
   const weverRoot =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>("weverRoot");
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("wever");
 
   const { extTransaction: everToTip3 } =
     await locklift.transactions.waitFinalized(
