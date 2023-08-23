@@ -669,6 +669,7 @@ describe("Check DexAccount add Pair", () => {
         poolsData.stablePair.contract,
         amountSecondToken,
         poolsData.stablePair.roots[1].address,
+        poolsData.stablePair.roots[0].address,
       );
       const firstTokenWallet = await getWallet(
         owner.address,
@@ -761,6 +762,7 @@ describe("Check DexAccount add Pair", () => {
         poolsData.pair.contract,
         amountFirstToken,
         poolsData.pair.roots[0].address,
+        poolsData.stablePair.roots[1].address,
       );
       const firstTokenWallet = await getWallet(
         owner.address,
@@ -848,6 +850,7 @@ describe("Check DexAccount add Pair", () => {
         poolsData.pair.contract,
         amountSecondToken,
         poolsData.pair.roots[1].address,
+        poolsData.stablePair.roots[0].address,
       );
       const firstTokenWallet = await getWallet(
         owner.address,
@@ -1070,7 +1073,7 @@ describe("Check DexAccount add Pair", () => {
       ).then(a => a.walletContract);
 
       const payload = await (
-        poolsData.stablePair.contract as Contract<DexStablePairAbi>
+        poolsData.stablePair.contract as Contract<DexPairAbi>
       ).methods
         .buildWithdrawLiquidityPayloadV2({
           _id: getRandomNonce(),
