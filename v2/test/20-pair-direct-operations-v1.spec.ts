@@ -594,7 +594,6 @@ describe("Check DexAccount add Pair", () => {
         .count(1);
 
       const poolDataEnd = await getPoolData(poolsData.stablePair.contract);
-
       expect(
         new BigNumber(
           poolDataStart.balances[
@@ -602,6 +601,7 @@ describe("Check DexAccount add Pair", () => {
           ],
         )
           .plus(amountFirstToken)
+          .minus(expectedExchangeData.beneficiaryFee)
           .toString(),
       ).to.equal(
         poolDataEnd.balances[poolsData.stablePair.roots[0].address.toString()],
@@ -689,6 +689,7 @@ describe("Check DexAccount add Pair", () => {
           ],
         )
           .plus(amountSecondToken)
+          .minus(expectedExchangeData.beneficiaryFee)
           .toString(),
       ).to.equal(
         poolDataEnd.balances[poolsData.stablePair.roots[1].address.toString()],
@@ -771,6 +772,7 @@ describe("Check DexAccount add Pair", () => {
           poolDataStart.balances[poolsData.pair.roots[0].address.toString()],
         )
           .plus(amountFirstToken)
+          .minus(expectedExchangeData.beneficiaryFee)
           .toString(),
       ).to.equal(
         poolDataEnd.balances[poolsData.pair.roots[0].address.toString()],
@@ -853,6 +855,7 @@ describe("Check DexAccount add Pair", () => {
           poolDataStart.balances[poolsData.pair.roots[1].address.toString()],
         )
           .plus(amountSecondToken)
+          .minus(expectedExchangeData.beneficiaryFee)
           .toString(),
       ).to.equal(
         poolDataEnd.balances[poolsData.pair.roots[1].address.toString()],
