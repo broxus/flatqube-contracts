@@ -12,6 +12,7 @@ import { calcValue } from "../utils/gas.utils";
 import {
   getDexAccountData,
   getPoolData,
+  getWallet,
   ITokens,
   transferWrapper,
 } from "../../utils/wrappers";
@@ -152,6 +153,13 @@ describe("Check DexAccount add Pair", () => {
         lp: expectedLpAmount,
       });
 
+      const accountLpChange = traceTree?.tokens.getTokenBalanceChange(
+        await getWallet(owner.address, lpRoot.address).then(
+          a => a.walletContract,
+        ),
+      );
+      expect(String(accountLpChange)).to.equal(expectedLpAmount);
+
       const poolDataEnd = await getPoolData(pair);
       const accountDataEnd = await getDexAccountData(
         pairRoots.map(root => root.address),
@@ -234,6 +242,13 @@ describe("Check DexAccount add Pair", () => {
           _tokenRoot: pairRoots[1].address,
         });
 
+      const accountLpChange = traceTree?.tokens.getTokenBalanceChange(
+        await getWallet(owner.address, lpRoot.address).then(
+          a => a.walletContract,
+        ),
+      );
+      expect(String(accountLpChange)).to.equal(expectedDepositData.lpReward);
+
       const poolDataEnd = await getPoolData(pair);
       const accountDataEnd = await getDexAccountData(
         pairRoots.map(root => root.address),
@@ -312,6 +327,13 @@ describe("Check DexAccount add Pair", () => {
         .count(2)
         .to.emit("Exchange", pair)
         .count(1);
+
+      const accountLpChange = traceTree?.tokens.getTokenBalanceChange(
+        await getWallet(owner.address, lpRoot.address).then(
+          a => a.walletContract,
+        ),
+      );
+      expect(String(accountLpChange)).to.equal(expectedDepositData.lpReward);
 
       const poolDataEnd = await getPoolData(pair);
       const accountDataEnd = await getDexAccountData(

@@ -197,7 +197,7 @@ export const getWallet = async (user: Address, tokenRoot: Address) => {
   );
 
   const isDeployed = await wallet.getFullState().then(s => {
-    return s.state?.isDeployed;
+    return s.state !== undefined && s.state.isDeployed;
   });
 
   return {
@@ -483,7 +483,7 @@ export const depositLiquidity = async (
 
   await transferWrapper(dexOwner, dexAccount.address, 0, depositData);
 
-  await locklift.tracing.trace(
+  await locklift.transactions.waitFinalized(
     dexAccount.methods
       .depositLiquidityV2({
         _callId: getRandomNonce(),
