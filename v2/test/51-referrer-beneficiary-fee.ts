@@ -200,17 +200,17 @@ describe(`Test beneficiary fee`, function () {
     }
 
     for (const pool in poolsData) {
-      // await depositLiquidity(
-      //   DexOwner.address,
-      //   DexAccount,
-      //   poolsData[pool as poolsType].contract,
-      //   poolsData[pool as poolsType].roots.map((root, i) => {
-      //     return {
-      //       root: root.address,
-      //       amount: 10 * 10 ** N_COINS[i],
-      //     };
-      //   }),
-      // );
+      await depositLiquidity(
+        DexOwner.address,
+        DexAccount,
+        poolsData[pool as poolsType].contract,
+        poolsData[pool as poolsType].roots.map((root, i) => {
+          return {
+            root: root.address,
+            amount: 10 * 10 ** N_COINS[i],
+          };
+        }),
+      );
     }
 
     poolLpRoot = locklift.factory.getDeployedContract(
