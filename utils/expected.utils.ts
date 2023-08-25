@@ -298,7 +298,7 @@ export async function expectedDepositLiquidity(
 
     const amounts: Record<string, string> = {};
     expected.amounts.forEach(
-      (a, i) => (poolFees[sortedTokens[i].root.toString()] = a),
+      (a, i) => (amounts[sortedTokens[i].root.toString()] = a),
     );
 
     return {
