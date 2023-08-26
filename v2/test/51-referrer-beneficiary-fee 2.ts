@@ -10,10 +10,7 @@ import {
   transferWrapper,
 } from "../../utils/wrappers";
 import { displayTx } from "../../utils/helpers";
-import {
-  expectedDepositLiquidity,
-  expectedDepositLiquidityOneCoin,
-} from "../../utils/expected.utils";
+import { expectedDepositLiquidity } from "../../utils/expected.utils";
 import BigNumber from "bignumber.js";
 import { Account } from "everscale-standalone-client";
 import {
@@ -54,13 +51,17 @@ const tokens: ITokenData[] = [];
 const N_COINS = [6, 9, 18];
 
 const tokenRoots: Contract<TokenRootUpgradeableAbi>[] = [];
-const tokenWallets: Contract<TokenWalletUpgradeableAbi>[] = [];
+const tokenWallets2: Contract<TokenWalletUpgradeableAbi>[] = [];
+const tokenWallets3: Contract<TokenWalletUpgradeableAbi>[] = [];
+const tokenWallets4: Contract<TokenWalletUpgradeableAbi>[] = [];
+const tokenVaultWallets: Contract<TokenWalletUpgradeableAbi>[] = [];
 
 let DexRoot: Contract<DexRootAbi>;
 let poolLpRoot: Contract<TokenRootUpgradeableAbi>;
 let DexAccount: Contract<DexAccountAbi>;
 let poolLpWallet: Contract<TokenWalletUpgradeableAbi>;
 let DexVault: Contract<DexVaultAbi>;
+let poolLpVaultWallet: Contract<TokenWalletUpgradeableAbi>;
 
 type poolsType = "stablePool" | "stablePair";
 
@@ -86,6 +87,77 @@ const poolsData: Record<
     lp: null,
   },
 };
+
+async function dexBalances() {
+  const token_balances = [];
+  for (let i = 0; i < N_COINS.length; i++) {
+    token_balances.push(
+      await tokenVaultWallets[i].methods
+        .balance({ answerId: 0 })
+        .call()
+        .then(data => {
+          const n = data.value0;
+          return new BigNumber(n).shiftedBy(-tokens[i].decimals).toString();
+        }),
+    );
+  }
+  const lp = await poolLpVaultWallet.methods
+    .balance({ answerId: 0 })
+    .call()
+    .then(data => {
+      const n = data.value0;
+      return new BigNumber(n).shiftedBy(-Constants.LP_DECIMALS).toString();
+    });
+  return { token_balances, lp };
+}
+
+async function account2balances() {
+  const token_balances: string[] = [];
+  for (let i = 0; i < N_COINS.length; i++) {
+    await tokenWallets2[i].methods
+      .balance({ answerId: 0 })
+      .call()
+      .then(data => {
+        const n = data.value0;
+        token_balances.push(
+          new BigNumber(n).shiftedBy(-tokens[i].decimals).toString(),
+        );
+      })
+      .catch(() => {
+        token_balances.push(undefined);
+      });
+  }
+  let lp;
+  await poolLpWallet.methods
+    .balance({ answerId: 0 })
+    .call()
+    .then(n => {
+      lp = new BigNumber(n.value0).shiftedBy(-Constants.LP_DECIMALS).toString();
+    });
+  const accountEversChange = 0;
+  return { token_balances, lp, ton: accountEversChange };
+}
+
+async function account4balances() {
+  const token_balances: string[] = [];
+  for (let i = 0; i < N_COINS.length; i++) {
+    await tokenWallets4[i].methods
+      .balance({ answerId: 0 })
+      .call()
+      .then(n => {
+        token_balances.push(
+          new BigNumber(n.value0).shiftedBy(-tokens[i].decimals).toString(),
+        );
+      })
+      .catch(() => {
+        token_balances.push(undefined);
+      });
+  }
+  // const ton = await locklift.utils
+  //   .convertCrystal(await locklift.ton.getBalance(Account4.address), "ton")
+  //   .toNumber();
+  return { token_balances, ton: 0 };
+}
 
 describe(`Test beneficiary fee`, function () {
   before("Load contracts", async function () {
@@ -180,11 +252,21 @@ describe(`Test beneficiary fee`, function () {
     // }
 
     for (let i = 0; i < N_COINS.length; i++) {
+      tokenWallets2.push(
+        locklift.deployments.getContract<TokenWalletUpgradeableAbi>(
+          `ownerWallet-${N_COINS[i]}-0`,
+        ),
+      );
+      tokenWallets3.push(
+        locklift.deployments.getContract<TokenWalletUpgradeableAbi>(
+          `ownerWallet-${N_COINS[i]}-0`,
+        ),
+      );
       const walletForNewAcc = await tokenRoots[i].methods
-        .walletOf({ walletOwner: DexOwner.address, answerId: 0 })
+        .walletOf({ walletOwner: Account4.address, answerId: 0 })
         .call();
 
-      tokenWallets.push(
+      tokenWallets4.push(
         locklift.factory.getDeployedContract(
           "TokenWalletUpgradeable",
           walletForNewAcc.value0,
@@ -198,6 +280,11 @@ describe(`Test beneficiary fee`, function () {
     console.log(poolsData.stablePool + "LpRoot: " + poolLpRoot.address);
 
     console.log("DexAccount#2: " + DexAccount.address);
+
+    for (let i = 0; i < N_COINS.length; i++) {
+      console.log(tokens[i].symbol + "Wallet#2: " + tokenWallets2[i].address);
+      console.log(tokens[i].symbol + "Wallet#3: " + tokenWallets3[i].address);
+    }
   });
 
   before("Set referral program params", async function () {
@@ -275,7 +362,9 @@ describe(`Test beneficiary fee`, function () {
     it("Add FOO+BAR liquidity (auto_change=true)", async function () {
       console.log("#################################################");
       console.log("# Add FOO+BAR liquidity (auto_change=true)");
+      console.log(DexAccount.address, "DexAccount2");
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
+      console.log(poolDataStart, "poolDataStart");
       const accountLpStart = (
         await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
       )[0];
@@ -345,6 +434,7 @@ describe(`Test beneficiary fee`, function () {
         await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
       )[0];
 
+      console.log(LP_REWARD, "LP_REWARD");
       const expectedAccount2TokenBalances: string[] = [];
       const totalDepoStart = Object.values(poolDataStart.balances)
         .reduce((acc, curr) => acc.plus(curr), new BigNumber(0))
@@ -425,361 +515,470 @@ describe(`Test beneficiary fee`, function () {
     });
   });
 
-  // todo: pair?
-  describe("Direct deposit to poolsData.stablePool", async function () {
-    it("DexOwner deposit Coin1 liquidity", async function () {
-      console.log("#################################################");
-      console.log(`# Account#2 deposit ${tokens[1].symbol} liquidity`);
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const accountLpStart = (
-        await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
-      )[0];
-      const receivedTokenAddress = poolsData.stablePool.roots[1].address;
-
-      console.log(poolDataStart, "poolDataStart");
-      console.log(accountLpStart, "accountLpStart");
-      console.log(receivedTokenAddress, "receivedTokenAddress");
-      const operations = {
-        root: tokenRoots[1].address,
-        amount: (N_COINS[1] ** 10).toString(),
-      };
-
-      const expected = await expectedDepositLiquidityOneCoin(
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>,
-        operations.amount,
-        operations.root,
-      );
-
-      const LP_REWARD = expected.lpReward;
-      const payload = await poolsData.stablePool.contract.methods
-        .buildDepositLiquidityPayload({
-          id: 0,
-          deploy_wallet_grams: toNano(0.05),
-          expected_amount: expected.lpReward,
-          recipient: Account4.address,
-          referrer: Account4.address,
-          success_payload: null,
-          cancel_payload: null,
-        })
-        .call();
-
-      console.log(expected, "expected");
-
-      await tokenWallets[1].methods
-        .transfer({
-          amount: operations.amount,
-          recipient: poolsData.stablePool.contract.address,
-          deployWalletValue: 0,
-          remainingGasTo: Account4.address,
-          notify: true,
-          payload: payload.value0,
-        })
-        .send({
-          amount: toNano(3.3),
-          from: DexOwner.address,
-        });
-
-      // await Account2.runTarget({
-      //   contract: tokenWallets2[1],
-      //   method: "transfer",
-      //   params: {
-      //     amount: new BigNumber(TOKENS_TO_DEPOSIT)
-      //       .shiftedBy(tokens[1].decimals)
-      //       .toString(),
-      //     recipient: DexPool.address,
-      //     deployWalletValue: 0,
-      //     remainingGasTo: Account2.address,
-      //     notify: true,
-      //     payload: payload,
-      //   },
-      //   value: locklift.utils.convertCrystal("3.3", "nano"),
-      //   keyPair: keyPairs[1],
-      // });
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-      const accountLpEnd = (
-        await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
-      )[0];
-
-      console.log(poolDataEnd, "poolDataEnd");
-      console.log(accountLpEnd, "accountLpEnd");
-
-      // const expectedAccountTokenBalances = accountStart.token_balances;
-      // expectedAccountTokenBalances[1] = new BigNumber(
-      //   accountStart.token_balances[1],
-      // )
-      //   .minus(TOKENS_TO_DEPOSIT)
-      //   .toString();
-      //
-      // let expectedAccountLp;
-      // let expectedPoolTokenBalances = [];
-      // let expectedPoolLp = new BigNumber(dexPoolInfoStart.lp_supply)
-      //   .plus(LP_REWARD)
-      //   .toString();
-      // let expectedDexAccount3TokenBalances = [];
-      // let expectedReferrerBalance = [];
-      // if (options.pool_contract_name === "DexPair") {
-      //   expectedAccountLp = new BigNumber(accountStart.lp)
-      //     .plus(
-      //       new BigNumber(expected.step_3_lp_reward).shiftedBy(
-      //         -Constants.LP_DECIMALS,
-      //       ),
-      //     )
-      //     .toString();
-      //
-      //   let expectedBeneficiary = new BigNumber(expected.step_2_spent)
-      //     .shiftedBy(-tokens[1].decimals)
-      //     .times(
-      //       new BigNumber(feeParams.pool_numerator)
-      //         .plus(feeParams.beneficiary_numerator)
-      //         .plus(feeParams.referrer_numerator),
-      //     )
-      //     .div(feeParams.denominator)
-      //     .dp(tokens[1].decimals, BigNumber.ROUND_CEIL)
-      //     .times(feeParams.beneficiary_numerator)
-      //     .div(
-      //       new BigNumber(feeParams.pool_numerator)
-      //         .plus(feeParams.beneficiary_numerator)
-      //         .plus(feeParams.referrer_numerator),
-      //     )
-      //     .dp(tokens[1].decimals, BigNumber.ROUND_FLOOR);
-      //
-      //   console.log(`Beneficiary fee: ${expectedBeneficiary.toString()}`);
-      //
-      //   let expectedReferrer = new BigNumber(expected.step_2_spent)
-      //     .shiftedBy(-tokens[1].decimals)
-      //     .times(
-      //       new BigNumber(feeParams.pool_numerator)
-      //         .plus(feeParams.beneficiary_numerator)
-      //         .plus(feeParams.referrer_numerator),
-      //     )
-      //     .div(feeParams.denominator)
-      //     .dp(tokens[1].decimals, BigNumber.ROUND_CEIL)
-      //     .times(feeParams.referrer_numerator)
-      //     .div(
-      //       new BigNumber(feeParams.pool_numerator)
-      //         .plus(feeParams.beneficiary_numerator)
-      //         .plus(feeParams.referrer_numerator),
-      //     )
-      //     .dp(tokens[1].decimals, BigNumber.ROUND_FLOOR);
-      //
-      //   console.log(`Referrer fee: ${expectedReferrer.toString()}`);
-      //
-      //   expectedPoolTokenBalances.push(
-      //     new BigNumber(dexPoolInfoStart.token_balances[0])
-      //       .plus(deposits[0])
-      //       .toString(),
-      //   );
-      //   expectedPoolTokenBalances.push(
-      //     new BigNumber(dexPoolInfoStart.token_balances[1])
-      //       .plus(deposits[1])
-      //       .minus(expectedBeneficiary)
-      //       .minus(expectedReferrer)
-      //       .toString(),
-      //   );
-      //
-      //   for (let i = 0; i < N_COINS.length; i++) {
-      //     expectedDexAccount3TokenBalances[i] = new BigNumber(
-      //       i === 1 ? expectedBeneficiary : 0,
-      //     )
-      //       .plus(dexPoolInfoStart.token_fees[i])
-      //       .plus(dexAccount3Start.accountBalances[i])
-      //       .toString();
-      //   }
-      //
-      //   expectedReferrerBalance = referrerStart.token_balances;
-      //   expectedReferrerBalance[1] = expectedReferrer
-      //     .plus(referrerStart.token_balances[1] || 0)
-      //     .toString();
-      // } else if (options.pool_contract_name === "DexStablePair") {
-      //   expectedAccountLp = new BigNumber(accountStart.lp)
-      //     .plus(LP_REWARD)
-      //     .toString();
-      //
-      //   let fee_numerator = new BigNumber(feeParams.pool_numerator)
-      //     .plus(feeParams.beneficiary_numerator)
-      //     .plus(feeParams.referrer_numerator)
-      //     .multipliedBy(options.roots.length)
-      //     .dividedBy(4 * (options.roots.length - 1));
-      //
-      //   for (let i = 0; i < N_COINS.length; i++) {
-      //     let expectedBeneficiary = new BigNumber(expected.differences[i])
-      //       .shiftedBy(-tokens[i].decimals)
-      //       .times(fee_numerator)
-      //       .div(feeParams.denominator)
-      //       .dp(tokens[i].decimals, BigNumber.ROUND_CEIL)
-      //       .times(feeParams.beneficiary_numerator)
-      //       .div(
-      //         new BigNumber(feeParams.pool_numerator)
-      //           .plus(feeParams.beneficiary_numerator)
-      //           .plus(feeParams.referrer_numerator),
-      //       )
-      //       .dp(tokens[i].decimals, BigNumber.ROUND_FLOOR);
-      //
-      //     console.log(
-      //       `Beneficiary fee ${
-      //         tokens[i].symbol
-      //       }: ${expectedBeneficiary.toString()}`,
-      //     );
-      //
-      //     let expectedReferrer = new BigNumber(expected.differences[i])
-      //       .shiftedBy(-tokens[i].decimals)
-      //       .times(fee_numerator)
-      //       .div(feeParams.denominator)
-      //       .dp(tokens[i].decimals, BigNumber.ROUND_CEIL)
-      //       .times(feeParams.referrer_numerator)
-      //       .div(
-      //         new BigNumber(feeParams.pool_numerator)
-      //           .plus(feeParams.beneficiary_numerator)
-      //           .plus(feeParams.referrer_numerator),
-      //       )
-      //       .dp(tokens[i].decimals, BigNumber.ROUND_FLOOR);
-      //
-      //     console.log(
-      //       `Referrer fee ${tokens[i].symbol}: ${expectedReferrer.toString()}`,
-      //     );
-      //
-      //     expectedPoolTokenBalances.push(
-      //       new BigNumber(dexPoolInfoStart.token_balances[i])
-      //         .plus(deposits[i])
-      //         .minus(expectedBeneficiary)
-      //         .minus(expectedReferrer)
-      //         .toString(),
-      //     );
-      //
-      //     expectedDexAccount3TokenBalances.push(
-      //       expectedBeneficiary
-      //         .plus(dexPoolInfoStart.token_fees[i])
-      //         .plus(dexAccount3Start.accountBalances[i])
-      //         .toString(),
-      //     );
-      //
-      //     expectedReferrerBalance.push(
-      //       expectedReferrer
-      //         .plus(referrerStart.token_balances[i] || 0)
-      //         .toString(),
-      //     );
-      //   }
-      // } else if (options.pool_contract_name === "DexStablePool") {
-      //   expectedAccountLp = new BigNumber(accountStart.lp)
-      //     .plus(LP_REWARD)
-      //     .toString();
-      //
-      //   let expectedBeneficiary = new BigNumber(amounts[1])
-      //     .shiftedBy(-tokens[1].decimals)
-      //     .times(
-      //       new BigNumber(feeParams.pool_numerator)
-      //         .plus(feeParams.beneficiary_numerator)
-      //         .plus(feeParams.referrer_numerator),
-      //     )
-      //     .div(feeParams.denominator)
-      //     .dp(tokens[1].decimals, BigNumber.ROUND_CEIL)
-      //     .times(feeParams.beneficiary_numerator)
-      //     .div(
-      //       new BigNumber(feeParams.pool_numerator)
-      //         .plus(feeParams.beneficiary_numerator)
-      //         .plus(feeParams.referrer_numerator),
-      //     )
-      //     .dp(tokens[1].decimals, BigNumber.ROUND_FLOOR);
-      //
-      //   console.log(`Beneficiary fee: ${expectedBeneficiary.toString()}`);
-      //
-      //   let expectedReferrer = new BigNumber(amounts[1])
-      //     .shiftedBy(-tokens[1].decimals)
-      //     .times(
-      //       new BigNumber(feeParams.pool_numerator)
-      //         .plus(feeParams.beneficiary_numerator)
-      //         .plus(feeParams.referrer_numerator),
-      //     )
-      //     .div(feeParams.denominator)
-      //     .dp(tokens[1].decimals, BigNumber.ROUND_CEIL)
-      //     .times(feeParams.referrer_numerator)
-      //     .div(
-      //       new BigNumber(feeParams.pool_numerator)
-      //         .plus(feeParams.beneficiary_numerator)
-      //         .plus(feeParams.referrer_numerator),
-      //     )
-      //     .dp(tokens[1].decimals, BigNumber.ROUND_FLOOR);
-      //
-      //   console.log(`Referrer fee: ${expectedReferrer.toString()}`);
-      //
-      //   expectedPoolTokenBalances = dexPoolInfoStart.token_balances;
-      //   expectedPoolTokenBalances[1] = new BigNumber(
-      //     dexPoolInfoStart.token_balances[1],
-      //   )
-      //     .plus(deposits[1])
-      //     .minus(expectedBeneficiary)
-      //     .minus(expectedReferrer)
-      //     .toString();
-      //
-      //   for (let i = 0; i < N_COINS.length; i++) {
-      //     expectedDexAccount3TokenBalances[i] = new BigNumber(
-      //       i === 1 ? expectedBeneficiary : 0,
-      //     )
-      //       .plus(dexPoolInfoStart.token_fees[i])
-      //       .plus(dexAccount3Start.accountBalances[i])
-      //       .toString();
-      //   }
-      //
-      //   expectedReferrerBalance = referrerStart.token_balances;
-      //   expectedReferrerBalance[1] = expectedReferrer
-      //     .plus(referrerStart.token_balances[1] || 0)
-      //     .toString();
-      // }
-      //
-      // expect(dexPoolInfoEnd.lp_supply_actual).to.equal(
-      //   dexPoolInfoEnd.lp_supply,
-      //   "Wrong LP supply",
-      // );
-      // for (let i = 0; i < N_COINS.length; i++) {
-      //   expect(
-      //     new BigNumber(accountEnd.token_balances[i]).toNumber(),
-      //   ).to.approximately(
-      //     new BigNumber(expectedAccountTokenBalances[i]).toNumber(),
-      //     new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
-      //     `Wrong Account#2 ${tokens[i].symbol} balance`,
-      //   );
-      // }
-      // expect(accountEnd.lp.toString()).to.equal(
-      //   expectedAccountLp,
-      //   "Wrong Account#2 LP balance",
-      // );
-      // for (let i = 0; i < N_COINS.length; i++) {
-      //   expect(
-      //     new BigNumber(expectedPoolTokenBalances[i]).toNumber(),
-      //   ).to.approximately(
-      //     new BigNumber(dexPoolInfoEnd.token_balances[i]).toNumber(),
-      //     new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
-      //     `Wrong DexPool ${tokens[i].symbol}`,
-      //   );
-      // }
-      // expect(expectedPoolLp).to.equal(
-      //   dexPoolInfoEnd.lp_supply,
-      //   "Wrong DexPool LP supply",
-      // );
-      // for (let i = 0; i < N_COINS.length; i++) {
-      //   expect(
-      //     new BigNumber(expectedDexAccount3TokenBalances[i]).toNumber(),
-      //   ).to.approximately(
-      //     new BigNumber(dexAccount3End.accountBalances[i])
-      //       .plus(dexPoolInfoEnd.token_fees[i])
-      //       .toNumber(),
-      //     new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
-      //     "Wrong beneficiary fee",
-      //   );
-      // }
-      // for (let i = 0; i < N_COINS.length; i++) {
-      //   expect(
-      //     new BigNumber(expectedReferrerBalance[i]).toNumber(),
-      //   ).to.approximately(
-      //     new BigNumber(referrerEnd.token_balances[i]).toNumber(),
-      //     new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
-      //     "Wrong referrer fee",
-      //   );
-      // }
-    });
-  });
-
+  // describe("Direct deposit", async function () {
+  //   it("Account#2 deposit Coin2 liquidity", async function () {
+  //     console.log("#################################################");
+  //     console.log(`# Account#2 deposit ${tokens[1].symbol} liquidity`);
+  //     const accountStart = await account2balances();
+  //     const dexPoolInfoStart = await dexPoolInfo();
+  //     const dexAccount3Start = await dexAccountBalances(DexAccount3);
+  //     const referrerStart = await account4balances();
+  //
+  //     console.log(
+  //       `Account#2 balance start: ` +
+  //         `${
+  //           accountStart.token_balances[0] !== undefined
+  //             ? accountStart.token_balances[0] + ` ${tokens[0].symbol}`
+  //             : `${tokens[0].symbol} (not deployed)`
+  //         }, ` +
+  //         `${
+  //           accountStart.token_balances[1] !== undefined
+  //             ? accountStart.token_balances[1] + ` ${tokens[1].symbol}`
+  //             : `${tokens[1].symbol} (not deployed)`
+  //         }, ` +
+  //         `${
+  //           accountStart.lp !== undefined
+  //             ? accountStart.lp + " LP"
+  //             : "LP (not deployed)"
+  //         }`,
+  //     );
+  //     console.log(
+  //       `DexAccount#3 balance start: ` +
+  //         `${dexAccount3Start.accountBalances[0]} ${tokens[0].symbol}, ${dexAccount3Start.accountBalances[1]} ${tokens[1].symbol}, ${dexAccount3Start.lp} LP`,
+  //     );
+  //     console.log(
+  //       `DexPool start: ` +
+  //         `${dexPoolInfoStart.token_balances[0]} ${tokens[0].symbol}, ${dexPoolInfoStart.token_balances[1]} ${tokens[1].symbol}, ` +
+  //         `${dexPoolInfoStart.token_fees[0]} ${tokens[0].symbol} FEE, ${dexPoolInfoStart.token_fees[1]} ${tokens[1].symbol} FEE, ` +
+  //         `LP SUPPLY (PLAN): ${dexPoolInfoStart.lp_supply} LP, ` +
+  //         `LP SUPPLY (ACTUAL): ${dexPoolInfoStart.lp_supply_actual} LP`,
+  //     );
+  //     let logs = `Account#4 balance start: `;
+  //     for (let i = 0; i < N_COINS.length; i++) {
+  //       logs += `${referrerStart.token_balances[i] || 0} ${tokens[i].symbol}, `;
+  //     }
+  //     console.log(logs);
+  //
+  //     const TOKENS_TO_DEPOSIT = 100;
+  //
+  //     const deposits = new Array(N_COINS).fill(0);
+  //     deposits[1] = TOKENS_TO_DEPOSIT;
+  //     const amounts = new Array(N_COINS).fill(0);
+  //     amounts[1] = new BigNumber(TOKENS_TO_DEPOSIT)
+  //       .shiftedBy(tokens[1].decimals)
+  //       .toString();
+  //
+  //     let expected;
+  //     let LP_REWARD;
+  //     if (options.pool_contract_name === "DexPair") {
+  //       expected = await DexPool.call({
+  //         method: "expectedDepositLiquidity",
+  //         params: {
+  //           left_amount: 0,
+  //           right_amount: new BigNumber(TOKENS_TO_DEPOSIT)
+  //             .shiftedBy(tokens[1].decimals)
+  //             .toString(),
+  //           auto_change: true,
+  //         },
+  //       });
+  //
+  //       LP_REWARD = new BigNumber(expected.step_1_lp_reward)
+  //         .plus(expected.step_3_lp_reward)
+  //         .shiftedBy(-9)
+  //         .toString();
+  //
+  //       logExpectedDeposit(expected, tokens);
+  //     } else if (options.pool_contract_name === "DexStablePair") {
+  //       expected = await DexPool.call({
+  //         method: "expectedDepositLiquidityV2",
+  //         params: {
+  //           amounts,
+  //         },
+  //       });
+  //
+  //       LP_REWARD = new BigNumber(expected.lp_reward).shiftedBy(-9).toString();
+  //
+  //       logExpectedDepositV2(expected, tokens);
+  //     } else if (options.pool_contract_name === "DexStablePool") {
+  //       expected = await DexPool.call({
+  //         method: "expectedDepositLiquidityOneCoin",
+  //         params: {
+  //           spent_token_root: tokenRoots[1].address,
+  //           amount: amounts[1],
+  //         },
+  //       });
+  //
+  //       LP_REWARD = new BigNumber(expected.lp_reward).shiftedBy(-9).toString();
+  //
+  //       logExpectedDepositV2(expected, tokens);
+  //     }
+  //
+  //     let payload;
+  //     if (options.pool_contract_name === "DexStablePool") {
+  //       payload = await DexPool.call({
+  //         method: "buildDepositLiquidityPayload",
+  //         params: {
+  //           id: 0,
+  //           deploy_wallet_grams: locklift.utils.convertCrystal("0.05", "nano"),
+  //           expected_amount: new BigNumber(LP_REWARD)
+  //             .shiftedBy(Constants.LP_DECIMALS)
+  //             .toString(),
+  //           recipient: Account2.address,
+  //           referrer: Account2.address,
+  //         },
+  //       });
+  //     } else {
+  //       payload = await DexPool.call({
+  //         method: "buildDepositLiquidityPayloadV2",
+  //         params: {
+  //           _id: 0,
+  //           _deployWalletGrams: locklift.utils.convertCrystal("0.2", "nano"),
+  //           _expectedAmount: new BigNumber(LP_REWARD).shiftedBy(
+  //             Constants.LP_DECIMALS,
+  //           ),
+  //           _recipient: Account2.address,
+  //           _referrer: Account2.address,
+  //         },
+  //       });
+  //     }
+  //
+  //     tx = await Account2.runTarget({
+  //       contract: tokenWallets2[1],
+  //       method: "transfer",
+  //       params: {
+  //         amount: new BigNumber(TOKENS_TO_DEPOSIT)
+  //           .shiftedBy(tokens[1].decimals)
+  //           .toString(),
+  //         recipient: DexPool.address,
+  //         deployWalletValue: 0,
+  //         remainingGasTo: Account2.address,
+  //         notify: true,
+  //         payload: payload,
+  //       },
+  //       value: locklift.utils.convertCrystal("3.3", "nano"),
+  //       keyPair: keyPairs[1],
+  //     });
+  //
+  //     displayTx(tx);
+  //
+  //     const accountEnd = await account2balances();
+  //     const dexPoolInfoEnd = await dexPoolInfo();
+  //     const dexAccount3End = await dexAccountBalances(DexAccount3);
+  //     const referrerEnd = await account4balances();
+  //
+  //     console.log(
+  //       `Account#2 balance end: ` +
+  //         `${
+  //           accountEnd.token_balances[0] !== undefined
+  //             ? accountEnd.token_balances[0] + ` ${tokens[0].symbol}`
+  //             : `${tokens[0].symbol} (not deployed)`
+  //         }, ` +
+  //         `${
+  //           accountEnd.token_balances[1] !== undefined
+  //             ? accountEnd.token_balances[1] + ` ${tokens[1].symbol}`
+  //             : `${tokens[1].symbol} (not deployed)`
+  //         }, ` +
+  //         `${
+  //           accountEnd.lp !== undefined
+  //             ? accountEnd.lp + " LP"
+  //             : "LP (not deployed)"
+  //         }`,
+  //     );
+  //     console.log(
+  //       `DexAccount#3 balance end: ` +
+  //         `${dexAccount3End.accountBalances[0]} ${tokens[0].symbol}, ${dexAccount3End.accountBalances[1]} ${tokens[1].symbol}, ${dexAccount3Start.lp} LP`,
+  //     );
+  //     console.log(
+  //       `DexPool end: ` +
+  //         `${dexPoolInfoEnd.token_balances[0]} ${tokens[0].symbol}, ${dexPoolInfoEnd.token_balances[1]} ${tokens[1].symbol}, ` +
+  //         `${dexPoolInfoEnd.token_fees[0]} ${tokens[0].symbol} FEE, ${dexPoolInfoEnd.token_fees[1]} ${tokens[1].symbol} FEE, ` +
+  //         `LP SUPPLY (PLAN): ${dexPoolInfoEnd.lp_supply} LP, ` +
+  //         `LP SUPPLY (ACTUAL): ${dexPoolInfoEnd.lp_supply_actual} LP`,
+  //     );
+  //     logs = `Account#4 balance end: `;
+  //     for (let i = 0; i < N_COINS.length; i++) {
+  //       logs += `${referrerEnd.token_balances[i] || 0} ${tokens[i].symbol}, `;
+  //     }
+  //     console.log(logs);
+  //
+  //     await migration.logGas();
+  //
+  //     const expectedAccountTokenBalances = accountStart.token_balances;
+  //     expectedAccountTokenBalances[1] = new BigNumber(
+  //       accountStart.token_balances[1],
+  //     )
+  //       .minus(TOKENS_TO_DEPOSIT)
+  //       .toString();
+  //
+  //     let expectedAccountLp;
+  //     let expectedPoolTokenBalances = [];
+  //     let expectedPoolLp = new BigNumber(dexPoolInfoStart.lp_supply)
+  //       .plus(LP_REWARD)
+  //       .toString();
+  //     let expectedDexAccount3TokenBalances = [];
+  //     let expectedReferrerBalance = [];
+  //     if (options.pool_contract_name === "DexPair") {
+  //       expectedAccountLp = new BigNumber(accountStart.lp)
+  //         .plus(
+  //           new BigNumber(expected.step_3_lp_reward).shiftedBy(
+  //             -Constants.LP_DECIMALS,
+  //           ),
+  //         )
+  //         .toString();
+  //
+  //       let expectedBeneficiary = new BigNumber(expected.step_2_spent)
+  //         .shiftedBy(-tokens[1].decimals)
+  //         .times(
+  //           new BigNumber(feeParams.pool_numerator)
+  //             .plus(feeParams.beneficiary_numerator)
+  //             .plus(feeParams.referrer_numerator),
+  //         )
+  //         .div(feeParams.denominator)
+  //         .dp(tokens[1].decimals, BigNumber.ROUND_CEIL)
+  //         .times(feeParams.beneficiary_numerator)
+  //         .div(
+  //           new BigNumber(feeParams.pool_numerator)
+  //             .plus(feeParams.beneficiary_numerator)
+  //             .plus(feeParams.referrer_numerator),
+  //         )
+  //         .dp(tokens[1].decimals, BigNumber.ROUND_FLOOR);
+  //
+  //       console.log(`Beneficiary fee: ${expectedBeneficiary.toString()}`);
+  //
+  //       let expectedReferrer = new BigNumber(expected.step_2_spent)
+  //         .shiftedBy(-tokens[1].decimals)
+  //         .times(
+  //           new BigNumber(feeParams.pool_numerator)
+  //             .plus(feeParams.beneficiary_numerator)
+  //             .plus(feeParams.referrer_numerator),
+  //         )
+  //         .div(feeParams.denominator)
+  //         .dp(tokens[1].decimals, BigNumber.ROUND_CEIL)
+  //         .times(feeParams.referrer_numerator)
+  //         .div(
+  //           new BigNumber(feeParams.pool_numerator)
+  //             .plus(feeParams.beneficiary_numerator)
+  //             .plus(feeParams.referrer_numerator),
+  //         )
+  //         .dp(tokens[1].decimals, BigNumber.ROUND_FLOOR);
+  //
+  //       console.log(`Referrer fee: ${expectedReferrer.toString()}`);
+  //
+  //       expectedPoolTokenBalances.push(
+  //         new BigNumber(dexPoolInfoStart.token_balances[0])
+  //           .plus(deposits[0])
+  //           .toString(),
+  //       );
+  //       expectedPoolTokenBalances.push(
+  //         new BigNumber(dexPoolInfoStart.token_balances[1])
+  //           .plus(deposits[1])
+  //           .minus(expectedBeneficiary)
+  //           .minus(expectedReferrer)
+  //           .toString(),
+  //       );
+  //
+  //       for (let i = 0; i < N_COINS.length; i++) {
+  //         expectedDexAccount3TokenBalances[i] = new BigNumber(
+  //           i === 1 ? expectedBeneficiary : 0,
+  //         )
+  //           .plus(dexPoolInfoStart.token_fees[i])
+  //           .plus(dexAccount3Start.accountBalances[i])
+  //           .toString();
+  //       }
+  //
+  //       expectedReferrerBalance = referrerStart.token_balances;
+  //       expectedReferrerBalance[1] = expectedReferrer
+  //         .plus(referrerStart.token_balances[1] || 0)
+  //         .toString();
+  //     } else if (options.pool_contract_name === "DexStablePair") {
+  //       expectedAccountLp = new BigNumber(accountStart.lp)
+  //         .plus(LP_REWARD)
+  //         .toString();
+  //
+  //       let fee_numerator = new BigNumber(feeParams.pool_numerator)
+  //         .plus(feeParams.beneficiary_numerator)
+  //         .plus(feeParams.referrer_numerator)
+  //         .multipliedBy(options.roots.length)
+  //         .dividedBy(4 * (options.roots.length - 1));
+  //
+  //       for (let i = 0; i < N_COINS.length; i++) {
+  //         let expectedBeneficiary = new BigNumber(expected.differences[i])
+  //           .shiftedBy(-tokens[i].decimals)
+  //           .times(fee_numerator)
+  //           .div(feeParams.denominator)
+  //           .dp(tokens[i].decimals, BigNumber.ROUND_CEIL)
+  //           .times(feeParams.beneficiary_numerator)
+  //           .div(
+  //             new BigNumber(feeParams.pool_numerator)
+  //               .plus(feeParams.beneficiary_numerator)
+  //               .plus(feeParams.referrer_numerator),
+  //           )
+  //           .dp(tokens[i].decimals, BigNumber.ROUND_FLOOR);
+  //
+  //         console.log(
+  //           `Beneficiary fee ${
+  //             tokens[i].symbol
+  //           }: ${expectedBeneficiary.toString()}`,
+  //         );
+  //
+  //         let expectedReferrer = new BigNumber(expected.differences[i])
+  //           .shiftedBy(-tokens[i].decimals)
+  //           .times(fee_numerator)
+  //           .div(feeParams.denominator)
+  //           .dp(tokens[i].decimals, BigNumber.ROUND_CEIL)
+  //           .times(feeParams.referrer_numerator)
+  //           .div(
+  //             new BigNumber(feeParams.pool_numerator)
+  //               .plus(feeParams.beneficiary_numerator)
+  //               .plus(feeParams.referrer_numerator),
+  //           )
+  //           .dp(tokens[i].decimals, BigNumber.ROUND_FLOOR);
+  //
+  //         console.log(
+  //           `Referrer fee ${tokens[i].symbol}: ${expectedReferrer.toString()}`,
+  //         );
+  //
+  //         expectedPoolTokenBalances.push(
+  //           new BigNumber(dexPoolInfoStart.token_balances[i])
+  //             .plus(deposits[i])
+  //             .minus(expectedBeneficiary)
+  //             .minus(expectedReferrer)
+  //             .toString(),
+  //         );
+  //
+  //         expectedDexAccount3TokenBalances.push(
+  //           expectedBeneficiary
+  //             .plus(dexPoolInfoStart.token_fees[i])
+  //             .plus(dexAccount3Start.accountBalances[i])
+  //             .toString(),
+  //         );
+  //
+  //         expectedReferrerBalance.push(
+  //           expectedReferrer
+  //             .plus(referrerStart.token_balances[i] || 0)
+  //             .toString(),
+  //         );
+  //       }
+  //     } else if (options.pool_contract_name === "DexStablePool") {
+  //       expectedAccountLp = new BigNumber(accountStart.lp)
+  //         .plus(LP_REWARD)
+  //         .toString();
+  //
+  //       let expectedBeneficiary = new BigNumber(amounts[1])
+  //         .shiftedBy(-tokens[1].decimals)
+  //         .times(
+  //           new BigNumber(feeParams.pool_numerator)
+  //             .plus(feeParams.beneficiary_numerator)
+  //             .plus(feeParams.referrer_numerator),
+  //         )
+  //         .div(feeParams.denominator)
+  //         .dp(tokens[1].decimals, BigNumber.ROUND_CEIL)
+  //         .times(feeParams.beneficiary_numerator)
+  //         .div(
+  //           new BigNumber(feeParams.pool_numerator)
+  //             .plus(feeParams.beneficiary_numerator)
+  //             .plus(feeParams.referrer_numerator),
+  //         )
+  //         .dp(tokens[1].decimals, BigNumber.ROUND_FLOOR);
+  //
+  //       console.log(`Beneficiary fee: ${expectedBeneficiary.toString()}`);
+  //
+  //       let expectedReferrer = new BigNumber(amounts[1])
+  //         .shiftedBy(-tokens[1].decimals)
+  //         .times(
+  //           new BigNumber(feeParams.pool_numerator)
+  //             .plus(feeParams.beneficiary_numerator)
+  //             .plus(feeParams.referrer_numerator),
+  //         )
+  //         .div(feeParams.denominator)
+  //         .dp(tokens[1].decimals, BigNumber.ROUND_CEIL)
+  //         .times(feeParams.referrer_numerator)
+  //         .div(
+  //           new BigNumber(feeParams.pool_numerator)
+  //             .plus(feeParams.beneficiary_numerator)
+  //             .plus(feeParams.referrer_numerator),
+  //         )
+  //         .dp(tokens[1].decimals, BigNumber.ROUND_FLOOR);
+  //
+  //       console.log(`Referrer fee: ${expectedReferrer.toString()}`);
+  //
+  //       expectedPoolTokenBalances = dexPoolInfoStart.token_balances;
+  //       expectedPoolTokenBalances[1] = new BigNumber(
+  //         dexPoolInfoStart.token_balances[1],
+  //       )
+  //         .plus(deposits[1])
+  //         .minus(expectedBeneficiary)
+  //         .minus(expectedReferrer)
+  //         .toString();
+  //
+  //       for (let i = 0; i < N_COINS.length; i++) {
+  //         expectedDexAccount3TokenBalances[i] = new BigNumber(
+  //           i === 1 ? expectedBeneficiary : 0,
+  //         )
+  //           .plus(dexPoolInfoStart.token_fees[i])
+  //           .plus(dexAccount3Start.accountBalances[i])
+  //           .toString();
+  //       }
+  //
+  //       expectedReferrerBalance = referrerStart.token_balances;
+  //       expectedReferrerBalance[1] = expectedReferrer
+  //         .plus(referrerStart.token_balances[1] || 0)
+  //         .toString();
+  //     }
+  //
+  //     expect(dexPoolInfoEnd.lp_supply_actual).to.equal(
+  //       dexPoolInfoEnd.lp_supply,
+  //       "Wrong LP supply",
+  //     );
+  //     for (let i = 0; i < N_COINS.length; i++) {
+  //       expect(
+  //         new BigNumber(accountEnd.token_balances[i]).toNumber(),
+  //       ).to.approximately(
+  //         new BigNumber(expectedAccountTokenBalances[i]).toNumber(),
+  //         new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
+  //         `Wrong Account#2 ${tokens[i].symbol} balance`,
+  //       );
+  //     }
+  //     expect(accountEnd.lp.toString()).to.equal(
+  //       expectedAccountLp,
+  //       "Wrong Account#2 LP balance",
+  //     );
+  //     for (let i = 0; i < N_COINS.length; i++) {
+  //       expect(
+  //         new BigNumber(expectedPoolTokenBalances[i]).toNumber(),
+  //       ).to.approximately(
+  //         new BigNumber(dexPoolInfoEnd.token_balances[i]).toNumber(),
+  //         new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
+  //         `Wrong DexPool ${tokens[i].symbol}`,
+  //       );
+  //     }
+  //     expect(expectedPoolLp).to.equal(
+  //       dexPoolInfoEnd.lp_supply,
+  //       "Wrong DexPool LP supply",
+  //     );
+  //     for (let i = 0; i < N_COINS.length; i++) {
+  //       expect(
+  //         new BigNumber(expectedDexAccount3TokenBalances[i]).toNumber(),
+  //       ).to.approximately(
+  //         new BigNumber(dexAccount3End.accountBalances[i])
+  //           .plus(dexPoolInfoEnd.token_fees[i])
+  //           .toNumber(),
+  //         new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
+  //         "Wrong beneficiary fee",
+  //       );
+  //     }
+  //     for (let i = 0; i < N_COINS.length; i++) {
+  //       expect(
+  //         new BigNumber(expectedReferrerBalance[i]).toNumber(),
+  //       ).to.approximately(
+  //         new BigNumber(referrerEnd.token_balances[i]).toNumber(),
+  //         new BigNumber(1).shiftedBy(-tokens[i].decimals).toNumber(),
+  //         "Wrong referrer fee",
+  //       );
+  //     }
+  //   });
+  // });
+  //
   // describe("Direct exchanges", async function () {
   //   it(`Account#2 exchange Coin2 to Coin1`, async function () {
   //     console.log("#################################################");
