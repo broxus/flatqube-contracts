@@ -292,10 +292,6 @@ export const getDexData = async (tokens: Address[]) => {
           .call()
       ).value0;
 
-      const decimals = (
-        await tokenRoot.methods.decimals({ answerId: 0 }).call()
-      ).value0;
-
       const dexTokenVaultWallet = await locklift.factory.getDeployedContract(
         "TokenWalletUpgradeable",
         dexTokenWalletAddress,
@@ -303,18 +299,16 @@ export const getDexData = async (tokens: Address[]) => {
 
       return {
         dexTokenVaultWallet,
-        decimals,
       };
     }),
   );
 
   const balances = Promise.all(
     tokensContracts.map(async _ => {
-      const vaultBalance = new BigNumber(
-        (
-          await _.dexTokenVaultWallet.methods.balance({ answerId: 0 }).call()
-        ).value0,
-      ).shiftedBy(-_.decimals);
+      const vaultBalance = await _.dexTokenVaultWallet.methods
+        .balance({ answerId: 0 })
+        .call()
+        .then(a => a.value0);
 
       // const vaultTokenBalance = new BigNumber(
       //   (

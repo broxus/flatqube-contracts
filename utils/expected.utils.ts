@@ -542,9 +542,9 @@ export async function expectedWithdrawLiquidityOneCoin(
     })
     .call();
 
-  const receivedAmount = expected.value0.amounts.find(a => a !== "0") || 0;
-  const benFee = expected.value0.beneficiary_fees.find(a => a !== "0") || 0;
-  const pFee = expected.value0.pool_fees.find(a => a !== "0") || 0;
+  const receivedAmount = expected.value0.amounts.find(a => a !== "0") || "0";
+  const benFee = expected.value0.beneficiary_fees.find(a => a !== "0") || "0";
+  const pFee = expected.value0.pool_fees.find(a => a !== "0") || "0";
 
   const { beneficiaryFee, poolFee, referrerFee } = await getFeesFromTotalFee(
     poolContract,
