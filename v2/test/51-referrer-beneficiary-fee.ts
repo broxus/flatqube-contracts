@@ -1,5 +1,11 @@
 import { expect } from "chai";
-import { Contract, getRandomNonce, toNano, zeroAddress } from "locklift";
+import {
+  Address,
+  Contract,
+  getRandomNonce,
+  toNano,
+  zeroAddress,
+} from "locklift";
 import { Constants } from "../../utils/consts";
 import {
   depositLiquidity,
@@ -13,6 +19,7 @@ import { displayTx } from "../../utils/helpers";
 import {
   expectedDepositLiquidity,
   expectedDepositLiquidityOneCoin,
+  getFeesFromTotalFee,
 } from "../../utils/expected.utils";
 import BigNumber from "bignumber.js";
 import { Account } from "everscale-standalone-client";
@@ -89,6 +96,17 @@ const poolsData: Record<
 
 describe(`Test beneficiary fee`, function () {
   before("Load contracts", async function () {
+    await locklift.deployments.fixture({
+      include: [
+        "dex-gas-values",
+        "wever",
+        "wrap-ever",
+        "dex-accounts",
+        "dex-pairs",
+        "dex-pairs-wever",
+      ],
+    });
+
     DexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
     DexVault = locklift.deployments.getContract<DexVaultAbi>("DexVault");
     DexOwner = locklift.deployments.getAccount("DexOwner").account;
@@ -99,8 +117,7 @@ describe(`Test beneficiary fee`, function () {
     DexAccount =
       locklift.deployments.getContract<DexAccountAbi>("OwnerDexAccount");
 
-    feeParams.beneficiary =
-      locklift.deployments.getAccount("DexOwner").account.address;
+    feeParams.beneficiary = Account1.address;
 
     poolsData.stablePair.contract =
       locklift.deployments.getContract<DexStablePairAbi>(
@@ -202,7 +219,7 @@ describe(`Test beneficiary fee`, function () {
 
   before("Set referral program params", async function () {
     const projectId = 22222;
-    const projectAddress = zeroAddress;
+    const projectAddress = Account1.address;
     const refSystemAddress = Account4.address;
 
     console.log(
@@ -219,7 +236,7 @@ describe(`Test beneficiary fee`, function () {
       })
       .send({
         amount: toNano(1),
-        from: Account1.address,
+        from: DexOwner.address,
       });
 
     displayTx(tx);
@@ -232,7 +249,7 @@ describe(`Test beneficiary fee`, function () {
         .setPairFeeParams({
           _roots: roots,
           _params: feeParams,
-          _remainingGasTo: Account1.address,
+          _remainingGasTo: DexOwner.address,
         })
         .send({
           from: DexOwner.address,
@@ -272,24 +289,19 @@ describe(`Test beneficiary fee`, function () {
 
   // todo: stable pair test deposit
   describe("DexAccount deposit to STABLE POOl", function () {
-    it("Add FOO+BAR liquidity (auto_change=true)", async function () {
+    it("Add multiple coins imbalanced liquidity", async function () {
       console.log("#################################################");
-      console.log("# Add FOO+BAR liquidity (auto_change=true)");
+      console.log("# Add multiple coins imbalanced liquidity");
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const accountLpStart = (
-        await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
-      )[0];
-      const receivedTokenAddress = poolsData.stablePool.roots[0].address;
 
-      const deposits = [];
-      const amounts = [];
       const operations = [];
 
       for (let i = 0; i < N_COINS.length; i++) {
-        deposits[i] = i % 2 ? 1000 : 9000;
-        amounts[i] = 10 ** N_COINS[i];
+        const amount = new BigNumber(i % 2 ? 10 : 90)
+          .shiftedBy(N_COINS[i])
+          .toString();
         operations.push({
-          amount: amounts[i],
+          amount: amount,
           root: tokenRoots[i].address,
         });
       }
@@ -298,11 +310,8 @@ describe(`Test beneficiary fee`, function () {
         poolsData.stablePool.contract,
         operations,
         true,
+        true,
       );
-
-      const totalReceived = Object.values(expected.amounts)
-        .reduce((acc, curr) => acc.plus(curr), new BigNumber(0))
-        .toString();
 
       console.log(expected, "expected");
 
@@ -312,16 +321,11 @@ describe(`Test beneficiary fee`, function () {
         DexOwner.address,
         DexAccount.address,
         0,
-        operations.concat([
-          {
-            root: poolsData.stablePool.lp.address,
-            amount: +LP_REWARD,
-          },
-        ]),
+        operations,
       );
 
-      await locklift.transactions.waitFinalized(
-        await DexAccount.methods
+      const { traceTree } = await locklift.tracing.trace(
+        DexAccount.methods
           .depositLiquidityV2({
             _callId: getRandomNonce(),
             _operations: operations,
@@ -337,100 +341,36 @@ describe(`Test beneficiary fee`, function () {
       );
 
       const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-      const accountLpEnd = (
-        await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
-      )[0];
 
-      const expectedAccount2TokenBalances: string[] = [];
-      const totalDepoStart = Object.values(poolDataStart.balances)
-        .reduce((acc, curr) => acc.plus(curr), new BigNumber(0))
-        .toString();
-      const totalDepoEnd = Object.values(poolDataEnd.balances)
-        .reduce((acc, curr) => acc.plus(curr), new BigNumber(0))
-        .toString();
-      const totalFees = Object.values(poolDataEnd.accumulatedFees)
-        .reduce((acc, curr) => acc.plus(curr), new BigNumber(0))
-        .toString();
+      const accountLpChange = traceTree?.tokens.getTokenBalanceChange(
+        await getWallet(DexOwner.address, poolsData.stablePool.lp.address).then(
+          a => a.walletContract,
+        ),
+      );
+      expect(String(accountLpChange)).to.equal(expected.lpReward);
 
-      for (let i = 0; i < N_COINS.length; i++) {
-        expectedAccount2TokenBalances.push(
-          new BigNumber(
-            poolDataStart.balances[tokenRoots[i].address.toString()],
-          )
-            .plus(amounts[i])
+      for (const deposit of operations) {
+        const root = deposit.root.toString();
+        expect(
+          new BigNumber(poolDataStart.balances[root])
+            .plus(deposit.amount)
+            .minus(expected.beneficiaryFees[root])
+            .minus(expected.referrerFees[root])
             .toString(),
-        );
+        ).to.equal(poolDataEnd.balances[root], `Pool has wrong balance`);
       }
-      //
-      // for (let i = 0; i < N_COINS.length; i++) {
-      //   const expectedBeneficiary = expected.beneficiaryFees;
-      //
-      //   const expectedReferrer = expected.referrerFees;
-      //
-      //   expectedPoolTokenBalances.push(
-      //     new BigNumber(dexPoolInfoStart.token_balances[i])
-      //       .plus(deposits[i])
-      //       .minus(expectedBeneficiary[tokens[i].root])
-      //       .minus(expectedReferrer[tokens[i].root])
-      //       .toString(),
-      //   );
-      //
-      //   expectedDexAccount3TokenBalances.push(
-      //     new BigNumber(expectedBeneficiary[tokens[i].root])
-      //       .plus(dexPoolInfoStart.token_fees[i])
-      //       .plus(dexAccount3Start.accountBalances[i])
-      //       .toString(),
-      //   );
-      // }
 
-      // expect(dexPoolInfoEnd.lp_supply_actual).to.equal(
-      //   dexPoolInfoEnd.lp_supply,
-      //   "Wrong LP supply",
-      // );
-      console.log(
-        expectedAccount2TokenBalances,
-        "expectedAccount2TokenBalances",
-      );
-      console.log(poolDataStart, "poolDataStart");
-      console.log(poolDataEnd, "poolDataEnd");
-      for (let i = 0; i < N_COINS.length; i++) {
-        expect(+expectedAccount2TokenBalances[i]).to.approximately(
-          +poolDataEnd.balances[tokenRoots[i].address.toString()],
-          +poolDataEnd.accumulatedFees[tokenRoots[i].address.toString()] * 3,
-          `Wrong DexAccount#2 ${tokens[i].symbol}`,
+      for (const [token, fee] of Object.entries(expected.referrerFees)) {
+        const refAccountChange = traceTree?.tokens.getTokenBalanceChange(
+          await getWallet(Account4.address, new Address(token)).then(
+            a => a.walletContract,
+          ),
+        );
+        expect(String(refAccountChange)).to.equal(
+          fee,
+          `Ref System has wrong balance`,
         );
       }
-      expect(new BigNumber(accountLpStart).plus(LP_REWARD).toString()).to.equal(
-        accountLpEnd,
-        `Account has wrong LP balance`,
-      );
-      expect(
-        new BigNumber(poolDataStart.balances[receivedTokenAddress.toString()])
-          .plus(expected.amounts[receivedTokenAddress.toString()])
-          .toNumber(),
-      ).to.approximately(
-        +poolDataEnd.balances[receivedTokenAddress.toString()],
-        +poolDataEnd.accumulatedFees[receivedTokenAddress.toString()] * 3,
-        `Pool has wrong received token balance`,
-      );
-      expect(
-        new BigNumber(totalDepoStart).plus(totalReceived).toNumber(),
-      ).to.approximately(
-        +totalDepoEnd,
-        new BigNumber(totalFees).times(3).toNumber(),
-        `Account has wrong received token balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.accumulatedFees[receivedTokenAddress.toString()],
-        )
-          .plus(expected.poolFees[tokens[0].root])
-          .toNumber(),
-      ).to.approximately(
-        +poolDataEnd.accumulatedFees[receivedTokenAddress.toString()],
-        10,
-        `Pool has wrong received token fees`,
-      );
       expect(
         new BigNumber(poolDataStart.lpSupply).plus(LP_REWARD).toString(),
       ).to.equal(poolDataEnd.lpSupply, "Pool has wrong LP balance");

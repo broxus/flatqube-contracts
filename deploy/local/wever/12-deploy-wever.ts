@@ -37,7 +37,7 @@ export default async () => {
         value: toNano(10),
         publicKey: weverOwner.signer.publicKey,
       },
-      deploymentName: "weverRoot",
+      deploymentName: "wever",
       enableLogs: true,
     }),
   );

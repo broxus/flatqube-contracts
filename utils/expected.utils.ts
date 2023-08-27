@@ -467,7 +467,7 @@ export async function getFeesFromTotalFee(
     const referrerFee = new BigNumber(totalFee)
       .times(feesData.referrer_numerator)
       .div(numerator)
-      .dp(0, BigNumber.ROUND_CEIL)
+      .dp(0, BigNumber.ROUND_FLOOR)
       .toString();
     const poolFee = new BigNumber(totalFee)
       .times(feesData.pool_numerator)
