@@ -16,6 +16,7 @@ import BigNumber from "bignumber.js";
 import {
   expectedWithdrawLiquidity,
   expectedWithdrawLiquidityOneCoin,
+  getFeesFromTotalFee,
 } from "../../utils/expected.utils";
 import { getWallet } from "../../utils/wrappers";
 
@@ -790,9 +791,11 @@ describe("Check DexAccount add Pair", () => {
         )
           .minus(expectedAmountFirstToken)
           .minus(
-            poolDataEnd.accumulatedFees[
-              poolsData.stablePool.roots[0].address.toString()
-            ],
+            await getFeesFromTotalFee(
+              poolsData.stablePool.contract,
+              expectedWithdrawData.expected_fee,
+              false,
+            ).then(a => a.beneficiaryFee),
           )
           .toString(),
       ).to.equal(
@@ -896,7 +899,7 @@ describe("Check DexAccount add Pair", () => {
           .transfer({
             amount: expectedWithdrawData.lp,
             recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
+            deployWalletValue: 0,
             remainingGasTo: owner.address,
             notify: true,
             payload: payload.value0,
@@ -922,9 +925,11 @@ describe("Check DexAccount add Pair", () => {
         )
           .minus(expectedAmountSecondToken)
           .minus(
-            poolDataEnd.accumulatedFees[
-              poolsData.stablePool.roots[1].address.toString()
-            ],
+            await getFeesFromTotalFee(
+              poolsData.stablePool.contract,
+              expectedWithdrawData.expected_fee,
+              false,
+            ).then(a => a.beneficiaryFee),
           )
           .toString(),
       ).to.equal(
@@ -974,7 +979,7 @@ describe("Check DexAccount add Pair", () => {
         "Pool LP balance is not equal to LP_Root total supply",
       );
     });
-    it.skip("Withdraw third token from DexStablePool via expectedOneCoinWithdrawalSpendAmount", async () => {
+    it("Withdraw third token from DexStablePool via expectedOneCoinWithdrawalSpendAmount", async () => {
       const gas = await getPoolWithdrawGas(3);
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
       const expectedAmountThirdToken = new BigNumber(1)
@@ -999,12 +1004,12 @@ describe("Check DexAccount add Pair", () => {
       ).then(a => a.walletContract);
 
       const firstTokenWallet = await getWallet(
-        owner.address,
+        commonAcc.address,
         poolsData.stablePool.roots[0].address,
       ).then(a => a.walletContract);
 
       const secondTokenWallet = await getWallet(
-        owner.address,
+        commonAcc.address,
         poolsData.stablePool.roots[1].address,
       ).then(a => a.walletContract);
 
@@ -1029,7 +1034,7 @@ describe("Check DexAccount add Pair", () => {
           .transfer({
             amount: expectedWithdrawData.lp,
             recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
+            deployWalletValue: 0,
             remainingGasTo: owner.address,
             notify: true,
             payload: payload.value0,
@@ -1041,7 +1046,7 @@ describe("Check DexAccount add Pair", () => {
         .count(1);
 
       const thirdTokenWallet = await getWallet(
-        owner.address,
+        commonAcc.address,
         poolsData.stablePool.roots[2].address,
       ).then(a => a.walletContract);
 
@@ -1055,13 +1060,28 @@ describe("Check DexAccount add Pair", () => {
         )
           .minus(expectedAmountThirdToken)
           .minus(
-            poolDataEnd.accumulatedFees[
-              poolsData.stablePool.roots[2].address.toString()
-            ],
+            await getFeesFromTotalFee(
+              poolsData.stablePool.contract,
+              expectedWithdrawData.expected_fee,
+              false,
+            ).then(a => a.beneficiaryFee),
           )
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[2].address.toString()],
+          .toNumber(),
+      ).to.approximately(
+        Number(
+          poolDataEnd.balances[
+            poolsData.stablePool.roots[2].address.toString()
+          ],
+        ),
+        new BigNumber(1)
+          .shiftedBy(
+            Math.max(
+              0,
+              tokensData[poolsData.stablePool.roots[2].address.toString()]
+                .decimals - 9,
+            ),
+          )
+          .toNumber(),
         `Pool has wrong ${poolsData.stablePool.tokens[2]} balance`,
       );
       expect(

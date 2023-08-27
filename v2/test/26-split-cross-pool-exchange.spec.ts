@@ -613,8 +613,8 @@ describe("Check direct CrossPairExchange v1", async function () {
 
     it(
       "DexStablePair -> DexStablePool exchange\n" +
-        "                       -> (3) DexPair\n" +
-        "                       -> (5) DexStablePair",
+        "              -> (3) DexPair\n" +
+        "              -> (5) DexStablePair",
       async function () {
         const startToken = getTokenBySymbol(`token-18-0`);
         const startAmount = new BigNumber(10)

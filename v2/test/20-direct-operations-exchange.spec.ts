@@ -13,7 +13,10 @@ import {
 import { calcValue } from "../utils/gas.utils";
 import { getPoolData, depositLiquidity } from "../../utils/wrappers";
 import BigNumber from "bignumber.js";
-import { expectedExchange } from "../../utils/expected.utils";
+import {
+  expectedExchange,
+  getFeesFromTotalFee,
+} from "../../utils/expected.utils";
 import { getWallet } from "../../utils/wrappers";
 
 describe("Check DexAccount add Pair", () => {
@@ -1005,9 +1008,11 @@ describe("Check DexAccount add Pair", () => {
         )
           .plus(expectedExchangeData.expected_amount)
           .minus(
-            poolDataEnd.accumulatedFees[
-              poolsData.stablePool.roots[0].address.toString()
-            ],
+            await getFeesFromTotalFee(
+              poolsData.stablePool.contract,
+              expectedExchangeData.expected_fee,
+              false,
+            ).then(a => a.beneficiaryFee),
           )
           .toString(),
       ).to.equal(
@@ -1117,14 +1122,11 @@ describe("Check DexAccount add Pair", () => {
         )
           .plus(expectedExchangeData.expected_amount)
           .minus(
-            poolDataEnd.accumulatedFees[
-              poolsData.stablePool.roots[0].address.toString()
-            ],
-          )
-          .plus(
-            poolDataStart.accumulatedFees[
-              poolsData.stablePool.roots[0].address.toString()
-            ],
+            await getFeesFromTotalFee(
+              poolsData.stablePool.contract,
+              expectedExchangeData.expected_fee,
+              false,
+            ).then(a => a.beneficiaryFee),
           )
           .toString(),
       ).to.equal(
@@ -1155,7 +1157,7 @@ describe("Check DexAccount add Pair", () => {
         "Pool LP balance is not equal to LP_Root total supply",
       );
     });
-    it.skip("Direct exchange second token on first token in DexStablePool via expectedSpendAmount()", async () => {
+    it("Direct exchange second token on first token in DexStablePool via expectedSpendAmount()", async () => {
       const gas = await getPoolExchangeGas();
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
       const expectedAmountFirstToken = new BigNumber(1)
@@ -1197,7 +1199,7 @@ describe("Check DexAccount add Pair", () => {
         .buildExchangePayload({
           id: getRandomNonce(),
           deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.expected_amount,
+          expected_amount: expectedAmountFirstToken,
           recipient: zeroAddress,
           referrer: zeroAddress,
           cancel_payload: null,
@@ -1233,9 +1235,11 @@ describe("Check DexAccount add Pair", () => {
         )
           .plus(expectedExchangeData.expected_amount)
           .minus(
-            poolDataEnd.accumulatedFees[
-              poolsData.stablePool.roots[1].address.toString()
-            ],
+            await getFeesFromTotalFee(
+              poolsData.stablePool.contract,
+              expectedExchangeData.expected_fee,
+              false,
+            ).then(a => a.beneficiaryFee),
           )
           .toString(),
       ).to.equal(
@@ -1344,9 +1348,11 @@ describe("Check DexAccount add Pair", () => {
         )
           .plus(expectedExchangeData.expected_amount)
           .minus(
-            poolDataEnd.accumulatedFees[
-              poolsData.stablePool.roots[1].address.toString()
-            ],
+            await getFeesFromTotalFee(
+              poolsData.stablePool.contract,
+              expectedExchangeData.expected_fee,
+              false,
+            ).then(a => a.beneficiaryFee),
           )
           .toString(),
       ).to.equal(
@@ -1377,7 +1383,7 @@ describe("Check DexAccount add Pair", () => {
         "Pool LP balance is not equal to LP_Root total supply",
       );
     });
-    it.skip("Direct exchange third token on first token in DexStablePool via expectedSpendAmount()", async () => {
+    it("Direct exchange third token on first token in DexStablePool via expectedSpendAmount()", async () => {
       const gas = await getPoolExchangeGas();
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
       const expectedAmountFirstToken = new BigNumber(1)
@@ -1419,7 +1425,7 @@ describe("Check DexAccount add Pair", () => {
         .buildExchangePayload({
           id: getRandomNonce(),
           deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.expected_amount,
+          expected_amount: expectedAmountFirstToken,
           recipient: zeroAddress,
           referrer: zeroAddress,
           cancel_payload: null,
@@ -1455,9 +1461,11 @@ describe("Check DexAccount add Pair", () => {
         )
           .plus(expectedExchangeData.expected_amount)
           .minus(
-            poolDataEnd.accumulatedFees[
-              poolsData.stablePool.roots[2].address.toString()
-            ],
+            await getFeesFromTotalFee(
+              poolsData.stablePool.contract,
+              expectedExchangeData.expected_fee,
+              false,
+            ).then(a => a.beneficiaryFee),
           )
           .toString(),
       ).to.equal(
@@ -1488,7 +1496,7 @@ describe("Check DexAccount add Pair", () => {
         "Pool LP balance is not equal to LP_Root total supply",
       );
     });
-    it.skip("Direct exchange third token on second token in DexStablePool via expectedSpendAmount()", async () => {
+    it("Direct exchange third token on second token in DexStablePool via expectedSpendAmount()", async () => {
       const gas = await getPoolExchangeGas();
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
       const expectedAmountSecondToken = new BigNumber(1)
@@ -1530,7 +1538,7 @@ describe("Check DexAccount add Pair", () => {
         .buildExchangePayload({
           id: getRandomNonce(),
           deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.expected_amount,
+          expected_amount: expectedAmountSecondToken,
           recipient: zeroAddress,
           referrer: zeroAddress,
           cancel_payload: null,
@@ -1566,9 +1574,11 @@ describe("Check DexAccount add Pair", () => {
         )
           .plus(expectedExchangeData.expected_amount)
           .minus(
-            poolDataEnd.accumulatedFees[
-              poolsData.stablePool.roots[2].address.toString()
-            ],
+            await getFeesFromTotalFee(
+              poolsData.stablePool.contract,
+              expectedExchangeData.expected_fee,
+              false,
+            ).then(a => a.beneficiaryFee),
           )
           .toString(),
       ).to.equal(
