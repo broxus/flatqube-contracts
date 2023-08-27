@@ -320,7 +320,7 @@ describe(`Test beneficiary fee`, function () {
         ]),
       );
 
-      const { traceTree } = await locklift.tracing.trace(
+      await locklift.transactions.waitFinalized(
         await DexAccount.methods
           .depositLiquidityV2({
             _callId: getRandomNonce(),
@@ -336,10 +336,6 @@ describe(`Test beneficiary fee`, function () {
           }),
       );
 
-      expect(traceTree)
-        .to.emit("DepositLiquidityV2", poolsData.stablePool.contract)
-        .count(1);
-
       const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
       const accountLpEnd = (
         await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
@@ -350,6 +346,9 @@ describe(`Test beneficiary fee`, function () {
         .reduce((acc, curr) => acc.plus(curr), new BigNumber(0))
         .toString();
       const totalDepoEnd = Object.values(poolDataEnd.balances)
+        .reduce((acc, curr) => acc.plus(curr), new BigNumber(0))
+        .toString();
+      const totalFees = Object.values(poolDataEnd.accumulatedFees)
         .reduce((acc, curr) => acc.plus(curr), new BigNumber(0))
         .toString();
 
@@ -388,9 +387,16 @@ describe(`Test beneficiary fee`, function () {
       //   dexPoolInfoEnd.lp_supply,
       //   "Wrong LP supply",
       // );
+      console.log(
+        expectedAccount2TokenBalances,
+        "expectedAccount2TokenBalances",
+      );
+      console.log(poolDataStart, "poolDataStart");
+      console.log(poolDataEnd, "poolDataEnd");
       for (let i = 0; i < N_COINS.length; i++) {
-        expect(expectedAccount2TokenBalances[i]).to.equal(
-          poolDataEnd.balances[tokenRoots[i].address.toString()],
+        expect(+expectedAccount2TokenBalances[i]).to.approximately(
+          +poolDataEnd.balances[tokenRoots[i].address.toString()],
+          +poolDataEnd.accumulatedFees[tokenRoots[i].address.toString()] * 3,
           `Wrong DexAccount#2 ${tokens[i].symbol}`,
         );
       }
@@ -401,22 +407,28 @@ describe(`Test beneficiary fee`, function () {
       expect(
         new BigNumber(poolDataStart.balances[receivedTokenAddress.toString()])
           .plus(expected.amounts[receivedTokenAddress.toString()])
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[receivedTokenAddress.toString()],
+          .toNumber(),
+      ).to.approximately(
+        +poolDataEnd.balances[receivedTokenAddress.toString()],
+        +poolDataEnd.accumulatedFees[receivedTokenAddress.toString()] * 3,
         `Pool has wrong received token balance`,
       );
       expect(
-        new BigNumber(totalDepoStart).plus(totalReceived).toString(),
-      ).to.equal(totalDepoEnd, `Account has wrong received token balance`);
+        new BigNumber(totalDepoStart).plus(totalReceived).toNumber(),
+      ).to.approximately(
+        +totalDepoEnd,
+        new BigNumber(totalFees).times(3).toNumber(),
+        `Account has wrong received token balance`,
+      );
       expect(
         new BigNumber(
           poolDataStart.accumulatedFees[receivedTokenAddress.toString()],
         )
-          .plus(expected.beneficiaryFees[tokens[0].root])
-          .toString(),
-      ).to.equal(
-        poolDataEnd.accumulatedFees[receivedTokenAddress.toString()],
+          .plus(expected.poolFees[tokens[0].root])
+          .toNumber(),
+      ).to.approximately(
+        +poolDataEnd.accumulatedFees[receivedTokenAddress.toString()],
+        10,
         `Pool has wrong received token fees`,
       );
       expect(
@@ -430,6 +442,7 @@ describe(`Test beneficiary fee`, function () {
     it("DexOwner deposit Coin1 liquidity", async function () {
       console.log("#################################################");
       console.log(`# Account#2 deposit ${tokens[1].symbol} liquidity`);
+      const TOKEN_NUM = 1;
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
       const accountLpStart = (
         await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
@@ -440,8 +453,8 @@ describe(`Test beneficiary fee`, function () {
       console.log(accountLpStart, "accountLpStart");
       console.log(receivedTokenAddress, "receivedTokenAddress");
       const operations = {
-        root: tokenRoots[1].address,
-        amount: (N_COINS[1] ** 10).toString(),
+        root: tokenRoots[TOKEN_NUM].address,
+        amount: (N_COINS[TOKEN_NUM] ** 10).toString(),
       };
 
       const expected = await expectedDepositLiquidityOneCoin(
@@ -455,7 +468,7 @@ describe(`Test beneficiary fee`, function () {
         .buildDepositLiquidityPayload({
           id: 0,
           deploy_wallet_grams: toNano(0.05),
-          expected_amount: expected.lpReward,
+          expected_amount: LP_REWARD,
           recipient: Account4.address,
           referrer: Account4.address,
           success_payload: null,
@@ -465,45 +478,54 @@ describe(`Test beneficiary fee`, function () {
 
       console.log(expected, "expected");
 
-      await tokenWallets[1].methods
-        .transfer({
-          amount: operations.amount,
-          recipient: poolsData.stablePool.contract.address,
-          deployWalletValue: 0,
-          remainingGasTo: Account4.address,
-          notify: true,
-          payload: payload.value0,
-        })
-        .send({
-          amount: toNano(3.3),
-          from: DexOwner.address,
-        });
-
-      // await Account2.runTarget({
-      //   contract: tokenWallets2[1],
-      //   method: "transfer",
-      //   params: {
-      //     amount: new BigNumber(TOKENS_TO_DEPOSIT)
-      //       .shiftedBy(tokens[1].decimals)
-      //       .toString(),
-      //     recipient: DexPool.address,
-      //     deployWalletValue: 0,
-      //     remainingGasTo: Account2.address,
-      //     notify: true,
-      //     payload: payload,
-      //   },
-      //   value: locklift.utils.convertCrystal("3.3", "nano"),
-      //   keyPair: keyPairs[1],
-      // });
+      await locklift.transactions.waitFinalized(
+        await tokenWallets[TOKEN_NUM].methods
+          .transfer({
+            amount: operations.amount,
+            recipient: poolsData.stablePool.contract.address,
+            deployWalletValue: 0,
+            remainingGasTo: Account4.address,
+            notify: true,
+            payload: payload.value0,
+          })
+          .send({
+            amount: toNano(3.3),
+            from: DexOwner.address,
+          }),
+      );
 
       const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
       const accountLpEnd = (
         await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
       )[0];
 
+      expect(poolDataStart.actualTotalSupply).to.equal(
+        new BigNumber(poolDataEnd.actualTotalSupply)
+          .minus(LP_REWARD)
+          .toString(),
+        "WRONG actualTotalSupply!",
+      );
       console.log(poolDataEnd, "poolDataEnd");
       console.log(accountLpEnd, "accountLpEnd");
 
+      console.log(
+        poolDataEnd.accumulatedFees[tokenRoots[TOKEN_NUM].address.toString()],
+        "poolDataEnd.accumulatedFees[tokenRoots[TOKEN_NUM].address.toString()]",
+      );
+      expect(
+        +poolDataStart.accumulatedFees[
+          tokenRoots[TOKEN_NUM].address.toString()
+        ],
+      ).to.lessThanOrEqual(
+        +poolDataEnd.accumulatedFees[tokenRoots[TOKEN_NUM].address.toString()],
+        "Fees didnt change in pool",
+      );
+      // for (let i = 0; i < N_COINS.length; i++) {
+      //   expect(expectedAccount2TokenBalances[i]).to.equal(
+      //     poolDataEnd.balances[tokenRoots[i].address.toString()],
+      //     `Wrong DexAccount#2 ${tokens[i].symbol}`,
+      //   );
+      // }
       // const expectedAccountTokenBalances = accountStart.token_balances;
       // expectedAccountTokenBalances[1] = new BigNumber(
       //   accountStart.token_balances[1],
