@@ -1,6 +1,6 @@
 import { expect } from "chai";
+import BigNumber from "bignumber.js";
 import { Contract, getRandomNonce, toNano, zeroAddress } from "locklift";
-import { Constants } from "../../utils/consts";
 import {
   depositLiquidity,
   getDexAccountData,
@@ -13,8 +13,8 @@ import { displayTx } from "../../utils/helpers";
 import {
   expectedDepositLiquidity,
   expectedDepositLiquidityOneCoin,
+  expectedExchange,
 } from "../../utils/expected.utils";
-import BigNumber from "bignumber.js";
 import { Account } from "everscale-standalone-client";
 import {
   DexAccountAbi,
@@ -59,7 +59,7 @@ const tokenWallets: Contract<TokenWalletUpgradeableAbi>[] = [];
 let DexRoot: Contract<DexRootAbi>;
 let poolLpRoot: Contract<TokenRootUpgradeableAbi>;
 let DexAccount: Contract<DexAccountAbi>;
-let poolLpWallet: Contract<TokenWalletUpgradeableAbi>;
+// let poolLpWallet: Contract<TokenWalletUpgradeableAbi>;
 let DexVault: Contract<DexVaultAbi>;
 
 type poolsType = "stablePool" | "stablePair";
@@ -150,10 +150,10 @@ describe(`Test beneficiary fee`, function () {
       ).lp,
     );
 
-    const lpWallet = await getWallet(DexOwner.address, poolLpRoot.address);
+    // const lpWallet = await getWallet(DexOwner.address, poolLpRoot.address);
 
     poolsData.stablePool.lp = poolLpRoot;
-    poolLpWallet = lpWallet.walletContract;
+    // poolLpWallet = lpWallet.walletContract;
 
     for (let i = 0; i < N_COINS.length; i++) {
       const root = locklift.deployments.getContract<TokenRootUpgradeableAbi>(
@@ -440,9 +440,10 @@ describe(`Test beneficiary fee`, function () {
   // todo: pair?
   describe("Direct deposit to poolsData.stablePool", async function () {
     it("DexOwner deposit Coin1 liquidity", async function () {
-      console.log("#################################################");
-      console.log(`# Account#2 deposit ${tokens[1].symbol} liquidity`);
       const TOKEN_NUM = 1;
+
+      console.log("#################################################");
+      console.log(`# Account#2 deposit ${tokens[TOKEN_NUM].symbol} liquidity`);
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
       const accountLpStart = (
         await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
@@ -495,9 +496,9 @@ describe(`Test beneficiary fee`, function () {
       );
 
       const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-      const accountLpEnd = (
-        await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
-      )[0];
+      // const accountLpEnd = (
+      //   await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
+      // )[0];
 
       expect(poolDataStart.actualTotalSupply).to.equal(
         new BigNumber(poolDataEnd.actualTotalSupply)
@@ -505,13 +506,7 @@ describe(`Test beneficiary fee`, function () {
           .toString(),
         "WRONG actualTotalSupply!",
       );
-      console.log(poolDataEnd, "poolDataEnd");
-      console.log(accountLpEnd, "accountLpEnd");
 
-      console.log(
-        poolDataEnd.accumulatedFees[tokenRoots[TOKEN_NUM].address.toString()],
-        "poolDataEnd.accumulatedFees[tokenRoots[TOKEN_NUM].address.toString()]",
-      );
       expect(
         +poolDataStart.accumulatedFees[
           tokenRoots[TOKEN_NUM].address.toString()
@@ -802,690 +797,381 @@ describe(`Test beneficiary fee`, function () {
     });
   });
 
-  // describe("Direct exchanges", async function () {
-  //   it(`Account#2 exchange Coin2 to Coin1`, async function () {
-  //     console.log("#################################################");
-  //     console.log(
-  //       `# Account#2 exchange ${tokens[1].symbol} to ${tokens[0].symbol}`,
-  //     );
-  //     const dexStart = await dexBalances();
-  //     const dexAccount3Start = await dexAccountBalances(DexAccount3);
-  //     const accountStart = await account2balances();
-  //     const dexPoolInfoStart = await dexPoolInfo();
-  //     const referrerStart = await account4balances();
-  //
-  //     console.log(
-  //       `Account#2 balance start: ` +
-  //         `${
-  //           accountStart.token_balances[0] !== undefined
-  //             ? accountStart.token_balances[0] + ` ${tokens[0].symbol}`
-  //             : `${tokens[0].symbol} (not deployed)`
-  //         }, ` +
-  //         `${
-  //           accountStart.token_balances[1] !== undefined
-  //             ? accountStart.token_balances[1] + ` ${tokens[1].symbol}`
-  //             : `${tokens[1].symbol} (not deployed)`
-  //         }, ` +
-  //         `${
-  //           accountStart.lp !== undefined
-  //             ? accountStart.lp + " LP"
-  //             : "LP (not deployed)"
-  //         }`,
-  //     );
-  //     console.log(
-  //       `DexAccount#3 balance start: ` +
-  //         `${dexAccount3Start.accountBalances[0]} ${tokens[0].symbol}, ${dexAccount3Start.accountBalances[1]} ${tokens[1].symbol}, ${dexAccount3Start.lp} LP`,
-  //     );
-  //     console.log(
-  //       `DexPool start: ` +
-  //         `${dexPoolInfoStart.token_balances[0]} ${tokens[0].symbol}, ${dexPoolInfoStart.token_balances[1]} ${tokens[1].symbol}, ` +
-  //         `${dexPoolInfoStart.token_fees[0]} ${tokens[0].symbol} FEE, ${dexPoolInfoStart.token_fees[1]} ${tokens[1].symbol} FEE, ` +
-  //         `LP SUPPLY (PLAN): ${dexPoolInfoStart.lp_supply} LP, ` +
-  //         `LP SUPPLY (ACTUAL): ${dexPoolInfoStart.lp_supply_actual} LP`,
-  //     );
-  //     console.log(
-  //       `DEXVault start: ${dexStart.token_balances[0]} ${tokens[0].symbol}, ${dexStart.token_balances[1]} ${tokens[1].symbol}`,
-  //     );
-  //     let logs = `Account#4 balance start: `;
-  //     for (let i = 0; i < N_COINS.length; i++) {
-  //       logs += `${referrerStart.token_balances[i] || 0} ${tokens[i].symbol}, `;
-  //     }
-  //     console.log(logs);
-  //
-  //     const TOKENS_TO_EXCHANGE = 100;
-  //
-  //     let expected;
-  //     if (options.roots.length === 2) {
-  //       expected = await DexPool.call({
-  //         method: "expectedExchange",
-  //         params: {
-  //           amount: new BigNumber(TOKENS_TO_EXCHANGE)
-  //             .shiftedBy(tokens[1].decimals)
-  //             .toString(),
-  //           spent_token_root: tokenRoots[1].address,
-  //         },
-  //       });
-  //     } else {
-  //       expected = await DexPool.call({
-  //         method: "expectedExchange",
-  //         params: {
-  //           amount: new BigNumber(TOKENS_TO_EXCHANGE)
-  //             .shiftedBy(tokens[1].decimals)
-  //             .toString(),
-  //           spent_token_root: tokenRoots[1].address,
-  //           receive_token_root: tokenRoots[0].address,
-  //         },
-  //       });
-  //     }
-  //
-  //     console.log(
-  //       `Spent amount: ${TOKENS_TO_EXCHANGE.toString()} ${tokens[1].symbol}`,
-  //     );
-  //     console.log(
-  //       `Expected fee: ${new BigNumber(expected.expected_fee)
-  //         .shiftedBy(-tokens[1].decimals)
-  //         .toString()} ${tokens[1].symbol}`,
-  //     );
-  //     console.log(
-  //       `Expected receive amount: ${new BigNumber(expected.expected_amount)
-  //         .shiftedBy(-tokens[0].decimals)
-  //         .toString()} ${tokens[0].symbol}`,
-  //     );
-  //
-  //     let payload;
-  //     if (options.roots.length === 2) {
-  //       payload = await DexPool.call({
-  //         method: "buildExchangePayloadV2",
-  //         params: {
-  //           _id: 0,
-  //           _deployWalletGrams: locklift.utils.convertCrystal("0.05", "nano"),
-  //           _expectedAmount: expected.expected_amount,
-  //           _recipient: Account2.address,
-  //           _referrer: Account2.address,
-  //         },
-  //       });
-  //     } else {
-  //       payload = await DexPool.call({
-  //         method: "buildExchangePayload",
-  //         params: {
-  //           id: 0,
-  //           deploy_wallet_grams: locklift.utils.convertCrystal("0.05", "nano"),
-  //           expected_amount: expected.expected_amount,
-  //           outcoming: tokenRoots[0].address,
-  //           recipient: Account2.address,
-  //           referrer: Account2.address,
-  //         },
-  //       });
-  //     }
-  //
-  //     tx = await Account2.runTarget({
-  //       contract: tokenWallets2[1],
-  //       method: "transfer",
-  //       params: {
-  //         amount: new BigNumber(TOKENS_TO_EXCHANGE)
-  //           .shiftedBy(tokens[1].decimals)
-  //           .toString(),
-  //         recipient: DexPool.address,
-  //         deployWalletValue: 0,
-  //         remainingGasTo: Account2.address,
-  //         notify: true,
-  //         payload: payload,
-  //       },
-  //       value: locklift.utils.convertCrystal("3.3", "nano"),
-  //       keyPair: keyPairs[1],
-  //     });
-  //
-  //     displayTx(tx);
-  //
-  //     const dexEnd = await dexBalances();
-  //     const dexAccount3End = await dexAccountBalances(DexAccount3);
-  //     const accountEnd = await account2balances();
-  //     const dexPoolInfoEnd = await dexPoolInfo();
-  //     const referrerEnd = await account4balances();
-  //
-  //     console.log(
-  //       `Account#2 balance end: ` +
-  //         `${
-  //           accountEnd.token_balances[0] !== undefined
-  //             ? accountEnd.token_balances[0] + ` ${tokens[0].symbol}`
-  //             : `${tokens[0].symbol} (not deployed)`
-  //         }, ` +
-  //         `${
-  //           accountEnd.token_balances[1] !== undefined
-  //             ? accountEnd.token_balances[1] + ` ${tokens[1].symbol}`
-  //             : `${tokens[1].symbol} (not deployed)`
-  //         }, ` +
-  //         `${
-  //           accountEnd.lp !== undefined
-  //             ? accountEnd.lp + " LP"
-  //             : "LP (not deployed)"
-  //         }`,
-  //     );
-  //     console.log(
-  //       `DexAccount#3 balance end: ` +
-  //         `${dexAccount3End.accountBalances[0]} ${tokens[0].symbol}, ${dexAccount3End.accountBalances[1]} ${tokens[1].symbol}, ${dexAccount3End.lp} LP`,
-  //     );
-  //     console.log(
-  //       `DexPool end: ` +
-  //         `${dexPoolInfoEnd.token_balances[0]} ${tokens[0].symbol}, ${dexPoolInfoEnd.token_balances[1]} ${tokens[1].symbol}, ` +
-  //         `${dexPoolInfoEnd.token_fees[0]} ${tokens[0].symbol} FEE, ${dexPoolInfoEnd.token_fees[1]} ${tokens[1].symbol} FEE, ` +
-  //         `LP SUPPLY (PLAN): ${dexPoolInfoEnd.lp_supply} LP, ` +
-  //         `LP SUPPLY (ACTUAL): ${dexPoolInfoEnd.lp_supply_actual} LP`,
-  //     );
-  //     console.log(
-  //       `DEXVault start: ${dexStart.token_balances[0]} ${tokens[0].symbol}, ${dexStart.token_balances[1]} ${tokens[1].symbol}`,
-  //     );
-  //     logs = `Account#4 balance end: `;
-  //     for (let i = 0; i < N_COINS.length; i++) {
-  //       logs += `${referrerEnd.token_balances[i] || 0} ${tokens[i].symbol}, `;
-  //     }
-  //     console.log(logs);
-  //
-  //     await migration.logGas();
-  //
-  //     let expectedBeneficiary = new BigNumber(TOKENS_TO_EXCHANGE)
-  //       .shiftedBy(tokens[1].decimals)
-  //       .times(
-  //         new BigNumber(feeParams.pool_numerator)
-  //           .plus(feeParams.beneficiary_numerator)
-  //           .plus(feeParams.referrer_numerator),
-  //       )
-  //       .div(feeParams.denominator)
-  //       .dp(0, BigNumber.ROUND_CEIL)
-  //       .times(feeParams.beneficiary_numerator)
-  //       .div(
-  //         new BigNumber(feeParams.pool_numerator)
-  //           .plus(feeParams.beneficiary_numerator)
-  //           .plus(feeParams.referrer_numerator),
-  //       )
-  //       .dp(0, BigNumber.ROUND_FLOOR)
-  //       .shiftedBy(-tokens[1].decimals);
-  //
-  //     console.log(`Beneficiary fee: ${expectedBeneficiary.toString()}`);
-  //
-  //     let expectedReferrer = new BigNumber(TOKENS_TO_EXCHANGE)
-  //       .shiftedBy(tokens[1].decimals)
-  //       .times(
-  //         new BigNumber(feeParams.pool_numerator)
-  //           .plus(feeParams.beneficiary_numerator)
-  //           .plus(feeParams.referrer_numerator),
-  //       )
-  //       .div(feeParams.denominator)
-  //       .dp(0, BigNumber.ROUND_CEIL)
-  //       .times(feeParams.referrer_numerator)
-  //       .div(
-  //         new BigNumber(feeParams.pool_numerator)
-  //           .plus(feeParams.beneficiary_numerator)
-  //           .plus(feeParams.referrer_numerator),
-  //       )
-  //       .dp(0, BigNumber.ROUND_FLOOR)
-  //       .shiftedBy(-tokens[1].decimals);
-  //
-  //     console.log(`Referrer fee: ${expectedReferrer.toString()}`);
-  //
-  //     const expectedReferrerBalanceSpent = expectedReferrer
-  //       .plus(referrerStart.token_balances[1] || 0)
-  //       .toString();
-  //     const expectedDexAccount3Spent = expectedBeneficiary
-  //       .plus(dexPoolInfoStart.token_fees[1])
-  //       .plus(dexAccount3Start.accountBalances[1])
-  //       .toString();
-  //     const expectedDexReceived = new BigNumber(dexStart.token_balances[0])
-  //       .minus(
-  //         new BigNumber(expected.expected_amount).shiftedBy(
-  //           -tokens[0].decimals,
-  //         ),
-  //       )
-  //       .toString();
-  //     const expectedDexSpent = new BigNumber(dexStart.token_balances[1])
-  //       .plus(TOKENS_TO_EXCHANGE)
-  //       .minus(expectedReferrer)
-  //       .toString();
-  //     const expectedAccountReceived = new BigNumber(
-  //       accountStart.token_balances[0],
-  //     )
-  //       .plus(
-  //         new BigNumber(expected.expected_amount).shiftedBy(
-  //           -tokens[0].decimals,
-  //         ),
-  //       )
-  //       .toString();
-  //     const expectedAccountSpent = new BigNumber(accountStart.token_balances[1])
-  //       .minus(TOKENS_TO_EXCHANGE)
-  //       .toString();
-  //     const expectedPoolReceived = new BigNumber(
-  //       dexPoolInfoStart.token_balances[0],
-  //     )
-  //       .minus(
-  //         new BigNumber(expected.expected_amount).shiftedBy(
-  //           -tokens[0].decimals,
-  //         ),
-  //       )
-  //       .toString();
-  //     const expectedPoolSpent = new BigNumber(
-  //       dexPoolInfoStart.token_balances[1],
-  //     )
-  //       .plus(TOKENS_TO_EXCHANGE)
-  //       .minus(expectedBeneficiary)
-  //       .minus(expectedReferrer)
-  //       .toString();
-  //
-  //     expect(expectedDexReceived).to.equal(
-  //       dexEnd.token_balances[0].toString(),
-  //       `Wrong DEX ${tokens[0].symbol} balance`,
-  //     );
-  //     expect(expectedDexSpent).to.equal(
-  //       dexEnd.token_balances[1].toString(),
-  //       `Wrong DEX ${tokens[1].symbol} balance`,
-  //     );
-  //     expect(expectedAccountReceived).to.equal(
-  //       accountEnd.token_balances[0].toString(),
-  //       `Wrong Account#2 ${tokens[0].symbol} balance`,
-  //     );
-  //     expect(expectedAccountSpent).to.equal(
-  //       accountEnd.token_balances[1].toString(),
-  //       `Wrong Account#2 ${tokens[1].symbol} balance`,
-  //     );
-  //     expect(expectedPoolReceived).to.equal(
-  //       dexPoolInfoEnd.token_balances[0].toString(),
-  //       `Wrong DEXPool ${tokens[0].symbol} balance`,
-  //     );
-  //     expect(expectedPoolSpent).to.equal(
-  //       dexPoolInfoEnd.token_balances[1].toString(),
-  //       `Wrong DEXPool ${tokens[1].symbol} balance`,
-  //     );
-  //     expect(expectedDexAccount3Spent).to.equal(
-  //       new BigNumber(dexAccount3End.accountBalances[1])
-  //         .plus(dexPoolInfoEnd.token_fees[1])
-  //         .toString(),
-  //       "Wrong beneficiary fee",
-  //     );
-  //     expect(expectedReferrerBalanceSpent).to.equal(
-  //       referrerEnd.token_balances[1],
-  //       "Wrong referrer fee",
-  //     );
-  //   });
-  //
-  //   it("Account#2 exchange Coin1 to Coin2 (expectedSpendAmount)", async function () {
-  //     console.log("#################################################");
-  //     console.log(
-  //       `# Account#2 exchange ${tokens[0].symbol} to ${tokens[1].symbol}`,
-  //     );
-  //     const dexStart = await dexBalances();
-  //     const dexAccount3Start = await dexAccountBalances(DexAccount3);
-  //     const accountStart = await account2balances();
-  //     const dexPoolInfoStart = await dexPoolInfo();
-  //     const referrerStart = await account4balances();
-  //
-  //     console.log(
-  //       `Account#2 balance start: ` +
-  //         `${
-  //           accountStart.token_balances[0] !== undefined
-  //             ? accountStart.token_balances[0] + ` ${tokens[0].symbol}`
-  //             : `${tokens[0].symbol} (not deployed)`
-  //         }, ` +
-  //         `${
-  //           accountStart.token_balances[1] !== undefined
-  //             ? accountStart.token_balances[1] + ` ${tokens[1].symbol}`
-  //             : `${tokens[1].symbol} (not deployed)`
-  //         }, ` +
-  //         `${
-  //           accountStart.lp !== undefined
-  //             ? accountStart.lp + " LP"
-  //             : "LP (not deployed)"
-  //         }`,
-  //     );
-  //     console.log(
-  //       `DexAccount#3 balance start: ` +
-  //         `${dexAccount3Start.accountBalances[0]} ${tokens[0].symbol}, ${dexAccount3Start.accountBalances[1]} ${tokens[1].symbol}, ${dexAccount3Start.lp} LP`,
-  //     );
-  //     console.log(
-  //       `DexPool start: ` +
-  //         `${dexPoolInfoStart.token_balances[0]} ${tokens[0].symbol}, ${dexPoolInfoStart.token_balances[1]} ${tokens[1].symbol}, ` +
-  //         `${dexPoolInfoStart.token_fees[0]} ${tokens[0].symbol} FEE, ${dexPoolInfoStart.token_fees[1]} ${tokens[1].symbol} FEE, ` +
-  //         `LP SUPPLY (PLAN): ${dexPoolInfoStart.lp_supply} LP, ` +
-  //         `LP SUPPLY (ACTUAL): ${dexPoolInfoStart.lp_supply_actual} LP`,
-  //     );
-  //     console.log(
-  //       `DEXVault start: ${dexStart.token_balances[0]} ${tokens[0].symbol}, ${dexStart.token_balances[1]} ${tokens[1].symbol}`,
-  //     );
-  //     let logs = `Account#4 balance start: `;
-  //     for (let i = 0; i < N_COINS.length; i++) {
-  //       logs += `${referrerStart.token_balances[i] || 0} ${tokens[i].symbol}, `;
-  //     }
-  //     console.log(logs);
-  //
-  //     const TOKENS_TO_RECEIVE = 100;
-  //
-  //     let expected;
-  //     if (options.roots.length === 2) {
-  //       expected = await DexPool.call({
-  //         method: "expectedSpendAmount",
-  //         params: {
-  //           receive_amount: new BigNumber(TOKENS_TO_RECEIVE)
-  //             .shiftedBy(tokens[1].decimals)
-  //             .toString(),
-  //           receive_token_root: tokenRoots[1].address,
-  //         },
-  //       });
-  //     } else {
-  //       expected = await DexPool.call({
-  //         method: "expectedSpendAmount",
-  //         params: {
-  //           receive_amount: new BigNumber(TOKENS_TO_RECEIVE)
-  //             .shiftedBy(tokens[1].decimals)
-  //             .toString(),
-  //           receive_token_root: tokenRoots[1].address,
-  //           spent_token_root: tokenRoots[0].address,
-  //         },
-  //       });
-  //     }
-  //
-  //     console.log(
-  //       `Expected spend amount: ${new BigNumber(expected.expected_amount)
-  //         .shiftedBy(-tokens[0].decimals)
-  //         .toString()} ${tokens[0].symbol}`,
-  //     );
-  //     console.log(
-  //       `Expected fee: ${new BigNumber(expected.expected_fee)
-  //         .shiftedBy(-tokens[0].decimals)
-  //         .toString()} ${tokens[0].symbol}`,
-  //     );
-  //     console.log(
-  //       `Expected receive amount: ${TOKENS_TO_RECEIVE} ${tokens[1].symbol}`,
-  //     );
-  //
-  //     let payload;
-  //     if (options.roots.length === 2) {
-  //       payload = await DexPool.call({
-  //         method: "buildExchangePayloadV2",
-  //         params: {
-  //           _id: 0,
-  //           _deployWalletGrams: locklift.utils.convertCrystal("0.2", "nano"),
-  //           _expectedAmount: 0,
-  //           _recipient: Account2.address,
-  //           _referrer: Account2.address,
-  //         },
-  //       });
-  //     } else {
-  //       payload = await DexPool.call({
-  //         method: "buildExchangePayload",
-  //         params: {
-  //           id: 0,
-  //           deploy_wallet_grams: 0,
-  //           expected_amount: 0,
-  //           outcoming: tokenRoots[1].address,
-  //           recipient: Account2.address,
-  //           referrer: Account2.address,
-  //         },
-  //       });
-  //     }
-  //
-  //     tx = await Account2.runTarget({
-  //       contract: tokenWallets2[0],
-  //       method: "transfer",
-  //       params: {
-  //         amount: expected.expected_amount,
-  //         recipient: DexPool.address,
-  //         deployWalletValue: 0,
-  //         remainingGasTo: Account2.address,
-  //         notify: true,
-  //         payload: payload,
-  //       },
-  //       value: locklift.utils.convertCrystal("3.3", "nano"),
-  //       keyPair: keyPairs[1],
-  //     });
-  //
-  //     displayTx(tx);
-  //
-  //     const dexEnd = await dexBalances();
-  //     const dexAccount3End = await dexAccountBalances(DexAccount3);
-  //     const accountEnd = await account2balances();
-  //     const dexPoolInfoEnd = await dexPoolInfo();
-  //     const referrerEnd = await account4balances();
-  //
-  //     console.log(
-  //       `Account#2 balance end: ` +
-  //         `${
-  //           accountEnd.token_balances[0] !== undefined
-  //             ? accountEnd.token_balances[0] + ` ${tokens[0].symbol}`
-  //             : `${tokens[0].symbol} (not deployed)`
-  //         }, ` +
-  //         `${
-  //           accountEnd.token_balances[1] !== undefined
-  //             ? accountEnd.token_balances[1] + ` ${tokens[1].symbol}`
-  //             : `${tokens[1].symbol} (not deployed)`
-  //         }, ` +
-  //         `${
-  //           accountEnd.lp !== undefined
-  //             ? accountEnd.lp + " LP"
-  //             : "LP (not deployed)"
-  //         }`,
-  //     );
-  //     console.log(
-  //       `DexAccount#3 balance end: ` +
-  //         `${dexAccount3End.accountBalances[0]} ${tokens[0].symbol}, ${dexAccount3End.accountBalances[1]} ${tokens[1].symbol}, ${dexAccount3End.lp} LP`,
-  //     );
-  //     console.log(
-  //       `DexPool end: ` +
-  //         `${dexPoolInfoEnd.token_balances[0]} ${tokens[0].symbol}, ${dexPoolInfoEnd.token_balances[1]} ${tokens[1].symbol}, ` +
-  //         `${dexPoolInfoEnd.token_fees[0]} ${tokens[0].symbol} FEE, ${dexPoolInfoEnd.token_fees[1]} ${tokens[1].symbol} FEE, ` +
-  //         `LP SUPPLY (PLAN): ${dexPoolInfoEnd.lp_supply} LP, ` +
-  //         `LP SUPPLY (ACTUAL): ${dexPoolInfoEnd.lp_supply_actual} LP`,
-  //     );
-  //     console.log(
-  //       `DEXVault start: ${dexStart.token_balances[0]} ${tokens[0].symbol}, ${dexStart.token_balances[1]} ${tokens[1].symbol}`,
-  //     );
-  //     logs = `Account#4 balance end: `;
-  //     for (let i = 0; i < N_COINS.length; i++) {
-  //       logs += `${referrerEnd.token_balances[i] || 0} ${tokens[i].symbol}, `;
-  //     }
-  //     console.log(logs);
-  //
-  //     await migration.logGas();
-  //
-  //     let expectedBeneficiary = new BigNumber(expected.expected_amount)
-  //       .times(
-  //         new BigNumber(feeParams.pool_numerator)
-  //           .plus(feeParams.beneficiary_numerator)
-  //           .plus(feeParams.referrer_numerator),
-  //       )
-  //       .div(feeParams.denominator)
-  //       .dp(0, BigNumber.ROUND_CEIL)
-  //       .times(feeParams.beneficiary_numerator)
-  //       .div(
-  //         new BigNumber(feeParams.pool_numerator)
-  //           .plus(feeParams.beneficiary_numerator)
-  //           .plus(feeParams.referrer_numerator),
-  //       )
-  //       .dp(0, BigNumber.ROUND_FLOOR)
-  //       .shiftedBy(-tokens[0].decimals);
-  //
-  //     console.log(`Beneficiary fee: ${expectedBeneficiary.toString()}`);
-  //
-  //     let expectedReferrer = new BigNumber(expected.expected_amount)
-  //       .times(
-  //         new BigNumber(feeParams.pool_numerator)
-  //           .plus(feeParams.beneficiary_numerator)
-  //           .plus(feeParams.referrer_numerator),
-  //       )
-  //       .div(feeParams.denominator)
-  //       .dp(0, BigNumber.ROUND_CEIL)
-  //       .times(feeParams.referrer_numerator)
-  //       .div(
-  //         new BigNumber(feeParams.pool_numerator)
-  //           .plus(feeParams.beneficiary_numerator)
-  //           .plus(feeParams.referrer_numerator),
-  //       )
-  //       .dp(0, BigNumber.ROUND_FLOOR)
-  //       .shiftedBy(-tokens[0].decimals);
-  //
-  //     console.log(`Referrer fee: ${expectedReferrer.toString()}`);
-  //
-  //     const expectedReferrerBalanceSpent = expectedReferrer
-  //       .plus(referrerStart.token_balances[0] || 0)
-  //       .toString();
-  //
-  //     const expectedDexAccount3Spent = expectedBeneficiary
-  //       .plus(dexPoolInfoStart.token_fees[0])
-  //       .plus(dexAccount3Start.accountBalances[0])
-  //       .toString();
-  //
-  //     const expectedDexReceived = new BigNumber(dexStart.token_balances[1])
-  //       .minus(TOKENS_TO_RECEIVE)
-  //       .toString();
-  //     const expectedDexSpent = new BigNumber(dexStart.token_balances[0])
-  //       .plus(
-  //         new BigNumber(expected.expected_amount).shiftedBy(
-  //           -tokens[0].decimals,
-  //         ),
-  //       )
-  //       .minus(expectedReferrer)
-  //       .toString();
-  //     const expectedAccountReceived = new BigNumber(
-  //       accountStart.token_balances[1],
-  //     )
-  //       .plus(TOKENS_TO_RECEIVE)
-  //       .toString();
-  //     const expectedAccountSpent = new BigNumber(accountStart.token_balances[0])
-  //       .minus(
-  //         new BigNumber(expected.expected_amount).shiftedBy(
-  //           -tokens[0].decimals,
-  //         ),
-  //       )
-  //       .toString();
-  //     const expectedPoolSpent = new BigNumber(
-  //       dexPoolInfoStart.token_balances[0],
-  //     )
-  //       .plus(
-  //         new BigNumber(expected.expected_amount).shiftedBy(
-  //           -tokens[0].decimals,
-  //         ),
-  //       )
-  //       .minus(expectedBeneficiary)
-  //       .minus(expectedReferrer)
-  //       .toString();
-  //     const expectedPoolReceived = new BigNumber(
-  //       dexPoolInfoStart.token_balances[1],
-  //     )
-  //       .minus(TOKENS_TO_RECEIVE)
-  //       .toString();
-  //
-  //     expect(expectedAccountSpent).to.equal(
-  //       accountEnd.token_balances[0].toString(),
-  //       `Wrong Account#2 ${tokens[0].symbol} balance`,
-  //     );
-  //     expect(expectedAccountReceived).to.equal(
-  //       accountEnd.token_balances[1].toString(),
-  //       `Wrong Account#2 ${tokens[1].symbol} balance`,
-  //     );
-  //     expect(new BigNumber(expectedPoolSpent).toNumber()).to.approximately(
-  //       new BigNumber(dexPoolInfoEnd.token_balances[0]).toNumber(),
-  //       new BigNumber(1).shiftedBy(-Constants.LP_DECIMALS).toNumber(),
-  //       `Wrong DEXPool ${tokens[0].symbol} balance`,
-  //     );
-  //     expect(expectedPoolReceived).to.equal(
-  //       dexPoolInfoEnd.token_balances[1].toString(),
-  //       `Wrong DEXPool ${tokens[1].symbol} balance`,
-  //     );
-  //     expect(expectedDexAccount3Spent).to.equal(
-  //       new BigNumber(dexAccount3End.accountBalances[0])
-  //         .plus(dexPoolInfoEnd.token_fees[0])
-  //         .toString(),
-  //       `Wrong DexAccount ${tokens[0].symbol} balance`,
-  //     );
-  //     expect(
-  //       new BigNumber(expectedReferrerBalanceSpent).toNumber(),
-  //     ).to.approximately(
-  //       new BigNumber(referrerEnd.token_balances[0]).toNumber(),
-  //       new BigNumber(1).shiftedBy(-tokens[0].decimals).toNumber(),
-  //       "Wrong referrer fee",
-  //     );
-  //     expect(new BigNumber(expectedDexSpent).toNumber()).to.approximately(
-  //       new BigNumber(dexEnd.token_balances[0]).toNumber(),
-  //       new BigNumber(1).shiftedBy(-tokens[0].decimals).toNumber(),
-  //       `Wrong DEX ${tokens[0].symbol} balance`,
-  //     );
-  //     expect(new BigNumber(expectedDexReceived).toNumber()).to.approximately(
-  //       new BigNumber(dexEnd.token_balances[1]).toNumber(),
-  //       new BigNumber(1).shiftedBy(-tokens[1].decimals).toNumber(),
-  //       `Wrong DEX ${tokens[1].symbol} balance`,
-  //     );
-  //   });
-  // });
-  //
-  // describe("Withdraw beneficiary fee", async function () {
-  //   it("Account#3 withdraw fee", async function () {
-  //     console.log("#################################################");
-  //     console.log("# DexPool.withdrawBeneficiaryFee");
-  //     const dexPoolInfoStart = await dexPoolInfo();
-  //     const dexAccount3Start = await dexAccountBalances(DexAccount3);
-  //
-  //     let logs = "DexAccount#3 balance start: ";
-  //     for (let i = 0; i < N_COINS.length; i++) {
-  //       logs +=
-  //         `${dexAccount3Start.accountBalances[i]} ${tokens[i].symbol}` +
-  //         (i === N_COINS - 1 ? "" : ", ");
-  //     }
-  //     console.log(logs);
-  //     logs = "";
-  //     for (let i = 0; i < N_COINS.length; i++) {
-  //       logs +=
-  //         `${dexPoolInfoStart.token_fees[i]} ${tokens[i].symbol} FEE` +
-  //         (i === N_COINS - 1 ? "" : ", ");
-  //     }
-  //     console.log(logs);
-  //
-  //     tx = await Account3.runTarget({
-  //       contract: DexPool,
-  //       method: "withdrawBeneficiaryFee",
-  //       params: {
-  //         send_gas_to: Account3.address,
-  //       },
-  //       value: locklift.utils.convertCrystal("1", "nano"),
-  //       keyPair: keyPairs[2],
-  //     });
-  //
-  //     displayTx(tx);
-  //
-  //     const dexPoolInfoEnd = await dexPoolInfo();
-  //     const dexAccount3End = await dexAccountBalances(DexAccount3);
-  //
-  //     logs = `DexAccount#3 balance end: `;
-  //     for (let i = 0; i < N_COINS.length; i++) {
-  //       logs +=
-  //         `${dexAccount3End.accountBalances[i]} ${tokens[i].symbol}` +
-  //         (i === N_COINS - 1 ? "" : ", ");
-  //     }
-  //     console.log(logs);
-  //     logs = "";
-  //     for (let i = 0; i < N_COINS.length; i++) {
-  //       logs +=
-  //         `${dexPoolInfoEnd.token_fees[i]} ${tokens[i].symbol} FEE` +
-  //         (i === N_COINS - 1 ? "" : ", ");
-  //     }
-  //     console.log(logs);
-  //
-  //     await migration.logGas();
-  //
-  //     for (let i = 0; i < N_COINS.length; i++) {
-  //       expect(dexPoolInfoEnd.token_fees[i]).to.equal(
-  //         "0",
-  //         `Wrong ${tokens[i].symbol} pool fee`,
-  //       );
-  //     }
-  //     for (let i = 0; i < N_COINS.length; i++) {
-  //       expect(
-  //         new BigNumber(dexAccount3Start.accountBalances[i])
-  //           .plus(dexPoolInfoStart.token_fees[i])
-  //           .toString(),
-  //       ).to.equal(
-  //         new BigNumber(dexAccount3End.accountBalances[i])
-  //           .plus(dexPoolInfoEnd.token_fees[i])
-  //           .toString(),
-  //         `Wrong ${tokens[i].symbol} beneficiary fee`,
-  //       );
-  //     }
-  //   });
-  // });
+  describe("Direct exchanges", async function () {
+    it(`Account#2 exchange Coin2 to Coin1`, async function () {
+      const TOKEN_1 = 0;
+      const TOKEN_2 = 1;
+      console.log("#################################################");
+      console.log(
+        `# Account#2 exchange ${tokens[TOKEN_1].symbol} to ${tokens[TOKEN_2].symbol}`,
+      );
+      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
+      const accountLpStart = (
+        await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
+      )[0];
+
+      const TOKENS_TO_EXCHANGE = 10;
+
+      const expected = await expectedExchange(
+        poolsData.stablePool.contract as Contract<DexStablePoolAbi>,
+        TOKENS_TO_EXCHANGE,
+        poolsData.stablePool.roots[TOKEN_2].address,
+        poolsData.stablePool.roots[TOKEN_1].address,
+      );
+
+      console.log(expected, "expected");
+      const payload = await poolsData.stablePool.contract.methods
+        .buildExchangePayload({
+          id: 0,
+          deploy_wallet_grams: toNano(0.05),
+          expected_amount: expected.receivedAmount,
+          outcoming: poolsData.stablePool.roots[TOKEN_1].address,
+          recipient: DexOwner.address,
+          referrer: DexOwner.address,
+          success_payload: null,
+          cancel_payload: null,
+          toNative: false,
+        })
+        .call();
+
+      await locklift.transactions.waitFinalized(
+        await tokenWallets[TOKEN_2].methods
+          .transfer({
+            amount: TOKENS_TO_EXCHANGE * N_COINS[TOKEN_2] ** 10,
+            recipient: poolsData.stablePool.contract.address,
+            deployWalletValue: 0,
+            remainingGasTo: Account4.address,
+            notify: true,
+            payload: payload.value0,
+          })
+          .send({
+            amount: toNano(3.3),
+            from: DexOwner.address,
+          }),
+      );
+
+      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
+      const accountLpEnd = (
+        await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
+      )[0];
+
+      console.log(poolDataStart, "poolDataStart");
+      console.log(poolDataEnd, "poolDataEnd");
+
+      console.log(accountLpStart, "accountLpStart");
+      console.log(accountLpEnd, "accountLpEnd");
+
+      // console.log(`Referrer fee: ${expectedReferrer.toString()}`);
+
+      // const expectedReferrerBalanceSpent = expectedReferrer
+      //   .plus(referrerStart.token_balances[1] || 0)
+      //   .toString();
+      // const expectedDexAccount3Spent = expectedBeneficiary
+      //   .plus(dexPoolInfoStart.token_fees[1])
+      //   .plus(dexAccount3Start.accountBalances[1])
+      //   .toString();
+      // const expectedDexReceived = new BigNumber(dexStart.token_balances[0])
+      //   .minus(
+      //     new BigNumber(expected.expected_amount).shiftedBy(
+      //       -tokens[0].decimals,
+      //     ),
+      //   )
+      //   .toString();
+      // const expectedDexSpent = new BigNumber(dexStart.token_balances[1])
+      //   .plus(TOKENS_TO_EXCHANGE)
+      //   .minus(expectedReferrer)
+      //   .toString();
+      // const expectedAccountReceived = new BigNumber(
+      //   accountStart.token_balances[0],
+      // )
+      //   .plus(
+      //     new BigNumber(expected.expected_amount).shiftedBy(
+      //       -tokens[0].decimals,
+      //     ),
+      //   )
+      //   .toString();
+      // const expectedAccountSpent = new BigNumber(accountStart.token_balances[1])
+      //   .minus(TOKENS_TO_EXCHANGE)
+      //   .toString();
+      // const expectedPoolReceived = new BigNumber(
+      //   dexPoolInfoStart.token_balances[0],
+      // )
+      //   .minus(
+      //     new BigNumber(expected.expected_amount).shiftedBy(
+      //       -tokens[0].decimals,
+      //     ),
+      //   )
+      //   .toString();
+      // const expectedPoolSpent = new BigNumber(
+      //   dexPoolInfoStart.token_balances[1],
+      // )
+      //   .plus(TOKENS_TO_EXCHANGE)
+      //   .minus(expectedBeneficiary)
+      //   .minus(expectedReferrer)
+      //   .toString();
+      //
+      // expect(expectedDexReceived).to.equal(
+      //   dexEnd.token_balances[0].toString(),
+      //   `Wrong DEX ${tokens[0].symbol} balance`,
+      // );
+      // expect(expectedDexSpent).to.equal(
+      //   dexEnd.token_balances[1].toString(),
+      //   `Wrong DEX ${tokens[1].symbol} balance`,
+      // );
+      // expect(expectedAccountReceived).to.equal(
+      //   accountEnd.token_balances[0].toString(),
+      //   `Wrong Account#2 ${tokens[0].symbol} balance`,
+      // );
+      // expect(expectedAccountSpent).to.equal(
+      //   accountEnd.token_balances[1].toString(),
+      //   `Wrong Account#2 ${tokens[1].symbol} balance`,
+      // );
+      // expect(expectedPoolReceived).to.equal(
+      //   dexPoolInfoEnd.token_balances[0].toString(),
+      //   `Wrong DEXPool ${tokens[0].symbol} balance`,
+      // );
+      // expect(expectedPoolSpent).to.equal(
+      //   dexPoolInfoEnd.token_balances[1].toString(),
+      //   `Wrong DEXPool ${tokens[1].symbol} balance`,
+      // );
+      // expect(expectedDexAccount3Spent).to.equal(
+      //   new BigNumber(dexAccount3End.accountBalances[1])
+      //     .plus(dexPoolInfoEnd.token_fees[1])
+      //     .toString(),
+      //   "Wrong beneficiary fee",
+      // );
+      // expect(expectedReferrerBalanceSpent).to.equal(
+      //   referrerEnd.token_balances[1],
+      //   "Wrong referrer fee",
+      // );
+    });
+
+    it("Account#2 exchange Coin1 to Coin2 (expectedSpendAmount)", async function () {
+      console.log("#################################################");
+      console.log(
+        `# Account#2 exchange ${tokens[0].symbol} to ${tokens[1].symbol}`,
+      );
+      const TOKEN_1 = 0;
+      const TOKEN_2 = 1;
+      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
+      const accountLpStart = (
+        await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
+      )[0];
+
+      const TOKENS_TO_RECEIVE = 100;
+
+      const expected = await poolsData.stablePool.contract.methods
+        .expectedSpendAmount({
+          receive_amount: TOKENS_TO_RECEIVE * N_COINS[TOKEN_1] ** 10,
+          receive_token_root: poolsData.stablePool.roots[TOKEN_2].address,
+          spent_token_root: poolsData.stablePool.roots[TOKEN_1].address,
+          answerId: 0,
+        })
+        .call();
+
+      console.log(expected, "expected");
+      // todo: for pair
+      // expected = await DexPool.call({
+      //   method: "expectedSpendAmount",
+      //   params: {
+      //     receive_amount: new BigNumber(TOKENS_TO_RECEIVE)
+      //       .shiftedBy(tokens[1].decimals)
+      //       .toString(),
+      //     receive_token_root: tokenRoots[1].address,
+      //   },
+      // payload = await DexPool.call({
+      //   method: "buildExchangePayloadV2",
+      //   params: {
+      //     _id: 0,
+      //     _deployWalletGrams: locklift.utils.convertCrystal("0.2", "nano"),
+      //     _expectedAmount: 0,
+      //     _recipient: Account2.address,
+      //     _referrer: Account2.address,
+      //   },
+      // });
+
+      const payload = await poolsData.stablePool.contract.methods
+        .buildExchangePayload({
+          id: 0,
+          deploy_wallet_grams: toNano(0.05),
+          expected_amount: expected.expected_amount,
+          outcoming: poolsData.stablePool.roots[TOKEN_1].address,
+          recipient: DexOwner.address,
+          referrer: DexOwner.address,
+          success_payload: null,
+          cancel_payload: null,
+          toNative: false,
+        })
+        .call();
+
+      await locklift.transactions.waitFinalized(
+        await tokenWallets[TOKEN_1].methods
+          .transfer({
+            amount: expected.expected_amount,
+            recipient: poolsData.stablePool.contract.address,
+            deployWalletValue: 0,
+            remainingGasTo: Account4.address,
+            notify: true,
+            payload: payload.value0,
+          })
+          .send({
+            amount: toNano(3.3),
+            from: DexOwner.address,
+          }),
+      );
+
+      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
+      const accountLpEnd = (
+        await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
+      )[0];
+
+      console.log(poolDataStart, "poolDataStart");
+      console.log(poolDataEnd, "poolDataEnd");
+
+      console.log(accountLpStart, "accountLpStart");
+      console.log(accountLpEnd, "accountLpEnd");
+      //
+      // const expectedReferrerBalanceSpent = expectedReferrer
+      //   .plus(referrerStart.token_balances[0] || 0)
+      //   .toString();
+      //
+      // const expectedDexAccount3Spent = expectedBeneficiary
+      //   .plus(dexPoolInfoStart.token_fees[0])
+      //   .plus(dexAccount3Start.accountBalances[0])
+      //   .toString();
+      //
+      // const expectedDexReceived = new BigNumber(dexStart.token_balances[1])
+      //   .minus(TOKENS_TO_RECEIVE)
+      //   .toString();
+      // const expectedDexSpent = new BigNumber(dexStart.token_balances[0])
+      //   .plus(
+      //     new BigNumber(expected.expected_amount).shiftedBy(
+      //       -tokens[0].decimals,
+      //     ),
+      //   )
+      //   .minus(expectedReferrer)
+      //   .toString();
+      // const expectedAccountReceived = new BigNumber(
+      //   accountStart.token_balances[1],
+      // )
+      //   .plus(TOKENS_TO_RECEIVE)
+      //   .toString();
+      // const expectedAccountSpent = new BigNumber(accountStart.token_balances[0])
+      //   .minus(
+      //     new BigNumber(expected.expected_amount).shiftedBy(
+      //       -tokens[0].decimals,
+      //     ),
+      //   )
+      //   .toString();
+      // const expectedPoolSpent = new BigNumber(
+      //   dexPoolInfoStart.token_balances[0],
+      // )
+      //   .plus(
+      //     new BigNumber(expected.expected_amount).shiftedBy(
+      //       -tokens[0].decimals,
+      //     ),
+      //   )
+      //   .minus(expectedBeneficiary)
+      //   .minus(expectedReferrer)
+      //   .toString();
+      // const expectedPoolReceived = new BigNumber(
+      //   dexPoolInfoStart.token_balances[1],
+      // )
+      //   .minus(TOKENS_TO_RECEIVE)
+      //   .toString();
+      //
+      // expect(expectedAccountSpent).to.equal(
+      //   accountEnd.token_balances[0].toString(),
+      //   `Wrong Account#2 ${tokens[0].symbol} balance`,
+      // );
+      // expect(expectedAccountReceived).to.equal(
+      //   accountEnd.token_balances[1].toString(),
+      //   `Wrong Account#2 ${tokens[1].symbol} balance`,
+      // );
+      // expect(new BigNumber(expectedPoolSpent).toNumber()).to.approximately(
+      //   new BigNumber(dexPoolInfoEnd.token_balances[0]).toNumber(),
+      //   new BigNumber(1).shiftedBy(-Constants.LP_DECIMALS).toNumber(),
+      //   `Wrong DEXPool ${tokens[0].symbol} balance`,
+      // );
+      // expect(expectedPoolReceived).to.equal(
+      //   dexPoolInfoEnd.token_balances[1].toString(),
+      //   `Wrong DEXPool ${tokens[1].symbol} balance`,
+      // );
+      // expect(expectedDexAccount3Spent).to.equal(
+      //   new BigNumber(dexAccount3End.accountBalances[0])
+      //     .plus(dexPoolInfoEnd.token_fees[0])
+      //     .toString(),
+      //   `Wrong DexAccount ${tokens[0].symbol} balance`,
+      // );
+      // expect(
+      //   new BigNumber(expectedReferrerBalanceSpent).toNumber(),
+      // ).to.approximately(
+      //   new BigNumber(referrerEnd.token_balances[0]).toNumber(),
+      //   new BigNumber(1).shiftedBy(-tokens[0].decimals).toNumber(),
+      //   "Wrong referrer fee",
+      // );
+      // expect(new BigNumber(expectedDexSpent).toNumber()).to.approximately(
+      //   new BigNumber(dexEnd.token_balances[0]).toNumber(),
+      //   new BigNumber(1).shiftedBy(-tokens[0].decimals).toNumber(),
+      //   `Wrong DEX ${tokens[0].symbol} balance`,
+      // );
+      // expect(new BigNumber(expectedDexReceived).toNumber()).to.approximately(
+      //   new BigNumber(dexEnd.token_balances[1]).toNumber(),
+      //   new BigNumber(1).shiftedBy(-tokens[1].decimals).toNumber(),
+      //   `Wrong DEX ${tokens[1].symbol} balance`,
+      // );
+    });
+  });
+
+  describe("Withdraw beneficiary fee", async function () {
+    it("Account#3 withdraw fee", async function () {
+      console.log("#################################################");
+      console.log("# DexPool.withdrawBeneficiaryFee");
+      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
+      const accountLpStart = (
+        await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
+      )[0];
+
+      await locklift.transactions.waitFinalized(
+        await poolsData.stablePool.contract.methods
+          .withdrawBeneficiaryFee({
+            send_gas_to: Account4.address,
+          })
+          .send({
+            from: DexOwner.address,
+            amount: toNano(1),
+          }),
+      );
+
+      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
+      const accountLpEnd = (
+        await getDexAccountData([poolsData.stablePool.lp.address], DexAccount)
+      )[0];
+
+      console.log(poolDataStart, "poolDataStart");
+      console.log(poolDataEnd, "poolDataEnd");
+
+      console.log(accountLpStart, "accountLpStart");
+      console.log(accountLpEnd, "accountLpEnd");
+
+      // for (let i = 0; i < N_COINS.length; i++) {
+      //   expect(dexPoolInfoEnd.token_fees[i]).to.equal(
+      //     "0",
+      //     `Wrong ${tokens[i].symbol} pool fee`,
+      //   );
+      // }
+      // for (let i = 0; i < N_COINS.length; i++) {
+      //   expect(
+      //     new BigNumber(dexAccount3Start.accountBalances[i])
+      //       .plus(dexPoolInfoStart.token_fees[i])
+      //       .toString(),
+      //   ).to.equal(
+      //     new BigNumber(dexAccount3End.accountBalances[i])
+      //       .plus(dexPoolInfoEnd.token_fees[i])
+      //       .toString(),
+      //     `Wrong ${tokens[i].symbol} beneficiary fee`,
+      //   );
+      // }
+    });
+  });
 });
