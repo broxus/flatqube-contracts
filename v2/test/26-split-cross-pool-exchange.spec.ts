@@ -28,7 +28,15 @@ import {
 } from "../../utils/expected.utils";
 import { calcValue } from "../utils/gas.utils";
 
-describe("Check direct CrossPairExchange v1", async function () {
+type RouteStep = {
+  outcoming: Address;
+  numerator: number;
+  pool: Contract<DexPairAbi> | Contract<DexStablePoolAbi>;
+  nextSteps: RouteStep[];
+  failed?: boolean;
+};
+
+describe("Check direct CrossPairExchange v2", async function () {
   let owner: Account;
   let dexAccount: Contract<DexAccountAbi>;
   let dexRoot: Contract<DexRootAbi>;
@@ -59,7 +67,7 @@ describe("Check direct CrossPairExchange v1", async function () {
   async function crossPoolExchangeTest(
     startToken: Address,
     startAmount: string,
-    route: any,
+    route: RouteStep[],
   ) {
     const poolsStart: Record<string, any> = {};
     await getRouteDexPoolsInfo(route, poolsStart);
@@ -223,7 +231,7 @@ describe("Check direct CrossPairExchange v1", async function () {
       return nextIndices;
     }
 
-    const poolsExpected = {};
+    const poolsExpected: Record<string, any> = {};
     const finalTokens: Record<string, string> = {};
     const nextIndices = await getRouteDexPoolsExpected(
       route,
@@ -420,7 +428,7 @@ describe("Check direct CrossPairExchange v1", async function () {
       const startAmount = new BigNumber(10)
         .shiftedBy(tokensData[startToken.address.toString()].decimals)
         .toString();
-      const route = [
+      const route: RouteStep[] = [
         {
           outcoming: getTokenBySymbol("DexStablePool_lp").address,
           numerator: 1,
@@ -442,7 +450,7 @@ describe("Check direct CrossPairExchange v1", async function () {
                       pool: getPoolBySymbol(
                         `DexStablePair_token-9-0_token-18-0`,
                       ),
-                      nextSteps: [] as any,
+                      nextSteps: [],
                     },
                   ],
                 },
@@ -464,7 +472,7 @@ describe("Check direct CrossPairExchange v1", async function () {
         const startAmount = new BigNumber(10)
           .shiftedBy(tokensData[startToken.address.toString()].decimals)
           .toString();
-        const route = [
+        const route: RouteStep[] = [
           {
             outcoming: getTokenBySymbol("token-9-0").address,
             numerator: 1,
@@ -476,7 +484,7 @@ describe("Check direct CrossPairExchange v1", async function () {
                 outcoming: getTokenBySymbol("token-9-1").address,
                 numerator: 1,
                 pool: getPoolBySymbol(`DexPair_token-9-0_token-9-1`),
-                nextSteps: [] as any,
+                nextSteps: [],
               },
               {
                 outcoming: getTokenBySymbol("token-18-0").address,
@@ -497,7 +505,7 @@ describe("Check direct CrossPairExchange v1", async function () {
       const startAmount = new BigNumber(10)
         .shiftedBy(tokensData[startToken.address.toString()].decimals)
         .toString();
-      const route = [
+      const route: RouteStep[] = [
         {
           outcoming: getTokenBySymbol("token-9-0").address,
           numerator: 1,
@@ -514,7 +522,7 @@ describe("Check direct CrossPairExchange v1", async function () {
                   outcoming: getTokenBySymbol("token-9-1").address,
                   numerator: 1,
                   pool: getPoolBySymbol(`DexPair_DexStablePool_lp_token-9-1`),
-                  nextSteps: [] as any,
+                  nextSteps: [],
                 },
               ],
             },
@@ -530,7 +538,7 @@ describe("Check direct CrossPairExchange v1", async function () {
       const startAmount = new BigNumber(10)
         .shiftedBy(tokensData[startToken.address.toString()].decimals)
         .toString();
-      const route = [
+      const route: RouteStep[] = [
         {
           outcoming: getTokenBySymbol("DexStablePool_lp").address,
           numerator: 1,
@@ -554,7 +562,7 @@ describe("Check direct CrossPairExchange v1", async function () {
                       pool: getPoolBySymbol(
                         `DexStablePair_token-9-0_token-18-0`,
                       ),
-                      nextSteps: [] as any,
+                      nextSteps: [],
                     },
                   ],
                 },
@@ -576,7 +584,7 @@ describe("Check direct CrossPairExchange v1", async function () {
         const startAmount = new BigNumber(10)
           .shiftedBy(tokensData[startToken.address.toString()].decimals)
           .toString();
-        const route = [
+        const route: RouteStep[] = [
           {
             outcoming: getTokenBySymbol("token-9-0").address,
             numerator: 1,
@@ -588,7 +596,7 @@ describe("Check direct CrossPairExchange v1", async function () {
                 pool: getPoolBySymbol(
                   `DexStablePool_token-6-0_token-9-0_token-18-0`,
                 ),
-                nextSteps: [] as any,
+                nextSteps: [],
               },
               {
                 outcoming: getTokenBySymbol("token-6-0").address,
@@ -620,7 +628,7 @@ describe("Check direct CrossPairExchange v1", async function () {
         const startAmount = new BigNumber(10)
           .shiftedBy(tokensData[startToken.address.toString()].decimals)
           .toString();
-        const route = [
+        const route: RouteStep[] = [
           {
             outcoming: getTokenBySymbol("token-9-0").address,
             numerator: 1,
@@ -637,7 +645,7 @@ describe("Check direct CrossPairExchange v1", async function () {
                     outcoming: getTokenBySymbol("token-6-1").address,
                     numerator: 3,
                     pool: getPoolBySymbol(`DexPair_token-6-0_token-6-1`),
-                    nextSteps: [] as any,
+                    nextSteps: [],
                   },
                   {
                     outcoming: getTokenBySymbol("token-9-0").address,
@@ -660,7 +668,7 @@ describe("Check direct CrossPairExchange v1", async function () {
       const startAmount = new BigNumber(10)
         .shiftedBy(tokensData[startToken.address.toString()].decimals)
         .toString();
-      const route = [
+      const route: RouteStep[] = [
         {
           outcoming: getTokenBySymbol("token-9-0").address,
           numerator: 1,
@@ -682,7 +690,7 @@ describe("Check direct CrossPairExchange v1", async function () {
                       pool: getPoolBySymbol(
                         `DexStablePool_token-6-0_token-9-0_token-18-0`,
                       ),
-                      nextSteps: [] as any,
+                      nextSteps: [],
                       failed: true,
                     },
                   ],
@@ -706,7 +714,7 @@ describe("Check direct CrossPairExchange v1", async function () {
         const startAmount = new BigNumber(10)
           .shiftedBy(tokensData[startToken.address.toString()].decimals)
           .toString();
-        const route = [
+        const route: RouteStep[] = [
           {
             outcoming: getTokenBySymbol("token-9-0").address,
             numerator: 1,
@@ -718,7 +726,7 @@ describe("Check direct CrossPairExchange v1", async function () {
                 pool: getPoolBySymbol(
                   `DexStablePool_token-6-0_token-9-0_token-18-0`,
                 ),
-                nextSteps: [] as any,
+                nextSteps: [],
                 failed: true,
               },
               {
@@ -727,7 +735,7 @@ describe("Check direct CrossPairExchange v1", async function () {
                 pool: getPoolBySymbol(
                   `DexStablePool_token-6-0_token-9-0_token-18-0`,
                 ),
-                nextSteps: [] as any,
+                nextSteps: [],
                 failed: true,
               },
               {
@@ -746,7 +754,7 @@ describe("Check direct CrossPairExchange v1", async function () {
                         pool: getPoolBySymbol(
                           `DexStablePool_token-6-0_token-9-0_token-18-0`,
                         ),
-                        nextSteps: [] as any,
+                        nextSteps: [],
                       },
                     ],
                   },
@@ -771,7 +779,7 @@ describe("Check direct CrossPairExchange v1", async function () {
         const startAmount = new BigNumber(10)
           .shiftedBy(tokensData[startToken.address.toString()].decimals)
           .toString();
-        const route = [
+        const route: RouteStep[] = [
           {
             outcoming: getTokenBySymbol("token-9-1").address,
             numerator: 1,
@@ -799,7 +807,7 @@ describe("Check direct CrossPairExchange v1", async function () {
                         outcoming: getTokenBySymbol("token-6-1").address,
                         numerator: 1,
                         pool: getPoolBySymbol(`DexPair_token-6-0_token-6-1`),
-                        nextSteps: [] as any,
+                        nextSteps: [],
                       },
                       {
                         outcoming: getTokenBySymbol("token-18-0").address,
@@ -807,7 +815,7 @@ describe("Check direct CrossPairExchange v1", async function () {
                         pool: getPoolBySymbol(
                           `DexStablePool_token-6-0_token-9-0_token-18-0`,
                         ),
-                        nextSteps: [] as any,
+                        nextSteps: [],
                         failed: true,
                       },
                     ],

@@ -22,7 +22,7 @@ BigNumber.config({ EXPONENTIAL_AT: 257 });
 const WEVER_DECIMALS = 9;
 const TOKEN_DECIMALS = 6;
 
-describe("Tests Swap Evers ", () => {
+describe("Tests Swap Evers", () => {
   let owner: Account;
 
   let gasValues: Contract<DexGasValuesAbi>;
