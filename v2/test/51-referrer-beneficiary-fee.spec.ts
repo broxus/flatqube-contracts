@@ -105,16 +105,9 @@ const poolsData: Record<
 
 describe(`Test beneficiary fee`, function () {
   before("Load contracts", async function () {
-    // await locklift.deployments.fixture({
-    //   include: [
-    //     "dex-gas-values",
-    //     "wever",
-    //     "wrap-ever",
-    //     "dex-accounts",
-    //     "dex-pairs",
-    //     "dex-pairs-wever",
-    //   ],
-    // });
+    await locklift.deployments.fixture({
+      include: ["dex-gas-values", "dex-accounts", "dex-pairs"],
+    });
 
     DexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
     DexVault = locklift.deployments.getContract<DexVaultAbi>("DexVault");
