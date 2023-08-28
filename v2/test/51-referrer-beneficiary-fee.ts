@@ -37,14 +37,6 @@ import {
 
 BigNumber.config({ EXPONENTIAL_AT: 257 });
 
-interface ITokenData {
-  decimals: number;
-  name: string;
-  symbol: string;
-  root: string;
-  upgradeable: boolean;
-}
-
 let Account1: Account;
 let Account4: Account;
 let DexOwner: Account;
@@ -59,7 +51,6 @@ const feeParams: IFee = {
   referrer_threshold: [],
 };
 
-const tokens: ITokenData[] = [];
 const N_COINS = [6, 9, 18];
 
 const tokenRoots: Contract<TokenRootUpgradeableAbi>[] = [];
@@ -191,20 +182,6 @@ describe(`Test beneficiary fee`, function () {
           .call()
           .then(a => a.lp),
       );
-    }
-
-    for (let i = 0; i < N_COINS.length; i++) {
-      const root = locklift.deployments.getContract<TokenRootUpgradeableAbi>(
-        `token-${N_COINS[i]}-0`,
-      );
-      const token = {
-        name: `token-${N_COINS[i]}-0`,
-        symbol: `token-${N_COINS[i]}-0`,
-        decimals: N_COINS[i],
-        upgradeable: true,
-        root: root.address.toString(),
-      };
-      tokens.push(token);
     }
 
     for (let i = 0; i < N_COINS.length; i++) {
@@ -672,7 +649,7 @@ describe(`Test beneficiary fee`, function () {
             .toString(),
         ).to.equal(
           poolDataEnd.balances[ROOT_1],
-          `${tokens[TOKEN_1].symbol} has wrong balance`,
+          `${contractData.roots[TOKEN_1]} has wrong balance`,
         );
         expect(
           new BigNumber(poolDataStart.balances[ROOT_2])
@@ -682,14 +659,14 @@ describe(`Test beneficiary fee`, function () {
             .toString(),
         ).to.equal(
           poolDataEnd.balances[ROOT_2],
-          `${tokens[TOKEN_2].symbol} has wrong balance`,
+          `${contractData.roots[TOKEN_2]} has wrong balance`,
         );
 
         // checking referrer fees!
         const refAccountChange = traceTree?.tokens.getTokenBalanceChange(
           await getWallet(
             Account4.address,
-            new Address(tokens[TOKEN_2].root),
+            new Address(contractData.roots[TOKEN_2].address.toString()),
           ).then(a => a.walletContract),
         );
 
@@ -760,7 +737,7 @@ describe(`Test beneficiary fee`, function () {
       const refAccountChange = traceTree?.tokens.getTokenBalanceChange(
         await getWallet(
           Account4.address,
-          new Address(tokens[TOKEN_NUM].root),
+          new Address(poolsData.stablePool.roots[TOKEN_NUM].address.toString()),
         ).then(a => a.walletContract),
       );
       expect(String(refAccountChange)).to.equal(
