@@ -26,7 +26,7 @@ import {
   expectedExchange,
   expectedWithdrawLiquidityOneCoin,
 } from "../../utils/expected.utils";
-import { calcValue } from "../utils/gas.utils";
+import { calcValue } from "../../utils/gas.utils";
 
 type RouteStep = {
   outcoming: Address;

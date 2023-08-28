@@ -9,7 +9,7 @@ import {
   DexStablePoolAbi,
   TokenRootUpgradeableAbi,
 } from "../../build/factorySource";
-import { calcValue } from "../utils/gas.utils";
+import { calcValue, getWithdrawLiquidityGas } from "../../utils/gas.utils";
 import {
   getDexAccountData,
   getPoolData,
@@ -67,13 +67,6 @@ describe("Check DexAccount add Pair", () => {
   async function getExchangeGas() {
     return gasValues.methods
       .getAccountExchangeGas()
-      .call()
-      .then(a => a.value0);
-  }
-
-  async function getWithdrawLiquidityGas(N: number) {
-    return gasValues.methods
-      .getAccountWithdrawLiquidityGas({ N: N })
       .call()
       .then(a => a.value0);
   }
@@ -1124,7 +1117,7 @@ describe("Check DexAccount add Pair", () => {
         },
       ]);
 
-      const gas = await getWithdrawLiquidityGas(2);
+      const gas = await getWithdrawLiquidityGas(2, gasValues);
 
       const poolDataStart = await getPoolData(poolsData.stablePair.contract);
       const accountDataStart = await getDexAccountData(
@@ -1185,7 +1178,7 @@ describe("Check DexAccount add Pair", () => {
     });
 
     it("Check DexStablePair withdraw liquidity, expectedAmount > received amount (revert)", async () => {
-      const gas = await getWithdrawLiquidityGas(2);
+      const gas = await getWithdrawLiquidityGas(2, gasValues);
 
       const poolDataStart = await getPoolData(poolsData.stablePair.contract);
       const accountDataStart = await getDexAccountData(
@@ -1253,7 +1246,7 @@ describe("Check DexAccount add Pair", () => {
         },
       ]);
 
-      const gas = await getWithdrawLiquidityGas(3);
+      const gas = await getWithdrawLiquidityGas(3, gasValues);
 
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
       const accountDataStart = await getDexAccountData(
@@ -1320,7 +1313,7 @@ describe("Check DexAccount add Pair", () => {
     });
 
     it("Check DexStablePool withdraw liquidity, expectedAmount > received amount (revert)", async () => {
-      const gas = await getWithdrawLiquidityGas(3);
+      const gas = await getWithdrawLiquidityGas(3, gasValues);
 
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
       const accountDataStart = await getDexAccountData(
@@ -1381,7 +1374,7 @@ describe("Check DexAccount add Pair", () => {
     });
 
     it("Withdraw liquidity from non-exists pool", async () => {
-      const gas = await getWithdrawLiquidityGas(2);
+      const gas = await getWithdrawLiquidityGas(2, gasValues);
 
       const expected = [
         { root: poolsData.stablePair.roots[0].address, amount: "0" },
@@ -1423,7 +1416,7 @@ describe("Check DexAccount add Pair", () => {
 
   describe("Withdraw liquidity one coin", () => {
     it("Check DexStablePool withdraw liquidity one coin", async () => {
-      const gas = await getWithdrawLiquidityGas(3);
+      const gas = await getWithdrawLiquidityGas(3, gasValues);
 
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
       const accountDataStart = await getDexAccountData(
@@ -1507,7 +1500,7 @@ describe("Check DexAccount add Pair", () => {
     });
 
     it("Check DexStablePool withdraw liquidity one coin, expectedAmount > received amount (revert)", async () => {
-      const gas = await getWithdrawLiquidityGas(3);
+      const gas = await getWithdrawLiquidityGas(3, gasValues);
 
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
       const accountDataStart = await getDexAccountData(
@@ -1573,7 +1566,7 @@ describe("Check DexAccount add Pair", () => {
     });
 
     it("Withdraw liquidity one coin from non-exists pool", async () => {
-      const gas = await getWithdrawLiquidityGas(2);
+      const gas = await getWithdrawLiquidityGas(2, gasValues);
 
       const roots = [
         poolsData.stablePair.roots[0].address,

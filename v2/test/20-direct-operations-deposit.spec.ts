@@ -16,7 +16,7 @@ import {
   DexStablePoolAbi,
   TokenRootUpgradeableAbi,
 } from "../../build/factorySource";
-import { calcValue } from "../utils/gas.utils";
+import { calcValue } from "../../utils/gas.utils";
 import { getPoolData, depositLiquidity } from "../../utils/wrappers";
 import BigNumber from "bignumber.js";
 import {

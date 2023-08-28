@@ -10,7 +10,7 @@ import {
   DexStablePoolAbi,
   TokenRootUpgradeableAbi,
 } from "../../build/factorySource";
-import { calcValue } from "../utils/gas.utils";
+import { calcValue } from "../../utils/gas.utils";
 import { getPoolData, depositLiquidity } from "../../utils/wrappers";
 import BigNumber from "bignumber.js";
 import {
@@ -58,6 +58,7 @@ describe("Check DexAccount add Pair", () => {
   };
 
   const tokensData: Record<string, { decimals: number }> = {};
+
   async function getPoolWithdrawGas(N: number) {
     return gasValues.methods
       .getPoolDirectWithdrawGas({

@@ -8,7 +8,7 @@ import {
   DexPairAbi,
   DexStablePoolAbi,
 } from "../../build/factorySource";
-import { calcValue } from "../utils/gas.utils";
+import { calcValue } from "../../utils/gas.utils";
 
 describe("Check DexAccount add Pair", () => {
   let pair: Contract<DexPairAbi>;

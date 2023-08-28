@@ -8,7 +8,7 @@ import {
   DexPairAbi,
   TokenRootUpgradeableAbi,
 } from "../../build/factorySource";
-import { calcValue } from "../utils/gas.utils";
+import { calcValue } from "../../utils/gas.utils";
 import {
   getDexAccountData,
   getPoolData,

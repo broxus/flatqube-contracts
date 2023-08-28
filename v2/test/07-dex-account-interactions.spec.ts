@@ -11,7 +11,7 @@ import {
   TokenRootUpgradeableAbi,
   TokenWalletUpgradeableAbi,
 } from "../../build/factorySource";
-import { calcValue } from "../utils/gas.utils";
+import { calcValue } from "../../utils/gas.utils";
 import { BigNumber } from "bignumber.js";
 
 describe("Check DexAccounts interaction", () => {

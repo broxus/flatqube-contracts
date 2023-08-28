@@ -27,7 +27,7 @@ import {
   getWallet,
 } from "../../utils/wrappers";
 import { expectedExchange } from "../../utils/expected.utils";
-import { calcValue } from "../utils/gas.utils";
+import { calcValue } from "../../utils/gas.utils";
 
 describe("Check direct CrossPairExchange v1", async function () {
   let owner: Account;
