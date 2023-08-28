@@ -416,9 +416,14 @@ describe(`Test beneficiary fee`, function () {
                   | Contract<DexPairAbi>
                   | Contract<DexStablePairAbi>
               ).methods
-                .buildDepositLiquidityPayload({
-                  id: 0,
-                  deploy_wallet_grams: toNano(0.05),
+                .buildDepositLiquidityPayloadV2({
+                  _id: 0,
+                  _deployWalletGrams: toNano(0.1),
+                  _expectedAmount: LP_REWARD,
+                  _recipient: DexOwner.address,
+                  _referrer: Account4.address,
+                  _successPayload: null,
+                  _cancelPayload: null,
                 })
                 .call();
 
@@ -598,10 +603,15 @@ describe(`Test beneficiary fee`, function () {
                   | Contract<DexStablePairAbi>
                   | Contract<DexPairAbi>
               ).methods
-                .buildExchangePayload({
-                  id: 0,
-                  deploy_wallet_grams: toNano(0.05),
-                  expected_amount: expected.receivedAmount,
+                .buildExchangePayloadV2({
+                  _id: 0,
+                  _deployWalletGrams: toNano(0.1),
+                  _expectedAmount: expected.receivedAmount,
+                  _recipient: DexOwner.address,
+                  _referrer: Account4.address,
+                  _successPayload: null,
+                  _cancelPayload: null,
+                  _toNative: false,
                 })
                 .call();
 
