@@ -159,7 +159,7 @@ export async function expectedDepositLiquidity(
           expectedLiq.step_2_left_to_right
             ? sortedTokens[1].root.toString()
             : sortedTokens[0].root.toString(),
-          0,
+          "0",
         ],
       ]),
       poolFees: Object.fromEntries([
@@ -173,7 +173,7 @@ export async function expectedDepositLiquidity(
           expectedLiq.step_2_left_to_right
             ? sortedTokens[1].root.toString()
             : sortedTokens[0].root.toString(),
-          0,
+          "0",
         ],
       ]),
       referrerFees: Object.fromEntries([
@@ -187,7 +187,7 @@ export async function expectedDepositLiquidity(
           expectedLiq.step_2_left_to_right
             ? sortedTokens[1].root.toString()
             : sortedTokens[0].root.toString(),
-          0,
+          "0",
         ],
       ]),
       amounts: Object.fromEntries([
