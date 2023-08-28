@@ -184,9 +184,9 @@ export default async () => {
 
   const feeParams = {
     denominator: 1000000,
-    pool_numerator: 3000,
-    beneficiary_numerator: 7000,
-    referrer_numerator: 0,
+    pool_numerator: 1000,
+    beneficiary_numerator: 2000,
+    referrer_numerator: 3000,
     beneficiary: commonAcc.address,
     threshold: getThresholdForAllTokens(),
     referrer_threshold: [],

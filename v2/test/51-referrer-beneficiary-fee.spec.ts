@@ -41,15 +41,15 @@ let Account1: Account;
 let Account4: Account;
 let DexOwner: Account;
 
-const feeParams: IFee = {
-  denominator: 1000000,
-  pool_numerator: 1000,
-  beneficiary_numerator: 2000,
-  referrer_numerator: 3000,
-  beneficiary: zeroAddress,
-  threshold: [],
-  referrer_threshold: [],
-};
+// const feeParams: IFee = {
+//   denominator: 1000000,
+//   pool_numerator: 1000,
+//   beneficiary_numerator: 2000,
+//   referrer_numerator: 3000,
+//   beneficiary: zeroAddress,
+//   threshold: [],
+//   referrer_threshold: [],
+// };
 
 const N_COINS = [6, 9, 18];
 
@@ -109,8 +109,8 @@ describe(`Test beneficiary fee`, function () {
 
     DexAccount =
       locklift.deployments.getContract<DexAccountAbi>("OwnerDexAccount");
-
-    feeParams.beneficiary = Account1.address;
+    //
+    // feeParams.beneficiary = Account1.address;
 
     poolsData.pair.contract =
       locklift.deployments.getContract<DexStablePairAbi>(
@@ -211,49 +211,49 @@ describe(`Test beneficiary fee`, function () {
 
     displayTx(tx);
   });
-
-  describe("Configure fee params", async function () {
-    it("Set fee params", async function () {
-      const roots = Object.values(tokenRoots).map(elem => elem.address);
-      await DexRoot.methods
-        .setPairFeeParams({
-          _roots: roots,
-          _params: feeParams,
-          _remainingGasTo: DexOwner.address,
-        })
-        .send({
-          from: DexOwner.address,
-          amount: toNano(1.5),
-        });
-
-      const feeParamsEnd = (
-        await poolsData.stablePool.contract.methods
-          .getFeeParams({ answerId: 0 })
-          .call()
-      ).value0;
-
-      expect(feeParamsEnd.beneficiary.toString()).to.equal(
-        feeParams.beneficiary.toString(),
-        "WRONG fee.beneficiary",
-      );
-      expect(feeParamsEnd.denominator).to.equal(
-        feeParams.denominator.toString(),
-        "WRONG fee.denominator",
-      );
-      expect(feeParamsEnd.pool_numerator).to.equal(
-        feeParams.pool_numerator.toString(),
-        "WRONG fee.pool_numerator",
-      );
-      expect(feeParamsEnd.beneficiary_numerator).to.equal(
-        feeParams.beneficiary_numerator.toString(),
-        "WRONG fee.beneficiary_numerator",
-      );
-      expect(feeParamsEnd.referrer_numerator).to.equal(
-        feeParams.referrer_numerator.toString(),
-        "WRONG fee.referrer_numerator",
-      );
-    });
-  });
+  //
+  // describe("Configure fee params", async function () {
+  //   it("Set fee params", async function () {
+  //     const roots = Object.values(tokenRoots).map(elem => elem.address);
+  //     await DexRoot.methods
+  //       .setPairFeeParams({
+  //         _roots: roots,
+  //         _params: feeParams,
+  //         _remainingGasTo: DexOwner.address,
+  //       })
+  //       .send({
+  //         from: DexOwner.address,
+  //         amount: toNano(1.5),
+  //       });
+  //
+  //     const feeParamsEnd = (
+  //       await poolsData.stablePool.contract.methods
+  //         .getFeeParams({ answerId: 0 })
+  //         .call()
+  //     ).value0;
+  //
+  //     expect(feeParamsEnd.beneficiary.toString()).to.equal(
+  //       feeParams.beneficiary.toString(),
+  //       "WRONG fee.beneficiary",
+  //     );
+  //     expect(feeParamsEnd.denominator).to.equal(
+  //       feeParams.denominator.toString(),
+  //       "WRONG fee.denominator",
+  //     );
+  //     expect(feeParamsEnd.pool_numerator).to.equal(
+  //       feeParams.pool_numerator.toString(),
+  //       "WRONG fee.pool_numerator",
+  //     );
+  //     expect(feeParamsEnd.beneficiary_numerator).to.equal(
+  //       feeParams.beneficiary_numerator.toString(),
+  //       "WRONG fee.beneficiary_numerator",
+  //     );
+  //     expect(feeParamsEnd.referrer_numerator).to.equal(
+  //       feeParams.referrer_numerator.toString(),
+  //       "WRONG fee.referrer_numerator",
+  //     );
+  //   });
+  // });
 
   describe("Deposit multiple coins to stablePool/stablePair/pair", async function () {
     it("Add multiple coins imbalanced liquidity", async function () {

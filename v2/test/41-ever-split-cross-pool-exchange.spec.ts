@@ -36,7 +36,9 @@ type RouteStep = {
   failed?: boolean;
 };
 
-describe("Check direct CrossPairExchange v1", async function () {
+// TODO refactor if time permits
+
+describe("Check Evers direct CrossPairExchange v2", async function () {
   let owner: Account;
   let dexAccount: Contract<DexAccountAbi>;
   let dexRoot: Contract<DexRootAbi>;

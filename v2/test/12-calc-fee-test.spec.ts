@@ -115,6 +115,7 @@ describe("Check DexAccount add Pair", () => {
       poolsData[pool].feeParams = {
         feeNumerator: new BigNumber(feeParams.beneficiary_numerator)
           .plus(feeParams.pool_numerator)
+          .plus(feeParams.referrer_numerator)
           .toString(),
         denominator: feeParams.denominator,
       };
