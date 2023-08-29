@@ -65,9 +65,9 @@ const poolsData: Record<
 
 describe(`Test beneficiary fee`, function () {
   before("Load contracts", async function () {
-    // await locklift.deployments.fixture({
-    //   include: ["dex-gas-values", "dex-accounts", "dex-pairs"],
-    // });
+    await locklift.deployments.fixture({
+      include: ["dex-gas-values", "dex-accounts", "dex-pairs"],
+    });
 
     DexVault = locklift.deployments.getContract<DexVaultAbi>("DexVault");
     DexOwner = locklift.deployments.getAccount("DexOwner").account;
