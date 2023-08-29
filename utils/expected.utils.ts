@@ -1,6 +1,6 @@
 import { ViewTracingTree } from "locklift/internal/tracing/viewTraceTree/viewTracingTree";
 import { ViewTraceTree } from "locklift/src/internal/tracing/types";
-import { Address, TraceType, Contract } from "locklift";
+import { Address, TraceType, Contract, zeroAddress } from "locklift";
 import BigNumber from "bignumber.js";
 
 // import { Constants } from "utils/consts";
@@ -55,7 +55,7 @@ export async function expectedDepositLiquidity(
     | Contract<DexStablePoolAbi>,
   tokens: ITokens[],
   autoChange: boolean,
-  isReferrer?: boolean,
+  referrer: Address = null,
 ): Promise<IDepositLiquidity> {
   const poolType = await poolContract.methods
     .getPoolType({ answerId: 0 })
@@ -88,7 +88,7 @@ export async function expectedDepositLiquidity(
           new BigNumber(expected.beneficiary_fees[i])
             .plus(expected.pool_fees[i])
             .toString(),
-          isReferrer,
+          referrer !== undefined && !referrer.equals(zeroAddress),
         );
       beneficiaryFees[sortedTokens[i].root.toString()] = beneficiaryFee;
       poolFees[sortedTokens[i].root.toString()] = poolFee;
@@ -117,6 +117,7 @@ export async function expectedDepositLiquidity(
         left_amount: sortedTokens[0].amount,
         right_amount: sortedTokens[1].amount,
         auto_change: autoChange,
+        referrer: referrer,
       })
       .call()
       .then(r => r.value0);
@@ -124,7 +125,7 @@ export async function expectedDepositLiquidity(
     const { beneficiaryFee, poolFee, referrerFee } = await getFeesFromTotalFee(
       poolContract,
       expectedLiq.step_2_fee,
-      isReferrer,
+      referrer && !referrer.equals(zeroAddress),
     );
 
     let leftAmount = new BigNumber(expectedLiq.step_1_left_deposit).toString();
@@ -206,7 +207,7 @@ export async function expectedExchange(
   amount: string | number,
   spent_token_root: Address,
   receive_token_root?: Address,
-  isReferrer?: boolean,
+  referrer: Address = null,
 ) {
   const poolType = await poolContract.methods
     .getPoolType({ answerId: 0 })
@@ -234,7 +235,7 @@ export async function expectedExchange(
   const { beneficiaryFee, poolFee, referrerFee } = await getFeesFromTotalFee(
     poolContract,
     expected.expected_fee,
-    isReferrer,
+    referrer && !referrer.equals(zeroAddress),
   );
 
   return {
@@ -331,7 +332,7 @@ export async function expectedWithdrawLiquidityOneCoin(
   poolContract: Contract<DexStablePoolAbi>,
   lpAmount: string,
   receivedToken: Address,
-  isReferrer?: boolean,
+  referrer: Address = null,
 ) {
   const expected = await poolContract.methods
     .expectedWithdrawLiquidityOneCoin({
@@ -348,7 +349,7 @@ export async function expectedWithdrawLiquidityOneCoin(
   const { beneficiaryFee, poolFee, referrerFee } = await getFeesFromTotalFee(
     poolContract,
     new BigNumber(benFee).plus(pFee).toString(),
-    isReferrer,
+    referrer && !referrer.equals(zeroAddress),
   );
 
   return { receivedAmount, beneficiaryFee, poolFee, referrerFee };
@@ -358,7 +359,7 @@ export async function expectedDepositLiquidityOneCoin(
   poolContract: Contract<DexStablePoolAbi>,
   amount: string,
   spentToken: Address,
-  isReferrer?: boolean,
+  referrer: Address = null,
 ): Promise<IStableDepositLiquidity> {
   const expected = await poolContract.methods
     .expectedDepositLiquidityOneCoin({
@@ -376,7 +377,7 @@ export async function expectedDepositLiquidityOneCoin(
   const { beneficiaryFee, poolFee, referrerFee } = await getFeesFromTotalFee(
     poolContract,
     new BigNumber(benFee).plus(pFee).toString(),
-    isReferrer,
+    referrer && !referrer.equals(zeroAddress),
   );
 
   return { lpReward, beneficiaryFee, poolFee, referrerFee, receivedAmount };

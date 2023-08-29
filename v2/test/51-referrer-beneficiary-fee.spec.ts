@@ -222,7 +222,7 @@ describe(`Test beneficiary fee`, function () {
           contractData.contract,
           operations,
           true,
-          true,
+          Account4.address,
         );
 
         const LP_REWARD = expected.lpReward;
@@ -321,7 +321,7 @@ describe(`Test beneficiary fee`, function () {
                 contractData.contract as Contract<DexStablePoolAbi>,
                 operations.amount,
                 operations.root,
-                true,
+                Account4.address,
               )
             : await expectedDepositLiquidity(
                 contractData.contract,
@@ -333,7 +333,7 @@ describe(`Test beneficiary fee`, function () {
                   operations,
                 ],
                 true,
-                true,
+                Account4.address,
               );
 
         const LP_REWARD = expectedData.lpReward;
@@ -517,7 +517,7 @@ describe(`Test beneficiary fee`, function () {
           TOKENS_TO_EXCHANGE,
           contractData.roots[TOKEN_2].address,
           contractData.roots[TOKEN_1].address,
-          true,
+          Account4.address,
         );
 
         const payload =
@@ -634,7 +634,7 @@ describe(`Test beneficiary fee`, function () {
         poolsData.stablePool.contract as Contract<DexStablePoolAbi>,
         lpAmount,
         receivedTokenAddress,
-        true,
+        Account4.address,
       );
 
       const payload = await (
