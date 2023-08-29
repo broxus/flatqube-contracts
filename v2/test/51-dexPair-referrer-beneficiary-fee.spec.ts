@@ -12,7 +12,6 @@ import {
   expectedDepositLiquidity,
   expectedDepositLiquidityOneCoin,
   expectedExchange,
-  expectedWithdrawLiquidityOneCoin,
   IDepositLiquidity,
   IStableDepositLiquidity,
 } from "../../utils/expected.utils";
@@ -24,7 +23,6 @@ import {
   DexStablePoolAbi,
   DexVaultAbi,
   TokenRootUpgradeableAbi,
-  TokenWalletUpgradeableAbi,
 } from "../../build/factorySource";
 
 BigNumber.config({ EXPONENTIAL_AT: 257 });
@@ -34,9 +32,6 @@ let Account4: Account;
 let DexOwner: Account;
 
 const N_COINS = [6, 9, 18];
-
-const tokenRoots: Contract<TokenRootUpgradeableAbi>[] = [];
-const tokenWallets: Contract<TokenWalletUpgradeableAbi>[] = [];
 
 let DexAccount: Contract<DexAccountAbi>;
 let DexVault: Contract<DexVaultAbi>;
@@ -91,14 +86,6 @@ describe(`Test beneficiary fee`, function () {
       );
     }
 
-    for (let i = 0; i < N_COINS.length; i++) {
-      tokenRoots.push(
-        locklift.deployments.getContract<TokenRootUpgradeableAbi>(
-          `token-${N_COINS[i]}-0`,
-        ),
-      );
-    }
-
     for (const pool in poolsData) {
       await depositLiquidity(
         DexOwner.address,
@@ -132,19 +119,6 @@ describe(`Test beneficiary fee`, function () {
           .getTokenRoots({ answerId: 0 })
           .call()
           .then(a => a.lp),
-      );
-    }
-
-    for (let i = 0; i < N_COINS.length; i++) {
-      const walletForNewAcc = await tokenRoots[i].methods
-        .walletOf({ walletOwner: DexOwner.address, answerId: 0 })
-        .call();
-
-      tokenWallets.push(
-        locklift.factory.getDeployedContract(
-          "TokenWalletUpgradeable",
-          walletForNewAcc.value0,
-        ),
       );
     }
   });
@@ -198,7 +172,7 @@ describe(`Test beneficiary fee`, function () {
           contractData.contract,
           operations,
           true,
-          true,
+          Account4.address,
         );
 
         const LP_REWARD = expected.lpReward;
@@ -297,7 +271,7 @@ describe(`Test beneficiary fee`, function () {
                 contractData.contract as Contract<DexStablePoolAbi>,
                 operations.amount,
                 operations.root,
-                true,
+                Account4.address,
               )
             : await expectedDepositLiquidity(
                 contractData.contract,
@@ -309,7 +283,7 @@ describe(`Test beneficiary fee`, function () {
                   operations,
                 ],
                 true,
-                true,
+                Account4.address,
               );
 
         const LP_REWARD = expectedData.lpReward;
@@ -493,7 +467,7 @@ describe(`Test beneficiary fee`, function () {
           TOKENS_TO_EXCHANGE,
           contractData.roots[TOKEN_2].address,
           contractData.roots[TOKEN_1].address,
-          true,
+          Account4.address,
         );
 
         const payload =
