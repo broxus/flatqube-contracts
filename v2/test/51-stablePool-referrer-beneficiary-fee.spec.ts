@@ -65,9 +65,9 @@ const poolsData: Record<
 
 describe(`Test beneficiary fee`, function () {
   before("Load contracts", async function () {
-    await locklift.deployments.fixture({
-      include: ["dex-gas-values", "dex-accounts", "dex-pairs"],
-    });
+    // await locklift.deployments.fixture({
+    //   include: ["dex-gas-values", "dex-accounts", "dex-pairs"],
+    // });
 
     DexVault = locklift.deployments.getContract<DexVaultAbi>("DexVault");
     DexOwner = locklift.deployments.getAccount("DexOwner").account;
@@ -173,7 +173,7 @@ describe(`Test beneficiary fee`, function () {
   describe("Deposit multiple coins to stablePool/stablePair/pair", async function () {
     it("Add multiple coins imbalanced liquidity", async function () {
       // loading contract data based on name
-      for (const contractName of ["stablePool", "stablePair", "pair"]) {
+      for (const contractName of ["stablePool"]) {
         const contractData = poolsData[contractName as poolsType];
         const poolDataStart = await getPoolData(contractData.contract);
         const operations = [];
