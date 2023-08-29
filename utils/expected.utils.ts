@@ -25,7 +25,7 @@ export interface IStableDepositLiquidity {
   poolFee: string;
   beneficiaryFee: string;
   referrerFee: string;
-  amounts: string;
+  receivedAmount: string | number;
 }
 
 export function calculateMaxCWi(traceTree: ViewTracingTree) {
