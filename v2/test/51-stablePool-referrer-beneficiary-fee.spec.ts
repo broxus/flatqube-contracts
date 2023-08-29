@@ -5,7 +5,6 @@ import {
   depositLiquidity,
   getPoolData,
   getWallet,
-  IFee,
   transferWrapper,
 } from "../../utils/wrappers";
 import { displayTx } from "../../utils/helpers";
@@ -21,7 +20,6 @@ import { Account } from "everscale-standalone-client";
 import {
   DexAccountAbi,
   DexPairAbi,
-  DexRootAbi,
   DexStablePairAbi,
   DexStablePoolAbi,
   DexVaultAbi,
@@ -40,11 +38,10 @@ const N_COINS = [6, 9, 18];
 const tokenRoots: Contract<TokenRootUpgradeableAbi>[] = [];
 const tokenWallets: Contract<TokenWalletUpgradeableAbi>[] = [];
 
-let DexRoot: Contract<DexRootAbi>;
 let DexAccount: Contract<DexAccountAbi>;
 let DexVault: Contract<DexVaultAbi>;
 
-type poolsType = "stablePool" | "stablePair" | "pair";
+type poolsType = "stablePool";
 
 const poolsData: Record<
   poolsType,
@@ -58,18 +55,6 @@ const poolsData: Record<
     lp: Contract<TokenRootUpgradeableAbi>;
   }
 > = {
-  pair: {
-    contract: null,
-    tokens: ["token-9-0", "token-9-1"],
-    roots: [],
-    lp: null,
-  },
-  stablePair: {
-    contract: null,
-    tokens: ["token-6-0", "token-9-0"],
-    roots: [],
-    lp: null,
-  },
   stablePool: {
     contract: null,
     tokens: ["token-6-0", "token-9-0", "token-18-0"],
@@ -84,7 +69,6 @@ describe(`Test beneficiary fee`, function () {
       include: ["dex-gas-values", "dex-accounts", "dex-pairs"],
     });
 
-    DexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
     DexVault = locklift.deployments.getContract<DexVaultAbi>("DexVault");
     DexOwner = locklift.deployments.getAccount("DexOwner").account;
 
@@ -94,14 +78,6 @@ describe(`Test beneficiary fee`, function () {
     DexAccount =
       locklift.deployments.getContract<DexAccountAbi>("OwnerDexAccount");
 
-    poolsData.pair.contract =
-      locklift.deployments.getContract<DexStablePairAbi>(
-        "DexPair_" + poolsData.pair.tokens.join("_"),
-      );
-    poolsData.stablePair.contract =
-      locklift.deployments.getContract<DexStablePairAbi>(
-        "DexStablePair_" + poolsData.stablePair.tokens.join("_"),
-      );
     poolsData.stablePool.contract =
       locklift.deployments.getContract<DexStablePoolAbi>(
         "DexStablePool_" + poolsData.stablePool.tokens.join("_"),
@@ -299,7 +275,7 @@ describe(`Test beneficiary fee`, function () {
   describe("Direct deposit to stablePool/stablePair/pair", async function () {
     it("DexOwner deposit Coin1 liquidity", async function () {
       // loading contract data based on name
-      for (const contractName of ["stablePool", "stablePair", "pair"]) {
+      for (const contractName of ["stablePool"]) {
         const TOKEN_NUM = 1;
         const contractData = poolsData[contractName as poolsType];
         const poolDataStart = await getPoolData(contractData.contract);
@@ -502,7 +478,7 @@ describe(`Test beneficiary fee`, function () {
     const TOKEN_2 = 1;
 
     it(`exchange token-${N_COINS[TOKEN_1]} --> token-${N_COINS[TOKEN_2]}`, async function () {
-      for (const contractName of ["stablePool", "stablePair", "pair"]) {
+      for (const contractName of ["stablePool"]) {
         const contractData = poolsData[contractName as poolsType];
         const poolDataStart = await getPoolData(contractData.contract);
         const TOKENS_TO_EXCHANGE = 10 ** N_COINS[TOKEN_2];
