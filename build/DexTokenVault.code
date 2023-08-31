@@ -1,4 +1,4 @@
-.version sol 0.64.0
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -81,6 +81,7 @@ ENDS
 CALLREF {
 	CALL $redeploy_0160a1d5_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -840,12 +841,15 @@ IFREF {
 .loc ../contracts/DexTokenVault.tsol, 194
 OVER
 PUSHCONT {
+	LDU 64
 	LDREF
 	ENDS
 	CTOS
 }
-IF
-LDU 64
+PUSHCONT {
+	LDU 64
+}
+IFELSE
 LDU 128
 LDMSGADDR
 LDU 128
@@ -863,6 +867,7 @@ ENDS
 CALLREF {
 	CALL $withdraw_0967fa4b_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1000,6 +1005,7 @@ ENDS
 CALLREF {
 	CALL $transfer_00a2c89b_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1143,6 +1149,7 @@ ENDS
 CALLREF {
 	CALL $referralFeeTransfer_84ca93db_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1327,6 +1334,7 @@ ENDS
 CALLREF {
 	CALL $setWeverVaultTokenRoot_184590c4_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1415,6 +1423,7 @@ ENDS
 CALLREF {
 	CALL $upgrade_fb9d1513_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1870,6 +1879,7 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensMint_2bd1475b_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -2451,6 +2461,7 @@ ENDS
 CALLREF {
 	CALL $onTokenWallet_e6d1bd58_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -3294,14 +3305,9 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX
+	LDSLICEX ; signatureSlice msgSlice
 	DUP
-	MYADDR
-	NEWC
-	STSLICE
-	STSLICE
-	ENDC
-	HASHCU
+	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
 	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
@@ -3315,7 +3321,7 @@ PUSHCONT {
 		GETGLOB 2
 	}
 	IFELSE
-	CHKSIGNU
+	CHKSIGNU ; msgSlice isSigned
 	THROWIFNOT 40
 }
 PUSHCONT {

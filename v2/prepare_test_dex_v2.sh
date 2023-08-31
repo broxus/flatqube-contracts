@@ -23,3 +23,9 @@ npx locklift run $PARAMS --script v2/scripts/7-deploy-test-swap-ever-wever-tip3-
 npx locklift test $PARAMS --tests v2/test/35-upgrade-pair.ts --left='tst' --right='foo' --old_contract_name='DexPair' --new_contract_name='DexStablePair' --pool_type=2
 
 npx locklift run $PARAMS --script v2/scripts/90-set-test-params.ts
+
+npx locklift run --disable-build --network main --script v2/scripts/98-mint-test-tokens-to.ts \
+--to='0:7a43a08e77dcc2bd7ce2f5f6798dbb84af9c8443e8bfb60c27e125033fef1760' \
+--mints='[{"account":2,"amount":200000000,"token":"foo"}, {"account":2,"amount":200000000,"token":"bar"}, {"account":2,"amount":200000000,"token":"tst"}, {"account":2,"amount":200000000,"token":"qwe"}]'
+
+npx locklift run --disable-build --network main --script v2/scripts/5-deploy-test-pair.ts --pairs='[["wever","foo"]]' --contract_name='DexPair'

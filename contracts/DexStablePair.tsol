@@ -1,4 +1,4 @@
-pragma ever-solidity 0.64.0;
+pragma ever-solidity 0.62.0;
 
 pragma AbiHeader time;
 pragma AbiHeader expire;
@@ -1243,7 +1243,7 @@ contract DexStablePair is
 
             if (dy_result.amount < expected_amount) {
                 errorCode = DirectOperationErrors.RECEIVED_AMOUNT_IS_LESS_THAN_EXPECTED;
-            } {
+            } else {
                 tokenData[i].balance += spent_amount - dy_result.beneficiary_fee - referrer_fee;
                 tokenData[j].balance -= dy_result.amount;
 

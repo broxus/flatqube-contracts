@@ -1,4 +1,4 @@
-.version sol 0.64.0
+.version sol 0.62.0
 
 .macro constructor
 DROP
@@ -84,6 +84,7 @@ ENDS
 CALLREF {
 	CALL $onWeverWallet_b024d1df_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -413,6 +414,7 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensMint_2bd1475b_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -558,6 +560,7 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensTransfer_e63f2284_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -840,6 +843,7 @@ ENDS
 CALLREF {
 	CALL $onAcceptTokensBurn_07d14114_internal_macro$
 }
+DROP
 CALLREF {
 	CALL $c7_to_c4$
 }
@@ -1123,14 +1127,9 @@ LDU 1 ; haveSign msgSlice
 SWAP
 PUSHCONT {
 	PUSHPOW2 9
-	LDSLICEX
+	LDSLICEX ; signatureSlice msgSlice
 	DUP
-	MYADDR
-	NEWC
-	STSLICE
-	STSLICE
-	ENDC
-	HASHCU
+	HASHSU ; signatureSlice msgSlice hashMsgSlice
 	SWAP
 	LDU 1 ; signatureSlice hashMsgSlice hasPubkey msgSlice
 	SWAP
@@ -1144,7 +1143,7 @@ PUSHCONT {
 		GETGLOB 2
 	}
 	IFELSE
-	CHKSIGNU
+	CHKSIGNU ; msgSlice isSigned
 	THROWIFNOT 40
 }
 PUSHCONT {
@@ -1230,20 +1229,6 @@ PUSHCONT {
 }
 IF
 THROW 0
-
-.globl	GasValues_no_obj_getDeployWalletGas_38991eb4
-.type	GasValues_no_obj_getDeployWalletGas_38991eb4, @function
-CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
-
-.macro GasValues_no_obj_getDeployWalletGas_38991eb4_macro
-.loc ../contracts/libraries/GasValues.tsol, 12
-PUSHINT 120000000
-PUSHINT 100000000
-ADD
-UFITS 128
-PUSHINT 100000
-PAIR
-.loc ../contracts/libraries/GasValues.tsol, 0
 
 .globl	EverToTip3Payloads_with_obj_buildExchangePayload_9586613e
 .type	EverToTip3Payloads_with_obj_buildExchangePayload_9586613e, @function
@@ -1860,6 +1845,20 @@ STREF
 ENDC
 BLKDROP2 2, 1
 .loc ../contracts/libraries/EverToTip3Payloads.tsol, 0
+
+.globl	GasValues_no_obj_getDeployWalletGas_38991eb4
+.type	GasValues_no_obj_getDeployWalletGas_38991eb4, @function
+CALL $GasValues_no_obj_getDeployWalletGas_38991eb4_macro$
+
+.macro GasValues_no_obj_getDeployWalletGas_38991eb4_macro
+.loc ../contracts/libraries/GasValues.tsol, 12
+PUSHINT 120000000
+PUSHINT 100000000
+ADD
+UFITS 128
+PUSHINT 100000
+PAIR
+.loc ../contracts/libraries/GasValues.tsol, 0
 
 .globl	PairPayload_with_obj_buildExchangePayloadV2_0d450309
 .type	PairPayload_with_obj_buildExchangePayloadV2_0d450309, @function
