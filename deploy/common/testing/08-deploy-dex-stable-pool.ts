@@ -66,7 +66,7 @@ export default async () => {
   ).value0;
 
   console.log(
-    `Dex_Stable_Pair_${FIRST}_${SECOND} address = ${dexStablePairAddressFirst}`,
+    `DexStablePair_${FIRST}_${SECOND} address = ${dexStablePairAddressFirst}`,
   );
 
   const DexStablePairFirst = locklift.factory.getDeployedContract(
@@ -118,7 +118,7 @@ export default async () => {
   ).value0;
 
   console.log(
-    `Dex_Stable_Pair_${SECOND}_${THIRD} address = ${dexStablePairAddressSecond}`,
+    `DexStablePair_${SECOND}_${THIRD} address = ${dexStablePairAddressSecond}`,
   );
 
   const DexStablePairSecond = locklift.factory.getDeployedContract(

@@ -124,23 +124,6 @@ describe(`Test beneficiary fee`, function () {
   });
 
   before("Set referral program params", async function () {
-    const projectId = 22222;
-    const projectAddress = Account1.address;
-    const refSystemAddress = Account4.address;
-
-    const tx = await DexVault.methods
-      .setReferralProgramParams({
-        params: {
-          projectId: projectId,
-          projectAddress: projectAddress,
-          systemAddress: refSystemAddress,
-        },
-      })
-      .send({
-        amount: toNano(1),
-        from: DexOwner.address,
-      });
-
     displayTx(tx);
   });
 

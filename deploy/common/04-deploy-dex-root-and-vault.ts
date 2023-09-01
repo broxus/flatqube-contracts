@@ -79,6 +79,25 @@ export default async () => {
       amount: toNano(2),
     });
 
+  const projectId = 22222;
+  const projectAddress =
+    locklift.deployments.getAccount("commonAccount-0").account.address;
+  const refSystemAddress =
+    locklift.deployments.getAccount("commonAccount-1").account.address;
+
+  tx = await dexVault.methods
+    .setReferralProgramParams({
+      params: {
+        projectId: projectId,
+        projectAddress: projectAddress,
+        systemAddress: refSystemAddress,
+      },
+    })
+    .send({
+      amount: toNano(1),
+      from: owner.address,
+    });
+
   tx = await dexRoot.methods
     .setVaultOnce({ new_vault: dexVault.address })
     .send({
@@ -138,14 +157,14 @@ export default async () => {
     });
 
   tx = await dexRoot.methods
-    .installOrUpdatePoolCode({ code: DexStablePool.code, pool_type: 3 })
+    .installOrUpdatePairCode({ code: DexStablePair.code, pool_type: 2 })
     .send({
       from: owner.address,
       amount: toNano(2),
     });
 
   tx = await dexRoot.methods
-    .installOrUpdatePairCode({ code: DexStablePair.code, pool_type: 2 })
+    .installOrUpdatePoolCode({ code: DexStablePool.code, pool_type: 3 })
     .send({
       from: owner.address,
       amount: toNano(2),
@@ -159,4 +178,8 @@ export default async () => {
 
 export const tag = "dex-root";
 
-export const dependencies = ["owner-account", "token-factory"];
+export const dependencies = [
+  "owner-account",
+  "common-accounts",
+  "token-factory",
+];

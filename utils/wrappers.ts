@@ -45,25 +45,75 @@ export interface IBalPair {
 }
 
 export const setPairFeeParams = async (roots: Address[], fees: IFee) => {
+  const owner = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
-  const mainAcc = locklift.deployments.getAccount("DexOwner").account;
 
   await dexRoot.methods
     .setPairFeeParams({
       _roots: roots,
       _params: fees,
-      _remainingGasTo: mainAcc.address,
+      _remainingGasTo: owner.address,
     })
     .send({
-      from: mainAcc.address,
+      from: owner.address,
       amount: toNano(1.5),
     });
+};
+
+export const deployToken = async (
+  name: string,
+  symbol: string,
+  amount: string | number = "100000",
+  decimals = 18,
+) => {
+  const owner = locklift.deployments.getAccount("DexOwner").account;
+  const signer = await locklift.keystore.getSigner("0");
+
+  const TokenWallet = locklift.factory.getContractArtifacts(
+    "TokenWalletUpgradeable",
+  );
+  const TokenWalletPlatform = locklift.factory.getContractArtifacts(
+    "TokenWalletPlatform",
+  );
+
+  const token = await locklift.transactions.waitFinalized(
+    locklift.deployments.deploy({
+      deployConfig: {
+        contract: "TokenRootUpgradeable",
+        publicKey: signer.publicKey,
+        initParams: {
+          randomNonce_: locklift.utils.getRandomNonce(),
+          deployer_: zeroAddress,
+          name_: name,
+          symbol_: symbol,
+          decimals_: decimals,
+          walletCode_: TokenWallet.code,
+          rootOwner_: owner.address,
+          platformCode_: TokenWalletPlatform.code,
+        },
+        constructorParams: {
+          initialSupplyTo: owner.address,
+          initialSupply: new BigNumber(amount).shiftedBy(decimals).toString(),
+          deployWalletValue: toNano(0.1),
+          mintDisabled: false,
+          burnByRootDisabled: false,
+          burnPaused: false,
+          remainingGasTo: owner.address,
+        },
+        value: toNano(10),
+      },
+      deploymentName: `token-${symbol}`,
+      enableLogs: true,
+    }),
+  );
+
+  return token.extTransaction.contract.address;
 };
 
 export const createDexPair = async (
   left: Address,
   right: Address,
-  fees: IFee,
+  fees?: IFee,
 ) => {
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
   const mainAcc = locklift.deployments.getAccount("DexOwner").account;
@@ -81,7 +131,9 @@ export const createDexPair = async (
       }),
   );
 
-  await setPairFeeParams([left, right], fees);
+  if (fees) {
+    await setPairFeeParams([left, right], fees);
+  }
 
   const dexPairFooBarAddress = await dexRoot.methods
     .getExpectedPairAddress({
@@ -91,10 +143,6 @@ export const createDexPair = async (
     })
     .call()
     .then(r => r.value0);
-
-  console.log(
-    `DexPair_${left.toString()}_${right.toString()} deployed: ${dexPairFooBarAddress}`,
-  );
 
   return dexPairFooBarAddress;
 };

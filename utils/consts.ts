@@ -1,5 +1,5 @@
 // wallets consts
-export const ACCOUNTS_N = 5;
+export const ACCOUNTS_N = 3;
 export const ACCOUNT_WALLET_AMOUNT = 100;
 export const EVER_WALLET_AMOUNT = 2000;
 export const WEVER_WALLET_AMOUNT = 1500;
