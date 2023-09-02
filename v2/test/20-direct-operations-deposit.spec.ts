@@ -559,7 +559,7 @@ describe("Check direct operations", () => {
           .toString();
 
         const expected = await expectedDepositLiquidityOneCoin(
-          poolsData.stablePool.contract,
+          poolsData.stablePool.contract as Contract<DexStablePoolAbi>,
           amount.toString(),
           tokenRoot,
         );
@@ -942,7 +942,7 @@ describe("Check direct operations", () => {
         .toString();
 
       const expected = await expectedDepositLiquidityOneCoin(
-        poolsData.stablePool.contract,
+        poolsData.stablePool.contract as Contract<DexStablePoolAbi>,
         amount.toString(),
         tokenRoot,
       );

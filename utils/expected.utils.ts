@@ -88,7 +88,7 @@ export async function expectedDepositLiquidity(
           new BigNumber(expected.beneficiary_fees[i])
             .plus(expected.pool_fees[i])
             .toString(),
-          referrer !== undefined && !referrer.equals(zeroAddress),
+          referrer && !referrer.equals(zeroAddress),
         );
       beneficiaryFees[sortedTokens[i].root.toString()] = beneficiaryFee;
       poolFees[sortedTokens[i].root.toString()] = poolFee;

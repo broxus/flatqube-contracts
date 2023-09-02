@@ -33,26 +33,22 @@ describe("Check DexAccount add Pair", () => {
         | Contract<DexStablePoolAbi>;
       tokens: string[];
       roots: Contract<TokenRootUpgradeableAbi>[];
-      lp: Contract<TokenRootUpgradeableAbi>;
     }
   > = {
     stablePair: {
       contract: null,
       tokens: ["token-6-0", "token-9-0"],
       roots: [],
-      lp: null,
     },
     pair: {
       contract: null,
       tokens: ["token-9-0", "token-9-1"],
       roots: [],
-      lp: null,
     },
     stablePool: {
       contract: null,
       tokens: ["token-6-0", "token-9-0", "token-18-0"],
       roots: [],
-      lp: null,
     },
   };
 
@@ -101,13 +97,6 @@ describe("Check DexAccount add Pair", () => {
             .then(a => Number(a.value0)),
         };
       }
-      poolsData[pool].lp = locklift.factory.getDeployedContract(
-        "TokenRootUpgradeable",
-        await poolsData[pool].contract.methods
-          .getTokenRoots({ answerId: 0 })
-          .call()
-          .then(a => a.lp),
-      );
     }
     commonAcc = locklift.deployments.getAccount("commonAccount-2").account;
 
@@ -132,427 +121,427 @@ describe("Check DexAccount add Pair", () => {
       );
     }
   });
+
   describe("Direct exchange in pair v1", () => {
-    it("Direct exchange first token on second token in DexStablePair", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePair.contract);
-      const amountFirstToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePair.roots[0].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
+    for (let tokenIndex of [0, 1]) {
+      it(`Direct exchange Token${tokenIndex + 1} on Token${
+        (tokenIndex ? 0 : 1) + 1
+      } in DexPair`, async () => {
+        const spentTokenRoot = poolsData.pair.roots[tokenIndex];
+        const receivedTokenRoot = poolsData.pair.roots[tokenIndex ? 0 : 1];
 
-      const expectedExchangeData = await expectedExchange(
-        poolsData.stablePair.contract,
-        amountFirstToken,
-        poolsData.stablePair.roots[0].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePair.roots[0].address,
-      ).then(a => a.walletContract);
+        const gas = await getPoolExchangeGas();
+        const poolDataStart = await getPoolData(poolsData.pair.contract);
+        const amount = new BigNumber(1)
+          .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+          .toString();
 
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePair.roots[1].address,
-      ).then(a => a.walletContract);
+        const expectedExchangeData = await expectedExchange(
+          poolsData.pair.contract,
+          amount,
+          spentTokenRoot.address,
+        );
+        const spentTokenWallet = await getWallet(
+          owner.address,
+          spentTokenRoot.address,
+        ).then(a => a.walletContract);
 
-      const payload = await (
-        poolsData.stablePair.contract as Contract<DexStablePairAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.receivedAmount,
-        })
-        .call();
+        const receivedTokenWallet = await getWallet(
+          owner.address,
+          receivedTokenRoot.address,
+        ).then(a => a.walletContract);
 
-      const { traceTree } = await locklift.tracing.trace(
-        firstTokenWallet.methods
-          .transfer({
-            amount: amountFirstToken,
-            recipient: poolsData.stablePair.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
+        const payload = await (
+          poolsData.pair.contract as Contract<DexPairAbi>
+        ).methods
+          .buildExchangePayload({
+            id: getRandomNonce(),
+            deploy_wallet_grams: toNano(0.1),
+            expected_amount: expectedExchangeData.receivedAmount,
           })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePair.contract)
-        .count(1);
+          .call();
 
-      const poolDataEnd = await getPoolData(poolsData.stablePair.contract);
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePair.roots[0].address.toString()
-          ],
-        )
-          .plus(amountFirstToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePair.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePair.tokens[0]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePair.roots[1].address.toString()
-          ],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePair.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePair.tokens[1]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
+        const { traceTree } = await locklift.tracing.trace(
+          spentTokenWallet.methods
+            .transfer({
+              amount: amount,
+              recipient: poolsData.pair.contract.address,
+              deployWalletValue: 0,
+              remainingGasTo: owner.address,
+              notify: true,
+              payload: payload.value0,
+            })
+            .send({ from: owner.address, amount: calcValue(gas, true) }),
+        );
+        expect(traceTree).to.emit("Exchange", poolsData.pair.contract).count(1);
 
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        (-amountFirstToken).toString(),
-      );
+        const poolDataEnd = await getPoolData(poolsData.pair.contract);
+        expect(
+          new BigNumber(
+            poolDataStart.balances[spentTokenRoot.address.toString()],
+          )
+            .plus(amount)
+            .minus(expectedExchangeData.beneficiaryFee)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[spentTokenRoot.address.toString()],
+          `Pool has wrong spent token balance`,
+        );
+        expect(
+          new BigNumber(
+            poolDataStart.balances[receivedTokenRoot.address.toString()],
+          )
+            .minus(expectedExchangeData.receivedAmount)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[receivedTokenRoot.address.toString()],
+          `Pool has wrong received token balance`,
+        );
+        const accountSpentTokensChange =
+          traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
+        const accountReceivedTokensChange =
+          traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
 
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount,
-      );
+        expect((-accountSpentTokensChange).toString()).to.equal(
+          amount,
+          `Account has wrong spent token balance`,
+        );
+        expect(accountReceivedTokensChange.toString()).to.equal(
+          expectedExchangeData.receivedAmount,
+          `Account has wrong received token balance`,
+        );
+      });
+    }
 
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange second token on first token in DexStablePair", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePair.contract);
-      const amountSecondToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePair.roots[1].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
+    for (let tokenIndex of [0, 1]) {
+      it(`Direct exchange Token${tokenIndex + 1} on Token${
+        (tokenIndex ? 0 : 1) + 1
+      } in DexStablePair`, async () => {
+        const spentTokenRoot = poolsData.stablePair.roots[tokenIndex];
+        const receivedTokenRoot =
+          poolsData.stablePair.roots[tokenIndex ? 0 : 1];
 
-      const expectedExchangeData = await expectedExchange(
-        poolsData.stablePair.contract,
-        amountSecondToken,
-        poolsData.stablePair.roots[1].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePair.roots[0].address,
-      ).then(a => a.walletContract);
+        const gas = await getPoolExchangeGas();
+        const poolDataStart = await getPoolData(poolsData.stablePair.contract);
+        const amount = new BigNumber(1)
+          .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+          .toString();
 
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePair.roots[1].address,
-      ).then(a => a.walletContract);
+        const expectedExchangeData = await expectedExchange(
+          poolsData.stablePair.contract,
+          amount,
+          spentTokenRoot.address,
+        );
+        const spentTokenWallet = await getWallet(
+          owner.address,
+          spentTokenRoot.address,
+        ).then(a => a.walletContract);
 
-      const payload = await (
-        poolsData.stablePair.contract as Contract<DexStablePairAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.receivedAmount,
-        })
-        .call();
+        const receivedTokenWallet = await getWallet(
+          owner.address,
+          receivedTokenRoot.address,
+        ).then(a => a.walletContract);
 
-      const { traceTree } = await locklift.tracing.trace(
-        secondTokenWallet.methods
-          .transfer({
-            amount: amountSecondToken,
-            recipient: poolsData.stablePair.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
+        const payload = await (
+          poolsData.stablePair.contract as Contract<DexStablePairAbi>
+        ).methods
+          .buildExchangePayload({
+            id: getRandomNonce(),
+            deploy_wallet_grams: toNano(0.1),
+            expected_amount: expectedExchangeData.receivedAmount,
           })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePair.contract)
-        .count(1);
+          .call();
 
-      const poolDataEnd = await getPoolData(poolsData.stablePair.contract);
+        const { traceTree } = await locklift.tracing.trace(
+          spentTokenWallet.methods
+            .transfer({
+              amount: amount,
+              recipient: poolsData.stablePair.contract.address,
+              deployWalletValue: 0,
+              remainingGasTo: owner.address,
+              notify: true,
+              payload: payload.value0,
+            })
+            .send({ from: owner.address, amount: calcValue(gas, true) }),
+        );
+        expect(traceTree)
+          .to.emit("Exchange", poolsData.stablePair.contract)
+          .count(1);
 
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePair.roots[1].address.toString()
-          ],
-        )
-          .plus(amountSecondToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePair.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePair.tokens[1]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePair.roots[0].address.toString()
-          ],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePair.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePair.tokens[0]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
+        const poolDataEnd = await getPoolData(poolsData.stablePair.contract);
+        expect(
+          new BigNumber(
+            poolDataStart.balances[spentTokenRoot.address.toString()],
+          )
+            .plus(amount)
+            .minus(expectedExchangeData.beneficiaryFee)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[spentTokenRoot.address.toString()],
+          `Pool has wrong spent token balance`,
+        );
+        expect(
+          new BigNumber(
+            poolDataStart.balances[receivedTokenRoot.address.toString()],
+          )
+            .minus(expectedExchangeData.receivedAmount)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[receivedTokenRoot.address.toString()],
+          `Pool has wrong received token balance`,
+        );
+        const accountSpentTokensChange =
+          traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
+        const accountReceivedTokensChange =
+          traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
 
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount.toString(),
-      );
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        (-amountSecondToken).toString(),
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange first token on second token in DexPair", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.pair.contract);
-      const amountFirstToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.pair.roots[0].address.toString()].decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.pair.contract,
-        amountFirstToken,
-        poolsData.pair.roots[0].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.pair.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.pair.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.pair.contract as Contract<DexPairAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.receivedAmount,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        firstTokenWallet.methods
-          .transfer({
-            amount: amountFirstToken,
-            recipient: poolsData.pair.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree).to.emit("Exchange", poolsData.pair.contract).count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.pair.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[poolsData.pair.roots[0].address.toString()],
-        )
-          .plus(amountFirstToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.pair.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.pair.tokens[0]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[poolsData.pair.roots[1].address.toString()],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.pair.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.pair.tokens[1]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        (-amountFirstToken).toString(),
-      );
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount,
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange second token on first token in DexPair", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.pair.contract);
-      const amountSecondToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.pair.roots[1].address.toString()].decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.pair.contract,
-        amountSecondToken,
-        poolsData.pair.roots[1].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.pair.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.pair.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.pair.contract as Contract<DexPairAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.receivedAmount,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        secondTokenWallet.methods
-          .transfer({
-            amount: amountSecondToken,
-            recipient: poolsData.pair.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree).to.emit("Exchange", poolsData.pair.contract).count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.pair.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[poolsData.pair.roots[1].address.toString()],
-        )
-          .plus(amountSecondToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.pair.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.pair.tokens[1]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[poolsData.pair.roots[0].address.toString()],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.pair.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.pair.tokens[0]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount.toString(),
-      );
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        (-amountSecondToken).toString(),
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
+        expect((-accountSpentTokensChange).toString()).to.equal(
+          amount,
+          `Account has wrong spent token balance`,
+        );
+        expect(accountReceivedTokensChange.toString()).to.equal(
+          expectedExchangeData.receivedAmount,
+          `Account has wrong received token balance`,
+        );
+      });
+    }
   });
   describe("Direct exchange in pair v2", () => {
-    it("Direct exchange first token on second token in DexStablePair", async () => {
+    for (let tokenIndex of [0, 1]) {
+      it(`Direct exchange Token${tokenIndex + 1} on Token${
+        (tokenIndex ? 0 : 1) + 1
+      } in DexPair`, async () => {
+        const spentTokenRoot = poolsData.pair.roots[tokenIndex];
+        const receivedTokenRoot = poolsData.pair.roots[tokenIndex ? 0 : 1];
+
+        const gas = await getPoolExchangeGas();
+        const poolDataStart = await getPoolData(poolsData.pair.contract);
+        const amount = new BigNumber(1)
+          .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+          .toString();
+
+        const expectedExchangeData = await expectedExchange(
+          poolsData.pair.contract,
+          amount,
+          spentTokenRoot.address,
+        );
+        const spentTokenWallet = await getWallet(
+          owner.address,
+          spentTokenRoot.address,
+        ).then(a => a.walletContract);
+
+        const receivedTokenWallet = await getWallet(
+          owner.address,
+          receivedTokenRoot.address,
+        ).then(a => a.walletContract);
+
+        const payload = await (
+          poolsData.pair.contract as Contract<DexPairAbi>
+        ).methods
+          .buildExchangePayloadV2({
+            _id: getRandomNonce(),
+            _deployWalletGrams: toNano(0.1),
+            _expectedAmount: expectedExchangeData.receivedAmount,
+            _recipient: zeroAddress,
+            _referrer: zeroAddress,
+            _cancelPayload: null,
+            _successPayload: null,
+            _toNative: false,
+          })
+          .call();
+
+        const { traceTree } = await locklift.tracing.trace(
+          spentTokenWallet.methods
+            .transfer({
+              amount: amount,
+              recipient: poolsData.pair.contract.address,
+              deployWalletValue: 0,
+              remainingGasTo: owner.address,
+              notify: true,
+              payload: payload.value0,
+            })
+            .send({ from: owner.address, amount: calcValue(gas, true) }),
+        );
+        expect(traceTree).to.emit("Exchange", poolsData.pair.contract).count(1);
+
+        const poolDataEnd = await getPoolData(poolsData.pair.contract);
+
+        expect(
+          new BigNumber(
+            poolDataStart.balances[spentTokenRoot.address.toString()],
+          )
+            .plus(amount)
+            .minus(expectedExchangeData.beneficiaryFee)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[spentTokenRoot.address.toString()],
+          `Pool has wrong spent token balance`,
+        );
+        expect(
+          new BigNumber(
+            poolDataStart.balances[receivedTokenRoot.address.toString()],
+          )
+            .minus(expectedExchangeData.receivedAmount)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[receivedTokenRoot.address.toString()],
+          `Pool has wrong received token balance`,
+        );
+        const accountSpentTokensChange =
+          traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
+        const accountReceivedTokensChange =
+          traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
+
+        expect((-accountSpentTokensChange).toString()).to.equal(
+          amount,
+          `Account has wrong spent token balance`,
+        );
+
+        expect(accountReceivedTokensChange.toString()).to.equal(
+          expectedExchangeData.receivedAmount,
+          `Account has wrong received token balance`,
+        );
+      });
+    }
+
+    for (let tokenIndex of [0, 1]) {
+      it(`Direct exchange Token${tokenIndex + 1} on Token${
+        (tokenIndex ? 0 : 1) + 1
+      } in DexStablePair`, async () => {
+        const spentTokenRoot = poolsData.stablePair.roots[tokenIndex];
+        const receivedTokenRoot =
+          poolsData.stablePair.roots[tokenIndex ? 0 : 1];
+
+        const gas = await getPoolExchangeGas();
+        const poolDataStart = await getPoolData(poolsData.stablePair.contract);
+        const amount = new BigNumber(1)
+          .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+          .toString();
+
+        const expectedExchangeData = await expectedExchange(
+          poolsData.stablePair.contract,
+          amount,
+          spentTokenRoot.address,
+        );
+        const spentTokenWallet = await getWallet(
+          owner.address,
+          spentTokenRoot.address,
+        ).then(a => a.walletContract);
+
+        const receivedTokenWallet = await getWallet(
+          owner.address,
+          receivedTokenRoot.address,
+        ).then(a => a.walletContract);
+
+        const payload = await (
+          poolsData.stablePair.contract as Contract<DexStablePairAbi>
+        ).methods
+          .buildExchangePayloadV2({
+            _id: getRandomNonce(),
+            _deployWalletGrams: toNano(0.1),
+            _expectedAmount: expectedExchangeData.receivedAmount,
+            _recipient: zeroAddress,
+            _referrer: zeroAddress,
+            _cancelPayload: null,
+            _successPayload: null,
+            _toNative: false,
+          })
+          .call();
+
+        const { traceTree } = await locklift.tracing.trace(
+          spentTokenWallet.methods
+            .transfer({
+              amount: amount,
+              recipient: poolsData.stablePair.contract.address,
+              deployWalletValue: 0,
+              remainingGasTo: owner.address,
+              notify: true,
+              payload: payload.value0,
+            })
+            .send({ from: owner.address, amount: calcValue(gas, true) }),
+        );
+        expect(traceTree)
+          .to.emit("Exchange", poolsData.stablePair.contract)
+          .count(1);
+
+        const poolDataEnd = await getPoolData(poolsData.stablePair.contract);
+
+        expect(
+          new BigNumber(
+            poolDataStart.balances[spentTokenRoot.address.toString()],
+          )
+            .plus(amount)
+            .minus(expectedExchangeData.beneficiaryFee)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[spentTokenRoot.address.toString()],
+          `Pool has wrong spent token balance`,
+        );
+        expect(
+          new BigNumber(
+            poolDataStart.balances[receivedTokenRoot.address.toString()],
+          )
+            .minus(expectedExchangeData.receivedAmount)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[receivedTokenRoot.address.toString()],
+          `Pool has wrong received token balance`,
+        );
+        const accountSpentTokensChange =
+          traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
+        const accountReceivedTokensChange =
+          traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
+
+        expect((-accountSpentTokensChange).toString()).to.equal(
+          amount,
+          `Account has wrong spent token balance`,
+        );
+
+        expect(accountReceivedTokensChange.toString()).to.equal(
+          expectedExchangeData.receivedAmount,
+          `Account has wrong received token balance`,
+        );
+      });
+    }
+
+    it("Direct exchange in DexPair via expectedSpendAmount()", async () => {
+      const spentTokenRoot = poolsData.pair.roots[1];
+      const receivedTokenRoot = poolsData.pair.roots[0];
+
       const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePair.contract);
-      const amountFirstToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePair.roots[0].address.toString()]
-            .decimals - 3,
-        )
+      const poolDataStart = await getPoolData(poolsData.pair.contract);
+      const expectedAmount = new BigNumber(1)
+        .shiftedBy(tokensData[receivedTokenRoot.address.toString()].decimals)
         .toString();
 
-      const expectedExchangeData = await expectedExchange(
-        poolsData.stablePair.contract,
-        amountFirstToken,
-        poolsData.stablePair.roots[0].address,
-      );
-      const firstTokenWallet = await getWallet(
+      const expectedSpentData = await (
+        poolsData.pair.contract as Contract<DexPairAbi>
+      ).methods
+        .expectedSpendAmount({
+          receive_amount: expectedAmount,
+          receive_token_root: receivedTokenRoot.address,
+          answerId: 0,
+        })
+        .call();
+
+      const spentTokenWallet = await getWallet(
         owner.address,
-        poolsData.stablePair.roots[0].address,
+        spentTokenRoot.address,
       ).then(a => a.walletContract);
 
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePair.roots[1].address,
+      const receivedTokenWallet = await getWallet(
+        commonAcc.address,
+        receivedTokenRoot.address,
       ).then(a => a.walletContract);
 
       const payload = await (
-        poolsData.stablePair.contract as Contract<DexStablePairAbi>
+        poolsData.pair.contract as Contract<DexPairAbi>
       ).methods
         .buildExchangePayloadV2({
           _id: getRandomNonce(),
           _deployWalletGrams: toNano(0.1),
-          _expectedAmount: expectedExchangeData.receivedAmount,
-          _recipient: zeroAddress,
+          _expectedAmount: expectedAmount,
+          _recipient: commonAcc.address,
           _referrer: zeroAddress,
           _cancelPayload: null,
           _successPayload: null,
@@ -561,11 +550,102 @@ describe("Check DexAccount add Pair", () => {
         .call();
 
       const { traceTree } = await locklift.tracing.trace(
-        firstTokenWallet.methods
+        spentTokenWallet.methods
           .transfer({
-            amount: amountFirstToken,
+            amount: expectedSpentData.expected_amount,
+            recipient: poolsData.pair.contract.address,
+            deployWalletValue: 0,
+            remainingGasTo: owner.address,
+            notify: true,
+            payload: payload.value0,
+          })
+          .send({ from: owner.address, amount: calcValue(gas, true) }),
+      );
+      expect(traceTree).to.emit("Exchange", poolsData.pair.contract).count(1);
+
+      const poolDataEnd = await getPoolData(poolsData.pair.contract);
+
+      expect(
+        new BigNumber(poolDataStart.balances[spentTokenRoot.address.toString()])
+          .plus(expectedSpentData.expected_amount)
+          .minus(
+            await getFeesFromTotalFee(
+              poolsData.pair.contract,
+              expectedSpentData.expected_fee,
+              false,
+            ).then(a => a.beneficiaryFee),
+          )
+          .toString(),
+      ).to.equal(
+        poolDataEnd.balances[spentTokenRoot.address.toString()],
+        `Pool has wrong spent token balance`,
+      );
+      const accountSpentTokensChange =
+        traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
+      const accountReceivedTokensChange =
+        traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
+
+      expect((-accountSpentTokensChange).toString()).to.equal(
+        expectedSpentData.expected_amount,
+        `Account has wrong spent token balance`,
+      );
+      expect(Number(accountReceivedTokensChange)).to.be.greaterThanOrEqual(
+        Number(expectedAmount),
+        `Account has wrong received token balance`,
+      );
+    });
+
+    it("Direct exchange in DexStablePair via expectedSpendAmount()", async () => {
+      const spentTokenRoot = poolsData.stablePair.roots[1];
+      const receivedTokenRoot = poolsData.stablePair.roots[0];
+
+      const gas = await getPoolExchangeGas();
+      const poolDataStart = await getPoolData(poolsData.stablePair.contract);
+      const expectedAmount = new BigNumber(1)
+        .shiftedBy(tokensData[receivedTokenRoot.address.toString()].decimals)
+        .toString();
+
+      const expectedSpentData = await (
+        poolsData.stablePair.contract as Contract<DexStablePairAbi>
+      ).methods
+        .expectedSpendAmount({
+          receive_amount: expectedAmount,
+          receive_token_root: receivedTokenRoot.address,
+          answerId: 0,
+        })
+        .call();
+
+      const spentTokenWallet = await getWallet(
+        owner.address,
+        spentTokenRoot.address,
+      ).then(a => a.walletContract);
+
+      const receivedTokenWallet = await getWallet(
+        commonAcc.address,
+        receivedTokenRoot.address,
+      ).then(a => a.walletContract);
+
+      const payload = await (
+        poolsData.stablePair.contract as Contract<DexStablePairAbi>
+      ).methods
+        .buildExchangePayloadV2({
+          _id: getRandomNonce(),
+          _deployWalletGrams: toNano(0.1),
+          _expectedAmount: expectedAmount,
+          _recipient: commonAcc.address,
+          _referrer: zeroAddress,
+          _cancelPayload: null,
+          _successPayload: null,
+          _toNative: false,
+        })
+        .call();
+
+      const { traceTree } = await locklift.tracing.trace(
+        spentTokenWallet.methods
+          .transfer({
+            amount: expectedSpentData.expected_amount,
             recipient: poolsData.stablePair.contract.address,
-            deployWalletValue: toNano(0.1),
+            deployWalletValue: 0,
             remainingGasTo: owner.address,
             notify: true,
             payload: payload.value0,
@@ -579,76 +659,142 @@ describe("Check DexAccount add Pair", () => {
       const poolDataEnd = await getPoolData(poolsData.stablePair.contract);
 
       expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePair.roots[0].address.toString()
-          ],
-        )
-          .plus(amountFirstToken)
-          .minus(expectedExchangeData.beneficiaryFee)
+        new BigNumber(poolDataStart.balances[spentTokenRoot.address.toString()])
+          .plus(expectedSpentData.expected_amount)
+          .minus(
+            await getFeesFromTotalFee(
+              poolsData.stablePair.contract,
+              expectedSpentData.expected_fee,
+              false,
+            ).then(a => a.beneficiaryFee),
+          )
           .toString(),
       ).to.equal(
-        poolDataEnd.balances[poolsData.stablePair.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePair.tokens[0]} balance`,
+        poolDataEnd.balances[spentTokenRoot.address.toString()],
+        `Pool has wrong spent token balance`,
       );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePair.roots[1].address.toString()
-          ],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePair.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePair.tokens[1]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
+      const accountSpentTokensChange =
+        traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
+      const accountReceivedTokensChange =
+        traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
 
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        (-amountFirstToken).toString(),
+      expect((-accountSpentTokensChange).toString()).to.equal(
+        expectedSpentData.expected_amount,
+        `Account has wrong spent token balance`,
       );
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount,
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
+      expect(Number(accountReceivedTokensChange)).to.be.greaterThanOrEqual(
+        Number(expectedAmount),
+        `Account has wrong received token balance`,
       );
     });
-    it("Direct exchange second token on first token in DexStablePair", async () => {
+
+    it("Direct exchange in DexPair, expected_amount > received amount (revert)", async () => {
+      const spentTokenRoot = poolsData.pair.roots[0];
+      const receivedTokenRoot = poolsData.pair.roots[1];
+
+      const gas = await getPoolExchangeGas();
+      const poolDataStart = await getPoolData(poolsData.pair.contract);
+      const amount = new BigNumber(1)
+        .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+        .toString();
+
+      const expectedExchangeData = await expectedExchange(
+        poolsData.pair.contract,
+        amount,
+        spentTokenRoot.address,
+      );
+      const spentTokenWallet = await getWallet(
+        owner.address,
+        spentTokenRoot.address,
+      ).then(a => a.walletContract);
+
+      const receivedTokenWallet = await getWallet(
+        owner.address,
+        receivedTokenRoot.address,
+      ).then(a => a.walletContract);
+
+      const payload = await (
+        poolsData.pair.contract as Contract<DexPairAbi>
+      ).methods
+        .buildExchangePayloadV2({
+          _id: getRandomNonce(),
+          _deployWalletGrams: toNano(0.1),
+          _expectedAmount: new BigNumber(expectedExchangeData.receivedAmount)
+            .plus(1)
+            .toString(),
+          _recipient: zeroAddress,
+          _referrer: zeroAddress,
+          _cancelPayload: null,
+          _successPayload: null,
+          _toNative: false,
+        })
+        .call();
+
+      const { traceTree } = await locklift.tracing.trace(
+        spentTokenWallet.methods
+          .transfer({
+            amount: amount,
+            recipient: poolsData.pair.contract.address,
+            deployWalletValue: 0,
+            remainingGasTo: owner.address,
+            notify: true,
+            payload: payload.value0,
+          })
+          .send({ from: owner.address, amount: calcValue(gas, true) }),
+      );
+
+      const poolDataEnd = await getPoolData(poolsData.pair.contract);
+
+      expect(
+        poolDataStart.balances[spentTokenRoot.address.toString()],
+      ).to.equal(
+        poolDataEnd.balances[spentTokenRoot.address.toString()],
+        `Pool has wrong spent token balance`,
+      );
+      expect(
+        poolDataStart.balances[receivedTokenRoot.address.toString()],
+      ).to.equal(
+        poolDataEnd.balances[receivedTokenRoot.address.toString()],
+        `Pool has wrong received token balance`,
+      );
+      const accountSpentTokensChange =
+        traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
+      const accountReceivedTokensChange =
+        traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
+
+      expect(accountSpentTokensChange).to.equal(
+        "0",
+        `Account has wrong spent token balance`,
+      );
+      expect(accountReceivedTokensChange).to.equal(
+        "0",
+        `Account has wrong received token balance`,
+      );
+    });
+
+    it("Direct exchange in DexStablePair, expected_amount > received amount (revert)", async () => {
+      const spentTokenRoot = poolsData.stablePair.roots[0];
+      const receivedTokenRoot = poolsData.stablePair.roots[1];
+
       const gas = await getPoolExchangeGas();
       const poolDataStart = await getPoolData(poolsData.stablePair.contract);
-      const amountSecondToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePair.roots[1].address.toString()]
-            .decimals - 3,
-        )
+      const amount = new BigNumber(1)
+        .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
         .toString();
 
       const expectedExchangeData = await expectedExchange(
         poolsData.stablePair.contract,
-        amountSecondToken,
-        poolsData.stablePair.roots[1].address,
-        poolsData.stablePair.roots[0].address,
+        amount,
+        spentTokenRoot.address,
       );
-      const firstTokenWallet = await getWallet(
+      const spentTokenWallet = await getWallet(
         owner.address,
-        poolsData.stablePair.roots[0].address,
+        spentTokenRoot.address,
       ).then(a => a.walletContract);
 
-      const secondTokenWallet = await getWallet(
+      const receivedTokenWallet = await getWallet(
         owner.address,
-        poolsData.stablePair.roots[1].address,
+        receivedTokenRoot.address,
       ).then(a => a.walletContract);
 
       const payload = await (
@@ -657,7 +803,9 @@ describe("Check DexAccount add Pair", () => {
         .buildExchangePayloadV2({
           _id: getRandomNonce(),
           _deployWalletGrams: toNano(0.1),
-          _expectedAmount: expectedExchangeData.receivedAmount,
+          _expectedAmount: new BigNumber(expectedExchangeData.receivedAmount)
+            .plus(1)
+            .toString(),
           _recipient: zeroAddress,
           _referrer: zeroAddress,
           _cancelPayload: null,
@@ -667,304 +815,180 @@ describe("Check DexAccount add Pair", () => {
         .call();
 
       const { traceTree } = await locklift.tracing.trace(
-        secondTokenWallet.methods
+        spentTokenWallet.methods
           .transfer({
-            amount: amountSecondToken,
+            amount: amount,
             recipient: poolsData.stablePair.contract.address,
-            deployWalletValue: toNano(0.1),
+            deployWalletValue: 0,
             remainingGasTo: owner.address,
             notify: true,
             payload: payload.value0,
           })
           .send({ from: owner.address, amount: calcValue(gas, true) }),
       );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePair.contract)
-        .count(1);
 
       const poolDataEnd = await getPoolData(poolsData.stablePair.contract);
 
       expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePair.roots[1].address.toString()
-          ],
-        )
-          .plus(amountSecondToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
+        poolDataStart.balances[spentTokenRoot.address.toString()],
       ).to.equal(
-        poolDataEnd.balances[poolsData.stablePair.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePair.tokens[1]} balance`,
+        poolDataEnd.balances[spentTokenRoot.address.toString()],
+        `Pool has wrong spent token balance`,
       );
       expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePair.roots[0].address.toString()
-          ],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
+        poolDataStart.balances[receivedTokenRoot.address.toString()],
       ).to.equal(
-        poolDataEnd.balances[poolsData.stablePair.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePair.tokens[0]} balance`,
+        poolDataEnd.balances[receivedTokenRoot.address.toString()],
+        `Pool has wrong received token balance`,
       );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
+      const accountSpentTokensChange =
+        traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
+      const accountReceivedTokensChange =
+        traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
 
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount.toString(),
+      expect(accountSpentTokensChange).to.equal(
+        "0",
+        `Account has wrong spent token balance`,
       );
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        (-amountSecondToken).toString(),
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange first token on second token in DexPair", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.pair.contract);
-      const amountFirstToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.pair.roots[0].address.toString()].decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.pair.contract,
-        amountFirstToken,
-        poolsData.pair.roots[0].address,
-        poolsData.stablePair.roots[1].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.pair.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.pair.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.pair.contract as Contract<DexPairAbi>
-      ).methods
-        .buildExchangePayloadV2({
-          _id: getRandomNonce(),
-          _deployWalletGrams: toNano(0.1),
-          _expectedAmount: expectedExchangeData.receivedAmount,
-          _recipient: zeroAddress,
-          _referrer: zeroAddress,
-          _cancelPayload: null,
-          _successPayload: null,
-          _toNative: false,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        firstTokenWallet.methods
-          .transfer({
-            amount: amountFirstToken,
-            recipient: poolsData.pair.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree).to.emit("Exchange", poolsData.pair.contract).count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.pair.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[poolsData.pair.roots[0].address.toString()],
-        )
-          .plus(amountFirstToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.pair.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.pair.tokens[0]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[poolsData.pair.roots[1].address.toString()],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.pair.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.pair.tokens[1]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        (-amountFirstToken).toString(),
-      );
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount,
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange second token on first token in DexPair", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.pair.contract);
-      const amountSecondToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.pair.roots[1].address.toString()].decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.pair.contract,
-        amountSecondToken,
-        poolsData.pair.roots[1].address,
-        poolsData.stablePair.roots[0].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.pair.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.pair.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.pair.contract as Contract<DexPairAbi>
-      ).methods
-        .buildExchangePayloadV2({
-          _id: getRandomNonce(),
-          _deployWalletGrams: toNano(0.1),
-          _expectedAmount: expectedExchangeData.receivedAmount,
-          _recipient: zeroAddress,
-          _referrer: zeroAddress,
-          _cancelPayload: null,
-          _successPayload: null,
-          _toNative: false,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        secondTokenWallet.methods
-          .transfer({
-            amount: amountSecondToken,
-            recipient: poolsData.pair.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree).to.emit("Exchange", poolsData.pair.contract).count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.pair.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[poolsData.pair.roots[1].address.toString()],
-        )
-          .plus(amountSecondToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.pair.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.pair.tokens[1]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[poolsData.pair.roots[0].address.toString()],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.pair.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.pair.tokens[0]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount.toString(),
-      );
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        (-amountSecondToken).toString(),
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
+      expect(accountReceivedTokensChange).to.equal(
+        "0",
+        `Account has wrong received token balance`,
       );
     });
   });
+
   describe("Direct exchange in stablePool", () => {
-    it("Direct exchange first token on second token in DexStablePool via expectedSpendAmount()", async () => {
+    const spentTokenIndex = 1;
+    for (let receivedTokenIndex of [0, 2]) {
+      it(`Direct exchange Token${spentTokenIndex + 1} on Token${
+        receivedTokenIndex + 1
+      } in DexStablePool`, async () => {
+        const spentTokenRoot = poolsData.stablePool.roots[spentTokenIndex];
+        const receivedTokenRoot =
+          poolsData.stablePool.roots[receivedTokenIndex];
+
+        const gas = await getPoolExchangeGas();
+        const poolDataStart = await getPoolData(poolsData.stablePool.contract);
+        const amount = new BigNumber(1)
+          .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+          .toString();
+
+        const expectedExchangeData = await expectedExchange(
+          poolsData.stablePool.contract,
+          amount,
+          spentTokenRoot.address,
+          receivedTokenRoot.address,
+        );
+        const spentTokenWallet = await getWallet(
+          owner.address,
+          spentTokenRoot.address,
+        ).then(a => a.walletContract);
+
+        const receivedTokenWallet = await getWallet(
+          owner.address,
+          receivedTokenRoot.address,
+        ).then(a => a.walletContract);
+
+        const payload = await (
+          poolsData.stablePool.contract as Contract<DexStablePoolAbi>
+        ).methods
+          .buildExchangePayload({
+            id: getRandomNonce(),
+            deploy_wallet_grams: toNano(0.1),
+            expected_amount: expectedExchangeData.receivedAmount,
+            outcoming: receivedTokenRoot.address,
+            recipient: zeroAddress,
+            referrer: zeroAddress,
+            cancel_payload: null,
+            success_payload: null,
+            toNative: false,
+          })
+          .call();
+
+        const { traceTree } = await locklift.tracing.trace(
+          spentTokenWallet.methods
+            .transfer({
+              amount: amount,
+              recipient: poolsData.stablePool.contract.address,
+              deployWalletValue: 0,
+              remainingGasTo: owner.address,
+              notify: true,
+              payload: payload.value0,
+            })
+            .send({ from: owner.address, amount: calcValue(gas, true) }),
+        );
+        expect(traceTree)
+          .to.emit("Exchange", poolsData.stablePool.contract)
+          .count(1);
+
+        const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
+
+        expect(
+          new BigNumber(
+            poolDataStart.balances[spentTokenRoot.address.toString()],
+          )
+            .plus(amount)
+            .minus(expectedExchangeData.beneficiaryFee)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[spentTokenRoot.address.toString()],
+          `Pool has wrong ${poolsData.stablePool.tokens[spentTokenIndex]} balance`,
+        );
+        expect(
+          new BigNumber(
+            poolDataStart.balances[receivedTokenRoot.address.toString()],
+          )
+            .minus(expectedExchangeData.receivedAmount)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[receivedTokenRoot.address.toString()],
+          `Pool has wrong spent balance`,
+        );
+        const accountSpentTokensChange =
+          traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
+        const accountReceivedTokensChange =
+          traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
+
+        expect((-accountSpentTokensChange).toString()).to.equal(
+          amount,
+          `Account has wrong spent token balance`,
+        );
+        expect(accountReceivedTokensChange.toString()).to.equal(
+          expectedExchangeData.receivedAmount,
+          `Account has wrong received token balance`,
+        );
+      });
+    }
+
+    it("Direct exchange in DexStablePool via expectedSpendAmount()", async () => {
+      const spentTokenRoot = poolsData.stablePool.roots[1];
+      const receivedTokenRoot = poolsData.stablePool.roots[0];
+
       const gas = await getPoolExchangeGas();
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const expectedAmountSecondToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[1].address.toString()]
-            .decimals - 3,
-        )
+      const expectedAmount = new BigNumber(1)
+        .shiftedBy(tokensData[receivedTokenRoot.address.toString()].decimals)
         .toString();
 
-      const expectedExchangeData = await (
+      const expectedSpentData = await (
         poolsData.stablePool.contract as Contract<DexStablePoolAbi>
       ).methods
         .expectedSpendAmount({
-          receive_amount: expectedAmountSecondToken,
-          spent_token_root: poolsData.stablePool.roots[0].address,
-          receive_token_root: poolsData.stablePool.roots[1].address,
+          receive_amount: expectedAmount,
+          spent_token_root: spentTokenRoot.address,
+          receive_token_root: receivedTokenRoot.address,
           answerId: 0,
         })
         .call();
 
-      const firstTokenWallet = await getWallet(
+      const spentTokenWallet = await getWallet(
         owner.address,
-        poolsData.stablePool.roots[0].address,
+        spentTokenRoot.address,
       ).then(a => a.walletContract);
 
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
+      const receivedTokenWallet = await getWallet(
+        commonAcc.address,
+        receivedTokenRoot.address,
       ).then(a => a.walletContract);
 
       const payload = await (
@@ -973,22 +997,22 @@ describe("Check DexAccount add Pair", () => {
         .buildExchangePayload({
           id: getRandomNonce(),
           deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.expected_amount,
-          recipient: zeroAddress,
+          expected_amount: expectedAmount,
+          outcoming: receivedTokenRoot.address,
+          recipient: commonAcc.address,
           referrer: zeroAddress,
           cancel_payload: null,
           success_payload: null,
           toNative: false,
-          outcoming: poolsData.stablePool.roots[1].address,
         })
         .call();
 
       const { traceTree } = await locklift.tracing.trace(
-        firstTokenWallet.methods
+        spentTokenWallet.methods
           .transfer({
-            amount: expectedExchangeData.expected_amount,
+            amount: expectedSpentData.expected_amount,
             recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
+            deployWalletValue: 0,
             remainingGasTo: owner.address,
             notify: true,
             payload: payload.value0,
@@ -1002,643 +1026,59 @@ describe("Check DexAccount add Pair", () => {
       const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
 
       expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[0].address.toString()
-          ],
-        )
-          .plus(expectedExchangeData.expected_amount)
+        new BigNumber(poolDataStart.balances[spentTokenRoot.address.toString()])
+          .plus(expectedSpentData.expected_amount)
           .minus(
             await getFeesFromTotalFee(
               poolsData.stablePool.contract,
-              expectedExchangeData.expected_fee,
+              expectedSpentData.expected_fee,
               false,
             ).then(a => a.beneficiaryFee),
           )
           .toString(),
       ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[0]} balance`,
+        poolDataEnd.balances[spentTokenRoot.address.toString()],
+        `Pool has wrong spent token balance`,
       );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
+      const accountSpentTokensChange =
+        traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
+      const accountReceivedTokensChange =
+        traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
 
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        (-expectedExchangeData.expected_amount).toString(),
+      expect((-accountSpentTokensChange).toString()).to.equal(
+        expectedSpentData.expected_amount,
+        `Account has wrong spent token balance`,
       );
-
-      expect(Number(accountSecondAccountTokensChange)).to.be.greaterThanOrEqual(
-        Number(expectedAmountSecondToken),
-      );
-      expect(accountThirdAccountTokensChange.toString()).to.equal("0");
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
+      expect(Number(accountReceivedTokensChange)).to.be.greaterThanOrEqual(
+        Number(expectedAmount),
+        `Account has wrong received token balance`,
       );
     });
-    it("Direct exchange first token on third token in DexStablePool via expectedSpendAmount()", async () => {
+
+    it("Direct exchange in DexStablePool, expected_amount > received amount (revert)", async () => {
+      const spentTokenRoot = poolsData.stablePool.roots[0];
+      const receivedTokenRoot = poolsData.stablePool.roots[1];
+
       const gas = await getPoolExchangeGas();
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const expectedAmountThirdToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[2].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .expectedSpendAmount({
-          receive_amount: expectedAmountThirdToken,
-          spent_token_root: poolsData.stablePool.roots[0].address,
-          receive_token_root: poolsData.stablePool.roots[2].address,
-          answerId: 0,
-        })
-        .call();
-
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.expected_amount,
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[2].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        firstTokenWallet.methods
-          .transfer({
-            amount: expectedExchangeData.expected_amount,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePool.contract)
-        .count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[0].address.toString()
-          ],
-        )
-          .plus(expectedExchangeData.expected_amount)
-          .minus(
-            await getFeesFromTotalFee(
-              poolsData.stablePool.contract,
-              expectedExchangeData.expected_fee,
-              false,
-            ).then(a => a.beneficiaryFee),
-          )
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[0]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        (-expectedExchangeData.expected_amount).toString(),
-      );
-      expect(accountSecondAccountTokensChange.toString()).to.equal("0");
-      expect(Number(accountThirdAccountTokensChange)).to.be.greaterThanOrEqual(
-        Number(expectedAmountThirdToken),
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange second token on first token in DexStablePool via expectedSpendAmount()", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const expectedAmountFirstToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[0].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .expectedSpendAmount({
-          receive_amount: expectedAmountFirstToken,
-          spent_token_root: poolsData.stablePool.roots[1].address,
-          receive_token_root: poolsData.stablePool.roots[0].address,
-          answerId: 0,
-        })
-        .call();
-
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedAmountFirstToken,
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[0].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        secondTokenWallet.methods
-          .transfer({
-            amount: expectedExchangeData.expected_amount,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePool.contract)
-        .count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[1].address.toString()
-          ],
-        )
-          .plus(expectedExchangeData.expected_amount)
-          .minus(
-            await getFeesFromTotalFee(
-              poolsData.stablePool.contract,
-              expectedExchangeData.expected_fee,
-              false,
-            ).then(a => a.beneficiaryFee),
-          )
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[1]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(Number(accountFirstAccountTokensChange)).to.be.greaterThanOrEqual(
-        Number(expectedAmountFirstToken),
-      );
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        (-expectedExchangeData.expected_amount).toString(),
-      );
-      expect(accountThirdAccountTokensChange.toString()).to.equal("0");
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange second token on third token in DexStablePool via expectedSpendAmount()", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const expectedAmountThirdToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[2].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .expectedSpendAmount({
-          receive_amount: expectedAmountThirdToken,
-          spent_token_root: poolsData.stablePool.roots[1].address,
-          receive_token_root: poolsData.stablePool.roots[2].address,
-          answerId: 0,
-        })
-        .call();
-
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.expected_amount,
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[2].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        secondTokenWallet.methods
-          .transfer({
-            amount: expectedExchangeData.expected_amount,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePool.contract)
-        .count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[1].address.toString()
-          ],
-        )
-          .plus(expectedExchangeData.expected_amount)
-          .minus(
-            await getFeesFromTotalFee(
-              poolsData.stablePool.contract,
-              expectedExchangeData.expected_fee,
-              false,
-            ).then(a => a.beneficiaryFee),
-          )
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[1]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal("0");
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        (-expectedExchangeData.expected_amount).toString(),
-      );
-      expect(Number(accountThirdAccountTokensChange)).to.be.greaterThanOrEqual(
-        Number(expectedAmountThirdToken),
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange third token on first token in DexStablePool via expectedSpendAmount()", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const expectedAmountFirstToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[0].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .expectedSpendAmount({
-          receive_amount: expectedAmountFirstToken,
-          spent_token_root: poolsData.stablePool.roots[2].address,
-          receive_token_root: poolsData.stablePool.roots[0].address,
-          answerId: 0,
-        })
-        .call();
-
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedAmountFirstToken,
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[0].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        thirdTokenWallet.methods
-          .transfer({
-            amount: expectedExchangeData.expected_amount,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePool.contract)
-        .count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[2].address.toString()
-          ],
-        )
-          .plus(expectedExchangeData.expected_amount)
-          .minus(
-            await getFeesFromTotalFee(
-              poolsData.stablePool.contract,
-              expectedExchangeData.expected_fee,
-              false,
-            ).then(a => a.beneficiaryFee),
-          )
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[2].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[2]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(Number(accountFirstAccountTokensChange)).to.be.greaterThanOrEqual(
-        Number(expectedAmountFirstToken),
-      );
-      expect(accountSecondAccountTokensChange.toString()).to.equal("0");
-      expect(accountThirdAccountTokensChange.toString()).to.equal(
-        (-expectedExchangeData.expected_amount).toString(),
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange third token on second token in DexStablePool via expectedSpendAmount()", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const expectedAmountSecondToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[1].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .expectedSpendAmount({
-          receive_amount: expectedAmountSecondToken,
-          spent_token_root: poolsData.stablePool.roots[2].address,
-          receive_token_root: poolsData.stablePool.roots[1].address,
-          answerId: 0,
-        })
-        .call();
-
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedAmountSecondToken,
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[1].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        thirdTokenWallet.methods
-          .transfer({
-            amount: expectedExchangeData.expected_amount,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePool.contract)
-        .count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[2].address.toString()
-          ],
-        )
-          .plus(expectedExchangeData.expected_amount)
-          .minus(
-            await getFeesFromTotalFee(
-              poolsData.stablePool.contract,
-              expectedExchangeData.expected_fee,
-              false,
-            ).then(a => a.beneficiaryFee),
-          )
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[2].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[2]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal("0");
-      expect(Number(accountSecondAccountTokensChange)).to.be.greaterThanOrEqual(
-        Number(expectedAmountSecondToken),
-      );
-      expect(accountThirdAccountTokensChange.toString()).to.equal(
-        (-expectedExchangeData.expected_amount).toString(),
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange first token on second token in DexStablePool", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const amountFirstToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[0].address.toString()]
-            .decimals - 3,
-        )
+      const amount = new BigNumber(1)
+        .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
         .toString();
 
       const expectedExchangeData = await expectedExchange(
         poolsData.stablePool.contract,
-        amountFirstToken,
-        poolsData.stablePool.roots[0].address,
-        poolsData.stablePool.roots[1].address,
+        amount,
+        spentTokenRoot.address,
+        receivedTokenRoot.address,
       );
-      const firstTokenWallet = await getWallet(
+      const spentTokenWallet = await getWallet(
         owner.address,
-        poolsData.stablePool.roots[0].address,
+        spentTokenRoot.address,
       ).then(a => a.walletContract);
 
-      const secondTokenWallet = await getWallet(
+      const receivedTokenWallet = await getWallet(
         owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
+        receivedTokenRoot.address,
       ).then(a => a.walletContract);
 
       const payload = await (
@@ -1647,904 +1087,24 @@ describe("Check DexAccount add Pair", () => {
         .buildExchangePayload({
           id: getRandomNonce(),
           deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.receivedAmount,
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[1].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        firstTokenWallet.methods
-          .transfer({
-            amount: amountFirstToken,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePool.contract)
-        .count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[0].address.toString()
-          ],
-        )
-          .plus(amountFirstToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[0]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[1].address.toString()
-          ],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[1]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        (-amountFirstToken).toString(),
-      );
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount,
-      );
-      expect(accountThirdAccountTokensChange.toString()).to.equal("0");
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange first token on third token in DexStablePool", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const amountFirstToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[0].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.stablePool.contract,
-        amountFirstToken,
-        poolsData.stablePool.roots[0].address,
-        poolsData.stablePool.roots[2].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.receivedAmount,
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[2].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        firstTokenWallet.methods
-          .transfer({
-            amount: amountFirstToken,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePool.contract)
-        .count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[0].address.toString()
-          ],
-        )
-          .plus(amountFirstToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[0]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[2].address.toString()
-          ],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[2].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[2]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        (-amountFirstToken).toString(),
-      );
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal("0");
-      expect(accountThirdAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount,
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange second token on first token in DexStablePool", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const amountSecondToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[1].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.stablePool.contract,
-        amountSecondToken,
-        poolsData.stablePool.roots[1].address,
-        poolsData.stablePool.roots[0].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.receivedAmount,
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[0].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        secondTokenWallet.methods
-          .transfer({
-            amount: amountSecondToken,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePool.contract)
-        .count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[1].address.toString()
-          ],
-        )
-          .plus(amountSecondToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[1]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[0].address.toString()
-          ],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[0]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount.toString(),
-      );
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        (-amountSecondToken).toString(),
-      );
-      expect(accountThirdAccountTokensChange.toString()).to.equal("0");
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange second token on third token in DexStablePool", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const amountSecondToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[1].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.stablePool.contract,
-        amountSecondToken,
-        poolsData.stablePool.roots[1].address,
-        poolsData.stablePool.roots[2].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.receivedAmount,
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[2].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        secondTokenWallet.methods
-          .transfer({
-            amount: amountSecondToken,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePool.contract)
-        .count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[1].address.toString()
-          ],
-        )
-          .plus(amountSecondToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[1]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[2].address.toString()
-          ],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[2].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[2]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        "0".toString(),
-      );
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        (-amountSecondToken).toString(),
-      );
-      expect(accountThirdAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount,
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange third token on first token in DexStablePool", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const amountThirdToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[2].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.stablePool.contract,
-        amountThirdToken,
-        poolsData.stablePool.roots[2].address,
-        poolsData.stablePool.roots[0].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.receivedAmount,
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[0].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        thirdTokenWallet.methods
-          .transfer({
-            amount: amountThirdToken,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePool.contract)
-        .count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[2].address.toString()
-          ],
-        )
-          .plus(amountThirdToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[2].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[2]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[0].address.toString()
-          ],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[0]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount,
-      );
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal("0");
-      expect(accountThirdAccountTokensChange.toString()).to.equal(
-        (-amountThirdToken).toString(),
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange third token on second token in DexStablePool", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const amountThirdToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[2].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.stablePool.contract,
-        amountThirdToken,
-        poolsData.stablePool.roots[2].address,
-        poolsData.stablePool.roots[1].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: expectedExchangeData.receivedAmount,
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[1].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        thirdTokenWallet.methods
-          .transfer({
-            amount: amountThirdToken,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-      expect(traceTree)
-        .to.emit("Exchange", poolsData.stablePool.contract)
-        .count(1);
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[2].address.toString()
-          ],
-        )
-          .plus(amountThirdToken)
-          .minus(expectedExchangeData.beneficiaryFee)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[2].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[2]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[1].address.toString()
-          ],
-        )
-          .minus(expectedExchangeData.receivedAmount)
-          .toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[1]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal("0");
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal(
-        expectedExchangeData.receivedAmount,
-      );
-      expect(accountThirdAccountTokensChange.toString()).to.equal(
-        (-amountThirdToken).toString(),
-      );
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-  });
-  describe("Direct exchange V2 but expected_amount is too big", () => {
-    it("Direct exchange first token on second token in DexStablePair", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePair.contract);
-      const amountFirstToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePair.roots[0].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.stablePair.contract,
-        amountFirstToken,
-        poolsData.stablePair.roots[0].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePair.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePair.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePair.contract as Contract<DexStablePairAbi>
-      ).methods
-        .buildExchangePayloadV2({
-          _id: getRandomNonce(),
-          _deployWalletGrams: toNano(0.1),
-          _expectedAmount: BigNumber(expectedExchangeData.receivedAmount)
+          expected_amount: new BigNumber(expectedExchangeData.receivedAmount)
             .plus(1)
             .toString(),
-          _recipient: zeroAddress,
-          _referrer: zeroAddress,
-          _cancelPayload: null,
-          _successPayload: null,
-          _toNative: false,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        firstTokenWallet.methods
-          .transfer({
-            amount: amountFirstToken,
-            recipient: poolsData.stablePair.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-
-      const poolDataEnd = await getPoolData(poolsData.stablePair.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePair.roots[0].address.toString()
-          ],
-        ).toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePair.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePair.tokens[0]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePair.roots[1].address.toString()
-          ],
-        ).toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePair.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePair.tokens[1]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal("0");
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal("0");
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange second token on first token in DexPair", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.pair.contract);
-      const amountSecondToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.pair.roots[1].address.toString()].decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.pair.contract,
-        amountSecondToken,
-        poolsData.pair.roots[1].address,
-        poolsData.stablePair.roots[0].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.pair.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.pair.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.pair.contract as Contract<DexPairAbi>
-      ).methods
-        .buildExchangePayloadV2({
-          _id: getRandomNonce(),
-          _deployWalletGrams: toNano(0.1),
-          _expectedAmount: BigNumber(expectedExchangeData.receivedAmount)
-            .plus(1)
-            .toString(),
-          _recipient: zeroAddress,
-          _referrer: zeroAddress,
-          _cancelPayload: null,
-          _successPayload: null,
-          _toNative: false,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        secondTokenWallet.methods
-          .transfer({
-            amount: amountSecondToken,
-            recipient: poolsData.pair.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-
-      const poolDataEnd = await getPoolData(poolsData.pair.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[poolsData.pair.roots[1].address.toString()],
-        ).toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.pair.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.pair.tokens[1]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[poolsData.pair.roots[0].address.toString()],
-        ).toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.pair.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.pair.tokens[0]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal("0");
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal("0");
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange first token on second token in DexStablePool", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const amountFirstToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[0].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.stablePool.contract,
-        amountFirstToken,
-        poolsData.stablePool.roots[0].address,
-        poolsData.stablePool.roots[1].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: BigNumber(expectedExchangeData.receivedAmount)
-            .plus(1)
-            .toString(),
+          outcoming: receivedTokenRoot.address,
           recipient: zeroAddress,
           referrer: zeroAddress,
           cancel_payload: null,
           success_payload: null,
           toNative: false,
-          outcoming: poolsData.stablePool.roots[1].address,
         })
         .call();
 
       const { traceTree } = await locklift.tracing.trace(
-        firstTokenWallet.methods
+        spentTokenWallet.methods
           .transfer({
-            amount: amountFirstToken,
+            amount: amount,
             recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
+            deployWalletValue: 0,
             remainingGasTo: owner.address,
             notify: true,
             payload: payload.value0,
@@ -2555,254 +1115,29 @@ describe("Check DexAccount add Pair", () => {
       const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
 
       expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[0].address.toString()
-          ],
-        ).toString(),
+        poolDataStart.balances[spentTokenRoot.address.toString()],
       ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[0]} balance`,
+        poolDataEnd.balances[spentTokenRoot.address.toString()],
+        `Pool has wrong spent token balance`,
       );
       expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[1].address.toString()
-          ],
-        ).toString(),
+        poolDataStart.balances[receivedTokenRoot.address.toString()],
       ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[1]} balance`,
+        poolDataEnd.balances[receivedTokenRoot.address.toString()],
+        `Pool has wrong received token balance`,
       );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
+      const accountSpentTokensChange =
+        traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
+      const accountReceivedTokensChange =
+        traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
 
-      expect(accountFirstAccountTokensChange.toString()).to.equal("0");
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal("0");
-      expect(accountThirdAccountTokensChange.toString()).to.equal("0");
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
+      expect(accountSpentTokensChange).to.equal(
+        "0",
+        `Account has wrong spent token balance`,
       );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange second token on third token in DexStablePool", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const amountSecondToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[1].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.stablePool.contract,
-        amountSecondToken,
-        poolsData.stablePool.roots[1].address,
-        poolsData.stablePool.roots[2].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: BigNumber(expectedExchangeData.receivedAmount)
-            .plus(1)
-            .toString(),
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[2].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        secondTokenWallet.methods
-          .transfer({
-            amount: amountSecondToken,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[1].address.toString()
-          ],
-        ).toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[1].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[1]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[2].address.toString()
-          ],
-        ).toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[2].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[2]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal("0");
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal("0");
-      expect(accountThirdAccountTokensChange.toString()).to.equal("0");
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
-      );
-    });
-    it("Direct exchange third token on first token in DexStablePool", async () => {
-      const gas = await getPoolExchangeGas();
-      const poolDataStart = await getPoolData(poolsData.stablePool.contract);
-      const amountThirdToken = new BigNumber(1)
-        .shiftedBy(
-          tokensData[poolsData.stablePool.roots[2].address.toString()]
-            .decimals - 3,
-        )
-        .toString();
-
-      const expectedExchangeData = await expectedExchange(
-        poolsData.stablePool.contract,
-        amountThirdToken,
-        poolsData.stablePool.roots[2].address,
-        poolsData.stablePool.roots[0].address,
-      );
-      const firstTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[0].address,
-      ).then(a => a.walletContract);
-
-      const secondTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[1].address,
-      ).then(a => a.walletContract);
-
-      const thirdTokenWallet = await getWallet(
-        owner.address,
-        poolsData.stablePool.roots[2].address,
-      ).then(a => a.walletContract);
-
-      const payload = await (
-        poolsData.stablePool.contract as Contract<DexStablePoolAbi>
-      ).methods
-        .buildExchangePayload({
-          id: getRandomNonce(),
-          deploy_wallet_grams: toNano(0.1),
-          expected_amount: BigNumber(expectedExchangeData.receivedAmount)
-            .plus(1)
-            .toString(),
-          recipient: zeroAddress,
-          referrer: zeroAddress,
-          cancel_payload: null,
-          success_payload: null,
-          toNative: false,
-          outcoming: poolsData.stablePool.roots[0].address,
-        })
-        .call();
-
-      const { traceTree } = await locklift.tracing.trace(
-        thirdTokenWallet.methods
-          .transfer({
-            amount: amountThirdToken,
-            recipient: poolsData.stablePool.contract.address,
-            deployWalletValue: toNano(0.1),
-            remainingGasTo: owner.address,
-            notify: true,
-            payload: payload.value0,
-          })
-          .send({ from: owner.address, amount: calcValue(gas, true) }),
-      );
-
-      const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
-
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[2].address.toString()
-          ],
-        ).toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[2].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[2]} balance`,
-      );
-      expect(
-        new BigNumber(
-          poolDataStart.balances[
-            poolsData.stablePool.roots[0].address.toString()
-          ],
-        ).toString(),
-      ).to.equal(
-        poolDataEnd.balances[poolsData.stablePool.roots[0].address.toString()],
-        `Pool has wrong ${poolsData.stablePool.tokens[0]} balance`,
-      );
-      const accountFirstAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(firstTokenWallet);
-      const accountSecondAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(secondTokenWallet);
-      const accountThirdAccountTokensChange =
-        traceTree?.tokens.getTokenBalanceChange(thirdTokenWallet);
-
-      expect(accountFirstAccountTokensChange.toString()).to.equal("0");
-
-      expect(accountSecondAccountTokensChange.toString()).to.equal("0");
-      expect(accountThirdAccountTokensChange.toString()).to.equal("0");
-
-      expect(new BigNumber(poolDataStart.lpSupply).toString()).to.equal(
-        poolDataEnd.lpSupply,
-        "Pool has wrong LP balance",
-      );
-      expect(poolDataEnd.lpSupply).to.equal(
-        poolDataEnd.actualTotalSupply,
-        "Pool LP balance is not equal to LP_Root total supply",
+      expect(accountReceivedTokensChange).to.equal(
+        "0",
+        `Account has wrong received token balance`,
       );
     });
   });
