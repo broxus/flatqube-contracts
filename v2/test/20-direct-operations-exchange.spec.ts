@@ -1,5 +1,11 @@
 import { expect } from "chai";
-import { Contract, getRandomNonce, toNano, zeroAddress } from "locklift";
+import {
+  Address,
+  Contract,
+  getRandomNonce,
+  toNano,
+  zeroAddress,
+} from "locklift";
 import { Account } from "everscale-standalone-client/nodejs";
 
 import {
@@ -32,7 +38,7 @@ describe("Check DexAccount add Pair", () => {
         | Contract<DexPairAbi>
         | Contract<DexStablePoolAbi>;
       tokens: string[];
-      roots: Contract<TokenRootUpgradeableAbi>[];
+      roots: Address[];
     }
   > = {
     stablePair: {
@@ -86,10 +92,11 @@ describe("Check DexAccount add Pair", () => {
       );
 
     for (const pool in poolsData) {
-      poolsData[pool].roots = poolsData[pool].tokens.map((token: string) =>
-        locklift.deployments.getContract<TokenRootUpgradeableAbi>(token),
-      );
-      for (const root of poolsData[pool].roots) {
+      for (const token of poolsData[pool].tokens) {
+        const root =
+          locklift.deployments.getContract<TokenRootUpgradeableAbi>(token);
+        poolsData[pool].roots.push(root.address);
+
         tokensData[root.address.toString()] = {
           decimals: await root.methods
             .decimals({ answerId: 0 })
@@ -112,9 +119,9 @@ describe("Check DexAccount add Pair", () => {
         poolsData[pool].contract,
         poolsData[pool].roots.map(root => {
           return {
-            root: root.address,
+            root: root,
             amount: new BigNumber(100)
-              .shiftedBy(tokensData[root.address.toString()].decimals)
+              .shiftedBy(tokensData[root.toString()].decimals)
               .toString(),
           };
         }),
@@ -133,22 +140,22 @@ describe("Check DexAccount add Pair", () => {
         const gas = await getPoolExchangeGas();
         const poolDataStart = await getPoolData(poolsData.pair.contract);
         const amount = new BigNumber(1)
-          .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+          .shiftedBy(tokensData[spentTokenRoot.toString()].decimals)
           .toString();
 
-        const expectedExchangeData = await expectedExchange(
+        const expected = await expectedExchange(
           poolsData.pair.contract,
           amount,
-          spentTokenRoot.address,
+          spentTokenRoot,
         );
         const spentTokenWallet = await getWallet(
           owner.address,
-          spentTokenRoot.address,
+          spentTokenRoot,
         ).then(a => a.walletContract);
 
         const receivedTokenWallet = await getWallet(
           owner.address,
-          receivedTokenRoot.address,
+          receivedTokenRoot,
         ).then(a => a.walletContract);
 
         const payload = await (
@@ -157,7 +164,7 @@ describe("Check DexAccount add Pair", () => {
           .buildExchangePayload({
             id: getRandomNonce(),
             deploy_wallet_grams: toNano(0.1),
-            expected_amount: expectedExchangeData.receivedAmount,
+            expected_amount: expected.receivedAmount,
           })
           .call();
 
@@ -177,26 +184,33 @@ describe("Check DexAccount add Pair", () => {
 
         const poolDataEnd = await getPoolData(poolsData.pair.contract);
         expect(
-          new BigNumber(
-            poolDataStart.balances[spentTokenRoot.address.toString()],
-          )
+          new BigNumber(poolDataStart.balances[spentTokenRoot.toString()])
             .plus(amount)
-            .minus(expectedExchangeData.beneficiaryFee)
+            .minus(expected.beneficiaryFee)
             .toString(),
         ).to.equal(
-          poolDataEnd.balances[spentTokenRoot.address.toString()],
+          poolDataEnd.balances[spentTokenRoot.toString()],
           `Pool has wrong spent token balance`,
         );
         expect(
           new BigNumber(
-            poolDataStart.balances[receivedTokenRoot.address.toString()],
+            poolDataStart.accumulatedFees[spentTokenRoot.toString()],
           )
-            .minus(expectedExchangeData.receivedAmount)
+            .plus(expected.beneficiaryFee)
             .toString(),
         ).to.equal(
-          poolDataEnd.balances[receivedTokenRoot.address.toString()],
+          poolDataEnd.accumulatedFees[spentTokenRoot.toString()],
+          `Pool has wrong spent token fees`,
+        );
+        expect(
+          new BigNumber(poolDataStart.balances[receivedTokenRoot.toString()])
+            .minus(expected.receivedAmount)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[receivedTokenRoot.toString()],
           `Pool has wrong received token balance`,
         );
+
         const accountSpentTokensChange =
           traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
         const accountReceivedTokensChange =
@@ -207,7 +221,7 @@ describe("Check DexAccount add Pair", () => {
           `Account has wrong spent token balance`,
         );
         expect(accountReceivedTokensChange.toString()).to.equal(
-          expectedExchangeData.receivedAmount,
+          expected.receivedAmount,
           `Account has wrong received token balance`,
         );
       });
@@ -224,22 +238,22 @@ describe("Check DexAccount add Pair", () => {
         const gas = await getPoolExchangeGas();
         const poolDataStart = await getPoolData(poolsData.stablePair.contract);
         const amount = new BigNumber(1)
-          .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+          .shiftedBy(tokensData[spentTokenRoot.toString()].decimals)
           .toString();
 
-        const expectedExchangeData = await expectedExchange(
+        const expected = await expectedExchange(
           poolsData.stablePair.contract,
           amount,
-          spentTokenRoot.address,
+          spentTokenRoot,
         );
         const spentTokenWallet = await getWallet(
           owner.address,
-          spentTokenRoot.address,
+          spentTokenRoot,
         ).then(a => a.walletContract);
 
         const receivedTokenWallet = await getWallet(
           owner.address,
-          receivedTokenRoot.address,
+          receivedTokenRoot,
         ).then(a => a.walletContract);
 
         const payload = await (
@@ -248,7 +262,7 @@ describe("Check DexAccount add Pair", () => {
           .buildExchangePayload({
             id: getRandomNonce(),
             deploy_wallet_grams: toNano(0.1),
-            expected_amount: expectedExchangeData.receivedAmount,
+            expected_amount: expected.receivedAmount,
           })
           .call();
 
@@ -270,26 +284,33 @@ describe("Check DexAccount add Pair", () => {
 
         const poolDataEnd = await getPoolData(poolsData.stablePair.contract);
         expect(
-          new BigNumber(
-            poolDataStart.balances[spentTokenRoot.address.toString()],
-          )
+          new BigNumber(poolDataStart.balances[spentTokenRoot.toString()])
             .plus(amount)
-            .minus(expectedExchangeData.beneficiaryFee)
+            .minus(expected.beneficiaryFee)
             .toString(),
         ).to.equal(
-          poolDataEnd.balances[spentTokenRoot.address.toString()],
+          poolDataEnd.balances[spentTokenRoot.toString()],
           `Pool has wrong spent token balance`,
         );
         expect(
           new BigNumber(
-            poolDataStart.balances[receivedTokenRoot.address.toString()],
+            poolDataStart.accumulatedFees[spentTokenRoot.toString()],
           )
-            .minus(expectedExchangeData.receivedAmount)
+            .plus(expected.beneficiaryFee)
             .toString(),
         ).to.equal(
-          poolDataEnd.balances[receivedTokenRoot.address.toString()],
+          poolDataEnd.accumulatedFees[spentTokenRoot.toString()],
+          `Pool has wrong spent token fees`,
+        );
+        expect(
+          new BigNumber(poolDataStart.balances[receivedTokenRoot.toString()])
+            .minus(expected.receivedAmount)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[receivedTokenRoot.toString()],
           `Pool has wrong received token balance`,
         );
+
         const accountSpentTokensChange =
           traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
         const accountReceivedTokensChange =
@@ -300,7 +321,7 @@ describe("Check DexAccount add Pair", () => {
           `Account has wrong spent token balance`,
         );
         expect(accountReceivedTokensChange.toString()).to.equal(
-          expectedExchangeData.receivedAmount,
+          expected.receivedAmount,
           `Account has wrong received token balance`,
         );
       });
@@ -317,22 +338,22 @@ describe("Check DexAccount add Pair", () => {
         const gas = await getPoolExchangeGas();
         const poolDataStart = await getPoolData(poolsData.pair.contract);
         const amount = new BigNumber(1)
-          .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+          .shiftedBy(tokensData[spentTokenRoot.toString()].decimals)
           .toString();
 
-        const expectedExchangeData = await expectedExchange(
+        const expected = await expectedExchange(
           poolsData.pair.contract,
           amount,
-          spentTokenRoot.address,
+          spentTokenRoot,
         );
         const spentTokenWallet = await getWallet(
           owner.address,
-          spentTokenRoot.address,
+          spentTokenRoot,
         ).then(a => a.walletContract);
 
         const receivedTokenWallet = await getWallet(
           owner.address,
-          receivedTokenRoot.address,
+          receivedTokenRoot,
         ).then(a => a.walletContract);
 
         const payload = await (
@@ -341,7 +362,7 @@ describe("Check DexAccount add Pair", () => {
           .buildExchangePayloadV2({
             _id: getRandomNonce(),
             _deployWalletGrams: toNano(0.1),
-            _expectedAmount: expectedExchangeData.receivedAmount,
+            _expectedAmount: expected.receivedAmount,
             _recipient: zeroAddress,
             _referrer: zeroAddress,
             _cancelPayload: null,
@@ -367,26 +388,33 @@ describe("Check DexAccount add Pair", () => {
         const poolDataEnd = await getPoolData(poolsData.pair.contract);
 
         expect(
-          new BigNumber(
-            poolDataStart.balances[spentTokenRoot.address.toString()],
-          )
+          new BigNumber(poolDataStart.balances[spentTokenRoot.toString()])
             .plus(amount)
-            .minus(expectedExchangeData.beneficiaryFee)
+            .minus(expected.beneficiaryFee)
             .toString(),
         ).to.equal(
-          poolDataEnd.balances[spentTokenRoot.address.toString()],
+          poolDataEnd.balances[spentTokenRoot.toString()],
           `Pool has wrong spent token balance`,
         );
         expect(
           new BigNumber(
-            poolDataStart.balances[receivedTokenRoot.address.toString()],
+            poolDataStart.accumulatedFees[spentTokenRoot.toString()],
           )
-            .minus(expectedExchangeData.receivedAmount)
+            .plus(expected.beneficiaryFee)
             .toString(),
         ).to.equal(
-          poolDataEnd.balances[receivedTokenRoot.address.toString()],
+          poolDataEnd.accumulatedFees[spentTokenRoot.toString()],
+          `Pool has wrong spent token fees`,
+        );
+        expect(
+          new BigNumber(poolDataStart.balances[receivedTokenRoot.toString()])
+            .minus(expected.receivedAmount)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[receivedTokenRoot.toString()],
           `Pool has wrong received token balance`,
         );
+
         const accountSpentTokensChange =
           traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
         const accountReceivedTokensChange =
@@ -398,7 +426,7 @@ describe("Check DexAccount add Pair", () => {
         );
 
         expect(accountReceivedTokensChange.toString()).to.equal(
-          expectedExchangeData.receivedAmount,
+          expected.receivedAmount,
           `Account has wrong received token balance`,
         );
       });
@@ -415,22 +443,22 @@ describe("Check DexAccount add Pair", () => {
         const gas = await getPoolExchangeGas();
         const poolDataStart = await getPoolData(poolsData.stablePair.contract);
         const amount = new BigNumber(1)
-          .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+          .shiftedBy(tokensData[spentTokenRoot.toString()].decimals)
           .toString();
 
-        const expectedExchangeData = await expectedExchange(
+        const expected = await expectedExchange(
           poolsData.stablePair.contract,
           amount,
-          spentTokenRoot.address,
+          spentTokenRoot,
         );
         const spentTokenWallet = await getWallet(
           owner.address,
-          spentTokenRoot.address,
+          spentTokenRoot,
         ).then(a => a.walletContract);
 
         const receivedTokenWallet = await getWallet(
           owner.address,
-          receivedTokenRoot.address,
+          receivedTokenRoot,
         ).then(a => a.walletContract);
 
         const payload = await (
@@ -439,7 +467,7 @@ describe("Check DexAccount add Pair", () => {
           .buildExchangePayloadV2({
             _id: getRandomNonce(),
             _deployWalletGrams: toNano(0.1),
-            _expectedAmount: expectedExchangeData.receivedAmount,
+            _expectedAmount: expected.receivedAmount,
             _recipient: zeroAddress,
             _referrer: zeroAddress,
             _cancelPayload: null,
@@ -467,26 +495,33 @@ describe("Check DexAccount add Pair", () => {
         const poolDataEnd = await getPoolData(poolsData.stablePair.contract);
 
         expect(
-          new BigNumber(
-            poolDataStart.balances[spentTokenRoot.address.toString()],
-          )
+          new BigNumber(poolDataStart.balances[spentTokenRoot.toString()])
             .plus(amount)
-            .minus(expectedExchangeData.beneficiaryFee)
+            .minus(expected.beneficiaryFee)
             .toString(),
         ).to.equal(
-          poolDataEnd.balances[spentTokenRoot.address.toString()],
+          poolDataEnd.balances[spentTokenRoot.toString()],
           `Pool has wrong spent token balance`,
         );
         expect(
           new BigNumber(
-            poolDataStart.balances[receivedTokenRoot.address.toString()],
+            poolDataStart.accumulatedFees[spentTokenRoot.toString()],
           )
-            .minus(expectedExchangeData.receivedAmount)
+            .plus(expected.beneficiaryFee)
             .toString(),
         ).to.equal(
-          poolDataEnd.balances[receivedTokenRoot.address.toString()],
+          poolDataEnd.accumulatedFees[spentTokenRoot.toString()],
+          `Pool has wrong spent token fees`,
+        );
+        expect(
+          new BigNumber(poolDataStart.balances[receivedTokenRoot.toString()])
+            .minus(expected.receivedAmount)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[receivedTokenRoot.toString()],
           `Pool has wrong received token balance`,
         );
+
         const accountSpentTokensChange =
           traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
         const accountReceivedTokensChange =
@@ -498,7 +533,7 @@ describe("Check DexAccount add Pair", () => {
         );
 
         expect(accountReceivedTokensChange.toString()).to.equal(
-          expectedExchangeData.receivedAmount,
+          expected.receivedAmount,
           `Account has wrong received token balance`,
         );
       });
@@ -511,7 +546,7 @@ describe("Check DexAccount add Pair", () => {
       const gas = await getPoolExchangeGas();
       const poolDataStart = await getPoolData(poolsData.pair.contract);
       const expectedAmount = new BigNumber(1)
-        .shiftedBy(tokensData[receivedTokenRoot.address.toString()].decimals)
+        .shiftedBy(tokensData[receivedTokenRoot.toString()].decimals)
         .toString();
 
       const expectedSpentData = await (
@@ -519,19 +554,19 @@ describe("Check DexAccount add Pair", () => {
       ).methods
         .expectedSpendAmount({
           receive_amount: expectedAmount,
-          receive_token_root: receivedTokenRoot.address,
+          receive_token_root: receivedTokenRoot,
           answerId: 0,
         })
         .call();
 
       const spentTokenWallet = await getWallet(
         owner.address,
-        spentTokenRoot.address,
+        spentTokenRoot,
       ).then(a => a.walletContract);
 
       const receivedTokenWallet = await getWallet(
         commonAcc.address,
-        receivedTokenRoot.address,
+        receivedTokenRoot,
       ).then(a => a.walletContract);
 
       const payload = await (
@@ -566,7 +601,7 @@ describe("Check DexAccount add Pair", () => {
       const poolDataEnd = await getPoolData(poolsData.pair.contract);
 
       expect(
-        new BigNumber(poolDataStart.balances[spentTokenRoot.address.toString()])
+        new BigNumber(poolDataStart.balances[spentTokenRoot.toString()])
           .plus(expectedSpentData.expected_amount)
           .minus(
             await getFeesFromTotalFee(
@@ -577,7 +612,7 @@ describe("Check DexAccount add Pair", () => {
           )
           .toString(),
       ).to.equal(
-        poolDataEnd.balances[spentTokenRoot.address.toString()],
+        poolDataEnd.balances[spentTokenRoot.toString()],
         `Pool has wrong spent token balance`,
       );
       const accountSpentTokensChange =
@@ -602,7 +637,7 @@ describe("Check DexAccount add Pair", () => {
       const gas = await getPoolExchangeGas();
       const poolDataStart = await getPoolData(poolsData.stablePair.contract);
       const expectedAmount = new BigNumber(1)
-        .shiftedBy(tokensData[receivedTokenRoot.address.toString()].decimals)
+        .shiftedBy(tokensData[receivedTokenRoot.toString()].decimals)
         .toString();
 
       const expectedSpentData = await (
@@ -610,19 +645,19 @@ describe("Check DexAccount add Pair", () => {
       ).methods
         .expectedSpendAmount({
           receive_amount: expectedAmount,
-          receive_token_root: receivedTokenRoot.address,
+          receive_token_root: receivedTokenRoot,
           answerId: 0,
         })
         .call();
 
       const spentTokenWallet = await getWallet(
         owner.address,
-        spentTokenRoot.address,
+        spentTokenRoot,
       ).then(a => a.walletContract);
 
       const receivedTokenWallet = await getWallet(
         commonAcc.address,
-        receivedTokenRoot.address,
+        receivedTokenRoot,
       ).then(a => a.walletContract);
 
       const payload = await (
@@ -659,7 +694,7 @@ describe("Check DexAccount add Pair", () => {
       const poolDataEnd = await getPoolData(poolsData.stablePair.contract);
 
       expect(
-        new BigNumber(poolDataStart.balances[spentTokenRoot.address.toString()])
+        new BigNumber(poolDataStart.balances[spentTokenRoot.toString()])
           .plus(expectedSpentData.expected_amount)
           .minus(
             await getFeesFromTotalFee(
@@ -670,7 +705,7 @@ describe("Check DexAccount add Pair", () => {
           )
           .toString(),
       ).to.equal(
-        poolDataEnd.balances[spentTokenRoot.address.toString()],
+        poolDataEnd.balances[spentTokenRoot.toString()],
         `Pool has wrong spent token balance`,
       );
       const accountSpentTokensChange =
@@ -695,22 +730,22 @@ describe("Check DexAccount add Pair", () => {
       const gas = await getPoolExchangeGas();
       const poolDataStart = await getPoolData(poolsData.pair.contract);
       const amount = new BigNumber(1)
-        .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+        .shiftedBy(tokensData[spentTokenRoot.toString()].decimals)
         .toString();
 
       const expectedExchangeData = await expectedExchange(
         poolsData.pair.contract,
         amount,
-        spentTokenRoot.address,
+        spentTokenRoot,
       );
       const spentTokenWallet = await getWallet(
         owner.address,
-        spentTokenRoot.address,
+        spentTokenRoot,
       ).then(a => a.walletContract);
 
       const receivedTokenWallet = await getWallet(
         owner.address,
-        receivedTokenRoot.address,
+        receivedTokenRoot,
       ).then(a => a.walletContract);
 
       const payload = await (
@@ -745,16 +780,12 @@ describe("Check DexAccount add Pair", () => {
 
       const poolDataEnd = await getPoolData(poolsData.pair.contract);
 
-      expect(
-        poolDataStart.balances[spentTokenRoot.address.toString()],
-      ).to.equal(
-        poolDataEnd.balances[spentTokenRoot.address.toString()],
+      expect(poolDataStart.balances[spentTokenRoot.toString()]).to.equal(
+        poolDataEnd.balances[spentTokenRoot.toString()],
         `Pool has wrong spent token balance`,
       );
-      expect(
-        poolDataStart.balances[receivedTokenRoot.address.toString()],
-      ).to.equal(
-        poolDataEnd.balances[receivedTokenRoot.address.toString()],
+      expect(poolDataStart.balances[receivedTokenRoot.toString()]).to.equal(
+        poolDataEnd.balances[receivedTokenRoot.toString()],
         `Pool has wrong received token balance`,
       );
       const accountSpentTokensChange =
@@ -779,22 +810,22 @@ describe("Check DexAccount add Pair", () => {
       const gas = await getPoolExchangeGas();
       const poolDataStart = await getPoolData(poolsData.stablePair.contract);
       const amount = new BigNumber(1)
-        .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+        .shiftedBy(tokensData[spentTokenRoot.toString()].decimals)
         .toString();
 
       const expectedExchangeData = await expectedExchange(
         poolsData.stablePair.contract,
         amount,
-        spentTokenRoot.address,
+        spentTokenRoot,
       );
       const spentTokenWallet = await getWallet(
         owner.address,
-        spentTokenRoot.address,
+        spentTokenRoot,
       ).then(a => a.walletContract);
 
       const receivedTokenWallet = await getWallet(
         owner.address,
-        receivedTokenRoot.address,
+        receivedTokenRoot,
       ).then(a => a.walletContract);
 
       const payload = await (
@@ -829,16 +860,12 @@ describe("Check DexAccount add Pair", () => {
 
       const poolDataEnd = await getPoolData(poolsData.stablePair.contract);
 
-      expect(
-        poolDataStart.balances[spentTokenRoot.address.toString()],
-      ).to.equal(
-        poolDataEnd.balances[spentTokenRoot.address.toString()],
+      expect(poolDataStart.balances[spentTokenRoot.toString()]).to.equal(
+        poolDataEnd.balances[spentTokenRoot.toString()],
         `Pool has wrong spent token balance`,
       );
-      expect(
-        poolDataStart.balances[receivedTokenRoot.address.toString()],
-      ).to.equal(
-        poolDataEnd.balances[receivedTokenRoot.address.toString()],
+      expect(poolDataStart.balances[receivedTokenRoot.toString()]).to.equal(
+        poolDataEnd.balances[receivedTokenRoot.toString()],
         `Pool has wrong received token balance`,
       );
       const accountSpentTokensChange =
@@ -870,23 +897,23 @@ describe("Check DexAccount add Pair", () => {
         const gas = await getPoolExchangeGas();
         const poolDataStart = await getPoolData(poolsData.stablePool.contract);
         const amount = new BigNumber(1)
-          .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+          .shiftedBy(tokensData[spentTokenRoot.toString()].decimals)
           .toString();
 
-        const expectedExchangeData = await expectedExchange(
+        const expected = await expectedExchange(
           poolsData.stablePool.contract,
           amount,
-          spentTokenRoot.address,
-          receivedTokenRoot.address,
+          spentTokenRoot,
+          receivedTokenRoot,
         );
         const spentTokenWallet = await getWallet(
           owner.address,
-          spentTokenRoot.address,
+          spentTokenRoot,
         ).then(a => a.walletContract);
 
         const receivedTokenWallet = await getWallet(
           owner.address,
-          receivedTokenRoot.address,
+          receivedTokenRoot,
         ).then(a => a.walletContract);
 
         const payload = await (
@@ -895,8 +922,8 @@ describe("Check DexAccount add Pair", () => {
           .buildExchangePayload({
             id: getRandomNonce(),
             deploy_wallet_grams: toNano(0.1),
-            expected_amount: expectedExchangeData.receivedAmount,
-            outcoming: receivedTokenRoot.address,
+            expected_amount: expected.receivedAmount,
+            outcoming: receivedTokenRoot,
             recipient: zeroAddress,
             referrer: zeroAddress,
             cancel_payload: null,
@@ -924,25 +951,31 @@ describe("Check DexAccount add Pair", () => {
         const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
 
         expect(
-          new BigNumber(
-            poolDataStart.balances[spentTokenRoot.address.toString()],
-          )
+          new BigNumber(poolDataStart.balances[spentTokenRoot.toString()])
             .plus(amount)
-            .minus(expectedExchangeData.beneficiaryFee)
+            .minus(expected.beneficiaryFee)
             .toString(),
         ).to.equal(
-          poolDataEnd.balances[spentTokenRoot.address.toString()],
+          poolDataEnd.balances[spentTokenRoot.toString()],
           `Pool has wrong ${poolsData.stablePool.tokens[spentTokenIndex]} balance`,
         );
         expect(
           new BigNumber(
-            poolDataStart.balances[receivedTokenRoot.address.toString()],
+            poolDataStart.accumulatedFees[spentTokenRoot.toString()],
           )
-            .minus(expectedExchangeData.receivedAmount)
+            .plus(expected.beneficiaryFee)
             .toString(),
         ).to.equal(
-          poolDataEnd.balances[receivedTokenRoot.address.toString()],
-          `Pool has wrong spent balance`,
+          poolDataEnd.accumulatedFees[spentTokenRoot.toString()],
+          `Pool has wrong ${poolsData.stablePool.tokens[spentTokenIndex]} fees`,
+        );
+        expect(
+          new BigNumber(poolDataStart.balances[receivedTokenRoot.toString()])
+            .minus(expected.receivedAmount)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.balances[receivedTokenRoot.toString()],
+          `Pool has wrong ${poolsData.stablePool.tokens[receivedTokenIndex]} balance`,
         );
         const accountSpentTokensChange =
           traceTree?.tokens.getTokenBalanceChange(spentTokenWallet);
@@ -951,11 +984,11 @@ describe("Check DexAccount add Pair", () => {
 
         expect((-accountSpentTokensChange).toString()).to.equal(
           amount,
-          `Account has wrong spent token balance`,
+          `Account has wrong ${poolsData.stablePool.tokens[spentTokenIndex]} balance`,
         );
         expect(accountReceivedTokensChange.toString()).to.equal(
-          expectedExchangeData.receivedAmount,
-          `Account has wrong received token balance`,
+          expected.receivedAmount,
+          `Account has wrong ${poolsData.stablePool.tokens[receivedTokenIndex]} balance`,
         );
       });
     }
@@ -967,7 +1000,7 @@ describe("Check DexAccount add Pair", () => {
       const gas = await getPoolExchangeGas();
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
       const expectedAmount = new BigNumber(1)
-        .shiftedBy(tokensData[receivedTokenRoot.address.toString()].decimals)
+        .shiftedBy(tokensData[receivedTokenRoot.toString()].decimals)
         .toString();
 
       const expectedSpentData = await (
@@ -975,20 +1008,20 @@ describe("Check DexAccount add Pair", () => {
       ).methods
         .expectedSpendAmount({
           receive_amount: expectedAmount,
-          spent_token_root: spentTokenRoot.address,
-          receive_token_root: receivedTokenRoot.address,
+          spent_token_root: spentTokenRoot,
+          receive_token_root: receivedTokenRoot,
           answerId: 0,
         })
         .call();
 
       const spentTokenWallet = await getWallet(
         owner.address,
-        spentTokenRoot.address,
+        spentTokenRoot,
       ).then(a => a.walletContract);
 
       const receivedTokenWallet = await getWallet(
         commonAcc.address,
-        receivedTokenRoot.address,
+        receivedTokenRoot,
       ).then(a => a.walletContract);
 
       const payload = await (
@@ -998,7 +1031,7 @@ describe("Check DexAccount add Pair", () => {
           id: getRandomNonce(),
           deploy_wallet_grams: toNano(0.1),
           expected_amount: expectedAmount,
-          outcoming: receivedTokenRoot.address,
+          outcoming: receivedTokenRoot,
           recipient: commonAcc.address,
           referrer: zeroAddress,
           cancel_payload: null,
@@ -1026,7 +1059,7 @@ describe("Check DexAccount add Pair", () => {
       const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
 
       expect(
-        new BigNumber(poolDataStart.balances[spentTokenRoot.address.toString()])
+        new BigNumber(poolDataStart.balances[spentTokenRoot.toString()])
           .plus(expectedSpentData.expected_amount)
           .minus(
             await getFeesFromTotalFee(
@@ -1037,7 +1070,7 @@ describe("Check DexAccount add Pair", () => {
           )
           .toString(),
       ).to.equal(
-        poolDataEnd.balances[spentTokenRoot.address.toString()],
+        poolDataEnd.balances[spentTokenRoot.toString()],
         `Pool has wrong spent token balance`,
       );
       const accountSpentTokensChange =
@@ -1062,23 +1095,23 @@ describe("Check DexAccount add Pair", () => {
       const gas = await getPoolExchangeGas();
       const poolDataStart = await getPoolData(poolsData.stablePool.contract);
       const amount = new BigNumber(1)
-        .shiftedBy(tokensData[spentTokenRoot.address.toString()].decimals)
+        .shiftedBy(tokensData[spentTokenRoot.toString()].decimals)
         .toString();
 
       const expectedExchangeData = await expectedExchange(
         poolsData.stablePool.contract,
         amount,
-        spentTokenRoot.address,
-        receivedTokenRoot.address,
+        spentTokenRoot,
+        receivedTokenRoot,
       );
       const spentTokenWallet = await getWallet(
         owner.address,
-        spentTokenRoot.address,
+        spentTokenRoot,
       ).then(a => a.walletContract);
 
       const receivedTokenWallet = await getWallet(
         owner.address,
-        receivedTokenRoot.address,
+        receivedTokenRoot,
       ).then(a => a.walletContract);
 
       const payload = await (
@@ -1090,7 +1123,7 @@ describe("Check DexAccount add Pair", () => {
           expected_amount: new BigNumber(expectedExchangeData.receivedAmount)
             .plus(1)
             .toString(),
-          outcoming: receivedTokenRoot.address,
+          outcoming: receivedTokenRoot,
           recipient: zeroAddress,
           referrer: zeroAddress,
           cancel_payload: null,
@@ -1114,16 +1147,12 @@ describe("Check DexAccount add Pair", () => {
 
       const poolDataEnd = await getPoolData(poolsData.stablePool.contract);
 
-      expect(
-        poolDataStart.balances[spentTokenRoot.address.toString()],
-      ).to.equal(
-        poolDataEnd.balances[spentTokenRoot.address.toString()],
+      expect(poolDataStart.balances[spentTokenRoot.toString()]).to.equal(
+        poolDataEnd.balances[spentTokenRoot.toString()],
         `Pool has wrong spent token balance`,
       );
-      expect(
-        poolDataStart.balances[receivedTokenRoot.address.toString()],
-      ).to.equal(
-        poolDataEnd.balances[receivedTokenRoot.address.toString()],
+      expect(poolDataStart.balances[receivedTokenRoot.toString()]).to.equal(
+        poolDataEnd.balances[receivedTokenRoot.toString()],
         `Pool has wrong received token balance`,
       );
       const accountSpentTokensChange =

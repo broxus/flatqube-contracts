@@ -417,6 +417,15 @@ describe("Check direct operations", () => {
           poolDataEnd.balances[tokenRoot.toString()],
           `Pool has wrong ${tokensData[tokenRoot.toString()].symbol} balance`,
         );
+        expect(
+          new BigNumber(poolDataStart.accumulatedFees[tokenRoot.toString()])
+            .plus(expected.beneficiaryFees[tokenRoot.toString()])
+            .toString(),
+        ).to.equal(
+          poolDataEnd.accumulatedFees[tokenRoot.toString()],
+          `Pool has wrong ${tokensData[tokenRoot.toString()].symbol} fees`,
+        );
+
         const accountTokensChange =
           traceTree?.tokens.getTokenBalanceChange(tokenWallet);
         const accountOtherTokensChange =
@@ -520,6 +529,15 @@ describe("Check direct operations", () => {
           poolDataEnd.balances[tokenRoot.toString()],
           `Pool has wrong ${tokensData[tokenRoot.toString()].symbol} balance`,
         );
+        expect(
+          new BigNumber(poolDataStart.accumulatedFees[tokenRoot.toString()])
+            .plus(expected.beneficiaryFees[tokenRoot.toString()])
+            .toString(),
+        ).to.equal(
+          poolDataEnd.accumulatedFees[tokenRoot.toString()],
+          `Pool has wrong ${tokensData[tokenRoot.toString()].symbol} fees`,
+        );
+
         const accountTokensChange =
           traceTree?.tokens.getTokenBalanceChange(tokenWallet);
         const accountOtherTokensChange =
@@ -615,6 +633,15 @@ describe("Check direct operations", () => {
           poolDataEnd.balances[tokenRoot.toString()],
           `Pool has wrong ${tokensData[tokenRoot.toString()].symbol} balance`,
         );
+        expect(
+          new BigNumber(poolDataStart.accumulatedFees[tokenRoot.toString()])
+            .plus(expected.beneficiaryFee)
+            .toString(),
+        ).to.equal(
+          poolDataEnd.accumulatedFees[tokenRoot.toString()],
+          `Pool has wrong ${tokensData[tokenRoot.toString()].symbol} fees`,
+        );
+
         const accountTokensChange =
           traceTree?.tokens.getTokenBalanceChange(tokenWallet);
         const accountOthersTokensChange = othersTokensWallets.map(wallet =>
