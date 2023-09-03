@@ -1,13 +1,7 @@
-import { WalletTypes } from "locklift";
+import { WalletTypes, getRandomNonce } from "locklift";
 import { logMigrationProcess, logMigrationSuccess } from "../../utils/oldUtils";
 
-const {
-  getRandomNonce,
-  Migration,
-  TOKEN_CONTRACTS_PATH,
-  Constants,
-  afterRun,
-} = require(process.cwd() + "/scripts/utils");
+const { Migration } = require(process.cwd() + "/scripts/utils");
 const migration = new Migration();
 
 async function main() {

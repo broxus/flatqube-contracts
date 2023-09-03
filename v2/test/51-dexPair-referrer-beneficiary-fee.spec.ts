@@ -7,7 +7,6 @@ import {
   getWallet,
   transferWrapper,
 } from "../../utils/wrappers";
-import { displayTx } from "../../utils/helpers";
 import {
   expectedDepositLiquidity,
   expectedDepositLiquidityOneCoin,
@@ -21,21 +20,17 @@ import {
   DexPairAbi,
   DexStablePairAbi,
   DexStablePoolAbi,
-  DexVaultAbi,
   TokenRootUpgradeableAbi,
 } from "../../build/factorySource";
 
 BigNumber.config({ EXPONENTIAL_AT: 257 });
 
-let Account1: Account;
 let Account4: Account;
 let DexOwner: Account;
 
 const N_COINS = [6, 9, 18];
 
 let DexAccount: Contract<DexAccountAbi>;
-let DexVault: Contract<DexVaultAbi>;
-
 type poolsType = "pair";
 
 const poolsData: Record<
@@ -64,10 +59,7 @@ describe(`Test beneficiary fee`, function () {
       include: ["dex-gas-values", "dex-accounts", "dex-pairs"],
     });
 
-    DexVault = locklift.deployments.getContract<DexVaultAbi>("DexVault");
     DexOwner = locklift.deployments.getAccount("DexOwner").account;
-
-    Account1 = locklift.deployments.getAccount("commonAccount-0").account;
     Account4 = locklift.deployments.getAccount("commonAccount-1").account;
 
     DexAccount =

@@ -6,9 +6,9 @@ import {
   displayTx,
 } from "../../utils/oldUtils/migration";
 
-const { expect } = require("chai");
-const logger = require("mocha-logger");
-const BigNumber = require("bignumber.js");
+import { expect } from "chai";
+import BigNumber from "bignumber.js";
+
 BigNumber.config({ EXPONENTIAL_AT: 257 });
 import { Command } from "commander";
 
@@ -184,14 +184,14 @@ describe("Test Dex Pair contract upgrade", async function () {
     );
 
     oldPairData = await loadPairData(dexPairFooBar, options.old_contract_name);
-    logger.log(
+    console.log(
       `Old Pair(${dexPairFooBar.address}) data:\n${JSON.stringify(
         oldPairData,
         null,
         4,
       )}`,
     );
-    logger.log(`Upgrading DexPair contract: 
+    console.log(`Upgrading DexPair contract: 
         - left=${tokenFoo.address}
         - right=${tokenBar.address}
         - current version = ${oldPairData.current_version}
@@ -214,7 +214,7 @@ describe("Test Dex Pair contract upgrade", async function () {
     );
 
     console.log(`##########################`);
-    displayTx(tx);
+    displayTx(tx.extTransaction);
     console.log(`##########################`);
 
     NewVersionContract = await locklift.factory.getDeployedContract(
@@ -225,7 +225,7 @@ describe("Test Dex Pair contract upgrade", async function () {
       NewVersionContract,
       options.new_contract_name,
     );
-    logger.log(
+    console.log(
       `New Pair(${NewVersionContract.address}) data:\n${JSON.stringify(
         newPairData,
         null,
