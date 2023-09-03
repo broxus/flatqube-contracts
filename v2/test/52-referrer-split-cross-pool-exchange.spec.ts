@@ -370,11 +370,11 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
   }
 
   before("Load contracts", async function () {
-    // await locklift.deployments.fixture({
-    //   include: ["dex-gas-values", "dex-accounts", "dex-pairs"],
-    // });
+    await locklift.deployments.fixture({
+      include: ["dex-gas-values", "dex-accounts", "dex-pairs"],
+    });
 
-    await locklift.deployments.load();
+    // await locklift.deployments.load();
     owner = locklift.deployments.getAccount("DexOwner").account;
     account4 = locklift.deployments.getAccount("commonAccount-1").account;
     dexAccount =
