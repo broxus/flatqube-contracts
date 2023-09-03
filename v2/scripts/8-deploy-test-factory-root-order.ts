@@ -1,5 +1,5 @@
-import { WalletTypes } from 'locklift';
-import { logMigrationProcess, logMigrationSuccess } from '../utils';
+import { WalletTypes } from "locklift";
+import { logMigrationProcess, logMigrationSuccess } from "../../utils/oldUtils";
 
 const {
   getRandomNonce,
@@ -7,40 +7,40 @@ const {
   TOKEN_CONTRACTS_PATH,
   Constants,
   afterRun,
-} = require(process.cwd() + '/scripts/utils');
+} = require(process.cwd() + "/scripts/utils");
 const migration = new Migration();
 
 async function main() {
-  const signer = await locklift.keystore.getSigner('0');
+  const signer = await locklift.keystore.getSigner("0");
   const account = await locklift.factory.accounts.addExistingAccount({
     type: WalletTypes.WalletV3,
     publicKey: signer!.publicKey,
   });
   const FactoryOrder = await locklift.factory.getContractArtifacts(
-    'OrderFactory',
+    "OrderFactory",
   );
-  const RootOrder = await locklift.factory.getContractArtifacts('OrderRoot');
-  const Order = await locklift.factory.getContractArtifacts('Order');
+  const RootOrder = await locklift.factory.getContractArtifacts("OrderRoot");
+  const Order = await locklift.factory.getContractArtifacts("Order");
   const ClosedOrder = await locklift.factory.getContractArtifacts(
-    'OrderClosed',
+    "OrderClosed",
   );
   const PlatformOrder = await locklift.factory.getContractArtifacts(
-    'OrderPlatform',
+    "OrderPlatform",
   );
 
   const dexRoot = await locklift.factory.getDeployedContract(
-    'DexRoot',
-    migration.getAddress('DexRoot'),
+    "DexRoot",
+    migration.getAddress("DexRoot"),
   );
 
   logMigrationProcess(
-    'factoryOrder',
-    'constructor',
-    'Deploying factoryOrder...',
+    "factoryOrder",
+    "constructor",
+    "Deploying factoryOrder...",
   );
   const factoryOrder = (
     await locklift.factory.deployContract({
-      contract: 'OrderFactory',
+      contract: "OrderFactory",
       publicKey: signer.publicKey,
       initParams: {
         randomNonce: getRandomNonce(),
@@ -55,14 +55,14 @@ async function main() {
   ).contract;
 
   logMigrationSuccess(
-    'factoryOrder',
-    'constructor',
+    "factoryOrder",
+    "constructor",
     `Deployed OrderFactory: ${factoryOrder.address}`,
   );
   logMigrationProcess(
-    'factoryOrder',
-    'setPlatformCodeOnce',
-    'Set code OrderPlatform...',
+    "factoryOrder",
+    "setPlatformCodeOnce",
+    "Set code OrderPlatform...",
   );
   await factoryOrder.methods
     .setPlatformCodeOnce({ _orderPlatform: PlatformOrder.code })
@@ -72,9 +72,9 @@ async function main() {
     });
 
   logMigrationProcess(
-    'factoryOrder',
-    'setOrderRootCode',
-    'Set code OrderRoot...',
+    "factoryOrder",
+    "setOrderRootCode",
+    "Set code OrderRoot...",
   );
   await factoryOrder.methods
     .setOrderRootCode({ _orderRootCode: RootOrder.code })
@@ -83,16 +83,16 @@ async function main() {
       from: account.address,
     });
 
-  logMigrationProcess('factoryOrder', 'setOrderCode', 'Set code Order...');
+  logMigrationProcess("factoryOrder", "setOrderCode", "Set code Order...");
   await factoryOrder.methods.setOrderCode({ _orderCode: Order.code }).send({
     amount: locklift.utils.toNano(0.1),
     from: account.address,
   });
 
   logMigrationProcess(
-    'factoryOrder',
-    'setOrderClosedCode',
-    'Set code OrderClosed...',
+    "factoryOrder",
+    "setOrderClosedCode",
+    "Set code OrderClosed...",
   );
   await factoryOrder.methods
     .setOrderClosedCode({ _orderClosedCode: ClosedOrder.code })
@@ -101,12 +101,12 @@ async function main() {
       from: account.address,
     });
 
-  migration.store(factoryOrder, 'OrderFactory');
+  migration.store(factoryOrder, "OrderFactory");
   const rootToken = await locklift.factory.getDeployedContract(
-    'TokenRootUpgradeable',
-    migration.getAddress('BarRoot'),
+    "TokenRootUpgradeable",
+    migration.getAddress("BarRoot"),
   );
-  logMigrationProcess('factoryOrder', 'createOrderRoot', 'Create OrderRoot...');
+  logMigrationProcess("factoryOrder", "createOrderRoot", "Create OrderRoot...");
   await factoryOrder.methods
     .createOrderRoot({ token: rootToken.address, callbackId: 1 })
     .send({
@@ -117,7 +117,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

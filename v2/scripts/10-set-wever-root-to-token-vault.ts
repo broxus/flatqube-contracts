@@ -1,17 +1,17 @@
-import logger from 'mocha-logger-ts';
-import { toNano } from 'locklift';
+import logger from "mocha-logger-ts";
+import { toNano } from "locklift";
 
-import { Constants, Migration } from '../utils/migration';
+import { Constants, Migration } from "../../utils/oldUtils/migration";
 
 const main = async () => {
   const migration = new Migration();
-  const owner = await migration.loadAccount('Account1', '0');
-  const tokenData = Constants.tokens['wever'];
+  const owner = await migration.loadAccount("Account1", "0");
+  const tokenData = Constants.tokens["wever"];
   const weverVault = migration.loadContract(
-    'VaultTokenRoot_V1',
+    "VaultTokenRoot_V1",
     `${tokenData.symbol}Root`,
   );
-  const dexRoot = migration.loadContract('DexRoot', 'DexRoot');
+  const dexRoot = migration.loadContract("DexRoot", "DexRoot");
 
   const tokenVault = await dexRoot.methods
     .getExpectedTokenVaultAddress({
@@ -19,7 +19,7 @@ const main = async () => {
       _tokenRoot: weverVault.address,
     })
     .call()
-    .then((r) => r.value0);
+    .then(r => r.value0);
 
   logger.log(
     `Setting ${weverVault.address} as WEVER Vault in TokenVault ${tokenVault}`,
@@ -40,7 +40,7 @@ const main = async () => {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

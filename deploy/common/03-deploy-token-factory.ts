@@ -1,6 +1,5 @@
 import { getRandomNonce, toNano } from "locklift";
 import { TokenFactoryAbi } from "../../build/factorySource";
-import { displayTx } from "../../v2/utils/migration";
 
 export default async () => {
   const signer = await locklift.keystore.getSigner("0");

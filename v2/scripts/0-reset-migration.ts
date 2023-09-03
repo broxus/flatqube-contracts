@@ -1,4 +1,4 @@
-import { Migration } from "../utils/migration";
+import { Migration } from "../../utils/oldUtils/migration";
 
 async function main() {
   const migration = new Migration();

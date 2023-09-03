@@ -1,17 +1,21 @@
-import { BigNumber } from 'bignumber.js';
-import { expect } from 'chai';
-import logger from 'mocha-logger-ts';
-import { Account } from 'everscale-standalone-client/nodejs';
-import { Contract, fromNano, toNano, zeroAddress } from 'locklift';
+import { BigNumber } from "bignumber.js";
+import { expect } from "chai";
+import logger from "mocha-logger-ts";
+import { Account } from "everscale-standalone-client/nodejs";
+import { Contract, fromNano, toNano, zeroAddress } from "locklift";
 
-import { Migration, Constants, displayTx } from '../utils/migration';
+import {
+  Migration,
+  Constants,
+  displayTx,
+} from "../../utils/oldUtils/migration";
 import {
   DexPairAbi,
   TokenRootUpgradeableAbi,
   TokenWalletUpgradeableAbi,
   VaultTokenRoot_V1Abi,
   VaultTokenWallet_V1Abi,
-} from '../../build/factorySource';
+} from "../../build/factorySource";
 
 BigNumber.config({ EXPONENTIAL_AT: 257 });
 
@@ -26,18 +30,18 @@ const logBalances = (
   logger.log(`DEX balance ${header}: ${dex.tst} TST, ${dex.wever} WEVER`);
   logger.log(
     `Account#3 balance ${header}: ` +
-      `${account.tst !== undefined ? account.tst + ' TST' : 'TST'}, ` +
-      `${account.ever !== undefined ? account.ever + ' EVER' : 'Ever'}, ` +
-      `${account.wever !== undefined ? account.wever + ' WEVER' : 'Wever'}`,
+      `${account.tst !== undefined ? account.tst + " TST" : "TST"}, ` +
+      `${account.ever !== undefined ? account.ever + " EVER" : "Ever"}, ` +
+      `${account.wever !== undefined ? account.wever + " WEVER" : "Wever"}`,
   );
   logger.log(
     `Pair balance ${header}: ` +
-      `${pair.tst !== undefined ? pair.tst + ' TST' : 'TST'}, ` +
-      `${pair.wever !== undefined ? pair.wever + ' WEVER' : 'WEVER'}`,
+      `${pair.tst !== undefined ? pair.tst + " TST" : "TST"}, ` +
+      `${pair.wever !== undefined ? pair.wever + " WEVER" : "WEVER"}`,
   );
 };
 
-describe('Tests Swap Evers', () => {
+describe("Tests Swap Evers", () => {
   let account2: Account;
   let account3: Account;
 
@@ -55,7 +59,7 @@ describe('Tests Swap Evers', () => {
     const balances = await dexPair.methods
       .getBalances({ answerId: 0 })
       .call()
-      .then((r) => r.value0);
+      .then(r => r.value0);
 
     let wever, tst;
 
@@ -81,7 +85,7 @@ describe('Tests Swap Evers', () => {
     const tst = await tstVaultWallet.methods
       .balance({ answerId: 0 })
       .call()
-      .then((n) => {
+      .then(n => {
         return new BigNumber(n.value0)
           .shiftedBy(-Constants.tokens.tst.decimals)
           .toString();
@@ -90,7 +94,7 @@ describe('Tests Swap Evers', () => {
     const wever = await wEverVaultWallet.methods
       .balance({ answerId: 0 })
       .call()
-      .then((n) => {
+      .then(n => {
         return new BigNumber(n.value0)
           .shiftedBy(-Constants.tokens.wever.decimals)
           .toString();
@@ -105,7 +109,7 @@ describe('Tests Swap Evers', () => {
     await tstWallet3.methods
       .balance({ answerId: 0 })
       .call()
-      .then((n) => {
+      .then(n => {
         tst = new BigNumber(n.value0)
           .shiftedBy(-Constants.tokens.tst.decimals)
           .toString();
@@ -119,7 +123,7 @@ describe('Tests Swap Evers', () => {
     await wEverWallet3.methods
       .balance({ answerId: 0 })
       .call()
-      .then((n) => {
+      .then(n => {
         wever = new BigNumber(n.value0)
           .shiftedBy(-Constants.tokens.wever.decimals)
           .toString();
@@ -133,20 +137,20 @@ describe('Tests Swap Evers', () => {
     return { tst, ever, wever };
   };
 
-  before('Load contracts', async () => {
+  before("Load contracts", async () => {
     weverVaultTokenRoot = migration.loadContract(
-      'VaultTokenRoot_V1',
-      'WEVERRoot',
+      "VaultTokenRoot_V1",
+      "WEVERRoot",
     );
-    dexPair = migration.loadContract('DexPair', 'DexPoolTstWEVER');
-    tstRoot = migration.loadContract('TokenRootUpgradeable', 'TstRoot');
+    dexPair = migration.loadContract("DexPair", "DexPoolTstWEVER");
+    tstRoot = migration.loadContract("TokenRootUpgradeable", "TstRoot");
     tstVaultWallet = migration.loadContract(
-      'TokenWalletUpgradeable',
-      'TstVaultWallet',
+      "TokenWalletUpgradeable",
+      "TstVaultWallet",
     );
     wEverVaultWallet = migration.loadContract(
-      'TokenWalletUpgradeable',
-      'WEVERVaultWallet',
+      "TokenWalletUpgradeable",
+      "WEVERVaultWallet",
     );
 
     const pairRoots = await dexPair.methods
@@ -155,25 +159,25 @@ describe('Tests Swap Evers', () => {
 
     IS_WEVER_LEFT = pairRoots.left === weverVaultTokenRoot.address;
 
-    account2 = await migration.loadAccount('Account2', '2');
-    account3 = await migration.loadAccount('Account3', '3');
+    account2 = await migration.loadAccount("Account2", "2");
+    account3 = await migration.loadAccount("Account3", "3");
 
     const tokenWalletAddress = await tstRoot.methods
       .walletOf({ answerId: 0, walletOwner: account3.address })
       .call()
-      .then((r) => r.value0);
+      .then(r => r.value0);
 
     tstWallet3 = locklift.factory.getDeployedContract(
-      'TokenWalletUpgradeable',
+      "TokenWalletUpgradeable",
       tokenWalletAddress,
     );
-    migration.store(tstWallet3, 'TstWallet3');
+    migration.store(tstWallet3, "TstWallet3");
 
     wEverWallet3 = await weverVaultTokenRoot.methods
       .walletOf({ answerId: 0, walletOwner: account3.address })
       .call()
-      .then((r) =>
-        locklift.factory.getDeployedContract('VaultTokenWallet_V1', r.value0),
+      .then(r =>
+        locklift.factory.getDeployedContract("VaultTokenWallet_V1", r.value0),
       );
 
     logger.log(`account3(wEverVault.address).wrap({
@@ -192,7 +196,7 @@ describe('Tests Swap Evers', () => {
         deployWalletValue: 0,
         remainingGasTo: account3.address,
         notify: false,
-        payload: '',
+        payload: "",
       })
       .send({ from: account3.address, amount: toNano(20 + 2) });
 
@@ -210,7 +214,7 @@ describe('Tests Swap Evers', () => {
     logger.log(`wEverWallet3: ${wEverWallet3.address}`);
   });
 
-  describe('Swap Ever to Tip3', () => {
+  describe("Swap Ever to Tip3", () => {
     it(`Swap Ever to Tip3 via  () - Success`, async () => {
       logger.log(`#############################`);
       logger.log(``);
@@ -242,8 +246,8 @@ describe('Tests Swap Evers', () => {
         _deployWalletGrams: toNano(0.1),
         _recipient: account3.address,
         _referrer: zeroAddress,
-        _successPayload: '',
-        _cancelPayload: '',
+        _successPayload: "",
+        _cancelPayload: "",
         _toNative: false,
       };
 
@@ -252,14 +256,14 @@ describe('Tests Swap Evers', () => {
       const payload = await dexPair.methods
         .buildExchangePayloadV2(params)
         .call()
-        .then((r) => r.value0);
+        .then(r => r.value0);
 
       logger.log(`Result payload = ${payload}`);
 
       const dexStart = await dexBalances();
       const accountStart = await account3balances();
       const pairStart = await dexPairInfo();
-      logBalances('start', dexStart, accountStart, pairStart);
+      logBalances("start", dexStart, accountStart, pairStart);
 
       logger.log(`wEverVault(wEverVault.address).wrap(
                 tokens = ${new BigNumber(EVERS_TO_EXCHANGE)
@@ -288,7 +292,7 @@ describe('Tests Swap Evers', () => {
       const dexEnd = await dexBalances();
       const accountEnd = await account3balances();
       const pairEnd = await dexPairInfo();
-      logBalances('end', dexEnd, accountEnd, pairEnd);
+      logBalances("end", dexEnd, accountEnd, pairEnd);
 
       const expectedAccountTst = new BigNumber(accountStart.tst || 0)
         .plus(
@@ -299,7 +303,7 @@ describe('Tests Swap Evers', () => {
         .toString();
       expect(expectedAccountTst).to.equal(
         accountEnd.tst.toString(),
-        'Wrong Account#3 TST balance',
+        "Wrong Account#3 TST balance",
       );
     });
 
@@ -336,8 +340,8 @@ describe('Tests Swap Evers', () => {
         _deployWalletGrams: toNano(0.1),
         _recipient: account3.address,
         _referrer: zeroAddress,
-        _successPayload: '',
-        _cancelPayload: '',
+        _successPayload: "",
+        _cancelPayload: "",
         _toNative: false,
       };
 
@@ -351,7 +355,7 @@ describe('Tests Swap Evers', () => {
       const dexStart = await dexBalances();
       const accountStart = await account3balances();
       const pairStart = await dexPairInfo();
-      logBalances('start', dexStart, accountStart, pairStart);
+      logBalances("start", dexStart, accountStart, pairStart);
 
       logger.log(`wEverVault(${weverVaultTokenRoot.address}).wrap(
                     tokens = ${new BigNumber(EVERS_TO_EXCHANGE)
@@ -379,20 +383,20 @@ describe('Tests Swap Evers', () => {
       const dexEnd = await dexBalances();
       const accountEnd = await account3balances();
       const pairEnd = await dexPairInfo();
-      logBalances('end', dexEnd, accountEnd, pairEnd);
+      logBalances("end", dexEnd, accountEnd, pairEnd);
 
       expect(accountStart.tst.toString()).to.equal(
         accountEnd.tst.toString(),
-        'Wrong Account#3 TST balance',
+        "Wrong Account#3 TST balance",
       );
       expect(new BigNumber(accountStart.ever).minus(5).toNumber()).lt(
         new BigNumber(accountEnd.ever).toNumber(),
-        'Wrong Account#3 EVER balance',
+        "Wrong Account#3 EVER balance",
       );
     });
   });
 
-  describe('Swap Tip3 to Ever', () => {
+  describe("Swap Tip3 to Ever", () => {
     it(`Swap Tip3 to Ever - Cancel`, async () => {
       logger.log(`#############################`);
       logger.log(``);
@@ -400,7 +404,7 @@ describe('Tests Swap Evers', () => {
       const dexStart = await dexBalances();
       const accountStart = await account3balances();
       const pairStart = await dexPairInfo();
-      logBalances('start', dexStart, accountStart, pairStart);
+      logBalances("start", dexStart, accountStart, pairStart);
       const TOKENS_TO_EXCHANGE = accountStart.tst;
       const expected = await dexPair.methods
         .expectedExchange({
@@ -432,8 +436,8 @@ describe('Tests Swap Evers', () => {
           .toString(),
         _recipient: account3.address,
         _referrer: zeroAddress,
-        _successPayload: '',
-        _cancelPayload: '',
+        _successPayload: "",
+        _cancelPayload: "",
         _toNative: true,
       };
 
@@ -473,11 +477,11 @@ describe('Tests Swap Evers', () => {
       const accountEnd = await account3balances();
       const pairEnd = await dexPairInfo();
 
-      logBalances('end', dexEnd, accountEnd, pairEnd);
+      logBalances("end", dexEnd, accountEnd, pairEnd);
 
       expect(accountStart.tst.toString()).to.equal(
         accountEnd.tst.toString(),
-        'Wrong Account#3 TST balance',
+        "Wrong Account#3 TST balance",
       );
     });
 
@@ -488,7 +492,7 @@ describe('Tests Swap Evers', () => {
       const dexStart = await dexBalances();
       const accountStart = await account3balances();
       const pairStart = await dexPairInfo();
-      logBalances('start', dexStart, accountStart, pairStart);
+      logBalances("start", dexStart, accountStart, pairStart);
       const TOKENS_TO_EXCHANGE = accountStart.tst;
       const expected = await dexPair.methods
         .expectedExchange({
@@ -518,8 +522,8 @@ describe('Tests Swap Evers', () => {
         _expectedAmount: expected.expected_amount,
         _recipient: account3.address,
         _referrer: zeroAddress,
-        _successPayload: '',
-        _cancelPayload: '',
+        _successPayload: "",
+        _cancelPayload: "",
         _toNative: true,
       };
 
@@ -558,14 +562,14 @@ describe('Tests Swap Evers', () => {
       const dexEnd = await dexBalances();
       const accountEnd = await account3balances();
       const pairEnd = await dexPairInfo();
-      logBalances('end', dexEnd, accountEnd, pairEnd);
+      logBalances("end", dexEnd, accountEnd, pairEnd);
 
       const expectedAccountTst = new BigNumber(accountStart.tst)
         .minus(TOKENS_TO_EXCHANGE)
         .toString();
       expect(expectedAccountTst).to.equal(
         accountEnd.tst.toString(),
-        'Wrong Account#3 TST balance',
+        "Wrong Account#3 TST balance",
       );
       const expectedAccountEverMin = new BigNumber(accountStart.ever)
         .plus(new BigNumber(expected.expected_amount).shiftedBy(-9))
@@ -573,12 +577,12 @@ describe('Tests Swap Evers', () => {
         .toNumber();
       expect(expectedAccountEverMin).to.lt(
         new BigNumber(accountEnd.ever).toNumber(),
-        'Wrong Account#3 EVER balance',
+        "Wrong Account#3 EVER balance",
       );
     });
   });
 
-  describe('Swap Ever and Wever to Tip3', () => {
+  describe("Swap Ever and Wever to Tip3", () => {
     it(`Swap Ever and Wever to Tip3 - Cancel`, async () => {
       logger.log(`#############################`);
       logger.log(``);
@@ -617,8 +621,8 @@ describe('Tests Swap Evers', () => {
         _deployWalletGrams: toNano(0.1),
         _referrer: zeroAddress,
         _recipient: account3.address,
-        _successPayload: '',
-        _cancelPayload: '',
+        _successPayload: "",
+        _cancelPayload: "",
         _toNative: false,
       };
 
@@ -634,7 +638,7 @@ describe('Tests Swap Evers', () => {
       const dexStart = await dexBalances();
       const accountStart = await account3balances();
       const pairStart = await dexPairInfo();
-      logBalances('start', dexStart, accountStart, pairStart);
+      logBalances("start", dexStart, accountStart, pairStart);
 
       logger.log(`account3(${account3.address}).transfer(
                     amount: ${new BigNumber(WEVERS_TO_EXCHANGE)
@@ -668,11 +672,11 @@ describe('Tests Swap Evers', () => {
       const dexEnd = await dexBalances();
       const accountEnd = await account3balances();
       const pairEnd = await dexPairInfo();
-      logBalances('end', dexEnd, accountEnd, pairEnd);
+      logBalances("end", dexEnd, accountEnd, pairEnd);
 
       expect(accountStart.tst.toString()).to.equal(
         accountEnd.tst.toString(),
-        'Wrong Account#3 TST balance',
+        "Wrong Account#3 TST balance",
       );
     });
 
@@ -712,8 +716,8 @@ describe('Tests Swap Evers', () => {
         _expectedAmount: expected.expected_amount,
         _deployWalletGrams: toNano(0.1),
         _referrer: zeroAddress,
-        _successPayload: '',
-        _cancelPayload: '',
+        _successPayload: "",
+        _cancelPayload: "",
         _toNative: false,
       };
 
@@ -730,7 +734,7 @@ describe('Tests Swap Evers', () => {
       const accountStart = await account3balances();
       const pairStart = await dexPairInfo();
 
-      logBalances('start', dexStart, accountStart, pairStart);
+      logBalances("start", dexStart, accountStart, pairStart);
 
       logger.log(`account3(${account3.address}).transfer(
                     amount: ${new BigNumber(WEVERS_TO_EXCHANGE)
@@ -751,7 +755,7 @@ describe('Tests Swap Evers', () => {
             deployWalletValue: toNano(0.1),
             remainingGasTo: account3.address,
             notify: false,
-            payload: '',
+            payload: "",
           })
           .send({
             from: account3.address,
@@ -780,7 +784,7 @@ describe('Tests Swap Evers', () => {
       const dexEnd = await dexBalances();
       const accountEnd = await account3balances();
       const pairEnd = await dexPairInfo();
-      logBalances('end', dexEnd, accountEnd, pairEnd);
+      logBalances("end", dexEnd, accountEnd, pairEnd);
 
       const expectedAccountTst = new BigNumber(accountStart.tst || 0)
         .plus(
@@ -791,7 +795,7 @@ describe('Tests Swap Evers', () => {
         .toString();
       expect(expectedAccountTst).to.equal(
         accountEnd.tst.toString(),
-        'Wrong Account#3 TST balance',
+        "Wrong Account#3 TST balance",
       );
     });
   });

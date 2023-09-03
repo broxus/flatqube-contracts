@@ -1,6 +1,10 @@
 import { Constants, TTokenName } from "../../utils/consts";
 import { toNano, zeroAddress } from "locklift";
-import { deployProject, deployRefFactory, deployRefSystem } from "../utils/ref";
+import {
+  deployProject,
+  deployRefFactory,
+  deployRefSystem,
+} from "../../utils/oldUtils/ref";
 import {
   DexStablePoolAbi,
   DexVaultAbi,

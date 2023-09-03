@@ -1,36 +1,36 @@
-import logger from 'mocha-logger-ts';
-import { fromNano, getRandomNonce, toNano, zeroAddress } from 'locklift';
-import { Command } from 'commander';
+import logger from "mocha-logger-ts";
+import { fromNano, getRandomNonce, toNano, zeroAddress } from "locklift";
+import { Command } from "commander";
 
-import { Constants, Migration } from '../utils/migration';
+import { Constants, Migration } from "../../utils/oldUtils/migration";
 
 const program = new Command();
 
 program
   .allowUnknownOption()
-  .option('-wa, --wrap-amount <wrapAmount>', 'wrap amount');
+  .option("-wa, --wrap-amount <wrapAmount>", "wrap amount");
 
 program.parse(process.argv);
 
 const main = async () => {
   const options = program.opts();
   const migration = new Migration();
-  const signer = await locklift.keystore.getSigner('1');
-  const owner = await migration.loadAccount('Account2', '1');
-  const tokenData = Constants.tokens['wever'];
+  const signer = await locklift.keystore.getSigner("1");
+  const owner = await migration.loadAccount("Account2", "1");
+  const tokenData = Constants.tokens["wever"];
 
   const vaultTokenWalletCode = locklift.factory.getContractArtifacts(
-    'VaultTokenWallet_V1',
+    "VaultTokenWallet_V1",
   ).code;
   const tokenWalletPlatformCode = locklift.factory.getContractArtifacts(
-    'TokenWalletPlatform',
+    "TokenWalletPlatform",
   ).code;
 
   logger.log(`Owner: ${owner.address}`);
   logger.log(`Deploying VaultTokenRoot_V1 for ${tokenData.symbol}`);
 
   const { contract } = await locklift.factory.deployContract({
-    contract: 'VaultTokenRoot_V1',
+    contract: "VaultTokenRoot_V1",
     constructorParams: {},
     initParams: {
       name_: tokenData.name,
@@ -65,7 +65,7 @@ const main = async () => {
   await locklift.transactions.waitFinalized(
     contract.methods
       .wrap({
-        payload: '',
+        payload: "",
         deployWalletValue: toNano(0.1),
         remainingGasTo: owner.address,
         notify: false,
@@ -81,16 +81,16 @@ const main = async () => {
   const wallet = await contract.methods
     .walletOf({ answerId: 0, walletOwner: owner.address })
     .call()
-    .then((r) =>
-      locklift.factory.getDeployedContract('VaultTokenWallet_V1', r.value0),
+    .then(r =>
+      locklift.factory.getDeployedContract("VaultTokenWallet_V1", r.value0),
     );
 
-  migration.store(wallet, tokenData.symbol + 'Wallet2');
+  migration.store(wallet, tokenData.symbol + "Wallet2");
 
   const balance = await wallet.methods
     .balance({ answerId: 0 })
     .call()
-    .then((r) => r.value0);
+    .then(r => r.value0);
 
   logger.success(
     `${tokenData.symbol} balance of ${owner.address}: ${fromNano(balance)}`,
@@ -99,7 +99,7 @@ const main = async () => {
 
 main()
   .then(() => process.exit(0))
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
     process.exit(1);
   });

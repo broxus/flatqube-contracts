@@ -1,5 +1,5 @@
 import { Address, toNano, WalletTypes } from "locklift";
-import { displayTx } from "../../utils/migration";
+import { displayTx } from "../../../utils/oldUtils/migration";
 import { yellowBright } from "chalk";
 import { DexRootAbi } from "build/factorySource";
 

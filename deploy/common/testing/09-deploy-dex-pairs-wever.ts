@@ -1,5 +1,5 @@
 import { toNano } from "locklift";
-import { Constants, displayTx } from "../../../v2/utils/migration";
+import { Constants, displayTx } from "../../../utils/oldUtils/migration";
 import {
   DexRootAbi,
   TokenRootUpgradeableAbi,

@@ -1,5 +1,5 @@
 import { Address, toNano } from "locklift";
-import { Migration, displayTx } from "../../utils/migration";
+import { Migration, displayTx } from "../../../utils/oldUtils/migration";
 
 import fs from "fs";
 

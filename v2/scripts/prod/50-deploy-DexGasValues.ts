@@ -1,4 +1,4 @@
-import { displayTx } from "../../utils/migration";
+import { displayTx } from "../../../utils/helpers";
 import { toNano, getRandomNonce, Address } from "locklift";
 import { Command } from "commander";
 

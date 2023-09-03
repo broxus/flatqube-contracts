@@ -1,27 +1,27 @@
-import { Command } from 'commander';
-import { Contract, fromNano, toNano, zeroAddress } from 'locklift';
-import { Account } from 'everscale-standalone-client/nodejs';
-import { expect } from 'chai';
-import { BigNumber } from 'bignumber.js';
-import logger from 'mocha-logger-ts';
+import { Command } from "commander";
+import { Contract, fromNano, toNano, zeroAddress } from "locklift";
+import { Account } from "everscale-standalone-client/nodejs";
+import { expect } from "chai";
+import { BigNumber } from "bignumber.js";
+import logger from "mocha-logger-ts";
 
-import { Constants, Migration } from '../utils/migration';
+import { Constants, Migration } from "../../utils/oldUtils/migration";
 import {
   DexPairAbi,
   DexRootAbi,
   TokenRootUpgradeableAbi,
   VaultTokenRoot_V1Abi,
-} from '../../build/factorySource';
+} from "../../build/factorySource";
 
 const program = new Command();
 const migration = new Migration();
 
 program
   .allowUnknownOption()
-  .option('-a, --amount <amount>', 'Amount of first token for exchange', '100')
-  .option('-st, --start-token <startToken>', 'Spent token', 'foo')
-  .option('-r, --route <route>', 'Exchange route', '[]')
-  .option('-tn, --to-native <toNative>', '', 'false');
+  .option("-a, --amount <amount>", "Amount of first token for exchange", "100")
+  .option("-st, --start-token <startToken>", "Spent token", "foo")
+  .option("-r, --route <route>", "Exchange route", "[]")
+  .option("-tn, --to-native <toNative>", "", "false");
 
 program.parse(process.argv);
 
@@ -35,17 +35,17 @@ type Route = {
 const amount: string = options.amount;
 const startToken: string = options.startToken.toLowerCase();
 const route: Route[] = JSON.parse(options.route);
-const toNative: boolean = options.toNative === 'true';
+const toNative: boolean = options.toNative === "true";
 const finishToken: string = route[route.length - 1].outcoming.toLowerCase();
 
-logger.log('------------------------- OPTIONS -------------------------');
+logger.log("------------------------- OPTIONS -------------------------");
 logger.log(`Amount: ${amount}`);
 logger.log(`Start token: ${startToken}`);
 logger.log(`Route: ${JSON.stringify(route)}`);
 logger.log(`To native: ${toNative}`);
-logger.log('-----------------------------------------------------------');
+logger.log("-----------------------------------------------------------");
 
-describe('Check WEVER cross-pair swaps', () => {
+describe("Check WEVER cross-pair swaps", () => {
   let dexRoot: Contract<DexRootAbi>;
   let weverVault: Contract<VaultTokenRoot_V1Abi>;
   let firstPair: Contract<DexPairAbi>;
@@ -56,73 +56,67 @@ describe('Check WEVER cross-pair swaps', () => {
   const pairToTokens: Record<string, string[]> = {};
 
   const getPairByTokens = (tokens: string[]): Contract<DexPairAbi> => {
-    const symbols = tokens.map((t) => Constants.tokens[t].symbol);
+    const symbols = tokens.map(t => Constants.tokens[t].symbol);
 
-    if (migration.exists(`DexPool${symbols.join('')}`)) {
-      return migration.loadContract('DexPair', `DexPool${symbols.join('')}`);
+    if (migration.exists(`DexPool${symbols.join("")}`)) {
+      return migration.loadContract("DexPair", `DexPool${symbols.join("")}`);
     }
 
     return migration.loadContract(
-      'DexPair',
-      `DexPool${symbols.reverse().join('')}`,
+      "DexPair",
+      `DexPool${symbols.reverse().join("")}`,
     );
   };
 
   const loadTokensFromRoutes = (routes: Route[]): void => {
     const uniqueTokens = new Set<string>();
 
-    routes.forEach((r) =>
-      r.roots.forEach((root) =>
-        uniqueTokens.add(Constants.tokens[root].symbol),
-      ),
+    routes.forEach(r =>
+      r.roots.forEach(root => uniqueTokens.add(Constants.tokens[root].symbol)),
     );
 
-    uniqueTokens.forEach((token) => {
+    uniqueTokens.forEach(token => {
       tokens[token.toLowerCase()] = migration.loadContract(
-        'TokenRootUpgradeable',
+        "TokenRootUpgradeable",
         `${token}Root`,
       );
     });
   };
 
   const loadPairsFromRoutes = (routes: Route[]): void => {
-    routes.forEach((r) => {
-      pairs[r.roots.join('')] = getPairByTokens(r.roots);
-      pairToTokens[r.roots.join('')] = r.roots.map((root) =>
-        root.toLowerCase(),
-      );
+    routes.forEach(r => {
+      pairs[r.roots.join("")] = getPairByTokens(r.roots);
+      pairToTokens[r.roots.join("")] = r.roots.map(root => root.toLowerCase());
     });
   };
 
   const logContractsAddresses = (): void => {
     logger.success(
-      '------------------- CONTRACTS ADDRESSES -------------------',
+      "------------------- CONTRACTS ADDRESSES -------------------",
     );
     logger.log(`WeverVault: ${weverVault.address}`);
     logger.log(`DexRoot: ${dexRoot.address}`);
     logger.log(`Account#3: ${account3.address}`);
     logger.log(`First pair: ${firstPair.address}`);
 
-    logger.log('');
-    logger.log('Tokens:');
+    logger.log("");
+    logger.log("Tokens:");
 
-    Object.keys(tokens).forEach((k) =>
-      logger.log(`${k}: ${tokens[k].address}`),
-    );
+    Object.keys(tokens).forEach(k => logger.log(`${k}: ${tokens[k].address}`));
 
-    logger.log('');
-    logger.log('Pairs:');
+    logger.log("");
+    logger.log("Pairs:");
 
-    Object.keys(pairs).forEach((k) => logger.log(`${k}: ${pairs[k].address}`));
+    Object.keys(pairs).forEach(k => logger.log(`${k}: ${pairs[k].address}`));
 
-    logger.log('-----------------------------------------------------------');
+    logger.log("-----------------------------------------------------------");
   };
 
   const getPairsReserves = async (): Promise<
     Record<string, Record<string, string>>
   > => {
     logger.success(
-      '---------------------- PAIRS RESERVES ---------------------',
+      "---------------------- PAIRS RESERVES ---------------------",
     );
 
     const balances: Record<string, Record<string, string>> = {};
@@ -135,7 +129,7 @@ describe('Check WEVER cross-pair swaps', () => {
       const reserves = await pairs[pair].methods
         .getBalances({ answerId: 0 })
         .call()
-        .then((r) => r.value0);
+        .then(r => r.value0);
 
       const symbols = roots.left.equals(tokens[pairToTokens[pair][0]].address)
         ? { left: pairToTokens[pair][0], right: pairToTokens[pair][1] }
@@ -160,41 +154,41 @@ describe('Check WEVER cross-pair swaps', () => {
       );
     }
 
-    logger.log('-----------------------------------------------------------');
+    logger.log("-----------------------------------------------------------");
 
     return balances;
   };
 
   const getAccountBalances = async (): Promise<Record<string, string>> => {
     logger.success(
-      '--------------------- ACCOUNT RESERVES --------------------',
+      "--------------------- ACCOUNT RESERVES --------------------",
     );
 
     const balances: Record<string, string> = {};
-    balances['ever'] = await locklift.provider.getBalance(account3.address);
+    balances["ever"] = await locklift.provider.getBalance(account3.address);
 
-    logger.log(`ever: ${fromNano(balances['ever'])}`);
+    logger.log(`ever: ${fromNano(balances["ever"])}`);
 
     for (const token of Object.keys(tokens)) {
       const wallet = await tokens[token].methods
         .walletOf({ answerId: 0, walletOwner: account3.address })
         .call()
-        .then((r) =>
+        .then(r =>
           locklift.factory.getDeployedContract(
-            'TokenWalletUpgradeable',
+            "TokenWalletUpgradeable",
             r.value0,
           ),
         );
 
       const isDeployed = await wallet
         .getFullState()
-        .then((s) => !!s.state?.isDeployed);
+        .then(s => !!s.state?.isDeployed);
 
       if (isDeployed) {
         const balance = await wallet.methods
           .balance({ answerId: 0 })
           .call()
-          .then((r) => r.value0);
+          .then(r => r.value0);
 
         balances[token] = balance;
 
@@ -204,19 +198,19 @@ describe('Check WEVER cross-pair swaps', () => {
           )}`,
         );
       } else {
-        balances[token] = '0';
+        balances[token] = "0";
       }
     }
 
-    logger.log('-----------------------------------------------------------');
+    logger.log("-----------------------------------------------------------");
 
     return balances;
   };
 
-  before('Load contracts', async () => {
-    weverVault = migration.loadContract('VaultTokenRoot_V1', 'WEVERRoot');
-    dexRoot = migration.loadContract('DexRoot', 'DexRoot');
-    account3 = await migration.loadAccount('Account3', '3');
+  before("Load contracts", async () => {
+    weverVault = migration.loadContract("VaultTokenRoot_V1", "WEVERRoot");
+    dexRoot = migration.loadContract("DexRoot", "DexRoot");
+    account3 = await migration.loadAccount("Account3", "3");
     firstPair = getPairByTokens(route[0].roots);
 
     loadTokensFromRoutes(route);
@@ -229,9 +223,9 @@ describe('Check WEVER cross-pair swaps', () => {
       const pairsBalancesBefore = await getPairsReserves();
       const accountBalancesBefore = await getAccountBalances();
 
-      const pairsChain: string[] = route.map((r) => r.roots.join(''));
+      const pairsChain: string[] = route.map(r => r.roots.join(""));
 
-      logger.log(`Swaps chain: ${pairsChain.join(' -> ')}`);
+      logger.log(`Swaps chain: ${pairsChain.join(" -> ")}`);
 
       const expectedAmounts: string[] = [];
       let incomingToken = startToken.toLowerCase();
@@ -240,7 +234,7 @@ describe('Check WEVER cross-pair swaps', () => {
         .toString();
 
       for (const r of route) {
-        const expectedExchange = await pairs[r.roots.join('')].methods
+        const expectedExchange = await pairs[r.roots.join("")].methods
           .expectedExchange({
             answerId: 0,
             amount: incomingAmount,
@@ -249,7 +243,7 @@ describe('Check WEVER cross-pair swaps', () => {
           .call();
 
         logger.log(
-          `Expected swap in ${r.roots.join('')} pair: ${new BigNumber(
+          `Expected swap in ${r.roots.join("")} pair: ${new BigNumber(
             incomingAmount,
           ).shiftedBy(
             -Constants.tokens[incomingToken].decimals,
@@ -280,36 +274,36 @@ describe('Check WEVER cross-pair swaps', () => {
             .map((r, i) => ({
               amount: expectedAmounts[i],
               outcoming: tokens[r.outcoming].address,
-              roots: r.roots.map((root) => tokens[root].address),
+              roots: r.roots.map(root => tokens[root].address),
               nextStepIndices: i === route.length - 1 ? [] : [i],
               numerator: 1,
             }))
             .slice(1),
           _recipient: account3.address,
           _referrer: zeroAddress,
-          _successPayload: '',
-          _cancelPayload: '',
+          _successPayload: "",
+          _cancelPayload: "",
           _toNative: toNative,
         })
         .call()
-        .then((r) => r.value0);
+        .then(r => r.value0);
 
       logger.success(`Swap payload: ${payload}`);
 
       const wallet = await tokens[startToken].methods
         .walletOf({ answerId: 0, walletOwner: account3.address })
         .call()
-        .then((r) =>
+        .then(r =>
           locklift.factory.getDeployedContract(
-            'TokenWalletUpgradeable',
+            "TokenWalletUpgradeable",
             r.value0,
           ),
         );
 
-      let extraWrap = '0';
+      let extraWrap = "0";
 
       if (
-        startToken === 'wever' &&
+        startToken === "wever" &&
         +toNano(amount) > +accountBalancesBefore[startToken]
       ) {
         extraWrap = new BigNumber(toNano(amount))
@@ -350,11 +344,11 @@ describe('Check WEVER cross-pair swaps', () => {
         }
       }
 
-      if (startToken === 'wever') {
+      if (startToken === "wever") {
         const startTokenDelta = new BigNumber(accountBalancesAfter[startToken])
-          .plus(accountBalancesAfter['ever'])
+          .plus(accountBalancesAfter["ever"])
           .minus(accountBalancesBefore[startToken])
-          .minus(accountBalancesBefore['ever'])
+          .minus(accountBalancesBefore["ever"])
           .toString();
 
         expect(+startTokenDelta).to.be.below(
@@ -375,8 +369,8 @@ describe('Check WEVER cross-pair swaps', () => {
       }
 
       if (toNative) {
-        const finishTokenDelta = new BigNumber(accountBalancesAfter['ever'])
-          .minus(accountBalancesBefore['ever'])
+        const finishTokenDelta = new BigNumber(accountBalancesAfter["ever"])
+          .minus(accountBalancesBefore["ever"])
           .toString();
 
         expect(+finishTokenDelta).to.be.closeTo(
