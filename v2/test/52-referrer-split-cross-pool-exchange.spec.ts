@@ -1,10 +1,4 @@
-import {
-  Address,
-  Contract,
-  getRandomNonce,
-  toNano,
-  zeroAddress,
-} from "locklift";
+import { Address, Contract, getRandomNonce, toNano } from "locklift";
 
 import { expect } from "chai";
 import BigNumber from "bignumber.js";
@@ -35,7 +29,7 @@ type RouteStep = {
   failed?: boolean;
 };
 
-describe("Check direct CrossPairExchange v2", async function () {
+describe("Check direct CrossPairExchange v2 with Referrer", async function () {
   let owner: Account;
   let account4: Account;
   let dexAccount: Contract<DexAccountAbi>;
@@ -102,7 +96,9 @@ describe("Check direct CrossPairExchange v2", async function () {
             elem.pool,
             elemSpentAmount,
             elem.outcoming,
+            account4.address,
           );
+
           receivedAmount = elem.failed
             ? new BigNumber(expected.receivedAmount).multipliedBy(2).toString()
             : expected.receivedAmount;
@@ -113,7 +109,11 @@ describe("Check direct CrossPairExchange v2", async function () {
             )
               .minus(expected.receivedAmount)
               .minus(expected.beneficiaryFee)
+              .minus(expected.referrerFee)
               .toString();
+
+            start.referrerFee = {};
+            start.referrerFee[elem.outcoming.toString()] = expected.referrerFee;
 
             start.accumulatedFees[elem.outcoming.toString()] = new BigNumber(
               start.accumulatedFees[elem.outcoming.toString()],
@@ -134,7 +134,7 @@ describe("Check direct CrossPairExchange v2", async function () {
             spentToken,
             account4.address,
           );
-          console.log(expected, "expected");
+
           receivedAmount = elem.failed
             ? new BigNumber(expected.lpReward).multipliedBy(2).toString()
             : expected.lpReward;
@@ -145,7 +145,11 @@ describe("Check direct CrossPairExchange v2", async function () {
             )
               .plus(elemSpentAmount)
               .minus(expected.beneficiaryFee)
+              .minus(expected.referrerFee)
               .toString();
+
+            start.referrerFee = {};
+            start.referrerFee[spentToken.toString()] = expected.referrerFee;
 
             start.accumulatedFees[spentToken.toString()] = new BigNumber(
               start.accumulatedFees[spentToken.toString()],
@@ -165,6 +169,7 @@ describe("Check direct CrossPairExchange v2", async function () {
             elem.outcoming,
             account4.address,
           );
+
           receivedAmount = elem.failed
             ? new BigNumber(expected.receivedAmount).multipliedBy(2).toString()
             : expected.receivedAmount;
@@ -175,7 +180,11 @@ describe("Check direct CrossPairExchange v2", async function () {
             )
               .plus(elemSpentAmount)
               .minus(expected.beneficiaryFee)
+              .minus(expected.referrerFee)
               .toString();
+
+            start.referrerFee = {};
+            start.referrerFee[spentToken.toString()] = expected.referrerFee;
 
             start.accumulatedFees[spentToken.toString()] = new BigNumber(
               start.accumulatedFees[spentToken.toString()],
@@ -310,12 +319,24 @@ describe("Check direct CrossPairExchange v2", async function () {
     await getRouteDexPoolsInfo(route, poolsEnd);
 
     Object.entries(poolsExpected).forEach(([pool, data]) => {
-      Object.entries(data.balances).forEach(([root, bal]) =>
+      // checking for all tokens REFERRER fee change
+      Object.entries(data.referrerFee).forEach(async ([root, refFee]) => {
+        const refAccountChange = traceTree?.tokens.getTokenBalanceChange(
+          await getWallet(account4.address, new Address(root)).then(
+            a => a.walletContract,
+          ),
+        );
+        expect(refFee).to.equal(
+          refAccountChange,
+          `Wrong referrer fee for ${poolsData[pool].symbol} with root ${root}`,
+        );
+      });
+      Object.entries(data.balances).forEach(([root, bal]) => {
         expect(bal).to.equal(
           poolsEnd[pool].balances[root],
           `Wrong ${tokensData[root].symbol} balance in ${poolsData[pool].symbol}`,
-        ),
-      );
+        );
+      });
       Object.entries(data.accumulatedFees).forEach(([root, bal]) =>
         expect(bal).to.equal(
           poolsEnd[pool].accumulatedFees[root],
@@ -352,6 +373,8 @@ describe("Check direct CrossPairExchange v2", async function () {
     // await locklift.deployments.fixture({
     //   include: ["dex-gas-values", "dex-accounts", "dex-pairs"],
     // });
+
+    await locklift.deployments.load();
     owner = locklift.deployments.getAccount("DexOwner").account;
     account4 = locklift.deployments.getAccount("commonAccount-1").account;
     dexAccount =

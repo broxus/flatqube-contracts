@@ -246,7 +246,6 @@ describe(`Test beneficiary fee`, function () {
           ).to.equal(poolDataEnd.balances[root], `Pool has wrong balance`);
         }
 
-        console.log(expected, "expected");
         // checking fee to referrer from every token
         for (const [token, fee] of Object.entries(expected.referrerFees)) {
           const refAccountChange = traceTree?.tokens.getTokenBalanceChange(
