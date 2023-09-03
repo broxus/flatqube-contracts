@@ -123,9 +123,9 @@ describe(`Test beneficiary fee`, function () {
     }
   });
 
-  before("Set referral program params", async function () {
-    displayTx(tx);
-  });
+  // before("Set referral program params", async function () {
+  //   displayTx(tx);
+  // });
 
   describe("Deposit multiple coins to stablePool/stablePair/pair", async function () {
     it("Add multiple coins imbalanced liquidity", async function () {
