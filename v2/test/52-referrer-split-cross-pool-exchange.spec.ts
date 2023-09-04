@@ -31,7 +31,7 @@ type RouteStep = {
 
 describe("Check direct CrossPairExchange v2 with Referrer", async function () {
   let owner: Account;
-  let account4: Account;
+  let commmonAcc1: Account; // ref system address
   let dexAccount: Contract<DexAccountAbi>;
   let gasValues: Contract<DexGasValuesAbi>;
 
@@ -96,7 +96,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
             elem.pool,
             elemSpentAmount,
             elem.outcoming,
-            account4.address,
+            commmonAcc1.address,
           );
 
           receivedAmount = elem.failed
@@ -132,7 +132,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
             elem.pool,
             elemSpentAmount,
             spentToken,
-            account4.address,
+            commmonAcc1.address,
           );
 
           receivedAmount = elem.failed
@@ -167,7 +167,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
             elemSpentAmount,
             spentToken,
             elem.outcoming,
-            account4.address,
+            commmonAcc1.address,
           );
 
           receivedAmount = elem.failed
@@ -262,7 +262,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
           nextStepIndices: steps[nextIndices[0]].nextStepIndices,
           steps: steps,
           recipient: owner.address,
-          referrer: account4.address,
+          referrer: commmonAcc1.address,
           success_payload: null,
           cancel_payload: null,
           to_native: false,
@@ -279,7 +279,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
           _nextStepIndices: steps[nextIndices[0]].nextStepIndices,
           _steps: steps,
           _recipient: owner.address,
-          _referrer: account4.address,
+          _referrer: commmonAcc1.address,
           _successPayload: null,
           _cancelPayload: null,
           _toNative: false,
@@ -297,7 +297,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
         steps: steps.length,
         leaves: leaves,
         deployWalletValue: toNano(0.1),
-        referrer: account4.address,
+        referrer: commmonAcc1.address,
       })
       .call()
       .then(a => a.value0);
@@ -322,7 +322,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
       // checking for all tokens REFERRER fee change
       Object.entries(data.referrerFee).forEach(async ([root, refFee]) => {
         const refAccountChange = traceTree?.tokens.getTokenBalanceChange(
-          await getWallet(account4.address, new Address(root)).then(
+          await getWallet(commmonAcc1.address, new Address(root)).then(
             a => a.walletContract,
           ),
         );
@@ -376,7 +376,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
 
     // await locklift.deployments.load();
     owner = locklift.deployments.getAccount("DexOwner").account;
-    account4 = locklift.deployments.getAccount("commonAccount-1").account;
+    commmonAcc1 = locklift.deployments.getAccount("commonAccount-1").account;
     dexAccount =
       locklift.deployments.getContract<DexAccountAbi>("OwnerDexAccount");
     gasValues =
