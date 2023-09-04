@@ -27,7 +27,7 @@ const LOCAL_NETWORK_ENDPOINT = 'http://localhost:80/graphql';
 
 const config: LockliftConfig = {
   compiler: {
-    version: '0.64.0',
+    version: '0.62.0',
     externalContracts: {
       precompiled: ['DexPlatform'],
       'node_modules/tip3/build': [
@@ -38,7 +38,7 @@ const config: LockliftConfig = {
       'node_modules/ever-wever/everscale/build': [],
     },
   },
-  linker: { version: '0.16.5' },
+  linker: { version: '0.15.48' },
   verifier: {
     verifierVersion: 'latest', // contract verifier binary, see https://github.com/broxus/everscan-verify/releases
     apiKey: process.env.EVERSCAN_API_KEY ?? '',
