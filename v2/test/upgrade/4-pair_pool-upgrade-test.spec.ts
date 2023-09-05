@@ -70,11 +70,13 @@ const loadPoolData = async (
     .call()
     .then(a => a.value0);
 
-  const token_roots = await pair.methods.getTokenRoots({ answerId: 0 }).call();
-  const token_wallets = await pair.methods
+  const token_roots: any = await pair.methods
+    .getTokenRoots({ answerId: 0 })
+    .call();
+  const token_wallets: any = await pair.methods
     .getTokenWallets({ answerId: 0 })
     .call();
-  const balances = await pair.methods
+  const balances: any = await pair.methods
     .getBalances({ answerId: 0 })
     .call()
     .then(a => a.value0);
