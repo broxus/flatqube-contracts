@@ -32,7 +32,17 @@ const config: LockliftConfig = {
   compiler: {
     version: "0.64.0",
     externalContracts: {
-      precompiled: ["DexPlatform"],
+      precompiled: [
+        "DexPlatform",
+        "DexGasValuesPrev",
+        "DexRootPrev",
+        "DexVaultPrev",
+        "DexTokenVaultPrev",
+        "DexPairPrev",
+        "DexStablePairPrev",
+        "DexStablePoolPrev",
+        "DexAccountPrev",
+      ],
       "node_modules/tip3/build": [
         "TokenRootUpgradeable",
         "TokenWalletUpgradeable",
@@ -54,6 +64,7 @@ const config: LockliftConfig = {
   },
   networks: {
     local: {
+      deploy: ["common/", "local/"],
       connection: {
         id: 1337,
         group: "localnet",
@@ -77,6 +88,7 @@ const config: LockliftConfig = {
       },
     },
     test: {
+      deploy: ["common/", "testnet/"],
       // Specify connection settings for https://github.com/broxus/everscale-standalone-client/
       connection: {
         id: 0,
@@ -103,6 +115,7 @@ const config: LockliftConfig = {
       },
     },
     main: {
+      deploy: ["common/", "main/"],
       connection: {
         id: 1,
         type: "jrpc",
@@ -122,6 +135,7 @@ const config: LockliftConfig = {
       },
     },
     venom_testnet: {
+      deploy: ["common/", "venom_testnet/"],
       connection: {
         id: 1000,
         type: "jrpc",
