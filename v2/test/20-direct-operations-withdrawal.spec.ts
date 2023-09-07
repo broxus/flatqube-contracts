@@ -25,8 +25,9 @@ import {
   getFeesFromTotalFee,
 } from "../../utils/expected.utils";
 import { getWallet } from "../../utils/wrappers";
+import { Constants } from "../../utils/consts";
 
-const LP_DECIMALS = 9;
+const LP_DECIMALS = Constants.LP_DECIMALS;
 
 describe("Check DexAccount add Pair", () => {
   let owner: Account;

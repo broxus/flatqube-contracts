@@ -24,8 +24,9 @@ import {
   expectedWithdrawLiquidity,
   expectedWithdrawLiquidityOneCoin,
 } from "../../utils/expected.utils";
+import { Constants } from "../../utils/consts";
 
-const LP_DECIMALS = 9;
+const LP_DECIMALS = Constants.LP_DECIMALS;
 
 describe("Check DexAccount add Pair", () => {
   let owner: Account;
@@ -73,7 +74,7 @@ describe("Check DexAccount add Pair", () => {
 
   before("Load contracts", async () => {
     await locklift.deployments.fixture({
-      include: ["dex-gas-values", "dex-accounts", "dex-pairs"],
+      include: ["dex-gas-values", "dex-accounts", "dex-stable"],
     });
     owner = locklift.deployments.getAccount("DexOwner").account;
 
@@ -132,7 +133,9 @@ describe("Check DexAccount add Pair", () => {
       .map((token: Contract<TokenRootUpgradeableAbi>) => {
         return {
           root: token.address,
-          amount: new BigNumber(1).shiftedBy(20).toString(),
+          amount: new BigNumber(100)
+            .shiftedBy(tokensData[token.address.toString()].decimals)
+            .toString(),
         };
       });
     await transferWrapper(owner.address, dexAccount.address, 0, deposits);
@@ -794,7 +797,7 @@ describe("Check DexAccount add Pair", () => {
       const receiveTokenAddress = poolsData.stablePair.roots[1].address;
 
       const spentAmount = new BigNumber(2)
-        .shiftedBy(tokensData[spentTokenAddress.toString()].decimals - 2)
+        .shiftedBy(tokensData[spentTokenAddress.toString()].decimals)
         .toString();
 
       const expected = await expectedExchange(
@@ -884,7 +887,7 @@ describe("Check DexAccount add Pair", () => {
       const receiveTokenAddress = poolsData.stablePair.roots[1].address;
 
       const spentAmount = new BigNumber(2)
-        .shiftedBy(tokensData[spentTokenAddress.toString()].decimals - 2)
+        .shiftedBy(tokensData[spentTokenAddress.toString()].decimals)
         .toString();
 
       const expected = await expectedExchange(
@@ -940,7 +943,7 @@ describe("Check DexAccount add Pair", () => {
       const receiveTokenAddress = poolsData.stablePool.roots[1].address;
 
       const spentAmount = new BigNumber(2)
-        .shiftedBy(tokensData[spentTokenAddress.toString()].decimals - 2)
+        .shiftedBy(tokensData[spentTokenAddress.toString()].decimals)
         .toString();
 
       const expected = await expectedExchange(
@@ -1032,7 +1035,7 @@ describe("Check DexAccount add Pair", () => {
       const receiveTokenAddress = poolsData.stablePool.roots[1].address;
 
       const spentAmount = new BigNumber(2)
-        .shiftedBy(tokensData[spentTokenAddress.toString()].decimals - 2)
+        .shiftedBy(tokensData[spentTokenAddress.toString()].decimals)
         .toString();
 
       const expected = await expectedExchange(

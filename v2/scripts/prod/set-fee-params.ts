@@ -1,5 +1,5 @@
 import { Address, toNano } from "locklift";
-import { Migration, displayTx } from "../../../utils/oldUtils/migration";
+import { displayTx } from "../../../utils/oldUtils/migration";
 
 import fs from "fs";
 
@@ -12,8 +12,8 @@ const data = fs.readFileSync("./dex_fees.json", "utf8");
 if (data) dexPairs = JSON.parse(data);
 
 async function main() {
-  const migration = new Migration();
-  const dexOwner = await migration.loadAccount("Account1", "0");
+  await locklift.deployments.load();
+  const dexOwner = locklift.deployments.getAccount("DexOwner").account;
 
   const dexRoot = await locklift.factory.getDeployedContract(
     "DexRoot",

@@ -1,206 +1,107 @@
-import { toNano } from "locklift";
-import { displayTx } from "../../utils/helpers";
-import { Constants, TTokenName } from "../../utils/consts";
+import { TTokenName } from "../../utils/consts";
+import { Command } from "commander";
 import {
-  DexRootAbi,
-  TokenRootAbi,
+  DexAccountAbi,
   TokenRootUpgradeableAbi,
 } from "../../build/factorySource";
+import { depositLiquidity } from "../../utils/wrappers";
+import { createStablePool } from "../../utils/deploy.utils";
 
-import { Command } from "commander";
+import BigNumber from "bignumber.js";
+
 const program = new Command();
 
 async function main() {
-  console.log("6-deploy-test-pool.js");
-  const account = locklift.deployments.getAccount("Account1").account;
+  await locklift.deployments.load();
+
+  const owner = locklift.deployments.getAccount("DexOwner").account;
 
   if (locklift.tracing) {
-    locklift.tracing.setAllowedCodesForAddress(account.address, {
+    locklift.tracing.setAllowedCodesForAddress(owner.address, {
       compute: [100],
     });
   }
 
-  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
-
   program
     .allowUnknownOption()
-    .option("-p, --pools <pools>", "pools to deploy")
+    .option("-p, --pools <pairs>", "pools to deploy")
     .option(
       "-cn, --contract_name <contract_name>",
       "New version of contract name",
+    )
+    .option(
+      "-d, --deposit <deposit>",
+      "deposit initial balance to pairs or not",
     );
 
   program.parse(process.argv);
 
   const options = program.opts();
   options.contract_name = options.contract_name || "DexStablePool";
+  options.deposit = options.deposit || false;
 
   const pools: TTokenName[][] = options.pools
     ? JSON.parse(options.pools)
     : [["foo", "bar", "qwe"]];
 
   for (const p of pools) {
-    const N_COINS = p.length;
+    const poolName =
+      `DexStablePool_` + p.map(symbol => `token-${symbol}`).join("_");
+    console.log(`Start deploy ${poolName}`);
 
-    const tokens = [];
-    let poolName = "";
-    for (const item of p) {
-      tokens.push(Constants.tokens[item]);
-      poolName += Constants.tokens[item].symbol;
-    }
-
-    console.log(`Start deploy pool DexStablePool${poolName}`);
-
-    const tokenContracts = [];
-    const tokenAddresses = [];
-
-    for (const token of tokens) {
-      const tokenContract = token.upgradeable
-        ? locklift.deployments.getContract<TokenRootUpgradeableAbi>(
-            token.symbol + "Root",
-          )
-        : locklift.deployments.getContract<TokenRootAbi>(token.symbol + "Root");
-
-      tokenContracts.push(tokenContract);
-      tokenAddresses.push(tokenContract.address);
-    }
-
-    const { extTransaction: tx } = await locklift.transactions.waitFinalized(
-      dexRoot.methods
-        .deployStablePool({
-          roots: tokenAddresses,
-          send_gas_to: account.address,
-        })
-        .send({
-          from: account.address,
-          amount: toNano(20),
-        }),
+    const tokens = p.map(symbol =>
+      locklift.deployments.getContract<TokenRootUpgradeableAbi>(
+        `token-${symbol}`,
+      ),
     );
 
-    displayTx(tx);
+    const dexPoolAddress = await createStablePool(
+      tokens.map(root => root.address),
+    );
 
-    const dexPoolAddress = (
-      await dexRoot.methods
-        .getExpectedPoolAddress({
-          answerId: 0,
-          _roots: tokenAddresses,
-        })
-        .call()
-    ).value0;
+    console.log(`${poolName}: ${dexPoolAddress}`);
 
-    console.log(`DexPool${poolName}: ${dexPoolAddress}`);
-
-    const DexPool = await locklift.factory.getDeployedContract<"DexStablePool">(
-      options.contract_name,
+    const dexPool = locklift.factory.getDeployedContract(
+      "DexStablePool",
       dexPoolAddress,
     );
     await locklift.deployments.saveContract({
-      contractName: "DexStablePool",
-      deploymentName: "DexPool" + poolName,
-      address: DexPool.address,
+      contractName: options.contract_name,
+      deploymentName: poolName,
+      address: dexPool.address,
     });
 
-    const version = (await DexPool.methods.getVersion({ answerId: 0 }).call())
+    const version = (await dexPool.methods.getVersion({ answerId: 0 }).call())
       .version;
-    console.log(`DexPool${poolName} version = ${version}`);
+    console.log(`${poolName} version = ${version}`);
 
-    await new Promise(resolve => setTimeout(resolve, 10000));
-
-    const active = (await DexPool.methods.isActive({ answerId: 0 }).call())
+    const active = (await dexPool.methods.isActive({ answerId: 0 }).call())
       .value0;
-    console.log(`DexPool${poolName} active = ${active}`);
+    console.log(`${poolName} active = ${active}`);
 
-    const DexPoolLpRoot = locklift.factory.getDeployedContract(
-      "TokenRootUpgradeable",
-      (await DexPool.methods.getTokenRoots({ answerId: 0 }).call()).lp,
-    );
-
-    locklift.deployments.deploymentsStore = {
-      [poolName + "LpRoot"]: DexPoolLpRoot,
-    };
-    for (let i = 0; i < N_COINS; i++) {
-      const tokenWallet = locklift.factory.getDeployedContract(
-        "TokenWalletUpgradeable",
-        (
-          await tokenContracts[i].methods
-            .walletOf({
-              answerId: 0,
-              walletOwner: dexPoolAddress,
-            })
+    if (active && options.deposit) {
+      const dexAccount =
+        locklift.deployments.getContract<DexAccountAbi>(`OwnerDexAccount`);
+      const decimals = await Promise.all(
+        tokens.map(root =>
+          root.methods
+            .decimals({ answerId: 0 })
             .call()
-        ).value0,
+            .then(a => Number(a.value0)),
+        ),
       );
-
-      locklift.deployments.deploymentsStore = {
-        [poolName + "Pool_" + tokens[i].symbol + "Wallet"]: tokenWallet,
-      };
-
-      const coinTokenVault = (
-        await dexRoot.methods
-          .getExpectedTokenVaultAddress({
-            answerId: 0,
-            _tokenRoot: tokenAddresses[i],
-          })
-          .call()
-      ).value0;
-
-      const tokenVaultWallet = await locklift.factory.getDeployedContract(
-        "TokenWalletUpgradeable",
-        (
-          await tokenContracts[i].methods
-            .walletOf({
-              answerId: 0,
-              walletOwner: coinTokenVault,
-            })
-            .call()
-        ).value0,
+      await depositLiquidity(
+        owner.address,
+        dexAccount,
+        dexPool,
+        tokens.map((root, i) => {
+          return {
+            root: root.address,
+            amount: new BigNumber(100).shiftedBy(decimals[i]).toString(),
+          };
+        }),
       );
-
-      locklift.deployments.deploymentsStore = {
-        [tokens[i].symbol + "VaultWallet"]: tokenVaultWallet,
-      };
     }
-
-    const DexPoolLpPoolWallet = await locklift.factory.getDeployedContract(
-      "TokenWalletUpgradeable",
-      (
-        await DexPoolLpRoot.methods
-          .walletOf({
-            answerId: 0,
-            walletOwner: dexPoolAddress,
-          })
-          .call()
-      ).value0,
-    );
-
-    locklift.deployments.deploymentsStore = {
-      [poolName + "Pool_LpWallet"]: DexPoolLpPoolWallet,
-    };
-
-    const dexPoolLpTokenVault = (
-      await dexRoot.methods
-        .getExpectedTokenVaultAddress({
-          answerId: 0,
-          _tokenRoot: DexPoolLpRoot.address,
-        })
-        .call()
-    ).value0;
-
-    const DexPoolLpVaultWallet = await locklift.factory.getDeployedContract(
-      "TokenWalletUpgradeable",
-      (
-        await DexPoolLpRoot.methods
-          .walletOf({
-            answerId: 0,
-            walletOwner: dexPoolLpTokenVault,
-          })
-          .call()
-      ).value0,
-    );
-
-    locklift.deployments.deploymentsStore = {
-      [poolName + "LpVaultWallet"]: DexPoolLpVaultWallet,
-    };
   }
 }
 

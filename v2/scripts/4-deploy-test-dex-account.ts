@@ -1,62 +1,36 @@
-import { toNano } from "locklift";
 import { Command } from "commander";
-import { DexRootAbi } from "../../build/factorySource";
+import { deployDexAccount } from "../../utils/deploy.utils";
 
 const program = new Command();
 
 program
   .allowUnknownOption()
-  .option("-o, --owner_n <owner_n>", "owner number")
   .option("-cn, --contract_name <contract_name>", "DexAccount contract name");
 
 program.parse(process.argv);
 
 const options = program.opts();
 
-options.owner_n = options.owner_n ? +options.owner_n : 2;
 options.contract_name = options.contract_name || "DexAccount";
 
 async function main() {
-  const accountN = locklift.deployments.getAccount(
-    "Account" + options.owner_n,
-  ).account;
+  await locklift.deployments.load();
+
+  const account = locklift.deployments.getAccount("DexOwner").account;
 
   if (locklift.tracing) {
-    locklift.tracing.setAllowedCodesForAddress(accountN.address, {
+    locklift.tracing.setAllowedCodesForAddress(account.address, {
       compute: [100],
     });
   }
 
-  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
-
-  await dexRoot.methods
-    .deployAccount({
-      account_owner: accountN.address,
-      send_gas_to: accountN.address,
-    })
-    .send({
-      from: accountN.address,
-      amount: toNano(4),
-    });
-
-  const dexAccountNAddress = (
-    await dexRoot.methods
-      .getExpectedAccountAddress({
-        answerId: 0,
-        account_owner: accountN.address,
-      })
-      .call()
-  ).value0;
-  console.log(`DexAccount${options.owner_n}: ${dexAccountNAddress}`);
-  const dexAccountN = locklift.factory.getDeployedContract(
-    options.contract_name,
-    dexAccountNAddress,
-  );
+  const dexAccountAddress = await deployDexAccount(account.address);
+  console.log(`DexAccount: ${dexAccountAddress}`);
 
   await locklift.deployments.saveContract({
-    contractName: "DexAccount",
-    deploymentName: "DexAccount" + options.owner_n,
-    address: dexAccountN.address,
+    contractName: options.contract_name,
+    deploymentName: "OwnerDexAccount",
+    address: dexAccountAddress,
   });
 }
 

@@ -11,7 +11,7 @@ import { BigNumber } from "bignumber.js";
 BigNumber.config({ EXPONENTIAL_AT: 257 });
 
 async function main() {
-  const rootOwner = locklift.deployments.getAccount("Account1").account;
+  const rootOwner = locklift.deployments.getAccount("DexOwner").account;
 
   program.allowUnknownOption().option("-m, --mints <mints>", "mint params");
 

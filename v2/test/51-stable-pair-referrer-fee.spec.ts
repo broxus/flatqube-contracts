@@ -43,7 +43,7 @@ const poolData: {
 describe(`Test beneficiary fee`, function () {
   before("Load contracts", async function () {
     await locklift.deployments.fixture({
-      include: ["dex-accounts", "dex-pairs"],
+      include: ["dex-accounts", "dex-stable"],
     });
 
     owner = locklift.deployments.getAccount("DexOwner").account;

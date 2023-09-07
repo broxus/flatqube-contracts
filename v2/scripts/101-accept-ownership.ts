@@ -20,7 +20,8 @@ options.root_contract_name = options.root_contract_name || "DexRoot";
 let tx;
 
 async function main() {
-  const account = locklift.deployments.getAccount("Account1").account;
+  await locklift.deployments.load();
+  const account = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   console.log(`Account address: ${account.address}`);

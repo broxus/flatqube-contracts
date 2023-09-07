@@ -1,7 +1,7 @@
-import { toNano } from "locklift";
-
 import { Command } from "commander";
 import { DexVaultAbi } from "build/factorySource";
+import { upgradeVault } from "../../utils/upgrade.utils";
+import { displayTx } from "../../utils/helpers";
 const program = new Command();
 
 program
@@ -15,7 +15,8 @@ options.old_contract = options.old_contract || "DexVaultPrev";
 options.new_contract = options.new_contract || "DexVault";
 
 async function main() {
-  const account = locklift.deployments.getAccount("Account1").account;
+  await locklift.deployments.load();
+
   const dexVaultPrev =
     locklift.deployments.getContract<DexVaultAbi>("DexVault");
 
@@ -25,12 +26,8 @@ async function main() {
 
   console.log(`Upgrading DexVault contract: ${dexVaultPrev.address}`);
 
-  await locklift.transactions.waitFinalized(
-    dexVaultPrev.methods.upgrade({ code: DexVault.code }).send({
-      from: account.address,
-      amount: toNano(6),
-    }),
-  );
+  const tx = await upgradeVault(dexVaultPrev, DexVault);
+  displayTx(tx);
 }
 
 main()

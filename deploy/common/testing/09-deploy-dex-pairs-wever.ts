@@ -1,20 +1,11 @@
-import { toNano } from "locklift";
-import { Constants, displayTx } from "../../../utils/oldUtils/migration";
-import {
-  DexRootAbi,
-  TokenRootUpgradeableAbi,
-} from "../../../build/factorySource";
-import { TOKENS_N } from "../../../utils/consts";
+import { TokenRootUpgradeableAbi } from "../../../build/factorySource";
+import { TOKENS_N, Constants } from "../../../utils/consts";
+import { createDexPair } from "../../../utils/deploy.utils";
 
 const TOKEN_DECIMAL = 6;
 
 export default async () => {
-  console.log("09-deploy-wever-dex-pairs.js");
-  await locklift.deployments.load();
-
   const wEverOwner = locklift.deployments.getAccount("DexOwner").account;
-
-  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   locklift.tracing.setAllowedCodesForAddress(wEverOwner.address, {
     compute: [100],
@@ -22,23 +13,9 @@ export default async () => {
 
   const deployDexPairFunc = async (lToken = "foo", rToken = "bar") => {
     const pairs = [[lToken, rToken]];
-    await locklift.deployments.load();
 
     for (const p of pairs) {
-      const tokenLeft = {
-        name: p[0],
-        symbol: p[0],
-        decimals: Constants.LP_DECIMALS,
-        upgradeable: true,
-      };
-      const tokenRight = {
-        name: [p[1]],
-        symbol: p[1],
-        decimals: Constants.LP_DECIMALS,
-        upgradeable: true,
-      };
-
-      const pair = { left: tokenLeft.symbol, right: tokenRight.symbol };
+      const pair = { left: p[0], right: p[1] };
 
       console.log(`Start deploy pair DexPair_${pair.left}_${pair.right}`);
 
@@ -48,29 +25,10 @@ export default async () => {
         locklift.deployments.getContract<TokenRootUpgradeableAbi>(pair.right);
 
       // deploying real PAIR
-      const tx = await locklift.transactions.waitFinalized(
-        dexRoot.methods
-          .deployPair({
-            left_root: tokenFoo.address,
-            right_root: tokenBar.address,
-            send_gas_to: wEverOwner.address,
-          })
-          .send({
-            from: wEverOwner.address,
-            amount: toNano(15),
-          }),
+      const dexPairFooBarAddress = await createDexPair(
+        tokenFoo.address,
+        tokenBar.address,
       );
-
-      displayTx(tx.extTransaction);
-
-      const dexPairFooBarAddress = await dexRoot.methods
-        .getExpectedPairAddress({
-          answerId: 0,
-          left_root: tokenFoo.address,
-          right_root: tokenBar.address,
-        })
-        .call()
-        .then(r => r.value0);
 
       console.log(
         `DexPair_${pair.left}_${pair.right}: ${dexPairFooBarAddress}`,
@@ -96,8 +54,6 @@ export default async () => {
         await dexPairFooBar.methods.isActive({ answerId: 0 }).call()
       ).value0;
       console.log(`DexPair_${pair.left}_${pair.right} active = ${active}`);
-
-      console.log("09-deploy-wever-dex-pairs.js END");
     }
   };
 

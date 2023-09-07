@@ -1,11 +1,13 @@
 import { toNano } from "locklift";
 import { displayTx } from "../../utils/helpers";
-import { DexGasValuesAbi } from "../../build/factorySource";
+import { DexGasValuesPrevAbi } from "../../build/factorySource";
 
 async function main() {
-  const account = locklift.deployments.getAccount("Account1").account;
+  await locklift.deployments.load();
+
+  const account = locklift.deployments.getAccount("DexOwner").account;
   const dexGasPrev =
-    locklift.deployments.getContract<DexGasValuesAbi>("DexVault");
+    locklift.deployments.getContract<DexGasValuesPrevAbi>("DexGasValues");
 
   const DexGas = await locklift.factory.getContractArtifacts("DexGasValues");
 
@@ -19,6 +21,12 @@ async function main() {
     });
 
   displayTx(tx);
+
+  await locklift.deployments.saveContract({
+    contractName: "DexGasValues",
+    deploymentName: "DexGasValues",
+    address: dexGasPrev.address,
+  });
 }
 
 main()

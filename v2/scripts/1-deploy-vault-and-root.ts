@@ -56,8 +56,10 @@ options.lp_pending_contract_name =
   options.lp_pending_contract_name || "LpTokenPending";
 
 async function main() {
+  await locklift.deployments.load();
+
   const signer = await locklift.keystore.getSigner("0");
-  const account = locklift.deployments.getAccount("Account1").account;
+  const account = locklift.deployments.getAccount("DexOwner").account;
 
   if (locklift.tracing) {
     locklift.tracing.setAllowedCodesForAddress(account.address, {
@@ -107,8 +109,6 @@ async function main() {
     }),
   );
 
-  console.log(`DexRoot address: ${dexRoot.address}`);
-
   console.log(`Deploying DexVault...`);
   const {
     extTransaction: { contract: dexVault },
@@ -126,12 +126,10 @@ async function main() {
         publicKey: signer.publicKey,
         value: toNano(2),
       },
-      deploymentName: "DexRoot",
+      deploymentName: "DexVault",
       enableLogs: true,
     }),
   );
-
-  console.log(`DexVault address: ${dexVault.address}`);
 
   console.log(`DexVault: installing Platform code...`);
   let tx = await dexVault.methods

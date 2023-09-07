@@ -11,7 +11,8 @@ const DEFAULT_DEX_ROOT_ADDRESS =
 
 async function main() {
   console.log("deploy-stable-pool.ts");
-  let dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
+
+  await locklift.deployments.load();
   const promptsData: any[] = [];
 
   program
@@ -33,10 +34,12 @@ async function main() {
   options.a_coef = options.a_coef ? JSON.parse(options.a_coef) : undefined;
 
   let dexRootAddress = "";
+  let dexRoot;
 
-  if (dexRoot.address) {
+  try {
+    dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
     dexRootAddress = dexRoot.address.toString();
-  } else {
+  } catch (e) {
     dexRootAddress = DEFAULT_DEX_ROOT_ADDRESS;
   }
 
@@ -107,7 +110,7 @@ async function main() {
     );
   }
 
-  const account = locklift.deployments.getAccount("Account1").account;
+  const account = locklift.deployments.getAccount("DexOwner").account;
 
   if (locklift.tracing) {
     locklift.tracing.setAllowedCodesForAddress(account.address, {

@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract } from "locklift";
+import { Contract, zeroAddress } from "locklift";
 import { Account } from "everscale-standalone-client/nodejs";
 
 import {
@@ -140,6 +140,7 @@ describe("Check DexAccount add Pair", () => {
           left_amount: amounts[0],
           right_amount: amounts[1],
           auto_change: true,
+          referrer: zeroAddress,
         })
         .call()
         .then(r => r.value0);

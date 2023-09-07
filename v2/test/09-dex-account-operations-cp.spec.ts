@@ -110,7 +110,9 @@ describe("Check DexAccount add Pair", () => {
       (token: Contract<TokenRootUpgradeableAbi>) => {
         return {
           root: token.address,
-          amount: new BigNumber(1).shiftedBy(20).toString(),
+          amount: new BigNumber(100)
+            .shiftedBy(tokensData[token.address.toString()].decimals)
+            .toString(),
         };
       },
     );
@@ -450,7 +452,7 @@ describe("Check DexAccount add Pair", () => {
       );
 
       const spentAmount = new BigNumber(2)
-        .shiftedBy(tokensData[pairRoots[0].address.toString()].decimals - 2)
+        .shiftedBy(tokensData[pairRoots[0].address.toString()].decimals)
         .toString();
 
       const expected = await expectedExchange(
@@ -535,7 +537,7 @@ describe("Check DexAccount add Pair", () => {
       );
 
       const spentAmount = new BigNumber(2)
-        .shiftedBy(tokensData[pairRoots[0].address.toString()].decimals - 2)
+        .shiftedBy(tokensData[pairRoots[0].address.toString()].decimals)
         .toString();
 
       const expected = await expectedExchange(

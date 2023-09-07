@@ -11,6 +11,7 @@ const chunkify = <T>(arr: T[], size: number): T[][] =>
   );
 
 const main = async (isActive: boolean) => {
+  await locklift.deployments.load();
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   const dexManagerAddress = await dexRoot.methods

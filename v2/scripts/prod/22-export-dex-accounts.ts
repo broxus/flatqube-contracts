@@ -12,6 +12,7 @@ type AccountEntity = {
 };
 
 async function main() {
+  await locklift.deployments.load();
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   console.log("DexRoot: " + dexRoot.address);

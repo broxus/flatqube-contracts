@@ -20,7 +20,7 @@ import {
   TestNewDexPairAbi,
   TestOracleDexPairAbi,
 } from "../../../build/factorySource";
-import { createDexPair, deployToken } from "../../../utils/wrappers";
+import { createDexPair, deployToken } from "../../../utils/deploy.utils";
 
 const TOKENS = [
   { name: "Token ABC", symbol: "ABC" },

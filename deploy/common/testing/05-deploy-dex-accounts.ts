@@ -1,6 +1,7 @@
 import { Address, toNano } from "locklift";
 import { DexRootAbi } from "../../../build/factorySource";
 import { ACCOUNTS_N } from "../../../utils/consts";
+import { deployDexAccount } from "../../../utils/deploy.utils";
 
 interface IDexAcc {
   address: Address;
@@ -10,41 +11,21 @@ interface IDexAcc {
 export default async () => {
   const owner = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
-  const commonWallets: Promise<IDexAcc>[] = [];
+  const commonDexAccounts: Promise<IDexAcc>[] = [];
 
   // parallel deploying
   for (let j = 0; j < ACCOUNTS_N; j++) {
     const acc = locklift.deployments.getAccount(`commonAccount-${j}`).account;
 
-    const wallet: Promise<IDexAcc> = new Promise(async resolve => {
-      await locklift.transactions
-        .waitFinalized(
-          dexRoot.methods
-            .deployAccount({
-              account_owner: acc.address,
-              send_gas_to: acc.address,
-            })
-            .send({
-              from: acc.address,
-              amount: toNano(4),
-            }),
-        )
-        .then(() => {
-          return dexRoot.methods
-            .getExpectedAccountAddress({
-              answerId: 0,
-              account_owner: acc.address,
-            })
-            .call();
-        })
-        .then(val => {
-          resolve({
-            address: val.value0,
-            index: j,
-          });
-        });
-    });
-    commonWallets.push(wallet);
+    const dexAccount: Promise<IDexAcc> = deployDexAccount(acc.address).then(
+      val => {
+        return {
+          address: val,
+          index: j,
+        };
+      },
+    );
+    commonDexAccounts.push(dexAccount);
   }
 
   await locklift.transactions.waitFinalized(
@@ -59,14 +40,7 @@ export default async () => {
       }),
   );
 
-  const dexAccountAddress = (
-    await dexRoot.methods
-      .getExpectedAccountAddress({
-        answerId: 0,
-        account_owner: owner.address,
-      })
-      .call()
-  ).value0;
+  const dexAccountAddress = await deployDexAccount(owner.address);
 
   await locklift.deployments.saveContract({
     contractName: "DexAccount",
@@ -76,8 +50,8 @@ export default async () => {
 
   console.log(`OwnerDexAccount deployed: ${dexAccountAddress}`);
 
-  const resolvePromisesSeq = async (walletsData: Promise<IDexAcc>[]) => {
-    for (const data of walletsData) {
+  const resolvePromisesSeq = async (accountsData: Promise<IDexAcc>[]) => {
+    for (const data of accountsData) {
       const result = await data;
 
       if (result) {
@@ -94,7 +68,7 @@ export default async () => {
     }
   };
 
-  await resolvePromisesSeq(commonWallets);
+  await resolvePromisesSeq(commonDexAccounts);
 };
 
 export const tag = "dex-accounts";

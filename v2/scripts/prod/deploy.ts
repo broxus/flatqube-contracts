@@ -20,7 +20,7 @@ async function main() {
   // ============ DEPLOYER ACCOUNT ============
 
   const signer = await locklift.keystore.getSigner("0");
-  const name = `Account1`;
+  const name = `DexOwner`;
 
   await locklift.deployments.deployAccounts(
     [

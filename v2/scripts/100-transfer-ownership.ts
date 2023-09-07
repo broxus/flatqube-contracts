@@ -31,7 +31,9 @@ options.account_contract_name = options.account_contract_name || "DexAccount";
 
 async function main() {
   if (options.new_owner) {
-    const account = locklift.deployments.getAccount("Account1").account;
+    await locklift.deployments.load();
+
+    const account = locklift.deployments.getAccount("DexOwner").account;
     const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
     const dexVault = locklift.deployments.getContract<DexVaultAbi>("DexVault");
 

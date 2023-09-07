@@ -12,6 +12,7 @@ type PoolEntity = {
 };
 
 async function exportDexPairs() {
+  await locklift.deployments.load();
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   console.log("DexRoot: " + dexRoot.address);

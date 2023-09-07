@@ -2,7 +2,6 @@ import { getRandomNonce, toNano, zeroAddress } from "locklift";
 import { TokenRootUpgradeableAbi } from "../../../build/factorySource";
 
 export default async () => {
-  await locklift.deployments.load();
   const weverOwner = locklift.deployments.getAccount("DexOwner");
 
   const { code: tokenWalletCode } = locklift.factory.getContractArtifacts(

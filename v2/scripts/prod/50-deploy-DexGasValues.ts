@@ -11,8 +11,10 @@ async function main() {
 
   const newOwner = new Address(options.owner);
 
+  await locklift.deployments.load();
+
   const signer = await locklift.keystore.getSigner("0");
-  const account = locklift.deployments.getAccount("Account1").account;
+  const account = locklift.deployments.getAccount("DexOwner").account;
 
   if (locklift.tracing) {
     locklift.tracing.setAllowedCodesForAddress(account.address, {

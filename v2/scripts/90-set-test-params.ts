@@ -10,7 +10,8 @@ const MANAGER = new Address(
 );
 
 async function main() {
-  const owner = locklift.deployments.getAccount("Account1").account;
+  await locklift.deployments.load();
+  const owner = locklift.deployments.getAccount("DexOwner").account;
 
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
   const dexVault = locklift.deployments.getContract<DexVaultAbi>("DexRoot");

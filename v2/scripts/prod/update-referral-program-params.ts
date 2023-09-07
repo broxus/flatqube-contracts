@@ -21,11 +21,12 @@ const DEX_VAULT_ADDRESS =
   "0:6fa537fa97adf43db0206b5bec98eb43474a9836c016a190ac8b792feb852230";
 
 async function main() {
+  await locklift.deployments.load();
   // const account = await locklift.factory.accounts.addExistingAccount({
   //   type: WalletTypes.EverWallet,
   //   address: migration.getAddress("Account1"),
   // });
-  const account = locklift.deployments.getAccount("Account1").account;
+  const account = locklift.deployments.getAccount("DexOwner").account;
 
   const dexVault = locklift.factory.getDeployedContract(
     "DexVault",

@@ -6,7 +6,6 @@ import {
 } from "build/factorySource";
 
 export default async () => {
-  await locklift.deployments.load();
   console.log("deploying testnet WEVER");
   const weverOwner = locklift.deployments.getAccount("DexOwner");
 

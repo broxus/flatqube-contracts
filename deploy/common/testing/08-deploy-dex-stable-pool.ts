@@ -1,9 +1,7 @@
-import { toNano, zeroAddress } from "locklift";
-import {
-  DexRootAbi,
-  TokenRootUpgradeableAbi,
-} from "../../../build/factorySource";
+import { TokenRootUpgradeableAbi } from "../../../build/factorySource";
 import { getThresholdForAllTokens, IFee } from "../../../utils/wrappers";
+import { createDexPair, createStablePool } from "../../../utils/deploy.utils";
+import { upgradePair } from "../../../utils/upgrade.utils";
 
 const FIRST = "token-6-0";
 const SECOND = "token-9-0";
@@ -11,9 +9,17 @@ const THIRD = "token-18-0";
 export const DEX_STABLE_POOL_LP = "DexStablePool_lp";
 
 export default async () => {
-  const account = locklift.deployments.getAccount("DexOwner").account;
-  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
   const commonAcc = locklift.deployments.getAccount("commonAccount-0").account;
+
+  const feeParams = {
+    denominator: 1000000,
+    pool_numerator: 1000,
+    beneficiary_numerator: 2000,
+    referrer_numerator: 3000,
+    beneficiary: commonAcc.address,
+    threshold: getThresholdForAllTokens(),
+    referrer_threshold: [],
+  } as IFee;
 
   const tokenFirst =
     locklift.deployments.getContract<TokenRootUpgradeableAbi>(FIRST);
@@ -29,132 +35,57 @@ export default async () => {
   ];
 
   // deploying first stable pair
-  await locklift.transactions.waitFinalized(
-    dexRoot.methods
-      .deployPair({
-        left_root: tokenFirst.address,
-        right_root: tokenSecond.address,
-        send_gas_to: account.address,
-      })
-      .send({
-        from: account.address,
-        amount: toNano(15),
-      }),
+  const dexStablePairFirst = await createDexPair(
+    tokenFirst.address,
+    tokenSecond.address,
+    feeParams,
   );
-
-  await locklift.transactions.waitFinalized(
-    await dexRoot.methods
-      .upgradePair({
-        left_root: tokenFirst.address,
-        right_root: tokenSecond.address,
-        pool_type: 2,
-        send_gas_to: account.address,
-      })
-      .send({
-        from: account.address,
-        amount: toNano(6),
-      }),
+  await upgradePair(
+    tokenFirst.address,
+    tokenSecond.address,
+    locklift.factory.getContractArtifacts("DexStablePair"),
+    2,
   );
-
-  const dexStablePairAddressFirst = (
-    await dexRoot.methods
-      .getExpectedPoolAddress({
-        answerId: 0,
-        _roots: [tokenFirst.address, tokenSecond.address],
-      })
-      .call()
-  ).value0;
 
   console.log(
-    `DexStablePair_${FIRST}_${SECOND} address = ${dexStablePairAddressFirst}`,
-  );
-
-  const DexStablePairFirst = locklift.factory.getDeployedContract(
-    "DexStablePair",
-    dexStablePairAddressFirst,
+    `DexStablePair_${FIRST}_${SECOND} address = ${dexStablePairFirst}`,
   );
 
   await locklift.deployments.saveContract({
     contractName: "DexStablePair",
     deploymentName: `DexStablePair_${FIRST}_${SECOND}`,
-    address: DexStablePairFirst.address,
+    address: dexStablePairFirst,
   });
 
   // deploying second stable pair
-  await locklift.transactions.waitFinalized(
-    dexRoot.methods
-      .deployPair({
-        left_root: tokenSecond.address,
-        right_root: tokenThird.address,
-        send_gas_to: account.address,
-      })
-      .send({
-        from: account.address,
-        amount: toNano(15),
-      }),
+  const dexStablePairSecond = await createDexPair(
+    tokenSecond.address,
+    tokenThird.address,
+    feeParams,
   );
-
-  await locklift.transactions.waitFinalized(
-    await dexRoot.methods
-      .upgradePair({
-        left_root: tokenSecond.address,
-        right_root: tokenThird.address,
-        pool_type: 2,
-        send_gas_to: account.address,
-      })
-      .send({
-        from: account.address,
-        amount: toNano(6),
-      }),
+  await upgradePair(
+    tokenSecond.address,
+    tokenThird.address,
+    locklift.factory.getContractArtifacts("DexStablePair"),
+    2,
   );
-
-  const dexStablePairAddressSecond = (
-    await dexRoot.methods
-      .getExpectedPoolAddress({
-        answerId: 0,
-        _roots: [tokenSecond.address, tokenThird.address],
-      })
-      .call()
-  ).value0;
 
   console.log(
-    `DexStablePair_${SECOND}_${THIRD} address = ${dexStablePairAddressSecond}`,
-  );
-
-  const DexStablePairSecond = locklift.factory.getDeployedContract(
-    "DexStablePair",
-    dexStablePairAddressSecond,
+    `DexStablePair_${SECOND}_${THIRD} address = ${dexStablePairSecond}`,
   );
 
   await locklift.deployments.saveContract({
     contractName: "DexStablePair",
     deploymentName: `DexStablePair_${SECOND}_${THIRD}`,
-    address: DexStablePairSecond.address,
+    address: dexStablePairSecond,
   });
 
   // deploying 3 tokens stable pool
-  await locklift.transactions.waitFinalized(
-    await dexRoot.methods
-      .deployStablePool({
-        roots: rootsTriple,
-        send_gas_to: account.address,
-      })
-      .send({
-        from: account.address,
-        amount: toNano(20),
-      }),
+
+  const dexStablePoolAddress = await createStablePool(rootsTriple, feeParams);
+  console.log(
+    `DexStablePool_${FIRST}_${SECOND}_${THIRD} address = ${dexStablePoolAddress}`,
   );
-
-  const dexStablePoolAddress = (
-    await dexRoot.methods
-      .getExpectedPoolAddress({
-        answerId: 0,
-        _roots: rootsTriple,
-      })
-      .call()
-  ).value0;
-
-  console.log(`Dex_Stable_Pool address = ${dexStablePoolAddress}`);
 
   const DexStablePool = locklift.factory.getDeployedContract(
     "DexStablePool",
@@ -178,59 +109,10 @@ export default async () => {
     address: DexStablePool.address,
   });
 
-  console.log(
-    `Stable pool deployed: DexStablePool_${FIRST}_${SECOND}_${THIRD}`,
-  );
-
-  const feeParams = {
-    denominator: 1000000,
-    pool_numerator: 1000,
-    beneficiary_numerator: 2000,
-    referrer_numerator: 3000,
-    beneficiary: commonAcc.address,
-    threshold: getThresholdForAllTokens(),
-    referrer_threshold: [],
-  } as IFee;
-
-  await dexRoot.methods
-    .setPairFeeParams({
-      _roots: rootsTriple,
-      _params: feeParams,
-      _remainingGasTo: account.address,
-    })
-    .send({
-      from: account.address,
-      amount: toNano(1.5),
-    });
-
-  await dexRoot.methods
-    .setPairFeeParams({
-      _roots: [tokenFirst.address, tokenSecond.address],
-      _params: feeParams,
-      _remainingGasTo: account.address,
-    })
-    .send({
-      from: account.address,
-      amount: toNano(1.5),
-    });
-
-  await dexRoot.methods
-    .setPairFeeParams({
-      _roots: [tokenSecond.address, tokenThird.address],
-      _params: feeParams,
-      _remainingGasTo: account.address,
-    })
-    .send({
-      from: account.address,
-      amount: toNano(1.5),
-    });
-
   const version = (
     await DexStablePool.methods.getVersion({ answerId: 0 }).call()
   ).version;
   console.log(`DexPool version = ${version}`);
-
-  // await new Promise(resolve => setTimeout(resolve, 10000));
 
   const active = (await DexStablePool.methods.isActive({ answerId: 0 }).call())
     .value0;
