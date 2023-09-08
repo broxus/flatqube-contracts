@@ -40,3 +40,5 @@ echo "____________________________________________________________________";
 echo "prev token vault -> token vault";
 npx locklift run --network local --disable-build --script v2/scripts/38-upgrade-token-vault.ts --token="6-0" --old_contract_name="DexTokenVaultPrev" --new_contract_name="DexTokenVault"
 
+echo "get-evers-back";
+npx locklift run --network local --disable-build --script v2/scripts/99-get-evers-back.ts

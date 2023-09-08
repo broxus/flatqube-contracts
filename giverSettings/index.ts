@@ -4,8 +4,8 @@ import {
   Giver,
   ProviderRpcClient,
   Transaction,
-} from 'locklift';
-import { Ed25519KeyPair } from 'everscale-standalone-client';
+} from "locklift";
+import { Ed25519KeyPair } from "everscale-standalone-client";
 
 // Reimplements this class if you need to use custom giver contract
 export class SimpleGiver implements Giver {
@@ -35,39 +35,39 @@ export class SimpleGiver implements Giver {
 }
 
 const giverAbi = {
-  'ABI version': 2,
-  header: ['time', 'expire'],
+  "ABI version": 2,
+  header: ["time", "expire"],
   functions: [
     {
-      name: 'upgrade',
-      inputs: [{ name: 'newcode', type: 'cell' }],
+      name: "upgrade",
+      inputs: [{ name: "newcode", type: "cell" }],
       outputs: [],
     },
     {
-      name: 'sendTransaction',
+      name: "sendTransaction",
       inputs: [
-        { name: 'dest', type: 'address' },
-        { name: 'value', type: 'uint128' },
-        { name: 'bounce', type: 'bool' },
+        { name: "dest", type: "address" },
+        { name: "value", type: "uint128" },
+        { name: "bounce", type: "bool" },
       ],
       outputs: [],
     },
     {
-      name: 'getMessages',
+      name: "getMessages",
       inputs: [],
       outputs: [
         {
           components: [
-            { name: 'hash', type: 'uint256' },
-            { name: 'expireAt', type: 'uint64' },
+            { name: "hash", type: "uint256" },
+            { name: "expireAt", type: "uint64" },
           ],
-          name: 'messages',
-          type: 'tuple[]',
+          name: "messages",
+          type: "tuple[]",
         },
       ],
     },
     {
-      name: 'constructor',
+      name: "constructor",
       inputs: [],
       outputs: [],
     },
@@ -97,24 +97,24 @@ export class GiverWallet implements Giver {
         dest: sendTo,
         bounce: false,
         flags: 3,
-        payload: '',
+        payload: "",
       })
       .sendExternal({ publicKey: this.keyPair.publicKey });
   }
 }
 
 const giverWallet = {
-  'ABI version': 2,
-  header: ['pubkey', 'time', 'expire'],
+  "ABI version": 2,
+  header: ["pubkey", "time", "expire"],
   functions: [
     {
-      name: 'sendTransaction',
+      name: "sendTransaction",
       inputs: [
-        { name: 'dest', type: 'address' },
-        { name: 'value', type: 'uint128' },
-        { name: 'bounce', type: 'bool' },
-        { name: 'flags', type: 'uint8' },
-        { name: 'payload', type: 'cell' },
+        { name: "dest", type: "address" },
+        { name: "value", type: "uint128" },
+        { name: "bounce", type: "bool" },
+        { name: "flags", type: "uint8" },
+        { name: "payload", type: "cell" },
       ],
       outputs: [],
     },
@@ -148,14 +148,14 @@ export class TestnetGiver implements Giver {
 }
 
 const testnetGiverAbi = {
-  'ABI version': 2,
-  header: ['pubkey', 'time', 'expire'],
+  "ABI version": 2,
+  header: ["pubkey", "time", "expire"],
   functions: [
     {
-      name: 'sendGrams',
+      name: "sendGrams",
       inputs: [
-        { name: 'dest', type: 'address' },
-        { name: 'amount', type: 'uint64' },
+        { name: "dest", type: "address" },
+        { name: "amount", type: "uint64" },
       ],
       outputs: [],
     },
@@ -185,24 +185,24 @@ export class GiverWalletV2_3 implements Giver {
         dest: sendTo,
         bounce: false,
         flags: 3,
-        payload: '',
+        payload: "",
       })
       .sendExternal({ publicKey: this.keyPair.publicKey });
   }
 }
-const broxusEverWallet = {
-  'ABI version': 2,
-  version: '2.3',
-  header: ['pubkey', 'time', 'expire'],
+export const broxusEverWallet = {
+  "ABI version": 2,
+  version: "2.3",
+  header: ["pubkey", "time", "expire"],
   functions: [
     {
-      name: 'sendTransaction',
+      name: "sendTransaction",
       inputs: [
-        { name: 'dest', type: 'address' },
-        { name: 'value', type: 'uint128' },
-        { name: 'bounce', type: 'bool' },
-        { name: 'flags', type: 'uint8' },
-        { name: 'payload', type: 'cell' },
+        { name: "dest", type: "address" },
+        { name: "value", type: "uint128" },
+        { name: "bounce", type: "bool" },
+        { name: "flags", type: "uint8" },
+        { name: "payload", type: "cell" },
       ],
       outputs: [],
     },
@@ -210,35 +210,48 @@ const broxusEverWallet = {
   events: [],
 } as const;
 
-
 export class GiverV1 implements Giver {
   public giverContract: Contract<typeof giverV1Abi>;
 
-  constructor(ever: ProviderRpcClient, readonly keyPair: Ed25519KeyPair, address: string) {
+  constructor(
+    ever: ProviderRpcClient,
+    readonly keyPair: Ed25519KeyPair,
+    address: string,
+  ) {
     const giverAddr = new Address(address);
     this.giverContract = new ever.Contract(giverV1Abi, giverAddr);
   }
 
-  public async sendTo(sendTo: Address, value: string): Promise<{ transaction: Transaction; output?: {} }> {
-    console.log(`GiverV1 sendTo : ${sendTo.toString()}`)
+  public async sendTo(
+    sendTo: Address,
+    value: string,
+  ): Promise<{ transaction: Transaction; output?: {} }> {
+    console.log(`GiverV1 sendTo : ${sendTo.toString()}`);
     return this.giverContract.methods
-        .sendGrams({
-          amount: value,
-          dest: sendTo,
-        })
-        .sendExternal({publicKey: this.keyPair.publicKey, withoutSignature: true});
+      .sendGrams({
+        amount: value,
+        dest: sendTo,
+      })
+      .sendExternal({
+        publicKey: this.keyPair.publicKey,
+        withoutSignature: true,
+      });
   }
-
 }
 
 const giverV1Abi = {
   "ABI version": 1,
-  "functions": [{"name": "constructor", "inputs": [], "outputs": []}, {
-    "name": "sendGrams",
-    "inputs": [{"name": "dest", "type": "address"}, {"name": "amount", "type": "uint64"}],
-    "outputs": []
-  }],
-  "events": [],
-  "data": []
+  functions: [
+    { name: "constructor", inputs: [], outputs: [] },
+    {
+      name: "sendGrams",
+      inputs: [
+        { name: "dest", type: "address" },
+        { name: "amount", type: "uint64" },
+      ],
+      outputs: [],
+    },
+  ],
+  events: [],
+  data: [],
 } as const;
-

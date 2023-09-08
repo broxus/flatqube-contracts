@@ -1,50 +1,47 @@
-import { Command } from "commander";
 import { Address, fromNano } from "locklift";
-
-const program = new Command();
-
-program
-  .allowUnknownOption()
-  .option("-n, --key_number <key_number>", "count of accounts");
-
-program.parse(process.argv);
+import { broxusEverWallet } from "../../giverSettings";
+import { ACCOUNTS_N } from "../../utils/consts";
 
 const main = async () => {
-  const options = program.opts();
-  const key_number = +(options.key_number || "0");
-  const accountAddress = locklift.deployments.getAccount(
-    `Account${key_number + 1}`,
-  ).account;
-  const pubKey = await locklift.keystore
-    .getSigner(key_number.toString())
-    .then(s => s.publicKey);
-  const account = locklift.factory.getDeployedContract(
-    "EverWallet",
-    accountAddress.address,
-  );
-
+  await locklift.deployments.load();
   const giverAddress = locklift.context.network.config.giver.address;
-  const balanceBefore = await locklift.provider.getBalance(account.address);
 
-  await locklift.transactions.waitFinalized(
-    account.methods
-      .sendTransaction({
-        dest: new Address(giverAddress),
-        value: 0,
-        bounce: false,
-        flags: 128,
-        payload: "",
-      })
-      .sendExternal({ publicKey: pubKey }),
-  );
+  async function getEvers(accountName: string) {
+    const account = locklift.deployments.getAccount(accountName);
+    const wallet = new locklift.provider.Contract(
+      broxusEverWallet,
+      account.account.address,
+    );
+    const balanceBefore = await locklift.provider.getBalance(wallet.address);
 
-  const balanceAfter = await locklift.provider.getBalance(account.address);
+    await locklift.transactions.waitFinalized(
+      wallet.methods
+        .sendTransaction({
+          dest: new Address(giverAddress),
+          value: 0,
+          bounce: false,
+          flags: 128,
+          payload: "",
+        })
+        .sendExternal({ publicKey: account.signer.publicKey }),
+    );
 
-  console.log(
-    `[EVER Balance] ${account.address.toString()}: ${fromNano(
-      balanceBefore,
-    )} -> ${fromNano(balanceAfter)}`,
-  );
+    const balanceAfter = await locklift.provider.getBalance(wallet.address);
+
+    console.log(
+      `[EVER Balance] ${wallet.address.toString()}: ${fromNano(
+        balanceBefore,
+      )} -> ${fromNano(balanceAfter)}`,
+    );
+  }
+
+  await getEvers("DexOwner");
+
+  for (let i = 0; i < ACCOUNTS_N; i++) {
+    try {
+      await getEvers(`commonAccount-${i}`);
+    } catch (e) {}
+  }
 };
 
 main()
