@@ -1,6 +1,6 @@
 import { Constants, TTokenName } from "../../utils/consts";
 import { Command } from "commander";
-import { deployToken } from "../../utils/wrappers";
+import { deployToken } from "../../utils/deploy.utils";
 
 const program = new Command();
 
