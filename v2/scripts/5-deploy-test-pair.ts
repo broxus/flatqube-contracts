@@ -58,7 +58,7 @@ async function main() {
         `token-${pair.right}`,
       );
 
-    const dexPairAddress = await createDexPair(
+    const { address: dexPairAddress } = await createDexPair(
       tokenLeft.address,
       tokenRight.address,
     );

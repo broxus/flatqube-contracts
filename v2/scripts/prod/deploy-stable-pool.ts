@@ -3,6 +3,8 @@ import { Address, toNano } from "locklift";
 import { displayTx, isValidEverAddress } from "utils/helpers";
 import { Command } from "commander";
 import prompts from "prompts";
+import { createStablePool } from "../../../utils/deploy.utils";
+import { setPairFeeParams } from "../../../utils/wrappers";
 
 const program = new Command();
 
@@ -108,6 +110,11 @@ async function main() {
       "DexRoot",
       new Address(dexRootAddress),
     );
+    await locklift.deployments.saveContract({
+      contractName: "DexRoot",
+      deploymentName: "DexRoot",
+      address: dexRoot.address,
+    });
   }
 
   const account = locklift.deployments.getAccount("DexOwner").account;
@@ -124,26 +131,8 @@ async function main() {
   ) {
     console.log(`Start deploy pool DexStablePool`);
 
-    const tx = await dexRoot.methods
-      .deployStablePool({
-        roots: roots,
-        send_gas_to: account.address,
-      })
-      .send({
-        from: account.address,
-        amount: toNano(20),
-      });
+    const { address: dexPoolAddress, tx } = await createStablePool(roots);
     displayTx(tx);
-
-    const dexPoolAddress = (
-      await dexRoot.methods
-        .getExpectedPoolAddress({
-          answerId: 0,
-          _roots: roots,
-        })
-        .call()
-    ).value0;
-
     console.log(`DexPool address = ${dexPoolAddress}`);
 
     const DexPool = await locklift.factory.getDeployedContract(
@@ -165,16 +154,8 @@ async function main() {
 
     if (fee !== undefined) {
       console.log(`Update fee params to ${JSON.stringify(fee)}`);
-      const tx = await dexRoot.methods
-        .setPairFeeParams({
-          _roots: roots,
-          _params: fee,
-          _remainingGasTo: account.address,
-        })
-        .send({
-          from: account.address,
-          amount: toNano(5),
-        });
+
+      const tx = await setPairFeeParams(roots, fee);
       displayTx(tx);
       console.log(``);
     }

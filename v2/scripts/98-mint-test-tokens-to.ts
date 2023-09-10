@@ -2,10 +2,7 @@ import { toNano } from "locklift";
 import { Command } from "commander";
 import { BigNumber } from "bignumber.js";
 import { Constants, EMPTY_TVM_CELL, TTokenName } from "../../utils/consts";
-import {
-  TokenRootAbi,
-  TokenRootUpgradeableAbi,
-} from "../../build/factorySource";
+import { TokenRootUpgradeableAbi } from "../../build/factorySource";
 
 const program = new Command();
 BigNumber.config({ EXPONENTIAL_AT: 257 });
@@ -37,16 +34,19 @@ async function main() {
     "0:0000000000000000000000000000000000000000000000000000000000000000";
 
   for (const mint of mints) {
-    const token = Constants.tokens[mint.token as TTokenName];
-    const amount = new BigNumber(mint.amount)
-      .shiftedBy(token.decimals)
-      .toFixed();
+    const tokenSymbol = Constants.tokens[mint.token as TTokenName]
+      ? Constants.tokens[mint.token as TTokenName].symbol
+      : mint.token;
 
-    const tokenRoot = token.upgradeable
-      ? locklift.deployments.getContract<TokenRootUpgradeableAbi>(
-          token.symbol + "Root",
-        )
-      : locklift.deployments.getContract<TokenRootAbi>(token.symbol + "Root");
+    const tokenRoot = locklift.deployments.getContract<TokenRootUpgradeableAbi>(
+      `token-${tokenSymbol}`,
+    );
+    const decimals = await tokenRoot.methods
+      .decimals({ answerId: 0 })
+      .call()
+      .then(a => Number(a.value0));
+
+    const amount = new BigNumber(mint.amount).shiftedBy(decimals).toFixed();
 
     await tokenRoot.methods
       .mint({

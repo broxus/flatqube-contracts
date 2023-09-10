@@ -1,5 +1,4 @@
 import { getRandomNonce, toNano, zeroAddress } from "locklift";
-import { TokenRootUpgradeableAbi } from "../../../build/factorySource";
 
 export default async () => {
   const weverOwner = locklift.deployments.getAccount("DexOwner");
@@ -36,7 +35,7 @@ export default async () => {
         value: toNano(10),
         publicKey: weverOwner.signer.publicKey,
       },
-      deploymentName: "wever",
+      deploymentName: "token-wever",
       enableLogs: true,
     }),
   );
@@ -96,62 +95,6 @@ export default async () => {
         enableLogs: true,
       }),
     );
-
-  const { extTransaction: everToTip3 } =
-    await locklift.transactions.waitFinalized(
-      locklift.deployments.deploy({
-        deploymentName: "EverToTip3",
-        deployConfig: {
-          contract: "EverToTip3",
-          initParams: {
-            randomNonce_: getRandomNonce(),
-            weverRoot: root.contract.address,
-            weverVault: weverVault.contract.address,
-          },
-          constructorParams: {},
-          value: toNano(2),
-          publicKey: weverOwner.signer.publicKey,
-        },
-        enableLogs: true,
-      }),
-    );
-
-  await locklift.transactions.waitFinalized(
-    locklift.deployments.deploy({
-      deploymentName: "EverWeverToTip3",
-      deployConfig: {
-        contract: "EverWeverToTip3",
-        constructorParams: {},
-        initParams: {
-          randomNonce_: getRandomNonce(),
-          weverRoot: root.contract.address,
-          weverVault: weverVault.contract.address,
-          everToTip3: everToTip3.contract.address,
-        },
-        value: toNano(2),
-        publicKey: weverOwner.signer.publicKey,
-      },
-      enableLogs: true,
-    }),
-  );
-
-  await locklift.transactions.waitFinalized(
-    locklift.deployments.deploy({
-      deploymentName: "Tip3ToEver",
-      deployConfig: {
-        contract: "Tip3ToEver",
-        constructorParams: {},
-        initParams: {
-          randomNonce_: getRandomNonce(),
-          weverRoot: root.contract.address,
-          weverVault: weverVault.contract.address,
-        },
-        value: toNano(2),
-        publicKey: weverOwner.signer.publicKey,
-      },
-      enableLogs: true,
-    }),
-  );
 
   // Proxy token transfer
   // - Deploy proxy token transfer

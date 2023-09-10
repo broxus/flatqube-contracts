@@ -62,7 +62,7 @@ describe("Oracle Upgrade", function () {
 
     pair = await locklift.factory.getDeployedContract(
       "TestOracleDexPair",
-      await createDexPair(tokenRoots[0], tokenRoots[1]),
+      await createDexPair(tokenRoots[0], tokenRoots[1]).then(a => a.address),
     );
 
     console.log(

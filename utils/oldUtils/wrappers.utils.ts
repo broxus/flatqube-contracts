@@ -12,7 +12,7 @@ import {
   DexRootAbi,
   DexVaultAbi,
   TokenFactoryAbi,
-} from "../build/factorySource";
+} from "../../build/factorySource";
 
 export interface ITokenRoot {
   name: string;

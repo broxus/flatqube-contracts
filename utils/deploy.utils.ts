@@ -9,8 +9,8 @@ export const deployToken = async (
   amount: string | number = "100000",
   decimals = 18,
 ) => {
-  const owner = locklift.deployments.getAccount("DexOwner").account;
-  const signer = await locklift.keystore.getSigner("0");
+  const account = locklift.deployments.getAccount("DexOwner");
+  const owner = account.account;
 
   const TokenWallet = locklift.factory.getContractArtifacts(
     "TokenWalletUpgradeable",
@@ -23,7 +23,7 @@ export const deployToken = async (
     locklift.deployments.deploy({
       deployConfig: {
         contract: "TokenRootUpgradeable",
-        publicKey: signer.publicKey,
+        publicKey: account.signer.publicKey,
         initParams: {
           randomNonce_: locklift.utils.getRandomNonce(),
           deployer_: zeroAddress,
@@ -61,7 +61,7 @@ export const createDexPair = async (
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
   const mainAcc = locklift.deployments.getAccount("DexOwner").account;
 
-  await locklift.transactions.waitFinalized(
+  const tx = await locklift.transactions.waitFinalized(
     dexRoot.methods
       .deployPair({
         left_root: left,
@@ -87,14 +87,14 @@ export const createDexPair = async (
     .call()
     .then(r => r.value0);
 
-  return dexPairAddress;
+  return { address: dexPairAddress, tx: tx.extTransaction };
 };
 
 export const createStablePool = async (roots: Address[], fees?: IFee) => {
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
   const mainAcc = locklift.deployments.getAccount("DexOwner").account;
 
-  await locklift.transactions.waitFinalized(
+  const tx = await locklift.transactions.waitFinalized(
     await dexRoot.methods
       .deployStablePool({
         roots,
@@ -119,24 +119,22 @@ export const createStablePool = async (roots: Address[], fees?: IFee) => {
       .call()
   ).value0;
 
-  return dexPoolAddress;
+  return { address: dexPoolAddress, tx: tx.extTransaction };
 };
 
 export const deployDexAccount = async (user: Address) => {
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
   const mainAcc = locklift.deployments.getAccount("DexOwner").account;
 
-  await locklift.transactions.waitFinalized(
-    dexRoot.methods
-      .deployAccount({
-        account_owner: user,
-        send_gas_to: mainAcc.address,
-      })
-      .send({
-        from: mainAcc.address,
-        amount: toNano(4),
-      }),
-  );
+  const tx = await dexRoot.methods
+    .deployAccount({
+      account_owner: user,
+      send_gas_to: mainAcc.address,
+    })
+    .send({
+      from: mainAcc.address,
+      amount: toNano(4),
+    });
 
   const dexAccountAddress = (
     await dexRoot.methods
@@ -147,5 +145,5 @@ export const deployDexAccount = async (user: Address) => {
       .call()
   ).value0;
 
-  return dexAccountAddress;
+  return { address: dexAccountAddress, tx: tx };
 };

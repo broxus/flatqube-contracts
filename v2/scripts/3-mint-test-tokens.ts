@@ -1,13 +1,11 @@
 import { toNano } from "locklift";
 import { Constants, EMPTY_TVM_CELL, TTokenName } from "../../utils/consts";
 import { Command } from "commander";
-import {
-  TokenRootAbi,
-  TokenRootUpgradeableAbi,
-} from "../../build/factorySource";
+import { TokenRootUpgradeableAbi } from "../../build/factorySource";
 
 const program = new Command();
 import { BigNumber } from "bignumber.js";
+import { getWallet } from "../../utils/wrappers";
 BigNumber.config({ EXPONENTIAL_AT: 257 });
 
 async function main() {
@@ -45,19 +43,23 @@ async function main() {
       ];
 
   for (const mint of mints) {
-    const token = Constants.tokens[mint.token as TTokenName];
-    const account = locklift.deployments.getAccount(
-      "Account" + mint.account,
-    ).account;
-    const amount = new BigNumber(mint.amount)
-      .shiftedBy(token.decimals)
-      .toFixed();
+    const tokenSymbol = Constants.tokens[mint.token as TTokenName]
+      ? Constants.tokens[mint.token as TTokenName].symbol
+      : mint.token;
 
-    const tokenRoot = token.upgradeable
-      ? locklift.deployments.getContract<TokenRootUpgradeableAbi>(
-          token.symbol + "Root",
-        )
-      : locklift.deployments.getContract<TokenRootAbi>(token.symbol + "Root");
+    const tokenRoot = locklift.deployments.getContract<TokenRootUpgradeableAbi>(
+      `token-${tokenSymbol}`,
+    );
+    const decimals = await tokenRoot.methods
+      .decimals({ answerId: 0 })
+      .call()
+      .then(a => Number(a.value0));
+
+    const amount = new BigNumber(mint.amount).shiftedBy(decimals).toFixed();
+
+    const account = locklift.deployments.getAccount(
+      `commonAccount-${mint.account}`,
+    ).account;
 
     await tokenRoot.methods
       .mint({
@@ -73,22 +75,21 @@ async function main() {
         amount: toNano(0.5),
       });
 
-    const tokenWalletAddress = (
-      await tokenRoot.methods
-        .walletOf({ answerId: 0, walletOwner: account.address })
-        .call()
-    ).value0;
-    const tokenWallet = locklift.factory.getDeployedContract(
-      "TokenWalletUpgradeable",
-      tokenWalletAddress,
+    const tokenWallet = await getWallet(
+      account.address,
+      tokenRoot.address,
+    ).then(a => a.walletContract);
+
+    // await locklift.deployments.saveContract({
+    //   contractName: "TokenWalletUpgradeable",
+    //   deploymentName: alias,
+    //   address: tokenWallet.address,
+    // });
+    console.log(
+      `wallet-${tokenSymbol}-${
+        mint.account
+      }: ${tokenWallet.address.toString()}`,
     );
-    const alias = token.symbol + "Wallet" + mint.account;
-    await locklift.deployments.saveContract({
-      contractName: "TokenWalletUpgradeable",
-      deploymentName: alias,
-      address: tokenWallet.address,
-    });
-    console.log(`${alias}: ${tokenWalletAddress}`);
   }
 }
 

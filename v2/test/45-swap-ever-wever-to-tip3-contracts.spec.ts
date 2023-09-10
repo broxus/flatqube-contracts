@@ -39,8 +39,7 @@ describe("Tests Swap Evers", () => {
     await locklift.deployments.fixture({
       include: [
         "dex-gas-values",
-        "wever",
-        "wrap-ever",
+        "ever-wever-tip3",
         "dex-accounts",
         "dex-pairs-wever",
       ],
@@ -57,10 +56,10 @@ describe("Tests Swap Evers", () => {
       locklift.deployments.getContract<EverWeverToTip3Abi>("EverWeverToTip3");
 
     dexPair = locklift.deployments.getContract<DexPairAbi>(
-      "DexPair_wever_token-6-0",
+      "DexPair_token-wever_token-6-0",
     );
     wEverRoot =
-      locklift.deployments.getContract<TokenRootUpgradeableAbi>("weverRoot");
+      locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-wever");
     tokenRoot =
       locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-6-0");
     wEverVault =

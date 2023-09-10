@@ -1,6 +1,4 @@
-import { ViewTracingTree } from "locklift/internal/tracing/viewTraceTree/viewTracingTree";
-import { ViewTraceTree } from "locklift/src/internal/tracing/types";
-import { Address, TraceType, Contract, zeroAddress } from "locklift";
+import { Address, Contract, zeroAddress } from "locklift";
 import BigNumber from "bignumber.js";
 
 // import { Constants } from "utils/consts";
@@ -26,26 +24,6 @@ export interface IStableDepositLiquidity {
   beneficiaryFee: string;
   referrerFee: string;
   receivedAmount: string | number;
-}
-
-export function calculateMaxCWi(traceTree: ViewTracingTree) {
-  function calculateCwi(viewTraceTree: ViewTraceTree, currentCWi: number) {
-    const CW_arr: number[] = [];
-    const traces = viewTraceTree.outTraces.filter(
-      (trace: ViewTraceTree) =>
-        trace.type !== TraceType.FUNCTION_RETURN &&
-        trace.type !== TraceType.EVENT &&
-        trace.type !== TraceType.EVENT_OR_FUNCTION_RETURN,
-    );
-
-    for (const trace of traces) {
-      CW_arr.push(calculateCwi(trace, traces.length * currentCWi));
-    }
-
-    return Math.max(currentCWi, ...CW_arr);
-  }
-
-  return calculateCwi(traceTree.viewTraceTree, 1);
 }
 
 export async function expectedDepositLiquidity(
@@ -303,7 +281,11 @@ export async function expectedWithdrawLiquidity(
     | Contract<DexStablePoolAbi>,
   lpAmount: string,
 ) {
-  // todo types
+  const poolType = await poolContract.methods
+    .getPoolType({ answerId: 0 })
+    .call()
+    .then(a => Number(a.value0));
+
   const tokenRoots: any = await poolContract.methods
     .getTokenRoots({ answerId: 0 })
     .call();
@@ -316,7 +298,8 @@ export async function expectedWithdrawLiquidity(
     .call();
 
   const amounts: Record<string, string> = {};
-  if (expected.hasOwnProperty("expected_left_amount")) {
+  if (poolType === 1 || poolType === 2) {
+    // pair or stable-pair
     amounts[tokenRoots.left.toString()] = expected.expected_left_amount;
     amounts[tokenRoots.right.toString()] = expected.expected_right_amount;
   } else {

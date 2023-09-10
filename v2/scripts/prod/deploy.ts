@@ -19,7 +19,6 @@ async function main() {
 
   // ============ DEPLOYER ACCOUNT ============
 
-  const signer = await locklift.keystore.getSigner("0");
   const name = `DexOwner`;
 
   await locklift.deployments.deployAccounts(
@@ -38,6 +37,7 @@ async function main() {
   );
 
   const account = locklift.deployments.getAccount(name).account;
+  const signer = locklift.deployments.getAccount(name).signer;
 
   await locklift.provider.sendMessage({
     sender: account.address,

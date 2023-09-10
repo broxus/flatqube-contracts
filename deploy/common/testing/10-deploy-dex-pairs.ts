@@ -31,7 +31,7 @@ export default async () => {
         locklift.deployments.getContract<TokenRootUpgradeableAbi>(pair.right);
 
       // deploying real PAIR
-      const dexPairAddress = await createDexPair(
+      const { address: dexPairAddress } = await createDexPair(
         tokenFoo.address,
         tokenBar.address,
         feeParams,
@@ -97,7 +97,7 @@ export default async () => {
     locklift.deployments.getContract<TokenRootUpgradeableAbi>(SECOND);
 
   // deploying real PAIR
-  const dexPairAddress = await createDexPair(
+  const { address: dexPairAddress } = await createDexPair(
     lpToken.address,
     tokenBar.address,
     feeParams,

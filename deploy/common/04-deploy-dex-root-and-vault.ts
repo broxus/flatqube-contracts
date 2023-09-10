@@ -4,10 +4,11 @@ import {
   DexRootAbi,
   TokenFactoryAbi,
 } from "../../build/factorySource";
+import { setReferralProgramParams } from "../../utils/wrappers";
 
 export default async () => {
-  const signer = await locklift.keystore.getSigner("0");
-  const owner = locklift.deployments.getAccount("DexOwner").account;
+  const account = locklift.deployments.getAccount("DexOwner");
+  const owner = account.account;
   const tokenFactory =
     locklift.deployments.getContract<TokenFactoryAbi>("TokenFactory");
 
@@ -40,7 +41,7 @@ export default async () => {
         initParams: {
           _nonce: getRandomNonce(),
         },
-        publicKey: signer.publicKey,
+        publicKey: account.signer.publicKey,
         value: toNano(2),
       },
       deploymentName: "DexRoot",
@@ -61,7 +62,7 @@ export default async () => {
         initParams: {
           _nonce: getRandomNonce(),
         },
-        publicKey: signer.publicKey,
+        publicKey: account.signer.publicKey,
         value: toNano(2),
       },
       deploymentName: "DexVault",
@@ -78,24 +79,11 @@ export default async () => {
       amount: toNano(2),
     });
 
-  const projectId = 22222;
-  const projectAddress =
-    locklift.deployments.getAccount("commonAccount-0").account.address;
-  const refSystemAddress =
-    locklift.deployments.getAccount("commonAccount-1").account.address;
-
-  tx = await dexVault.methods
-    .setReferralProgramParams({
-      params: {
-        projectId: projectId,
-        projectAddress: projectAddress,
-        systemAddress: refSystemAddress,
-      },
-    })
-    .send({
-      amount: toNano(1),
-      from: owner.address,
-    });
+  tx = await setReferralProgramParams(
+    22222,
+    locklift.deployments.getAccount("commonAccount-0").account.address, // project
+    locklift.deployments.getAccount("commonAccount-1").account.address, // ref system
+  );
 
   tx = await dexRoot.methods
     .setVaultOnce({ new_vault: dexVault.address })

@@ -1,34 +1,25 @@
 import { toNano } from "locklift";
 import { ACCOUNTS_N } from "../../utils/consts";
 import { TokenRootUpgradeableAbi } from "../../build/factorySource";
+import { getWallet } from "../../utils/wrappers";
 
 export default async () => {
   const owner = locklift.deployments.getAccount("DexOwner").account;
 
   const token =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>("wever");
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-wever");
 
-  const ownerWalletAddress = (
-    await token.methods
-      .walletOf({
-        answerId: 0,
-        walletOwner: owner.address,
-      })
-      .call()
-  ).value0;
-
-  const ownerWallet = locklift.factory.getDeployedContract(
-    "TokenWalletUpgradeable",
-    ownerWalletAddress,
+  const ownerWallet = await getWallet(owner.address, token.address).then(
+    a => a.walletContract,
   );
 
-  await locklift.deployments.saveContract({
-    contractName: "TokenWalletUpgradeable",
-    deploymentName: `ownerWallet-weverRoot`,
-    address: ownerWallet.address,
-  });
+  // await locklift.deployments.saveContract({
+  //   contractName: "TokenWalletUpgradeable",
+  //   deploymentName: `ownerWallet-weverRoot`,
+  //   address: ownerWallet.address,
+  // });
 
-  console.log(`ownerWallet-weverRoot deployed`);
+  console.log(`ownerWallet-wever deployed: ${ownerWallet.address.toString()}`);
   const arrOfWallets = [];
 
   for (let j = 0; j < ACCOUNTS_N; j++) {
@@ -60,13 +51,13 @@ export default async () => {
               .call()
           ).value0;
 
-          await locklift.deployments.saveContract({
-            contractName: "TokenWalletUpgradeable",
-            deploymentName: `wallet-weverRoot-${j}`,
-            address: walletAddress,
-          });
+          // await locklift.deployments.saveContract({
+          //   contractName: "TokenWalletUpgradeable",
+          //   deploymentName: `wallet-weverRoot-${j}`,
+          //   address: walletAddress,
+          // });
 
-          resolve(`wallet-weverRoot-${j}: ${walletAddress}`);
+          resolve(`wallet-wever-${j}: ${walletAddress.toString()}`);
         });
     });
 
@@ -83,7 +74,6 @@ export default async () => {
     }
   };
 
-  console.log(`creating wallets for wever account...`);
   await resolvePromisesSeq(arrOfWallets);
 };
 

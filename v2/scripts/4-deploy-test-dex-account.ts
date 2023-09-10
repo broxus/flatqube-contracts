@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { deployDexAccount } from "../../utils/deploy.utils";
+import { displayTx } from "../../utils/helpers";
 
 const program = new Command();
 
@@ -24,7 +25,10 @@ async function main() {
     });
   }
 
-  const dexAccountAddress = await deployDexAccount(account.address);
+  const { address: dexAccountAddress, tx } = await deployDexAccount(
+    account.address,
+  );
+  displayTx(tx);
   console.log(`DexAccount: ${dexAccountAddress}`);
 
   await locklift.deployments.saveContract({

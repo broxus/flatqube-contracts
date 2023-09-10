@@ -13,8 +13,8 @@ async function main() {
 
   await locklift.deployments.load();
 
-  const signer = await locklift.keystore.getSigner("0");
-  const account = locklift.deployments.getAccount("DexOwner").account;
+  const owner = locklift.deployments.getAccount("DexOwner");
+  const account = owner.account;
 
   if (locklift.tracing) {
     locklift.tracing.setAllowedCodesForAddress(account.address, {
@@ -34,7 +34,7 @@ async function main() {
         initParams: {
           _nonce: getRandomNonce(),
         },
-        publicKey: signer.publicKey,
+        publicKey: owner.signer.publicKey,
         value: toNano(2),
       },
       deploymentName: "DexGasValues",

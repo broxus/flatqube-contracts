@@ -8,7 +8,7 @@ export const WEVER_DEXPAIR_AMOUNT = 200;
 // tokens consts
 export const TOKENS_N = 2;
 export const TOKENS_DECIMALS = [6, 9, 18];
-export type TTokenName = "foo" | "bar" | "qwe" | "tst" | "coin" | "wever";
+export type TTokenName = "foo" | "bar" | "qwe" | "tst" | "coin";
 
 export interface ITokenItem {
   name: string;
@@ -52,12 +52,6 @@ export const Constants: ITokenConst = {
     coin: {
       name: "Coin",
       symbol: "Coin",
-      decimals: 9,
-      upgradeable: true,
-    },
-    wever: {
-      name: "Wrapped EVER",
-      symbol: "WEVER",
       decimals: 9,
       upgradeable: true,
     },

@@ -48,7 +48,7 @@ export const upgradePair = async (
       });
   }
 
-  const tx = await dexRoot.methods
+  return await dexRoot.methods
     .upgradePair({
       left_root: leftRoot,
       right_root: rightRoot,
@@ -59,8 +59,6 @@ export const upgradePair = async (
       from: owner.address,
       amount: toNano(10),
     });
-
-  return tx;
 };
 
 /**
@@ -89,7 +87,7 @@ export const upgradePool = async (
       });
   }
 
-  const tx = await dexRoot.methods
+  return await dexRoot.methods
     .upgradePool({
       roots: roots,
       send_gas_to: owner.address,
@@ -99,8 +97,6 @@ export const upgradePool = async (
       from: owner.address,
       amount: toNano(10),
     });
-
-  return tx;
 };
 
 /**
@@ -129,14 +125,12 @@ export const upgradeAccount = async (
       });
   }
 
-  const tx = await dexAccount.methods
+  return await dexAccount.methods
     .requestUpgrade({ send_gas_to: user.address })
     .send({
       from: user.address,
       amount: toNano(6),
     });
-
-  return tx;
 };
 
 /**
@@ -163,14 +157,12 @@ export const forceUpgradeAccount = async (
       });
   }
 
-  const tx = await dexRoot.methods
+  return await dexRoot.methods
     .forceUpgradeAccount({ account_owner: user, send_gas_to: owner.address })
     .send({
       from: owner.address,
       amount: toNano(6),
     });
-
-  return tx;
 };
 
 /**
@@ -200,14 +192,12 @@ export const upgradeTokenVault = async (
       });
   }
 
-  const tx = await dexRoot.methods
+  return await dexRoot.methods
     .upgradeTokenVault({ _tokenRoot: token, _remainingGasTo: owner.address })
     .send({
       from: owner.address,
       amount: toNano(6),
     });
-
-  return tx;
 };
 
 /**

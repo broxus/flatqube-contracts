@@ -1,5 +1,5 @@
 import { TokenRootUpgradeableAbi } from "../../../build/factorySource";
-import { TOKENS_N, Constants } from "../../../utils/consts";
+import { TOKENS_N } from "../../../utils/consts";
 import { createDexPair } from "../../../utils/deploy.utils";
 
 const TOKEN_DECIMAL = 6;
@@ -25,7 +25,7 @@ export default async () => {
         locklift.deployments.getContract<TokenRootUpgradeableAbi>(pair.right);
 
       // deploying real PAIR
-      const dexPairFooBarAddress = await createDexPair(
+      const { address: dexPairFooBarAddress } = await createDexPair(
         tokenFoo.address,
         tokenBar.address,
       );
@@ -62,7 +62,7 @@ export default async () => {
   const allWeverPairs: [string, string][] = [];
 
   Array.from({ length: TOKENS_N }).map(async (_, iRight) => {
-    allWeverPairs.push([`wever`, `token-${TOKEN_DECIMAL}-${iRight}`]);
+    allWeverPairs.push([`token-wever`, `token-${TOKEN_DECIMAL}-${iRight}`]);
   });
 
   for (let i = 0; i < allWeverPairs.length; i++) {

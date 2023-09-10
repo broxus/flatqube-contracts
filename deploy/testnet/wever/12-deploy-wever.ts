@@ -10,21 +10,21 @@ export default async () => {
   const weverOwner = locklift.deployments.getAccount("DexOwner");
 
   await locklift.deployments.saveContract({
-    deploymentName: "weverRoot",
+    deploymentName: "token-wever",
     address:
       "0:a49cd4e158a9a15555e624759e2e4e766d22600b7800d891e46f9291f044a93d",
     contractName: "TokenRootUpgradeable",
   });
 
   await locklift.deployments.saveContract({
-    deploymentName: "wever",
+    deploymentName: "weverVault",
     address:
       "0:557957cba74ab1dc544b4081be81f1208ad73997d74ab3b72d95864a41b779a4",
     contractName: "TestWeverVault",
   });
 
   const root =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>("weverRoot");
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-wever");
   const weverVault =
     locklift.deployments.getContract<TestWeverVaultAbi>("weverVault");
 

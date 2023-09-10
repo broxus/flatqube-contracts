@@ -1,24 +1,15 @@
-import { Address, toNano } from "locklift";
-import { displayTx } from "../../../utils/oldUtils/migration";
+import { displayTx } from "../../../utils/helpers";
 
 import fs from "fs";
+import { setPairFeeParams } from "../../../utils/wrappers";
 
 let dexPairs: any[];
-
-const DEX_ROOT_ADDRESS =
-  "0:5eb5713ea9b4a0f3a13bc91b282cde809636eb1e68d2fcb6427b9ad78a5a9008";
 
 const data = fs.readFileSync("./dex_fees.json", "utf8");
 if (data) dexPairs = JSON.parse(data);
 
 async function main() {
   await locklift.deployments.load();
-  const dexOwner = locklift.deployments.getAccount("DexOwner").account;
-
-  const dexRoot = await locklift.factory.getDeployedContract(
-    "DexRoot",
-    new Address(DEX_ROOT_ADDRESS),
-  );
 
   console.log(`Start upgrade fee params. Count = ${dexPairs.length}`);
 
@@ -29,17 +20,9 @@ async function main() {
         pairData.title
       }`,
     );
-    const tx = await dexRoot.methods
-      .setPairFeeParams({
-        _roots: pairData.roots,
-        _params: pairData.fee,
-        _remainingGasTo: dexOwner.address,
-      })
-      .send({
-        from: dexOwner.address,
-        amount: toNano(5),
-      });
+    const tx = await setPairFeeParams(pairData.roots, pairData.fee);
     displayTx(tx);
+
     console.log(``);
   }
 }

@@ -7,7 +7,12 @@ const main = async () => {
   const giverAddress = locklift.context.network.config.giver.address;
 
   async function getEvers(accountName: string) {
-    const account = locklift.deployments.getAccount(accountName);
+    let account;
+    try {
+      account = locklift.deployments.getAccount(accountName);
+    } catch (e) {
+      return;
+    }
     const wallet = new locklift.provider.Contract(
       broxusEverWallet,
       account.account.address,
@@ -38,9 +43,7 @@ const main = async () => {
   await getEvers("DexOwner");
 
   for (let i = 0; i < ACCOUNTS_N; i++) {
-    try {
-      await getEvers(`commonAccount-${i}`);
-    } catch (e) {}
+    await getEvers(`commonAccount-${i}`);
   }
 };
 

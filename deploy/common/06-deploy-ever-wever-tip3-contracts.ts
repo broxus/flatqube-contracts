@@ -5,11 +5,11 @@ import {
 } from "../../build/factorySource";
 
 export default async () => {
-  const signer = await locklift.keystore.getSigner("0");
+  const account = locklift.deployments.getAccount("DexOwner");
   const weverVault =
     locklift.deployments.getContract<TestWeverVaultAbi>("weverVault");
   const weverRoot =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>("wever");
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-wever");
 
   const { extTransaction: everToTip3 } =
     await locklift.transactions.waitFinalized(
@@ -22,7 +22,7 @@ export default async () => {
             weverRoot: weverRoot.address,
             weverVault: weverVault.address,
           },
-          publicKey: signer.publicKey,
+          publicKey: account.signer.publicKey,
           value: toNano(2),
         },
         deploymentName: "EverToTip3",
@@ -40,7 +40,7 @@ export default async () => {
           weverRoot: weverRoot.address,
           weverVault: weverVault.address,
         },
-        publicKey: signer.publicKey,
+        publicKey: account.signer.publicKey,
         value: toNano(2),
       },
       deploymentName: "Tip3ToEver",
@@ -59,7 +59,7 @@ export default async () => {
           weverVault: weverVault.address,
           everToTip3: everToTip3.contract.address,
         },
-        publicKey: signer.publicKey,
+        publicKey: account.signer.publicKey,
         value: toNano(2),
       },
       deploymentName: "EverWeverToTip3",

@@ -2,8 +2,8 @@ import { toNano, getRandomNonce } from "locklift";
 import { DexRootAbi } from "../../build/factorySource";
 
 export default async () => {
-  const signer = await locklift.keystore.getSigner("0");
-  const account = locklift.deployments.getAccount("DexOwner").account;
+  const owner = locklift.deployments.getAccount("DexOwner");
+  const account = owner.account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   const PlatformRootOrder =
@@ -25,7 +25,7 @@ export default async () => {
             randomNonce: getRandomNonce(),
             dexRoot: dexRoot.address,
           },
-          publicKey: signer.publicKey,
+          publicKey: owner.signer.publicKey,
           value: toNano(5),
         },
         deploymentName: "OrderFactory",

@@ -55,7 +55,7 @@ async function main() {
       ),
     );
 
-    const dexPoolAddress = await createStablePool(
+    const { address: dexPoolAddress } = await createStablePool(
       tokens.map(root => root.address),
     );
 

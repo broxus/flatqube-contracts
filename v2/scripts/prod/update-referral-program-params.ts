@@ -1,7 +1,8 @@
-import { Address, toNano } from "locklift";
+import { Address } from "locklift";
 
 import { displayTx } from "utils/helpers";
 import { Command } from "commander";
+import { setReferralProgramParams } from "../../../utils/wrappers";
 const program = new Command();
 
 program
@@ -17,21 +18,8 @@ program.parse(process.argv);
 
 const options = program.opts();
 
-const DEX_VAULT_ADDRESS =
-  "0:6fa537fa97adf43db0206b5bec98eb43474a9836c016a190ac8b792feb852230";
-
 async function main() {
   await locklift.deployments.load();
-  // const account = await locklift.factory.accounts.addExistingAccount({
-  //   type: WalletTypes.EverWallet,
-  //   address: migration.getAddress("Account1"),
-  // });
-  const account = locklift.deployments.getAccount("DexOwner").account;
-
-  const dexVault = locklift.factory.getDeployedContract(
-    "DexVault",
-    new Address(DEX_VAULT_ADDRESS),
-  );
 
   if (
     options.project_id !== undefined &&
@@ -41,18 +29,11 @@ async function main() {
     console.log(
       `Set referral program params:\n -project_id: ${options.project_id}\n -project_address: ${options.project_address}\n -ref_system_address: ${options.ref_system_address}`,
     );
-    const tx = await dexVault.methods
-      .setReferralProgramParams({
-        params: {
-          projectId: options.project_id,
-          projectAddress: options.project_address,
-          systemAddress: options.ref_system_address,
-        },
-      })
-      .send({
-        from: account.address,
-        amount: toNano(1),
-      });
+    const tx = await setReferralProgramParams(
+      options.project_id,
+      new Address(options.project_address),
+      new Address(options.ref_system_address),
+    );
     displayTx(tx);
   }
 }

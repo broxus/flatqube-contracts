@@ -1,7 +1,6 @@
-npx locklift deploy --network local --disable-build --tags owner-account tokens --force
+npx locklift deploy --network local --disable-build --tags owner-account tokens token-factory --force
 
 npx locklift run --network local --disable-build --script v2/scripts/deploy-DexGasValues.ts --gas_contract_name="DexGasValuesPrev"
-npx locklift run --network local --disable-build --script v2/scripts/0-deploy-TokenFactory.ts
 npx locklift run --network local --disable-build --script v2/scripts/1-deploy-vault-and-root.ts --root_contract_name='DexRootPrev' --vault_contract_name='DexVaultPrev' --token_vault_contract_name='DexTokenVaultPrev' --account_contract_name='DexAccountPrev' --pair_contract_name='DexPairPrev' --stableswap_contract_name='DexStablePairPrev' --pool_contract_name='DexStablePoolPrev'
 npx locklift run --network local --disable-build --script v2/scripts/4-deploy-test-dex-account.ts --contract_name='DexAccountPrev'
 npx locklift run --network local --disable-build --script v2/scripts/5-deploy-test-pair.ts --pairs='[["6-0", "9-0"], ["6-0", "18-0"]]' --contract_name='DexPairPrev' --deposit=true

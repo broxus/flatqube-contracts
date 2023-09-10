@@ -19,13 +19,3 @@ export const calcValue = (
     .times(gasPrice)
     .plus(gas.fixedValue)
     .toString();
-
-export function getWithdrawLiquidityGas(
-  N: number,
-  gasValues: Contract<DexGasValuesAbi>,
-) {
-  return gasValues.methods
-    .getAccountWithdrawLiquidityGas({ N: N })
-    .call()
-    .then(a => a.value0);
-}

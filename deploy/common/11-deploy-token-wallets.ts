@@ -2,6 +2,8 @@ import { toNano } from "locklift";
 import { ACCOUNTS_N } from "../../utils/consts";
 import { TOKENS_N, TOKENS_DECIMALS } from "../../utils/consts";
 import { TokenRootUpgradeableAbi } from "../../build/factorySource";
+import { getWallet } from "../../utils/wrappers";
+import BigNumber from "bignumber.js";
 
 export default async () => {
   const owner = locklift.deployments.getAccount("DexOwner").account;
@@ -13,28 +15,24 @@ export default async () => {
       const token = locklift.deployments.getContract<TokenRootUpgradeableAbi>(
         `token-${TOKENS_DECIMALS[i]}-${k}`,
       );
+      const decimals = await token.methods
+        .decimals({ answerId: 0 })
+        .call()
+        .then(a => Number(a.value0));
 
-      const ownerWalletAddress = (
-        await token.methods
-          .walletOf({
-            answerId: 0,
-            walletOwner: owner.address,
-          })
-          .call()
-      ).value0;
-
-      const ownerWallet = await locklift.factory.getDeployedContract(
-        "TokenWalletUpgradeable",
-        ownerWalletAddress,
+      const ownerWallet = await getWallet(owner.address, token.address).then(
+        a => a.walletContract,
       );
 
-      await locklift.deployments.saveContract({
-        contractName: "TokenWalletUpgradeable",
-        deploymentName: `ownerWallet-${TOKENS_DECIMALS[i]}-${k}`,
-        address: ownerWallet.address,
-      });
+      // await locklift.deployments.saveContract({
+      //   contractName: "TokenWalletUpgradeable",
+      //   deploymentName: `ownerWallet-${TOKENS_DECIMALS[i]}-${k}`,
+      //   address: ownerWallet.address,
+      // });
 
-      console.log(`ownerWallet-${i} deployed`);
+      console.log(
+        `ownerWallet-${i}-${k} deployed: ${ownerWallet.address.toString()}`,
+      );
       const arrOfWallets = [];
 
       for (let j = 0; j < ACCOUNTS_N; j++) {
@@ -45,7 +43,7 @@ export default async () => {
         const wallet: Promise<string> = new Promise(async resolve => {
           ownerWallet.methods
             .transfer({
-              amount: 10 ** 14,
+              amount: new BigNumber(10000).shiftedBy(decimals).toString(),
               recipient: account.address,
               deployWalletValue: toNano(0.1),
               remainingGasTo: owner.address,
@@ -66,14 +64,16 @@ export default async () => {
                   .call()
               ).value0;
 
-              await locklift.deployments.saveContract({
-                contractName: "TokenWalletUpgradeable",
-                deploymentName: `wallet-${TOKENS_DECIMALS[i]}-${k}-${j}`,
-                address: walletAddress,
-              });
+              // await locklift.deployments.saveContract({
+              //   contractName: "TokenWalletUpgradeable",
+              //   deploymentName: `wallet-${TOKENS_DECIMALS[i]}-${k}-${j}`,
+              //   address: walletAddress,
+              // });
 
               resolve(
-                `wallet-${TOKENS_DECIMALS[i]}-${k}-${j}: ${walletAddress}`,
+                `wallet-${
+                  TOKENS_DECIMALS[i]
+                }-${k}-${j}: ${walletAddress.toString()}`,
               );
             });
         });
@@ -91,7 +91,6 @@ export default async () => {
         }
       };
 
-      console.log(`creating wallets for ${i} account...`);
       await resolvePromisesSeq(arrOfWallets);
     }
   }

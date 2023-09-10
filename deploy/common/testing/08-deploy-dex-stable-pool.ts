@@ -35,7 +35,7 @@ export default async () => {
   ];
 
   // deploying first stable pair
-  const dexStablePairFirst = await createDexPair(
+  const { address: dexStablePairFirst } = await createDexPair(
     tokenFirst.address,
     tokenSecond.address,
     feeParams,
@@ -58,7 +58,7 @@ export default async () => {
   });
 
   // deploying second stable pair
-  const dexStablePairSecond = await createDexPair(
+  const { address: dexStablePairSecond } = await createDexPair(
     tokenSecond.address,
     tokenThird.address,
     feeParams,
@@ -82,7 +82,10 @@ export default async () => {
 
   // deploying 3 tokens stable pool
 
-  const dexStablePoolAddress = await createStablePool(rootsTriple, feeParams);
+  const { address: dexStablePoolAddress } = await createStablePool(
+    rootsTriple,
+    feeParams,
+  );
   console.log(
     `DexStablePool_${FIRST}_${SECOND}_${THIRD} address = ${dexStablePoolAddress}`,
   );

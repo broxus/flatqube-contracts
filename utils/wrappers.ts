@@ -12,7 +12,6 @@ import {
   DexPairAbi,
   DexStablePairAbi,
   DexStablePoolAbi,
-  TokenWalletUpgradeableAbi,
   TokenRootUpgradeableAbi,
 } from "../build/factorySource";
 import { BigNumber } from "bignumber.js";
@@ -48,7 +47,7 @@ export const setPairFeeParams = async (roots: Address[], fees: IFee) => {
   const owner = locklift.deployments.getAccount("DexOwner").account;
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
-  await dexRoot.methods
+  return await dexRoot.methods
     .setPairFeeParams({
       _roots: roots,
       _params: fees,
@@ -120,25 +119,21 @@ export const getDexAccountData = async (
   tokenRoot: Address[],
   dexAccount: Contract<DexAccountAbi>,
 ) => {
-  const arrBalances = await Promise.all(
+  return await Promise.all(
     tokenRoot.map(async _ => {
-      const balance = await dexAccount.methods
+      return await dexAccount.methods
         .getWalletData({
           answerId: 0,
           token_root: _,
         })
         .call()
         .then(a => a.balance);
-
-      return balance;
     }),
   );
-
-  return arrBalances;
 };
 
-export const setReferralProgram = async (
-  projectId = "0",
+export const setReferralProgramParams = async (
+  projectId: string | number = "0",
   systemAddress: Address,
   projectAddress: Address,
 ) => {
@@ -162,16 +157,13 @@ export const setReferralProgram = async (
 export const getExpectedTokenVault = async (root: Address) => {
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
-  const tokenVaultAddress = (
-    await dexRoot.methods
-      .getExpectedTokenVaultAddress({
-        answerId: 0,
-        _tokenRoot: root,
-      })
-      .call()
-  ).value0;
-
-  return tokenVaultAddress;
+  return await dexRoot.methods
+    .getExpectedTokenVaultAddress({
+      answerId: 0,
+      _tokenRoot: root,
+    })
+    .call()
+    .then(a => a.value0);
 };
 
 export const getDexData = async (tokens: Address[]) => {
@@ -341,31 +333,7 @@ export const depositLiquidity = async (
     | Contract<DexStablePoolAbi>,
   depositData: ITokens[],
 ) => {
-  const ownerWallets: Contract<TokenWalletUpgradeableAbi>[] = [];
   const tokenRoots: Address[] = depositData.map(_ => _.root);
-
-  for (let i = 0; i < depositData.length; i++) {
-    const tokenRoot = locklift.factory.getDeployedContract(
-      "TokenRootUpgradeable",
-      depositData[i].root,
-    );
-
-    const ownerWalletAddress = (
-      await tokenRoot.methods
-        .walletOf({
-          answerId: 0,
-          walletOwner: dexOwner,
-        })
-        .call()
-    ).value0;
-
-    const ownerWallet = locklift.factory.getDeployedContract(
-      "TokenWalletUpgradeable",
-      ownerWalletAddress,
-    );
-
-    ownerWallets.push(ownerWallet);
-  }
 
   await locklift.transactions.waitFinalized(
     dexAccount.methods
@@ -378,11 +346,9 @@ export const depositLiquidity = async (
       }),
   );
 
-  const dexPairFooBar = poolContract;
-
   const FooBarLpRoot = locklift.factory.getDeployedContract(
     "TokenRootUpgradeable",
-    (await dexPairFooBar.methods.getTokenRoots({ answerId: 0 }).call()).lp,
+    (await poolContract.methods.getTokenRoots({ answerId: 0 }).call()).lp,
   );
 
   await transferWrapper(dexOwner, dexAccount.address, 0, depositData);

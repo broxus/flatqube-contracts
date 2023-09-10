@@ -1,6 +1,4 @@
 import { getRandomNonce, toNano, WalletTypes } from "locklift";
-
-export const WEVER_DEXPAIR_AMOUNT = 200;
 import { ACCOUNTS_N, ACCOUNT_WALLET_AMOUNT } from "../../utils/consts";
 
 export default async () => {
