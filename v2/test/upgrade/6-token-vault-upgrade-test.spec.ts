@@ -1,10 +1,17 @@
 import { expect } from "chai";
 
 import { Contract } from "locklift";
-import { DexTokenVaultAbi, TokenRootUpgradeableAbi } from "build/factorySource";
+import {
+  DexTokenVaultAbi,
+  TestNewDexTokenVaultAbi,
+  TokenRootUpgradeableAbi,
+} from "build/factorySource";
 import { Account } from "everscale-standalone-client";
 import { ContractData } from "locklift/internal/factory";
-import { getExpectedTokenVault } from "../../../utils/wrappers";
+import {
+  getExpectedTokenVaultAddress,
+  setWeverInDexTokenVault,
+} from "../../../utils/wrappers";
 import { upgradeTokenVault } from "../../../utils/upgrade.utils";
 
 interface ITokenVaultData {
@@ -14,10 +21,13 @@ interface ITokenVaultData {
   tokenRoot: string;
   tokenWallet: string;
   vault: string;
+  weverTokenRoot: string;
   targetBalance: string;
 }
 
-const loadTokenVaultData = async (tokenVault: Contract<DexTokenVaultAbi>) => {
+const loadTokenVaultData = async (
+  tokenVault: Contract<DexTokenVaultAbi> | Contract<TestNewDexTokenVaultAbi>,
+) => {
   const data: ITokenVaultData = {} as ITokenVaultData;
 
   data.root = await tokenVault.methods
@@ -50,6 +60,11 @@ const loadTokenVaultData = async (tokenVault: Contract<DexTokenVaultAbi>) => {
     .call()
     .then(a => a.value0.toString());
 
+  data.weverTokenRoot = await tokenVault.methods
+    .getWeverVaultTokenRoot({ answerId: 0 })
+    .call()
+    .then(a => a.value0.toString());
+
   data.targetBalance = await tokenVault.methods
     .getTargetBalance({ answerId: 0 })
     .call()
@@ -59,18 +74,18 @@ const loadTokenVaultData = async (tokenVault: Contract<DexTokenVaultAbi>) => {
 };
 
 describe("Test DexTokenVault contract upgrade", async function () {
-  let NewDexTokenVaultData: ContractData<DexTokenVaultAbi>;
+  let NewDexTokenVaultData: ContractData<TestNewDexTokenVaultAbi>;
 
   let owner: Account;
   let dexTokenVault: Contract<DexTokenVaultAbi>;
-  let newDexTokenVault: Contract<DexTokenVaultAbi>;
+  let newDexTokenVault: Contract<TestNewDexTokenVaultAbi>;
 
   let oldTokenVaultData: ITokenVaultData = {} as ITokenVaultData;
   let newTokenVaultData: ITokenVaultData = {} as ITokenVaultData;
 
   before("Load contracts", async function () {
     await locklift.deployments.fixture({
-      include: ["dex-gas-values", "dex-root", "dex-pairs"],
+      include: ["dex-gas-values", "dex-root", "wever", "dex-pairs-wever"],
     });
 
     const token =
@@ -79,24 +94,31 @@ describe("Test DexTokenVault contract upgrade", async function () {
     owner = locklift.deployments.getAccount("DexOwner").account;
     dexTokenVault = locklift.factory.getDeployedContract(
       "DexTokenVault",
-      await getExpectedTokenVault(token.address),
+      await getExpectedTokenVaultAddress(token.address),
+    );
+    NewDexTokenVaultData = await locklift.factory.getContractArtifacts(
+      "TestNewDexTokenVault",
     );
 
-    NewDexTokenVaultData = await locklift.factory.getContractArtifacts(
-      "DexTokenVault",
-    );
+    await setWeverInDexTokenVault(token.address);
+
     oldTokenVaultData = await loadTokenVaultData(dexTokenVault);
 
     await upgradeTokenVault(token.address, NewDexTokenVaultData);
 
     newDexTokenVault = locklift.factory.getDeployedContract(
-      "DexTokenVault",
+      "TestNewDexTokenVault",
       dexTokenVault.address,
     );
     newTokenVaultData = await loadTokenVaultData(newDexTokenVault);
   });
 
   describe("Check DexTokenVault after upgrade", async function () {
+    it("Check New Function", async function () {
+      expect(
+        (await newDexTokenVault.methods.newFunc().call()).value0.toString(),
+      ).to.equal("New Token Vault", "DexTokenVault new function incorrect");
+    });
     it("Check All data correct installed in new contract", async function () {
       expect(newTokenVaultData.root).to.equal(
         oldTokenVaultData.root,
@@ -121,6 +143,10 @@ describe("Test DexTokenVault contract upgrade", async function () {
       expect(newTokenVaultData.vault).to.equal(
         oldTokenVaultData.vault,
         "New vault value incorrect",
+      );
+      expect(newTokenVaultData.weverTokenRoot).to.equal(
+        oldTokenVaultData.weverTokenRoot,
+        "New wever token root value incorrect",
       );
       expect(newTokenVaultData.targetBalance).to.equal(
         oldTokenVaultData.targetBalance,

@@ -3,7 +3,7 @@ import { Command } from "commander";
 import { TokenRootUpgradeableAbi } from "../../build/factorySource";
 import { displayTx } from "../../utils/helpers";
 import { upgradeTokenVault } from "../../utils/upgrade.utils";
-import { getExpectedTokenVault } from "../../utils/wrappers";
+import { getExpectedTokenVaultAddress } from "../../utils/wrappers";
 
 const program = new Command();
 
@@ -35,7 +35,7 @@ async function main() {
   );
   const dexTokenVault = locklift.factory.getDeployedContract(
     "DexTokenVault",
-    await getExpectedTokenVault(token.address),
+    await getExpectedTokenVaultAddress(token.address),
   );
   const oldVersion = await dexTokenVault.methods
     .getVersion({ answerId: 0 })

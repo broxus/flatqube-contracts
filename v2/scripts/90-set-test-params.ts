@@ -20,13 +20,13 @@ async function main() {
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
   const dexVault = locklift.deployments.getContract<DexVaultAbi>("DexVault");
   const foo =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-foo");
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-Foo");
   const bar =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-bar");
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-Bar");
   const qwe =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-qwe");
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-Qwe");
   const tst =
-    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-tst");
+    locklift.deployments.getContract<TokenRootUpgradeableAbi>("token-Tst");
 
   console.log(`DexRoot.setManager(${MANAGER})`);
   await dexRoot.methods.setManager({ _newManager: MANAGER }).send({

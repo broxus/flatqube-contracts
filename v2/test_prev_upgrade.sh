@@ -1,9 +1,9 @@
-npx locklift deploy --network local --disable-build --tags owner-account tokens token-factory --force
+npx locklift deploy --network local --disable-build --tags owner-account tokens token-factory wever --force
 
 npx locklift run --network local --disable-build --script v2/scripts/deploy-DexGasValues.ts --gas_contract_name="DexGasValuesPrev"
 npx locklift run --network local --disable-build --script v2/scripts/1-deploy-vault-and-root.ts --root_contract_name='DexRootPrev' --vault_contract_name='DexVaultPrev' --token_vault_contract_name='DexTokenVaultPrev' --account_contract_name='DexAccountPrev' --pair_contract_name='DexPairPrev' --stableswap_contract_name='DexStablePairPrev' --pool_contract_name='DexStablePoolPrev'
 npx locklift run --network local --disable-build --script v2/scripts/4-deploy-test-dex-account.ts --contract_name='DexAccountPrev'
-npx locklift run --network local --disable-build --script v2/scripts/5-deploy-test-pair.ts --pairs='[["6-0", "9-0"], ["6-0", "18-0"]]' --contract_name='DexPairPrev' --deposit=true
+npx locklift run --network local --disable-build --script v2/scripts/5-deploy-test-pair.ts --pairs='[["6-0", "wever"], ["6-0", "18-0"]]' --contract_name='DexPairPrev' --deposit=true
 npx locklift run --network local --disable-build --script v2/scripts/35-upgrade-pair.ts --roots='["6-0", "18-0"]' --old_contract_name='DexPairPrev' --new_contract_name='DexStablePairPrev' --pool_type=2
 npx locklift run --network local --disable-build --script v2/scripts/5-deploy-test-pool.ts --pools='[["6-0", "9-0", "18-0"]]' --contract_name='DexStablePoolPrev' --deposit=true
 
@@ -25,7 +25,7 @@ npx locklift run --network local --disable-build --script v2/scripts/update-dexV
 
 echo "____________________________________________________________________";
 echo "prev pair -> pair";
-npx locklift run --network local --disable-build --script v2/scripts/35-upgrade-pair.ts --roots='["6-0", "9-0"]' --old_contract_name='DexPairPrev' --new_contract_name='DexPair' --pool_type=1
+npx locklift run --network local --disable-build --script v2/scripts/35-upgrade-pair.ts --roots='["6-0", "wever"]' --old_contract_name='DexPairPrev' --new_contract_name='DexPair' --pool_type=1
 
 echo "____________________________________________________________________";
 echo "prev stable pair -> stable pair";
@@ -37,7 +37,8 @@ npx locklift run --network local --disable-build --script v2/scripts/35-upgrade-
 
 echo "____________________________________________________________________";
 echo "prev token vault -> token vault";
-npx locklift run --network local --disable-build --script v2/scripts/38-upgrade-token-vault.ts --token="6-0" --old_contract_name="DexTokenVaultPrev" --new_contract_name="DexTokenVault"
+npx locklift run --network local --disable-build --script v2/scripts/38-upgrade-token-vault.ts --token="wever" --old_contract_name="DexTokenVaultPrev" --new_contract_name="DexTokenVault"
+npx locklift run --network local --disable-build --script v2/scripts/10-set-wever-root-to-token-vault.ts
 
 echo "get-evers-back";
 npx locklift run --network local --disable-build --script v2/scripts/99-get-evers-back.ts

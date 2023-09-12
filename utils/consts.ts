@@ -38,7 +38,7 @@ export const Constants: ITokenConst = {
       upgradeable: true,
     },
     qwe: {
-      name: "QWE",
+      name: "Qwe",
       symbol: "Qwe",
       decimals: 18,
       upgradeable: true,

@@ -1,0 +1,151 @@
+pragma ever-solidity 0.64.0;
+
+pragma AbiHeader time;
+pragma AbiHeader expire;
+pragma AbiHeader pubkey;
+
+import "../libraries/DexErrors.tsol";
+import "../libraries/DexGas.tsol";
+import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
+
+// This is just for test purposes, this is not a real contract!
+contract NewDexTokenVault{
+    TvmCell public platform_code;
+
+    address private _root;
+    address private _weverVaultTokenRoot;
+    address private _vault;
+    uint32 private _version;
+
+    address private _tokenRoot;
+    address private _tokenWallet;
+
+    address private _remainingGasToAfterDeploy;
+
+    string newTestField;
+
+    constructor() public {revert();}
+
+    /// @notice Balance to keep for contract
+    function _getTargetBalanceInternal()
+        internal
+        pure
+        returns (uint128)
+    {
+        return DexGas.VAULT_INITIAL_BALANCE;
+    }
+
+    function getDexRoot() external view responsible returns (address) {
+        return {
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS,
+            bounce: false
+        } _root;
+    }
+
+    function getVersion() external view responsible returns (uint32) {
+        return {
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS,
+            bounce: false
+        } _version;
+    }
+
+    function getPlatformCode() external view responsible returns (TvmCell) {
+        return {
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS,
+            bounce: false
+        } platform_code;
+    }
+
+    function getTokenRoot() external view responsible returns (address) {
+        return {
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS,
+            bounce: false
+        } _tokenRoot;
+    }
+
+    function getTokenWallet() external view responsible returns (address) {
+        return {
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS,
+            bounce: false
+        } _tokenWallet;
+    }
+
+    function getVault() external view responsible returns (address) {
+        return {
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS,
+            bounce: false
+        } _vault;
+    }
+
+    function getWeverVaultTokenRoot() external view responsible returns (address) {
+        return {
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS,
+            bounce: false
+        } _weverVaultTokenRoot;
+    }
+
+    function getTargetBalance() external view responsible returns (uint128) {
+        return {
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS,
+            bounce: false
+        } _getTargetBalanceInternal();
+    }
+
+    function onCodeUpgrade(TvmCell _data) private {
+        tvm.resetStorage();
+
+        TvmSlice slice = _data.toSlice();
+
+        (
+            address root,
+            address vault,
+            uint32 previousVersion,
+            uint32 currentVersion,
+            address remainingGasTo
+        ) = slice.decode(
+            address,
+            address,
+            uint32,
+            uint32,
+            address
+        );
+
+        _root = root;
+        _vault = vault;
+
+        _version = currentVersion;
+        platform_code = slice.loadRef();
+        (
+            _tokenRoot,
+            _tokenWallet,
+            _remainingGasToAfterDeploy,
+            _weverVaultTokenRoot
+        ) = abi.decode(slice.loadRef(), (
+            address,
+            address,
+            address,
+            address
+        ));
+
+        newTestField = "New Token Vault";
+
+        // Refund remaining gas
+        remainingGasTo.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
+    }
+
+    function newFunc() public view returns (string) {
+        return newTestField;
+    }
+}

@@ -42,14 +42,10 @@ export default async () => {
           amount: toNano(0.5),
         })
         .then(async () => {
-          const walletAddress = (
-            await token.methods
-              .walletOf({
-                answerId: 0,
-                walletOwner: account.address,
-              })
-              .call()
-          ).value0;
+          const walletAddress = await getWallet(
+            account.address,
+            token.address,
+          ).then(a => a.walletContract.address);
 
           // await locklift.deployments.saveContract({
           //   contractName: "TokenWalletUpgradeable",

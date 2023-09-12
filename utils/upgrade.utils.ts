@@ -12,6 +12,7 @@ import {
   TestNewDexPairAbi,
   TestNewDexRootAbi,
   TestNewDexStablePairAbi,
+  TestNewDexTokenVaultAbi,
   TestNewDexVaultAbi,
 } from "../build/factorySource";
 import { ContractData } from "locklift/internal/factory";
@@ -173,7 +174,9 @@ export const forceUpgradeAccount = async (
  */
 export const upgradeTokenVault = async (
   token: Address,
-  newTokenVault: ContractData<DexTokenVaultAbi>,
+  newTokenVault:
+    | ContractData<DexTokenVaultAbi>
+    | ContractData<TestNewDexTokenVaultAbi>,
   updateCode: boolean = true,
 ) => {
   const owner: Account = locklift.deployments.getAccount("DexOwner").account;

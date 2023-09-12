@@ -13,6 +13,8 @@ import {
   DexStablePairAbi,
   DexStablePoolAbi,
   TokenRootUpgradeableAbi,
+  TokenWalletUpgradeableAbi,
+  VaultTokenRoot_V1Abi,
 } from "../build/factorySource";
 import { BigNumber } from "bignumber.js";
 import { TOKENS_DECIMALS, TOKENS_N, Constants } from "./consts";
@@ -59,6 +61,23 @@ export const setPairFeeParams = async (roots: Address[], fees: IFee) => {
     });
 };
 
+export const setWeverInDexTokenVault = async (tokenRoot: Address) => {
+  const owner = locklift.deployments.getAccount("DexOwner").account;
+  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
+  const weverRoot =
+    locklift.deployments.getContract<VaultTokenRoot_V1Abi>("token-wever");
+
+  const tokenVaultAddress = await getExpectedTokenVaultAddress(tokenRoot);
+
+  return await dexRoot.methods
+    .setWeverInDexTokenVault({
+      _dexTokenVault: tokenVaultAddress,
+      _newWeverVaultTokenRoot: weverRoot.address,
+      _remainingGasTo: owner.address,
+    })
+    .send({ from: owner.address, amount: toNano(0.5) });
+};
+
 export const getThresholdForAllTokens = () => {
   const threshold: [Address, string | number][] = [];
 
@@ -86,10 +105,8 @@ export const getThresholdForAllTokens = () => {
 };
 
 export const getWallet = async (user: Address, tokenRoot: Address) => {
-  const token = locklift.factory.getDeployedContract(
-    "TokenRootUpgradeable",
-    tokenRoot,
-  );
+  const token: Contract<TokenRootUpgradeableAbi> =
+    locklift.factory.getDeployedContract("TokenRootUpgradeable", tokenRoot);
 
   const ownerWalletAddress = (
     await token.methods
@@ -100,10 +117,11 @@ export const getWallet = async (user: Address, tokenRoot: Address) => {
       .call()
   ).value0;
 
-  const wallet = locklift.factory.getDeployedContract(
-    "TokenWalletUpgradeable",
-    ownerWalletAddress,
-  );
+  const wallet: Contract<TokenWalletUpgradeableAbi> =
+    locklift.factory.getDeployedContract(
+      "TokenWalletUpgradeable",
+      ownerWalletAddress,
+    );
 
   const isDeployed = await wallet.getFullState().then(s => {
     return s.state !== undefined && s.state.isDeployed;
@@ -154,7 +172,7 @@ export const setReferralProgramParams = async (
     });
 };
 
-export const getExpectedTokenVault = async (root: Address) => {
+export const getExpectedTokenVaultAddress = async (root: Address) => {
   const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
 
   return await dexRoot.methods
@@ -167,36 +185,12 @@ export const getExpectedTokenVault = async (root: Address) => {
 };
 
 export const getDexData = async (tokens: Address[]) => {
-  const dexRoot = locklift.deployments.getContract<DexRootAbi>("DexRoot");
-
   const tokensContracts = await Promise.all(
     tokens.map(async _ => {
-      const tokenVaultAddress = (
-        await dexRoot.methods
-          .getExpectedTokenVaultAddress({
-            answerId: 0,
-            _tokenRoot: _,
-          })
-          .call()
-      ).value0;
-      const dexTokenVault = await locklift.factory.getDeployedContract(
-        "DexTokenVault",
-        tokenVaultAddress,
-      );
+      const tokenVaultAddress = await getExpectedTokenVaultAddress(_);
 
-      const tokenRoot = locklift.factory.getDeployedContract(
-        "TokenRootUpgradeable",
-        _,
-      );
-      const dexTokenWalletAddress = (
-        await tokenRoot.methods
-          .walletOf({ answerId: 0, walletOwner: dexTokenVault.address })
-          .call()
-      ).value0;
-
-      const dexTokenVaultWallet = await locklift.factory.getDeployedContract(
-        "TokenWalletUpgradeable",
-        dexTokenWalletAddress,
+      const dexTokenVaultWallet = await getWallet(tokenVaultAddress, _).then(
+        a => a.walletContract,
       );
 
       return {
@@ -205,7 +199,7 @@ export const getDexData = async (tokens: Address[]) => {
     }),
   );
 
-  const balances = Promise.all(
+  const balances = await Promise.all(
     tokensContracts.map(async _ => {
       const vaultBalance = await _.dexTokenVaultWallet.methods
         .balance({ answerId: 0 })
@@ -237,23 +231,8 @@ export const transferWrapper = async (
   transferData: ITokens[],
 ) => {
   for (let i = 0; i < transferData.length; i++) {
-    const tokenRoot = locklift.factory.getDeployedContract(
-      "TokenRootUpgradeable",
-      transferData[i].root,
-    );
-
-    const ownerWalletAddress = (
-      await tokenRoot.methods
-        .walletOf({
-          answerId: 0,
-          walletOwner: sender,
-        })
-        .call()
-    ).value0;
-
-    const ownerWallet = locklift.factory.getDeployedContract(
-      "TokenWalletUpgradeable",
-      ownerWalletAddress,
+    const ownerWallet = await getWallet(sender, transferData[i].root).then(
+      a => a.walletContract,
     );
 
     await ownerWallet.methods
@@ -307,10 +286,8 @@ export const getPoolData = async (
     await poolContract.methods.getAccumulatedFees({ answerId: 0 }).call()
   ).accumulatedFees.forEach((fee, i) => (fees[roots[i]] = fee));
 
-  const FooBarLpRoot = locklift.factory.getDeployedContract(
-    "TokenRootUpgradeable",
-    tokenRoots.lp,
-  );
+  const FooBarLpRoot: Contract<TokenRootUpgradeableAbi> =
+    locklift.factory.getDeployedContract("TokenRootUpgradeable", tokenRoots.lp);
 
   const actualSupply = await FooBarLpRoot.methods
     .totalSupply({ answerId: 0 })

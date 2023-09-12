@@ -22,7 +22,7 @@ import {
 import { Account } from "locklift/everscale-client";
 import {
   depositLiquidity,
-  getExpectedTokenVault,
+  getExpectedTokenVaultAddress,
   getPoolData,
   getWallet,
 } from "../../utils/wrappers";
@@ -179,9 +179,10 @@ describe("Check direct CrossPairExchange v1", async function () {
     const spentAccountChange =
       traceTree?.tokens.getTokenBalanceChange(spentWallet);
     const spentDexChange = traceTree?.tokens.getTokenBalanceChange(
-      await getWallet(await getExpectedTokenVault(startToken), startToken).then(
-        a => a.walletContract,
-      ),
+      await getWallet(
+        await getExpectedTokenVaultAddress(startToken),
+        startToken,
+      ).then(a => a.walletContract),
     );
 
     expect(spentAccountChange).to.equal(
@@ -199,7 +200,7 @@ describe("Check direct CrossPairExchange v1", async function () {
       );
       const recevedDexChange = traceTree?.tokens.getTokenBalanceChange(
         await getWallet(
-          await getExpectedTokenVault(steps[lastStepIndex].root),
+          await getExpectedTokenVaultAddress(steps[lastStepIndex].root),
           steps[lastStepIndex].root,
         ).then(a => a.walletContract),
       );

@@ -13,6 +13,7 @@ import {
 } from "../../build/factorySource";
 import { calcValue } from "../../utils/gas.utils";
 import { BigNumber } from "bignumber.js";
+import { getExpectedTokenVaultAddress, getWallet } from "../../utils/wrappers";
 
 describe("Check DexAccounts interaction", () => {
   let pair: Contract<DexPairAbi>;
@@ -49,42 +50,18 @@ describe("Check DexAccounts interaction", () => {
     tokenRoot = locklift.deployments.getContract<TokenRootUpgradeableAbi>(
       pairRoots[0],
     );
-    tokenWallet = locklift.factory.getDeployedContract(
-      "TokenWalletUpgradeable",
-      await tokenRoot.methods
-        .walletOf({
-          answerId: 0,
-          walletOwner: owner.address,
-        })
-        .call()
-        .then(a => a.value0),
+    tokenWallet = await getWallet(owner.address, tokenRoot.address).then(
+      a => a.walletContract,
     );
 
     account1 = locklift.deployments.getAccount("commonAccount-1").account;
     dexAccount1 =
       locklift.deployments.getContract<DexAccountAbi>("commonDexAccount-1");
 
-    dexTokenVault = locklift.factory.getDeployedContract(
-      "DexTokenVault",
-      await dexRoot.methods
-        .getExpectedTokenVaultAddress({
-          answerId: 0,
-          _tokenRoot: tokenRoot.address,
-        })
-        .call()
-        .then(a => a.value0),
-    );
-
-    dexTokenVaultWallet = locklift.factory.getDeployedContract(
-      "TokenWalletUpgradeable",
-      await tokenRoot.methods
-        .walletOf({
-          answerId: 0,
-          walletOwner: dexTokenVault.address,
-        })
-        .call()
-        .then(a => a.value0),
-    );
+    dexTokenVaultWallet = await getWallet(
+      await getExpectedTokenVaultAddress(tokenRoot.address),
+      tokenRoot.address,
+    ).then(a => a.walletContract);
   });
 
   describe("Check transfer from account to dexAccount", () => {

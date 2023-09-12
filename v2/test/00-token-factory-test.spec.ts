@@ -3,6 +3,7 @@ import { TokenFactoryAbi } from "../../build/factorySource";
 import { Account } from "everscale-standalone-client";
 import { expect } from "chai";
 import { BigNumber } from "bignumber.js";
+import { getWallet } from "../../utils/wrappers";
 
 describe("TokenFactory contract", () => {
   let owner: Account;
@@ -102,75 +103,69 @@ describe("TokenFactory contract", () => {
           .send({ from: owner.address, amount: toNano(3) }),
       );
 
-      let deployedTokenRoot = traceTree?.findEventsForContract({
+      let tokenRootAddress = traceTree?.findEventsForContract({
         contract: tokenFactory,
         name: "TokenCreated" as const,
       })[0].tokenRoot;
 
-      console.log(`Deployed ${tokenData.symbol}: ${deployedTokenRoot}`);
-
-      expect(deployedTokenRoot.toString()).not.equal(
+      expect(tokenRootAddress.toString()).not.equal(
         zeroAddress.toString(),
         "Bad Token Root address",
       );
 
-      let deployedTokenRootContract = locklift.factory.getDeployedContract(
+      let tokenRoot = locklift.factory.getDeployedContract(
         "TokenRootUpgradeable",
-        deployedTokenRoot,
+        tokenRootAddress,
       );
 
-      const name = await deployedTokenRootContract.methods
+      const name = await tokenRoot.methods
         .name({ answerId: 0 })
         .call()
         .then(a => a.value0);
-      const symbol = await deployedTokenRootContract.methods
+      const symbol = await tokenRoot.methods
         .symbol({ answerId: 0 })
         .call()
         .then(a => a.value0);
-      const decimals = await deployedTokenRootContract.methods
+      const decimals = await tokenRoot.methods
         .decimals({ answerId: 0 })
         .call()
         .then(a => a.value0);
-      const rootOwner = await deployedTokenRootContract.methods
+      const rootOwner = await tokenRoot.methods
         .rootOwner({ answerId: 0 })
         .call()
         .then(a => a.value0);
-      const mintDisabled = await deployedTokenRootContract.methods
+      const mintDisabled = await tokenRoot.methods
         .mintDisabled({ answerId: 0 })
         .call()
         .then(a => a.value0);
-      const burnByRootDisabled = await deployedTokenRootContract.methods
+      const burnByRootDisabled = await tokenRoot.methods
         .burnByRootDisabled({ answerId: 0 })
         .call()
         .then(a => a.value0);
-      const burnPaused = await deployedTokenRootContract.methods
+      const burnPaused = await tokenRoot.methods
         .burnPaused({ answerId: 0 })
         .call()
         .then(a => a.value0);
-      const walletCode = await deployedTokenRootContract.methods
+      const walletCode = await tokenRoot.methods
         .walletCode({ answerId: 0 })
         .call()
         .then(a => a.value0);
-      const platformCode = await deployedTokenRootContract.methods
+      const platformCode = await tokenRoot.methods
         .platformCode({ answerId: 0 })
         .call()
         .then(a => a.value0);
 
       if (!tokenData.initialSupplyTo.equals(zeroAddress)) {
-        const totalSupply = await deployedTokenRootContract.methods
+        const totalSupply = await tokenRoot.methods
           .totalSupply({ answerId: 0 })
           .call()
           .then(a => a.value0);
 
-        const tokenWallet = await deployedTokenRootContract.methods
-          .walletOf({ answerId: 0, walletOwner: tokenData.initialSupplyTo })
-          .call()
-          .then(a =>
-            locklift.factory.getDeployedContract(
-              "TokenWalletUpgradeable",
-              a.value0,
-            ),
-          );
+        const tokenWallet = await getWallet(
+          tokenData.initialSupplyTo,
+          tokenRoot.address,
+        ).then(a => a.walletContract);
+
         const balance = await tokenWallet.methods
           .balance({ answerId: 0 })
           .call()
