@@ -15,6 +15,7 @@ import {
   TokenRootUpgradeableAbi,
   TokenWalletUpgradeableAbi,
   VaultTokenRoot_V1Abi,
+  VaultTokenWallet_V1Abi,
 } from "../build/factorySource";
 import { BigNumber } from "bignumber.js";
 import { TOKENS_DECIMALS, TOKENS_N, Constants } from "./consts";
@@ -120,6 +121,35 @@ export const getWallet = async (user: Address, tokenRoot: Address) => {
   const wallet: Contract<TokenWalletUpgradeableAbi> =
     locklift.factory.getDeployedContract(
       "TokenWalletUpgradeable",
+      ownerWalletAddress,
+    );
+
+  const isDeployed = await wallet.getFullState().then(s => {
+    return s.state !== undefined && s.state.isDeployed;
+  });
+
+  return {
+    isDeployed,
+    walletContract: wallet,
+  };
+};
+
+export const getWeverWallet = async (user: Address) => {
+  const token =
+    locklift.deployments.getContract<VaultTokenRoot_V1Abi>("token-wever");
+
+  const ownerWalletAddress = (
+    await token.methods
+      .walletOf({
+        answerId: 0,
+        walletOwner: user,
+      })
+      .call()
+  ).value0;
+
+  const wallet: Contract<VaultTokenWallet_V1Abi> =
+    locklift.factory.getDeployedContract(
+      "VaultTokenWallet_V1",
       ownerWalletAddress,
     );
 

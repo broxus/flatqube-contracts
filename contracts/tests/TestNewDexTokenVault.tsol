@@ -91,7 +91,7 @@ contract NewDexTokenVault{
         } _weverVaultTokenRoot;
     }
 
-    function getTargetBalance() external view responsible returns (uint128) {
+    function getTargetBalance() external pure responsible returns (uint128) {
         return {
             value: 0,
             flag: MsgFlag.REMAINING_GAS,
@@ -107,7 +107,7 @@ contract NewDexTokenVault{
         (
             address root,
             address vault,
-            uint32 previousVersion,
+            /* uint32 previousVersion */,
             uint32 currentVersion,
             address remainingGasTo
         ) = slice.decode(

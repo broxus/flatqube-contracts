@@ -1,11 +1,17 @@
-import { TokenRootUpgradeableAbi } from "../../../build/factorySource";
+import {
+  TokenRootUpgradeableAbi,
+  VaultTokenRoot_V1Abi,
+} from "../../../build/factorySource";
 import { TOKENS_N } from "../../../utils/consts";
 import { createDexPair } from "../../../utils/deploy.utils";
+import { setWeverInDexTokenVault } from "../../../utils/wrappers";
 
 const TOKEN_DECIMAL = 6;
 
 export default async () => {
   const wEverOwner = locklift.deployments.getAccount("DexOwner").account;
+  const weverRoot =
+    locklift.deployments.getContract<VaultTokenRoot_V1Abi>("token-wever");
 
   locklift.tracing.setAllowedCodesForAddress(wEverOwner.address, {
     compute: [100],
@@ -69,6 +75,8 @@ export default async () => {
     // await deployDexPairFunc(`token-0`, `token-2`);
     await deployDexPairFunc(allWeverPairs[i][0], allWeverPairs[i][1]);
   }
+
+  await setWeverInDexTokenVault(weverRoot.address);
 };
 
 export const tag = "dex-pairs-wever";

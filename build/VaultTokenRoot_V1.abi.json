@@ -11,6 +11,67 @@
 			]
 		},
 		{
+			"name": "setLegacyVault",
+			"inputs": [
+				{"name":"legacy_vault_","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setLegacyVaultReserves",
+			"inputs": [
+				{"name":"amount","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "decreaseLegacyVaultReserves",
+			"inputs": [
+				{"name":"delta","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "increaseLegacyVaultReserves",
+			"inputs": [
+				{"name":"delta","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setUpgradeAssistantAdmin",
+			"inputs": [
+				{"name":"admin","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setUpgradeAssistant",
+			"inputs": [
+				{"name":"assistant","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "mint",
+			"inputs": [
+				{"name":"amount","type":"uint128"},
+				{"name":"recipient","type":"address"},
+				{"name":"deployWalletValue","type":"uint128"},
+				{"name":"remainingGasTo","type":"address"},
+				{"name":"notify","type":"bool"},
+				{"name":"payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "supportsInterface",
 			"inputs": [
 				{"name":"answerId","type":"uint32"},
@@ -18,6 +79,15 @@
 			],
 			"outputs": [
 				{"name":"value0","type":"bool"}
+			]
+		},
+		{
+			"name": "specialWalletOwners",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address[]"}
 			]
 		},
 		{
@@ -72,6 +142,7 @@
 		{
 			"name": "getReserves",
 			"inputs": [
+				{"name":"answerId","type":"uint32"}
 			],
 			"outputs": [
 				{"name":"value0","type":"uint128"}
@@ -85,6 +156,33 @@
 				{"name":"remainingGasTo","type":"address"}
 			],
 			"outputs": [
+			]
+		},
+		{
+			"name": "getReceiveSafeFee",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint128"}
+			]
+		},
+		{
+			"name": "getWrapDeployWalletValue",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint128"}
+			]
+		},
+		{
+			"name": "getInitialBalance",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint128"}
 			]
 		},
 		{
@@ -124,7 +222,8 @@
 			"name": "upgradeWallets",
 			"inputs": [
 				{"name":"wallets","type":"address[]"},
-				{"name":"accept_upgrade_value","type":"uint128"}
+				{"name":"accept_upgrade_value","type":"uint128"},
+				{"name":"remainingGasTo","type":"address"}
 			],
 			"outputs": [
 			]
@@ -290,24 +389,51 @@
 			]
 		},
 		{
-			"name": "mint",
-			"inputs": [
-				{"name":"amount","type":"uint128"},
-				{"name":"recipient","type":"address"},
-				{"name":"deployWalletValue","type":"uint128"},
-				{"name":"remainingGasTo","type":"address"},
-				{"name":"notify","type":"bool"},
-				{"name":"payload","type":"cell"}
-			],
-			"outputs": [
-			]
-		},
-		{
 			"name": "sendSurplusGas",
 			"inputs": [
 				{"name":"to","type":"address"}
 			],
 			"outputs": [
+			]
+		},
+		{
+			"name": "upgrade_assistant_admin",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"upgrade_assistant_admin","type":"address"}
+			]
+		},
+		{
+			"name": "upgrade_assistant",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"upgrade_assistant","type":"address"}
+			]
+		},
+		{
+			"name": "legacy_vault",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"legacy_vault","type":"address"}
+			]
+		},
+		{
+			"name": "legacy_vault_token_wallet",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"legacy_vault_token_wallet","type":"address"}
+			]
+		},
+		{
+			"name": "legacy_vault_reserves",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"legacy_vault_reserves","type":"uint128"}
 			]
 		}
 	],
@@ -339,6 +465,11 @@
 		{"name":"randomNonce_","type":"uint256"},
 		{"name":"deployer_","type":"address"},
 		{"name":"platformCode_","type":"cell"},
-		{"name":"walletVersion_","type":"uint32"}
+		{"name":"walletVersion_","type":"uint32"},
+		{"name":"upgrade_assistant_admin","type":"address"},
+		{"name":"upgrade_assistant","type":"address"},
+		{"name":"legacy_vault","type":"address"},
+		{"name":"legacy_vault_token_wallet","type":"address"},
+		{"name":"legacy_vault_reserves","type":"uint128"}
 	]
 }
