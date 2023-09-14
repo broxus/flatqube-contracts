@@ -221,13 +221,13 @@ describe("Check direct operations", () => {
         const accountOtherTokensChange =
           traceTree?.tokens.getTokenBalanceChange(otherTokenWallet);
 
-        expect(accountTokensChange.toString()).to.equal(
+        expect(accountTokensChange).to.equal(
           (-amount).toString(),
           `Account has wrong ${
             tokensData[tokenRoot.toString()].symbol
           } balance`,
         );
-        expect(accountOtherTokensChange.toString()).to.equal("0");
+        expect(accountOtherTokensChange).to.equal("0");
         expect(
           new BigNumber(poolDataStart.lpSupply)
             .plus(expected.lpReward)
@@ -319,13 +319,13 @@ describe("Check direct operations", () => {
         const accountOtherTokensChange =
           traceTree?.tokens.getTokenBalanceChange(otherTokenWallet);
 
-        expect(accountTokensChange.toString()).to.equal(
+        expect(accountTokensChange).to.equal(
           (-amount).toString(),
           `Account has wrong ${
             tokensData[tokenRoot.toString()].symbol
           } balance`,
         );
-        expect(accountOtherTokensChange.toString()).to.equal("0");
+        expect(accountOtherTokensChange).to.equal("0");
 
         expect(
           new BigNumber(poolDataStart.lpSupply)
@@ -431,13 +431,13 @@ describe("Check direct operations", () => {
         const accountOtherTokensChange =
           traceTree?.tokens.getTokenBalanceChange(otherTokenWallet);
 
-        expect(accountTokensChange.toString()).to.equal(
+        expect(accountTokensChange).to.equal(
           (-amount).toString(),
           `Account has wrong ${
             tokensData[tokenRoot.toString()].symbol
           } balance`,
         );
-        expect(accountOtherTokensChange.toString()).to.equal("0");
+        expect(accountOtherTokensChange).to.equal("0");
         expect(
           new BigNumber(poolDataStart.lpSupply)
             .plus(expected.lpReward)
@@ -543,13 +543,13 @@ describe("Check direct operations", () => {
         const accountOtherTokensChange =
           traceTree?.tokens.getTokenBalanceChange(otherTokenWallet);
 
-        expect(accountTokensChange.toString()).to.equal(
+        expect(accountTokensChange).to.equal(
           (-amount).toString(),
           `Account has wrong ${
             tokensData[tokenRoot.toString()].symbol
           } balance`,
         );
-        expect(accountOtherTokensChange.toString()).to.equal("0");
+        expect(accountOtherTokensChange).to.equal("0");
 
         expect(
           new BigNumber(poolDataStart.lpSupply)
@@ -648,7 +648,7 @@ describe("Check direct operations", () => {
           traceTree?.tokens.getTokenBalanceChange(wallet),
         );
 
-        expect(accountTokensChange.toString()).to.equal(
+        expect(accountTokensChange).to.equal(
           new BigNumber(amount).multipliedBy(-1).toString(),
           `Account has wrong ${
             tokensData[tokenRoot.toString()].symbol
@@ -761,7 +761,7 @@ describe("Check direct operations", () => {
         const lpTokensChange =
           traceTree?.tokens.getTokenBalanceChange(lpTokenWallet);
 
-        expect(accountTokensChange.toString()).to.equal(
+        expect(accountTokensChange).to.equal(
           new BigNumber(expectedSpendData.tokens_amount)
             .multipliedBy(-1)
             .toString(),

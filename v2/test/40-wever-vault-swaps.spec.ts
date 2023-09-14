@@ -253,7 +253,7 @@ describe(`Tests ever swaps`, function () {
       const accountReceivedTokensChange =
         traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
 
-      expect(accountReceivedTokensChange.toString()).to.equal(
+      expect(accountReceivedTokensChange).to.equal(
         expected.receivedAmount,
         `Account has wrong received token balance`,
       );
@@ -561,7 +561,7 @@ describe(`Tests ever swaps`, function () {
       const accountReceivedTokensChange =
         traceTree?.tokens.getTokenBalanceChange(receivedTokenWallet);
 
-      expect(accountReceivedTokensChange.toString()).to.equal(
+      expect(accountReceivedTokensChange).to.equal(
         expected.receivedAmount,
         `Account has wrong received token balance`,
       );
@@ -797,7 +797,7 @@ describe(`Tests ever swaps`, function () {
       const accountEversChange = traceTree.getBalanceDiff(owner.address);
       expect(Number(accountEversChange)).gt(
         new BigNumber(expected.amounts[weverRoot.toString()])
-          .minus(calcValue(gas))
+          .minus(calcValue(gas, true))
           .toNumber(),
         "Wrong Account ever balance",
       );
@@ -855,7 +855,9 @@ describe(`Tests ever swaps`, function () {
 
       const accountEversChange = traceTree.getBalanceDiff(owner.address);
       expect(Number(accountEversChange)).gt(
-        new BigNumber(expected.receivedAmount).minus(calcValue(gas)).toNumber(),
+        new BigNumber(expected.receivedAmount)
+          .minus(calcValue(gas, true))
+          .toNumber(),
         "Wrong Account ever balance",
       );
     });

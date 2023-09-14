@@ -220,7 +220,7 @@ describe("Check DexAccount add Pair", () => {
           amount,
           `Account has wrong spent token balance`,
         );
-        expect(accountReceivedTokensChange.toString()).to.equal(
+        expect(accountReceivedTokensChange).to.equal(
           expected.receivedAmount,
           `Account has wrong received token balance`,
         );
@@ -320,7 +320,7 @@ describe("Check DexAccount add Pair", () => {
           amount,
           `Account has wrong spent token balance`,
         );
-        expect(accountReceivedTokensChange.toString()).to.equal(
+        expect(accountReceivedTokensChange).to.equal(
           expected.receivedAmount,
           `Account has wrong received token balance`,
         );
@@ -425,7 +425,7 @@ describe("Check DexAccount add Pair", () => {
           `Account has wrong spent token balance`,
         );
 
-        expect(accountReceivedTokensChange.toString()).to.equal(
+        expect(accountReceivedTokensChange).to.equal(
           expected.receivedAmount,
           `Account has wrong received token balance`,
         );
@@ -532,7 +532,7 @@ describe("Check DexAccount add Pair", () => {
           `Account has wrong spent token balance`,
         );
 
-        expect(accountReceivedTokensChange.toString()).to.equal(
+        expect(accountReceivedTokensChange).to.equal(
           expected.receivedAmount,
           `Account has wrong received token balance`,
         );
@@ -986,7 +986,7 @@ describe("Check DexAccount add Pair", () => {
           amount,
           `Account has wrong ${poolsData.stablePool.tokens[spentTokenIndex]} balance`,
         );
-        expect(accountReceivedTokensChange.toString()).to.equal(
+        expect(accountReceivedTokensChange).to.equal(
           expected.receivedAmount,
           `Account has wrong ${poolsData.stablePool.tokens[receivedTokenIndex]} balance`,
         );
