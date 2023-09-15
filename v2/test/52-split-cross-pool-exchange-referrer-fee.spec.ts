@@ -13,7 +13,12 @@ import {
   TokenRootUpgradeableAbi,
 } from "../../build/factorySource";
 import { Account } from "locklift/everscale-client";
-import { depositLiquidity, getPoolData, getWallet } from "../../utils/wrappers";
+import {
+  depositLiquidity,
+  getPoolData,
+  getWallet,
+  setReferralProgramParams,
+} from "../../utils/wrappers";
 import {
   expectedDepositLiquidityOneCoin,
   expectedExchange,
@@ -31,7 +36,7 @@ type RouteStep = {
 
 describe("Check direct CrossPairExchange v2 with Referrer", async function () {
   let owner: Account;
-  let commmonAcc1: Account; // ref system address
+  let commonAcc1: Account; // ref system address
   let dexAccount: Contract<DexAccountAbi>;
   let gasValues: Contract<DexGasValuesAbi>;
 
@@ -96,7 +101,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
             elem.pool,
             elemSpentAmount,
             elem.outcoming,
-            commmonAcc1.address,
+            commonAcc1.address,
           );
 
           receivedAmount = elem.failed
@@ -132,7 +137,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
             elem.pool,
             elemSpentAmount,
             spentToken,
-            commmonAcc1.address,
+            commonAcc1.address,
           );
 
           receivedAmount = elem.failed
@@ -167,7 +172,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
             elemSpentAmount,
             spentToken,
             elem.outcoming,
-            commmonAcc1.address,
+            commonAcc1.address,
           );
 
           receivedAmount = elem.failed
@@ -262,7 +267,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
           nextStepIndices: steps[nextIndices[0]].nextStepIndices,
           steps: steps,
           recipient: owner.address,
-          referrer: commmonAcc1.address,
+          referrer: commonAcc1.address,
           success_payload: null,
           cancel_payload: null,
           to_native: false,
@@ -279,7 +284,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
           _nextStepIndices: steps[nextIndices[0]].nextStepIndices,
           _steps: steps,
           _recipient: owner.address,
-          _referrer: commmonAcc1.address,
+          _referrer: commonAcc1.address,
           _successPayload: null,
           _cancelPayload: null,
           _toNative: false,
@@ -297,7 +302,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
         steps: steps.length,
         leaves: leaves,
         deployWalletValue: toNano(0.1),
-        referrer: commmonAcc1.address,
+        referrer: commonAcc1.address,
       })
       .call()
       .then(a => a.value0);
@@ -322,7 +327,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
       // checking for all tokens REFERRER fee change
       Object.entries(data.referrerFee).forEach(async ([root, refFee]) => {
         const refAccountChange = traceTree?.tokens.getTokenBalanceChange(
-          await getWallet(commmonAcc1.address, new Address(root)).then(
+          await getWallet(commonAcc1.address, new Address(root)).then(
             a => a.walletContract,
           ),
         );
@@ -376,7 +381,7 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
 
     // await locklift.deployments.load();
     owner = locklift.deployments.getAccount("DexOwner").account;
-    commmonAcc1 = locklift.deployments.getAccount("commonAccount-1").account;
+    commonAcc1 = locklift.deployments.getAccount("commonAccount-1").account;
     dexAccount =
       locklift.deployments.getContract<DexAccountAbi>("OwnerDexAccount");
     gasValues =
@@ -446,6 +451,12 @@ describe("Check direct CrossPairExchange v2 with Referrer", async function () {
         symbol: poolName,
       };
     }
+
+    await setReferralProgramParams(
+      22222,
+      commonAcc1.address, // ref system
+      locklift.deployments.getAccount("commonAccount-0").account.address, // project
+    );
   });
 
   describe("Direct split-cross-pool exchange", async function () {

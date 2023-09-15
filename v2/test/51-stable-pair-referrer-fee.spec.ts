@@ -6,6 +6,7 @@ import {
   getDexAccountData,
   getPoolData,
   getWallet,
+  setReferralProgramParams,
   transferWrapper,
 } from "../../utils/wrappers";
 import {
@@ -78,6 +79,12 @@ describe(`Test beneficiary fee`, function () {
       .getTokenRoots({ answerId: 0 })
       .call()
       .then(a => a.lp);
+
+    await setReferralProgramParams(
+      22222,
+      commonAcc1.address, // ref system
+      locklift.deployments.getAccount("commonAccount-0").account.address, // project
+    );
   });
 
   describe("Deposit multiple coins to DexStablePair", async function () {

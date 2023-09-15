@@ -4,7 +4,6 @@ import {
   DexRootAbi,
   TokenFactoryAbi,
 } from "../../build/factorySource";
-import { setReferralProgramParams } from "../../utils/wrappers";
 
 export default async () => {
   const account = locklift.deployments.getAccount("DexOwner");
@@ -78,12 +77,6 @@ export default async () => {
       from: owner.address,
       amount: toNano(2),
     });
-
-  tx = await setReferralProgramParams(
-    22222,
-    locklift.deployments.getAccount("commonAccount-0").account.address, // project
-    locklift.deployments.getAccount("commonAccount-1").account.address, // ref system
-  );
 
   tx = await dexRoot.methods
     .setVaultOnce({ new_vault: dexVault.address })

@@ -230,12 +230,15 @@ describe("Test Dex Pools contracts upgrade", async function () {
   describe("Check Pair/Pool upgrade", async function () {
     it("DexPair -> DexStablePair upgrade", async function () {
       const oldData = await loadPoolData(dexPair_6_9);
-      await upgradePair(
-        new Address(oldData.roots[0]),
-        new Address(oldData.roots[1]),
-        locklift.factory.getContractArtifacts("DexStablePair"),
-        2,
+      const { traceTree } = await locklift.tracing.trace(
+        upgradePair(
+          new Address(oldData.roots[0]),
+          new Address(oldData.roots[1]),
+          locklift.factory.getContractArtifacts("DexStablePair"),
+          2,
+        ),
       );
+      expect(traceTree).to.emit("PairCodeUpgraded", dexPair_6_9);
       const newData = await loadPoolData(dexPair_6_9);
 
       poolDataCheck(oldData, "1", newData, "2");
@@ -276,12 +279,15 @@ describe("Test Dex Pools contracts upgrade", async function () {
 
     it("DexPair -> TestNewDexPair upgrade", async function () {
       const oldData = await loadPoolData(dexPair_6_9);
-      await upgradePair(
-        new Address(oldData.roots[0]),
-        new Address(oldData.roots[1]),
-        locklift.factory.getContractArtifacts("TestNewDexPair"),
-        1,
+      const { traceTree } = await locklift.tracing.trace(
+        upgradePair(
+          new Address(oldData.roots[0]),
+          new Address(oldData.roots[1]),
+          locklift.factory.getContractArtifacts("TestNewDexPair"),
+          1,
+        ),
       );
+      expect(traceTree).to.emit("PairCodeUpgraded", dexPair_6_9);
       const newData = await loadPoolData(dexPair_6_9);
 
       poolDataCheck(oldData, "1", newData, "1");
@@ -289,12 +295,15 @@ describe("Test Dex Pools contracts upgrade", async function () {
 
     it("DexStablePair -> DexPair upgrade", async function () {
       const oldData = await loadPoolData(dexPair_9_18);
-      await upgradePair(
-        new Address(oldData.roots[0]),
-        new Address(oldData.roots[1]),
-        locklift.factory.getContractArtifacts("DexPair"),
-        1,
+      const { traceTree } = await locklift.tracing.trace(
+        upgradePair(
+          new Address(oldData.roots[0]),
+          new Address(oldData.roots[1]),
+          locklift.factory.getContractArtifacts("DexPair"),
+          1,
+        ),
       );
+      expect(traceTree).to.emit("PairCodeUpgraded", dexPair_9_18);
       const newData = await loadPoolData(dexPair_9_18);
 
       poolDataCheck(oldData, "2", newData, "1");
@@ -318,11 +327,14 @@ describe("Test Dex Pools contracts upgrade", async function () {
 
     it("DexStablePool -> DexStablePool upgrade", async function () {
       const oldData = await loadPoolData(dexPair_9_18);
-      await upgradePool(
-        oldData.roots.map(r => new Address(r)),
-        locklift.factory.getContractArtifacts("DexStablePool"),
-        3,
+      const { traceTree } = await locklift.tracing.trace(
+        upgradePool(
+          oldData.roots.map(r => new Address(r)),
+          locklift.factory.getContractArtifacts("DexStablePool"),
+          3,
+        ),
       );
+      expect(traceTree).to.emit("PoolCodeUpgraded", dexPair_9_18);
       const newData = await loadPoolData(dexPair_9_18);
 
       poolDataCheck(oldData, "3", newData, "3");
@@ -347,12 +359,15 @@ describe("Test Dex Pools contracts upgrade", async function () {
 
     it("DexStablePair -> TestNewDexStablePair upgrade", async function () {
       const oldData = await loadPoolData(dexPair_9_18);
-      await upgradePair(
-        new Address(oldData.roots[0]),
-        new Address(oldData.roots[1]),
-        locklift.factory.getContractArtifacts("TestNewDexStablePair"),
-        2,
+      const { traceTree } = await locklift.tracing.trace(
+        upgradePair(
+          new Address(oldData.roots[0]),
+          new Address(oldData.roots[1]),
+          locklift.factory.getContractArtifacts("TestNewDexStablePair"),
+          2,
+        ),
       );
+      expect(traceTree).to.emit("PairCodeUpgraded", dexPair_9_18);
       const newData = await loadPoolData(dexPair_9_18);
 
       poolDataCheck(oldData, "2", newData, "2");

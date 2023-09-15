@@ -111,7 +111,10 @@ describe("Test Dex Account contract upgrade", async function () {
         locklift.deployments.getContract<DexAccountAbi>("commonDexAccount-0");
       oldAccountData = await loadAccountData(dexAccount);
 
-      await upgradeAccount(account, dexAccount, NewDexAccountArt);
+      const { traceTree } = await locklift.tracing.trace(
+        upgradeAccount(account, dexAccount, NewDexAccountArt),
+      );
+      expect(traceTree).to.emit("AccountCodeUpgraded", dexAccount);
 
       NewDexAccount = locklift.factory.getDeployedContract(
         "TestNewDexAccount",
@@ -149,7 +152,10 @@ describe("Test Dex Account contract upgrade", async function () {
         locklift.deployments.getContract<DexAccountAbi>("commonDexAccount-1");
       oldAccountData = await loadAccountData(dexAccount);
 
-      await forceUpgradeAccount(account.address, NewDexAccountArt, false);
+      const { traceTree } = await locklift.tracing.trace(
+        forceUpgradeAccount(account.address, NewDexAccountArt, false),
+      );
+      expect(traceTree).to.emit("AccountCodeUpgraded", dexAccount);
 
       NewDexAccount = locklift.factory.getDeployedContract(
         "TestNewDexAccount",

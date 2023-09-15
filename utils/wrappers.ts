@@ -100,6 +100,12 @@ export const getThresholdForAllTokens = () => {
       ).address,
       new BigNumber(100).shiftedBy(Constants.LP_DECIMALS).toString(),
     ]);
+
+    threshold.push([
+      locklift.deployments.getContract<TokenRootUpgradeableAbi>(`token-wever`)
+        .address,
+      new BigNumber(100).shiftedBy(9).toString(),
+    ]);
   } catch (e) {}
 
   return threshold;

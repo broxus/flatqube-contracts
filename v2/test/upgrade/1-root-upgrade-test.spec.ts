@@ -104,14 +104,17 @@ describe("Test Dex Root contract upgrade", async function () {
     oldRootData = await loadRootData(dexRoot);
 
     console.log(`Upgrading DexRoot contract: ${dexRoot.address}`);
-    await dexRoot.methods
-      .upgrade({
-        code: NewDexRoot.code,
-      })
-      .send({
-        from: owner.address,
-        amount: toNano(11),
-      });
+    const { traceTree } = await locklift.tracing.trace(
+      dexRoot.methods
+        .upgrade({
+          code: NewDexRoot.code,
+        })
+        .send({
+          from: owner.address,
+          amount: toNano(11),
+        }),
+    );
+    expect(traceTree).to.emit("RootCodeUpgraded", dexRoot);
 
     newDexRoot = locklift.factory.getDeployedContract(
       "TestNewDexRoot",

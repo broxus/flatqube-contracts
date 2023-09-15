@@ -77,14 +77,17 @@ describe("Test Dex Vault contract upgrade", async function () {
     );
 
     console.log(`Upgrading DexVault contract: ${dexVault.address}`);
-    await dexVault.methods
-      .upgrade({
-        code: NewDexVaultCode.code,
-      })
-      .send({
-        from: owner.address,
-        amount: toNano(6),
-      });
+    const { traceTree } = await locklift.tracing.trace(
+      dexVault.methods
+        .upgrade({
+          code: NewDexVaultCode.code,
+        })
+        .send({
+          from: owner.address,
+          amount: toNano(6),
+        }),
+    );
+    expect(traceTree).to.emit("VaultCodeUpgraded", dexVault);
 
     newDexVault = locklift.factory.getDeployedContract(
       "TestNewDexVault",
