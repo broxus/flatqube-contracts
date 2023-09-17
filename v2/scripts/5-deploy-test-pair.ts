@@ -1,13 +1,16 @@
-import { TTokenName } from "../../utils/consts";
 import { Command } from "commander";
 import {
   DexAccountAbi,
   TokenRootUpgradeableAbi,
 } from "../../build/factorySource";
-import { depositLiquidity } from "../../utils/wrappers";
+import {
+  depositLiquidity,
+  getExpectedTokenVaultAddress,
+} from "../../utils/wrappers";
 import { createDexPair } from "../../utils/deploy.utils";
 
 import BigNumber from "bignumber.js";
+import { Constants } from "../../utils/consts";
 
 const program = new Command();
 
@@ -40,12 +43,15 @@ async function main() {
   options.contract_name = options.contract_name || "DexPair";
   options.deposit = options.deposit || false;
 
-  const pairs: TTokenName[][] = options.pairs
+  const pairs: string[][] = options.pairs
     ? JSON.parse(options.pairs)
     : [["foo", "bar"]];
 
   for (const p of pairs) {
-    const pair = { left: p[0], right: p[1] };
+    const pair = {
+      left: Constants.tokens[p[0]] ? Constants.tokens[p[0]].symbol : p[0],
+      right: Constants.tokens[p[1]] ? Constants.tokens[p[1]].symbol : p[1],
+    };
 
     const pairName = `DexPair_token-${pair.left}_token-${pair.right}`;
     console.log(`Start deploy ${pairName}`);

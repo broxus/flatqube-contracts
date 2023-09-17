@@ -4,7 +4,7 @@ import { yellowBright } from "chalk";
 import { DexRootAbi } from "build/factorySource";
 
 const OLD_DEX_TOKEN_VAULTS_CODE_HASH =
-  "80cda6cdc2997c143552385d3f73a06a8d2e261eded0b1962cd548e37ad26be3";
+  "7d6f470658e8e36f5e9c61ce1e49057b94a2b274a9a51f5d38c1fe362465efec";
 
 type TokenVaultEntity = {
   tokenVault: Address;

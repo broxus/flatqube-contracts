@@ -76,7 +76,7 @@ const main = async () => {
       }
     } else {
       const tx = await locklift.transactions.waitFinalized(p);
-      displayTx(tx);
+      displayTx(tx.extTransaction);
     }
   }
 };

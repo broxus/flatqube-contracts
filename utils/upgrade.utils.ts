@@ -17,6 +17,26 @@ import {
 } from "../build/factorySource";
 import { ContractData } from "locklift/internal/factory";
 
+export const installPairCode = async (
+  newPair:
+    | ContractData<DexPairAbi>
+    | ContractData<TestNewDexPairAbi>
+    | ContractData<DexStablePairAbi>
+    | ContractData<TestNewDexStablePairAbi>,
+  poolType = 1,
+) => {
+  const owner: Account = locklift.deployments.getAccount("DexOwner").account;
+  const dexRoot: Contract<DexRootAbi> =
+    locklift.deployments.getContract("DexRoot");
+
+  return await dexRoot.methods
+    .installOrUpdatePairCode({ code: newPair.code, pool_type: poolType })
+    .send({
+      from: owner.address,
+      amount: toNano(3),
+    });
+};
+
 /**
  * Upgrades DEX pair's code
  * @param leftRoot TokenRoot contract of the left pair's token with address
@@ -41,12 +61,7 @@ export const upgradePair = async (
     locklift.deployments.getContract("DexRoot");
 
   if (updateCode) {
-    await dexRoot.methods
-      .installOrUpdatePairCode({ code: newPair.code, pool_type: poolType })
-      .send({
-        from: owner.address,
-        amount: toNano(3),
-      });
+    await installPairCode(newPair, poolType);
   }
 
   return await dexRoot.methods
@@ -59,6 +74,22 @@ export const upgradePair = async (
     .send({
       from: owner.address,
       amount: toNano(10),
+    });
+};
+
+export const installPoolCode = async (
+  newPool: ContractData<DexStablePoolAbi>,
+  poolType = 3,
+) => {
+  const owner: Account = locklift.deployments.getAccount("DexOwner").account;
+  const dexRoot: Contract<DexRootAbi> =
+    locklift.deployments.getContract("DexRoot");
+
+  return await dexRoot.methods
+    .installOrUpdatePoolCode({ code: newPool.code, pool_type: poolType })
+    .send({
+      from: owner.address,
+      amount: toNano(3),
     });
 };
 
@@ -80,12 +111,7 @@ export const upgradePool = async (
     locklift.deployments.getContract("DexRoot");
 
   if (updateCode) {
-    await dexRoot.methods
-      .installOrUpdatePoolCode({ code: newPool.code, pool_type: poolType })
-      .send({
-        from: owner.address,
-        amount: toNano(3),
-      });
+    await installPoolCode(newPool, poolType);
   }
 
   return await dexRoot.methods
@@ -97,6 +123,21 @@ export const upgradePool = async (
     .send({
       from: owner.address,
       amount: toNano(10),
+    });
+};
+
+export const installAccountCode = async (
+  newAccount: ContractData<DexAccountAbi> | ContractData<TestNewDexAccountAbi>,
+) => {
+  const owner: Account = locklift.deployments.getAccount("DexOwner").account;
+  const dexRoot: Contract<DexRootAbi> =
+    locklift.deployments.getContract("DexRoot");
+
+  return await dexRoot.methods
+    .installOrUpdateAccountCode({ code: newAccount.code })
+    .send({
+      from: owner.address,
+      amount: toNano(3),
     });
 };
 
@@ -118,12 +159,7 @@ export const upgradeAccount = async (
     locklift.deployments.getContract("DexRoot");
 
   if (updateCode) {
-    await dexRoot.methods
-      .installOrUpdateAccountCode({ code: newAccount.code })
-      .send({
-        from: owner.address,
-        amount: toNano(3),
-      });
+    await installAccountCode(newAccount);
   }
 
   return await dexAccount.methods
@@ -150,12 +186,7 @@ export const forceUpgradeAccount = async (
     locklift.deployments.getContract("DexRoot");
 
   if (updateCode) {
-    await dexRoot.methods
-      .installOrUpdateAccountCode({ code: newAccount.code })
-      .send({
-        from: owner.address,
-        amount: toNano(3),
-      });
+    await installAccountCode(newAccount);
   }
 
   return await dexRoot.methods
@@ -163,6 +194,26 @@ export const forceUpgradeAccount = async (
     .send({
       from: owner.address,
       amount: toNano(6),
+    });
+};
+
+export const installTokenVaultCode = async (
+  newTokenVault:
+    | ContractData<DexTokenVaultAbi>
+    | ContractData<TestNewDexTokenVaultAbi>,
+) => {
+  const owner: Account = locklift.deployments.getAccount("DexOwner").account;
+  const dexRoot: Contract<DexRootAbi> =
+    locklift.deployments.getContract("DexRoot");
+
+  return await dexRoot.methods
+    .installOrUpdateTokenVaultCode({
+      _newCode: newTokenVault.code,
+      _remainingGasTo: owner.address,
+    })
+    .send({
+      from: owner.address,
+      amount: toNano(3),
     });
 };
 
@@ -184,15 +235,7 @@ export const upgradeTokenVault = async (
     locklift.deployments.getContract("DexRoot");
 
   if (updateCode) {
-    await dexRoot.methods
-      .installOrUpdateTokenVaultCode({
-        _newCode: newTokenVault.code,
-        _remainingGasTo: owner.address,
-      })
-      .send({
-        from: owner.address,
-        amount: toNano(3),
-      });
+    await installTokenVaultCode(newTokenVault);
   }
 
   return await dexRoot.methods

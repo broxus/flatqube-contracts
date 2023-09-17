@@ -4,7 +4,7 @@ import { yellowBright } from "chalk";
 import { DexRootAbi } from "build/factorySource";
 
 const OLD_DEX_POOL_CODE_HASH =
-  "c186a348418ddf13dfbf70eb48c13e4a2d86d2e8495a89e924a39c81ec8903e9";
+  "0020352be65c5f23fa7ee73663646200bd622e2f1a02e649091359c554d1e876";
 
 type PoolEntity = {
   dexPool: Address;

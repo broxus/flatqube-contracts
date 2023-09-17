@@ -1,4 +1,3 @@
-import { TTokenName } from "../../utils/consts";
 import { Command } from "commander";
 import {
   DexAccountAbi,
@@ -8,6 +7,7 @@ import { depositLiquidity } from "../../utils/wrappers";
 import { createStablePool } from "../../utils/deploy.utils";
 
 import BigNumber from "bignumber.js";
+import { Constants } from "../../utils/consts";
 
 const program = new Command();
 
@@ -15,12 +15,6 @@ async function main() {
   await locklift.deployments.load();
 
   const owner = locklift.deployments.getAccount("DexOwner").account;
-
-  if (locklift.tracing) {
-    locklift.tracing.setAllowedCodesForAddress(owner.address, {
-      compute: [100],
-    });
-  }
 
   program
     .allowUnknownOption()
@@ -40,19 +34,22 @@ async function main() {
   options.contract_name = options.contract_name || "DexStablePool";
   options.deposit = options.deposit || false;
 
-  const pools: TTokenName[][] = options.pools
+  const pools: string[][] = options.pools
     ? JSON.parse(options.pools)
     : [["foo", "bar", "qwe"]];
 
-  for (const p of pools) {
-    const poolName =
-      `DexStablePool_` + p.map(symbol => `token-${symbol}`).join("_");
+  for (const poolTokens of pools) {
+    const p = poolTokens.map(
+      symbol =>
+        `token-${
+          Constants.tokens[symbol] ? Constants.tokens[symbol].symbol : symbol
+        }`,
+    );
+    const poolName = `DexStablePool_` + p.map(symbol => `${symbol}`).join("_");
     console.log(`Start deploy ${poolName}`);
 
     const tokens = p.map(symbol =>
-      locklift.deployments.getContract<TokenRootUpgradeableAbi>(
-        `token-${symbol}`,
-      ),
+      locklift.deployments.getContract<TokenRootUpgradeableAbi>(symbol),
     );
 
     const { address: dexPoolAddress } = await createStablePool(

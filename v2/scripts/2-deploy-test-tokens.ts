@@ -1,4 +1,4 @@
-import { Constants, TTokenName } from "../../utils/consts";
+import { Constants } from "../../utils/consts";
 import { Command } from "commander";
 import { deployToken } from "../../utils/deploy.utils";
 
@@ -6,13 +6,6 @@ const program = new Command();
 
 async function main() {
   await locklift.deployments.load();
-
-  const account = locklift.deployments.getAccount("DexOwner").account;
-  if (locklift.tracing) {
-    locklift.tracing.setAllowedCodesForAddress(account.address, {
-      compute: [100],
-    });
-  }
 
   // ex: --tokens='["qwa"]'
   program
@@ -23,7 +16,7 @@ async function main() {
 
   const options = program.opts();
 
-  const tokens: TTokenName[] = options.tokens
+  const tokens: string[] = options.tokens
     ? JSON.parse(options.tokens)
     : ["foo", "bar", "tst"];
 

@@ -1,7 +1,7 @@
 import { toNano } from "locklift";
 import { Command } from "commander";
 import { BigNumber } from "bignumber.js";
-import { Constants, EMPTY_TVM_CELL, TTokenName } from "../../utils/consts";
+import { Constants, EMPTY_TVM_CELL } from "../../utils/consts";
 import { TokenRootUpgradeableAbi } from "../../build/factorySource";
 
 const program = new Command();
@@ -34,8 +34,8 @@ async function main() {
     "0:0000000000000000000000000000000000000000000000000000000000000000";
 
   for (const mint of mints) {
-    const tokenSymbol = Constants.tokens[mint.token as TTokenName]
-      ? Constants.tokens[mint.token as TTokenName].symbol
+    const tokenSymbol = Constants.tokens[mint.token]
+      ? Constants.tokens[mint.token].symbol
       : mint.token;
 
     const tokenRoot = locklift.deployments.getContract<TokenRootUpgradeableAbi>(

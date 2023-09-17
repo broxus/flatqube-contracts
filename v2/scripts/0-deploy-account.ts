@@ -6,8 +6,8 @@ const program = new Command();
 async function main() {
   program
     .allowUnknownOption()
-    .option("-n, --key_number <key_number>", "count of accounts")
-    .option("-b, --balance <balance>", "count of accounts");
+    .option("-n, --key_number <key_number>", "account's key number")
+    .option("-b, --balance <balance>", "account's balance");
 
   program.parse(process.argv);
 
@@ -15,7 +15,7 @@ async function main() {
 
   const key_number = +(options.key_number ?? "0");
   const balance = +(options.balance ?? "10");
-  const name = `Account${key_number + 1}`;
+  const name = `commonAccount-${key_number + 1}`;
 
   await locklift.deployments.deployAccounts(
     [

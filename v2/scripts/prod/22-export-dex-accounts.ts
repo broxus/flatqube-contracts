@@ -4,7 +4,7 @@ import { yellowBright } from "chalk";
 import { DexRootAbi } from "build/factorySource";
 
 const OLD_DEX_ACCOUNT_CODE_HASH =
-  "345a26f10e059ebca100974c51b39bfb241b937f2e27e7f235b3950242682b2d";
+  "f2c37b4d8b9b40052acd81071ef811b354ee2cac207fb3f1c7a6ff56f45de7ab";
 
 type AccountEntity = {
   dexAccount: Address;

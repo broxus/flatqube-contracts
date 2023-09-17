@@ -1,6 +1,7 @@
 import { fromNano, getRandomNonce, toNano, zeroAddress } from "locklift";
 import logger from "mocha-logger-ts";
 import { getWallet } from "../../utils/wrappers";
+import { WEVER_WALLET_AMOUNT } from "../../utils/consts";
 
 export default async () => {
   const owner = await locklift.deployments.getAccount("DexOwner");
@@ -42,7 +43,7 @@ export default async () => {
       .send({ from: account.address, amount: toNano(0.1) }),
   );
 
-  const wrapAmount = 1500;
+  const wrapAmount = WEVER_WALLET_AMOUNT;
 
   logger.log(`Wrap ${wrapAmount} ever`);
 
