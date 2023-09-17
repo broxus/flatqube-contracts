@@ -3,6 +3,12 @@ import { TokenFactoryAbi } from "../../build/factorySource";
 import { displayTx } from "../../utils/helpers";
 
 import { Command } from "commander";
+import {
+  installAccountCode,
+  installPairCode,
+  installPoolCode,
+  installTokenVaultCode,
+} from "../../utils/upgrade.utils";
 const program = new Command();
 
 program
@@ -150,15 +156,7 @@ async function main() {
   displayTx(tx);
 
   console.log("DexRoot: installing vault code...");
-  tx = await dexRoot.methods
-    .installOrUpdateTokenVaultCode({
-      _newCode: DexTokenVault.code,
-      _remainingGasTo: account.address,
-    })
-    .send({
-      from: account.address,
-      amount: toNano(2),
-    });
+  tx = await installTokenVaultCode(DexTokenVault);
   displayTx(tx);
 
   console.log("DexRoot: installing lp pending code...");
@@ -198,39 +196,19 @@ async function main() {
   displayTx(tx);
 
   console.log(`DexRoot: installing DexAccount code...`);
-  tx = await dexRoot.methods
-    .installOrUpdateAccountCode({ code: DexAccount.code })
-    .send({
-      from: account.address,
-      amount: toNano(2),
-    });
+  tx = await installAccountCode(DexAccount);
   displayTx(tx);
 
   console.log(`DexRoot: installing DexPair CONSTANT_PRODUCT code...`);
-  tx = await dexRoot.methods
-    .installOrUpdatePairCode({ code: DexPair.code, pool_type: 1 })
-    .send({
-      from: account.address,
-      amount: toNano(2),
-    });
-  displayTx(tx);
-
-  console.log(`DexRoot: installing DexStablePool code...`);
-  tx = await dexRoot.methods
-    .installOrUpdatePoolCode({ code: DexStablePool.code, pool_type: 3 })
-    .send({
-      from: account.address,
-      amount: toNano(2),
-    });
+  tx = await installPairCode(DexPair, 1);
   displayTx(tx);
 
   console.log(`DexRoot: installing DexPair STABLESWAP code...`);
-  tx = await dexRoot.methods
-    .installOrUpdatePairCode({ code: DexStablePair.code, pool_type: 2 })
-    .send({
-      from: account.address,
-      amount: toNano(2),
-    });
+  tx = await installPairCode(DexStablePair, 2);
+  displayTx(tx);
+
+  console.log(`DexRoot: installing DexStablePool code...`);
+  tx = await installPoolCode(DexStablePool, 3);
   displayTx(tx);
 
   console.log(`DexRoot: set Dex is active...`);

@@ -4,6 +4,12 @@ import {
   DexRootAbi,
   TokenFactoryAbi,
 } from "../../build/factorySource";
+import {
+  installAccountCode,
+  installPairCode,
+  installPoolCode,
+  installTokenVaultCode,
+} from "../../utils/upgrade.utils";
 
 export default async () => {
   const account = locklift.deployments.getAccount("DexOwner");
@@ -85,15 +91,7 @@ export default async () => {
       amount: toNano(2),
     });
 
-  tx = await dexRoot.methods
-    .installOrUpdateTokenVaultCode({
-      _newCode: DexTokenVault.code,
-      _remainingGasTo: owner.address,
-    })
-    .send({
-      from: owner.address,
-      amount: toNano(2),
-    });
+  tx = await installTokenVaultCode(DexTokenVault);
 
   tx = await dexRoot.methods
     .installOrUpdateLpTokenPendingCode({
@@ -122,33 +120,13 @@ export default async () => {
       amount: toNano(2),
     });
 
-  tx = await dexRoot.methods
-    .installOrUpdateAccountCode({ code: DexAccount.code })
-    .send({
-      from: owner.address,
-      amount: toNano(2),
-    });
+  tx = await installAccountCode(DexAccount);
 
-  tx = await dexRoot.methods
-    .installOrUpdatePairCode({ code: DexPair.code, pool_type: 1 })
-    .send({
-      from: owner.address,
-      amount: toNano(2),
-    });
+  tx = await installPairCode(DexPair, 1);
 
-  tx = await dexRoot.methods
-    .installOrUpdatePairCode({ code: DexStablePair.code, pool_type: 2 })
-    .send({
-      from: owner.address,
-      amount: toNano(2),
-    });
+  tx = await installPairCode(DexStablePair, 2);
 
-  tx = await dexRoot.methods
-    .installOrUpdatePoolCode({ code: DexStablePool.code, pool_type: 3 })
-    .send({
-      from: owner.address,
-      amount: toNano(2),
-    });
+  tx = await installPoolCode(DexStablePool, 3);
 
   tx = await dexRoot.methods.setActive({ new_active: true }).send({
     from: owner.address,

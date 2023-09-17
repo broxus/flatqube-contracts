@@ -154,10 +154,6 @@ export const upgradeAccount = async (
   newAccount: ContractData<DexAccountAbi> | ContractData<TestNewDexAccountAbi>,
   updateCode: boolean = true,
 ) => {
-  const owner: Account = locklift.deployments.getAccount("DexOwner").account;
-  const dexRoot: Contract<DexRootAbi> =
-    locklift.deployments.getContract("DexRoot");
-
   if (updateCode) {
     await installAccountCode(newAccount);
   }
