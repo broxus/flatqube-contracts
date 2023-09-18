@@ -50,6 +50,23 @@ const config: LockliftConfig = {
     // license: "AGPL-3.0-or-later", <- this is default value and can be overrided
   },
   networks: {
+    locklift: {
+      giver: {
+        address: process.env.LOCAL_GIVER_ADDRESS!,
+        key: process.env.LOCAL_GIVER_KEY!,
+      },
+      connection: {
+        id: 1001,
+        type: "proxy",
+        data: {
+          // connectionFactory: { create: ()=>{} }
+        }
+      },
+      keys: {
+        phrase: process.env.LOCAL_PHRASE,
+        amount: 20,
+      },
+    },
     local: {
       connection: {
         id: 1337,
@@ -100,6 +117,27 @@ const config: LockliftConfig = {
         amount: 20,
       },
     },
+
+    main_graphql: {
+      connection: {
+        id: 1,
+        type: 'graphql',
+        group: 'main',
+        data: {
+          endpoints: [process.env.MAINNET_GQL_NETWORK_ENDPOINT],
+          latencyDetectionInterval: 1000,
+          local: false,
+        },
+      },
+      giver: {
+        address: process.env.MAINNET_GIVER_ADDRESS ?? '',
+        key: process.env.MAINNET_GIVER_KEY ?? '',
+      },
+      keys: {
+        phrase: process.env.MAINNET_PHRASE,
+        amount: 20,
+      },
+    },
     main: {
       connection: {
         id: 1,
@@ -119,6 +157,7 @@ const config: LockliftConfig = {
         amount: 20,
       },
     },
+
     venom_testnet: {
       connection: {
         id: 1000,

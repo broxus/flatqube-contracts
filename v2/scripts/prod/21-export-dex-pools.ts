@@ -5,7 +5,7 @@ import { yellowBright } from 'chalk';
 import { Migration } from '../../utils/migration';
 
 const OLD_DEX_POOL_CODE_HASH =
-  'c186a348418ddf13dfbf70eb48c13e4a2d86d2e8495a89e924a39c81ec8903e9';
+  '317ba2a1d20ec8a67c8380fe62f4f2afb6d15472ff8e47adeff67ce63518f05d';
 
 type PoolEntity = {
   dexPool: Address;

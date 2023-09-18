@@ -25,14 +25,14 @@ const main = async () => {
     `Setting ${weverVault.address} as WEVER Vault in TokenVault ${tokenVault}`,
   );
 
-  await locklift.tracing.trace(
+  await locklift.transactions.waitFinalized(
     dexRoot.methods
       .setWeverInDexTokenVault({
         _dexTokenVault: tokenVault,
         _newWeverVaultTokenRoot: weverVault.address,
         _remainingGasTo: owner.address,
       })
-      .send({ from: owner.address, amount: toNano(0.5) }),
+      .send({ from: owner.address, amount: toNano(1) }),
   );
 
   logger.success(`Set ${weverVault.address} as WEVER Vault`);

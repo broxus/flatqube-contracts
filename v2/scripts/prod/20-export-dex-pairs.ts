@@ -5,7 +5,7 @@ import { yellowBright } from 'chalk';
 import { Migration } from '../../utils/migration';
 
 const OLD_DEX_PAIR_CODE_HASH =
-  '8129f75b7cd80a2492e1fff5f58eb76d62d819dec288eb7233cc6fcc57a1557c';
+  '208fe1d51443bbf5ddcc8b3f70ce7a2471d322fcec80b4595ea0109e9047e9c1';
 
 type PairEntity = {
   dexPair: Address;

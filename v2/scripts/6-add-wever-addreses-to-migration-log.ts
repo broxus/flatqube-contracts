@@ -7,7 +7,7 @@ async function main() {
   migration.store(
     {
       address: new Address(
-        '0:5fc1c3c6ed83f5752f5029ac2b2bb64e77bef307c967f997895eaf516331ee11',
+        '0:2c3a2ff6443af741ce653ae4ef2c85c2d52a9df84944bbe14d702c3131da3f14',
       ),
     },
     'WEVERRoot',
@@ -16,7 +16,7 @@ async function main() {
   migration.store(
     {
       address: new Address(
-        '0:5fc1c3c6ed83f5752f5029ac2b2bb64e77bef307c967f997895eaf516331ee11',
+        '0:2c3a2ff6443af741ce653ae4ef2c85c2d52a9df84944bbe14d702c3131da3f14',
       ),
     },
     'WEVERVault',
