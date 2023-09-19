@@ -8,6 +8,7 @@ import "@broxus/contracts/contracts/libraries/MsgFlag.tsol";
 
 import "tip3/contracts/interfaces/ITokenRoot.tsol";
 import "tip3/contracts/interfaces/ITokenWallet.tsol";
+import "tip3/contracts/interfaces/IBurnableTokenWallet.tsol";
 
 import "./abstract/DexContractBase.tsol";
 
@@ -28,6 +29,7 @@ import "./structures/IGasValueStructure.tsol";
 
 contract DexTokenVault is DexContractBase, IDexTokenVault, IGasValueStructure {
     address private _root;
+    address private _weverVaultTokenRoot;
     address private _vault;
     uint32 private _version;
 
@@ -167,6 +169,14 @@ contract DexTokenVault is DexContractBase, IDexTokenVault, IGasValueStructure {
         } _vault;
     }
 
+    function getWeverVaultTokenRoot() external view override responsible returns (address) {
+        return {
+            value: 0,
+            flag: MsgFlag.REMAINING_GAS,
+            bounce: false
+        } _weverVaultTokenRoot;
+    }
+
     function getTargetBalance() external view override responsible returns (uint128) {
         return {
             value: 0,
@@ -233,26 +243,45 @@ contract DexTokenVault is DexContractBase, IDexTokenVault, IGasValueStructure {
         TvmCell _payload,
         address[] _poolTokenRoots,
         uint32 /* _poolVersion */,
-        address _remainingGasTo
+        address _remainingGasTo,
+        bool _toNative
     )
         external
         override
         reserve(_getTargetBalanceInternal())
         onlyPool(_poolTokenRoots)
     {
-        ITokenWallet(_tokenWallet)
-            .transfer{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED,
-                bounce: false
-            }(
-                _amount,
-                _recipient,
-                _deployRecipientWalletGrams,
-                _remainingGasTo,
-                _notifyRecipient,
-                _payload
-            );
+        if (
+            _toNative &&
+            _weverVaultTokenRoot.value != 0 &&
+            _tokenRoot == _weverVaultTokenRoot
+        ) {
+            IBurnableTokenWallet(_tokenWallet)
+                .burn{
+                    value: 0,
+                    flag: MsgFlag.ALL_NOT_RESERVED,
+                    bounce: false
+                }(
+                    _amount,
+                    _remainingGasTo,
+                    _recipient,
+                    _payload
+                );
+        } else {
+            ITokenWallet(_tokenWallet)
+                .transfer{
+                    value: 0,
+                    flag: MsgFlag.ALL_NOT_RESERVED,
+                    bounce: false
+                }(
+                    _amount,
+                    _recipient,
+                    _deployRecipientWalletGrams,
+                    _remainingGasTo,
+                    _notifyRecipient,
+                    _payload
+                );
+        }
 
         emit PairTransferTokens({
             amount: _amount,
@@ -313,6 +342,28 @@ contract DexTokenVault is DexContractBase, IDexTokenVault, IGasValueStructure {
         });
     }
 
+    function setWeverVaultTokenRoot(
+        address _newWeverVaultTokenRoot,
+        address _remainingGasTo
+    )
+        external
+        override
+        reserve(_getTargetBalanceInternal())
+        onlyDexRoot
+    {
+        address previous = _weverVaultTokenRoot;
+
+        _weverVaultTokenRoot = _newWeverVaultTokenRoot;
+
+        emit WeverVaultTokenRootChanged(_newWeverVaultTokenRoot, previous);
+
+        _remainingGasTo.transfer({
+            value: 0,
+            flag: MsgFlag.ALL_NOT_RESERVED + MsgFlag.IGNORE_ERRORS,
+            bounce: false
+        });
+    }
+
     //  _   _ ____   ____ ____      _    ____  _____
     // | | | |  _ \ / ___|  _ \    / \  |  _ \| ____|
     // | | | | |_) | |  _| |_) |  / _ \ | | | |  _|
@@ -332,7 +383,8 @@ contract DexTokenVault is DexContractBase, IDexTokenVault, IGasValueStructure {
         TvmCell params = abi.encode(
             _tokenRoot,
             _tokenWallet,
-            _remainingGasToAfterDeploy
+            _remainingGasToAfterDeploy,
+            _weverVaultTokenRoot
         );
 
         TvmBuilder builder;
@@ -549,7 +601,8 @@ contract DexTokenVault is DexContractBase, IDexTokenVault, IGasValueStructure {
             address recipient,
             address referrer,
             uint128 deployWalletGrams,
-            NextExchangeData[] nextSteps
+            NextExchangeData[] nextSteps,
+            bool toNative
         ) = abi.decode(exchangeData, (
             uint64,
             uint32,
@@ -559,7 +612,8 @@ contract DexTokenVault is DexContractBase, IDexTokenVault, IGasValueStructure {
             address,
             address,
             uint128,
-            NextExchangeData[]
+            NextExchangeData[],
+            bool
         ));
 
         TvmCell successPayload;
@@ -640,6 +694,7 @@ contract DexTokenVault is DexContractBase, IDexTokenVault, IGasValueStructure {
                         senderAddress,
                         recipient,
                         referrer,
+                        toNative,
 
                         _remainingGasTo,
                         deployWalletGrams,

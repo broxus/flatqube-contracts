@@ -251,7 +251,8 @@ contract DexStablePool is
         address recipient,
         address referrer,
         optional(TvmCell) success_payload,
-        optional(TvmCell) cancel_payload
+        optional(TvmCell) cancel_payload,
+        optional(bool) toNative
     )  external pure returns (TvmCell) {
         return PairPayload.buildExchangePayloadV2(
             id,
@@ -261,7 +262,8 @@ contract DexStablePool is
             outcoming,
             referrer,
             success_payload,
-            cancel_payload
+            cancel_payload,
+            toNative
         );
     }
 
@@ -292,7 +294,8 @@ contract DexStablePool is
         address recipient,
         address referrer,
         optional(TvmCell) success_payload,
-        optional(TvmCell) cancel_payload
+        optional(TvmCell) cancel_payload,
+        optional(bool) to_native
     ) external view returns (TvmCell) {
         require(expected_amounts.length == 0 || expected_amounts.length == N_COINS);
 
@@ -303,7 +306,8 @@ contract DexStablePool is
             recipient,
             referrer,
             success_payload,
-            cancel_payload
+            cancel_payload,
+            to_native
         );
     }
 
@@ -315,7 +319,8 @@ contract DexStablePool is
         address recipient,
         address referrer,
         optional(TvmCell) success_payload,
-        optional(TvmCell) cancel_payload
+        optional(TvmCell) cancel_payload,
+        optional(bool) to_native
     ) external pure returns (TvmCell) {
         return PairPayload.buildWithdrawLiquidityOneCoinPayload(
             id,
@@ -325,7 +330,8 @@ contract DexStablePool is
             outcoming,
             referrer,
             success_payload,
-            cancel_payload
+            cancel_payload,
+            to_native
         );
     }
 
@@ -339,7 +345,8 @@ contract DexStablePool is
         address recipient,
         address referrer,
         optional(TvmCell) success_payload,
-        optional(TvmCell) cancel_payload
+        optional(TvmCell) cancel_payload,
+        optional(bool) to_native
     ) external view returns (TvmCell) {
         address[] pools;
 
@@ -359,7 +366,8 @@ contract DexStablePool is
             pools,
             referrer,
             success_payload,
-            cancel_payload
+            cancel_payload,
+            to_native
         );
     }
 
@@ -383,7 +391,8 @@ contract DexStablePool is
             uint128[] expected_amounts,
             address outcoming,
             NextExchangeData[] next_steps,
-            address referrer
+            address referrer,
+            bool toNative
         ) = PairPayload.decodeOnAcceptTokensTransferData(payload);
 
         uint128 expected_amount = expected_amounts.length == 1 ? expected_amounts[0] : 0;
@@ -428,19 +437,25 @@ contract DexStablePool is
 
                     for (uint8 ii = 0; ii < N_COINS; ii++) {
                         if (result.amounts[ii] >= 0) {
-                            IDexTokenVault(_expectedTokenVaultAddress(tokenData[ii].root)).transfer{
-                                value: _calcValue(GasValues.getTokenVaultTransferGas(deploy_wallet_grams)),
-                                flag: MsgFlag.SENDER_PAYS_FEES
-                            }(
-                                result.amounts[ii],
-                                recipient,
-                                deploy_wallet_grams,
-                                notify_success,
-                                PairPayload.buildSuccessPayload(op, success_payload, sender_address),
-                                _tokenRoots(),
-                                current_version,
-                                original_gas_to
-                            );
+                            IDexTokenVault(_expectedTokenVaultAddress(tokenData[ii].root))
+                                .transfer{
+                                    value: _calcValue(GasValues.getTokenVaultTransferGas(deploy_wallet_grams)),
+                                    flag: MsgFlag.SENDER_PAYS_FEES
+                                }(
+                                    result.amounts[ii],
+                                    recipient,
+                                    deploy_wallet_grams,
+                                    notify_success,
+                                    PairPayload.buildSuccessPayload(
+                                        op,
+                                        success_payload,
+                                        sender_address
+                                    ),
+                                    _tokenRoots(),
+                                    current_version,
+                                    original_gas_to,
+                                    toNative
+                                );
                         }
                     }
 
@@ -471,19 +486,25 @@ contract DexStablePool is
                         original_gas_to
                     );
 
-                    IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root)).transfer{
-                        value: _calcValue(GasValues.getTokenVaultTransferGas(deploy_wallet_grams)),
-                        flag: MsgFlag.SENDER_PAYS_FEES
-                    }(
-                        result.amounts[i],
-                        recipient,
-                        deploy_wallet_grams,
-                        notify_success,
-                        PairPayload.buildSuccessPayload(op, success_payload, sender_address),
-                        _tokenRoots(),
-                        current_version,
-                        original_gas_to
-                    );
+                    IDexTokenVault(_expectedTokenVaultAddress(tokenData[i].root))
+                        .transfer{
+                            value: _calcValue(GasValues.getTokenVaultTransferGas(deploy_wallet_grams)),
+                            flag: MsgFlag.SENDER_PAYS_FEES
+                        }(
+                            result.amounts[i],
+                            recipient,
+                            deploy_wallet_grams,
+                            notify_success,
+                            PairPayload.buildSuccessPayload(
+                                op,
+                                success_payload,
+                                sender_address
+                            ),
+                            _tokenRoots(),
+                            current_version,
+                            original_gas_to,
+                            toNative
+                        );
 
                     IBurnableTokenWallet(msg.sender).burn{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }(
                         tokens_amount,
@@ -580,19 +601,21 @@ contract DexStablePool is
                         empty
                     );
 
-                    IDexTokenVault(_expectedTokenVaultAddress(tokenData[j].root)).transfer{
-                        value: 0,
-                        flag: MsgFlag.ALL_NOT_RESERVED
-                    }(
-                        dy_result.amount,
-                        recipient,
-                        deploy_wallet_grams,
-                        notify_success,
-                        PairPayload.buildSuccessPayload(op, success_payload, sender_address),
-                        _tokenRoots(),
-                        current_version,
-                        original_gas_to
-                    );
+                    IDexTokenVault(_expectedTokenVaultAddress(tokenData[j].root))
+                        .transfer{
+                            value: 0,
+                            flag: MsgFlag.ALL_NOT_RESERVED
+                        }(
+                            dy_result.amount,
+                            recipient,
+                            deploy_wallet_grams,
+                            notify_success,
+                            PairPayload.buildSuccessPayload(op, success_payload, sender_address),
+                            _tokenRoots(),
+                            current_version,
+                            original_gas_to,
+                            toNative
+                        );
                 }
             } else if (op == DexOperationTypes.CROSS_PAIR_EXCHANGE_V2) {
 
@@ -656,7 +679,8 @@ contract DexStablePool is
                                 recipient,
                                 referrer,
                                 deploy_wallet_grams,
-                                next_steps
+                                next_steps,
+                                toNative
                             );
                             builder.store(exchange_data);
 
@@ -813,34 +837,36 @@ contract DexStablePool is
                             uint128 next_pool_amount = uint128(math.muldiv(operation.amount, next_step.numerator, denominator));
                             uint128 current_extra_value = math.muldiv(uint128(next_step.leaves), extraValue, uint128(all_leaves));
 
-                            IDexBasePool(next_step.poolRoot).crossPoolExchange{
-                                value: i == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) + current_extra_value,
-                                flag: i == max_nested_nodes_idx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
-                            }(
-                                id,
+                            IDexBasePool(next_step.poolRoot)
+                                .crossPoolExchange{
+                                    value: i == max_nested_nodes_idx ? 0 : (next_step.nestedNodes + 1) * _calcValue(GasValues.getPoolCrossExchangeStepGas(referrer)) + current_extra_value,
+                                    flag: i == max_nested_nodes_idx ? MsgFlag.ALL_NOT_RESERVED : MsgFlag.SENDER_PAYS_FEES
+                                }(
+                                    id,
 
-                                current_version,
-                                DexPoolTypes.STABLE_POOL,
+                                    current_version,
+                                    DexPoolTypes.STABLE_POOL,
 
-                                _tokenRoots(),
+                                    _tokenRoots(),
 
-                                op,
-                                operation.root,
-                                next_pool_amount,
+                                    op,
+                                    operation.root,
+                                    next_pool_amount,
 
-                                sender_address,
-                                recipient,
-                                referrer,
+                                    sender_address,
+                                    recipient,
+                                    referrer,
+                                    toNative,
 
-                                original_gas_to,
-                                deploy_wallet_grams,
+                                    original_gas_to,
+                                    deploy_wallet_grams,
 
-                                next_step.payload,
-                                notify_success,
-                                success_payload,
-                                notify_cancel,
-                                cancel_payload
-                            );
+                                    next_step.payload,
+                                    notify_success,
+                                    success_payload,
+                                    notify_cancel,
+                                    cancel_payload
+                                );
                         }
                     }
                 }
@@ -1397,6 +1423,7 @@ contract DexStablePool is
         address sender_address,
         address recipient,
         address referrer,
+        bool toNative,
 
         address original_gas_to,
         uint128 deploy_wallet_grams,
@@ -1456,7 +1483,8 @@ contract DexStablePool is
                         recipient,
                         referrer,
                         deploy_wallet_grams,
-                        next_steps
+                        next_steps,
+                        toNative
                     );
                     builder.store(exchange_data);
 
@@ -1646,6 +1674,7 @@ contract DexStablePool is
                                 sender_address,
                                 recipient,
                                 referrer,
+                                toNative,
 
                                 original_gas_to,
                                 deploy_wallet_grams,
@@ -1677,21 +1706,23 @@ contract DexStablePool is
                             }
                         }
 
-                        IDexTokenVault(_expectedTokenVaultAddress(tokenData[j].root)).transfer{
-                            value: 0,
-                            flag: MsgFlag.ALL_NOT_RESERVED
-                        }(
-                            operation.amount,
-                            is_last_step ? recipient : sender_address,
-                            deploy_wallet_grams,
-                            is_last_step ? notify_success : notify_cancel,
-                            is_last_step
-                                ? PairPayload.buildSuccessPayload(op, success_payload, sender_address)
-                                : PairPayload.buildCancelPayload(op, post_swap_error_code, cancel_payload, next_steps),
-                            _tokenRoots(),
-                            current_version,
-                            original_gas_to
-                        );
+                        IDexTokenVault(_expectedTokenVaultAddress(tokenData[j].root))
+                            .transfer{
+                                value: 0,
+                                flag: MsgFlag.ALL_NOT_RESERVED
+                            }(
+                                operation.amount,
+                                is_last_step ? recipient : sender_address,
+                                deploy_wallet_grams,
+                                is_last_step ? notify_success : notify_cancel,
+                                is_last_step
+                                    ? PairPayload.buildSuccessPayload(op, success_payload, sender_address)
+                                    : PairPayload.buildCancelPayload(op, post_swap_error_code, cancel_payload, next_steps),
+                                _tokenRoots(),
+                                current_version,
+                                original_gas_to,
+                                toNative
+                            );
                     }
                 }
             }
@@ -1712,19 +1743,26 @@ contract DexStablePool is
                 }(id);
             }
 
-            IDexTokenVault(_expectedTokenVaultAddress(spent_token_root)).transfer{
-                value: 0,
-                flag: MsgFlag.ALL_NOT_RESERVED
-            }(
-                spent_amount,
-                sender_address,
-                deploy_wallet_grams,
-                notify_cancel,
-                PairPayload.buildCancelPayload(op, errorCode, cancel_payload, next_steps),
-                _tokenRoots(),
-                current_version,
-                original_gas_to
-            );
+            IDexTokenVault(_expectedTokenVaultAddress(spent_token_root))
+                .transfer{
+                    value: 0,
+                    flag: MsgFlag.ALL_NOT_RESERVED
+                }(
+                    spent_amount,
+                    sender_address,
+                    deploy_wallet_grams,
+                    notify_cancel,
+                    PairPayload.buildCancelPayload(
+                        op,
+                        errorCode,
+                        cancel_payload,
+                        next_steps
+                    ),
+                    _tokenRoots(),
+                    current_version,
+                    original_gas_to,
+                    toNative
+                );
         } else {
             _sync();
         }

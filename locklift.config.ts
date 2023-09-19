@@ -36,6 +36,10 @@ const config: LockliftConfig = {
         'TokenWalletPlatform',
       ],
       'node_modules/ever-wever/everscale/build': [],
+      'node_modules/@broxus/wever/build': [
+        'VaultTokenRoot_V1',
+        'VaultTokenWallet_V1',
+      ],
     },
   },
   linker: { version: '0.15.48' },
@@ -46,6 +50,23 @@ const config: LockliftConfig = {
     // license: "AGPL-3.0-or-later", <- this is default value and can be overrided
   },
   networks: {
+    locklift: {
+      giver: {
+        address: process.env.LOCAL_GIVER_ADDRESS!,
+        key: process.env.LOCAL_GIVER_KEY!,
+      },
+      connection: {
+        id: 1001,
+        type: "proxy",
+        data: {
+          // connectionFactory: { create: ()=>{} }
+        }
+      },
+      keys: {
+        phrase: process.env.LOCAL_PHRASE,
+        amount: 20,
+      },
+    },
     local: {
       connection: {
         id: 1337,
@@ -59,13 +80,13 @@ const config: LockliftConfig = {
       },
       giver: {
         address:
-            '0:ece57bcc6c530283becbbd8a3b24d3c5987cdddc3c8b7b33be6e4a6312490415',
+          '0:ece57bcc6c530283becbbd8a3b24d3c5987cdddc3c8b7b33be6e4a6312490415',
         key: '172af540e43a524763dd53b26a066d472a97c4de37d5498170564510608250c3',
       },
       tracing: { endpoint: LOCAL_NETWORK_ENDPOINT },
       keys: {
         phrase:
-            'action inject penalty envelope rabbit element slim tornado dinner pizza off blood',
+          'action inject penalty envelope rabbit element slim tornado dinner pizza off blood',
         amount: 20,
       },
     },
@@ -96,6 +117,27 @@ const config: LockliftConfig = {
         amount: 20,
       },
     },
+
+    main_graphql: {
+      connection: {
+        id: 1,
+        type: 'graphql',
+        group: 'main',
+        data: {
+          endpoints: [process.env.MAINNET_GQL_NETWORK_ENDPOINT],
+          latencyDetectionInterval: 1000,
+          local: false,
+        },
+      },
+      giver: {
+        address: process.env.MAINNET_GIVER_ADDRESS ?? '',
+        key: process.env.MAINNET_GIVER_KEY ?? '',
+      },
+      keys: {
+        phrase: process.env.MAINNET_PHRASE,
+        amount: 20,
+      },
+    },
     main: {
       connection: {
         id: 1,
@@ -115,6 +157,7 @@ const config: LockliftConfig = {
         amount: 20,
       },
     },
+
     venom_testnet: {
       connection: {
         id: 1000,

@@ -16,6 +16,7 @@ import "./interfaces/IDexConstantProductPair.tsol";
 import "./interfaces/IResetGas.tsol";
 import "./interfaces/ILiquidityTokenRootDeployedCallback.tsol";
 import "./interfaces/ILiquidityTokenRootNotDeployedCallback.tsol";
+import "./interfaces/IDexTokenVault.tsol";
 
 import "./libraries/DexPlatformTypes.tsol";
 import "./libraries/DexErrors.tsol";
@@ -1382,5 +1383,24 @@ contract DexRoot is DexContractBase, IDexRoot {
         IDexConstantProductPair(_expectedPoolAddress([_leftRoot, _rightRoot]))
             .removeLastNPoints{ value: 0, flag: MsgFlag.ALL_NOT_RESERVED }
             (_count, _remainingGasTo);
+    }
+
+    function setWeverInDexTokenVault(
+        address _dexTokenVault,
+        address _newWeverVaultTokenRoot,
+        address _remainingGasTo
+    )
+        external
+        view
+        override
+        reserve(DexGas.ROOT_INITIAL_BALANCE)
+        onlyManagerOrOwner
+    {
+        IDexTokenVault(_dexTokenVault)
+            .setWeverVaultTokenRoot{
+                value: 0,
+                flag: MsgFlag.ALL_NOT_RESERVED,
+                bounce: false
+            }(_newWeverVaultTokenRoot, _remainingGasTo);
     }
 }

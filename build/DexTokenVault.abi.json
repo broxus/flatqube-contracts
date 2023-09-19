@@ -77,6 +77,15 @@
 			]
 		},
 		{
+			"name": "getWeverVaultTokenRoot",
+			"inputs": [
+				{"name":"answerId","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
 			"name": "getTargetBalance",
 			"inputs": [
 				{"name":"answerId","type":"uint32"}
@@ -109,7 +118,8 @@
 				{"name":"_payload","type":"cell"},
 				{"name":"_poolTokenRoots","type":"address[]"},
 				{"name":"value6","type":"uint32"},
-				{"name":"_remainingGasTo","type":"address"}
+				{"name":"_remainingGasTo","type":"address"},
+				{"name":"_toNative","type":"bool"}
 			],
 			"outputs": [
 			]
@@ -128,6 +138,15 @@
 		{
 			"name": "resetGas",
 			"inputs": [
+				{"name":"_remainingGasTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setWeverVaultTokenRoot",
+			"inputs": [
+				{"name":"_newWeverVaultTokenRoot","type":"address"},
 				{"name":"_remainingGasTo","type":"address"}
 			],
 			"outputs": [
@@ -237,6 +256,15 @@
 			],
 			"outputs": [
 			]
+		},
+		{
+			"name": "WeverVaultTokenRootChanged",
+			"inputs": [
+				{"name":"current","type":"address"},
+				{"name":"previous","type":"address"}
+			],
+			"outputs": [
+			]
 		}
 	],
 	"fields": [
@@ -245,6 +273,7 @@
 		{"name":"_constructorFlag","type":"bool"},
 		{"name":"platform_code","type":"cell"},
 		{"name":"_root","type":"address"},
+		{"name":"_weverVaultTokenRoot","type":"address"},
 		{"name":"_vault","type":"address"},
 		{"name":"_version","type":"uint32"},
 		{"name":"_tokenRoot","type":"address"},
