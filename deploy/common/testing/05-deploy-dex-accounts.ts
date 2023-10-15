@@ -15,18 +15,20 @@ export default async () => {
   console.log(`OwnerDexAccount deployed: ${dexAccountAddress}`);
 
   for (let j = 0; j < ACCOUNTS_N; j++) {
-    const acc = locklift.deployments.getAccount(`commonAccount-${j}`).account;
+    try {
+      const acc = locklift.deployments.getAccount(`commonAccount-${j}`).account;
 
-    const dexAccount = await deployDexAccount(acc.address).then(
-      val => val.address,
-    );
-    console.log(`commonDexAccount-${j} created: ${dexAccount.toString()}`);
+      const dexAccount = await deployDexAccount(acc.address).then(
+          val => val.address,
+      );
+      console.log(`commonDexAccount-${j} created: ${dexAccount.toString()}`);
 
-    await locklift.deployments.saveContract({
-      contractName: "DexAccount",
-      deploymentName: `commonDexAccount-${j}`,
-      address: dexAccount,
-    });
+      await locklift.deployments.saveContract({
+        contractName: "DexAccount",
+        deploymentName: `commonDexAccount-${j}`,
+        address: dexAccount,
+      });
+    } catch (e) {}
   }
 };
 
@@ -35,6 +37,5 @@ export const tag = "dex-accounts";
 export const dependencies = [
   "owner-account",
   "token-factory",
-  "common-accounts",
   "dex-root",
 ];

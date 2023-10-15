@@ -138,6 +138,5 @@ export const tag = "dex-root";
 
 export const dependencies = [
   "owner-account",
-  "common-accounts",
   "token-factory",
 ];

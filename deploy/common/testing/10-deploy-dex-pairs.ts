@@ -132,6 +132,7 @@ export const tag = "dex-pairs";
 
 export const dependencies = [
   "owner-account",
+  "common-accounts",
   "tokens",
   "dex-root",
   "dex-stable",
