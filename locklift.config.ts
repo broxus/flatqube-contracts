@@ -28,7 +28,7 @@ declare module "locklift" {
 
 const config: LockliftConfig = {
   compiler: {
-    version: "0.64.0",
+    version: "0.62.0",
     externalContracts: {
       precompiled: [
         "DexPlatform",
