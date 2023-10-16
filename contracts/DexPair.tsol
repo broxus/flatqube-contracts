@@ -196,7 +196,8 @@ contract DexPair is DexPairBase, INextExchangeData {
     function expectedDepositLiquidity(
         uint128 left_amount,
         uint128 right_amount,
-        bool auto_change
+        bool auto_change,
+        optional(address) referrer
     ) override external view responsible returns (DepositLiquidityResult) {
         (DepositLiquidityResult result,,,) = Math.calculateExpectedDepositLiquidity(
             left_amount,
@@ -206,7 +207,7 @@ contract DexPair is DexPairBase, INextExchangeData {
             _typeToReserves[DexReserveType.POOL][1],
             _typeToReserves[DexReserveType.LP][0],
             _fee,
-            address(0),
+            referrer.hasValue() ? referrer.get() : address(0),
             _tokenRoots()[0],
             _tokenRoots()[1]
         );

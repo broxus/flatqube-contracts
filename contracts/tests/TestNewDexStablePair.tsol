@@ -60,10 +60,19 @@ contract TestNewDexStablePair is
 
     string newTestField;
 
+    event PairCodeUpgraded(
+        uint32 version,
+        uint8 pool_type
+    );
+
     constructor() public {revert();}
 
     function getRoot() external view responsible returns (address dex_root) {
         return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } root;
+    }
+
+    function getVault() external view responsible returns (address) {
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} vault;
     }
 
     function getTokenRoots() external view responsible returns (address left, address right, address lp) {

@@ -140,8 +140,8 @@ contract DexGasValues is IGasValueStructure {
         return accountExchange;
     }
 
-    function getAccountDepositGas(uint8 N, address referrer) external pure returns (GasValue) {
-        GasValue accountDeposit = GasValues.getAccountDepositGas(N, referrer);
+    function getAccountDepositGas(uint8 N, address referrer, bool autoChange) external pure returns (GasValue) {
+        GasValue accountDeposit = GasValues.getAccountDepositGas(N, referrer, autoChange);
         accountDeposit.fixedValue += DexGas.DEX_ACCOUNT_COMPENSATION;
 
         return accountDeposit;

@@ -22,11 +22,11 @@ import "../structures/IOracleOptions.tsol";
 
 // This is just for test purposes, this is not a real contract!
 contract TestNewDexPair is
-    ITokenOperationStructure,
-    IFeeParams,
-    IDexPairBalances,
-    IPoint,
-    IOracleOptions
+ITokenOperationStructure,
+IFeeParams,
+IDexPairBalances,
+IPoint,
+IOracleOptions
 {
     address root;
     address vault;
@@ -70,38 +70,48 @@ contract TestNewDexPair is
 
     string newTestField;
 
+    event PairCodeUpgraded(
+        uint32 version,
+        uint8 pool_type
+    );
+
     constructor() public {revert();}
 
+
+    function getVault() external view responsible returns (address) {
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} vault;
+    }
+
     function getRoot() external view responsible returns (address dex_root) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } root;
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} root;
     }
 
     function getTokenRoots() external view responsible returns (address left, address right, address lp) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (left_root, right_root, lp_root);
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} (left_root, right_root, lp_root);
     }
 
     function getTokenWallets() external view responsible returns (address left, address right, address lp) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } (left_wallet, right_wallet, lp_wallet);
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} (left_wallet, right_wallet, lp_wallet);
     }
 
     function getVersion() external view responsible returns (uint32 version) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } current_version;
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} current_version;
     }
 
     function getPoolType() external pure responsible returns (uint8) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } DexPoolTypes.CONSTANT_PRODUCT;
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} DexPoolTypes.CONSTANT_PRODUCT;
     }
 
     function getFeeParams() external view responsible returns (FeeParams) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } fee;
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} fee;
     }
 
     function isActive() external view responsible returns (bool) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } active;
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} active;
     }
 
     function getBalances() external view responsible returns (DexPairBalances) {
-        return { value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS } DexPairBalances(
+        return {value: 0, bounce: false, flag: MsgFlag.REMAINING_GAS} DexPairBalances(
             lp_supply,
             left_balance,
             right_balance
@@ -171,24 +181,26 @@ contract TestNewDexPair is
 
         (root, vault, old_version, current_version, send_gas_to) = s.decode(address, address, uint32, uint32, address);
 
-        platform_code = s.loadRef(); // ref 1
+        platform_code = s.loadRef();
+        // ref 1
 
-        TvmCell otherDataCell = s.loadRef();    // ref 2
+        TvmCell otherDataCell = s.loadRef();
+        // ref 2
 
         mapping(uint8 => uint128[]) type_to_reserves;
         mapping(uint8 => address[]) type_to_root_addresses;
         mapping(uint8 => address[]) type_to_wallet_addresses;
 
         (
-            fee,
-            type_to_reserves,
-            type_to_root_addresses,
-            type_to_wallet_addresses
+        fee,
+        type_to_reserves,
+        type_to_root_addresses,
+        type_to_wallet_addresses
         ) = abi.decode(otherDataCell, (
-            FeeParams,
-            mapping(uint8 => uint128[]),
-            mapping(uint8 => address[]),
-            mapping(uint8 => address[])
+        FeeParams,
+        mapping(uint8 => uint128[]),
+        mapping(uint8 => address[]),
+        mapping(uint8 => address[])
         ));
 
         lp_root = type_to_root_addresses[DexAddressType.LP][0];
@@ -204,12 +216,13 @@ contract TestNewDexPair is
         left_balance = type_to_reserves[DexReserveType.POOL][0];
         right_balance = type_to_reserves[DexReserveType.POOL][1];
 
-        TvmSlice oracleDataSlice = s.loadRefAsSlice();  // ref 4
+        TvmSlice oracleDataSlice = s.loadRefAsSlice();
+        // ref 4
 
         (
-            _points,
-            _options,
-            _length
+        _points,
+        _options,
+        _length
         ) = oracleDataSlice.decode(
             mapping(uint32 => Point),
             OracleOptions,
@@ -218,7 +231,7 @@ contract TestNewDexPair is
 
         newTestField = "New Pair";
 
-        send_gas_to.transfer({ value: 0, flag: MsgFlag.ALL_NOT_RESERVED });
+        send_gas_to.transfer({value: 0, flag: MsgFlag.ALL_NOT_RESERVED});
     }
 
     function newFunc() public view returns (string) {

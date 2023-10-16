@@ -900,7 +900,19 @@ contract DexStablePair is
         address referrer
     ) override external onlyActive onlyAccount(account_owner) {
         require(_expected.root == lp_root, DexErrors.NOT_LP_TOKEN_ROOT);
-        require(lp_supply != 0 || (_operations[0].amount > 0 && _operations[1].amount > 0), DexErrors.WRONG_LIQUIDITY);
+
+        uint256 leftDeposit = math.muldiv(tokenData[tokenIndex[_operations[0].root]].rate, _operations[0].amount, PRECISION);
+        uint256 rightDeposit = math.muldiv(tokenData[tokenIndex[_operations[1].root]].rate, _operations[1].amount, PRECISION);
+        require(
+            lp_supply != 0 ||
+            (
+                _operations[0].amount > 0 &&
+                _operations[1].amount > 0 &&
+                leftDeposit == rightDeposit
+            ),
+            DexErrors.WRONG_LIQUIDITY
+        );
+
         require(
             (_operations[0].amount > 0 && _operations[1].amount > 0) ||
             (auto_change && (_operations[0].amount + _operations[1].amount > 0)),
