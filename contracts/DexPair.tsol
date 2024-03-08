@@ -262,7 +262,11 @@ contract DexPair is DexPairBase, INextExchangeData {
             operations[1].root
         );
 
-        require(result.step_1_lp_reward + result.step_3_lp_reward >= _expected.amount, DexErrors.WRONG_LIQUIDITY);
+        require(
+            (result.step_1_lp_reward + result.step_3_lp_reward > 0) &&
+            (result.step_1_lp_reward + result.step_3_lp_reward >= _expected.amount),
+            DexErrors.WRONG_LIQUIDITY
+        );
 
         if (_lpReserve() == 0) {
             for (uint i = 0; i < operations.length; i++) {
